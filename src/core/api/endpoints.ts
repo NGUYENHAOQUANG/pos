@@ -1,0 +1,26 @@
+/**
+ * @file endpoints.ts
+ * @description API Endpoints constants
+ * @author Kindy
+ * @created 2025-11-16
+ */
+export const API_ENDPOINTS = {
+  // Auth
+  AUTH: {
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
+  },
+  // Products
+  PRODUCTS: {
+    LIST: '/products',
+    DETAIL: (id: string) => `/products/${id}`,
+    CREATE: '/products',
+    UPDATE: (id: string) => `/products/${id}`,
+    DELETE: (id: string) => `/products/${id}`,
+  },
+} as const;
+
