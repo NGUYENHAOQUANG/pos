@@ -13,6 +13,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
 // Import components
 import { Button, Logo } from '@/shared/components';
@@ -22,7 +23,7 @@ import { spacing } from '@/styles';
 export default function VerifyOTPScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const route = useRoute<RouteProp<AuthStackParamList, 'Verify-otp'>>();
-
+  const login = useAuthStore(state => state.login);
   // Params
   const { contact } = route.params || { contact: '0908 123 456' };
 
@@ -51,7 +52,8 @@ export default function VerifyOTPScreen() {
     if (errorMessage) setErrorMessage('');
   };
 
-  const handleVerifyOTP = () => {
+  const handleVerifyOTP = async () => {
+    // Thêm async
     const otpString = otp.join('');
 
     // 1. Validate
@@ -66,10 +68,18 @@ export default function VerifyOTPScreen() {
       return;
     }
 
-    console.log('Verify Success:', otpString);
-    navigation.navigate('Login');
-  };
+    // 3. XỬ LÝ ĐĂNG NHẬP THÀNH CÔNG
+    try {
+      console.log('Verify Success:', otpString);
 
+      // Gọi hàm login của store để set isAuthenticated = true
+      // Vì đang dùng OTP nên password có thể để rỗng hoặc string bất kỳ tùy logic backend sau này
+      await login({ phone: contact, password: '' });
+    } catch (error) {
+      setErrorMessage('Đăng nhập thất bại, vui lòng thử lại.');
+      console.error(error);
+    }
+  };
   const handleResendOTP = () => {
     setCountdown(59);
     setOtp(['', '', '', '']); // Reset state
