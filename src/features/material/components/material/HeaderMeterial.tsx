@@ -8,12 +8,14 @@ interface HeaderMeterialProps {
     title?: string;
     onBackPress?: () => void;
     rightComponent?: React.ReactNode;
+    showBackButton?: boolean;
 }
 
 export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
     title = "Quản Lý Vật Tư",
     onBackPress,
     rightComponent,
+    showBackButton = true,
 }) => {
     const navigation = useNavigation();
 
@@ -30,9 +32,11 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.leftContainer}>
-                <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
+                {showBackButton && (
+                    <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                )}
             </View>
             <View style={styles.centerContainer}>
                 <Text style={styles.title}>{title}</Text>
@@ -56,6 +60,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
+        zIndex: 1000, // Ensure header (and its dropdowns) stay on top
     },
     leftContainer: {
         width: 44,

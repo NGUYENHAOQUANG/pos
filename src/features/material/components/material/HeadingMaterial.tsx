@@ -6,7 +6,7 @@ import {
     StyleSheet,
     ScrollView,
 } from 'react-native';
-import { colors, spacing, sizes } from '@/styles';
+import { colors, spacing } from '@/styles';
 
 export type TabType = 'list' | 'history' | 'inventory';
 

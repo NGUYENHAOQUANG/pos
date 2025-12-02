@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup, MaterialGroupType } from './MaterialGroup';
 import { ButtonMaterialList } from './ButtonMaterialList';
-import { colors, spacing, borderRadius, sizes } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 
 if (
     Platform.OS === 'android' &&
@@ -60,6 +60,8 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                 <MaterialGroup group={item.group} />
             </View>
 
+            <View style={styles.separator} />
+
             {/* Basic Info Row */}
             <View style={styles.infoRow}>
                 <Text style={styles.infoText}>
@@ -71,6 +73,8 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                     {item.remaining}
                 </Text>
             </View>
+
+            <View style={styles.separator} />
 
             {/* Expanded Content */}
             {isExpanded && (
@@ -117,6 +121,8 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                 />
             </TouchableOpacity>
 
+            <View style={styles.separator} />
+
             {/* Action Buttons */}
             <View style={styles.actionRow}>
                 <ButtonMaterialList
@@ -157,11 +163,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
     },
     name: {
-        fontSize: 16,
-        fontWeight: '500',
+        fontSize: 18,
         color: colors.text,
         flex: 1,
         marginRight: spacing.sm,
@@ -169,7 +174,7 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
     },
     infoText: {
         fontSize: 14,
@@ -214,12 +219,17 @@ const styles = StyleSheet.create({
     },
     actionRow: {
         flexDirection: 'row',
-        paddingTop: spacing.sm,
+        paddingTop: spacing.xs,
     },
     actionButton: {
         flex: 1,
     },
     spacer: {
         width: spacing.md,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#F0F0F0', // Very light gray for separator
+        marginVertical: spacing.xs,
     },
 });

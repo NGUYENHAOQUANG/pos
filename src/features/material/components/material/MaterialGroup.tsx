@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, borderRadius, spacing } from '@/styles';
 
-export type MaterialGroupType = 'Thức ăn' | 'Thuốc trộn' | 'Xử lý môi trường' | 'Dùng chung' | string;
+export type MaterialGroupType = 'Nuôi' | 'Vật tư nội bộ' | 'CCDC' | 'Thiết bị điện' | 'Chi phí khác' | string;
 
 interface MaterialGroupProps {
     group: MaterialGroupType;
@@ -11,29 +11,36 @@ interface MaterialGroupProps {
 export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
     const getStyle = (type: MaterialGroupType) => {
         switch (type) {
-            case 'Thức ăn':
+            case 'Nuôi':
+            case 'Thức ăn': // Keep for backward compatibility if needed
                 return {
                     backgroundColor: '#FFF2E8', // Light orange
                     color: '#FA541C', // Dark orange
                     borderColor: '#FFBB96',
                 };
-            case 'Thuốc trộn':
+            case 'Vật tư nội bộ':
                 return {
                     backgroundColor: '#E6F7FF', // Light blue
                     color: '#1890FF', // Dark blue
                     borderColor: '#91D5FF',
                 };
-            case 'Xử lý môi trường':
+            case 'CCDC':
                 return {
-                    backgroundColor: '#F6FFED', // Light green
-                    color: '#52C41A', // Dark green
-                    borderColor: '#B7EB8F',
+                    backgroundColor: '#F9F0FF', // Light purple
+                    color: '#722ED1', // Dark purple
+                    borderColor: '#D3ADF7',
                 };
-            case 'Dùng chung':
+            case 'Thiết bị điện':
                 return {
-                    backgroundColor: '#FFF0F6', // Light pink
-                    color: '#EB2F96', // Dark pink
-                    borderColor: '#FFADD2',
+                    backgroundColor: '#FFF1F0', // Light red
+                    color: '#F5222D', // Dark red
+                    borderColor: '#FFA39E',
+                };
+            case 'Chi phí khác':
+                return {
+                    backgroundColor: '#F5F5F5', // Light gray
+                    color: '#595959', // Dark gray
+                    borderColor: '#D9D9D9',
                 };
             default:
                 return {

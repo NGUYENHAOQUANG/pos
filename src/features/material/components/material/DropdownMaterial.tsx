@@ -4,32 +4,46 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    ScrollView,
     Platform,
-    Modal,
+    ScrollView,
+    ViewStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, sizes } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 
-interface MaterialGroupProps {
+interface DropdownMaterialProps {
+    value?: string;
+    onChange?: (value: string) => void;
+    options?: string[];
     label?: string;
     required?: boolean;
-    value?: string;
-    options?: string[];
-    onChange?: (value: string) => void;
     placeholder?: string;
+    dropdownStyle?: ViewStyle;
+    showAllOption?: boolean;
 }
 
-export const MaterialGroup: React.FC<MaterialGroupProps> = ({
-    label = 'Nhóm vật tư',
-    required = false,
+export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     value,
-    options = [],
     onChange,
-    placeholder = 'Chọn nhóm vật tư',
+    options = [
+        'Tất cả nhóm vật tư',
+        'Nuôi',
+        'Vật tư nội bộ',
+        'CCDC',
+        'Thiết bị điện',
+        'Chi phí khác',
+    ],
+    label,
+    required,
+    placeholder = 'Tất cả nhóm vật tư',
+    dropdownStyle,
+    showAllOption = true,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [layout, setLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+
+    const displayOptions = showAllOption
+        ? options
+        : options.filter(option => option !== 'Tất cả nhóm vật tư');
 
     const handleSelect = (option: string) => {
         onChange?.(option);
@@ -37,12 +51,7 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({
     };
 
     return (
-        <View
-            style={styles.container}
-            onLayout={(event) => {
-                setLayout(event.nativeEvent.layout);
-            }}
-        >
+        <View style={styles.container}>
             {/* Label */}
             {label && (
                 <View style={styles.labelContainer}>
@@ -51,13 +60,12 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({
                 </View>
             )}
 
-            {/* Trigger Button */}
             <TouchableOpacity
-                style={styles.trigger}
+                style={styles.button}
                 onPress={() => setIsOpen(!isOpen)}
                 activeOpacity={0.7}
             >
-                <Text style={[styles.valueText, !value && styles.placeholderText]}>
+                <Text style={[styles.text, !value && styles.placeholderText]}>
                     {value || placeholder}
                 </Text>
                 <Ionicons
@@ -67,19 +75,18 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({
                 />
             </TouchableOpacity>
 
-            {/* Dropdown List */}
             {isOpen && (
-                <View style={styles.dropdown}>
+                <View style={[styles.dropdown, dropdownStyle]}>
                     <ScrollView nestedScrollEnabled style={styles.scrollContent}>
-                        {options.map((option, index) => {
+                        {displayOptions.map((option, index) => {
                             const isSelected = option === value;
                             return (
                                 <TouchableOpacity
                                     key={index}
-                                    style={[styles.option, isSelected && styles.selectedOption]}
+                                    style={[styles.item, isSelected && styles.itemSelected]}
                                     onPress={() => handleSelect(option)}
                                 >
-                                    <Text style={[styles.optionText, isSelected && styles.selectedOptionText]}>
+                                    <Text style={[styles.itemText, isSelected && styles.itemTextSelected]}>
                                         {option}
                                     </Text>
                                 </TouchableOpacity>
@@ -94,8 +101,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.md,
-        zIndex: 10, // Ensure dropdown appears on top
+        flex: 1,
+        zIndex: 10,
+        position: 'relative',
     },
     labelContainer: {
         flexDirection: 'row',
@@ -110,7 +118,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.error || '#FF4D4F',
     },
-    trigger: {
+    button: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -121,7 +129,7 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: borderRadius.sm,
     },
-    valueText: {
+    text: {
         fontSize: 15,
         color: colors.text,
     },
@@ -130,43 +138,46 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         position: 'absolute',
-        top: '100%', // Position right below the trigger
+        top: '100%',
         left: 0,
         right: 0,
-        marginTop: 4,
+        marginTop: spacing['2xl'],
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md, // Increased border radius
         borderWidth: 1,
-        borderColor: colors.border,
-        maxHeight: 200,
+        borderColor: '#E5E7EB', // Lighter border
+        maxHeight: 250,
         zIndex: 1000,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
+                shadowOpacity: 0.1,
+                shadowRadius: 12,
             },
             android: {
-                elevation: 4,
+                elevation: 8,
             },
         }),
     },
     scrollContent: {
         paddingVertical: spacing.xs,
     },
-    option: {
+    item: {
         paddingVertical: spacing.sm + 2,
         paddingHorizontal: spacing.md,
+        marginHorizontal: spacing.xs, // Add margin for rounded hover effect look
+        borderRadius: borderRadius.sm,
     },
-    selectedOption: {
-        backgroundColor: colors.background || '#F5F5F5',
+    itemSelected: {
+        backgroundColor: '#F3F4F6', // Light gray background
     },
-    optionText: {
+    itemText: {
         fontSize: 14,
         color: colors.text,
     },
-    selectedOptionText: {
+    itemTextSelected: {
         fontWeight: '500',
+        color: colors.text,
     },
 });

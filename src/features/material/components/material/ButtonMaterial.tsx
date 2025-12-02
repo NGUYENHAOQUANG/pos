@@ -10,7 +10,7 @@ import {
     TouchableHighlight,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, sizes } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 
 interface ButtonMetaerialProps {
     onPressCreateImport?: () => void;

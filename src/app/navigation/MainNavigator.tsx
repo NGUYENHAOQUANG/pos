@@ -12,16 +12,13 @@ import {
   View,
   Text,
   Dimensions,
-  Platform,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import Animated, {
   useAnimatedProps,
   useSharedValue,
   withTiming,
-  withSpring,
   useAnimatedStyle,
-  interpolate,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -80,8 +77,11 @@ const navigationItems: NavigationItem[] = [
   },
 ];
 
+import { TabBarVisibilityContext } from './TabBarVisibilityContext';
+
 export function MainNavigator() {
   const [selectedTab, setSelectedTab] = React.useState(2); // Start at Management
+  const [isTabBarVisible, setTabBarVisible] = React.useState(true);
   const insets = useSafeAreaInsets();
 
   // Shared value for the center position of the curve
@@ -93,7 +93,7 @@ export function MainNavigator() {
     tabX.value = withTiming(newX, {
       duration: 300,
     });
-  }, [selectedTab]);
+  }, [selectedTab, tabX]);
 
   const animatedPathProps = useAnimatedProps(() => {
     const center = tabX.value;
@@ -125,66 +125,70 @@ export function MainNavigator() {
   const CurrentScreen = navigationItems[selectedTab].component;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <CurrentScreen />
-      </View>
-
-      <View style={styles.bottomContainer}>
-        {/* SVG Background */}
-        <View style={[styles.svgContainer, { height: TAB_HEIGHT + insets.bottom }]}>
-          <Svg width={width} height={TAB_HEIGHT + insets.bottom}>
-            <AnimatedPath
-              animatedProps={animatedPathProps}
-              fill="white"
-              stroke="#E0E0E0" // Optional: subtle border
-              strokeWidth={0.5}
-            />
-          </Svg>
+    <TabBarVisibilityContext.Provider value={{ isTabBarVisible, setTabBarVisible }}>
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <CurrentScreen />
         </View>
 
-        {/* Floating Action Button */}
-        <Animated.View style={[styles.floatingButtonContainer, animatedButtonStyle]}>
-          <TouchableOpacity
-            style={styles.floatingButton}
-            activeOpacity={0.9}
-            onPress={() => { }} // Already handled by tab press, but keeps interaction
-          >
-            <Icon
-              name={navigationItems[selectedTab].icon.active}
-              size={28} // Increased icon size
-              color="white"
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        {isTabBarVisible && (
+          <View style={styles.bottomContainer}>
+            {/* SVG Background */}
+            <View style={[styles.svgContainer, { height: TAB_HEIGHT + insets.bottom }]}>
+              <Svg width={width} height={TAB_HEIGHT + insets.bottom}>
+                <AnimatedPath
+                  animatedProps={animatedPathProps}
+                  fill="white"
+                  stroke="#E0E0E0" // Optional: subtle border
+                  strokeWidth={0.5}
+                />
+              </Svg>
+            </View>
 
-        {/* Tab Items */}
-        <View style={[styles.tabsContainer, { paddingBottom: insets.bottom }]}>
-          {navigationItems.map((item, index) => {
-            const isSelected = selectedTab === index;
-            return (
+            {/* Floating Action Button */}
+            <Animated.View style={[styles.floatingButtonContainer, animatedButtonStyle]}>
               <TouchableOpacity
-                key={item.key}
-                style={styles.tabItem}
-                onPress={() => setSelectedTab(index)}
-                activeOpacity={0.7}
+                style={styles.floatingButton}
+                activeOpacity={0.9}
+                onPress={() => { }} // Already handled by tab press, but keeps interaction
               >
-                <View style={[styles.iconContainer, isSelected && styles.hiddenIcon]}>
-                  <Icon
-                    name={item.icon.inactive}
-                    size={24}
-                    color="#8E8E93"
-                  />
-                </View>
-                <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
-                  {item.label}
-                </Text>
+                <Icon
+                  name={navigationItems[selectedTab].icon.active}
+                  size={28} // Increased icon size
+                  color="white"
+                />
               </TouchableOpacity>
-            );
-          })}
-        </View>
+            </Animated.View>
+
+            {/* Tab Items */}
+            <View style={[styles.tabsContainer, { paddingBottom: insets.bottom }]}>
+              {navigationItems.map((item, index) => {
+                const isSelected = selectedTab === index;
+                return (
+                  <TouchableOpacity
+                    key={item.key}
+                    style={styles.tabItem}
+                    onPress={() => setSelectedTab(index)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.iconContainer, isSelected && styles.hiddenIcon]}>
+                      <Icon
+                        name={item.icon.inactive}
+                        size={24}
+                        color="#8E8E93"
+                      />
+                    </View>
+                    <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
       </View>
-    </View>
+    </TabBarVisibilityContext.Provider>
   );
 }
 

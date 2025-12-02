@@ -8,7 +8,7 @@ import {
     Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, sizes } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 
 interface UnitOfMeasureProps {
     label?: string;
@@ -63,7 +63,11 @@ export const UnitOfMeasure: React.FC<UnitOfMeasureProps> = ({
             {/* Dropdown List */}
             {isOpen && (
                 <View style={styles.dropdown}>
-                    <ScrollView nestedScrollEnabled style={styles.scrollContent}>
+                    <ScrollView
+                        nestedScrollEnabled
+                        style={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
                         {options.map((option, index) => {
                             const isSelected = option === value;
                             return (
@@ -128,10 +132,10 @@ const styles = StyleSheet.create({
         right: 0,
         marginTop: 4,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
-        borderColor: colors.border,
-        maxHeight: 200,
+        borderColor: '#E5E7EB',
+        maxHeight: 250,
         zIndex: 1000,
         ...Platform.select({
             ios: {
@@ -151,9 +155,11 @@ const styles = StyleSheet.create({
     option: {
         paddingVertical: spacing.sm + 2,
         paddingHorizontal: spacing.md,
+        marginHorizontal: spacing.xs,
+        borderRadius: borderRadius.sm,
     },
     selectedOption: {
-        backgroundColor: colors.background || '#F5F5F5',
+        backgroundColor: '#F3F4F6',
     },
     optionText: {
         fontSize: 14,
@@ -161,5 +167,6 @@ const styles = StyleSheet.create({
     },
     selectedOptionText: {
         fontWeight: '500',
+        color: colors.text,
     },
 });

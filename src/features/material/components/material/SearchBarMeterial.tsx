@@ -4,13 +4,15 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
-    Text,
     LayoutAnimation,
     Platform,
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, sizes } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
+import { DropdownMaterial } from './DropdownMaterial';
+import { DropdownVoteStatus } from '../inventory/DropdownVoteStatus';
+import { TabType } from './HeadingMaterial';
 
 if (
     Platform.OS === 'android' &&
@@ -22,14 +24,21 @@ if (
 interface SearchBarMeterialProps {
     onSearch?: (text: string) => void;
     onFilterPress?: () => void;
+    selectedTab?: TabType;
+    onGroupChange?: (group: string) => void;
 }
 
 export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     onSearch,
     onFilterPress,
+    selectedTab = 'list',
+    onGroupChange,
 }) => {
     const [searchText, setSearchText] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const [materialGroup, setMaterialGroup] = useState('');
+    const [voteStatus, setVoteStatus] = useState('');
 
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -86,14 +95,23 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
-                        <Text style={styles.filterText}>Tất cả nhóm vật tư</Text>
-                        <Ionicons
-                            name="chevron-down"
-                            size={20}
-                            color={colors.textSecondary || '#999'}
+                    {selectedTab === 'history' && (
+                        <View style={styles.dropdownWrapper}>
+                            <DropdownVoteStatus
+                                value={voteStatus}
+                                onChange={setVoteStatus}
+                            />
+                        </View>
+                    )}
+                    <View style={styles.dropdownWrapper}>
+                        <DropdownMaterial
+                            value={materialGroup}
+                            onChange={(value) => {
+                                setMaterialGroup(value);
+                                onGroupChange?.(value);
+                            }}
                         />
-                    </TouchableOpacity>
+                    </View>
                 </View>
             )}
         </View>
@@ -103,7 +121,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 const styles = StyleSheet.create({
     container: {
         padding: spacing.md,
-        backgroundColor: colors.background,
+        backgroundColor: '#F0F5FF',
+        zIndex: 100, // Ensure dropdowns can float above content below
     },
     topRow: {
         flexDirection: 'row',
@@ -143,23 +162,17 @@ const styles = StyleSheet.create({
     },
     moreButtonActive: {
         borderColor: colors.primary,
+        backgroundColor: '#E6F7FF', // Light blue background when active
     },
     expandedContent: {
-        marginTop: spacing.sm,
-    },
-    filterButton: {
+        marginTop: spacing.md,
+        marginBottom: spacing.lg, // Add more space below when expanded
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 44,
-        paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
+        gap: spacing.md,
+        zIndex: 100, // Ensure dropdowns sit on top
     },
-    filterText: {
-        fontSize: 15,
-        color: colors.text,
+    dropdownWrapper: {
+        flex: 1,
+        zIndex: 100,
     },
 });
