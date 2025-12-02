@@ -86,9 +86,6 @@ export default function LoginScreen() {
 
           {/* Main Content */}
           <View style={styles.content}>
-            <Text style={styles.title}>Xin chào!</Text>
-            <Text style={styles.subtitle}>Đăng nhập để tiếp tục sử dụng TOMOTA</Text>
-
             <SegmentedControl
               options={['Email', 'Số điện thoại']}
               selectedIndex={selectedTab}
