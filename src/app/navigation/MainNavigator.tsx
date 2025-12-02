@@ -28,7 +28,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 import DevicesScreen from '@/features/devices/screens/DevicesScreen';
-import HelpScreen from '@/features/help/screens/HelpScreen';
+import { MeterialScreen } from '@/features/material/screens/MeterialScreen';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 
 const { width } = Dimensions.get('window');
@@ -67,10 +67,10 @@ const navigationItems: NavigationItem[] = [
     component: HomeScreen,
   },
   {
-    key: 'Help',
-    label: 'Trợ giúp',
-    icon: { active: 'chatbubbles', inactive: 'chatbubbles-outline' },
-    component: HelpScreen,
+    key: 'Material',
+    label: 'Vật tư',
+    icon: { active: 'cube', inactive: 'cube-outline' },
+    component: MeterialScreen,
   },
   {
     key: 'Settings',
@@ -148,7 +148,7 @@ export function MainNavigator() {
           <TouchableOpacity
             style={styles.floatingButton}
             activeOpacity={0.9}
-            onPress={() => {}} // Already handled by tab press, but keeps interaction
+            onPress={() => { }} // Already handled by tab press, but keeps interaction
           >
             <Icon
               name={navigationItems[selectedTab].icon.active}
@@ -170,7 +170,7 @@ export function MainNavigator() {
                 activeOpacity={0.7}
               >
                 <View style={[styles.iconContainer, isSelected && styles.hiddenIcon]}>
-                   <Icon
+                  <Icon
                     name={item.icon.inactive}
                     size={24}
                     color="#8E8E93"

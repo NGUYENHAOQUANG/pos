@@ -1,0 +1,88 @@
+import React from 'react';
+import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { colors, spacing, borderRadius } from '@/styles';
+
+interface HeaderMeterialProps {
+    title?: string;
+    onBackPress?: () => void;
+    rightComponent?: React.ReactNode;
+}
+
+export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
+    title = "Quản Lý Vật Tư",
+    onBackPress,
+    rightComponent,
+}) => {
+    const navigation = useNavigation();
+
+    const handleBack = () => {
+        if (onBackPress) {
+            onBackPress();
+        } else {
+            if (navigation.canGoBack()) {
+                navigation.goBack();
+            }
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.leftContainer}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+            </View>
+            <View style={styles.centerContainer}>
+                <Text style={styles.title}>{title}</Text>
+            </View>
+            <View style={styles.rightContainer}>
+                {rightComponent}
+            </View>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        // Add padding for status bar on Android
+        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + spacing.xs : spacing.md,
+        paddingBottom: spacing.sm,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    leftContainer: {
+        width: 44,
+        alignItems: 'flex-start',
+    },
+    centerContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    rightContainer: {
+        width: 44,
+        alignItems: 'flex-end',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    iconButton: {
+        width: 44,
+        height: 44,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
+    }
+});
