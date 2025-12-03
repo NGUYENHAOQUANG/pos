@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.primary || '#1890FF',
         marginRight: 4,
+        fontWeight: '600',
     },
     actionRow: {
         flexDirection: 'row',

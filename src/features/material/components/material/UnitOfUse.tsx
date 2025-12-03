@@ -79,8 +79,8 @@ export const UnitOfUse: React.FC<UnitOfUseProps> = ({
             {/* Dropdown List */}
             {isOpen && (
                 <View style={styles.dropdown}>
-                    <ScrollView 
-                        nestedScrollEnabled 
+                    <ScrollView
+                        nestedScrollEnabled
                         style={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
                     >
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     valueText: {
+        flex: 1,
         fontSize: 15,
         color: colors.text,
     },

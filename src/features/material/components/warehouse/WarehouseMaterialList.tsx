@@ -1,145 +1,119 @@
-import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    Platform,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterial';
+import { WarehouseReceiptItems } from './WarehouseReceiptItems';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-export interface MaterialItem {
-    id: string;
-    materialName: string;
-    quantity: string;
-    price: string;
+if (Platform.OS === 'android') {
+    if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
 }
 
 interface WarehouseMaterialListProps {
-    materials: MaterialItem[];
-    onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
-    onAddMaterial: () => void;
+    receipts: any[];
 }
 
-export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
-    materials,
-    onUpdateMaterial,
-    onAddMaterial,
-}) => {
+export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ receipts }) => {
+    const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+    const toggleExpand = (id: string) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (expandedIds.includes(id)) {
+            setExpandedIds(expandedIds.filter(i => i !== id));
+        } else {
+            setExpandedIds([...expandedIds, id]);
+        }
+    };
+
     const formatCurrency = (value: number) => {
         return value.toLocaleString('vi-VN') + ' đ';
     };
 
-    return (
-        <View style={styles.mainMaterialCard}>
-            <View style={styles.mainHeader}>
-                <Text style={styles.mainHeaderTitle}>Vật tư nhập kho</Text>
-            </View>
+    const formatDate = (dateString: string | Date) => {
+        const date = new Date(dateString);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+    };
 
-            <View style={styles.mainContent}>
-                {materials.map((item, index) => {
-                    const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
-                    const displayTotal = itemTotal > 0 ? formatCurrency(itemTotal) : 'Vui lòng nhập số lượng và đơn giá';
+    const renderItem = ({ item }: { item: any }) => {
+        const isExpanded = expandedIds.includes(item.id);
 
-                    return (
-                        <View key={item.id} style={styles.materialWrapper}>
-                            <View style={styles.materialCard}>
-                                {/* Header */}
-                                <View style={styles.materialHeader}>
-                                    <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
-                                </View>
+        return (
+            <View style={styles.card}>
+                <View style={styles.cardContent}>
+                    {/* Header Info */}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Nhập kho:</Text>
+                        <Text style={styles.value}>{formatDate(item.date)}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Tạo phiếu:</Text>
+                        <Text style={styles.value}>{formatDate(item.date)}</Text>
+                    </View>
 
-                                <View style={styles.content}>
-                                    {/* Material Name */}
-                                    <View style={styles.inputGroup}>
-                                        <DropdownMaterial
-                                            label="Tên vật tư"
-                                            required
-                                            value={item.materialName}
-                                            options={['CP 09 – Thức ăn tôm giai đoạn 2', 'Biozeus Probiotics', 'Vôi', 'Khoáng']}
-                                            onChange={(val) => onUpdateMaterial(item.id, 'materialName', val)}
-                                            placeholder="Chọn vật tư"
-                                            showAllOption={false}
-                                        />
-                                    </View>
+                    <View style={styles.divider} />
 
-                                    {/* Quantity and Price Row */}
-                                    <View style={styles.row}>
-                                        {/* Quantity */}
-                                        <View style={styles.halfWidth}>
-                                            <View style={styles.labelContainer}>
-                                                <Text style={styles.required}>* </Text>
-                                                <Text style={styles.label}>Số lượng</Text>
-                                            </View>
-                                            <View style={styles.inputContainer}>
-                                                <TextInput
-                                                    style={styles.innerInput}
-                                                    placeholder="Nhập số lượng"
-                                                    placeholderTextColor={colors.textSecondary || '#999'}
-                                                    value={item.quantity}
-                                                    onChangeText={(val) => onUpdateMaterial(item.id, 'quantity', val)}
-                                                    keyboardType="numeric"
-                                                />
-                                                <Text style={styles.unitText}>Kg</Text>
-                                            </View>
-                                        </View>
+                    {/* Summary Info */}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Tổng hàng hoá:</Text>
+                        <Text style={styles.value}>{item.materials.length}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Tổng giá trị:</Text>
+                        <Text style={styles.value}>{formatCurrency(item.totalAmount)}</Text>
+                    </View>
+                </View>
 
-                                        {/* Price */}
-                                        <View style={styles.halfWidth}>
-                                            <View style={styles.labelContainer}>
-                                                <Text style={styles.required}>* </Text>
-                                                <Text style={styles.label}>Đơn giá (đ)</Text>
-                                            </View>
-                                            <View style={styles.inputContainer}>
-                                                <TextInput
-                                                    style={styles.innerInput}
-                                                    placeholder="Nhập đơn giá"
-                                                    placeholderTextColor={colors.textSecondary || '#999'}
-                                                    value={item.price}
-                                                    onChangeText={(val) => onUpdateMaterial(item.id, 'price', val)}
-                                                    keyboardType="numeric"
-                                                />
-                                            </View>
-                                        </View>
-                                    </View>
-
-                                    {/* Total Amount */}
-                                    <View style={styles.footer}>
-                                        <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                        <Text style={[styles.footerValue, !itemTotal && styles.placeholderText]}>
-                                            {displayTotal}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
+                {/* Expanded Details */}
+                {isExpanded && (
+                    <View style={styles.detailsContainer}>
+                        {/* Supplier Info */}
+                        <View style={styles.supplierRow}>
+                            <Text style={styles.label}>Nhà cung cấp:</Text>
+                            <Text style={styles.value}>{item.supplier || '---'}</Text>
                         </View>
-                    );
-                })}
 
-                {/* Add Button */}
+                        <WarehouseReceiptItems
+                            materials={item.materials}
+                        />
+                    </View>
+                )}
+
+                {/* Expand Button */}
                 <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={onAddMaterial}
-                    activeOpacity={0.7}
+                    style={styles.expandButton}
+                    onPress={() => toggleExpand(item.id)}
                 >
-                    <Ionicons name="add" size={24} color={colors.textSecondary} />
-                    <Text style={styles.addButtonText}>Thêm vật tư</Text>
+                    <Text style={styles.expandText}>{isExpanded ? "Thu gọn" : "Xem thêm"}</Text>
+                    <Ionicons
+                        name={isExpanded ? "chevron-up" : "chevron-down"}
+                        size={16}
+                        color={colors.primary}
+                    />
                 </TouchableOpacity>
             </View>
-        </View>
+        );
+    };
+
+    return (
+        <FlatList
+            data={receipts}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+        />
     );
 };
 
 const styles = StyleSheet.create({
-    // Main Material Card Styles
-    mainMaterialCard: {
+    listContainer: {
+        paddingBottom: 100,
+    },
+    card: {
         backgroundColor: colors.white,
-        borderRadius: 0,
+        borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        marginHorizontal: -spacing.md,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -151,142 +125,52 @@ const styles = StyleSheet.create({
                 elevation: 2,
             },
         }),
-        // overflow: 'hidden', // Removed to allow dropdown overflow
-        zIndex: 1, // Ensure stacking context
+        overflow: 'hidden',
+        paddingBottom: spacing.sm,
     },
-    mainHeader: {
+    cardContent: {
         padding: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
+        paddingBottom: spacing.xs,
     },
-    mainHeaderTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    mainContent: {
-        padding: spacing.md,
-        zIndex: 2, // Ensure content is above header
-    },
-    materialWrapper: {
-        marginBottom: spacing.md,
-        zIndex: 10, // Ensure wrapper has high zIndex for dropdowns
-    },
-    // Nested Material Card Styles
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        // overflow: 'hidden', // Removed to allow dropdown overflow
-        zIndex: 10,
-    },
-    materialHeader: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-        backgroundColor: '#F9FAFB',
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-    },
-    materialHeaderTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    inputGroup: {
-        marginBottom: spacing.md,
-    },
-    labelContainer: {
+    row: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         marginBottom: spacing.xs,
     },
     label: {
         fontSize: 14,
         color: colors.text,
-        fontWeight: '400',
+        fontWeight: '600',
     },
-    required: {
+    value: {
         fontSize: 14,
-        color: colors.error || '#FF4D4F',
-    },
-    row: {
-        flexDirection: 'row',
-        gap: spacing.md,
-        marginBottom: spacing.md,
-    },
-    halfWidth: {
-        flex: 1,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    innerInput: {
-        flex: 1,
-        height: '100%',
-        fontSize: 15,
-        color: colors.text,
-        padding: 0,
-    },
-    unitText: {
-        fontSize: 15,
-        color: colors.text,
-        marginLeft: spacing.xs,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: spacing.xs,
-        paddingTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: '#F3F4F6',
-    },
-    footerLabel: {
-        fontSize: 15,
         color: colors.text,
         fontWeight: '400',
     },
-    footerValue: {
-        fontSize: 15,
-        color: colors.text,
-        fontWeight: '500',
-        textAlign: 'right',
-        flex: 1,
-        marginLeft: spacing.md,
+    divider: {
+        height: 1,
+        backgroundColor: '#F3F4F6',
+        marginVertical: spacing.sm,
     },
-    placeholderText: {
-        color: colors.textSecondary || '#999',
-        fontWeight: '400',
-    },
-    addButton: {
+    expandButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderStyle: 'dashed',
-        borderRadius: borderRadius.md,
-        marginTop: spacing.xs,
+        paddingVertical: spacing.sm,
+        gap: 4,
     },
-    addButtonText: {
-        fontSize: 15,
-        color: colors.textSecondary,
-        marginLeft: spacing.xs,
+    expandText: {
+        fontSize: 14,
+        color: colors.primary,
         fontWeight: '500',
+    },
+    detailsContainer: {
+        backgroundColor: colors.white,
+    },
+    supplierRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: spacing.md,
+        marginBottom: spacing.md,
     },
 });

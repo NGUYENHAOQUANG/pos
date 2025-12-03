@@ -42,10 +42,15 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
     };
 
     const formatDate = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        if (!date) return '';
+        // Ensure we have a valid date object
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
     };
 
     return (
@@ -76,7 +81,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                             onPress={() => setDatePickerVisible(true)}
                             activeOpacity={0.7}
                         >
-                            <Text style={styles.dateText}>{formatDate(date)}</Text>
+                            <Text style={styles.dateText} numberOfLines={1}>{formatDate(date)}</Text>
                             <Ionicons
                                 name="calendar-outline"
                                 size={20}
@@ -176,6 +181,8 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 15,
         color: colors.text,
+        flex: 1,
+        marginRight: spacing.sm,
     },
     input: {
         height: 44,

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { HeaderMeterial } from '../../components/HeaderMeterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
+import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
 
@@ -81,16 +82,24 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
                 </ScrollView>
 
                 <View style={styles.footer}>
-                    <Button
-                        title="Huỷ"
-                        onPress={() => onBack?.()}
-                        variant="outline"
-                        style={styles.cancelButton}
-                    />
-                    <View style={styles.spacer} />
-                    <Button
-                        title="Lưu thông tin"
-                        onPress={() => {
+                    <ButtonBarMaterial
+                        mode="double"
+                        primaryTitle="Lưu thông tin"
+                        secondaryTitle="Huỷ"
+                        onPrimaryPress={() => {
+                            if (!name.trim()) {
+                                console.warn('Tên vật tư là bắt buộc');
+                                return;
+                            }
+                            if (!group) {
+                                console.warn('Nhóm vật tư là bắt buộc');
+                                return;
+                            }
+                            if (!unit) {
+                                console.warn('Đơn vị tính là bắt buộc');
+                                return;
+                            }
+
                             onSave?.({
                                 ...initialData, // Keep existing ID and other fields
                                 name,
@@ -102,8 +111,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
                                 manufacturer,
                             });
                         }}
-                        variant="primary"
-                        style={styles.saveButton}
+                        onSecondaryPress={() => onBack?.()}
                     />
                 </View>
             </View>
@@ -127,20 +135,10 @@ const styles = StyleSheet.create({
         padding: spacing.md,
     },
     footer: {
-        flexDirection: 'row',
         padding: spacing.md,
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.border,
         paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.md,
-    },
-    cancelButton: {
-        width: 100,
-    },
-    saveButton: {
-        flex: 1,
-    },
-    spacer: {
-        width: spacing.md,
     },
 });

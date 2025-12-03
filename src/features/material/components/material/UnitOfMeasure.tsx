@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     valueText: {
+        flex: 1,
         fontSize: 15,
         color: colors.text,
     },

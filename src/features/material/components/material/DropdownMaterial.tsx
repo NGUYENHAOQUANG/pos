@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     text: {
+        flex: 1,
         fontSize: 15,
         color: colors.text,
     },
