@@ -8,58 +8,58 @@ import { ButtonMetaerial } from '../../components/ButtonMaterial';
 import { colors, spacing } from '@/styles';
 
 export const MaterialListScreen = () => {
-    const [selectedTab, setSelectedTab] = useState<TabType>('list');
+  const [selectedTab, setSelectedTab] = useState<TabType>('list');
 
-    const handleSearch = (text: string) => {
-        console.log('Search:', text);
-    };
+  const handleSearch = (text: string) => {
+    console.log('Search:', text);
+  };
 
-    const handleFilterPress = () => {
-        console.log('Filter pressed');
-    };
+  const handleFilterPress = () => {
+    console.log('Filter pressed');
+  };
 
-    const handleAddMaterial = () => {
-        console.log('Add material pressed');
-    };
+  const handleAddMaterial = () => {
+    console.log('Add material pressed');
+  };
 
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <View style={styles.container}>
-                <HeaderMeterial
-                    rightComponent={
-                        <ButtonMetaerial
-                            onPressCreateImport={() => console.log('Import')}
-                            onPressCreateAdjustment={() => console.log('Adjustment')}
-                            onPressCreateMaterial={() => console.log('Create Material')}
-                        />
-                    }
-                />
-                <HeadingMeterial selectedTab={selectedTab} onTabSelect={setSelectedTab} />
-                <SearchBarMeterial onSearch={handleSearch} onFilterPress={handleFilterPress} />
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      <View style={styles.container}>
+        <HeaderMeterial
+          rightComponent={
+            <ButtonMetaerial
+              onPressCreateImport={() => console.log('Import')}
+              onPressCreateAdjustment={() => console.log('Adjustment')}
+              onPressCreateMaterial={() => console.log('Create Material')}
+            />
+          }
+        />
+        <HeadingMeterial selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+        <SearchBarMeterial onSearch={handleSearch} onFilterPress={handleFilterPress} />
 
-                <View style={styles.content}>
-                    <AddMaterialCard onPressAdd={handleAddMaterial} />
-                </View>
-            </View>
-        </SafeAreaView>
-    );
+        <View style={styles.content}>
+          <AddMaterialCard onPressAdd={handleAddMaterial} />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.white,
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    },
-    container: {
-        flex: 1,
-        backgroundColor: colors.background || '#F5F7FA', // Fallback to light gray if background color not defined
-    },
-    content: {
-        flex: 1,
-        padding: spacing.md,
-        alignItems: 'center',
-        paddingTop: spacing.xl,
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.white,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background || '#F5F7FA', // Fallback to light gray if background color not defined
+  },
+  content: {
+    flex: 1,
+    padding: spacing.md,
+    alignItems: 'center',
+    paddingTop: spacing.xl,
+  },
 });
