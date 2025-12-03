@@ -1,17 +1,19 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { HeaderMeterial } from '../components/material/HeaderMeterial';
-import { ButtonMetaerial } from '../components/material/ButtonMaterial';
-import { HeadingMeterial, TabType } from '../components/material/HeadingMaterial';
-import { SearchBarMeterial } from '../components/material/SearchBarMeterial';
+import { HeaderMeterial } from '../components/HeaderMeterial';
+import { ButtonMetaerial } from '../components/ButtonMaterial';
+import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
+import { SearchBarMeterial } from '../components/SearchBarMeterial';
 import { AddMaterialCard } from '../components/material/AddMaterialCard';
+import { AddWarehouseCard } from '../components/warehouse/AddWarehouseCard';
 import { AddMaterialScreen } from './material/AddMaterialScreen';
 import { EditMaterialScreen } from './material/EditMaterialScreen';
+import { AddWarehouseScreen } from './warehouse/AddWarehouseScreen';
 import { MaterialList } from '../components/material/MaterialList';
 import { spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
-type ScreenType = 'list' | 'add_material' | 'edit_material';
+type ScreenType = 'list' | 'add_material' | 'edit_material' | 'add_warehouse';
 
 export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
@@ -23,7 +25,7 @@ export const MeterialScreen = () => {
     const [filterGroup, setFilterGroup] = useState('');
 
     useLayoutEffect(() => {
-        if (currentScreen === 'add_material' || currentScreen === 'edit_material') {
+        if (currentScreen === 'add_material' || currentScreen === 'edit_material' || currentScreen === 'add_warehouse') {
             setTabBarVisible(false);
         } else {
             setTabBarVisible(true);
@@ -33,7 +35,7 @@ export const MeterialScreen = () => {
     }, [currentScreen, setTabBarVisible]);
 
     const handleCreateImport = () => {
-        console.log('Create Import');
+        setCurrentScreen('add_warehouse');
     };
 
     const handleCreateAdjustment = () => {
@@ -105,6 +107,18 @@ export const MeterialScreen = () => {
         );
     }
 
+    if (currentScreen === 'add_warehouse') {
+        return (
+            <AddWarehouseScreen
+                onBack={handleBackToMaterialList}
+                onSave={(data) => {
+                    console.log('Save Warehouse Import', data);
+                    handleBackToMaterialList();
+                }}
+            />
+        );
+    }
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -146,6 +160,9 @@ export const MeterialScreen = () => {
                         ) : (
                             <AddMaterialCard onPressAdd={handleAddMaterial} />
                         )
+                    )}
+                    {selectedTab === 'history' && (
+                        <AddWarehouseCard onPressAdd={handleCreateImport} />
                     )}
                 </View>
             </View>

@@ -51,7 +51,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, isOpen && { zIndex: 1000 }]}>
             {/* Label */}
             {label && (
                 <View style={styles.labelContainer}>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
         top: '100%',
         left: 0,
         right: 0,
-        marginTop: spacing['2xl'],
+        marginTop: 4, // Reduced from spacing['2xl'] to move it up
         backgroundColor: colors.white,
         borderRadius: borderRadius.md, // Increased border radius
         borderWidth: 1,

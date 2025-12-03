@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   floatingButtonContainer: {
     position: 'absolute',
-    top: -45, // Half of button height (70/2)
+    top: -25, // Adjusted to move button down
     left: 0,
     zIndex: 10,
   },

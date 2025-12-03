@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from './DropdownMaterial';
-import { DropdownVoteStatus } from '../inventory/DropdownVoteStatus';
+import { DropdownMaterial } from './material/DropdownMaterial';
+import { DropdownVoteStatus } from './inventory/DropdownVoteStatus';
 import { TabType } from './HeadingMaterial';
 
 if (

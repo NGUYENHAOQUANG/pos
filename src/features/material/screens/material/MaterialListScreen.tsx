@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Platform } from 'react-native';
-import { HeaderMeterial } from '../../components/material/HeaderMeterial';
-import { HeadingMeterial, TabType } from '../../components/material/HeadingMaterial';
-import { SearchBarMeterial } from '../../components/material/SearchBarMeterial';
+import { HeaderMeterial } from '../../components/HeaderMeterial';
+import { HeadingMeterial, TabType } from '../../components/HeadingMaterial';
+import { SearchBarMeterial } from '../../components/SearchBarMeterial';
 import { AddMaterialCard } from '../../components/material/AddMaterialCard';
-import { ButtonMetaerial } from '../../components/material/ButtonMaterial';
+import { ButtonMetaerial } from '../../components/ButtonMaterial';
 import { colors, spacing } from '@/styles';
 
 export const MaterialListScreen = () => {

@@ -7,7 +7,7 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
-import { HeaderMeterial } from '../../components/material/HeaderMeterial';
+import { HeaderMeterial } from '../../components/HeaderMeterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';

@@ -1,0 +1,190 @@
+import React, { useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    Platform,
+    LayoutAnimation,
+    UIManager,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { colors, spacing, borderRadius } from '@/styles';
+import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+
+if (
+    Platform.OS === 'android' &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+interface WarehouseInformationProps {
+    date: Date;
+    onDateChange: (date: Date) => void;
+    supplier: string;
+    onSupplierChange: (text: string) => void;
+}
+
+export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
+    date,
+    onDateChange,
+    supplier,
+    onSupplierChange,
+}) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+
+    const toggleExpand = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsExpanded(!isExpanded);
+    };
+
+    const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    return (
+        <View style={styles.cardContainer}>
+            <TouchableOpacity
+                style={styles.header}
+                onPress={toggleExpand}
+                activeOpacity={0.7}
+            >
+                <Text style={styles.headerTitle}>Thông tin nhập kho</Text>
+                <Ionicons
+                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={colors.text}
+                />
+            </TouchableOpacity>
+
+            {isExpanded && (
+                <View style={styles.content}>
+                    {/* Date Input */}
+                    <View style={styles.inputGroup}>
+                        <View style={styles.labelContainer}>
+                            <Text style={styles.required}>* </Text>
+                            <Text style={styles.label}>Ngày nhập</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.dateInput}
+                            onPress={() => setDatePickerVisible(true)}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.dateText}>{formatDate(date)}</Text>
+                            <Ionicons
+                                name="calendar-outline"
+                                size={20}
+                                color={colors.textSecondary || '#999'}
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Supplier Input */}
+                    <View style={styles.inputGroup}>
+                        <View style={styles.labelContainer}>
+                            <Text style={styles.required}>* </Text>
+                            <Text style={styles.label}>Nhà cung cấp</Text>
+                        </View>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Nhập nhà cung cấp"
+                            placeholderTextColor={colors.textSecondary || '#999'}
+                            value={supplier}
+                            onChangeText={onSupplierChange}
+                        />
+                    </View>
+                </View>
+            )}
+
+            <DatePickerModal
+                visible={isDatePickerVisible}
+                onClose={() => setDatePickerVisible(false)}
+                date={date}
+                onSelectDate={onDateChange}
+            />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    cardContainer: {
+        backgroundColor: colors.white,
+        borderRadius: 0,
+        marginBottom: spacing.md,
+        marginHorizontal: -spacing.md,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
+        // overflow: 'hidden',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: spacing.md,
+        backgroundColor: '#F9FAFB',
+    },
+    headerTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    content: {
+        padding: spacing.md,
+    },
+    inputGroup: {
+        marginBottom: spacing.md,
+    },
+    labelContainer: {
+        flexDirection: 'row',
+        marginBottom: spacing.xs,
+    },
+    label: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
+    },
+    required: {
+        fontSize: 14,
+        color: colors.error || '#FF4D4F',
+    },
+    dateInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 44,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+    },
+    dateText: {
+        fontSize: 15,
+        color: colors.text,
+    },
+    input: {
+        height: 44,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+        fontSize: 15,
+        color: colors.text,
+    },
+});
