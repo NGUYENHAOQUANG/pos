@@ -27,6 +27,7 @@ export const MeterialScreen = () => {
     const [editingMaterial, setEditingMaterial] = useState<any>(null);
     const [searchText, setSearchText] = useState('');
     const [filterGroup, setFilterGroup] = useState('');
+    const [inventoryList, setInventoryList] = useState<InventoryTicket[]>([]);
 
     useLayoutEffect(() => {
         if (
@@ -217,6 +218,21 @@ export const MeterialScreen = () => {
                     )}
                     {selectedTab === 'history' && (
                         <AddWarehouseCard onPressAdd={handleCreateImport} />
+                    )}
+                    {selectedTab === 'inventory' && (
+                        inventoryList.length > 0 ? (
+                            <FlatList
+                                data={inventoryList}
+                                keyExtractor={(item) => item.id}
+                                renderItem={({ item }) => (
+                                    <InventoryCard data={item} />
+                                )}
+                                contentContainerStyle={{ paddingBottom: spacing.xl }}
+                                showsVerticalScrollIndicator={false}
+                            />
+                        ) : (
+                            <InventoryEmptyState onPressCreate={handleCreateInventory} />
+                        )
                     )}
                 </View>
             </View>
