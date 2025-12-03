@@ -13,21 +13,27 @@ import { WarehouseListScreen } from './warehouse/WarehouseListScreen';
 import { MaterialList } from '../components/material/MaterialList';
 import { spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
+import { InventoryEmptyState } from '../components/inventory/InventoryEmptyState';
+import { InventoryCard, InventoryTicket } from '../components/inventory/InventoryCard';
+import { AddInventoryScreen } from './inventory/AddInventoryScreen';
 
-type ScreenType = 'list' | 'add_material' | 'edit_material' | 'add_warehouse';
+type ScreenType = 'list' | 'add_material' | 'edit_material' | 'add_warehouse' | 'add_inventory';
 
 export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
     const [currentScreen, setCurrentScreen] = useState<ScreenType>('list');
     const [materials, setMaterials] = useState<any[]>([]);
-    const [receipts, setReceipts] = useState<any[]>([]);
     const [editingMaterial, setEditingMaterial] = useState<any>(null);
     const [searchText, setSearchText] = useState('');
     const [filterGroup, setFilterGroup] = useState('');
 
     useLayoutEffect(() => {
-        if (currentScreen === 'add_material' || currentScreen === 'edit_material' || currentScreen === 'add_warehouse') {
+        if (
+            currentScreen === 'add_material' ||
+            currentScreen === 'edit_material' ||
+            currentScreen === 'add_warehouse'
+        ) {
             setTabBarVisible(false);
         } else {
             setTabBarVisible(true);
@@ -44,6 +50,27 @@ export const MeterialScreen = () => {
         console.log('Create Adjustment');
     };
 
+    const handleCreateInventory = () => {
+        // --- SỬA THÀNH ---
+        console.log('Tạo phiếu điều chỉnh tồn kho');
+        const newTicket: InventoryTicket = {
+            id: Date.now().toString(),
+            checkerName: 'Nguyễn Phương Duy',
+            date: '11:00 28/11/2025',
+            note: 'Kiểm kê định kỳ tháng 11',
+            totalDifference: -2,
+            items: [
+                {
+                    id: '1',
+                    materialName: 'CP 09 – Thức ăn tôm giai đoạn 2',
+                    beforeQuantity: 4,
+                    afterQuantity: 2,
+                },
+            ],
+        };
+        setInventoryList(prev => [newTicket, ...prev]);
+        setCurrentScreen('add_inventory');
+    };
     const handleCreateMaterial = () => {
         setCurrentScreen('add_material');
     };
@@ -84,41 +111,14 @@ export const MeterialScreen = () => {
         handleBackToMaterialList();
     };
 
-    const handleSaveWarehouse = (data: any) => {
-        console.log('Save Warehouse Import', data);
-        const newReceipt = { ...data, id: Date.now().toString() };
-        setReceipts(prev => [newReceipt, ...prev]);
-        setSelectedTab('history');
-        handleBackToMaterialList();
-    };
-
     const filteredMaterials = materials.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase());
         const matchesGroup = filterGroup === '' || filterGroup === 'Tất cả nhóm vật tư' || item.group === filterGroup;
         return matchesSearch && matchesGroup;
     });
 
-    const filteredReceipts = receipts.filter(item => {
-        const matchesSearch = searchText === '' ||
-            (item.supplier && item.supplier.toLowerCase().includes(searchText.toLowerCase())) ||
-            item.materials.some((m: any) => m.materialName.toLowerCase().includes(searchText.toLowerCase()));
-
-        const matchesGroup = filterGroup === '' || filterGroup === 'Tất cả nhóm vật tư' ||
-            item.materials.some((m: any) => {
-                const materialDef = materials.find(mat => mat.name === m.materialName);
-                return materialDef && materialDef.group === filterGroup;
-            });
-
-        return matchesSearch && matchesGroup;
-    });
-
     if (currentScreen === 'add_material') {
-        return (
-            <AddMaterialScreen
-                onBack={handleBackToMaterialList}
-                onSave={handleSaveMaterial}
-            />
-        );
+        return <AddMaterialScreen onBack={handleBackToMaterialList} onSave={handleSaveMaterial} />;
     }
 
     if (currentScreen === 'edit_material' && editingMaterial) {
@@ -135,12 +135,44 @@ export const MeterialScreen = () => {
         return (
             <AddWarehouseScreen
                 onBack={handleBackToMaterialList}
-                availableMaterials={materials}
-                onSave={handleSaveWarehouse}
+                onSave={(data) => {
+                    console.log('Save Warehouse Import', data);
+                    handleBackToMaterialList();
+                }}
             />
         );
     }
 
+    if (currentScreen === 'add_inventory') {
+        return (
+            <AddInventoryScreen
+                onBack={() => setCurrentScreen('list')}
+                onSave={data => {
+                    // Logic lưu phiếu
+                    console.log('Dữ liệu lưu:', data);
+
+                    const newTicket: InventoryTicket = {
+                        id: Date.now().toString(),
+                        checkerName: 'Nguyễn Phương Duy',
+                        date: '11:00 28/11/2025',
+                        note: data.note || 'Phiếu mới',
+                        totalDifference: data.items[0].diff,
+                        items: [
+                            {
+                                id: '1',
+                                materialName: data.items[0].name,
+                                beforeQuantity: data.items[0].oldStock,
+                                afterQuantity: data.items[0].newStock,
+                            },
+                        ],
+                    };
+
+                    setInventoryList(prev => [newTicket, ...prev]);
+                    setCurrentScreen('list');
+                }}
+            />
+        );
+    }
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -149,7 +181,7 @@ export const MeterialScreen = () => {
                     rightComponent={
                         <ButtonMetaerial
                             onPressCreateImport={handleCreateImport}
-                            onPressCreateAdjustment={handleCreateAdjustment}
+                            onPressCreateAdjustment={handleCreateInventory}
                             onPressCreateMaterial={handleCreateMaterial}
                         />
                     }
@@ -176,7 +208,7 @@ export const MeterialScreen = () => {
                                         onAdjustmentPress={(item) => console.log('Adjustment', item)}
                                     />
                                 )}
-                                contentContainerStyle={{ paddingBottom: 100 }}
+                                contentContainerStyle={{ paddingBottom: spacing.xl }}
                                 showsVerticalScrollIndicator={false}
                             />
                         ) : (
@@ -184,11 +216,7 @@ export const MeterialScreen = () => {
                         )
                     )}
                     {selectedTab === 'history' && (
-                        receipts.length > 0 ? (
-                            <WarehouseListScreen receipts={filteredReceipts} />
-                        ) : (
-                            <AddWarehouseCard onPressAdd={handleCreateImport} />
-                        )
+                        <AddWarehouseCard onPressAdd={handleCreateImport} />
                     )}
                 </View>
             </View>
