@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Đang kiểm tra ESLint cho toàn bộ project..."
+
+npm run lint
+
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint phát hiện lỗi! Vui lòng sửa lỗi trước khi push."
+  echo "💡 Chạy 'npm run lint:fix' để tự động fix một số lỗi."
+  exit 1
+fi
+
+echo "✅ Tất cả file đã pass ESLint check!"
+

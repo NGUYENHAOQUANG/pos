@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Đang kiểm tra ESLint cho các file đã staged..."
+
+npx lint-staged
+
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint phát hiện lỗi! Vui lòng sửa lỗi trước khi commit."
+  exit 1
+fi
+
+echo "✅ Tất cả file đã pass ESLint check!"
