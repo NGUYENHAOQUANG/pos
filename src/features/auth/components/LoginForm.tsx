@@ -1,6 +1,6 @@
 import { Button } from '@/shared/components/buttons/Button';
 import { Logo } from '@/shared/components/brand/Logo';
-import { PhoneInput } from '@/features/auth/components/PhoneInput';
+import PhoneInput from '@/features/auth/components/PhoneInput';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
@@ -17,7 +17,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/styles';
 
-export default function LoginScreen() {
+export default function LoginForm() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const insets = useSafeAreaInsets();
 

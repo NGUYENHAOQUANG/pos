@@ -5,11 +5,21 @@ import {
     StyleSheet,
     TextInput,
     TouchableOpacity,
+    LayoutAnimation,
+    UIManager,
     Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '../material/DropdownMaterial';
+import { CollapseHead } from '../CollapseHead';
+
+if (
+    Platform.OS === 'android' &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export interface MaterialItem {
     id: string;
@@ -31,6 +41,13 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     onAddMaterial,
     materialOptions = [],
 }) => {
+    const [isExpanded, setIsExpanded] = React.useState(true);
+
+    const toggleExpand = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setIsExpanded(!isExpanded);
+    };
+
     const formatCurrency = (value: number) => {
         return value.toLocaleString('vi-VN') + ' đ';
     };
@@ -39,107 +56,111 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
 
     return (
         <View style={styles.mainMaterialCard}>
-            <View style={styles.mainHeader}>
-                <Text style={styles.mainHeaderTitle}>Vật tư nhập kho</Text>
-            </View>
+            <CollapseHead
+                title="Vật tư nhập kho"
+                isExpanded={isExpanded}
+                onToggle={toggleExpand}
+            />
 
-            <View style={styles.mainContent}>
-                {materials.map((item, index) => {
-                    const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
-                    const displayTotal = itemTotal > 0 ? formatCurrency(itemTotal) : 'Vui lòng nhập số lượng và đơn giá';
+            {isExpanded && (
+                <View style={styles.mainContent}>
+                    {materials.map((item, index) => {
+                        const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+                        const displayTotal = itemTotal > 0 ? formatCurrency(itemTotal) : 'Vui lòng nhập số lượng và đơn giá';
 
-                    return (
-                        <View key={item.id} style={styles.materialWrapper}>
-                            <View style={styles.materialCard}>
-                                {/* Header */}
-                                <View style={styles.materialHeader}>
-                                    <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
-                                </View>
-
-                                <View style={styles.content}>
-                                    {/* Material Name */}
-                                    <View style={styles.inputGroup}>
-                                        <DropdownMaterial
-                                            label="Tên vật tư"
-                                            required
-                                            value={item.materialName}
-                                            options={materialNames.length > 0 ? materialNames : ['CP 09 – Thức ăn tôm giai đoạn 2', 'Biozeus Probiotics', 'Vôi', 'Khoáng']}
-                                            onChange={(val) => onUpdateMaterial(item.id, 'materialName', val)}
-                                            placeholder="Chọn vật tư"
-                                            showAllOption={false}
-                                        />
+                        return (
+                            <View key={item.id} style={styles.materialWrapper}>
+                                <View style={styles.materialCard}>
+                                    {/* Header */}
+                                    <View style={styles.materialHeader}>
+                                        <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
                                     </View>
 
-                                    {/* Quantity and Price Row */}
-                                    <View style={styles.row}>
-                                        {/* Quantity */}
-                                        <View style={styles.halfWidth}>
-                                            <View style={styles.labelContainer}>
-                                                <Text style={styles.required}>* </Text>
-                                                <Text style={styles.label}>Số lượng</Text>
+                                    <View style={styles.content}>
+                                        {/* Material Name */}
+                                        <View style={styles.inputGroup}>
+                                            <DropdownMaterial
+                                                label="Tên vật tư"
+                                                required
+                                                value={item.materialName}
+                                                options={materialNames.length > 0 ? materialNames : ['CP 09 – Thức ăn tôm giai đoạn 2', 'Biozeus Probiotics', 'Vôi', 'Khoáng']}
+                                                onChange={(val) => onUpdateMaterial(item.id, 'materialName', val)}
+                                                placeholder="Chọn vật tư"
+                                                showAllOption={false}
+                                            />
+                                        </View>
+
+                                        {/* Quantity and Price Row */}
+                                        <View style={styles.row}>
+                                            {/* Quantity */}
+                                            <View style={styles.halfWidth}>
+                                                <View style={styles.labelContainer}>
+                                                    <Text style={styles.required}>* </Text>
+                                                    <Text style={styles.label}>Số lượng</Text>
+                                                </View>
+                                                <View style={styles.inputContainer}>
+                                                    <TextInput
+                                                        style={styles.innerInput}
+                                                        placeholder="Nhập số lượng"
+                                                        placeholderTextColor={colors.textSecondary || '#999'}
+                                                        value={item.quantity}
+                                                        onChangeText={(val) => {
+                                                            // Only allow numeric input
+                                                            if (/^\d*\.?\d*$/.test(val)) {
+                                                                onUpdateMaterial(item.id, 'quantity', val);
+                                                            }
+                                                        }}
+                                                        keyboardType="numeric"
+                                                    />
+                                                    <Text style={styles.unitText}>
+                                                        {materialOptions.find(opt => opt.value === item.materialName)?.unit || ''}
+                                                    </Text>
+                                                </View>
                                             </View>
-                                            <View style={styles.inputContainer}>
-                                                <TextInput
-                                                    style={styles.innerInput}
-                                                    placeholder="Nhập số lượng"
-                                                    placeholderTextColor={colors.textSecondary || '#999'}
-                                                    value={item.quantity}
-                                                    onChangeText={(val) => {
-                                                        // Only allow numeric input
-                                                        if (/^\d*\.?\d*$/.test(val)) {
-                                                            onUpdateMaterial(item.id, 'quantity', val);
-                                                        }
-                                                    }}
-                                                    keyboardType="numeric"
-                                                />
-                                                <Text style={styles.unitText}>
-                                                    {materialOptions.find(opt => opt.value === item.materialName)?.unit || ''}
-                                                </Text>
+
+                                            {/* Price */}
+                                            <View style={styles.halfWidth}>
+                                                <View style={styles.labelContainer}>
+                                                    <Text style={styles.required}>* </Text>
+                                                    <Text style={styles.label}>Đơn giá (đ)</Text>
+                                                </View>
+                                                <View style={styles.inputContainer}>
+                                                    <TextInput
+                                                        style={styles.innerInput}
+                                                        placeholder="Nhập đơn giá"
+                                                        placeholderTextColor={colors.textSecondary || '#999'}
+                                                        value={item.price}
+                                                        onChangeText={(val) => onUpdateMaterial(item.id, 'price', val)}
+                                                        keyboardType="numeric"
+                                                    />
+                                                </View>
                                             </View>
                                         </View>
 
-                                        {/* Price */}
-                                        <View style={styles.halfWidth}>
-                                            <View style={styles.labelContainer}>
-                                                <Text style={styles.required}>* </Text>
-                                                <Text style={styles.label}>Đơn giá (đ)</Text>
-                                            </View>
-                                            <View style={styles.inputContainer}>
-                                                <TextInput
-                                                    style={styles.innerInput}
-                                                    placeholder="Nhập đơn giá"
-                                                    placeholderTextColor={colors.textSecondary || '#999'}
-                                                    value={item.price}
-                                                    onChangeText={(val) => onUpdateMaterial(item.id, 'price', val)}
-                                                    keyboardType="numeric"
-                                                />
-                                            </View>
+                                        {/* Total Amount */}
+                                        <View style={styles.footer}>
+                                            <Text style={styles.footerLabel}>Thành tiền:</Text>
+                                            <Text style={[styles.footerValue, !itemTotal && styles.placeholderText]}>
+                                                {displayTotal}
+                                            </Text>
                                         </View>
-                                    </View>
-
-                                    {/* Total Amount */}
-                                    <View style={styles.footer}>
-                                        <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                        <Text style={[styles.footerValue, !itemTotal && styles.placeholderText]}>
-                                            {displayTotal}
-                                        </Text>
                                     </View>
                                 </View>
                             </View>
-                        </View>
-                    );
-                })}
+                        );
+                    })}
 
-                {/* Add Button */}
-                <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={onAddMaterial}
-                    activeOpacity={0.7}
-                >
-                    <Ionicons name="add" size={24} color={colors.textSecondary} />
-                    <Text style={styles.addButtonText}>Thêm vật tư</Text>
-                </TouchableOpacity>
-            </View>
+                    {/* Add Button */}
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={onAddMaterial}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons name="add" size={24} color={colors.textSecondary} />
+                        <Text style={styles.addButtonText}>Thêm vật tư</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </View>
     );
 };
@@ -148,9 +169,8 @@ const styles = StyleSheet.create({
     // Main Material Card Styles
     mainMaterialCard: {
         backgroundColor: colors.white,
-        borderRadius: 0,
+        borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        marginHorizontal: -spacing.md,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -163,17 +183,6 @@ const styles = StyleSheet.create({
             },
         }),
         zIndex: 1,
-    },
-    mainHeader: {
-        padding: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-    },
-    mainHeaderTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
     },
     mainContent: {
         padding: spacing.md,

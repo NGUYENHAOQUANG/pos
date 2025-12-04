@@ -1,11 +1,10 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { HeaderMeterial } from '../components/HeaderMeterial';
+import { HeaderMeterial } from '../components/HeaderMaterial';
 import { ButtonMetaerial } from '../components/ButtonMaterial';
 import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
-import { SearchBarMeterial } from '../components/SearchBarMeterial';
-import { AddMaterialCard } from '../components/material/AddMaterialCard';
-import { AddWarehouseCard } from '../components/warehouse/AddWarehouseCard';
+import { SearchBarMeterial } from '../components/SearchBarMaterial';
+import { EmptyStateCard } from '../components/EmptyStateCard';
 import { AddMaterialScreen } from './material/AddMaterialScreen';
 import { EditMaterialScreen } from './material/EditMaterialScreen';
 import { AddWarehouseScreen } from './warehouse/AddWarehouseScreen';
@@ -13,7 +12,7 @@ import { WarehouseListScreen } from './warehouse/WarehouseListScreen';
 import { MaterialList } from '../components/material/MaterialList';
 import { spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { InventoryEmptyState } from '../components/inventory/InventoryEmptyState';
+
 import { InventoryCard, InventoryTicket } from '../components/inventory/InventoryCard';
 import { AddInventoryScreen } from './inventory/AddInventoryScreen';
 
@@ -28,6 +27,7 @@ export const MeterialScreen = () => {
     const [searchText, setSearchText] = useState('');
     const [filterGroup, setFilterGroup] = useState('');
     const [inventoryList, setInventoryList] = useState<InventoryTicket[]>([]);
+    const [warehouseList, setWarehouseList] = useState<any[]>([]);
 
     useLayoutEffect(() => {
         if (
@@ -136,8 +136,14 @@ export const MeterialScreen = () => {
         return (
             <AddWarehouseScreen
                 onBack={handleBackToMaterialList}
+                availableMaterials={materials}
                 onSave={(data) => {
                     console.log('Save Warehouse Import', data);
+                    const newReceipt = {
+                        id: Date.now().toString(),
+                        ...data
+                    };
+                    setWarehouseList(prev => [newReceipt, ...prev]);
                     handleBackToMaterialList();
                 }}
             />
@@ -213,11 +219,23 @@ export const MeterialScreen = () => {
                                 showsVerticalScrollIndicator={false}
                             />
                         ) : (
-                            <AddMaterialCard onPressAdd={handleAddMaterial} />
+                            <EmptyStateCard
+                                message="Chưa có vật tư nào được thêm."
+                                buttonTitle="Thêm vật tư"
+                                onPress={handleAddMaterial}
+                            />
                         )
                     )}
                     {selectedTab === 'history' && (
-                        <AddWarehouseCard onPressAdd={handleCreateImport} />
+                        warehouseList.length > 0 ? (
+                            <WarehouseListScreen receipts={warehouseList} />
+                        ) : (
+                            <EmptyStateCard
+                                message="Chưa có phiếu nhập kho nào được tạo."
+                                buttonTitle="Tạo phiếu nhập kho"
+                                onPress={handleCreateImport}
+                            />
+                        )
                     )}
                     {selectedTab === 'inventory' && (
                         inventoryList.length > 0 ? (
@@ -231,7 +249,12 @@ export const MeterialScreen = () => {
                                 showsVerticalScrollIndicator={false}
                             />
                         ) : (
-                            <InventoryEmptyState onPressCreate={handleCreateInventory} />
+                            <EmptyStateCard
+                                message="Chưa có phiếu điều chỉnh tồn kho nào được tạo."
+                                buttonTitle="Tạo Phiếu Điều Chỉnh Tồn Kho"
+                                onPress={handleCreateInventory}
+                                buttonStyle={{ width: '100%' }}
+                            />
                         )
                     )}
                 </View>

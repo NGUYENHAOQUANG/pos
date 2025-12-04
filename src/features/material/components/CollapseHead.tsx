@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 
 interface CollapseHeadProps {
   title: string;
@@ -42,7 +42,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[50],
+    borderRadius: borderRadius.md,
   },
   title: {
     fontSize: 16,

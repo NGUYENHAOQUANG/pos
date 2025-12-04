@@ -9,8 +9,8 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DropdownMaterial } from './DropdownMaterial';
+import { CollapseHead } from '../CollapseHead';
 import { UnitOfMeasure } from './UnitOfMeasure';
 import { UnitOfUse } from './UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -79,18 +79,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
         <View>
             {/* Basic Info Section */}
             <View style={[styles.sectionContainer, { zIndex: 20 }]}>
-                <TouchableOpacity
-                    style={styles.header}
-                    onPress={toggleBasicExpand}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.headerTitle}>Thông tin cơ bản</Text>
-                    <Ionicons
-                        name={isBasicExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={20}
-                        color={colors.text}
-                    />
-                </TouchableOpacity>
+                <CollapseHead
+                    title="Thông tin cơ bản"
+                    isExpanded={isBasicExpanded}
+                    onToggle={toggleBasicExpand}
+                />
 
                 {isBasicExpanded && (
                     <View style={styles.content}>
@@ -137,18 +130,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
             {/* Advanced Info Section */}
             <View style={[styles.sectionContainer, { zIndex: 10 }]}>
-                <TouchableOpacity
-                    style={styles.header}
-                    onPress={toggleAdvancedExpand}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.headerTitle}>Thông tin nâng cao (không bắt buộc)</Text>
-                    <Ionicons
-                        name={isAdvancedExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={20}
-                        color={colors.text}
-                    />
-                </TouchableOpacity>
+                <CollapseHead
+                    title="Thông tin nâng cao (không bắt buộc)"
+                    isExpanded={isAdvancedExpanded}
+                    onToggle={toggleAdvancedExpand}
+                />
 
                 {isAdvancedExpanded && (
                     <View style={styles.content}>
@@ -222,17 +208,6 @@ const styles = StyleSheet.create({
                 elevation: 2,
             },
         }),
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.md,
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
     },
     content: {
         paddingHorizontal: spacing.md,

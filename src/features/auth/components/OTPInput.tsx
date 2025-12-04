@@ -74,7 +74,7 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
           return (
             <TextInput
               key={index}
-              ref={el => (inputRefs.current[index] = el)}
+              ref={el => { inputRefs.current[index] = el; }}
               style={[styles.otpBoxInput, { borderColor }]}
               value={digit}
               onChangeText={text => handleCodeChange(text, index)}

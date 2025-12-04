@@ -1,30 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, Platform, ImageSourcePropType, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 
-interface AddMaterialCardProps {
-    onPressAdd?: () => void;
+interface EmptyStateCardProps {
+    message: string;
+    buttonTitle: string;
+    onPress: () => void;
+    imageSource?: ImageSourcePropType;
+    buttonStyle?: ViewStyle;
 }
 
-export const AddWarehouseCard: React.FC<AddMaterialCardProps> = ({
-    onPressAdd,
+export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
+    message,
+    buttonTitle,
+    onPress,
+    imageSource = require('@/assets/images/Material.png'),
+    buttonStyle,
 }) => {
     return (
         <View style={styles.container}>
             <Image
-                source={require('@/assets/images/Material.png')}
+                source={imageSource}
                 style={styles.image}
                 resizeMode="contain"
             />
-            <Text style={styles.text}>Chưa có phiếu nhập kho nào được tạo.</Text>
+            <Text style={styles.text}>{message}</Text>
             <Button
-                title="Tạo phiếu nhập kho"
-                onPress={() => onPressAdd?.()}
+                title={buttonTitle}
+                onPress={onPress}
                 iconLeft="add"
                 variant="primary"
                 size="medium"
-                style={styles.button}
+                style={StyleSheet.flatten([styles.button, buttonStyle])}
             />
         </View>
     );

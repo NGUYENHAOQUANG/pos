@@ -10,6 +10,7 @@ import {
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { CollapseHead } from '../CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 
@@ -55,18 +56,11 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
 
     return (
         <View style={styles.cardContainer}>
-            <TouchableOpacity
-                style={styles.header}
-                onPress={toggleExpand}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.headerTitle}>Thông tin nhập kho</Text>
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color={colors.text}
-                />
-            </TouchableOpacity>
+            <CollapseHead
+                title="Thông tin nhập kho"
+                isExpanded={isExpanded}
+                onToggle={toggleExpand}
+            />
 
             {isExpanded && (
                 <View style={styles.content}>
@@ -120,9 +114,8 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: colors.white,
-        borderRadius: 0,
+        borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        marginHorizontal: -spacing.md,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -136,18 +129,7 @@ const styles = StyleSheet.create({
         }),
         // overflow: 'hidden',
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.md,
-        backgroundColor: '#F9FAFB',
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-    },
+
     content: {
         padding: spacing.md,
     },

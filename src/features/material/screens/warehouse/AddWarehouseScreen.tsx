@@ -8,7 +8,7 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
-import { HeaderMeterial } from '../../components/HeaderMeterial';
+import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { WarehouseInformation } from '../../components/warehouse/WarehouseInformation';
 import { AddWarehouseMaterial, MaterialItem } from '../../components/warehouse/AddWarehouseMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        padding: spacing.md,
+        paddingVertical: spacing.md,
         paddingBottom: spacing.xl,
     },
     footer: {

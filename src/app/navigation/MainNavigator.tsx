@@ -25,7 +25,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 import DevicesScreen from '@/features/devices/screens/DevicesScreen';
-import { MeterialScreen } from '@/features/material/screens/MeterialScreen';
+import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 
 const { width } = Dimensions.get('window');

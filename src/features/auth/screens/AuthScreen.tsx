@@ -20,7 +20,7 @@ import type { AuthStackParamList } from '@/app/navigation/types';
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 // import WaveHeader from '@/shared/components/layout/WaveHeader';
 // Import PhoneInput bạn đã tạo ở bước trước
-import { PhoneInput } from '../components/PhoneInput';
+import PhoneInput from '../components/PhoneInput';
 
 // --- IMPORTS STORE & STYLES ---
 import { useAuthStore } from '../store/authStore';

@@ -15,15 +15,21 @@ interface PhoneInputProps {
   onChangeText: (value: string) => void;
   error?: string; // Chuỗi lỗi để hiển thị
   onClear?: () => void; // Hàm reset lỗi hoặc xóa text
+  countryCode?: string;
+  onCountryCodeChange?: (code: string) => void;
+  required?: boolean;
 }
 
-export const PhoneInput: React.FC<PhoneInputProps> = ({
+const PhoneInput: React.FC<PhoneInputProps> = ({
   label = 'Số điện thoại',
-  placeholder = 'nhập số điện thoại',
+  placeholder = 'Nhập số điện thoại',
   value,
   onChangeText,
   error,
   onClear,
+  countryCode,
+  onCountryCodeChange,
+  required,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -138,3 +144,5 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 });
+
+export default PhoneInput;

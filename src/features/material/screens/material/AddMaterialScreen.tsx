@@ -7,7 +7,7 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
-import { HeaderMeterial } from '../../components/HeaderMeterial';
+import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { Button } from '@/shared/components/buttons/Button';
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        padding: spacing.md,
+        paddingVertical: spacing.md,
     },
     footer: {
         padding: spacing.md,

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Platform } from 'react-native';
-import { HeaderMeterial } from '../../components/HeaderMeterial';
+import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { HeadingMeterial, TabType } from '../../components/HeadingMaterial';
-import { SearchBarMeterial } from '../../components/SearchBarMeterial';
-import { AddMaterialCard } from '../../components/material/AddMaterialCard';
+import { SearchBarMeterial } from '../../components/SearchBarMaterial';
+import { EmptyStateCard } from '../../components/EmptyStateCard';
 import { ButtonMetaerial } from '../../components/ButtonMaterial';
 import { colors, spacing } from '@/styles';
 
@@ -39,7 +39,11 @@ export const MaterialListScreen = () => {
         <SearchBarMeterial onSearch={handleSearch} onFilterPress={handleFilterPress} />
 
         <View style={styles.content}>
-          <AddMaterialCard onPressAdd={handleAddMaterial} />
+          <EmptyStateCard
+            message="Chưa có vật tư nào được thêm."
+            buttonTitle="Thêm vật tư"
+            onPress={handleAddMaterial}
+          />
         </View>
       </View>
     </SafeAreaView>
