@@ -5,26 +5,53 @@
  * @created 2025-01-XX
  */
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Platform,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
-import { colors, spacing, borderRadius } from '@/styles';
+import { spacing } from '@/styles';
 import { DeviceCard } from '../components/DeviceCard';
 import { DeviceIconButton } from '../components/DeviceIconButton';
 
 const { width } = Dimensions.get('window');
+
+interface CurvedHeaderProps {
+  height: number;
+  insetsTop: number;
+}
+
+const CurvedHeader = React.memo<CurvedHeaderProps>(({ height, insetsTop }) => {
+  const curveHeight = 40;
+
+  return (
+    <View style={[styles.headerContainer, { height }]}>
+      <Svg
+        height={height}
+        width={width}
+        viewBox={`0 0 ${width} ${height}`}
+        style={styles.headerSvg}
+      >
+        <Defs>
+          <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor="#0076F7" stopOpacity="1" />
+            <Stop offset="1" stopColor="#00C6FF" stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Path
+          d={`M0 0 L${width} 0 L${width} ${height - curveHeight} Q${width / 2} ${height + 20} 0 ${
+            height - curveHeight
+          } Z`}
+          fill="url(#grad)"
+        />
+      </Svg>
+      <View style={[styles.headerContent, { paddingTop: insetsTop + 10 }]}>
+        <Text style={styles.headerTitle}>Thiết bị</Text>
+      </View>
+    </View>
+  );
+});
+
+CurvedHeader.displayName = 'CurvedHeader';
 
 interface Device {
   id: string;
@@ -77,56 +104,24 @@ export default function DevicesScreen() {
   ]);
 
   const handleToggle = React.useCallback((deviceId: string) => {
-    setDevices((prevDevices) =>
-      prevDevices.map((device) =>
-        device.id === deviceId
-          ? { ...device, status: !device.status }
-          : device
+    setDevices(prevDevices =>
+      prevDevices.map(device =>
+        device.id === deviceId ? { ...device, status: !device.status } : device
       )
     );
   }, []);
 
-  const filteredDevices = devices.filter((device) => {
+  const filteredDevices = devices.filter(device => {
     if (filter === 'active') return device.status;
     if (filter === 'paused') return !device.status;
     return true;
-  });
-
-  const CurvedHeader = React.memo(() => {
-    const height = 180;
-    const curveHeight = 40;
-
-    return (
-      <View style={[styles.headerContainer, { height }]}>
-        <Svg
-          height={height}
-          width={width}
-          viewBox={`0 0 ${width} ${height}`}
-          style={styles.headerSvg}
-        >
-          <Defs>
-            <LinearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
-              <Stop offset="0" stopColor="#0076F7" stopOpacity="1" />
-              <Stop offset="1" stopColor="#00C6FF" stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Path
-            d={`M0 0 L${width} 0 L${width} ${height - curveHeight} Q${width / 2} ${height + 20} 0 ${height - curveHeight} Z`}
-            fill="url(#grad)"
-          />
-        </Svg>
-        <View style={[styles.headerContent, { paddingTop: insets.top + 10 }]}>
-          <Text style={styles.headerTitle}>Thiết bị</Text>
-        </View>
-      </View>
-    );
   });
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <CurvedHeader />
+      <CurvedHeader height={180} insetsTop={insets.top} />
 
       <ScrollView
         style={styles.scrollView}
@@ -135,8 +130,12 @@ export default function DevicesScreen() {
       >
         {/* Device Icons Row (Overlapping) */}
         <View style={styles.iconRowContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.iconRowScroll}>
-            {devices.map((device) => (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.iconRowScroll}
+          >
+            {devices.map(device => (
               <View key={device.id} style={styles.iconWrapper}>
                 <DeviceIconButton
                   name={device.name}
@@ -162,52 +161,28 @@ export default function DevicesScreen() {
         {/* Filter Tabs */}
         <View style={styles.filterTabs}>
           <TouchableOpacity
-            style={[
-              styles.filterTab,
-              filter === 'all' && styles.filterTabActive,
-            ]}
+            style={[styles.filterTab, filter === 'all' && styles.filterTabActive]}
             onPress={() => setFilter('all')}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                filter === 'all' && styles.filterTabTextActive,
-              ]}
-            >
+            <Text style={[styles.filterTabText, filter === 'all' && styles.filterTabTextActive]}>
               Tất cả thiết bị
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.filterTab,
-              filter === 'active' && styles.filterTabActive,
-            ]}
+            style={[styles.filterTab, filter === 'active' && styles.filterTabActive]}
             onPress={() => setFilter('active')}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                filter === 'active' && styles.filterTabTextActive,
-              ]}
-            >
+            <Text style={[styles.filterTabText, filter === 'active' && styles.filterTabTextActive]}>
               Đang hoạt động
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.filterTab,
-              filter === 'paused' && styles.filterTabActive,
-            ]}
+            style={[styles.filterTab, filter === 'paused' && styles.filterTabActive]}
             onPress={() => setFilter('paused')}
           >
-            <Text
-              style={[
-                styles.filterTabText,
-                filter === 'paused' && styles.filterTabTextActive,
-              ]}
-            >
+            <Text style={[styles.filterTabText, filter === 'paused' && styles.filterTabTextActive]}>
               Tạm dừng
             </Text>
           </TouchableOpacity>
@@ -215,7 +190,7 @@ export default function DevicesScreen() {
 
         {/* Device Cards */}
         <View style={styles.cardsContainer}>
-          {filteredDevices.map((device) => (
+          {filteredDevices.map(device => (
             <DeviceCard
               key={device.id}
               id={device.id}

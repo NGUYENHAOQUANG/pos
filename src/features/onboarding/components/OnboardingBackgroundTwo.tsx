@@ -1,10 +1,4 @@
-import {
-  Dimensions,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useEffect } from 'react';
 import Animated, {
@@ -27,7 +21,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
   const pondTranslateY = useSharedValue(SCREEN_HEIGHT * 0.4);
   const tankTranslateX = useSharedValue(-80);
   const appTranslateX = useSharedValue(80);
-  const phTranslateY = useSharedValue(50)
+  const phTranslateY = useSharedValue(50);
   const transformWidth = useSharedValue(0);
 
   const transformStyle = useAnimatedStyle(() => ({
@@ -44,7 +38,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
   }));
   const phStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: phTranslateY.value }],
-  }))
+  }));
 
   useEffect(() => {
     pondTranslateY.value = withTiming(0, {
@@ -57,7 +51,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
       withTiming(0, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
 
     transformWidth.value = withDelay(
@@ -65,7 +59,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
       withTiming(70, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
 
     appTranslateX.value = withDelay(
@@ -73,7 +67,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
       withTiming(0, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
 
     phTranslateY.value = withDelay(
@@ -82,7 +76,8 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
         duration: 500,
         easing: Easing.out(Easing.cubic),
       })
-    )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -95,9 +90,9 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
           ]}
           start={{ x: 0.5, y: 0 }} // từ trên
           end={{ x: 0.5, y: 1 }} // xuống dưới
-          style={{ flex: 1 }}
+          style={styles.linearGradient}
         >
-          <SafeAreaView style={{ flex: 1 }}>
+          <SafeAreaView style={styles.safeArea}>
             <View style={styles.topHalf}>
               <View style={styles.badge}>
                 <View style={styles.dot} />
@@ -140,9 +135,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
                 />
               </View>
 
-              <View
-                style={styles.outer}
-              >
+              <View style={styles.outer}>
                 <Animated.View style={[styles.inner, phStyle]}>
                   <Ionicons name="water" color="#000" size={24} />
                   <Text style={styles.text}>pH 7.2</Text>
@@ -151,7 +144,7 @@ const OnboardingBackgroundTwo: React.FC<OnboardingBackgroundProps> = ({}) => {
             </View>
 
             {/* Nửa dưới */}
-            <View style={styles.bottomHalf}></View>
+            <View style={styles.bottomHalf} />
           </SafeAreaView>
         </LinearGradient>
       </View>
@@ -265,10 +258,16 @@ const styles = StyleSheet.create({
   },
 
   // php
+  safeArea: {
+    flex: 1,
+  },
+  linearGradient: {
+    flex: 1,
+  },
   outer: {
     position: 'absolute',
-    left: "10%",
-    bottom: "15%",
+    left: '10%',
+    bottom: '15%',
     padding: 2,
     borderRadius: 18,
   },

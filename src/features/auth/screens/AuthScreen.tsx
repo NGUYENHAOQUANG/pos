@@ -23,7 +23,7 @@ import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import PhoneInput from '../components/PhoneInput';
 
 // --- IMPORTS STORE & STYLES ---
-import { useAuthStore } from '../store/authStore';
+// import { useAuthStore } from '../store/authStore'; // TODO: Uncomment when implementing login
 import { spacing } from '@/styles';
 
 export default function AuthScreen() {
@@ -34,7 +34,7 @@ export default function AuthScreen() {
   // --- STATE ---
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuthStore();
+  // const { login } = useAuthStore(); // TODO: Uncomment when implementing login
 
   // --- HANDLERS ---
   const handleLogin = async () => {

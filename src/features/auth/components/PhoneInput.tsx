@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // Giả định bạn đã có các biến này trong project, nếu chưa hãy thay bằng mã màu cứng
-import { colors, spacing, typography, borderRadius, sizes } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 
 interface PhoneInputProps {
   label?: string;
@@ -27,9 +27,9 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   onChangeText,
   error,
   onClear,
-  countryCode,
-  onCountryCodeChange,
-  required,
+  countryCode: _countryCode,
+  onCountryCodeChange: _onCountryCodeChange,
+  required: _required,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 

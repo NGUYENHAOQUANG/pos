@@ -28,7 +28,7 @@ export interface InventoryDetailItem {
 export interface InventoryTicket {
   id: string;
   checkerName: string;
-  date: string; 
+  date: string;
   note: string;
   totalDifference: number;
   items: InventoryDetailItem[];
@@ -61,16 +61,16 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
       </View>
       <View style={styles.separator} />
       {/* Body: Ghi chú & Tổng chênh lệch */}
-      <View style={[styles.col, { marginTop: spacing.sm }]}>
-        <View style={[styles.row, { flex: 2 }]}>
+      <View style={[styles.col, styles.colWithMargin]}>
+        <View style={[styles.row, styles.rowFlex2]}>
           <Text style={styles.label}>Ghi chú</Text>
           <Text style={styles.noteText} numberOfLines={2}>
             {data.note}
           </Text>
         </View>
-        <View style={[styles.row, styles.alignRight, { flex: 1 }]}>
+        <View style={[styles.row, styles.alignRight, styles.rowFlex1]}>
           <Text style={styles.label}>Tổng chênh lệch:</Text>
-          <Text style={[styles.value, { fontWeight: 'bold' }]}>{data.totalDifference}</Text>
+          <Text style={[styles.value, styles.valueBold]}>{data.totalDifference}</Text>
         </View>
       </View>
 
@@ -205,5 +205,17 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     height: 1,
     backgroundColor: '#F0F0F0',
+  },
+  colWithMargin: {
+    marginTop: spacing.sm,
+  },
+  rowFlex2: {
+    flex: 2,
+  },
+  rowFlex1: {
+    flex: 1,
+  },
+  valueBold: {
+    fontWeight: 'bold',
   },
 });

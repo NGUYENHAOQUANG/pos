@@ -133,7 +133,7 @@ export default function VerifyOTPScreen() {
             {isError ? (
               <Text style={styles.errorText}>{errorMessage}</Text>
             ) : (
-              <View style={{ height: 24 }} />
+              <View style={styles.errorPlaceholder} />
             )}
 
             {/* Resend & Timer */}
@@ -270,5 +270,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#007CFF',
     borderRadius: 25,
     height: 50,
+  },
+  errorPlaceholder: {
+    height: 24,
   },
 });

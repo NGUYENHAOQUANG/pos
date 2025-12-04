@@ -5,13 +5,14 @@
  * @created 2025-11-16
  */
 import React from 'react';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {NavigationContainer} from '@react-navigation/native';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {Provider as AntdProvider} from '@ant-design/react-native';
-import {AppNavigator} from './navigation/AppNavigator';
-import {antdTheme} from '../core/config/antd-theme';
+import { StyleSheet } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavigationContainer } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider as AntdProvider } from '@ant-design/react-native';
+import { AppNavigator } from './navigation/AppNavigator';
+import { antdTheme } from '../core/config/antd-theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,7 +26,7 @@ const queryClient = new QueryClient({
 export function AppProviders() {
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{flex: 1}}>
+      <GestureHandlerRootView style={styles.gestureHandler}>
         <AntdProvider theme={antdTheme}>
           <QueryClientProvider client={queryClient}>
             <NavigationContainer>
@@ -37,3 +38,9 @@ export function AppProviders() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  gestureHandler: {
+    flex: 1,
+  },
+});

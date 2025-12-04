@@ -5,12 +5,7 @@
  * @created 2025-11-18
  */
 import React from 'react';
-import {
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import { TouchableOpacity, View, StyleSheet } from 'react-native';
 
 interface ToggleSwitchProps {
   value: boolean;
@@ -38,8 +33,8 @@ export function ToggleSwitch({
   const thumbPosition = value ? 39 : 3; // OFF: 3px, ON: 39px
   const thumbWidth = 28; // Fixed width, no droplet effect
   const thumbBorderRadius = 14; // Fixed border radius, no morphing
-  const borderWidth = value ? 3 : 0; // Border only when active
-  const borderColor = value ? activeColor : 'transparent';
+  // const borderWidth = value ? 3 : 0; // Border only when active
+  // const borderColor = value ? activeColor : 'transparent'; // TODO: Use when implementing border
 
   return (
     <TouchableOpacity

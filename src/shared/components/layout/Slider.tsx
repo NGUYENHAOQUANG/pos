@@ -122,7 +122,7 @@ const Slider: React.FC<SliderProps> = ({
             name="arrow-forward-outline"
             color={colors.white}
             size={24}
-            style={{ marginLeft: 8 }}
+            style={styles.iconMargin}
           />
         </TouchableOpacity>
       </View>
@@ -232,6 +232,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlignVertical: 'center',
     includeFontPadding: false,
+  },
+  iconMargin: {
+    marginLeft: 8,
   },
 });
 

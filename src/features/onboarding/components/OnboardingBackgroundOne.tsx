@@ -49,14 +49,14 @@ const OnboardingBackgroundOne: React.FC<OnboardingBackgroundProps> = ({}) => {
       withTiming(0, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
     shrimpsOpacity.value = withDelay(
       150,
       withTiming(1, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
 
     // pulse nổi lên + fade in sau một chút
@@ -65,24 +65,25 @@ const OnboardingBackgroundOne: React.FC<OnboardingBackgroundProps> = ({}) => {
       withTiming(0, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
     pulseOpacity.value = withDelay(
       250,
       withTiming(1, {
         duration: 500,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <View style={styles.layerBackground} pointerEvents="none">
       <ImageBackground
         source={require('@/assets/backgrounds/background-1.png')}
-        style={{ flex: 1 }}
+        style={styles.imageBackground}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} />
+        <View style={styles.overlay} />
 
         <Animated.View style={styles.imagePound}>
           {/* Ao tôm: scale in */}
@@ -111,6 +112,13 @@ const OnboardingBackgroundOne: React.FC<OnboardingBackgroundProps> = ({}) => {
 const styles = StyleSheet.create({
   layerBackground: {
     flex: 1,
+  },
+  imageBackground: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   imagePound: {
     position: 'absolute',

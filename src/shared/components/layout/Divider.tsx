@@ -8,16 +8,20 @@ interface DividerProps {
   lineColor?: string;
 }
 
-export function Divider({ text, textColor = colors.textSecondary, lineColor = colors.border }: DividerProps) {
+export function Divider({
+  text,
+  textColor = colors.textSecondary,
+  lineColor = colors.border,
+}: DividerProps) {
   if (!text) {
     return <View style={[styles.line, { backgroundColor: lineColor }]} />;
   }
 
   return (
     <View style={styles.container}>
-      <View style={[styles.line, { backgroundColor: lineColor, flex: 1 }]} />
+      <View style={[styles.line, styles.lineFlex, { backgroundColor: lineColor }]} />
       <Text style={[styles.text, { color: textColor }]}>{text}</Text>
-      <View style={[styles.line, { backgroundColor: lineColor, flex: 1 }]} />
+      <View style={[styles.line, styles.lineFlex, { backgroundColor: lineColor }]} />
     </View>
   );
 }
@@ -37,5 +41,8 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
     paddingHorizontal: spacing.xs,
+  },
+  lineFlex: {
+    flex: 1,
   },
 });

@@ -1,13 +1,6 @@
 import { colors, spacing, typography } from '@/styles';
 import React from 'react';
-import {
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  FlatList,
-} from 'react-native';
+import { Modal, StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -25,6 +18,9 @@ export interface SelectorModalProps {
   onClose: () => void;
 }
 
+const Separator = React.memo(() => <View style={styles.separator} />);
+Separator.displayName = 'Separator';
+
 export const SelectorModal: React.FC<SelectorModalProps> = ({
   visible,
   title,
@@ -39,19 +35,10 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <TouchableOpacity
-          style={styles.overlayTouchable}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={[styles.overlay, styles.overlayFlex]}>
+        <TouchableOpacity style={styles.overlayTouchable} activeOpacity={1} onPress={onClose} />
+        <SafeAreaView style={[styles.container, styles.safeAreaFlex]} edges={['bottom']}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
@@ -64,7 +51,7 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
           {options.length > 0 ? (
             <FlatList
               data={options}
-              keyExtractor={(item) => item.value}
+              keyExtractor={item => item.value}
               renderItem={({ item }) => {
                 const isSelected = item.value === selectedValue;
                 return (
@@ -76,13 +63,11 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
                     <Text style={[styles.optionText, isSelected && styles.optionTextSelected]}>
                       {item.label}
                     </Text>
-                    {isSelected && (
-                      <Ionicons name="checkmark" size={20} color={colors.primary} />
-                    )}
+                    {isSelected && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                   </TouchableOpacity>
                 );
               }}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ItemSeparatorComponent={Separator}
               style={styles.list}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={true}
@@ -171,5 +156,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[200],
     marginLeft: spacing.lg,
   },
+  safeAreaFlex: {
+    flex: 1,
+  },
+  overlayFlex: {
+    flex: 1,
+  },
 });
-

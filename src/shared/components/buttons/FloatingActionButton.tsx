@@ -1,11 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-  Animated,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-} from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles';
@@ -95,8 +89,8 @@ export function FloatingActionButton({
                 {
                   transform: [{ translateY }, { scale }],
                   opacity,
-                  marginBottom: 16,
                 },
+                styles.menuItemMargin,
               ]}
             >
               <TouchableOpacity
@@ -113,11 +107,7 @@ export function FloatingActionButton({
                     { backgroundColor: item.backgroundColor || colors.primary + '20' },
                   ]}
                 >
-                  <Icon
-                    name={item.icon}
-                    size={24}
-                    color={item.iconColor || colors.primary}
-                  />
+                  <Icon name={item.icon} size={24} color={item.iconColor || colors.primary} />
                 </View>
                 <Text style={styles.menuLabel}>{item.label}</Text>
               </TouchableOpacity>
@@ -204,5 +194,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 10,
     zIndex: 1000,
+  },
+  menuItemMargin: {
+    marginBottom: 16,
   },
 });

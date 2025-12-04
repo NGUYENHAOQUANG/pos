@@ -1,11 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ImageSourcePropType,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Animated, {
   Easing,
@@ -37,11 +31,7 @@ type AnimatedChatBubbleProps = {
   delay?: number; // ms
 };
 
-const AnimatedChatBubble: React.FC<AnimatedChatBubbleProps> = ({
-                                                                 children,
-                                                                 style,
-                                                                 delay = 0,
-                                                               }) => {
+const AnimatedChatBubble: React.FC<AnimatedChatBubbleProps> = ({ children, style, delay = 0 }) => {
   const progress = useSharedValue(0); // 0 -> 1
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -61,23 +51,20 @@ const AnimatedChatBubble: React.FC<AnimatedChatBubbleProps> = ({
       withTiming(1, {
         duration: 800,
         easing: Easing.out(Easing.cubic),
-      }),
+      })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <Animated.View style={[style, animatedStyle]}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
 };
 
 const ShrimpChatPreview: React.FC<ShrimpChatPreviewProps> = ({
-                                                               avatarSource,
-                                                               question,
-                                                               answer,
-                                                               metrics,
-                                                             }) => {
+  avatarSource,
+  question,
+  answer,
+  metrics,
+}) => {
   return (
     <View style={styles.container}>
       {/* Bubble 1: user hỏi */}
@@ -89,29 +76,21 @@ const ShrimpChatPreview: React.FC<ShrimpChatPreviewProps> = ({
       </AnimatedChatBubble>
 
       {/* Bubble 2: bot trả lời */}
-      <AnimatedChatBubble
-        style={[styles.row, { marginTop: 8, marginLeft: 56 }]}
-        delay={1400}
-      >
+      <AnimatedChatBubble style={[styles.row, styles.bubble2]} delay={1400}>
         <View style={styles.botBubble}>
-          <Text style={styles.botBubbleText} numberOfLines={2}>{answer}</Text>
+          <Text style={styles.botBubbleText} numberOfLines={2}>
+            {answer}
+          </Text>
         </View>
         <View style={styles.botIconContainer}>
-          <Image
-            source={require("@/assets/backgrounds/icon-for-answer.png")}
-          ></Image>
+          <Image source={require('@/assets/backgrounds/icon-for-answer.png')} />
         </View>
       </AnimatedChatBubble>
 
       {/* Bubble 3: card báo cáo */}
-      <AnimatedChatBubble
-        style={[styles.row, { marginTop: 12, marginLeft: 56 }]}
-        delay={1800}
-      >
+      <AnimatedChatBubble style={[styles.row, styles.bubble3]} delay={1800}>
         <View style={styles.metricsCard}>
-          <Text style={styles.metricsTitle}>
-            Dưới đây là tóm tắt hằng ngày của bạn
-          </Text>
+          <Text style={styles.metricsTitle}>Dưới đây là tóm tắt hằng ngày của bạn</Text>
 
           {metrics.map(item => (
             <View key={item.id} style={styles.metricRow}>
@@ -120,23 +99,15 @@ const ShrimpChatPreview: React.FC<ShrimpChatPreviewProps> = ({
                   name={item.iconName}
                   size={18}
                   color={item.iconColor}
-                  style={{ marginRight: 6 }}
+                  style={styles.iconMargin}
                 />
                 <Text style={styles.metricLabel}>{item.label}</Text>
               </View>
 
               <View style={styles.metricRight}>
                 <Text style={styles.metricValue}>{item.value}</Text>
-                {item.unit ? (
-                  <Text style={styles.metricUnit}>{item.unit}</Text>
-                ) : null}
-                <View style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 32,
-                  backgroundColor: '#00ff00',
-                  marginLeft: 4,
-                }}></View>
+                {item.unit ? <Text style={styles.metricUnit}>{item.unit}</Text> : null}
+                <View style={styles.statusIndicator} />
               </View>
             </View>
           ))}
@@ -194,7 +165,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 4,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    marginLeft: "auto",
+    marginLeft: 'auto',
   },
   botIconContainer: {
     width: 38,
@@ -219,8 +190,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 2,
-    marginLeft: "auto",
-    marginRight: 38
+    marginLeft: 'auto',
+    marginRight: 38,
   },
   botBubbleText: {
     color: '#111827',
@@ -245,7 +216,7 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 13,
     color: '#374151',
-    lineHeight: 18
+    lineHeight: 18,
   },
   metricRight: {
     flexDirection: 'row',
@@ -259,6 +230,24 @@ const styles = StyleSheet.create({
   metricUnit: {
     fontSize: 11,
     color: '#6B7280',
+    marginLeft: 4,
+  },
+  bubble2: {
+    marginTop: 8,
+    marginLeft: 56,
+  },
+  bubble3: {
+    marginTop: 12,
+    marginLeft: 56,
+  },
+  iconMargin: {
+    marginRight: 6,
+  },
+  statusIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 32,
+    backgroundColor: '#00ff00',
     marginLeft: 4,
   },
 });

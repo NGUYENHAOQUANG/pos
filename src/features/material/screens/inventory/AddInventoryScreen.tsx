@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing } from '@/styles';
+import { spacing } from '@/styles';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 
 // Import 2 component con

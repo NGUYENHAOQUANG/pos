@@ -3,7 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-nativ
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
 
-export enum FarmType {'BREEDING_AREA' , 'POND' , 'FARM' };
+export enum FarmType {
+  'BREEDING_AREA',
+  'POND',
+  'FARM',
+}
 
 export interface FarmStats {
   totalJobs: number; // Tổng công việc
@@ -85,8 +89,10 @@ const FarmCard: React.FC<FarmCardProps> = ({
               </Text>
             </View>
           </View>
-          <View style={[styles.typeBadge, { backgroundColor: '#FFE8DE' }]}>
-            <Text style={[styles.typeBadgeText, { color: '#D54D12' }]}>{typeConfig.label}</Text>
+          <View style={[styles.typeBadge, styles.typeBadgeOrange]}>
+            <Text style={[styles.typeBadgeText, styles.typeBadgeTextOrange]}>
+              {typeConfig.label}
+            </Text>
           </View>
         </View>
       </View>
@@ -382,6 +388,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#0076F7',
+  },
+  typeBadgeOrange: {
+    backgroundColor: '#FFE8DE',
+  },
+  typeBadgeTextOrange: {
+    color: '#D54D12',
   },
 });
 

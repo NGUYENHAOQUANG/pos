@@ -89,7 +89,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
 
 // Helper Component cho dòng thông tin
 const InfoRow = ({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) => (
-  <View style={[styles.row, isLast && { marginBottom: 0 }]}>
+  <View style={[styles.row, isLast && styles.rowNoMargin]}>
     <Text style={styles.infoLabel}>{label}</Text>
     <Text style={styles.infoValue}>{value}</Text>
   </View>
@@ -172,5 +172,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     backgroundColor: colors.white,
+  },
+  rowNoMargin: {
+    marginBottom: 0,
   },
 });

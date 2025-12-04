@@ -76,6 +76,7 @@ export default function OnboardingScreen() {
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const slidesData = [
@@ -87,7 +88,7 @@ export default function OnboardingScreen() {
           description={`Cập nhật tức thì mọi chỉ số môi trường – nhiệt độ, độ mặn, oxy, pH.\nGiúp bạn kiểm soát ao nuôi thông minh, mọi lúc, mọi nơi.`}
         />
       ),
-      background: <OnboardingBackgroundOne></OnboardingBackgroundOne>,
+      background: <OnboardingBackgroundOne />,
     },
     {
       id: '2',
@@ -97,7 +98,7 @@ export default function OnboardingScreen() {
           description={`Cảm biến thông minh giúp ao nuôi của bạn vận hành tối ưu 24/7.\nTự động điều chỉnh lượng thức ăn, gửi cảnh báo ngay khi có bất thường.`}
         />
       ),
-      background: <OnboardingBackgroundTwo></OnboardingBackgroundTwo>,
+      background: <OnboardingBackgroundTwo />,
     },
     {
       id: '3',
@@ -107,7 +108,7 @@ export default function OnboardingScreen() {
           description={`Khi có thắc mắc về tình trạng ao, lượng ăn hay cách xử lý sự cố,\nchỉ cần hỏi – Mebione AI sẽ giúp bạn đưa ra giải pháp chính xác, nhanh chóng.`}
         />
       ),
-      background: <OnboardingBackgroundThree></OnboardingBackgroundThree>,
+      background: <OnboardingBackgroundThree />,
     },
   ];
 
@@ -115,10 +116,10 @@ export default function OnboardingScreen() {
     const nextIndex = (currentIndex + 1) % slidesData.length;
     goToSlide(nextIndex);
   };
-  const goToPreviousSlide = () => {
-    const prevIndex = currentIndex === 0 ? slidesData.length - 1 : currentIndex - 1;
-    goToSlide(prevIndex);
-  };
+  // const goToPreviousSlide = () => {
+  //   const prevIndex = currentIndex === 0 ? slidesData.length - 1 : currentIndex - 1;
+  //   goToSlide(prevIndex);
+  // }; // TODO: Uncomment when implementing previous slide functionality
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
     translateX.value = withTiming(-index * SCREEN_WIDTH, {
@@ -168,7 +169,7 @@ export default function OnboardingScreen() {
             name="arrow-forward-outline"
             color={colors.white}
             size={24}
-            style={{ marginLeft: 8 }}
+            style={styles.iconArrow}
           />
         </TouchableOpacity>
       </View>
@@ -191,7 +192,7 @@ export default function OnboardingScreen() {
 
       {/* Layer 3: Content Layer */}
       <Animated.View style={[styles.sliderContainer, sliderContainerAnimatedStyle]}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView style={styles.gestureHandler}>
           <GestureDetector gesture={flingGesture}>
             {/* Layer 3: Content Layer */}
             <Animated.View style={[styles.sliderWrapper, sliderAnimatedStyle]}>
@@ -347,5 +348,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlignVertical: 'center',
     includeFontPadding: false,
+  },
+  iconArrow: {
+    marginLeft: 8,
+  },
+  gestureHandler: {
+    flex: 1,
   },
 });

@@ -5,19 +5,10 @@
  * @created 2025-11-18
  */
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ToggleSwitch } from '@/shared/components/toggle/ToggleSwitch';
-import { spacing, borderRadius } from '@/styles';
-import {
-  FanIcon,
-  PumpIcon,
-  XyphonIcon,
-} from './icons';
+import { spacing } from '@/styles';
+import { FanIcon, PumpIcon, XyphonIcon } from './icons';
 
 interface DeviceCardProps {
   id: string;
@@ -29,103 +20,96 @@ interface DeviceCardProps {
   backgroundColor: string;
 }
 
-export const DeviceCard = React.memo(({
-  id,
-  name,
-  type,
-  status,
-  onToggle,
-  activeColor,
-  backgroundColor,
-}: DeviceCardProps) => {
-  const handleCardPress = () => {
-    onToggle(id);
-  };
-
-  const handleTogglePress = (e: any) => {
-    // Stop propagation to prevent card press
-    e.stopPropagation();
-    onToggle(id);
-  };
-
-  const renderDeviceIcon = () => {
-    // Ensure good contrast - use slightly darker gray for inactive state
-    const inactiveColor = '#90A4AE'; // Better contrast than #B0BEC5
-
-    const iconProps = {
-      width: 80,
-      height: 80,
-      color: status ? activeColor : inactiveColor,
-      isActive: status,
+export const DeviceCard = React.memo(
+  ({ id, name, type, status, onToggle, activeColor, backgroundColor }: DeviceCardProps) => {
+    const handleCardPress = () => {
+      onToggle(id);
     };
 
-    switch (type) {
-      case 'fan':
-        return <FanIcon {...iconProps} />;
-      case 'xyphon':
-        return <XyphonIcon {...iconProps} />;
-      default:
-        return <PumpIcon {...iconProps} />;
-    }
-  };
+    const handleTogglePress = (e: any) => {
+      // Stop propagation to prevent card press
+      e.stopPropagation();
+      onToggle(id);
+    };
 
-  return (
-    <View>
-      <TouchableOpacity
-        style={[
-          styles.card,
-          {
-            backgroundColor: '#FFFFFF', // Always white background for card body
-            borderColor: status ? activeColor : 'transparent',
-          },
-        ]}
-        onPress={handleCardPress}
-        activeOpacity={0.9}
-        accessible={true}
-        accessibilityLabel={`${name}, ${status ? 'đang bật' : 'đã tắt'}`}
-        accessibilityHint="Nhấn để bật hoặc tắt thiết bị"
-        accessibilityRole="button"
-        accessibilityState={{ disabled: false, selected: status }}
-      >
-        <View style={styles.cardContent}>
-          <View style={styles.cardLeft}>
-            <Text style={styles.deviceName}>{name}</Text>
-            <View style={styles.toggleWrapper}>
-              <TouchableOpacity
-                onPress={handleTogglePress}
-                accessible={true}
-                accessibilityLabel={`Công tắc ${name}`}
-                accessibilityHint={status ? 'Nhấn để tắt' : 'Nhấn để bật'}
-                accessibilityRole="switch"
-                accessibilityState={{ checked: status }}
-              >
-                <ToggleSwitch
-                  value={status}
-                  onValueChange={() => {}} // Handled by TouchableOpacity
-                  activeColor={activeColor}
-                />
-              </TouchableOpacity>
+    const cardBorderStyle = {
+      borderColor: status ? activeColor : 'transparent',
+    };
+
+    const iconBackgroundStyle = {
+      backgroundColor: status ? backgroundColor : '#F5F7FA',
+    };
+
+    const renderDeviceIcon = () => {
+      // Ensure good contrast - use slightly darker gray for inactive state
+      const inactiveColor = '#90A4AE'; // Better contrast than #B0BEC5
+
+      const iconProps = {
+        width: 80,
+        height: 80,
+        color: status ? activeColor : inactiveColor,
+        isActive: status,
+      };
+
+      switch (type) {
+        case 'fan':
+          return <FanIcon {...iconProps} />;
+        case 'xyphon':
+          return <XyphonIcon {...iconProps} />;
+        default:
+          return <PumpIcon {...iconProps} />;
+      }
+    };
+
+    return (
+      <View>
+        <TouchableOpacity
+          style={[styles.card, styles.cardWhiteBg, cardBorderStyle]}
+          onPress={handleCardPress}
+          activeOpacity={0.9}
+          accessible={true}
+          accessibilityLabel={`${name}, ${status ? 'đang bật' : 'đã tắt'}`}
+          accessibilityHint="Nhấn để bật hoặc tắt thiết bị"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: false, selected: status }}
+        >
+          <View style={styles.cardContent}>
+            <View style={styles.cardLeft}>
+              <Text style={styles.deviceName}>{name}</Text>
+              <View style={styles.toggleWrapper}>
+                <TouchableOpacity
+                  onPress={handleTogglePress}
+                  accessible={true}
+                  accessibilityLabel={`Công tắc ${name}`}
+                  accessibilityHint={status ? 'Nhấn để tắt' : 'Nhấn để bật'}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: status }}
+                >
+                  <ToggleSwitch
+                    value={status}
+                    onValueChange={() => {}} // Handled by TouchableOpacity
+                    activeColor={activeColor}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.cardRight}>
+              {/* Background splash effect */}
+              <View style={[styles.iconBackground, iconBackgroundStyle]}>{renderDeviceIcon()}</View>
             </View>
           </View>
-
-          <View style={styles.cardRight}>
-            {/* Background splash effect */}
-            <View style={[styles.iconBackground, { backgroundColor: status ? backgroundColor : '#F5F7FA' }]}>
-               {renderDeviceIcon()}
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-});
+        </TouchableOpacity>
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     borderWidth: 1.5,
     marginBottom: spacing.md,
-    backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -161,6 +145,9 @@ const styles = StyleSheet.create({
   cardRight: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  cardWhiteBg: {
+    backgroundColor: '#FFFFFF',
   },
   iconBackground: {
     width: 100, // Larger background area

@@ -29,7 +29,7 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
       <Text style={styles.title}>Vật tư điều chỉnh</Text>
 
       {/* Dropdown chọn vật tư (Sử dụng component có sẵn) */}
-      <View style={{ marginBottom: hasSelectedMaterial ? 16 : 0 }}>
+      <View style={hasSelectedMaterial ? styles.dropdownWithMargin : styles.dropdownNoMargin}>
         <DropdownMaterial
           value={materialName}
           placeholder="Chọn vật tư"
@@ -69,7 +69,12 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
           {/* Dòng Tổng chênh lệch */}
           <View style={styles.footer}>
             <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
-            <Text style={[styles.footerValue, { color: diff < 0 ? '#FF4D4F' : '#52C41A' }]}>
+            <Text
+              style={[
+                styles.footerValue,
+                diff < 0 ? styles.footerValueNegative : styles.footerValuePositive,
+              ]}
+            >
               {diff}
             </Text>
           </View>
@@ -164,5 +169,17 @@ const styles = StyleSheet.create({
   footerValue: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  dropdownWithMargin: {
+    marginBottom: 16,
+  },
+  dropdownNoMargin: {
+    marginBottom: 0,
+  },
+  footerValueNegative: {
+    color: '#FF4D4F',
+  },
+  footerValuePositive: {
+    color: '#52C41A',
   },
 });

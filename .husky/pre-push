@@ -3,10 +3,16 @@
 
 echo "🔍 Đang kiểm tra ESLint cho toàn bộ project..."
 
-npm run lint
+# Chạy ESLint với --max-warnings=0 để fail nếu có warnings
+npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
 
-if [ $? -ne 0 ]; then
-  echo "❌ ESLint phát hiện lỗi! Vui lòng sửa lỗi trước khi push."
+# Kiểm tra exit code
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "❌ ESLint phát hiện lỗi hoặc warnings!"
+  echo "💡 Vui lòng sửa lỗi trước khi push."
   echo "💡 Chạy 'npm run lint:fix' để tự động fix một số lỗi."
   exit 1
 fi

@@ -27,7 +27,7 @@ interface SearchBarMeterialProps {
 
 export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
   onSearch,
-  onFilterPress,
+  onFilterPress: _onFilterPress,
   selectedTab = 'list',
   onGroupChange,
 }) => {
