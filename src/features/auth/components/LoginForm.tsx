@@ -1,101 +1,176 @@
-/**
- * @file LoginForm.tsx
- * @description LoginForm component
- * @author Kindy
- * @created 2025-11-16
- */
-import React from 'react';
-import {View, StyleSheet} from 'react-native';
-import {Controller, useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
-import {Input, Button} from '@/shared/components';
-import {useAuth} from '../hooks/useAuth';
-import {phoneSchema} from '@/shared/utils/validation';
-import {spacing} from '@/styles/spacing';
+import { Button } from '@/shared/components/buttons/Button';
+import { Logo } from '@/shared/components/brand/Logo';
+import PhoneInput from '@/features/auth/components/PhoneInput';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { AuthStackParamList } from '@/app/navigation/types';
+import React, { useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  KeyboardAvoidingView,
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, spacing, typography } from '@/styles';
 
-const loginSchema = z.object({
-  phone: phoneSchema,
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+export default function LoginForm() {
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const insets = useSafeAreaInsets();
 
-type LoginFormData = z.infer<typeof loginSchema>;
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+84');
+  const [error, setError] = useState<string | undefined>(undefined);
 
-interface LoginFormProps {
-  onSuccess?: () => void;
-}
-
-export function LoginForm({onSuccess}: LoginFormProps) {
-  const {login, loading} = useAuth();
-  const {
-    control,
-    handleSubmit,
-    formState: {errors},
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      // Demo: Mock login - không call API
-      // Simulate login success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await login(data);
-      onSuccess?.();
-    } catch (error) {
-      console.error('Login error:', error);
+  const handleLogin = async () => {
+    // Validate đơn giản
+    if (!phone || phone.length < 9) {
+      setError('Số điện thoại không tồn tại, vui lòng kiểm tra và thử lại.');
+      return;
     }
+
+    setError(undefined);
+
+    console.log('Login request sent', {
+      phone,
+      countryCode,
+    });
+
+    // Giả lập gửi OTP thành công -> Chuyển sang màn Verify
+    // Truyền sđt sang màn OTP để hiển thị
+    navigation.navigate('Verify-otp', {
+      method: 'phone',
+      contact: `${countryCode} ${phone}`,
+    });
   };
 
   return (
-    <View style={styles.container}>
-      <Controller
-        control={control}
-        name="phone"
-        render={({field: {onChange, onBlur, value}}) => (
-          <Input
-            label="Phone Number"
-            placeholder="Enter your phone number"
-            autoCapitalize="none"
-            keyboardType="phone-pad"
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-            error={errors.phone?.message}
-          />
-        )}
-      />
-      <Controller
-        control={control}
-        name="password"
-        render={({field: {onChange, onBlur, value}}) => (
-          <Input
-            label="Password"
-            placeholder="Enter your password"
-            secureTextEntry
-            value={value}
-            onBlur={onBlur}
-            onChangeText={onChange}
-            error={errors.password?.message}
-          />
-        )}
-      />
-      <Button
-        title="Login"
-        onPress={handleSubmit(onSubmit)}
-        loading={loading}
-        style={styles.button}
-      />
-    </View>
+    <SafeAreaView
+      style={styles.container}
+      edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
+    >
+      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+      {Platform.OS === 'android' && (
+        <View style={[styles.androidStatusBar, { height: insets.top }]} />
+      )}
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Logo Section - Canh giữa */}
+          <View style={styles.logoSection}>
+            <Logo size="medium" />
+          </View>
+
+          {/* Title Section */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>Đăng nhập</Text>
+          </View>
+
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            <View style={styles.inputLabelContainer}>
+              <Text style={styles.inputLabel}>Số điện thoại</Text>
+            </View>
+
+            <PhoneInput
+              // label="Số điện thoại" //
+              placeholder="0908 456 789"
+              value={phone}
+              onChangeText={text => {
+                setPhone(text);
+                if (error) setError(undefined); // Clear error khi user nhập lại
+              }}
+              countryCode={countryCode}
+              onCountryCodeChange={setCountryCode}
+              error={error} // Truyền prop error vào để hiển thị viền đỏ
+            />
+
+            {/* Hiển thị text lỗi bên dưới input */}
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Đăng Nhập"
+                onPress={handleLogin}
+                variant="primary"
+                fullWidth
+                style={styles.loginButton}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: spacing.md,
+    flex: 1,
+    backgroundColor: colors.white, // Nền trắng như design
   },
-  button: {
+  androidStatusBar: {
+    backgroundColor: colors.white,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing['2xl'],
+  },
+  logoSection: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+    marginTop: spacing.xl,
+  },
+  titleSection: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  title: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: '700', // Đậm hơn
+    color: '#1A1A1A', // Màu đen đậm
+  },
+  formSection: {
+    width: '100%',
+  },
+  inputLabelContainer: {
+    marginBottom: spacing.xs,
+  },
+  inputLabel: {
+    fontSize: typography.fontSize.base,
+    color: colors.text,
+    fontWeight: '400',
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: typography.fontSize.sm,
+    marginTop: -spacing.sm, // Kéo lên gần input hơn chút
+    marginBottom: spacing.md,
+    lineHeight: 20,
+  },
+  buttonContainer: {
     marginTop: spacing.md,
   },
+  loginButton: {
+    borderRadius: 99, // Bo tròn kiểu viên thuốc (Pill shape) như design
+    height: 50,
+  },
 });
-

@@ -3,7 +3,7 @@ import { Button } from '@/shared/components/buttons/Button';
 import { Input } from '@/shared/components/forms/Input';
 import { Logo } from '@/shared/components/brand/Logo';
 import { SegmentedControl } from '@/shared/components/forms/SegmentedControl';
-import { PhoneInput } from '@/features/auth/components/PhoneInput';
+import PhoneInput from '@/features/auth/components/PhoneInput';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -86,9 +86,6 @@ export default function LoginScreen() {
 
           {/* Main Content */}
           <View style={styles.content}>
-            <Text style={styles.title}>Xin chào!</Text>
-            <Text style={styles.subtitle}>Đăng nhập để tiếp tục sử dụng TOMOTA</Text>
-
             <SegmentedControl
               options={['Email', 'Số điện thoại']}
               selectedIndex={selectedTab}

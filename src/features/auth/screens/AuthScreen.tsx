@@ -1,85 +1,79 @@
-import type { AuthStackNavigationProp } from '@/app/navigation/types';
-import {
-  Button,
-  ErrorBoundary,
-  Input,
-  Logo,
-  SegmentedControl,
-  TextLink,
-} from '@/shared/components';
-import WaveHeader from '@/shared/components/layout/WaveHeader';
-import { spacing, typography } from '@/styles';
-import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
   View,
+  Text,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuthStore } from '../store/authStore';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+// --- IMPORTS TYPES ---
+// Đảm bảo bạn đã định nghĩa 'Verify-otp' trong AuthStackParamList
+import type { AuthStackParamList } from '@/app/navigation/types';
+
+// --- IMPORTS COMPONENTS ---
+import { Button, ErrorBoundary, Logo } from '@/shared/components';
+// import WaveHeader from '@/shared/components/layout/WaveHeader';
+// Import PhoneInput bạn đã tạo ở bước trước
+import PhoneInput from '../components/PhoneInput';
+
+// --- IMPORTS STORE & STYLES ---
+import { useAuthStore } from '../store/authStore';
+import { spacing } from '@/styles';
 
 export default function AuthScreen() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const navigation = useNavigation<AuthStackNavigationProp>();
+  // Sử dụng NativeStackNavigationProp để có gợi ý code cho navigation
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const insets = useSafeAreaInsets();
-  const [selectedTab, setSelectedTab] = useState(0);
-  const { login, register } = useAuthStore();
 
-  const [accountName, setAccountName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  // --- STATE ---
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuthStore();
 
+  // --- HANDLERS ---
   const handleLogin = async () => {
-    console.log('Login pressed', {
-      accountName,
-      password,
-    });
+    setError(''); // Reset lỗi
+
+    // 1. Validate rỗng
+    if (!phoneNumber.trim()) {
+      setError('Vui lòng nhập số điện thoại.');
+      return;
+    }
+
+    // 2. Validate định dạng (Ví dụ: phải đủ 10 số)
+    // Loại bỏ khoảng trắng để đếm số lượng ký tự thực
+    const rawPhone = phoneNumber.replace(/\s/g, '');
+    if (rawPhone.length < 10) {
+      setError('Số điện thoại không hợp lệ, vui lòng kiểm tra lại.');
+      return;
+    }
+
+    console.log('Login pressed with phone:', rawPhone);
 
     try {
-      // Call login from auth store - this will set isAuthenticated to true
-      await login({ phone: accountName, password });
-      // Navigation will happen automatically via AppNavigator watching isAuthenticated
-    } catch (error) {
-      console.error('Login failed:', error);
-      // TODO: Show error message to user
+      // Giả lập call API login thành công (hoặc check user tồn tại)
+      // await login({ phone: rawPhone, password: '...' });
+
+      // 3. CHUYỂN HƯỚNG SANG MÀN HÌNH OTP
+      navigation.navigate('Verify-otp', {
+        method: 'phone',
+        contact: rawPhone, // Truyền số điện thoại sang màn OTP
+      });
+    } catch (err) {
+      console.error('Login failed:', err);
+      setError('Đã có lỗi xảy ra, vui lòng thử lại.');
     }
   };
 
-  const handleCreateAccount = async () => {
-    console.log('Create account pressed', {
-      accountName,
-      password,
-      confirmPassword,
-    });
-
-    try {
-      // Call register from auth store
-      await register({ phone: accountName, password, name: accountName });
-      // Navigation will happen automatically via AppNavigator watching isAuthenticated
-    } catch (error) {
-      console.error('Registration failed:', error);
-      // TODO: Show error message to user
-    }
-  };
-
-  const handleForgotPassword = () => {
-    console.log('Forgot password pressed');
-    // TODO: Navigate to ForgotPassword screen when it's available
-  };
-
-  const handleTermsPress = () => {
-    console.log('Terms of service pressed');
-  };
-
-  const handlePrivacyPress = () => {
-    console.log('Privacy policy pressed');
+  const handleClearError = () => {
+    setPhoneNumber('');
+    setError('');
   };
 
   return (
@@ -89,29 +83,25 @@ export default function AuthScreen() {
         edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
       >
         <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
+        {/* Android Status Bar Spacer */}
         {Platform.OS === 'android' && (
           <View style={[styles.androidStatusBar, { height: insets.top }]} />
         )}
 
-        {/* WaveHeader ở trên - màu xanh nhạt */}
-        <View style={styles.waveTopContainer}>
+        {/* --- BACKGROUND WAVES --- */}
+        {/* <View style={styles.waveTopContainer}>
           <WaveHeader
             width={SCREEN_WIDTH}
             height={(SCREEN_HEIGHT * 1.5) / 4}
             backgroundColor="#8FD5FF"
             fill1="#FFFFFF"
             fill2="#4FACFE"
-            options={{
-              height: 200,
-              amplitude: 20,
-              speed: 0.4,
-              points: 2,
-            }}
+            options={{ height: 200, amplitude: 20, speed: 0.4, points: 2 }}
             containerStyle={styles.waveTop}
           />
         </View>
 
-        {/* WaveHeader ở dưới - màu xanh đậm (ngược lại) */}
         <View style={styles.waveBottomContainer}>
           <WaveHeader
             width={SCREEN_WIDTH}
@@ -119,20 +109,15 @@ export default function AuthScreen() {
             backgroundColor="#8FD5FF"
             fill1="#007CFF"
             fill2="#8FD5FF"
-            options={{
-              height: 80,
-              amplitude: 20,
-              speed: 0.4,
-              points: 2,
-            }}
+            options={{ height: 80, amplitude: 20, speed: 0.4, points: 2 }}
             containerStyle={styles.waveBottom}
           />
-        </View>
+        </View> */}
 
+        {/* --- MAIN CONTENT --- */}
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
           <ScrollView
             style={styles.scrollView}
@@ -140,101 +125,39 @@ export default function AuthScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Form Card */}
             <View style={styles.formCard}>
+              {/* Logo */}
               <View style={styles.logoSection}>
                 <ErrorBoundary>
                   <Logo size="medium" />
                 </ErrorBoundary>
               </View>
-              <View style={styles.tabSection}>
-                <ErrorBoundary>
-                  <SegmentedControl
-                    options={['Đăng nhập', 'Đăng ký']}
-                    selectedIndex={selectedTab}
-                    onSelect={setSelectedTab}
+              <View style={styles.spacer} />
+              {/* Title */}
+              <Text style={styles.screenTitle}>Đăng nhập</Text>
+              {/* Input & Button */}
+              <View style={styles.formContent}>
+                <PhoneInput
+                  value={phoneNumber}
+                  onChangeText={text => {
+                    setPhoneNumber(text);
+                    if (error) setError('');
+                  }}
+                  error={error}
+                  onClear={handleClearError}
+                />
+
+                <View style={styles.buttonSection}>
+                  <Button
+                    title="Đăng Nhập" //
+                    onPress={handleLogin}
+                    variant="primary"
+                    fullWidth
+                    style={styles.loginButton}
                   />
-                </ErrorBoundary>
+                </View>
               </View>
-              {selectedTab === 1 && (
-                <ErrorBoundary>
-                  <>
-                    <Input
-                      label="Tên tài khoản"
-                      placeholder="Nhập tên tài khoản"
-                      value={accountName}
-                      onChangeText={setAccountName}
-                    />
-
-                    <Input
-                      label="Mật khẩu"
-                      placeholder="Nhập mật khẩu"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry
-                    />
-
-                    <Input
-                      label="Nhập lại mật khẩu"
-                      placeholder="Nhập lại mật khẩu"
-                      value={confirmPassword}
-                      onChangeText={setConfirmPassword}
-                      secureTextEntry
-                    />
-
-                    <View style={styles.buttonSection}>
-                      <Button
-                        title="Tạo tài khoản"
-                        onPress={handleCreateAccount}
-                        variant="primary"
-                        fullWidth
-                      />
-                    </View>
-
-                    <View style={styles.termsSection}>
-                      <TextLink
-                        text="Bằng việc đăng kí, bạn đã đồng ý với Mebione về"
-                        links={[
-                          { text: 'Điều khoản dịch vụ', onPress: handleTermsPress },
-                          { text: 'Chính sách bảo mật', onPress: handlePrivacyPress },
-                        ]}
-                        align="center"
-                        fontSize={typography.fontSize.xs}
-                      />
-                    </View>
-                  </>
-                </ErrorBoundary>
-              )}
-
-              {selectedTab === 0 && (
-                <ErrorBoundary>
-                  <>
-                    <Input
-                      label="Tên tài khoản"
-                      placeholder="Nhập tên tài khoản"
-                      value={accountName}
-                      onChangeText={setAccountName}
-                    />
-
-                    <Input
-                      label="Mật khẩu"
-                      placeholder="Nhập mật khẩu"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry
-                    />
-                    <View style={styles.forgotPasswordSection}>
-                      <TextLink
-                        linkText="Quên mật khẩu"
-                        onPress={handleForgotPassword}
-                        align="right"
-                      />
-                    </View>
-                    <View style={styles.buttonSection}>
-                      <Button title="Đăng nhập" onPress={handleLogin} variant="primary" fullWidth />
-                    </View>
-                  </>
-                </ErrorBoundary>
-              )}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -249,83 +172,64 @@ const styles = StyleSheet.create({
     backgroundColor: '#8FD5FF',
     overflow: 'hidden',
   },
-  waveTopContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 0,
+  androidStatusBar: {
+    backgroundColor: '#8FD5FF',
   },
-  waveTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  waveBottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 0,
-  },
-  waveBottom: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  keyboardView: {
-    flex: 1,
-    zIndex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    zIndex: 1,
-  },
+  // Wave Styles
+  waveTopContainer: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 0 },
+  waveTop: { position: 'absolute', top: 0, left: 0, right: 0 },
+  waveBottomContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 0 },
+  waveBottom: { position: 'absolute', bottom: 0, left: 0, right: 0 },
+
+  // Layout Styles
+  keyboardView: { flex: 1, zIndex: 1 },
+  scrollView: { flex: 1, zIndex: 1 },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: spacing.sm,
-    paddingTop: spacing['2xl'],
-    paddingBottom: spacing.xl,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
   },
   formCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing['2xl'],
-    paddingBottom: spacing['2xl'],
-    marginTop: spacing['2xl'],
-    marginBottom: spacing.lg,
-    shadowColor: '#222222',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.09,
-    shadowRadius: 20,
+    borderRadius: 16,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
     elevation: 8,
+    marginHorizontal: spacing.xs,
   },
   logoSection: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.sm,
   },
-  tabSection: {
-    marginBottom: spacing.xl,
+  spacer: {
+    width: '100%',
+    marginBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    alignSelf: 'center',
   },
-  loginPlaceholder: {
-    minHeight: 200,
-    justifyContent: 'center',
+  screenTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
-  forgotPasswordSection: {
+  formContent: {
     marginTop: spacing.sm,
-    marginBottom: spacing.xs,
   },
   buttonSection: {
-    marginTop: spacing.lg,
-  },
-  termsSection: {
     marginTop: spacing.sm,
-    paddingHorizontal: spacing.xs,
   },
-  androidStatusBar: {
-    backgroundColor: '#8FD5FF',
+  loginButton: {
+    backgroundColor: '#007CFF',
+    borderRadius: 25, // Bo tròn mạnh
+    height: 50,
   },
 });

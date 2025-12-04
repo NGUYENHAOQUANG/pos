@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/buttons/Button";
 import { Input } from "@/shared/components/forms/Input";
 import { Logo } from "@/shared/components/brand/Logo";
 import { SegmentedControl } from "@/shared/components/forms/SegmentedControl";
-import { PhoneInput } from "@/features/auth/components/PhoneInput";
+import PhoneInput from "@/features/auth/components/PhoneInput";
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';

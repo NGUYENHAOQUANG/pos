@@ -25,11 +25,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Directions } from 'react-native-gesture-handler/src';
 import OnboardingBackgroundTwo from '@/features/onboarding/components/OnboardingBackgroundTwo.tsx';
 import OnboardingBackgroundOne from '@/features/onboarding/components/OnboardingBackgroundOne.tsx';
@@ -39,13 +35,7 @@ import OnboardingBackgroundThree from '@/features/onboarding/components/Onboardi
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const SlideContent = ({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) => (
+const SlideContent = ({ title, description }: { title: string; description: string }) => (
   <View style={styles.slideContentContainer}>
     {/* Logo Section - Giữ nguyên như yêu cầu */}
     <View style={styles.logoContainer}>
@@ -76,10 +66,9 @@ export default function OnboardingScreen() {
   });
   const sliderContainerAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateY: translateY.value }]
+      transform: [{ translateY: translateY.value }],
     };
   });
-
 
   // Chạy animation ngay khi mount
   useEffect(() => {
@@ -87,9 +76,7 @@ export default function OnboardingScreen() {
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
-
   }, []);
-
 
   const slidesData = [
     {
@@ -100,7 +87,7 @@ export default function OnboardingScreen() {
           description={`Cập nhật tức thì mọi chỉ số môi trường – nhiệt độ, độ mặn, oxy, pH.\nGiúp bạn kiểm soát ao nuôi thông minh, mọi lúc, mọi nơi.`}
         />
       ),
-      background: <OnboardingBackgroundOne></OnboardingBackgroundOne>
+      background: <OnboardingBackgroundOne></OnboardingBackgroundOne>,
     },
     {
       id: '2',
@@ -110,7 +97,7 @@ export default function OnboardingScreen() {
           description={`Cảm biến thông minh giúp ao nuôi của bạn vận hành tối ưu 24/7.\nTự động điều chỉnh lượng thức ăn, gửi cảnh báo ngay khi có bất thường.`}
         />
       ),
-      background: <OnboardingBackgroundTwo></OnboardingBackgroundTwo>
+      background: <OnboardingBackgroundTwo></OnboardingBackgroundTwo>,
     },
     {
       id: '3',
@@ -120,7 +107,7 @@ export default function OnboardingScreen() {
           description={`Khi có thắc mắc về tình trạng ao, lượng ăn hay cách xử lý sự cố,\nchỉ cần hỏi – Mebione AI sẽ giúp bạn đưa ra giải pháp chính xác, nhanh chóng.`}
         />
       ),
-      background: <OnboardingBackgroundThree></OnboardingBackgroundThree>
+      background: <OnboardingBackgroundThree></OnboardingBackgroundThree>,
     },
   ];
 
@@ -136,18 +123,15 @@ export default function OnboardingScreen() {
     setCurrentIndex(index);
     translateX.value = withTiming(-index * SCREEN_WIDTH, {
       duration: 300,
-      easing: Easing.out(Easing.ease)
+      easing: Easing.out(Easing.ease),
     });
   };
 
   const flingGesture = Gesture.Fling()
     .direction(Directions.LEFT)
-    .onStart(() => {
-    })
+    .onStart(() => {})
     .direction(Directions.RIGHT)
-    .onStart(() => {
-    });
-
+    .onStart(() => {});
 
   const renderActionButtons = () => {
     const isFirstSlide = currentIndex === 0;
@@ -158,9 +142,7 @@ export default function OnboardingScreen() {
       navigation.navigate('Login');
     };
 
-    const handleMainButtonPress = isLastSlide
-      ? handleFinish
-      : goToNextSlide;
+    const handleMainButtonPress = isLastSlide ? handleFinish : goToNextSlide;
 
     return (
       <View style={styles.actionContainer}>
@@ -171,11 +153,7 @@ export default function OnboardingScreen() {
             onPress={() => goToSlide(currentIndex - 1)}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name="arrow-back-outline"
-              color={colors.primary}
-              size={24}
-            />
+            <Ionicons name="arrow-back-outline" color={colors.primary} size={24} />
           </TouchableOpacity>
         )}
 
@@ -205,17 +183,15 @@ export default function OnboardingScreen() {
         <View style={{ height: insets.top, backgroundColor: colors.white }} />
       )}
 
-       {/*Layer 1: SliderBackgroundItem */}
-      <View style={styles.backgroundWrapper}>
-        {slidesData[currentIndex]?.background}
-      </View>
+      {/*Layer 1: SliderBackgroundItem */}
+      <View style={styles.backgroundWrapper}>{slidesData[currentIndex]?.background}</View>
 
       {/* Layer 2: Spacer Layer*/}
       <View style={styles.spacer} pointerEvents="none" />
 
       {/* Layer 3: Content Layer */}
       <Animated.View style={[styles.sliderContainer, sliderContainerAnimatedStyle]}>
-        <GestureHandlerRootView style={{flex: 1}}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
           <GestureDetector gesture={flingGesture}>
             {/* Layer 3: Content Layer */}
             <Animated.View style={[styles.sliderWrapper, sliderAnimatedStyle]}>
@@ -285,12 +261,12 @@ const styles = StyleSheet.create({
 
   backgroundWrapper: {
     ...StyleSheet.absoluteFill,
-    zIndex: 0
+    zIndex: 0,
   },
   backgroundImage: {
-    width: "100%",
-    height: "100%",
-    position: "absolute"
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
 
   // Layer spacer
