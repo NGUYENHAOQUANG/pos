@@ -61,7 +61,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
 
   // Format Date YYYY-MM-DD
   const formatDate = (d: Date) => {
-    return d.toISOString().split('T')[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -90,21 +93,19 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
             onMaterialSelect={handleMaterialSelect}
             onNewStockChange={setNewStock}
           />
-
-          {/* Nút Gửi Phiếu */}
-          <View style={styles.footerContainer}>
-            <Button
-              title="Gửi Phiếu"
-              onPress={handleSave}
-              variant="primary"
-              size="large"
-              style={styles.button}
-              // Disable nút nếu chưa chọn vật tư hoặc chưa nhập số lượng
-              disabled={!materialName || !newStock}
-            />
-          </View>
         </ScrollView>
-
+        {/* Nút Gửi Phiếu */}
+        <View style={styles.footerContainer}>
+          <Button
+            title="Gửi Phiếu"
+            onPress={handleSave}
+            variant="primary"
+            size="large"
+            style={styles.button}
+            // Disable nút nếu chưa chọn vật tư hoặc chưa nhập số lượng
+            disabled={!materialName || !newStock}
+          />
+        </View>
         {/* Modal Chọn Ngày */}
         <DatePickerModal
           visible={isDatePickerVisible}
@@ -134,10 +135,20 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   footerContainer: {
-    marginTop: spacing.xl,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    padding: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 10,
   },
   button: {
     width: '100%',
     borderRadius: 6,
+    minHeight: 40,
+    paddingVertical: 0,
   },
 });

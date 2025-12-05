@@ -33,7 +33,8 @@ export const MeterialScreen = () => {
     if (
       currentScreen === 'add_material' ||
       currentScreen === 'edit_material' ||
-      currentScreen === 'add_warehouse'
+      currentScreen === 'add_warehouse' ||
+      currentScreen === 'add_inventory'
     ) {
       setTabBarVisible(false);
     } else {
@@ -52,24 +53,7 @@ export const MeterialScreen = () => {
   // }; // TODO: Uncomment when implementing adjustment
 
   const handleCreateInventory = () => {
-    // --- SỬA THÀNH ---
     console.log('Tạo phiếu điều chỉnh tồn kho');
-    const newTicket: InventoryTicket = {
-      id: Date.now().toString(),
-      checkerName: 'Nguyễn Phương Duy',
-      date: '11:00 28/11/2025',
-      note: 'Kiểm kê định kỳ tháng 11',
-      totalDifference: -2,
-      items: [
-        {
-          id: '1',
-          materialName: 'CP 09 – Thức ăn tôm giai đoạn 2',
-          beforeQuantity: 4,
-          afterQuantity: 2,
-        },
-      ],
-    };
-    setInventoryList(prev => [newTicket, ...prev]);
     setCurrentScreen('add_inventory');
   };
   const handleCreateMaterial = () => {
@@ -164,7 +148,7 @@ export const MeterialScreen = () => {
           const newTicket: InventoryTicket = {
             id: Date.now().toString(),
             checkerName: 'Nguyễn Phương Duy',
-            date: '11:00 28/11/2025',
+            date: data.date,
             note: data.note || 'Phiếu mới',
             totalDifference: data.items[0].diff,
             items: [
