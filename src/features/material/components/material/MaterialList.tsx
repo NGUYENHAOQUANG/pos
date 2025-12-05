@@ -1,236 +1,216 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { MaterialGroup, MaterialGroupType } from './MaterialGroup';
+import { MaterialGroup } from './MaterialGroup';
 import { ButtonMaterialList } from './ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
+import { IMaterial } from '../../types/material.types';
 
-if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-export interface MaterialItem {
-    id: string;
-    name: string;
-    group: MaterialGroupType;
-    unit: string;
-    remaining: number;
-    manufacturer?: string;
-    usage?: string;
-    unitOfUse?: string;
-    dosage?: string;
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 interface MaterialListProps {
-    item: MaterialItem;
-    onEdit?: (item: MaterialItem) => void;
-    onHistoryPress?: (item: MaterialItem) => void;
-    onAdjustmentPress?: (item: MaterialItem) => void;
+  item: IMaterial;
+  onEdit?: (item: IMaterial) => void;
+  onHistoryPress?: (item: IMaterial) => void;
+  onAdjustmentPress?: (item: IMaterial) => void;
 }
 
 export const MaterialList: React.FC<MaterialListProps> = ({
-    item,
-    onEdit,
-    onHistoryPress,
-    onAdjustmentPress,
+  item,
+  onEdit,
+  onHistoryPress,
+  onAdjustmentPress,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsExpanded(!isExpanded);
-    };
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsExpanded(!isExpanded);
+  };
 
-    return (
-        <View style={styles.container}>
-            {/* Header Row */}
-            <View style={styles.headerRow}>
-                <Text style={styles.name}>{item.name}</Text>
-                <MaterialGroup group={item.group} />
-            </View>
+  return (
+    <View style={styles.container}>
+      {/* Header Row */}
+      <View style={styles.headerRow}>
+        <Text style={styles.name}>{item.name}</Text>
+        <MaterialGroup group={item.group} />
+      </View>
 
-            <View style={styles.separator} />
+      <View style={styles.separator} />
 
-            {/* Basic Info Row */}
-            <View style={styles.infoRow}>
-                <Text style={styles.infoText}>
-                    <Text style={styles.label}>Đơn vị tính: </Text>
-                    {item.unit}
-                </Text>
-                <Text style={styles.infoText}>
-                    <Text style={styles.label}>Còn: </Text>
-                    {item.remaining}
-                </Text>
-            </View>
+      {/* Basic Info Row */}
+      <View style={styles.infoRow}>
+        <Text style={styles.infoText}>
+          <Text style={styles.label}>Đơn vị tính: </Text>
+          {item.unit}
+        </Text>
+        <Text style={styles.infoText}>
+          <Text style={styles.label}>Còn: </Text>
+          {item.remaining}
+        </Text>
+      </View>
 
-            <View style={styles.separator} />
+      <View style={styles.separator} />
 
-            {/* Expanded Content */}
-            {isExpanded && (
-                <View style={styles.expandedContent}>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Nhà sản xuất: </Text>
-                        <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Công dụng: </Text>
-                        <Text style={styles.detailValue}>{item.usage || '---'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
-                        <Text style={styles.detailValue}>{item.unitOfUse || '---'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Liều dùng: </Text>
-                        <Text style={styles.detailValue}>{item.dosage || '---'}</Text>
-                    </View>
+      {/* Expanded Content */}
+      {isExpanded && (
+        <View style={styles.expandedContent}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Nhà sản xuất: </Text>
+            <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Công dụng: </Text>
+            <Text style={styles.detailValue}>{item.usage || '---'}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
+            <Text style={styles.detailValue}>{item.unitOfUse || '---'}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Liều dùng: </Text>
+            <Text style={styles.detailValue}>{item.dosage || '---'}</Text>
+          </View>
 
-                    {/* Edit Button */}
-                    <ButtonMaterialList
-                        title="Sửa thông tin"
-                        onPress={() => onEdit?.(item)}
-                        style={styles.editButton}
-                    />
-                </View>
-            )}
-
-            {/* Expand Toggle */}
-            <TouchableOpacity
-                style={styles.expandToggle}
-                onPress={toggleExpand}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.expandText}>
-                    {isExpanded ? 'Thu gọn' : 'Xem thêm'}
-                </Text>
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color={colors.primary || '#1890FF'}
-                />
-            </TouchableOpacity>
-
-            <View style={styles.separator} />
-
-            {/* Action Buttons */}
-            <View style={styles.actionRow}>
-                <ButtonMaterialList
-                    title="Lịch sử nhập kho"
-                    onPress={() => onHistoryPress?.(item)}
-                    style={styles.actionButton}
-                />
-                <View style={styles.spacer} />
-                <ButtonMaterialList
-                    title="Điều chỉnh tồn kho"
-                    onPress={() => onAdjustmentPress?.(item)}
-                    style={styles.actionButton}
-                />
-            </View>
+          {/* Edit Button */}
+          <ButtonMaterialList
+            title="Sửa thông tin"
+            onPress={() => onEdit?.(item)}
+            style={styles.editButton}
+          />
         </View>
-    );
+      )}
+
+      {/* Expand Toggle */}
+      <TouchableOpacity style={styles.expandToggle} onPress={toggleExpand} activeOpacity={0.7}>
+        <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+        <Ionicons
+          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={colors.primary || '#1890FF'}
+        />
+      </TouchableOpacity>
+
+      <View style={styles.separator} />
+
+      {/* Action Buttons */}
+      <View style={styles.actionRow}>
+        <ButtonMaterialList
+          title="Lịch sử nhập kho"
+          onPress={() => onHistoryPress?.(item)}
+          style={styles.actionButton}
+        />
+        <View style={styles.spacer} />
+        <ButtonMaterialList
+          title="Điều chỉnh tồn kho"
+          onPress={() => onAdjustmentPress?.(item)}
+          style={styles.actionButton}
+        />
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
-        padding: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.xs,
-    },
-    name: {
-        fontSize: 18,
-        color: colors.text,
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.xs,
-    },
-    infoText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    label: {
-        fontWeight: '600',
-    },
-    expandedContent: {
-        marginTop: spacing.xs,
-        marginBottom: spacing.sm,
-    },
-    detailRow: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-        flexWrap: 'wrap',
-    },
-    detailLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    detailValue: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
-    editButton: {
-        marginTop: spacing.sm,
-    },
-    expandToggle: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.xs,
-        marginBottom: spacing.sm,
-    },
-    expandText: {
-        fontSize: 14,
-        color: colors.primary || '#1890FF',
-        marginRight: 4,
-        fontWeight: '600',
-    },
-    actionRow: {
-        flexDirection: 'row',
-        paddingTop: spacing.xs,
-    },
-    actionButton: {
-        flex: 1,
-    },
-    spacer: {
-        width: spacing.md,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: '#F0F0F0', // Very light gray for separator
-        marginVertical: spacing.xs,
-    },
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.xs,
+  },
+  name: {
+    fontSize: 18,
+    color: colors.text,
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xs,
+  },
+  infoText: {
+    fontSize: 14,
+    color: colors.text,
+  },
+  label: {
+    fontWeight: '600',
+  },
+  expandedContent: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+    flexWrap: 'wrap',
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: colors.text,
+    flex: 1,
+  },
+  editButton: {
+    marginTop: spacing.sm,
+  },
+  expandToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  expandText: {
+    fontSize: 14,
+    color: colors.primary || '#1890FF',
+    marginRight: 4,
+    fontWeight: '600',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    paddingTop: spacing.xs,
+  },
+  actionButton: {
+    flex: 1,
+  },
+  spacer: {
+    width: spacing.md,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#F0F0F0', // Very light gray for separator
+    marginVertical: spacing.xs,
+  },
 });

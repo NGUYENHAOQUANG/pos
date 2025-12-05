@@ -9,9 +9,11 @@ import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
 
+import { IInventoryTicket } from '../../types/material.types';
+
 interface AddInventoryScreenProps {
   onBack: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: IInventoryTicket) => void;
 }
 
 export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, onSave }) => {
@@ -44,19 +46,22 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
   };
 
   const handleSave = () => {
-    const data = {
+    const newTicket: IInventoryTicket = {
+      id: Date.now().toString(),
+      checkerName: 'Nguyễn Phương Duy', // Hardcoded for now as per original code
       date: formatDate(date),
-      note,
+      note: note || 'Phiếu mới',
+      totalDifference: Number(newStock) - oldStock,
       items: [
         {
-          name: materialName,
-          oldStock,
-          newStock: Number(newStock),
-          diff: Number(newStock) - oldStock,
+          id: '1',
+          materialName: materialName,
+          beforeQuantity: oldStock,
+          afterQuantity: Number(newStock),
         },
       ],
     };
-    onSave(data);
+    onSave(newTicket);
   };
 
   // Format Date YYYY-MM-DD

@@ -1,46 +1,32 @@
 /**
  * @file MainNavigator.tsx
- * @description Main Navigator - Shrimp farm management app navigation with animated curved bottom bar
+ * @description Main Navigator - Shrimp farm management app navigation
  * @author Kindy
  * @created 2025-11-16
- * @updated 2025-11-20
+ * @updated 2025-12-05
  */
-import React, { useEffect } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Text,
-  Dimensions,
-} from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Text, Image, ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 import DevicesScreen from '@/features/devices/screens/DevicesScreen';
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 
-const { width } = Dimensions.get('window');
-const TAB_HEIGHT = 75;
-const TAB_ITEM_WIDTH = width / 5;
+// Import Icons
+const IconReport = require('../../assets/images/Icon/IconMainNavigator/Icon-Report.png');
+const IconDevices = require('../../assets/images/Icon/IconMainNavigator/Icon-Devices.png');
+const IconFarm = require('../../assets/images/Icon/IconMainNavigator/Icon-Farm.png');
+const IconMaterial = require('../../assets/images/Icon/IconMainNavigator/Icon-Material.png');
+const IconSetting = require('../../assets/images/Icon/IconMainNavigator/Icon-Setting.png');
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+const TAB_HEIGHT = 70;
 
 interface NavigationItem {
   key: string;
   label: string;
-  icon: {
-    active: string;
-    inactive: string;
-  };
+  icon: ImageSourcePropType;
   component: React.ComponentType<any>;
 }
 
@@ -48,147 +34,78 @@ const navigationItems: NavigationItem[] = [
   {
     key: 'Reports',
     label: 'Báo cáo',
-    icon: { active: 'stats-chart', inactive: 'stats-chart-outline' },
+    icon: IconReport,
     component: ReportsScreen,
   },
   {
     key: 'Devices',
-    label: 'Thiết bị',
-    icon: { active: 'radio', inactive: 'radio-outline' },
+    label: 'Điều khiển',
+    icon: IconDevices,
     component: DevicesScreen,
   },
   {
     key: 'Management',
-    label: 'Quản lý',
-    icon: { active: 'grid', inactive: 'grid-outline' },
+    label: 'Trại nuôi',
+    icon: IconFarm,
     component: HomeScreen,
   },
   {
     key: 'Material',
     label: 'Vật tư',
-    icon: { active: 'cube', inactive: 'cube-outline' },
+    icon: IconMaterial,
     component: MeterialScreen,
   },
   {
     key: 'Settings',
-    label: 'Cài đặt',
-    icon: { active: 'settings', inactive: 'settings-outline' },
+    label: 'Menu',
+    icon: IconSetting,
     component: SettingsScreen,
   },
 ];
 
-import { TabBarVisibilityContext } from './TabBarVisibilityContext';
-
 export function MainNavigator() {
-  const [selectedTab, setSelectedTab] = React.useState(2); // Start at Management
-  const [isTabBarVisible, setTabBarVisible] = React.useState(true);
+  const [selectedTab, setSelectedTab] = useState(1); // Default to "Điều khiển" as per image or 2 for "Trại nuôi" depending on preference. Let's stick to 1 (Devices) as it seems active in the image provided by user? Actually image shows "Điều khiển" active.
   const insets = useSafeAreaInsets();
-
-  // Shared value for the center position of the curve
-  const tabX = useSharedValue(2 * TAB_ITEM_WIDTH + TAB_ITEM_WIDTH / 2);
-
-  useEffect(() => {
-    const newX = selectedTab * TAB_ITEM_WIDTH + TAB_ITEM_WIDTH / 2;
-    // Use withTiming for a direct animation without bounce/overshoot
-    tabX.value = withTiming(newX, {
-      duration: 300,
-    });
-  }, [selectedTab, tabX]);
-
-  const animatedPathProps = useAnimatedProps(() => {
-    const center = tabX.value;
-    const depth = 55; // Increased depth for larger button
-    const curveWidth = 120; // Increased width for larger button
-    const top = 5;
-
-    // Constructing the path
-    // Start from top left
-    const path = `
-      M0,${top}
-      L${center - curveWidth / 2},${top}
-      C${center - curveWidth / 2 + 20},${top} ${center - 50},${depth} ${center},${depth}
-      S${center + curveWidth / 2 - 20},${top} ${center + curveWidth / 2},${top}
-      L${width},${top}
-      L${width},${TAB_HEIGHT + insets.bottom}
-      L0,${TAB_HEIGHT + insets.bottom}
-      Z
-    `;
-    return { d: path };
-  });
-
-  const animatedButtonStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: tabX.value - 35 }], // -35 to center the 70px button
-    };
-  });
 
   const CurrentScreen = navigationItems[selectedTab].component;
 
   return (
-    <TabBarVisibilityContext.Provider value={{ isTabBarVisible, setTabBarVisible }}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <CurrentScreen />
-        </View>
-
-        {isTabBarVisible && (
-          <View style={styles.bottomContainer}>
-            {/* SVG Background */}
-            <View style={[styles.svgContainer, { height: TAB_HEIGHT + insets.bottom }]}>
-              <Svg width={width} height={TAB_HEIGHT + insets.bottom}>
-                <AnimatedPath
-                  animatedProps={animatedPathProps}
-                  fill="white"
-                  stroke="#E0E0E0" // Optional: subtle border
-                  strokeWidth={0.5}
-                />
-              </Svg>
-            </View>
-
-            {/* Floating Action Button */}
-            <Animated.View style={[styles.floatingButtonContainer, animatedButtonStyle]}>
-              <TouchableOpacity
-                style={styles.floatingButton}
-                activeOpacity={0.9}
-                onPress={() => { }} // Already handled by tab press, but keeps interaction
-              >
-                <Icon
-                  name={navigationItems[selectedTab].icon.active}
-                  size={28} // Increased icon size
-                  color="white"
-                />
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Tab Items */}
-            <View style={[styles.tabsContainer, { paddingBottom: insets.bottom }]}>
-              {navigationItems.map((item, index) => {
-                const isSelected = selectedTab === index;
-                return (
-                  <TouchableOpacity
-                    key={item.key}
-                    style={styles.tabItem}
-                    onPress={() => setSelectedTab(index)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.iconContainer, isSelected && styles.hiddenIcon]}>
-                      <Icon
-                        name={item.icon.inactive}
-                        size={24}
-                        color="#8E8E93"
-                      />
-                    </View>
-                    <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        )}
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <CurrentScreen />
       </View>
-    </TabBarVisibilityContext.Provider>
+
+      <View
+        style={[
+          styles.bottomContainer,
+          { paddingBottom: insets.bottom, height: TAB_HEIGHT + insets.bottom },
+        ]}
+      >
+        {navigationItems.map((item, index) => {
+          const isSelected = selectedTab === index;
+          return (
+            <TouchableOpacity
+              key={item.key}
+              style={styles.tabItem}
+              onPress={() => setSelectedTab(index)}
+              activeOpacity={0.7}
+            >
+              {isSelected && <View style={styles.activeIndicator} />}
+              <View style={styles.iconContainer}>
+                <Image
+                  source={item.icon}
+                  style={[styles.icon, isSelected ? styles.iconActive : styles.iconInactive]}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -201,71 +118,55 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-  },
-  svgContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderTopWidth: 0, // Remove border top width as we have rounded corners and shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 10,
-    backgroundColor: 'transparent', // Ensure SVG container is transparent
-  },
-  floatingButtonContainer: {
-    position: 'absolute',
-    top: -25, // Adjusted to move button down
-    left: 0,
-    zIndex: 10,
-  },
-  floatingButton: {
-    width: 70, // Increased size
-    height: 70, // Increased size
-    borderRadius: 35,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: 'white', // The white border requested
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    height: TAB_HEIGHT,
-    alignItems: 'flex-end',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 10,
+    justifyContent: 'center',
     height: '100%',
+    position: 'relative',
+  },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    width: '80%',
+    height: 3,
+    backgroundColor: '#007AFF',
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
   },
   iconContainer: {
     marginBottom: 4,
+    marginTop: 8,
   },
-  hiddenIcon: {
-    opacity: 0, // Hide icon when selected (it moves to floating button)
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  iconActive: {
+    tintColor: '#007AFF',
+  },
+  iconInactive: {
+    tintColor: '#8E8E93',
   },
   tabLabel: {
     fontSize: 12,
     color: '#8E8E93',
     fontWeight: '400',
+    marginBottom: 4,
   },
   tabLabelActive: {
     color: '#007AFF',
     fontWeight: '600',
-    transform: [{ translateY: 0 }] // Push label down slightly when active to fit under curve
   },
 });
