@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as AntdProvider } from '@ant-design/react-native';
 import { AppNavigator } from './navigation/AppNavigator';
 import { antdTheme } from '../core/config/antd-theme';
+import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,9 +30,11 @@ export function AppProviders() {
       <GestureHandlerRootView style={styles.gestureHandler}>
         <AntdProvider theme={antdTheme}>
           <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
+            <TabBarVisibilityProvider>
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+            </TabBarVisibilityProvider>
           </QueryClientProvider>
         </AntdProvider>
       </GestureHandlerRootView>

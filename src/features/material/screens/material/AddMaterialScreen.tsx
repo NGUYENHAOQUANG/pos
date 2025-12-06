@@ -16,6 +16,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, on
   // Basic Info State
   const [name, setName] = useState('');
   const [group, setGroup] = useState('');
+  const [type, setType] = useState('');
   const [unit, setUnit] = useState('');
 
   // Advanced Info State
@@ -44,6 +45,8 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, on
             onNameChange={setName}
             group={group}
             onGroupChange={setGroup}
+            type={type}
+            onTypeChange={setType}
             unit={unit}
             onUnitChange={setUnit}
             unitOptions={['Kg', 'G', 'Lít', 'Ml', 'Bao', 'Gói']}
@@ -67,6 +70,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, on
               onSave?.({
                 name,
                 group,
+                type,
                 unit,
                 usage,
                 unitOfUse,

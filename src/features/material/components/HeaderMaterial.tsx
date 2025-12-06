@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface HeaderMeterialProps {
     title?: string;
@@ -29,8 +30,10 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
         }
     };
 
+    const insets = useSafeAreaInsets();
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + spacing.xs }]}>
             <View style={styles.leftContainer}>
                 {showBackButton && (
                     <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         // Add padding for status bar on Android
-        paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 0) + spacing.xs : spacing.md,
+        paddingTop: spacing.md,
         paddingBottom: spacing.sm,
         paddingHorizontal: spacing.md,
         backgroundColor: colors.white,

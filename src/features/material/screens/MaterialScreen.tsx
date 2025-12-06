@@ -124,8 +124,35 @@ export const MeterialScreen = () => {
   });
 
   const filteredWarehouseList = warehouseList.filter(receipt => {
-    if (!filterMaterialName) return true;
-    return receipt.materials.some(m => m.materialName === filterMaterialName);
+    // 1. Filter by specific material (from History press)
+    if (filterMaterialName) {
+      if (!receipt.materials.some(m => m.materialName === filterMaterialName)) {
+        return false;
+      }
+    }
+
+    // 2. Filter by Group (from Dropdown)
+    if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
+      const hasGroup = receipt.materials.some(receiptItem => {
+        // Find the material definition to check its group
+        const materialDef = materials.find(m => m.name === receiptItem.materialName);
+        return materialDef?.group === filterGroup;
+      });
+      if (!hasGroup) return false;
+    }
+
+    // 3. Filter by Search Text (optional, but good for consistency)
+    if (searchText) {
+      const lowerSearch = searchText.toLowerCase();
+      // Check supplier or material names
+      const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
+      const matchesMaterial = receipt.materials.some(m =>
+        m.materialName.toLowerCase().includes(lowerSearch)
+      );
+      if (!matchesSupplier && !matchesMaterial) return false;
+    }
+
+    return true;
   });
 
   if (currentScreen === 'add_material') {

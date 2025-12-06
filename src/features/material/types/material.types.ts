@@ -10,6 +10,7 @@ export interface IMaterial {
   id: string;
   name: string;
   group: MaterialGroupType;
+  type?: string;
   unit: string;
   usage?: string;
   unitOfUse?: string;
