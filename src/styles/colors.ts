@@ -39,6 +39,7 @@ export const colors = {
 
   // Background colors
   background: '#FFFFFF',
+  backgroundPrimary: '#F0F5FF', // Light blue background for screens
   backgroundSecondary: '#F9FAFB',
   backgroundTertiary: '#F3F4F6',
 
@@ -52,7 +53,22 @@ export const colors = {
   border: '#E5E7EB',
   borderLight: '#F3F4F6',
   borderDark: '#D1D5DB',
+
+  // Status colors (for DevicesStatus)
+  status: {
+    // Total ponds - Blue
+    totalText: '#2F6BFF',
+    totalBg: '#F0F6FF',
+    // Active - Green
+    activeText: '#2E7D32',
+    activeBg: '#F1F8E9',
+    // Warning - Red
+    warningText: '#D32F2F',
+    warningBg: '#FFEBEE',
+    // Other - Gray
+    otherText: '#1F2937',
+    otherBg: '#F9FAFB',
+  },
 } as const;
 
 export type Colors = typeof colors;
-
