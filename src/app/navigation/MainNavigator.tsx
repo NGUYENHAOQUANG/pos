@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @file MainNavigator.tsx
  * @description Main Navigator - Shrimp farm management app navigation
