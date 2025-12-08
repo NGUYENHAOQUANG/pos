@@ -10,10 +10,12 @@ import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '../../components/warehouse/ConfirmSubmiss';
 
+import { IMaterial, IWarehouseReceipt } from '../../types/material.types';
+
 interface AddWarehouseScreenProps {
   onBack?: () => void;
-  onSave?: (data: any) => void;
-  availableMaterials?: any[];
+  onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
+  availableMaterials?: IMaterial[];
 }
 
 export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = ({
@@ -22,7 +24,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = ({
   availableMaterials = [],
 }) => {
   // Combine mock materials with passed available materials
-  const materialOptions = availableMaterials.map((m: any) => ({
+  const materialOptions = availableMaterials.map((m: IMaterial) => ({
     label: m.name,
     value: m.name,
     unit: m.unit,

@@ -5,10 +5,12 @@ import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 
+import { IMaterial } from '../../types/material.types';
+
 interface EditMaterialScreenProps {
-  initialData: any;
+  initialData: IMaterial;
   onBack?: () => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: IMaterial) => void;
 }
 
 export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({

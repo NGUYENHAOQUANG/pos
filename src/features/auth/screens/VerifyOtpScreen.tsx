@@ -39,7 +39,7 @@ export default function VerifyOTPScreen() {
 
   // Timer logic
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval>;
     if (countdown > 0) {
       timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
     }
@@ -170,7 +170,7 @@ export default function VerifyOTPScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#8FD5FF',
+    backgroundColor: '#F0F5FF',
   },
   backButton: {
     position: 'absolute',

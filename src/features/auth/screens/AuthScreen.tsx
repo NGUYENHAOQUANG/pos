@@ -169,11 +169,11 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#8FD5FF',
+    backgroundColor: '#F0F5FF',
     overflow: 'hidden',
   },
   androidStatusBar: {
-    backgroundColor: '#8FD5FF',
+    backgroundColor: '#F0F5FF',
   },
   // Wave Styles
   waveTopContainer: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 0 },

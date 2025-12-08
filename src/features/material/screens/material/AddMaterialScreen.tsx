@@ -5,9 +5,11 @@ import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 
+import { IMaterial } from '../../types/material.types';
+
 interface AddMaterialScreenProps {
   onBack?: () => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: Omit<IMaterial, 'id'>) => void;
 }
 
 export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, onSave }) => {
