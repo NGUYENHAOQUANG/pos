@@ -8,7 +8,8 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { DropdownMaterial } from './DropdownMaterial';
+import { DropdownMaterial } from './DropdownMaterialGroup';
+import { DropdownMaterialType } from './DropdownMaterialType';
 import { CollapseHead } from '../CollapseHead';
 import { UnitOfMeasure } from './UnitOfMeasure';
 import { UnitOfUse } from './UnitOfUse';
@@ -24,6 +25,8 @@ interface AddMaterialProps {
   onNameChange?: (text: string) => void;
   group?: string;
   onGroupChange?: (value: string) => void;
+  type?: string;
+  onTypeChange?: (value: string) => void;
   unit?: string;
   onUnitChange?: (value: string) => void;
   groupOptions?: string[];
@@ -45,6 +48,8 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
   onNameChange,
   group,
   onGroupChange,
+  type,
+  onTypeChange,
   unit,
   onUnitChange,
   groupOptions = [],
@@ -97,7 +102,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
               />
             </View>
 
-            <View style={styles.row}>
+            <View style={[styles.row, styles.rowZ30]}>
               <View style={styles.halfWidth}>
                 <DropdownMaterial
                   label="Nhóm vật tư"
@@ -110,6 +115,20 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                   showAllOption={false}
                 />
               </View>
+              <View style={styles.halfWidth}>
+                <DropdownMaterialType
+                  label="Loại vật tư"
+                  required
+                  value={type}
+                  onChange={onTypeChange}
+                  group={group}
+                  placeholder="Chọn loại"
+                  dropdownStyle={styles.dropdownNegativeMargin}
+                />
+              </View>
+            </View>
+
+            <View style={[styles.row, styles.rowMarginTop, styles.rowZ20]}>
               <View style={styles.halfWidth}>
                 <UnitOfMeasure
                   label="Đơn vị tính"
@@ -125,65 +144,67 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
       </View>
 
       {/* Advanced Info Section */}
-      <View style={[styles.sectionContainer, styles.sectionContainerZ10]}>
+      < View style={[styles.sectionContainer, styles.sectionContainerZ10]} >
         <CollapseHead
           title="Thông tin nâng cao (không bắt buộc)"
           isExpanded={isAdvancedExpanded}
           onToggle={toggleAdvancedExpand}
         />
 
-        {isAdvancedExpanded && (
-          <View style={styles.content}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Công dụng</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Nhập công dụng"
-                placeholderTextColor={colors.textSecondary || '#999'}
-                value={usage}
-                onChangeText={onUsageChange}
-                multiline
-                textAlignVertical="top"
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.halfWidth}>
-                <UnitOfUse
-                  label="Đơn vị sử dụng"
-                  value={unitOfUse}
-                  options={unitOptions}
-                  onChange={onUnitOfUseChange}
+        {
+          isAdvancedExpanded && (
+            <View style={styles.content}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Công dụng</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Nhập công dụng"
+                  placeholderTextColor={colors.textSecondary || '#999'}
+                  value={usage}
+                  onChangeText={onUsageChange}
+                  multiline
+                  textAlignVertical="top"
                 />
               </View>
-              <View style={styles.halfWidth}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Liều dùng</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Nhập liều dùng"
-                    placeholderTextColor={colors.textSecondary || '#999'}
-                    value={dosage}
-                    onChangeText={onDosageChange}
+
+              <View style={styles.row}>
+                <View style={styles.halfWidth}>
+                  <UnitOfUse
+                    label="Đơn vị sử dụng"
+                    value={unitOfUse}
+                    options={unitOptions}
+                    onChange={onUnitOfUseChange}
                   />
                 </View>
+                <View style={styles.halfWidth}>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Liều dùng</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Nhập liều dùng"
+                      placeholderTextColor={colors.textSecondary || '#999'}
+                      value={dosage}
+                      onChangeText={onDosageChange}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Nhà sản xuất</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập nhà sản xuất"
+                  placeholderTextColor={colors.textSecondary || '#999'}
+                  value={manufacturer}
+                  onChangeText={onManufacturerChange}
+                />
               </View>
             </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nhà sản xuất</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập nhà sản xuất"
-                placeholderTextColor={colors.textSecondary || '#999'}
-                value={manufacturer}
-                onChangeText={onManufacturerChange}
-              />
-            </View>
-          </View>
-        )}
-      </View>
-    </View>
+          )
+        }
+      </View >
+    </View >
   );
 };
 
@@ -256,5 +277,14 @@ const styles = StyleSheet.create({
   },
   dropdownNegativeMargin: {
     marginTop: -12,
+  },
+  rowZ30: {
+    zIndex: 30,
+  },
+  rowZ20: {
+    zIndex: 20,
+  },
+  rowMarginTop: {
+    marginTop: spacing.md,
   },
 });

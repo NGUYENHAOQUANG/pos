@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
-import { DropdownMaterial } from '../material/DropdownMaterial';
+import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { colors, spacing, borderRadius } from '@/styles';
 
 interface InventoryMaterialInputProps {

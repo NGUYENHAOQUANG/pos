@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from './material/DropdownMaterial';
+import { DropdownMaterial } from './material/DropdownMaterialGroup';
 import { DropdownVoteStatus } from './inventory/DropdownVoteStatus';
 import { TabType } from './HeadingMaterial';
 
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F7FF', // Light blue background when active
   },
   expandedContent: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg, // Add more space below when expanded
+    marginTop: spacing.md, 
+    marginBottom: spacing['2xl'], 
     flexDirection: 'row',
     gap: spacing.md,
     zIndex: 100, // Ensure dropdowns sit on top

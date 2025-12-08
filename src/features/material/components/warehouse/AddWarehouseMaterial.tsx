@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterial';
+import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { CollapseHead } from '../CollapseHead';
 
 if (

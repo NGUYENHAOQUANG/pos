@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Image, ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTabBarVisibility } from './TabBarVisibilityContext';
 import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 import DevicesScreen from '@/features/devices/screens/DevicesScreen';
@@ -64,7 +65,8 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export function MainNavigator() {
-  const [selectedTab, setSelectedTab] = useState(1); // Default to "Điều khiển" as per image or 2 for "Trại nuôi" depending on preference. Let's stick to 1 (Devices) as it seems active in the image provided by user? Actually image shows "Điều khiển" active.
+  const [selectedTab, setSelectedTab] = useState(1);
+  const { isTabBarVisible } = useTabBarVisibility();
   const insets = useSafeAreaInsets();
 
   const CurrentScreen = navigationItems[selectedTab].component;
@@ -75,36 +77,38 @@ export function MainNavigator() {
         <CurrentScreen />
       </View>
 
-      <View
-        style={[
-          styles.bottomContainer,
-          { paddingBottom: insets.bottom, height: TAB_HEIGHT + insets.bottom },
-        ]}
-      >
-        {navigationItems.map((item, index) => {
-          const isSelected = selectedTab === index;
-          return (
-            <TouchableOpacity
-              key={item.key}
-              style={styles.tabItem}
-              onPress={() => setSelectedTab(index)}
-              activeOpacity={0.7}
-            >
-              {isSelected && <View style={styles.activeIndicator} />}
-              <View style={styles.iconContainer}>
-                <Image
-                  source={item.icon}
-                  style={[styles.icon, isSelected ? styles.iconActive : styles.iconInactive]}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      {isTabBarVisible && (
+        <View
+          style={[
+            styles.bottomContainer,
+            { paddingBottom: insets.bottom, height: TAB_HEIGHT + insets.bottom },
+          ]}
+        >
+          {navigationItems.map((item, index) => {
+            const isSelected = selectedTab === index;
+            return (
+              <TouchableOpacity
+                key={item.key}
+                style={styles.tabItem}
+                onPress={() => setSelectedTab(index)}
+                activeOpacity={0.7}
+              >
+                {isSelected && <View style={styles.activeIndicator} />}
+                <View style={styles.iconContainer}>
+                  <Image
+                    source={item.icon}
+                    style={[styles.icon, isSelected ? styles.iconActive : styles.iconInactive]}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
