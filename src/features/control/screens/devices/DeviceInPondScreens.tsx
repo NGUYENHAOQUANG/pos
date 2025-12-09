@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { HeadingDevices } from '../../components/HeadingDevices';
+import { HeadingDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
 import { colors, spacing } from '@/styles';
