@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @file MainNavigator.tsx
  * @description Main Navigator - Shrimp farm management app navigation
@@ -11,8 +12,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBarVisibility } from './TabBarVisibilityContext';
 import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
-import DevicesScreen from '@/features/devices/screens/DevicesScreen';
+// import DevicesScreen from '@/features/devices/screens/DevicesScreen';
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
+import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 
 // Import Icons
@@ -42,7 +44,7 @@ const navigationItems: NavigationItem[] = [
     key: 'Devices',
     label: 'Điều khiển',
     icon: IconDevices,
-    component: DevicesScreen,
+    component: DeviceControlScreens,
   },
   {
     key: 'Management',
