@@ -44,29 +44,25 @@ export const colors = {
   backgroundTertiary: '#F3F4F6',
   backgroundButton: '#F9FAFB',
   backgroundIconBtn: '#FAFAFA',
+
   // Text colors
   text: '#111827',
   textSecondary: '#6B7280',
   textTertiary: '#9CA3AF',
   textInverse: '#FFFFFF',
-  textButton: '#374151',
+
   // Border colors
   border: '#E5E7EB',
   borderLight: '#F3F4F6',
   borderDark: '#D1D5DB',
-  borderDashed: '#D1D5DB',
 
+  // Utilities
   shadow: '#000000',
   overlay: 'rgba(0, 0, 0, 0.5)',
 
-  chart: {
-    plan: '#007AFF',
-    actual: '#FF5630',
-    gridLine: '#F3F4F6',
-    axisLine: '#D1D5DB',
-    tickMark: '#9CA3AF',
-    cursorLine: '#4B5563',
-  },
+  // Custom colors
+  orange: '#FF5630',
+
   // Status colors (for DevicesStatus)
   status: {
     // Total ponds - Blue

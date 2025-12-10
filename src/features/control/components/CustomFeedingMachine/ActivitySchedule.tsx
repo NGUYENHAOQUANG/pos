@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: colors.borderDashed,
+    borderColor: colors.borderDark,
     borderStyle: 'dashed',
     backgroundColor: colors.backgroundButton,
     marginTop: 4,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   addBtnText: {
     fontSize: 15,
     fontWeight: '500',
-    color: colors.textButton,
+    color: colors.gray[700],
     marginLeft: 8,
   },
 });

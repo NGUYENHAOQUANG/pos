@@ -153,12 +153,13 @@ export default function FeedingChart() {
           <Svg width={SCREEN_WIDTH - 32} height={CHART_HEIGHT}>
             {yLabels.map(val => (
               <G key={`grid-y-${val}`}>
+                {/* Dùng gray[100] thay cho gridLine */}
                 <Line
                   x1={PADDING_LEFT}
                   y1={getY(val)}
                   x2={chartWidth + PADDING_LEFT}
                   y2={getY(val)}
-                  stroke={colors.chart.gridLine}
+                  stroke={colors.gray[100]}
                   strokeWidth={1}
                 />
                 <SvgText
@@ -173,12 +174,13 @@ export default function FeedingChart() {
               </G>
             ))}
 
+            {/* Dùng gray[300] thay cho axisLine */}
             <Line
               x1={PADDING_LEFT}
               y1={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
               x2={chartWidth + PADDING_LEFT}
               y2={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
-              stroke={colors.chart.axisLine}
+              stroke={colors.gray[300]}
               strokeWidth={1}
             />
 
@@ -191,20 +193,22 @@ export default function FeedingChart() {
 
               return (
                 <G key={`grid-x-${index}`}>
+                  {/* Dùng gray[100] thay cho gridLine */}
                   <Line
                     x1={xPos}
                     y1={PADDING_TOP}
                     x2={xPos}
                     y2={chartBottom}
-                    stroke={colors.chart.gridLine}
+                    stroke={colors.gray[100]}
                     strokeDasharray="4 4"
                   />
+                  {/* Dùng gray[400] thay cho tickMark */}
                   <Line
                     x1={xPos}
                     y1={axisY - tickHalf}
                     x2={xPos}
                     y2={axisY + tickHalf}
-                    stroke={colors.chart.tickMark}
+                    stroke={colors.gray[400]}
                     strokeWidth={1.5}
                   />
                   <SvgText
@@ -220,41 +224,44 @@ export default function FeedingChart() {
               );
             })}
 
+            {/* PLAN: Dùng colors.primary */}
             <Rect
               x={getX(4, ACTUAL_DATA.length) - 8}
               y={getY(2.5)}
               width={16}
               height={chartHeight + PADDING_TOP - getY(2.5)}
-              fill={colors.chart.plan}
+              fill={colors.primary}
             />
             <Rect
               x={getX(11, ACTUAL_DATA.length) - 8}
               y={getY(3.5)}
               width={16}
               height={chartHeight + PADDING_TOP - getY(3.5)}
-              fill={colors.chart.plan}
+              fill={colors.primary}
             />
 
-            <Path d={createStepPath()} fill="none" stroke={colors.chart.actual} strokeWidth="2" />
+            {/* ACTUAL: Dùng colors.orange (màu mới thêm) */}
+            <Path d={createStepPath()} fill="none" stroke={colors.orange} strokeWidth="2" />
             {ACTUAL_DATA.map((point, i) => (
               <Circle
                 key={i}
                 cx={getX(i, ACTUAL_DATA.length)}
                 cy={getY(point.value)}
                 r={3}
-                fill={colors.chart.actual}
+                fill={colors.orange}
                 stroke={colors.white}
                 strokeWidth={1}
               />
             ))}
 
+            {/* Cursor Line: Dùng gray[600] */}
             <AnimatedG style={verticalLineStyle}>
               <Line
                 x1={0}
                 y1={PADDING_TOP}
                 x2={0}
                 y2={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
-                stroke={colors.chart.cursorLine}
+                stroke={colors.gray[600]}
                 strokeWidth={1}
               />
             </AnimatedG>
@@ -265,7 +272,7 @@ export default function FeedingChart() {
                 y1={0}
                 x2={chartWidth + PADDING_LEFT}
                 y2={0}
-                stroke={colors.chart.cursorLine}
+                stroke={colors.gray[600]}
                 strokeWidth={1}
               />
             </AnimatedG>
@@ -275,7 +282,7 @@ export default function FeedingChart() {
                 cx={0}
                 cy={0}
                 r={4}
-                fill={colors.chart.actual}
+                fill={colors.orange}
                 stroke={colors.white}
                 strokeWidth={2}
               />
@@ -360,13 +367,13 @@ const styles = StyleSheet.create({
   legendDashActual: {
     width: 16,
     height: 2,
-    backgroundColor: colors.chart.actual,
+    backgroundColor: colors.orange,
   },
   legendCirclePlan: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.chart.plan,
+    backgroundColor: colors.primary,
   },
   legendText: {
     fontSize: 12,
