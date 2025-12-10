@@ -69,6 +69,13 @@ export const colors = {
     otherText: '#1F2937',
     otherBg: '#F9FAFB',
   },
+
+  // Schedule colors
+  schedule: {
+    remote: '#D6E4FF',
+    schedule: '#FFF3CD',
+    local: '#D4EDDA',
+  },
 } as const;
 
 export type Colors = typeof colors;

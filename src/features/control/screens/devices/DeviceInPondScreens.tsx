@@ -1,25 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { HeadingDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
+import { ScheduleActivitieScreens } from '../schedule/ScheduleActivitieScreens';
+import { HistoryActivitieScreens } from '../schedule/HistoryActivitieScreens';
 import { colors, spacing } from '@/styles';
 
 interface DevicesInPondScreensProps {
   onBack?: () => void;
+  pondName?: string;
 }
 
-export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = ({ onBack }) => {
+type ViewMode = 'list' | 'schedule' | 'history';
+
+export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = ({
+  onBack,
+  pondName = 'Ao 1',
+}) => {
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  // Show schedule screen
+  if (viewMode === 'schedule') {
+    return <ScheduleActivitieScreens pondName={pondName} onBack={() => setViewMode('list')} />;
+  }
+
+  // Show history screen
+  if (viewMode === 'history') {
+    return <HistoryActivitieScreens pondName={pondName} onBack={() => setViewMode('list')} />;
+  }
+
   return (
     <View style={styles.container}>
-      <HeadingDevices title="Thiết Bị - Ao 1" onBackPress={onBack} />
+      <HeadingDevices title={`Thiết Bị - ${pondName}`} onBackPress={onBack} />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* History Buttons Section */}
         <View style={styles.historySection}>
           <ButtonHistory
-            onSchedulePress={() => console.log('Press Schedule')}
-            onStatisticPress={() => console.log('Press Statistic')}
+            onSchedulePress={() => setViewMode('schedule')}
+            onStatisticPress={() => setViewMode('history')}
             style={styles.historyButton}
           />
         </View>
@@ -70,6 +90,6 @@ const styles = StyleSheet.create({
   },
   extendedCard: {
     marginHorizontal: -spacing.md,
-    paddingHorizontal: spacing.md + 16, // 16 is original padding, spacing.md compensates margin
+    paddingHorizontal: spacing.md + 16,
   },
 });

@@ -18,6 +18,11 @@ export interface TabItem {
   label: string;
 }
 
+export const CONTROL_TABS: TabItem[] = [
+  { key: 'history', label: 'Lịch sử hoạt động' },
+  { key: 'statistic', label: 'Thống kê cảm biến' },
+];
+
 interface HeadingDevicesProps {
   title?: string;
   tabs?: TabItem[];
@@ -173,6 +178,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   tabsContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   tab: {
