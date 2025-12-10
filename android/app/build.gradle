@@ -87,9 +87,9 @@ android {
     }
 
     // Add this for react-native-vector-icons
-    project.ext.vectoricons = [
-        iconFontNames: [ 'Ionicons.ttf' ]
-    ]
+    // project.ext.vectoricons = [
+    //     iconFontNames: [ 'Ionicons.ttf' ]
+    // ]
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

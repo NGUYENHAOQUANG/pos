@@ -42,6 +42,8 @@ export const colors = {
   backgroundPrimary: '#F0F5FF', // Light blue background for screens
   backgroundSecondary: '#F9FAFB',
   backgroundTertiary: '#F3F4F6',
+  backgroundButton: '#F9FAFB',
+  backgroundIconBtn: '#FAFAFA',
 
   // Text colors
   text: '#111827',
@@ -53,6 +55,13 @@ export const colors = {
   border: '#E5E7EB',
   borderLight: '#F3F4F6',
   borderDark: '#D1D5DB',
+
+  // Utilities
+  shadow: '#000000',
+  overlay: 'rgba(0, 0, 0, 0.5)',
+
+  // Custom colors
+  orange: '#FF5630',
 
   // Status colors (for DevicesStatus)
   status: {
