@@ -12,7 +12,7 @@ import Svg, { Line, Path, Circle, Rect, G, Text as SvgText } from 'react-native-
 import { FeedingTooltip } from './FeedingTooltip';
 import { colors } from '@/styles';
 
-const AnimatedG = Animated.createAnimatedComponent(G);
+const AnimatedG = Animated.createAnimatedComponent(G) as any;
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 const ACTUAL_DATA = [
@@ -222,17 +222,19 @@ export default function FeedingChart() {
               );
             })}
 
+            {/* Plan at 02:00 = 2h. 2 / 6 = 0.333 chartWidth */}
             <Rect
-              x={getX(4, ACTUAL_DATA.length) - 8}
+              x={chartWidth * (2 / 6) + PADDING_LEFT - 5}
               y={getY(2.5)}
-              width={16}
+              width={10}
               height={chartHeight + PADDING_TOP - getY(2.5)}
               fill={colors.primary}
             />
+            {/* Plan at 06:00 = 6h. 6 / 6 = 1.0 chartWidth */}
             <Rect
-              x={getX(11, ACTUAL_DATA.length) - 8}
+              x={chartWidth * (6 / 6) + PADDING_LEFT - 5}
               y={getY(3.5)}
-              width={16}
+              width={10}
               height={chartHeight + PADDING_TOP - getY(3.5)}
               fill={colors.primary}
             />

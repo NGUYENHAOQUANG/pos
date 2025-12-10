@@ -11,6 +11,8 @@ interface HistoryActivitieScreensProps {
   onBack?: () => void;
 }
 
+import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
+
 export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({
   pondName = 'Ao 1',
   onBack,
@@ -44,10 +46,16 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
         rightComponent={renderRightComponent()}
       />
       <View style={styles.content}>
-        <View style={styles.filterWrapper}>
-          <FilterDate />
-        </View>
-        <HistoryActivitie />
+        {activeTab === 'history' ? (
+          <>
+            <View style={styles.filterWrapper}>
+              <FilterDate />
+            </View>
+            <HistoryActivitie />
+          </>
+        ) : (
+          <SensorStatisticsScreen />
+        )}
       </View>
     </View>
   );

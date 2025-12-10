@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,47 +8,84 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles';
 
 import ActivitySchedule, {
   ScheduleItem,
 } from '../../components/CustomFeedingMachine/ActivitySchedule';
+import { HeadingDevices } from '../../components/HeaderDevices';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
-export default function CustomFeedingMachine() {
+import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
+
+interface CustomFeedingMachineProps {
+  onBack?: () => void;
+  initialMode?: 'manual' | 'schedule';
+  onSave?: (mode: 'manual' | 'schedule') => void;
+}
+
+export default function CustomFeedingMachine({
+  onBack,
+  initialMode = 'manual',
+  onSave,
+}: CustomFeedingMachineProps) {
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<'manual' | 'schedule'>('manual');
+  const { setTabBarVisible } = useTabBarVisibility();
+  const [mode, setMode] = useState<'manual' | 'schedule'>(initialMode);
   const [runDuration, setRunDuration] = useState('');
   const [stopDuration, setStopDuration] = useState('');
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
 
+  // Dirty state tracking
+  const [isDirty, setIsDirty] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  useEffect(() => {
+    setTabBarVisible(false);
+    return () => setTabBarVisible(true);
+  }, [setTabBarVisible]);
+
   const handleSave = () => {
     console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
-    Alert.alert('Thành công', 'Đã lưu thay đổi cấu hình máy.');
+    onSave?.(mode);
+    setIsDirty(false); // Reset dirty state on save
+    if (onBack) {
+      onBack();
+    } else {
+      navigation.goBack();
+    }
   };
 
   const handleCancel = () => {
-    navigation.goBack();
+    if (isDirty) {
+      setShowConfirmModal(true); // Show confirmation if changes exist
+    } else {
+      leaveScreen();
+    }
   };
 
-  const headerDynamicStyle = {
-    paddingTop: insets.top + 12,
+  const leaveScreen = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigation.goBack();
+    }
   };
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, headerDynamicStyle]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tuỳ Chỉnh Máy Cho Ăn</Text>
-        <View style={styles.headerRightPlaceholder} />
-      </View>
+      <HeadingDevices title="Tuỳ Chỉnh Máy Cho Ăn" onBackPress={handleCancel} />
+
+      <ConfirmModal
+        visible={showConfirmModal}
+        onConfirm={() => {
+          setShowConfirmModal(false);
+          leaveScreen();
+        }}
+        onCancel={() => setShowConfirmModal(false)}
+      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -64,7 +101,10 @@ export default function CustomFeedingMachine() {
             <View style={styles.radioGroup}>
               <TouchableOpacity
                 style={styles.radioItem}
-                onPress={() => setMode('manual')}
+                onPress={() => {
+                  setMode('manual');
+                  setIsDirty(true);
+                }}
                 activeOpacity={0.8}
               >
                 <View style={[styles.radioOuter, mode === 'manual' && styles.radioOuterSelected]}>
@@ -75,7 +115,10 @@ export default function CustomFeedingMachine() {
 
               <TouchableOpacity
                 style={styles.radioItem}
-                onPress={() => setMode('schedule')}
+                onPress={() => {
+                  setMode('schedule');
+                  setIsDirty(true);
+                }}
                 activeOpacity={0.8}
               >
                 <View style={[styles.radioOuter, mode === 'schedule' && styles.radioOuterSelected]}>
@@ -98,7 +141,10 @@ export default function CustomFeedingMachine() {
                   placeholderTextColor={colors.gray[400]}
                   keyboardType="numeric"
                   value={runDuration}
-                  onChangeText={setRunDuration}
+                  onChangeText={text => {
+                    setRunDuration(text);
+                    setIsDirty(true);
+                  }}
                 />
               </View>
 
@@ -110,7 +156,10 @@ export default function CustomFeedingMachine() {
                   placeholderTextColor={colors.gray[400]}
                   keyboardType="numeric"
                   value={stopDuration}
-                  onChangeText={setStopDuration}
+                  onChangeText={text => {
+                    setStopDuration(text);
+                    setIsDirty(true);
+                  }}
                 />
               </View>
             </View>
@@ -143,28 +192,6 @@ const styles = StyleSheet.create({
   },
   flex1: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  backButton: {
-    padding: 8,
-    marginLeft: -8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  headerRightPlaceholder: {
-    width: 40,
   },
   scrollContent: {
     padding: 16,
