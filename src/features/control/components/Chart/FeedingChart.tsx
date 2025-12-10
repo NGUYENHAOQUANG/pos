@@ -153,7 +153,6 @@ export default function FeedingChart() {
           <Svg width={SCREEN_WIDTH - 32} height={CHART_HEIGHT}>
             {yLabels.map(val => (
               <G key={`grid-y-${val}`}>
-                {/* Dùng gray[100] thay cho gridLine */}
                 <Line
                   x1={PADDING_LEFT}
                   y1={getY(val)}
@@ -174,7 +173,6 @@ export default function FeedingChart() {
               </G>
             ))}
 
-            {/* Dùng gray[300] thay cho axisLine */}
             <Line
               x1={PADDING_LEFT}
               y1={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
@@ -202,7 +200,7 @@ export default function FeedingChart() {
                     stroke={colors.gray[100]}
                     strokeDasharray="4 4"
                   />
-                  {/* Dùng gray[400] thay cho tickMark */}
+
                   <Line
                     x1={xPos}
                     y1={axisY - tickHalf}
@@ -224,7 +222,6 @@ export default function FeedingChart() {
               );
             })}
 
-            {/* PLAN: Dùng colors.primary */}
             <Rect
               x={getX(4, ACTUAL_DATA.length) - 8}
               y={getY(2.5)}
@@ -240,7 +237,6 @@ export default function FeedingChart() {
               fill={colors.primary}
             />
 
-            {/* ACTUAL: Dùng colors.orange (màu mới thêm) */}
             <Path d={createStepPath()} fill="none" stroke={colors.orange} strokeWidth="2" />
             {ACTUAL_DATA.map((point, i) => (
               <Circle
@@ -254,7 +250,6 @@ export default function FeedingChart() {
               />
             ))}
 
-            {/* Cursor Line: Dùng gray[600] */}
             <AnimatedG style={verticalLineStyle}>
               <Line
                 x1={0}

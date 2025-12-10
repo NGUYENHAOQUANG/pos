@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Fontisto';
 import { TimePickerModal } from './TimePickerModal';
-import { colors } from '@/styles'; //
+import { colors } from '@/styles';
 
 interface ModalAddTurnProps {
   label?: string;
@@ -29,9 +29,6 @@ export default function ModalAddTurn({
 }: ModalAddTurnProps) {
   const [isPickerVisible, setPickerVisible] = useState(false);
 
-  // Sử dụng màu primaryLight (tương ứng #5AC8FA cũ)
-  const activeColor = colors.primaryLight;
-
   const formatTime = (date: Date | null) => {
     if (!date) return '';
     return date.toLocaleTimeString('vi-VN', {
@@ -46,12 +43,11 @@ export default function ModalAddTurn({
       {label && <Text style={styles.label}>{label}</Text>}
 
       <TouchableOpacity onPress={() => setPickerVisible(true)} activeOpacity={0.7}>
-        <View style={[styles.inputContainer, value ? { borderColor: activeColor } : undefined]}>
+        <View style={[styles.inputContainer, value ? { borderColor: colors.primary } : undefined]}>
           <TextInput
             style={[styles.input, value ? styles.activeInput : undefined]}
             placeholder={placeholder}
-            // Sử dụng màu textTertiary cho placeholder (tương ứng #9CA3AF / #A0A0A0)
-            placeholderTextColor={colors.textTertiary}
+            placeholderTextColor={colors.gray[400]}
             value={formatTime(value)}
             editable={false}
             pointerEvents="none"
@@ -59,8 +55,7 @@ export default function ModalAddTurn({
           <Icon
             name="clock"
             size={16}
-            // Logic màu icon: Có giá trị thì màu active, không thì màu xám nhạt
-            color={value ? activeColor : colors.textTertiary}
+            color={value ? colors.primary : colors.gray[400]}
             style={styles.icon}
           />
         </View>
@@ -106,7 +101,6 @@ const styles = StyleSheet.create({
   },
   activeInput: {
     color: colors.text,
-    fontWeight: '500',
   },
   icon: {
     marginLeft: 5,

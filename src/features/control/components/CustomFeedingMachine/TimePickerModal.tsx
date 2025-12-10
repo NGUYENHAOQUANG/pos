@@ -32,12 +32,10 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
 
-  // Khởi tạo giờ mặc định là giờ hiện tại hoặc giờ truyền vào
   const defaultTime = time || new Date();
   const [selectedHour, setSelectedHour] = useState(defaultTime.getHours());
   const [selectedMinute, setSelectedMinute] = useState(defaultTime.getMinutes());
 
-  // Cập nhật state khi prop time thay đổi
   useEffect(() => {
     if (time) {
       setSelectedHour(time.getHours());

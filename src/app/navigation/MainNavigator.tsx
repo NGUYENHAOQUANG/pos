@@ -13,8 +13,9 @@ import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 // import DevicesScreen from '@/features/devices/screens/DevicesScreen';
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
-import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
+// import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
+import CustomFeedingMachine from '@/features/control/screens/CustomFeedingMachine/CustomFeedingMachineScreen';
 
 // Import Icons
 const IconReport = require('../../assets/images/Icon/IconMainNavigator/Icon-Report.png');
@@ -43,7 +44,7 @@ const navigationItems: NavigationItem[] = [
     key: 'Devices',
     label: 'Điều khiển',
     icon: IconDevices,
-    component: DeviceControlScreens,
+    component: CustomFeedingMachine,
   },
   {
     key: 'Management',
