@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Fontisto';
 import { TimePickerModal } from './TimePickerModal';
+import { colors } from '@/styles'; //
 
 interface ModalAddTurnProps {
   label?: string;
@@ -27,7 +28,9 @@ export default function ModalAddTurn({
   style,
 }: ModalAddTurnProps) {
   const [isPickerVisible, setPickerVisible] = useState(false);
-  const APP_COLOR = '#5AC8FA';
+
+  // Sử dụng màu primaryLight (tương ứng #5AC8FA cũ)
+  const activeColor = colors.primaryLight;
 
   const formatTime = (date: Date | null) => {
     if (!date) return '';
@@ -43,16 +46,23 @@ export default function ModalAddTurn({
       {label && <Text style={styles.label}>{label}</Text>}
 
       <TouchableOpacity onPress={() => setPickerVisible(true)} activeOpacity={0.7}>
-        <View style={[styles.inputContainer, value ? { borderColor: APP_COLOR } : undefined]}>
+        <View style={[styles.inputContainer, value ? { borderColor: activeColor } : undefined]}>
           <TextInput
             style={[styles.input, value ? styles.activeInput : undefined]}
             placeholder={placeholder}
-            placeholderTextColor="#A0A0A0"
+            // Sử dụng màu textTertiary cho placeholder (tương ứng #9CA3AF / #A0A0A0)
+            placeholderTextColor={colors.textTertiary}
             value={formatTime(value)}
             editable={false}
             pointerEvents="none"
           />
-          <Icon name="clock" size={16} color={value ? APP_COLOR : '#A0A0A0'} style={styles.icon} />
+          <Icon
+            name="clock"
+            size={16}
+            // Logic màu icon: Có giá trị thì màu active, không thì màu xám nhạt
+            color={value ? activeColor : colors.textTertiary}
+            style={styles.icon}
+          />
         </View>
       </TouchableOpacity>
 
@@ -76,26 +86,27 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
     fontSize: 14,
-    color: '#333',
+    color: colors.text,
     fontWeight: '500',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: colors.border,
     height: 45,
     paddingHorizontal: 15,
   },
   input: {
     flex: 1,
     height: '100%',
-    color: '#333',
+    color: colors.text,
   },
   activeInput: {
-    color: '#000',
+    color: colors.text,
+    fontWeight: '500',
   },
   icon: {
     marginLeft: 5,
