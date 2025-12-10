@@ -10,21 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Line, Path, Circle, Rect, G, Text as SvgText } from 'react-native-svg';
 import { FeedingTooltip } from './FeedingTooltip';
-
-const COLORS = {
-  white: '#FFFFFF',
-  black: '#000000',
-  textTitle: '#111827',
-  textSub: '#6B7280',
-  textLegend: '#4B5563',
-  gridLine: '#F3F4F6',
-  axisLine: '#D1D5DB',
-  tickMark: '#9CA3AF',
-  cursorLine: '#4B5563',
-  chartPlan: '#007AFF',
-  chartActual: '#FF5630',
-  shadow: '#000000',
-};
+import { colors } from '@/styles';
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedView = Animated.createAnimatedComponent(View);
@@ -172,13 +158,13 @@ export default function FeedingChart() {
                   y1={getY(val)}
                   x2={chartWidth + PADDING_LEFT}
                   y2={getY(val)}
-                  stroke={COLORS.gridLine}
+                  stroke={colors.chart.gridLine}
                   strokeWidth={1}
                 />
                 <SvgText
                   x={PADDING_LEFT - 8}
                   y={getY(val) + 3}
-                  fill={COLORS.textTitle}
+                  fill={colors.text}
                   fontSize="10"
                   textAnchor="end"
                 >
@@ -192,7 +178,7 @@ export default function FeedingChart() {
               y1={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
               x2={chartWidth + PADDING_LEFT}
               y2={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
-              stroke={COLORS.axisLine}
+              stroke={colors.chart.axisLine}
               strokeWidth={1}
             />
 
@@ -210,7 +196,7 @@ export default function FeedingChart() {
                     y1={PADDING_TOP}
                     x2={xPos}
                     y2={chartBottom}
-                    stroke={COLORS.gridLine}
+                    stroke={colors.chart.gridLine}
                     strokeDasharray="4 4"
                   />
                   <Line
@@ -218,13 +204,13 @@ export default function FeedingChart() {
                     y1={axisY - tickHalf}
                     x2={xPos}
                     y2={axisY + tickHalf}
-                    stroke={COLORS.tickMark}
+                    stroke={colors.chart.tickMark}
                     strokeWidth={1.5}
                   />
                   <SvgText
                     x={xPos}
                     y={axisY + tickHalf + textMargin}
-                    fill={COLORS.textSub}
+                    fill={colors.textSecondary}
                     fontSize="10"
                     textAnchor="middle"
                   >
@@ -239,25 +225,25 @@ export default function FeedingChart() {
               y={getY(2.5)}
               width={16}
               height={chartHeight + PADDING_TOP - getY(2.5)}
-              fill={COLORS.chartPlan}
+              fill={colors.chart.plan}
             />
             <Rect
               x={getX(11, ACTUAL_DATA.length) - 8}
               y={getY(3.5)}
               width={16}
               height={chartHeight + PADDING_TOP - getY(3.5)}
-              fill={COLORS.chartPlan}
+              fill={colors.chart.plan}
             />
 
-            <Path d={createStepPath()} fill="none" stroke={COLORS.chartActual} strokeWidth="2" />
+            <Path d={createStepPath()} fill="none" stroke={colors.chart.actual} strokeWidth="2" />
             {ACTUAL_DATA.map((point, i) => (
               <Circle
                 key={i}
                 cx={getX(i, ACTUAL_DATA.length)}
                 cy={getY(point.value)}
                 r={3}
-                fill={COLORS.chartActual}
-                stroke={COLORS.white}
+                fill={colors.chart.actual}
+                stroke={colors.white}
                 strokeWidth={1}
               />
             ))}
@@ -268,7 +254,7 @@ export default function FeedingChart() {
                 y1={PADDING_TOP}
                 x2={0}
                 y2={chartHeight + PADDING_TOP + AXIS_MARGIN_TOP}
-                stroke={COLORS.cursorLine}
+                stroke={colors.chart.cursorLine}
                 strokeWidth={1}
               />
             </AnimatedG>
@@ -279,7 +265,7 @@ export default function FeedingChart() {
                 y1={0}
                 x2={chartWidth + PADDING_LEFT}
                 y2={0}
-                stroke={COLORS.cursorLine}
+                stroke={colors.chart.cursorLine}
                 strokeWidth={1}
               />
             </AnimatedG>
@@ -289,8 +275,8 @@ export default function FeedingChart() {
                 cx={0}
                 cy={0}
                 r={4}
-                fill={COLORS.chartActual}
-                stroke={COLORS.white}
+                fill={colors.chart.actual}
+                stroke={colors.white}
                 strokeWidth={2}
               />
             </AnimatedG>
@@ -326,11 +312,11 @@ export default function FeedingChart() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.white,
+    backgroundColor: colors.white,
     padding: 16,
     borderRadius: 12,
     marginTop: 16,
-    shadowColor: COLORS.shadow,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -339,12 +325,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.textTitle,
+    color: colors.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 12,
-    color: COLORS.textSub,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -374,16 +360,16 @@ const styles = StyleSheet.create({
   legendDashActual: {
     width: 16,
     height: 2,
-    backgroundColor: COLORS.chartActual,
+    backgroundColor: colors.chart.actual,
   },
   legendCirclePlan: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.chartPlan,
+    backgroundColor: colors.chart.plan,
   },
   legendText: {
     fontSize: 12,
-    color: COLORS.textLegend,
+    color: colors.textSecondary,
   },
 });

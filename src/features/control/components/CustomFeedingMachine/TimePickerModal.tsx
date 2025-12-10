@@ -9,14 +9,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/styles';
 
-const colors = {
-  primary: '#5AC8FA',
-  white: '#FFFFFF',
-  text: '#333333',
-  textSecondary: '#888888',
-  gray: { 100: '#F5F5F5', 200: '#E0E0E0' },
-};
 const spacing = { sm: 8, md: 16, lg: 24 };
 const typography = {
   fontSize: { sm: 12, base: 14, lg: 16, xl: 18, xxl: 24 },
@@ -142,7 +136,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay,
     justifyContent: 'flex-end',
   },
   container: {

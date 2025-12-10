@@ -3,27 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import IconTrash from 'react-native-vector-icons/Feather';
 import IconAdd from 'react-native-vector-icons/Ionicons';
 import ModalAddTurn from './ModalAddTurn';
+import { colors } from '@/styles';
 
 interface ScheduleItem {
   id: string;
   startTime: Date | null;
   endTime: Date | null;
 }
-
-// 1. Định nghĩa bảng màu tập trung
-const colors = {
-  primary: '#5AC8FA',
-  text: '#333333',
-  textSecondary: '#666666',
-  textButton: '#374151',
-  border: '#E0E0E0',
-  borderDashed: '#D1D5DB',
-  white: '#FFFFFF',
-  background: '#F5F5F5',
-  buttonBg: '#F9FAFB',
-  iconBtnBg: '#FAFAFA',
-  shadow: '#000000',
-};
 
 export default function ActivitySchedule() {
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
@@ -163,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.iconBtnBg,
+    backgroundColor: colors.backgroundIconBtn,
   },
   addBtn: {
     flexDirection: 'row',
@@ -174,7 +160,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.borderDashed,
     borderStyle: 'dashed',
-    backgroundColor: colors.buttonBg,
+    backgroundColor: colors.backgroundButton,
     marginTop: 4,
   },
   addBtnText: {

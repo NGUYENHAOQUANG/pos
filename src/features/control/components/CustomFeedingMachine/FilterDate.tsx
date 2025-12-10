@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DatePickerModal } from '../../../home/components/DatePickerModal';
-
-const colors = {
-  primary: '#5AC8FA',
-  text: '#333333',
-  border: '#E0E0E0',
-  white: '#FFFFFF',
-};
+import { colors } from '@/styles';
 
 export default function FilterDate() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -75,7 +69,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 16,
     elevation: 2,
   },

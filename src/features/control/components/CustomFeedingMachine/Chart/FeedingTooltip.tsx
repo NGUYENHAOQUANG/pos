@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
+import { colors } from '@/styles';
 
 interface FeedingTooltipProps {
   x: number;
@@ -33,7 +34,10 @@ export const FeedingTooltip = ({ x, y, time, weight, visible }: FeedingTooltipPr
       {/* Phần mũi tên */}
       <View style={styles.arrowContainer}>
         <Svg width={arrowWidth} height={arrowHeight}>
-          <Polygon points={`0,0 ${arrowWidth},0 ${arrowWidth / 2},${arrowHeight}`} fill="#111827" />
+          <Polygon
+            points={`0,0 ${arrowWidth},0 ${arrowWidth / 2},${arrowHeight}`}
+            fill={colors.gray[900]}
+          />
         </Svg>
       </View>
     </View>
@@ -47,7 +51,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   box: {
-    backgroundColor: '#111827',
+    backgroundColor: colors.gray[900],
     borderRadius: 8,
     padding: 8,
     justifyContent: 'center',
@@ -56,12 +60,12 @@ const styles = StyleSheet.create({
     marginTop: -1,
   },
   timeText: {
-    color: '#9CA3AF',
+    color: colors.gray[400],
     fontSize: 12,
     marginBottom: 2,
   },
   valueText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontWeight: '600',
     fontSize: 13,
   },
