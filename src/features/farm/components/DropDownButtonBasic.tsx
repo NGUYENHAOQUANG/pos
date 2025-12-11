@@ -13,46 +13,40 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export interface FarmLocation {
-  id: string;
-  name: string;
+export interface DropDownItem {
+  id: string | number;
+  label: string;
+  value?: any;
 }
 
-interface HeaderCamLocationProps {
-  locations?: FarmLocation[];
-  selectedLocation?: FarmLocation;
-  onLocationSelect?: (location: FarmLocation) => void;
-  onMenuPress?: () => void;
+interface DropDownButtonBasicProps {
+  data?: DropDownItem[];
+  value?: DropDownItem;
+  onSelect?: (item: DropDownItem) => void;
   style?: StyleProp<ViewStyle>;
 }
 
-const DEFAULT_LOCATIONS: FarmLocation[] = [
-  { id: '1', name: 'Trại Kiên Giang' },
-  { id: '2', name: 'Trại Cà Mau' },
-  { id: '3', name: 'Trại Bạc Liêu' },
-  { id: '4', name: 'Trại Sóc Trăng' },
+const DEFAULT_DATA: DropDownItem[] = [
+  { id: '1', label: 'Trại Kiên Giang' },
+  { id: '2', label: 'Trại Cà Mau' },
+  { id: '3', label: 'Trại Bạc Liêu' },
 ];
 
-export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
-  locations = DEFAULT_LOCATIONS,
-  selectedLocation,
-  onLocationSelect,
-  onMenuPress,
+export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
+  data = DEFAULT_DATA,
+  value,
+  onSelect,
   style,
 }) => {
-  const insets = useSafeAreaInsets();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<FarmLocation>(
-    selectedLocation || locations[0]
-  );
+  const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
+  const dropdownButtonRef = useRef<View>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const locationButtonRef = useRef<View>(null);
 
-  const handleLocationPress = () => {
-    if (locationButtonRef.current) {
-      locationButtonRef.current.measureInWindow((x, y, width, height) => {
+  const handleDropdownPress = () => {
+    if (dropdownButtonRef.current) {
+      dropdownButtonRef.current.measureInWindow((x, y, width, height) => {
         setDropdownPosition({
           top: y + height + 4,
           left: x,
@@ -63,22 +57,22 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
     }
   };
 
-  const handleSelectLocation = (location: FarmLocation) => {
-    setCurrentLocation(location);
+  const handleSelect = (item: DropDownItem) => {
+    setCurrentItem(item);
     setIsDropdownVisible(false);
-    onLocationSelect?.(location);
+    onSelect?.(item);
   };
 
-  const renderLocationItem = ({ item }: { item: FarmLocation }) => {
-    const isSelected = item.id === currentLocation.id;
+  const renderItem = ({ item }: { item: DropDownItem }) => {
+    const isSelected = item.id === currentItem.id;
     return (
       <TouchableOpacity
         style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
-        onPress={() => handleSelectLocation(item)}
+        onPress={() => handleSelect(item)}
         activeOpacity={0.7}
       >
         <Text style={[styles.dropdownItemText, isSelected && styles.dropdownItemTextSelected]}>
-          {item.name}
+          {item.label}
         </Text>
         {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
       </TouchableOpacity>
@@ -86,19 +80,19 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.xs }, style]}>
-      {/* Location Picker */}
-      <View ref={locationButtonRef} collapsable={false}>
+    <View style={[styles.container, style]}>
+      {/* Dropdown Picker */}
+      <View ref={dropdownButtonRef} collapsable={false}>
         <TouchableOpacity
           style={styles.locationButton}
-          onPress={handleLocationPress}
+          onPress={handleDropdownPress}
           activeOpacity={0.7}
         >
           <Image
             source={require('@/assets/images/Icon/IconDevices/EnvironmentOutlined.png')}
             style={styles.locationIcon}
           />
-          <Text style={styles.locationText}>{currentLocation.name}</Text>
+          <Text style={styles.locationText}>{currentItem.label}</Text>
           <Ionicons
             name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
             size={16}
@@ -106,11 +100,6 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
           />
         </TouchableOpacity>
       </View>
-
-      {/* Menu Button */}
-      <TouchableOpacity style={styles.menuButton} onPress={onMenuPress} activeOpacity={0.7}>
-        <Ionicons name="ellipsis-vertical" size={20} color={colors.text} />
-      </TouchableOpacity>
 
       {/* Dropdown Modal */}
       <Modal
@@ -135,9 +124,9 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
             ]}
           >
             <FlatList
-              data={locations}
-              keyExtractor={item => item.id}
-              renderItem={renderLocationItem}
+              data={data}
+              keyExtractor={item => item.id.toString()}
+              renderItem={renderItem}
               scrollEnabled={false}
               contentContainerStyle={styles.dropdownScrollContent}
             />
@@ -150,16 +139,9 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 64,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    // Just a wrapper mostly for positioning the modal relative to button if needed,
+    // but measureInWindow is used so simpler view is fine.
+    // Removing header styles.
     zIndex: 1000,
   },
   locationButton: {
@@ -182,16 +164,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.text,
     marginRight: spacing.xs,
-  },
-  menuButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
   },
   modalOverlay: {
     flex: 1,
@@ -217,7 +189,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   dropdownItemSelected: {
-    backgroundColor: colors.gray[100],
+    backgroundColor: colors.blue[50],
   },
   dropdownItemText: {
     fontSize: 14,
