@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Image, ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBarVisibility } from './TabBarVisibilityContext';
-import { HomeScreen } from '@/features/home';
+import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
 import { ReportsScreen } from '@/features/reports';
 // import DevicesScreen from '@/features/devices/screens/DevicesScreen';
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
@@ -49,7 +49,7 @@ const navigationItems: NavigationItem[] = [
     key: 'Management',
     label: 'Trại nuôi',
     icon: IconFarm,
-    component: HomeScreen,
+    component: ShrimpFarmScreens,
   },
   {
     key: 'Material',
