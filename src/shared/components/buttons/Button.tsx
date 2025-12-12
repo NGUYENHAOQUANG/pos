@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
+  TextStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -44,7 +45,7 @@ export interface ButtonProps {
   /** Custom styles */
   style?: ViewStyle;
   /** Custom text styles */
-  textStyle?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
 /**

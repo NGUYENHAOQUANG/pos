@@ -23,7 +23,7 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
   message,
   buttonTitle,
   onPress,
-  imageSource = require('@/assets/images/Material.png'),
+  imageSource = require('@/assets/images/EmptyState.png'),
   buttonStyle,
 }) => {
   return (

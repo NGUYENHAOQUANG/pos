@@ -21,6 +21,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
   // Basic Info State
   const [name, setName] = useState('');
   const [group, setGroup] = useState('');
+  const [type, setType] = useState('');
   const [unit, setUnit] = useState('');
 
   // Advanced Info State
@@ -33,6 +34,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
     if (initialData) {
       setName(initialData.name || '');
       setGroup(initialData.group || '');
+      setType(initialData.type || '');
       setUnit(initialData.unit || '');
       setUsage(initialData.usage || '');
       setUnitOfUse(initialData.unitOfUse || '');
@@ -61,6 +63,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
             onNameChange={setName}
             group={group}
             onGroupChange={setGroup}
+            type={type}
+            onTypeChange={setType}
             unit={unit}
             onUnitChange={setUnit}
             unitOptions={['Kg', 'G', 'Lít', 'Ml', 'Bao', 'Gói']}
@@ -98,6 +102,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
                 ...initialData, // Keep existing ID and other fields
                 name,
                 group,
+                type,
                 unit,
                 usage,
                 unitOfUse,
@@ -116,11 +121,11 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   content: {
     flex: 1,

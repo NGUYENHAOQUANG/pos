@@ -51,6 +51,7 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
               variant="outline"
               size="medium"
               style={styles.secondaryButton}
+              textStyle={{ color: colors.text }}
             />
             <View style={styles.spacer} />
             <Button
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     minWidth: 100,
     backgroundColor: colors.white,
-    borderColor: '#E5E7EB',
+    borderColor: colors.borderDark,
   },
   flexButton: {
     flex: 1,

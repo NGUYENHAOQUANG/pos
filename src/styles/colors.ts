@@ -72,7 +72,7 @@ export const colors = {
   backgroundIconBtn: '#FAFAFA',
 
   // Text colors
-  text: '#111827',
+  text: '#000000E0',
   textSecondary: '#6B7280',
   textTertiary: '#9CA3AF',
   textInverse: '#FFFFFF',

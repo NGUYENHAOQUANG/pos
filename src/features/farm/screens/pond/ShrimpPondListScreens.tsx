@@ -3,10 +3,14 @@ import { View, StyleSheet } from 'react-native';
 import { colors } from '@/styles';
 import { ShrimpPondList } from '@/features/farm/components/pond/ShrimpPondList';
 
-export const ShrimpPondListScreens = () => {
+interface ShrimpPondListScreensProps {
+  onPondPress?: (pond: any) => void;
+}
+
+export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = ({ onPondPress }) => {
   return (
     <View style={styles.container}>
-      <ShrimpPondList />
+      <ShrimpPondList onPondPress={onPondPress} />
     </View>
   );
 };
