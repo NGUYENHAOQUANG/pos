@@ -17,7 +17,7 @@ import type { AuthStackParamList } from '@/app/navigation/types';
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import PhoneInput from '../components/PhoneInput';
 
-import { spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
 
 export default function AuthScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -37,6 +37,10 @@ export default function AuthScreen() {
     const rawPhone = phoneNumber.replace(/\s/g, '');
     if (rawPhone.length < 10) {
       setError('Số điện thoại không hợp lệ, vui lòng kiểm tra lại.');
+      return;
+    }
+    if (rawPhone === '0908456789') {
+      setError('Số điện thoại không tồn tại, vui kiểm tra và thử lại.');
       return;
     }
 
@@ -123,11 +127,11 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
     overflow: 'hidden',
   },
   androidStatusBar: {
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   keyboardView: { flex: 1, zIndex: 1 },
   scrollView: { flex: 1, zIndex: 1 },
@@ -138,10 +142,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   formCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 16,
     paddingVertical: spacing.md,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -157,12 +161,12 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border,
   },
   screenTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: spacing.sm,
     paddingHorizontal: spacing.lg,
@@ -175,7 +179,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   loginButton: {
-    backgroundColor: '#007CFF',
+    backgroundColor: colors.primary,
     borderRadius: 25,
     height: 50,
   },

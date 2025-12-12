@@ -14,7 +14,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuthStore } from '@/features/auth/store/authStore';
-
+import { colors } from '@/styles';
 import { Button, Logo } from '@/shared/components';
 import OTPInput, { OTPInputHandle } from '../components/OTPInput';
 import { spacing } from '@/styles';
@@ -160,7 +160,7 @@ export default function VerifyOTPScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   backButton: {
     position: 'absolute',
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 10,
     padding: 8,
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: colors.white,
     borderRadius: 20,
   },
   keyboardView: {
@@ -180,11 +180,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderRadius: 16,
     paddingVertical: 20,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border,
     alignSelf: 'stretch',
   },
   logoWrapper: {
@@ -205,13 +205,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: colors.gray[800],
     marginBottom: 16,
     paddingHorizontal: 24,
   },
   subtitle: {
     fontSize: 15,
-    color: '#4B5563',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 4,
     paddingHorizontal: 24,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   phoneNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: colors.text,
     marginBottom: 32,
     paddingHorizontal: 24,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   errorText: {
-    color: '#EF4444',
+    color: colors.error,
     fontSize: 13,
     marginBottom: 16,
     marginTop: 4,
@@ -244,19 +244,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   resendLabel: {
-    color: '#374151',
+    color: colors.gray[700],
     fontSize: 14,
   },
   timerText: {
-    color: '#374151',
+    color: colors.gray[700],
     fontSize: 14,
   },
   disabledLink: {
     textDecorationLine: 'underline',
-    color: '#9CA3AF',
+    color: colors.textTertiary,
   },
   activeLink: {
-    color: '#3B82F6',
+    color: colors.primary,
     fontWeight: '600',
     textDecorationLine: 'underline',
   },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   submitButton: {
-    backgroundColor: '#007CFF',
+    backgroundColor: colors.primary,
     borderRadius: 25,
     height: 50,
   },

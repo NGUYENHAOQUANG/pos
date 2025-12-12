@@ -118,7 +118,7 @@ export default function LoginForm() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white, // Nền trắng như design
+    backgroundColor: colors.white,
   },
   androidStatusBar: {
     backgroundColor: colors.white,
@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.fontSize['2xl'],
-    fontWeight: '700', // Đậm hơn
-    color: '#1A1A1A', // Màu đen đậm
+    fontWeight: '700',
+    color: colors.black,
   },
   formSection: {
     width: '100%',
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: typography.fontSize.sm,
-    marginTop: -spacing.sm, // Kéo lên gần input hơn chút
+    marginTop: -spacing.sm,
     marginBottom: spacing.md,
     lineHeight: 20,
   },
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   loginButton: {
-    borderRadius: 99, // Bo tròn kiểu viên thuốc (Pill shape) như design
+    borderRadius: 99,
     height: 50,
   },
 });
