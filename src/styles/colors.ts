@@ -30,7 +30,33 @@ export const colors = {
     800: '#1F2937',
     900: '#111827',
   },
-
+  blue: {
+    50: '#E6F4FF',
+    200: '#C3E6FF',
+    400: '#91CAFF',
+    600: '#1677FF',
+  },
+  orange: {
+    50: '#FFF2E8',
+    200: '#FFBB96',
+    500: '#D48806',
+    600: '#FA541C',
+  },
+  green: {
+    50: '#F6FFED',
+    300: '#B7EB8F',
+    600: '#389E0D',
+  },
+  purple: {
+    50: '#F9F0FF',
+    300: '#D3ADF7',
+    600: '#722ED1',
+  },
+  pink: {
+    50: '#FFF0F6',
+    300: '#FFADD2',
+    600: '#EB2F96',
+  },
   // Semantic colors
   success: '#34C759',
   warning: '#FF9500',
@@ -52,6 +78,7 @@ export const colors = {
   textInverse: '#FFFFFF',
 
   // Border colors
+  defaultBorder: '#DEE4ED',
   border: '#E5E7EB',
   borderLight: '#F3F4F6',
   borderDark: '#D1D5DB',
@@ -59,9 +86,6 @@ export const colors = {
   // Utilities
   shadow: '#000000',
   overlay: 'rgba(0, 0, 0, 0.5)',
-
-  // Custom colors
-  orange: '#FF5630',
 
   // Status colors (for DevicesStatus)
   status: {

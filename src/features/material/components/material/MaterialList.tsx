@@ -66,6 +66,10 @@ export const MaterialList: React.FC<MaterialListProps> = ({
       {isExpanded && (
         <View style={styles.expandedContent}>
           <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Loại vật tư: </Text>
+            <Text style={styles.detailValue}>{item.type || '---'}</Text>
+          </View>
+          <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Nhà sản xuất: </Text>
             <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
           </View>
