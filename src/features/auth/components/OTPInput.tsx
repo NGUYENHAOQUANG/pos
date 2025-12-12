@@ -1,4 +1,3 @@
-import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import {
   View,
   TextInput,
@@ -6,7 +5,7 @@ import {
   NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
-
+import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 interface OTPInputProps {
   code: string[]; // Array of 4 characters ['1', '2', '', '']
   onCodeChanged: (code: string[]) => void;
@@ -74,7 +73,9 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
           return (
             <TextInput
               key={index}
-              ref={el => { inputRefs.current[index] = el; }}
+              ref={el => {
+                inputRefs.current[index] = el;
+              }}
               style={[styles.otpBoxInput, { borderColor }]}
               value={digit}
               onChangeText={text => handleCodeChange(text, index)}
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
-    gap: 16,
+    gap: 6,
   },
   otpBoxInput: {
     width: 56,
