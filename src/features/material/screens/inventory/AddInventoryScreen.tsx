@@ -1,22 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { Button } from '@/shared/components/buttons/Button';
 import { spacing } from '@/styles';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
-
-// Import 2 component con
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
-
 import { IInventoryTicket } from '../../types/material.types';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 
 interface AddInventoryScreenProps {
-  onBack: () => void;
-  onSave: (data: IInventoryTicket) => void;
+  // onBack: () => void;
+  // onSave: (data: IInventoryTicket) => void;
 }
 
-export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, onSave }) => {
+export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+  const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
+  const params = route.params;
+  const onSave = params?.onSave;
+
+  const { setTabBarVisible } = useTabBarVisibility();
+
+  useEffect(() => {
+    setTabBarVisible(false);
+    return () => setTabBarVisible(true);
+  }, [setTabBarVisible]);
   // --- States ---
   const [date, setDate] = useState(new Date());
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -61,7 +73,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
         },
       ],
     };
-    onSave(newTicket);
+    if (onSave) {
+      onSave(newTicket);
+    }
+    navigation.goBack();
   };
 
   // Format Date YYYY-MM-DD
@@ -75,7 +90,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <HeaderMeterial title="Tạo Phiếu Điều Chỉnh Tồn Kho" onBackPress={onBack} />
+        <HeaderMeterial
+          title="Tạo Phiếu Điều Chỉnh Tồn Kho"
+          onBackPress={() => navigation.goBack()}
+        />
 
         <ScrollView
           style={styles.scrollView}
@@ -107,8 +125,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = ({ onBack, 
             variant="primary"
             size="large"
             style={styles.button}
-            // Disable nút nếu chưa chọn vật tư hoặc chưa nhập số lượng
-            disabled={!materialName || !newStock}
+            // Disable nút nếu chưa chọn vật tư hoặc chưa nhập số lượng (cho phép nhập 0)
+            disabled={!materialName || newStock === ''}
           />
         </View>
         {/* Modal Chọn Ngày */}

@@ -33,7 +33,7 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.xs }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
       <View style={styles.leftContainer}>
         {showBackButton && (
           <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // Add padding for status bar on Android
     paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingBottom: 12,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     zIndex: 1000, // Ensure header (and its dropdowns) stay on top
   },
   leftContainer: {
-    width: 44,
+    width: 40,
     alignItems: 'flex-start',
   },
   centerContainer: {
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rightContainer: {
-    width: 44,
+    width: 40,
     alignItems: 'flex-end',
   },
   title: {
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: borderRadius.sm,
     backgroundColor: colors.white,
     justifyContent: 'center',

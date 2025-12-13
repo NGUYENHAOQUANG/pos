@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { DeviceCard, DeviceData } from './Devices';
 import { EControlMode } from '../../types/control.types';
 import { ButtonControlSwitch } from './ButtonControlSwitch';
+import { spacing } from '@/styles';
 
 // Mock Data
 const MOCK_FEEDERS: DeviceData[] = [
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 16, // Consistent with design typically
     padding: 16,
-    marginBottom: 24, // Spacing between cards
+    marginBottom: spacing.md, // Spacing between cards
     // Shadow for the whole card
     shadowColor: '#000',
     shadowOffset: {
@@ -175,9 +176,10 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   gridItem: {
     width: '48%',
+    marginBottom: 12,
   },
 });

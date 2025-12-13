@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { HeadingDevices } from '../../components/HeaderDevices';
+import { HeaderDevices } from '../../components/HeaderDevices';
 import { ScheduleActivitie } from '../../components/schedule/ScheduleActivitie';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { colors } from '@/styles';
@@ -28,7 +28,7 @@ export const ScheduleActivitieScreens: React.FC<ScheduleActivitieScreensProps> =
 
   return (
     <View style={styles.container}>
-      <HeadingDevices title={`Lịch Trình - ${pondName}`} onBackPress={onBack} />
+      <HeaderDevices title={`Lịch Trình - ${pondName}`} onBackPress={onBack} />
       <View style={styles.content}>
         <ScheduleActivitie />
       </View>

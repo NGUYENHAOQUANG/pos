@@ -239,14 +239,14 @@ export default function FeedingChart() {
               fill={colors.primary}
             />
 
-            <Path d={createStepPath()} fill="none" stroke={colors.orange} strokeWidth="2" />
+            <Path d={createStepPath()} fill="none" stroke={colors.orange[600]} strokeWidth="2" />
             {ACTUAL_DATA.map((point, i) => (
               <Circle
                 key={i}
                 cx={getX(i, ACTUAL_DATA.length)}
                 cy={getY(point.value)}
                 r={3}
-                fill={colors.orange}
+                fill={colors.orange[600]}
                 stroke={colors.white}
                 strokeWidth={1}
               />
@@ -279,7 +279,7 @@ export default function FeedingChart() {
                 cx={0}
                 cy={0}
                 r={4}
-                fill={colors.orange}
+                fill={colors.orange[600]}
                 stroke={colors.white}
                 strokeWidth={2}
               />
@@ -318,7 +318,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
     padding: 16,
-    borderRadius: 12,
     marginTop: 16,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
@@ -364,7 +363,7 @@ const styles = StyleSheet.create({
   legendDashActual: {
     width: 16,
     height: 2,
-    backgroundColor: colors.orange,
+    backgroundColor: colors.orange[600],
   },
   legendCirclePlan: {
     width: 10,

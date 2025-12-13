@@ -1,16 +1,53 @@
-import React from 'react';
+import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors } from '@/styles';
 import { ShrimpPondList } from '@/features/farm/components/pond/ShrimpPondList';
+import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { FarmStackParamList } from '../../navigation/FarmNavigator';
 
-interface ShrimpPondListScreensProps {
-  onPondPress?: (pond: any) => void;
-}
+interface ShrimpPondListScreensProps {}
 
-export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = ({ onPondPress }) => {
+type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+
+export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {
+  const navigation = useNavigation<NavigationProp>();
+  const [selectedTab, setSelectedTab] = useState('all');
+  const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
+    id: '1',
+    label: 'Trại Kiên Giang',
+    value: '1',
+  });
+
+  const farmOptions: DropDownItem[] = [
+    { id: '1', label: 'Trại Kiên Giang', value: '1' },
+    { id: '2', label: 'Trại Cà Mau', value: '2' },
+    { id: '3', label: 'Trại Bạc Liêu', value: '3' },
+  ];
+
+  const handlePondPress = (pond: any) => {
+    navigation.navigate('PondDetail', { pond });
+  };
+
   return (
     <View style={styles.container}>
-      <ShrimpPondList onPondPress={onPondPress} />
+      <HeaderFarm
+        type="list"
+        data={farmOptions}
+        value={selectedFarm}
+        onSelect={setSelectedFarm}
+        onMenuPress={() => console.log('Menu pressed')}
+      />
+      <HeadingFarm
+        selectedTab={selectedTab}
+        onTabSelect={setSelectedTab}
+        tabType="dashboard"
+        counts={{ all: 5, active: 1, preparing: 4 }}
+      />
+      <ShrimpPondList onPondPress={handlePondPress} />
     </View>
   );
 };

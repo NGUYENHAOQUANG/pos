@@ -1,31 +1,28 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialStackParamList } from '../navigation/MaterialNavigator';
+
 import { HeaderMeterial } from '../components/HeaderMaterial';
 import { ButtonMetaerial } from '../components/ButtonMaterial';
 import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
 import { SearchBarMeterial } from '../components/SearchBarMaterial';
 import { MaterialEmptyState } from '../components/EmptyStateCard';
-import { AddMaterialScreen } from './material/AddMaterialScreen';
-import { EditMaterialScreen } from './material/EditMaterialScreen';
-import { AddWarehouseScreen } from './warehouse/AddWarehouseScreen';
 import { WarehouseListScreen } from './warehouse/WarehouseListScreen';
 import { MaterialListScreen } from './material/MaterialListScreen';
-import { spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { InventoryCard } from '../components/inventory/InventoryCard';
-import { AddInventoryScreen } from './inventory/AddInventoryScreen';
-
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
 
-type ScreenType = 'list' | 'add_material' | 'edit_material' | 'add_warehouse' | 'add_inventory';
-
 export const MeterialScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
   const { setTabBarVisible } = useTabBarVisibility();
+
   const [selectedTab, setSelectedTab] = useState<TabType>('list');
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('list');
   const [materials, setMaterials] = useState<IMaterial[]>([]);
-  const [editingMaterial, setEditingMaterial] = useState<IMaterial | null>(null);
   const [searchText, setSearchText] = useState('');
   const [filterGroup, setFilterGroup] = useState('');
   const [inventoryList, setInventoryList] = useState<IInventoryTicket[]>([]);
@@ -33,34 +30,65 @@ export const MeterialScreen = () => {
   const [filterMaterialName, setFilterMaterialName] = useState<string | null>(null);
 
   useLayoutEffect(() => {
-    if (
-      currentScreen === 'add_material' ||
-      currentScreen === 'edit_material' ||
-      currentScreen === 'add_warehouse' ||
-      currentScreen === 'add_inventory'
-    ) {
-      setTabBarVisible(false);
-    } else {
-      setTabBarVisible(true);
-    }
-
+    // Always show tab bar on list screen
+    setTabBarVisible(true);
     return () => setTabBarVisible(true);
-  }, [currentScreen, setTabBarVisible]);
+  }, [setTabBarVisible]);
 
-  const handleCreateImport = () => {
-    setCurrentScreen('add_warehouse');
+  const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
+    setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
   };
 
-  // const handleCreateAdjustment = () => {
-  //     console.log('Create Adjustment');
-  // }; // TODO: Uncomment when implementing adjustment
+  const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
+    setMaterials(prev =>
+      prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
+    );
+  };
+
+  const handleSaveWarehouse = (data: any) => {
+    console.log('Save Warehouse Import', data);
+    const newReceipt = {
+      // Type this properly if possible
+      id: Date.now().toString(),
+      ...data,
+    };
+    setWarehouseList(prev => [newReceipt, ...prev]);
+  };
+
+  const handleSaveInventory = (newTicket: IInventoryTicket) => {
+    console.log('Dữ liệu lưu:', newTicket);
+    setInventoryList(prev => [newTicket, ...prev]);
+  };
+
+  const handleCreateImport = () => {
+    navigation.navigate('AddWarehouse', {
+      availableMaterials: materials,
+      onSave: handleSaveWarehouse, // Pass callback (requires updating Navigator param list type)
+    } as any);
+  };
 
   const handleCreateInventory = () => {
     console.log('Tạo phiếu điều chỉnh tồn kho');
-    setCurrentScreen('add_inventory');
+    navigation.navigate('AddInventory', {
+      onSave: handleSaveInventory,
+    } as any);
   };
+
   const handleCreateMaterial = () => {
-    setCurrentScreen('add_material');
+    navigation.navigate('AddMaterial', {
+      onSave: handleSaveMaterial,
+    } as any);
+  };
+
+  const handleEditMaterial = (item: IMaterial) => {
+    navigation.navigate('EditMaterial', {
+      material: item,
+      onSave: handleUpdateMaterial,
+    } as any);
+  };
+
+  const handleAddMaterial = () => {
+    handleCreateMaterial();
   };
 
   const handleSearch = (text: string) => {
@@ -75,38 +103,11 @@ export const MeterialScreen = () => {
     console.log('Filter pressed');
   };
 
-  const handleAddMaterial = () => {
-    setCurrentScreen('add_material');
-  };
-
-  const handleBackToMaterialList = () => {
-    setCurrentScreen('list');
-    setEditingMaterial(null);
-  };
-
-  const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
-    setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
-    handleBackToMaterialList();
-  };
-
-  const handleEditMaterial = (item: IMaterial) => {
-    setEditingMaterial(item);
-    setCurrentScreen('edit_material');
-  };
-
-  const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
-    setMaterials(prev =>
-      prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
-    );
-    handleBackToMaterialList();
-  };
-
   const handleTabSelect = (tab: TabType) => {
     setSelectedTab(tab);
     if (tab !== 'history') {
       setFilterMaterialName(null);
     } else if (filterMaterialName) {
-      // If manually switching to history, clear the filter to show all
       setFilterMaterialName(null);
     }
   };
@@ -124,81 +125,29 @@ export const MeterialScreen = () => {
   });
 
   const filteredWarehouseList = warehouseList.filter(receipt => {
-    // 1. Filter by specific material (from History press)
     if (filterMaterialName) {
       if (!receipt.materials.some(m => m.materialName === filterMaterialName)) {
         return false;
       }
     }
-
-    // 2. Filter by Group (from Dropdown)
     if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
       const hasGroup = receipt.materials.some(receiptItem => {
-        // Find the material definition to check its group
         const materialDef = materials.find(m => m.name === receiptItem.materialName);
         return materialDef?.group === filterGroup;
       });
       if (!hasGroup) return false;
     }
-
-    // 3. Filter by Search Text (optional, but good for consistency)
     if (searchText) {
       const lowerSearch = searchText.toLowerCase();
-      // Check supplier or material names
       const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
       const matchesMaterial = receipt.materials.some(m =>
         m.materialName.toLowerCase().includes(lowerSearch)
       );
       if (!matchesSupplier && !matchesMaterial) return false;
     }
-
     return true;
   });
 
-  if (currentScreen === 'add_material') {
-    return <AddMaterialScreen onBack={handleBackToMaterialList} onSave={handleSaveMaterial} />;
-  }
-
-  if (currentScreen === 'edit_material' && editingMaterial) {
-    return (
-      <EditMaterialScreen
-        initialData={editingMaterial}
-        onBack={handleBackToMaterialList}
-        onSave={handleUpdateMaterial}
-      />
-    );
-  }
-
-  if (currentScreen === 'add_warehouse') {
-    return (
-      <AddWarehouseScreen
-        onBack={handleBackToMaterialList}
-        availableMaterials={materials}
-        onSave={data => {
-          console.log('Save Warehouse Import', data);
-          const newReceipt = {
-            id: Date.now().toString(),
-            ...data,
-          };
-          setWarehouseList(prev => [newReceipt, ...prev]);
-          handleBackToMaterialList();
-        }}
-      />
-    );
-  }
-
-  if (currentScreen === 'add_inventory') {
-    return (
-      <AddInventoryScreen
-        onBack={() => setCurrentScreen('list')}
-        onSave={newTicket => {
-          console.log('Dữ liệu lưu:', newTicket);
-          setInventoryList(prev => [newTicket, ...prev]);
-          setCurrentScreen('list');
-        }}
-      />
-    );
-  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -257,7 +206,7 @@ export const MeterialScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,

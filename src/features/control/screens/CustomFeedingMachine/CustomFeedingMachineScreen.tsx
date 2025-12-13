@@ -15,7 +15,7 @@ import { colors } from '@/styles';
 import ActivitySchedule, {
   ScheduleItem,
 } from '../../components/CustomFeedingMachine/ActivitySchedule';
-import { HeadingDevices } from '../../components/HeaderDevices';
+import { HeaderDevices } from '../../components/HeaderDevices';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
@@ -76,7 +76,7 @@ export default function CustomFeedingMachine({
 
   return (
     <View style={styles.container}>
-      <HeadingDevices title="Tuỳ Chỉnh Máy Cho Ăn" onBackPress={handleCancel} />
+      <HeaderDevices title="Cấu hình cho ăn" onBackPress={handleCancel} />
 
       <ConfirmModal
         visible={showConfirmModal}

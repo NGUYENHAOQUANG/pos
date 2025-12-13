@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { HeadingDevices } from '../../components/HeaderDevices';
+import { HeaderDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
-import { ScheduleActivitieScreens } from '../schedule/ScheduleActivitieScreens';
-import { HistoryActivitieScreens } from '../schedule/HistoryActivitieScreens';
 import { colors, spacing } from '@/styles';
-
 import CustomFeedingMachine from '../CustomFeedingMachine/CustomFeedingMachineScreen';
-
 import { DeviceData } from '../../components/devices/Devices';
 import { EControlMode } from '../../types/control.types';
-
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ControlStackParamList } from '../../navigation/ControlNavigator';
 // Mock Data (moved from DevicesCard)
 const MOCK_FEEDERS: DeviceData[] = [
   {
@@ -56,34 +54,25 @@ const MOCK_OTHERS: DeviceData[] = [
 ];
 
 interface DevicesInPondScreensProps {
-  onBack?: () => void;
-  pondName?: string;
+  // onBack?: () => void;
+  // pondName?: string;
 }
 
-type ViewMode = 'list' | 'schedule' | 'history' | 'customFeeding';
+type ViewMode = 'list' | 'customFeeding'; // Removed schedule/history from internal state
 
-export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = ({
-  onBack,
-  pondName = 'Ao 1',
-}) => {
+export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
+  const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
+  const { pondName = 'Ao 1' } = route.params || {};
+
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [feeders, setFeeders] = useState<DeviceData[]>(MOCK_FEEDERS);
   const [otherDevices, setOtherDevices] = useState<DeviceData[]>(MOCK_OTHERS);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
-  // Show schedule screen
-  if (viewMode === 'schedule') {
-    return <ScheduleActivitieScreens pondName={pondName} onBack={() => setViewMode('list')} />;
-  }
-
-  // Show history screen
-  if (viewMode === 'history') {
-    return <HistoryActivitieScreens pondName={pondName} onBack={() => setViewMode('list')} />;
-  }
-
-  // Show Custom Feeding Machine Screen
+  // Show Custom Feeding Machine Screen (Keep as internal modal for now or move to stack properly later if needed)
   if (viewMode === 'customFeeding') {
-    // Find the selected device to pass initial mode
+    // ... same logic
     const selectedDevice =
       feeders.find(d => d.id === selectedDeviceId) ||
       otherDevices.find(d => d.id === selectedDeviceId);
@@ -97,6 +86,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = ({
           setSelectedDeviceId(null);
         }}
         onSave={newMode => {
+          // ... same logic
           const updatedMode = newMode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
 
           if (feeders.some(d => d.id === selectedDeviceId)) {
@@ -122,14 +112,14 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = ({
 
   return (
     <View style={styles.container}>
-      <HeadingDevices title={`Thiết Bị - ${pondName}`} onBackPress={onBack} />
+      <HeaderDevices title={`Thiết Bị - ${pondName}`} onBackPress={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* History Buttons Section */}
         <View style={styles.historySection}>
           <ButtonHistory
-            onSchedulePress={() => setViewMode('schedule')}
-            onStatisticPress={() => setViewMode('history')}
+            onSchedulePress={() => navigation.navigate('Schedule', { pondName })}
+            onStatisticPress={() => navigation.navigate('History', { pondName })}
             style={styles.historyButton}
           />
         </View>
@@ -184,7 +174,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   historySection: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     marginHorizontal: -spacing.md,
   },
   historyButton: {
@@ -194,6 +184,6 @@ const styles = StyleSheet.create({
   },
   extendedCard: {
     marginHorizontal: -spacing.md,
-    paddingHorizontal: spacing.md + 16,
+    paddingHorizontal: spacing.md,
   },
 });

@@ -23,7 +23,7 @@ export const CONTROL_TABS: TabItem[] = [
   { key: 'statistic', label: 'Thống kê cảm biến' },
 ];
 
-interface HeadingDevicesProps {
+interface HeaderDevicesProps {
   title?: string;
   tabs?: TabItem[];
   selectedTab?: string;
@@ -36,7 +36,7 @@ interface HeadingDevicesProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export const HeadingDevices: React.FC<HeadingDevicesProps> = ({
+export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
   title,
   tabs,
   selectedTab,
@@ -98,9 +98,7 @@ export const HeadingDevices: React.FC<HeadingDevicesProps> = ({
   };
 
   return (
-    <View
-      style={[styles.container, includeSafeArea && { paddingTop: insets.top + spacing.xs }, style]}
-    >
+    <View style={[styles.container, includeSafeArea && { paddingTop: insets.top + 12 }, style]}>
       <View style={styles.leftContainer}>
         {showBackButton && (
           <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
@@ -127,8 +125,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: 12,
+    paddingBottom: 12,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   leftContainer: {
-    minWidth: 44,
+    width: 40,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
@@ -147,7 +145,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xs,
   },
   rightContainer: {
-    minWidth: 44,
+    width: 40,
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
@@ -163,8 +161,8 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   iconButton: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: borderRadius.sm,
     backgroundColor: colors.white,
     justifyContent: 'center',

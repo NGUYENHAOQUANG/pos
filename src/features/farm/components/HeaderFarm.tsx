@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import { DropDownButtonBasic, DropDownItem } from './DropDownButtonBasic';
 import { ButtonHeader } from './ButtonHeader';
 import { PondTypeTag, PondType } from './pond/PondTypeTag';
@@ -44,7 +44,7 @@ export const HeaderFarm = ({
    */
   if (type === 'detail') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
+      <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
         <View style={styles.detailLeft}>
           <TouchableOpacity onPress={onBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -73,7 +73,7 @@ export const HeaderFarm = ({
    * Render List Mode (Dropdown, Menu) - Default
    */
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.xs }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
       <View style={styles.leftContainer}>
         {onSelect && <DropDownButtonBasic data={data} value={value} onSelect={onSelect} />}
       </View>
@@ -91,11 +91,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: spacing.md, // fallback if insets not used/zero
-    paddingBottom: spacing.sm,
+    paddingBottom: 12,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
-    // Add shadow
-    ...shadows.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     zIndex: 1000,
   },
   // --- List Mode Styles ---
