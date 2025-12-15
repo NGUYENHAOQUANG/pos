@@ -50,9 +50,20 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     };
   }, [setTabBarVisible]);
 
-  const handleMenuPress = () => {
-    navigation.goBack();
+  const handleInfoPress = () => {
+    if (pond) {
+      navigation.navigate('PondInfo', { pond });
+    }
   };
+
+  const handleCyclePress = () => {
+    console.log('Các chu kì nuôi pressed');
+  };
+
+  const menuOptions = [
+    { value: 'Thông tin ao', onMenuOptionPress: handleInfoPress },
+    { value: 'Các chu kì nuôi', onMenuOptionPress: handleCyclePress },
+  ];
 
   const handleStartCycle = () => {
     console.log('Start Cycle pressed');
@@ -94,7 +105,7 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
         fullWidth
         pond={pond}
         onBack={() => navigation.goBack()}
-        onMenuPress={handleMenuPress}
+        menuOptions={menuOptions}
       />
 
       {/* Content */}

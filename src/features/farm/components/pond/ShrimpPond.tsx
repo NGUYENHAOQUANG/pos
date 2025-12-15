@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,13 @@ import {
   TouchableOpacity,
   StyleProp,
   ViewStyle,
+  Modal,
+  TouchableWithoutFeedback,
+  Dimensions,
+  Platform,
+  StatusBar,
 } from 'react-native';
+
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import { PondTypeTag, PondType } from './PondTypeTag';
 import { Tag, TagStatus } from './Tag';
@@ -19,7 +25,8 @@ interface ShrimpPondProps {
   type: PondType;
   lastUpdate?: string;
   lastActivity?: string;
-  onMenuPress?: () => void;
+  onInfoPress?: () => void;
+  onCyclePress?: () => void;
   onDetailPress?: () => void;
   style?: StyleProp<ViewStyle>;
   status?: TagStatus;
@@ -31,13 +38,36 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
   type,
   lastUpdate,
   lastActivity,
-  onMenuPress,
+  onInfoPress,
+  onCyclePress,
   onDetailPress,
   style,
   status,
 }) => {
   // If no update/activity provided, consider it empty/no-data mode
   const hasData = !!lastUpdate || !!lastActivity;
+
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [dropdownTop, setDropdownTop] = useState(0);
+  const [dropdownRight, setDropdownRight] = useState(24);
+  const buttonRef = React.useRef<View>(null);
+
+  const openMenu = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measure((fx, fy, width, height, px, py) => {
+        const windowWidth = Dimensions.get('window').width;
+        const rightSpace = windowWidth - (px + width);
+
+        setDropdownRight(rightSpace >= 0 ? rightSpace : 24);
+
+        const statusbarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
+        const top = py ? py + height - statusbarHeight + 4 : fy + height + 100;
+        setDropdownTop(top || 200);
+
+        setMenuVisible(true);
+      });
+    }
+  };
 
   return (
     <View style={[styles.container, style]}>
@@ -56,7 +86,9 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         </View>
         <View style={styles.headerRight}>
           <PondTypeTag type={type} style={styles.tag} />
-          <ButtonHeader onPress={onMenuPress} style={styles.menuBtn} />
+          <View ref={buttonRef} collapsable={false}>
+            <ButtonHeader onPress={openMenu} style={styles.menuBtn} />
+          </View>
         </View>
       </View>
 
@@ -94,6 +126,38 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
           </View>
         </>
       )}
+
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.menuContainer, { top: dropdownTop, right: dropdownRight }]}>
+              <TouchableOpacity
+                style={[styles.menuItem, styles.menuItemFirst]}
+                onPress={() => {
+                  onInfoPress?.();
+                  setMenuVisible(false);
+                }}
+              >
+                <Text style={styles.menuText}>Thông tin ao</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  onCyclePress?.();
+                  setMenuVisible(false);
+                }}
+              >
+                <Text style={styles.menuText}>Các chu kì nuôi</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -193,5 +257,37 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '500',
     fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+  menuContainer: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    paddingVertical: 4,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    minWidth: 200,
+    zIndex: 100,
+  },
+  menuItem: {
+    padding: 4,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  menuItemFirst: {
+    backgroundColor: '#0000000A',
+  },
+  menuText: {
+    fontSize: 16,
+    color: colors.gray[800],
+    fontWeight: '400',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
 });

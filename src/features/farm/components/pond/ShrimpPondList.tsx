@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
+
 import { spacing } from '@/styles';
+import { useFarm } from '../../context/FarmContext';
 import { ShrimpPond } from './ShrimpPond';
 import { PondType } from './PondTypeTag';
 import { TagStatus } from './Tag';
@@ -56,11 +58,10 @@ const DUMMY_DATA: PondData[] = [
 
 interface ShrimpPondListProps {
   onPondPress?: (pond: PondData) => void;
+  onInfoPress?: (pond: PondData) => void;
 }
 
-import { useFarm } from '../../context/FarmContext';
-
-export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({ onPondPress }) => {
+export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({ onPondPress, onInfoPress }) => {
   const { getLatestPondActivity } = useFarm();
 
   const getStatus = (pondType: PondType, activityName?: string): TagStatus | undefined => {
@@ -94,7 +95,8 @@ export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({ onPondPress }) =
         lastActivity={displayActivity}
         status={computedStatus}
         style={styles.item}
-        onMenuPress={() => {}}
+        onInfoPress={() => onInfoPress?.(item)}
+        onCyclePress={() => {}}
         onDetailPress={() => onPondPress?.(item)}
       />
     );
