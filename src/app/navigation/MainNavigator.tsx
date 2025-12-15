@@ -6,7 +6,7 @@
  * @updated 2025-12-05
  */
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, Image, ImageSourcePropType } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTabBarVisibility } from './TabBarVisibilityContext';
@@ -19,18 +19,27 @@ import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import { colors } from '@/styles';
 
 // Import Icons
-const IconReport = require('../../assets/images/Icon/IconMainNavigator/Icon-Report.png');
-const IconDevices = require('../../assets/images/Icon/IconMainNavigator/Icon-Devices.png');
-const IconFarm = require('../../assets/images/Icon/IconMainNavigator/Icon-Farm.png');
-const IconMaterial = require('../../assets/images/Icon/IconMainNavigator/Icon-Material.png');
-const IconSetting = require('../../assets/images/Icon/IconMainNavigator/Icon-Setting.png');
+import {
+  IconReport,
+  IconReportActive,
+  IconDevices,
+  IconDevicesActive,
+  IconFarm,
+  IconFarmActive,
+  IconMaterial,
+  IconMaterialActive,
+  IconSetting,
+  IconSettingActive,
+} from '@/assets/icons';
+import { SvgProps } from 'react-native-svg';
 
 const TAB_HEIGHT = 70;
 
 interface NavigationItem {
   key: string;
   label: string;
-  icon: ImageSourcePropType;
+  Icon: React.FC<SvgProps>;
+  IconActive: React.FC<SvgProps>;
   component: React.ComponentType<any>;
 }
 
@@ -38,31 +47,36 @@ const navigationItems: NavigationItem[] = [
   {
     key: 'Reports',
     label: 'Báo cáo',
-    icon: IconReport,
+    Icon: IconReport,
+    IconActive: IconReportActive,
     component: ReportsScreen,
   },
   {
     key: 'Devices',
     label: 'Điều khiển',
-    icon: IconDevices,
+    Icon: IconDevices,
+    IconActive: IconDevicesActive,
     component: ControlNavigator,
   },
   {
     key: 'Farm',
     label: 'Trại nuôi',
-    icon: IconFarm,
+    Icon: IconFarm,
+    IconActive: IconFarmActive,
     component: FarmNavigator,
   },
   {
     key: 'Material',
     label: 'Vật tư',
-    icon: IconMaterial,
+    Icon: IconMaterial,
+    IconActive: IconMaterialActive,
     component: MaterialNavigator,
   },
   {
     key: 'Settings',
     label: 'Menu',
-    icon: IconSetting,
+    Icon: IconSetting,
+    IconActive: IconSettingActive,
     component: SettingsScreen,
   },
 ];
@@ -108,6 +122,8 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
         if (!item) return null;
 
+        const IconComponent = isFocused ? item.IconActive : item.Icon;
+
         return (
           <TouchableOpacity
             key={route.key}
@@ -117,11 +133,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
           >
             {isFocused && <View style={styles.activeIndicator} />}
             <View style={styles.iconContainer}>
-              <Image
-                source={item.icon}
-                style={[styles.icon, isFocused ? styles.iconActive : styles.iconInactive]}
-                resizeMode="contain"
-              />
+              <IconComponent width={24} height={24} />
             </View>
             <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>{item.label}</Text>
           </TouchableOpacity>

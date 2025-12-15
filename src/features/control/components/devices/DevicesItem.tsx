@@ -1,19 +1,11 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ImageSourcePropType,
-  TouchableOpacity,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { SvgProps } from 'react-native-svg';
 import { colors } from '@/styles/colors';
 
 interface DevicesItemProps {
-  icon: ImageSourcePropType;
+  icon: React.FC<SvgProps>;
   activeCount?: number;
   warningCount?: number;
   inactiveCount?: number;
@@ -22,7 +14,7 @@ interface DevicesItemProps {
 }
 
 export const DevicesItem: React.FC<DevicesItemProps> = ({
-  icon,
+  icon: Icon,
   activeCount = 0,
   warningCount = 0,
   inactiveCount = 0,
@@ -32,7 +24,7 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
   return (
     <TouchableOpacity style={[styles.container, style]} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.iconContainer}>
-        <Image source={icon} style={styles.mainIcon} resizeMode="contain" />
+        <Icon width={40} height={40} />
       </View>
 
       <View style={styles.statsContainer}>
@@ -64,27 +56,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.borderDark,
-    // Removed fixed minWidth to allow flex shrinking/growing
+    minHeight: 160,
   },
   iconContainer: {
-    marginBottom: 8,
-    height: 40,
+    marginBottom: 12,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
   },
   mainIcon: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
   },
   statsContainer: {
-    gap: 4,
+    gap: 10,
     alignItems: 'center',
     width: '100%',
   },
   statRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     width: '100%',
     justifyContent: 'center',
   },

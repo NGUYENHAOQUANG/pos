@@ -10,12 +10,17 @@ import { EControlMode } from '../../types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
+import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
+import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
+import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
+import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
+
 // Mock Data (moved from DevicesCard)
 const MOCK_FEEDERS: DeviceData[] = [
   {
     id: 'f1',
     name: 'Máy cho ăn',
-    icon: require('@/assets/images/Icon/IconDevices/feeder.png'),
+    icon: FeederIcon,
     mode: EControlMode.MANUAL,
     isOn: true,
   },
@@ -25,21 +30,21 @@ const MOCK_OTHERS: DeviceData[] = [
   {
     id: 'o1',
     name: 'Quạt nước 1',
-    icon: require('@/assets/images/Icon/IconDevices/fan.png'),
+    icon: FanIcon,
     mode: EControlMode.SCHEDULE,
     isOn: true,
   },
   {
     id: 'o2',
     name: 'Quạt nước 2',
-    icon: require('@/assets/images/Icon/IconDevices/fan.png'),
+    icon: FanIcon,
     mode: EControlMode.LOCAL,
     isOn: true,
   },
   {
     id: 'o3',
     name: 'Máy thổi khí',
-    icon: require('@/assets/images/Icon/IconDevices/oxy.png'),
+    icon: OxyIcon,
     mode: EControlMode.SCHEDULE,
     isOn: true,
     errorMessage: 'Bị mất khí!',
@@ -47,7 +52,7 @@ const MOCK_OTHERS: DeviceData[] = [
   {
     id: 'o4',
     name: 'Syphon',
-    icon: require('@/assets/images/Icon/IconDevices/syphon.png'),
+    icon: SyphonIcon,
     mode: EControlMode.SCHEDULE,
     isOn: false,
   },

@@ -8,12 +8,13 @@ import {
   FlatList,
   StyleProp,
   ViewStyle,
-  Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import EnvironmentIcon from '@/assets/images/Icon/IconDevices/EnvironmentOutlined.svg';
 
 export interface FarmLocation {
   id: string;
@@ -94,10 +95,7 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
           onPress={handleLocationPress}
           activeOpacity={0.7}
         >
-          <Image
-            source={require('@/assets/images/Icon/IconDevices/EnvironmentOutlined.png')}
-            style={styles.locationIcon}
-          />
+          <EnvironmentIcon width={18} height={18} style={styles.locationIcon} />
           <Text style={styles.locationText}>{currentLocation.name}</Text>
           <Ionicons
             name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}

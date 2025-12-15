@@ -1,24 +1,17 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  ImageSourcePropType,
-  ViewStyle,
-  StyleProp,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { SvgProps } from 'react-native-svg';
 import { ButtonControlMode } from './ButtonControlMode';
 import { ButtonDevices } from './ButtonDevices';
+import { DevicesStatusColor } from './DevicesStatusColor';
 import { EControlMode } from '../../types/control.types';
-import { colors } from '@/styles';
+import { colors } from '@/styles/colors';
 
 export interface DeviceData {
   id: string;
   name: string;
-  icon: ImageSourcePropType;
+  icon: React.FC<SvgProps>;
   mode: EControlMode;
   isOn: boolean;
   errorMessage?: string;
@@ -41,32 +34,32 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 }) => {
   // Determine styles based on state
   let containerStyle: ViewStyle = styles.cardContainer;
-  let iconColor: string = colors.primary; // Default Blue
   let switchTrackColor: string = colors.primary;
 
   if (data.errorMessage) {
     // Error State
     containerStyle = { ...styles.cardContainer, ...styles.cardError };
-    iconColor = colors.error;
     switchTrackColor = colors.primary;
   } else if (!data.isOn) {
     // Inactive State
     containerStyle = { ...styles.cardContainer, ...styles.cardInactive };
-    iconColor = colors.gray[500];
     switchTrackColor = colors.gray[200];
   } else {
     // Active State
     containerStyle = { ...styles.cardContainer, ...styles.cardActive };
   }
 
+  const Icon = data.icon;
+
   return (
     <View style={[containerStyle, style]}>
       {/* Left Content: Icon & Name */}
       <View style={styles.leftContent}>
-        <Image
-          source={data.icon}
-          style={[styles.icon, { tintColor: iconColor }]}
-          resizeMode="contain"
+        <DevicesStatusColor
+          icon={Icon}
+          isOn={data.isOn}
+          errorMessage={data.errorMessage}
+          size={48}
         />
         <View style={styles.infoContainer}>
           {data.errorMessage && <Text style={styles.errorText}>{data.errorMessage}</Text>}

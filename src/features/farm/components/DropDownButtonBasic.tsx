@@ -8,11 +8,11 @@ import {
   FlatList,
   StyleProp,
   ViewStyle,
-  Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
+import IconEnvironment from '@/assets/images/Icon/IconDevices/EnvironmentOutlined.svg';
 
 export interface DropDownItem {
   id: string | number;
@@ -88,10 +88,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
           onPress={handleDropdownPress}
           activeOpacity={0.7}
         >
-          <Image
-            source={require('@/assets/images/Icon/IconDevices/EnvironmentOutlined.png')}
-            style={styles.locationIcon}
-          />
+          <IconEnvironment width={18} height={18} style={styles.locationIcon} />
           <Text style={styles.locationText}>{currentItem.label}</Text>
           <Ionicons
             name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}

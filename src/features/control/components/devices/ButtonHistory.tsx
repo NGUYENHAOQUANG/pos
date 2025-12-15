@@ -1,18 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StyleProp,
-  ViewStyle,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 
-// Import PNG icons
-const FieldTimeIcon = require('@/assets/images/Icon/IconDevices/FieldTimeOutlined.png');
-const LineChartIcon = require('@/assets/images/Icon/IconDevices/LineChartOutlined.png');
+// Import SVG icons
+import FieldTimeIcon from '@/assets/images/Icon/IconDevices/FieldTimeOutlined.svg';
+import LineChartIcon from '@/assets/images/Icon/IconDevices/LineChartOutlined.svg';
 
 interface ButtonHistoryProps {
   onSchedulePress?: () => void;
@@ -28,7 +20,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity style={styles.scheduleButton} onPress={onSchedulePress} activeOpacity={0.7}>
-        <Image source={FieldTimeIcon} style={styles.icon} resizeMode="contain" />
+        <FieldTimeIcon width={20} height={20} style={styles.icon} />
         <Text style={styles.text}>Lịch trình</Text>
       </TouchableOpacity>
 
@@ -37,7 +29,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
         onPress={onStatisticPress}
         activeOpacity={0.7}
       >
-        <Image source={LineChartIcon} style={styles.icon} resizeMode="contain" />
+        <LineChartIcon width={20} height={20} style={styles.icon} />
         <Text style={styles.text}>Lịch sử & Thống kê</Text>
       </TouchableOpacity>
     </View>

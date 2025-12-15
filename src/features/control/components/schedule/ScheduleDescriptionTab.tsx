@@ -59,8 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.lg,
-    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   legendItem: {
     flexDirection: 'row',
