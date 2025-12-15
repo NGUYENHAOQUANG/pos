@@ -60,7 +60,7 @@ export const MaterialList: React.FC<MaterialListProps> = ({
         </Text>
       </View>
 
-      <View style={styles.separator} />
+      <View style={styles.separatorCenter} />
 
       {/* Expanded Content */}
       {isExpanded && (
@@ -74,8 +74,9 @@ export const MaterialList: React.FC<MaterialListProps> = ({
             <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Công dụng: </Text>
-            <Text style={styles.detailValue}>{item.usage || '---'}</Text>
+            <Text style={styles.detailValue}>
+              <Text style={styles.detailLabel}>Công dụng:</Text> {item.usage || '---'}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
@@ -214,7 +215,14 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#F0F0F0', // Very light gray for separator
+    backgroundColor: '#F0F0F0',
     marginVertical: spacing.xs,
+    marginHorizontal: -spacing.md,
+  },
+  separatorCenter: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: spacing.xs,
+    marginHorizontal: spacing.md,
   },
 });

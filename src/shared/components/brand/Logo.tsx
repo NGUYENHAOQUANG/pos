@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import LogoSvg from '@/assets/images/Mebione-logo-auth.svg';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -7,8 +8,8 @@ interface LogoProps {
 
 export function Logo({ size = 'small' }: LogoProps) {
   const sizeMap = {
-    small: { width: 80, height: 30 },
-    medium: { width: 120, height: 45 },
+    small: { width: 20, height: 30 },
+    medium: { width: 110, height: 35 },
     large: { width: 160, height: 60 },
   };
 
@@ -16,11 +17,7 @@ export function Logo({ size = 'small' }: LogoProps) {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('@/assets/images/logo.jpg')}
-        style={[styles.logo, dimensions]}
-        resizeMode="contain"
-      />
+      <LogoSvg width={dimensions.width} height={dimensions.height} />
     </View>
   );
 }
