@@ -76,8 +76,9 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 
       {/* Right Controls: Absolute Positioned */}
 
-      {/* Settings Button: Top Right */}
-      <View style={styles.settingsPos}>
+      {/* Right Controls Container */}
+      <View style={styles.rightControlContainer}>
+        {/* Settings Button */}
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => onSettingsPress?.(data.id)}
@@ -85,21 +86,17 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
         >
           <Ionicons name="settings-outline" size={18} color={colors.gray[600]} />
         </TouchableOpacity>
-      </View>
 
-      {/* Switch: Bottom Right */}
-      <View style={styles.switchPos}>
+        <ButtonControlMode
+          mode={data.mode}
+          onPress={() => onModePress?.(data.id)}
+          style={styles.modeButton}
+        />
         <ButtonDevices
           value={data.isOn}
           onValueChange={val => onToggle(data.id, val)}
           trackColor={switchTrackColor}
         />
-      </View>
-
-      {/* Mode Button: Above Switch or Middle Right */}
-      {/* Based on design, it seems firmly placed in the middle-right area */}
-      <View style={styles.modePos}>
-        <ButtonControlMode mode={data.mode} onPress={() => onModePress?.(data.id)} />
       </View>
     </View>
   );
@@ -112,7 +109,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderColor: colors.border,
-    aspectRatio: 164 / 124, // Maintain Figma aspect ratio
+    width: '100%', // Fill the grid wrapper
+    aspectRatio: 164 / 124, // Maintain shape
     position: 'relative', // Context for absolute positioning
   },
   cardActive: {
@@ -141,8 +139,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   deviceName: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '400',
     color: colors.text,
   },
   errorText: {
@@ -152,23 +150,19 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   // Absolute Positions
-  settingsPos: {
+  // Right Control Container
+  rightControlContainer: {
     position: 'absolute',
     top: 12,
-    right: 12,
-    zIndex: 1,
-  },
-  switchPos: {
-    position: 'absolute',
     bottom: 12,
     right: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end', // Align all items to the right edge
     zIndex: 1,
+    width: 66,
   },
-  modePos: {
-    position: 'absolute',
-    right: 12,
-    bottom: 45, // Positioned above switch
-    zIndex: 1,
+  modeButton: {
+    // marginBottom removed as space-between handles it
   },
   settingsButton: {
     width: 40,

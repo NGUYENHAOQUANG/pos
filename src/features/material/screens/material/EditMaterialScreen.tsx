@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Platform, ScrollView } from 'react-native';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
-
 import { IMaterial } from '../../types/material.types';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 
-interface EditMaterialScreenProps {
-  initialData: IMaterial;
-  onBack?: () => void;
-  onSave?: (data: IMaterial) => void;
-}
+interface EditMaterialScreenProps {}
 
-export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
-  initialData,
-  onBack,
-  onSave,
-}) => {
+export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+  const route = useRoute<RouteProp<MaterialStackParamList, 'EditMaterial'>>();
+  const { setTabBarVisible } = useTabBarVisibility();
+
+  useEffect(() => {
+    setTabBarVisible(false);
+    return () => setTabBarVisible(true);
+  }, [setTabBarVisible]);
+
+  const params = route.params as
+    | { material: IMaterial; onSave?: (data: IMaterial) => void }
+    | undefined;
+  const initialData = params?.material;
+  const onSave = params?.onSave;
   // Basic Info State
   const [name, setName] = useState('');
   const [group, setGroup] = useState('');
@@ -49,7 +58,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
       <View style={styles.container}>
         <HeaderMeterial
           title="Sửa Thông Tin Vật Tư"
-          onBackPress={onBack}
+          onBackPress={() => navigation.goBack()}
           rightComponent={null} // Hide the right button
         />
 
@@ -98,8 +107,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
                 return;
               }
 
+              if (!initialData) return;
+
               onSave?.({
-                ...initialData, // Keep existing ID and other fields
+                ...initialData,
                 name,
                 group,
                 type,
@@ -109,8 +120,9 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = ({
                 dosage,
                 manufacturer,
               });
+              navigation.goBack();
             }}
-            onSecondaryPress={() => onBack?.()}
+            onSecondaryPress={() => navigation.goBack()}
           />
         </View>
       </View>

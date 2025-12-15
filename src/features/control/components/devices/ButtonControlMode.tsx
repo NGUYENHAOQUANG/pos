@@ -37,18 +37,20 @@ export const ButtonControlMode: React.FC<ButtonControlModeProps> = ({ mode, styl
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    width: 66,
+    height: 22,
+    paddingVertical: 0, // Remove padding for fixed height
+    paddingHorizontal: 0, // Remove padding for fixed width
     backgroundColor: colors.gray[50],
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 6,
-    alignSelf: 'flex-start', // Fit content
+    // alignSelf: 'flex-start', // Removed to allow parent control
     alignItems: 'center',
     justifyContent: 'center',
   },
   text: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.gray[800],
     fontWeight: '400',
   },

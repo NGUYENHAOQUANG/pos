@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { HeadingDevices } from '../components/HeaderDevices';
+import { HeaderDevices } from '../components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
 import { ButtonHelp } from '../components/ButtonHelp';
 import { DevicesStatus } from '../components/DevicesStatus';
 import { PondCard } from '../components/devices/PondCard';
 import { colors } from '@/styles';
-import { DevicesInPondScreens } from './devices/DeviceInPondScreens';
-
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 // Define pond count for each farm
 const FARM_POND_CONFIG: Record<string, number> = {
   '1': 2,
@@ -17,7 +18,7 @@ const FARM_POND_CONFIG: Record<string, number> = {
 };
 
 export const DeviceControlScreens = () => {
-  const [selectedPond, setSelectedPond] = useState<string | null>(null);
+  const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
   const [selectedFarm, setSelectedFarm] = useState<FarmLocation>({
     id: '1',
     name: 'Trại Kiên Giang',
@@ -26,16 +27,16 @@ export const DeviceControlScreens = () => {
   // Get pond count based on selected farm
   const pondCount = FARM_POND_CONFIG[selectedFarm.id] || 2;
 
-  if (selectedPond) {
-    return <DevicesInPondScreens onBack={() => setSelectedPond(null)} />;
-  }
-
-  // Create pond cards list
+  // Render pond cards list
   const renderPondCards = () => {
     const cards = [];
     for (let i = 1; i <= pondCount; i++) {
       cards.push(
-        <PondCard key={i} pondName={`Ao ${i}`} onPressDetail={() => setSelectedPond(`Ao ${i}`)} />
+        <PondCard
+          key={i}
+          pondName={`Ao ${i}`}
+          onPressDetail={() => navigation.navigate('ControlDetail', { pondName: `Ao ${i}` })}
+        />
       );
     }
     return cards;
@@ -44,7 +45,7 @@ export const DeviceControlScreens = () => {
   return (
     <View style={styles.container}>
       <HeaderCamLocation onLocationSelect={setSelectedFarm} />
-      <HeadingDevices
+      <HeaderDevices
         title="Điều Khiển Thiết Bị"
         rightComponent={<ButtonHelp />}
         showBackButton={false}

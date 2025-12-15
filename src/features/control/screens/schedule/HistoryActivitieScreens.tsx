@@ -1,17 +1,16 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { HeadingDevices, CONTROL_TABS } from '../../components/HeaderDevices';
+import { HeaderDevices, CONTROL_TABS } from '../../components/HeaderDevices';
 import { HistoryActivitie } from '../../components/schedule/HistoryActivitie';
 import FilterDate from '../../components/schedule/FilterDate';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { colors, spacing } from '@/styles';
+import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
 
 interface HistoryActivitieScreensProps {
   pondName?: string;
   onBack?: () => void;
 }
-
-import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
 
 export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({
   pondName = 'Ao 1',
@@ -38,7 +37,7 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
 
   return (
     <View style={styles.container}>
-      <HeadingDevices
+      <HeaderDevices
         tabs={CONTROL_TABS}
         selectedTab={activeTab}
         onTabSelect={setActiveTab}

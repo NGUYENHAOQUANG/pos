@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Platform, ScrollView } from 'react-native';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { WarehouseInformation } from '../../components/warehouse/WarehouseInformation';
 import {
@@ -9,20 +10,31 @@ import {
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '../../components/warehouse/ConfirmSubmiss';
-
 import { IMaterial, IWarehouseReceipt } from '../../types/material.types';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 
 interface AddWarehouseScreenProps {
-  onBack?: () => void;
-  onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
-  availableMaterials?: IMaterial[];
+  // onBack?: () => void;
+  // onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
+  // availableMaterials?: IMaterial[];
 }
 
-export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = ({
-  onBack,
-  onSave,
-  availableMaterials = [],
-}) => {
+export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+  const route = useRoute<RouteProp<MaterialStackParamList, 'AddWarehouse'>>();
+  const { setTabBarVisible } = useTabBarVisibility();
+
+  useEffect(() => {
+    setTabBarVisible(false);
+    return () => setTabBarVisible(true);
+  }, [setTabBarVisible]);
+  const params = route.params as
+    | { onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void; availableMaterials?: IMaterial[] }
+    | undefined;
+  const onSave = params?.onSave;
+  const availableMaterials = params?.availableMaterials || [];
   // Combine mock materials with passed available materials
   const materialOptions = availableMaterials.map((m: IMaterial) => ({
     label: m.name,
@@ -83,7 +95,11 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
       <View style={styles.container}>
-        <HeaderMeterial title="Tạo Phiếu Nhập Kho" onBackPress={onBack} rightComponent={null} />
+        <HeaderMeterial
+          title="Tạo Phiếu Nhập Kho"
+          onBackPress={() => navigation.goBack()}
+          rightComponent={null}
+        />
 
         <ScrollView
           style={styles.content}
@@ -128,6 +144,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = ({
               materials,
               totalAmount,
             });
+            navigation.goBack();
           }}
         />
       </View>

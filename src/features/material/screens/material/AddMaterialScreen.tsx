@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, Platform, ScrollView } from 'react-native';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
-
 import { IMaterial } from '../../types/material.types';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 
 interface AddMaterialScreenProps {
-  onBack?: () => void;
-  onSave?: (data: Omit<IMaterial, 'id'>) => void;
+  // onBack?: () => void;
+  // onSave?: (data: Omit<IMaterial, 'id'>) => void;
 }
 
-export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, onSave }) => {
+export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+  const route = useRoute<RouteProp<MaterialStackParamList, 'AddMaterial'>>();
+  const params = route.params as { onSave?: (data: Omit<IMaterial, 'id'>) => void } | undefined;
+  const onSave = params?.onSave;
+
+  const { setTabBarVisible } = useTabBarVisibility();
+
+  useEffect(() => {
+    setTabBarVisible(false);
+    return () => setTabBarVisible(true);
+  }, [setTabBarVisible]);
+
   // Basic Info State
   const [name, setName] = useState('');
   const [group, setGroup] = useState('');
@@ -31,7 +46,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, on
       <View style={styles.container}>
         <HeaderMeterial
           title="Thêm Vật Tư"
-          onBackPress={onBack}
+          onBackPress={() => navigation.goBack()}
           rightComponent={null} // Hide the right button
         />
 
@@ -78,8 +93,9 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = ({ onBack, on
                 manufacturer,
                 remaining: 0, // Default value for new material
               });
+              navigation.goBack();
             }}
-            onSecondaryPress={() => onBack?.()}
+            onSecondaryPress={() => navigation.goBack()}
           />
         </View>
       </View>

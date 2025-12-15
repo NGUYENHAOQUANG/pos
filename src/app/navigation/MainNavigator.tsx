@@ -5,15 +5,16 @@
  * @created 2025-11-16
  * @updated 2025-12-05
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Image, ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTabBarVisibility } from './TabBarVisibilityContext';
-import { HomeScreen } from '@/features/home';
 import { ReportsScreen } from '@/features/reports';
 // import DevicesScreen from '@/features/devices/screens/DevicesScreen';
-import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
-import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
+import { MaterialNavigator } from '@/features/material/navigation/MaterialNavigator';
+import { ControlNavigator } from '@/features/control/navigation/ControlNavigator';
+import { FarmNavigator } from '@/features/farm/navigation/FarmNavigator';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import { colors } from '@/styles';
 
@@ -44,19 +45,19 @@ const navigationItems: NavigationItem[] = [
     key: 'Devices',
     label: 'Điều khiển',
     icon: IconDevices,
-    component: DeviceControlScreens,
+    component: ControlNavigator,
   },
   {
-    key: 'Management',
+    key: 'Farm',
     label: 'Trại nuôi',
     icon: IconFarm,
-    component: HomeScreen,
+    component: FarmNavigator,
   },
   {
     key: 'Material',
     label: 'Vật tư',
     icon: IconMaterial,
-    component: MeterialScreen,
+    component: MaterialNavigator,
   },
   {
     key: 'Settings',
@@ -66,51 +67,86 @@ const navigationItems: NavigationItem[] = [
   },
 ];
 
-export function MainNavigator() {
-  const [selectedTab, setSelectedTab] = useState(1);
+const Tab = createBottomTabNavigator();
+
+const PADDING_BOTTOM = 12;
+
+const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
   const { isTabBarVisible } = useTabBarVisibility();
   const insets = useSafeAreaInsets();
 
-  const CurrentScreen = navigationItems[selectedTab].component;
+  if (!isTabBarVisible) return null;
+
+  const safeBottom = Math.max(insets.bottom, PADDING_BOTTOM);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <CurrentScreen />
-      </View>
+    <View
+      style={[
+        styles.bottomContainer,
+        {
+          paddingBottom: safeBottom,
+          height: TAB_HEIGHT + safeBottom,
+        },
+      ]}
+    >
+      {state.routes.map((route, index) => {
+        // const { options } = descriptors[route.key]; // Unused
+        const isFocused = state.index === index;
+        const item = navigationItems.find(i => i.key === route.name);
 
-      {isTabBarVisible && (
-        <View
-          style={[
-            styles.bottomContainer,
-            { paddingBottom: insets.bottom, height: TAB_HEIGHT + insets.bottom },
-          ]}
-        >
-          {navigationItems.map((item, index) => {
-            const isSelected = selectedTab === index;
-            return (
-              <TouchableOpacity
-                key={item.key}
-                style={styles.tabItem}
-                onPress={() => setSelectedTab(index)}
-                activeOpacity={0.7}
-              >
-                {isSelected && <View style={styles.activeIndicator} />}
-                <View style={styles.iconContainer}>
-                  <Image
-                    source={item.icon}
-                    style={[styles.icon, isSelected ? styles.iconActive : styles.iconInactive]}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      )}
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
+        if (!item) return null;
+
+        return (
+          <TouchableOpacity
+            key={route.key}
+            style={styles.tabItem}
+            onPress={onPress}
+            activeOpacity={0.7}
+          >
+            {isFocused && <View style={styles.activeIndicator} />}
+            <View style={styles.iconContainer}>
+              <Image
+                source={item.icon}
+                style={[styles.icon, isFocused ? styles.iconActive : styles.iconInactive]}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>{item.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
+
+export function MainNavigator() {
+  return (
+    <View style={styles.container}>
+      <Tab.Navigator
+        initialRouteName="Farm"
+        screenOptions={{
+          headerShown: false,
+        }}
+        tabBar={renderTabBar}
+      >
+        {navigationItems.map(item => (
+          <Tab.Screen key={item.key} name={item.key} component={item.component} />
+        ))}
+      </Tab.Navigator>
     </View>
   );
 }
@@ -120,13 +156,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-  content: {
-    flex: 1,
-  },
   bottomContainer: {
     flexDirection: 'row',
     backgroundColor: 'white',
-    borderTopWidth: 0, // Remove border top width as we have rounded corners and shadow
+    borderTopWidth: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
@@ -134,6 +167,10 @@ const styles = StyleSheet.create({
     elevation: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   tabItem: {
     flex: 1,
