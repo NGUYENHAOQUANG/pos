@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import { PondTypeTag, PondType } from './PondTypeTag';
+import { Tag, TagStatus } from './Tag';
 import { ButtonHeader } from '../ButtonHeader';
 
 interface ShrimpPondProps {
@@ -21,6 +22,7 @@ interface ShrimpPondProps {
   onMenuPress?: () => void;
   onDetailPress?: () => void;
   style?: StyleProp<ViewStyle>;
+  status?: TagStatus;
 }
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
@@ -32,6 +34,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
   onMenuPress,
   onDetailPress,
   style,
+  status,
 }) => {
   // If no update/activity provided, consider it empty/no-data mode
   const hasData = !!lastUpdate || !!lastActivity;
@@ -61,6 +64,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
       {/* Info Section */}
       <View style={styles.body}>
+        {status && <Tag status={status} style={styles.statusTag} />}
         {hasData ? (
           <>
             <Text style={styles.bodyText}>
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     ...shadows.sm, // Assuming a small shadow for card look
     borderWidth: 1,
-    borderColor: colors.borderLight, // Or transparent if shadow is enough
+    borderColor: colors.borderDark, // Or transparent if shadow is enough
     overflow: 'hidden',
   },
   header: {
@@ -144,6 +148,9 @@ const styles = StyleSheet.create({
     marginRight: spacing.xs,
     alignSelf: 'center',
   },
+  statusTag: {
+    marginBottom: spacing.sm,
+  },
   menuBtn: {
     width: 32, // Smaller menu button in card? Image shows standard size but maybe compact
     height: 32,
@@ -159,7 +166,7 @@ const styles = StyleSheet.create({
   },
   bodyText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text,
   },
   bodyValue: {
     color: colors.text,

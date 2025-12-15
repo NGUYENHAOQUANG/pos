@@ -54,11 +54,11 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.borderLight, // Ensure there's a subtle border if needed, usually cards have it or shadow
+    borderColor: colors.borderDark,
     ...shadows.sm,
   },
   header: {
-    backgroundColor: colors.backgroundPrimary, // Or colors.blue[50]
+    backgroundColor: colors.backgroundPrimary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },

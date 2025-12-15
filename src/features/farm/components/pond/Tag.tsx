@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     alignSelf: 'flex-start',
     justifyContent: 'center',
     alignItems: 'center',

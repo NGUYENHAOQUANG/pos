@@ -15,6 +15,7 @@ import { ReportsScreen } from '@/features/reports';
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import SettingsScreen from '@/features/settings/screens/SettingsScreen';
+import { colors } from '@/styles';
 
 // Import Icons
 const IconReport = require('../../assets/images/Icon/IconMainNavigator/Icon-Report.png');
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.text,
     fontWeight: '400',
     marginBottom: 4,
   },

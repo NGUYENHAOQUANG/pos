@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderDark,
     backgroundColor: colors.white,
   },
 });
