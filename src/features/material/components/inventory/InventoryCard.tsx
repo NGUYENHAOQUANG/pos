@@ -55,7 +55,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
           <Text style={styles.value}>{data.checkerName}</Text>
         </View>
         <View style={[styles.row, styles.alignRight]}>
-          <Text style={styles.label}>Ngày kiểm:</Text>
+          <Text style={styles.label}>Ngày Kiểm</Text>
           <Text style={styles.value}>{data.date}</Text>
         </View>
       </View>

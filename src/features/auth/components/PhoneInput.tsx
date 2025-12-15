@@ -75,7 +75,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
       <View
         style={[
           styles.inputContainer,
-          isFocused && styles.inputContainerFocused,
+          !error && isFocused && styles.inputContainerFocused,
           !!error && styles.inputContainerError, // Nếu có lỗi thì viền đỏ
         ]}
       >
@@ -84,7 +84,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
           value={getDisplayValue()}
           onChangeText={formatAndSetPhone}
           placeholder={placeholder}
-          placeholderTextColor={colors.textSecondary || '#A0A0A0'}
+          placeholderTextColor={colors.gray[300]}
           keyboardType="number-pad"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -93,7 +93,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         {/* Hiển thị icon X đỏ nếu có lỗi */}
         {!!error && (
           <TouchableOpacity onPress={onClear} style={styles.errorIcon}>
-            <Ionicons name="close-circle" size={20} color={colors.error || '#FF4D4F'} />
+            <Ionicons name="close-circle" size={20} color={colors.error} />
           </TouchableOpacity>
         )}
       </View>
@@ -110,37 +110,37 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.fontSize.base,
-    color: colors.text || '#333',
+    color: colors.text,
     marginBottom: spacing.md,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border || '#E0E0E0',
-    borderRadius: borderRadius.md || 8,
-    backgroundColor: colors.white || '#FFF',
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.white,
     height: 50,
     paddingHorizontal: spacing.md,
   },
   inputContainerFocused: {
-    borderColor: colors.primary || '#1890FF',
+    boxShadow: `0px 0px 4px ${colors.primaryLight}`,
   },
   inputContainerError: {
-    borderColor: colors.error || '#FF4D4F', // Viền đỏ khi lỗi
+    borderColor: colors.error, // Viền đỏ khi lỗi
   },
   input: {
     flex: 1,
-    fontSize: typography.fontSize.lg || 16,
-    color: colors.text || '#000',
+    fontSize: typography.fontSize.lg,
+    color: colors.text,
     height: '100%',
   },
   errorIcon: {
     paddingLeft: spacing.xs,
   },
   errorText: {
-    fontSize: typography.fontSize.sm || 13,
-    color: colors.error || '#FF4D4F',
+    fontSize: typography.fontSize.sm,
+    color: colors.error,
     marginTop: spacing.xs,
   },
 });
