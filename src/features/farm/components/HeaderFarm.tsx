@@ -124,7 +124,7 @@ export const HeaderFarm = ({
                   {menuOptions.map((option, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={[styles.menuItem, index === 0 && styles.menuItemFirst]}
+                      style={styles.menuItem}
                       onPress={() => handleMenuOptionPress(option.onMenuOptionPress)}
                     >
                       <Text style={styles.menuText}>{option.value}</Text>
@@ -254,9 +254,6 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 4,
     marginHorizontal: 4,
-  },
-  menuItemFirst: {
-    backgroundColor: '#0000000A',
   },
   menuText: {
     fontSize: 16,
