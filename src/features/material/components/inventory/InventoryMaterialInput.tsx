@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
 import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -18,17 +18,16 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
   onMaterialSelect,
   onNewStockChange,
 }) => {
-  // Tính chênh lệch
-  const diff = newStock ? Number(newStock) - oldStock : 0;
+  // state để quản lý đóng mở dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Kiểm tra đã chọn vật tư chưa
+  const diff = newStock ? Number(newStock) - oldStock : 0;
   const hasSelectedMaterial = !!materialName;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vật tư điều chỉnh</Text>
 
-      {/* Dropdown chọn vật tư (Sử dụng component có sẵn) */}
       <View style={hasSelectedMaterial ? styles.dropdownWithMargin : styles.dropdownNoMargin}>
         <DropdownMaterial
           value={materialName}
@@ -36,20 +35,20 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
           options={['CP 09 – Thức ăn tôm giai đoạn 2', 'Vật tư B', 'Vật tư C']}
           onChange={onMaterialSelect}
           showAllOption={false}
+          // Truyền props đóng mở vào đây
+          isOpen={isDropdownOpen}
+          onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
         />
       </View>
 
-      {/* Chỉ hiện phần nhập liệu khi ĐÃ chọn vật tư */}
       {hasSelectedMaterial && (
         <View style={styles.inputContainer}>
           <View style={styles.row}>
-            {/* Cột Trái: Tồn kho cũ */}
             <View style={styles.col}>
               <Text style={styles.label}>Tồn kho cũ:</Text>
               <Text style={styles.oldStockValue}>{oldStock} Kg</Text>
             </View>
 
-            {/* Cột Phải: Tồn kho mới */}
             <View style={styles.col}>
               <Text style={styles.label}>
                 <Text style={styles.required}>* </Text>Tồn kho mới
@@ -66,7 +65,6 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
             </View>
           </View>
 
-          {/* Dòng Tổng chênh lệch */}
           <View style={styles.footer}>
             <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
             <Text
@@ -89,7 +87,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: spacing.md,
     borderRadius: borderRadius.md,
-    // Shadow
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -172,9 +169,11 @@ const styles = StyleSheet.create({
   },
   dropdownWithMargin: {
     marginBottom: 16,
+    zIndex: 10,
   },
   dropdownNoMargin: {
     marginBottom: 0,
+    zIndex: 10,
   },
   footerValueNegative: {
     color: '#FF4D4F',

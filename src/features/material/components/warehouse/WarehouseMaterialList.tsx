@@ -157,6 +157,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     fontWeight: '400',
+    maxWidth: '60%',
+    textAlign: 'right',
   },
   divider: {
     height: 1,
