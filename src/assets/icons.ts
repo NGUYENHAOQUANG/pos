@@ -1,0 +1,10 @@
+export { default as IconReport } from './images/Icon/IconMainNavigator/Icon-Report.svg';
+export { default as IconReportActive } from './images/Icon/IconMainNavigator/Icon-Report-Active.svg';
+export { default as IconDevices } from './images/Icon/IconMainNavigator/Icon-Devices.svg';
+export { default as IconDevicesActive } from './images/Icon/IconMainNavigator/Icon-Devices-Active.svg';
+export { default as IconFarm } from './images/Icon/IconMainNavigator/Icon-Farm.svg';
+export { default as IconFarmActive } from './images/Icon/IconMainNavigator/Icon-Farm-Active.svg';
+export { default as IconMaterial } from './images/Icon/IconMainNavigator/Icon-Material.svg';
+export { default as IconMaterialActive } from './images/Icon/IconMainNavigator/Icon-Material-Active.svg';
+export { default as IconSetting } from './images/Icon/IconMainNavigator/Icon-Setting.svg';
+export { default as IconSettingActive } from './images/Icon/IconMainNavigator/Icon-Setting-Active.svg';

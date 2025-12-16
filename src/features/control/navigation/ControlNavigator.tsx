@@ -4,29 +4,46 @@ import { DeviceControlScreens } from '../screens/DeviceControlScreens';
 import { DevicesInPondScreens } from '../screens/devices/DeviceInPondScreens';
 import { ScheduleActivitieScreens } from '../screens/schedule/ScheduleActivitieScreens';
 import { HistoryActivitieScreens } from '../screens/schedule/HistoryActivitieScreens';
+import { ConnectDeviceScreens } from '../screens/devices/ConnectDeviceScreens';
 
 export type ControlStackParamList = {
-  ControlList: undefined;
+  ControlList: { connectedPondName?: string } | undefined;
   ControlDetail: { pondName: string };
+  ConnectDevice: { pondName: string };
   Schedule: { pondName: string };
   History: { pondName: string };
 };
 
 const Stack = createNativeStackNavigator<ControlStackParamList>();
 
+import { ControlProvider } from '../context/ControlContext';
+
+// ... (Stack definition)
+
 export const ControlNavigator = () => {
   return (
-    <Stack.Navigator
-      initialRouteName="ControlList"
-      screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_right',
-      }}
-    >
-      <Stack.Screen name="ControlList" component={DeviceControlScreens} />
-      <Stack.Screen name="ControlDetail" component={DevicesInPondScreens} />
-      <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
-      <Stack.Screen name="History" component={HistoryActivitieScreens} />
-    </Stack.Navigator>
+    <ControlProvider>
+      <Stack.Navigator
+        initialRouteName="ControlList"
+        screenOptions={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="ControlList" component={DeviceControlScreens} />
+        <Stack.Screen
+          name="ConnectDevice"
+          component={ConnectDeviceScreens}
+          options={{
+            headerShown: false,
+            presentation: 'fullScreenModal',
+            animation: 'fade',
+          }}
+        />
+        <Stack.Screen name="ControlDetail" component={DevicesInPondScreens} />
+        <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
+        <Stack.Screen name="History" component={HistoryActivitieScreens} />
+      </Stack.Navigator>
+    </ControlProvider>
   );
 };

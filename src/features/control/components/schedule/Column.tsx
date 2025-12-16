@@ -1,6 +1,12 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
+import { SvgProps } from 'react-native-svg';
+
+import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
+import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
+import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
+import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
 
 // Device types
 type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon';
@@ -18,11 +24,11 @@ interface ColumnProps {
 }
 
 // Device icon mapping
-const DEVICE_ICONS: Record<DeviceType, ReturnType<typeof require>> = {
-  fan: require('@/assets/images/Icon/IconDevices/fan.png'),
-  feeder: require('@/assets/images/Icon/IconDevices/feeder.png'),
-  oxy: require('@/assets/images/Icon/IconDevices/oxy.png'),
-  syphon: require('@/assets/images/Icon/IconDevices/syphon.png'),
+const DEVICE_ICONS: Record<DeviceType, React.FC<SvgProps>> = {
+  fan: FanIcon,
+  feeder: FeederIcon,
+  oxy: OxyIcon,
+  syphon: SyphonIcon,
 };
 
 // Status color mapping
@@ -62,19 +68,17 @@ export const Column: React.FC<ColumnProps> = ({
       {/* Header with device icons */}
       <View style={styles.header}>
         <View style={styles.timeColumnHeader} />
-        {devices.map((device, index) => (
-          <View key={index} style={styles.deviceColumn}>
-            <Image
-              source={DEVICE_ICONS[device.type]}
-              style={[styles.deviceIcon, { tintColor: STATUS_COLORS[device.status || 'default'] }]}
-            />
-            <Text
-              style={[styles.deviceCount, { color: STATUS_COLORS[device.status || 'default'] }]}
-            >
-              {device.count}
-            </Text>
-          </View>
-        ))}
+        {devices.map((device, index) => {
+          const status = device.status || 'default';
+          const iconColor = STATUS_COLORS[status];
+          const Icon = DEVICE_ICONS[device.type];
+          return (
+            <View key={index} style={styles.deviceColumn}>
+              <Icon width={24} height={24} color={iconColor} />
+              <Text style={[styles.deviceCount, { color: iconColor }]}>{device.count}</Text>
+            </View>
+          );
+        })}
       </View>
 
       {/* Time slots */}

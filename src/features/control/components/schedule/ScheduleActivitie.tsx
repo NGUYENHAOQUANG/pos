@@ -1,8 +1,14 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { ScheduleDescriptionTab } from './ScheduleDescriptionTab';
 import { ScheduleActivityPill } from './ScheduleActivityPill';
+import { SvgProps } from 'react-native-svg';
+
+import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
+import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
+import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
+import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
 
 // Device types
 type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon';
@@ -25,11 +31,11 @@ interface ScheduleActivitieProps {
 }
 
 // Device icon mapping
-const DEVICE_ICONS: Record<DeviceType, ReturnType<typeof require>> = {
-  fan: require('@/assets/images/Icon/IconDevices/fan.png'),
-  feeder: require('@/assets/images/Icon/IconDevices/feeder.png'),
-  oxy: require('@/assets/images/Icon/IconDevices/oxy.png'),
-  syphon: require('@/assets/images/Icon/IconDevices/syphon.png'),
+const DEVICE_ICONS: Record<DeviceType, React.FC<SvgProps>> = {
+  fan: FanIcon,
+  feeder: FeederIcon,
+  oxy: OxyIcon,
+  syphon: SyphonIcon,
 };
 
 // Generate time slots from 00:00 to 24:00 with 15 min intervals
@@ -96,12 +102,10 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({
           <View style={styles.timeColumnHeader} />
           {devices.map((device, index) => {
             const iconColor = device.color || colors.primary;
+            const Icon = DEVICE_ICONS[device.type];
             return (
               <View key={index} style={styles.deviceColumn}>
-                <Image
-                  source={DEVICE_ICONS[device.type]}
-                  style={[styles.deviceIcon, { tintColor: iconColor }]}
-                />
+                <Icon width={32} height={32} color={iconColor} />
                 <Text style={[styles.deviceCount, { color: iconColor }]}>{device.count}</Text>
               </View>
             );
