@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DatePickerModal } from '../../../home/components/DatePickerModal';
 import { LayoutChangeEvent } from 'react-native';
-import { colors } from '../../../../styles/colors';
+import { colors } from '@/styles';
 
 export default function FilterDate() {
   const [selectedDate, setSelectedDate] = useState(new Date());
