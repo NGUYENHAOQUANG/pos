@@ -14,7 +14,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { ComfirmDelete } from '@/features/farm/components/pondwork/feed/ComfirmDelete';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
 import { useFarm } from '@/features/farm/context/FarmContext';
@@ -259,7 +259,7 @@ export const EditFeederScreens = () => {
         materials={MOCK_MATERIALS}
       />
 
-      <ComfirmDelete
+      <ConfirmationDeleteModal
         visible={showDeleteModal}
         onConfirm={confirmDelete}
         onCancel={() => setShowDeleteModal(false)}

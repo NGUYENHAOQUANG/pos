@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+// Removed unused Ionicons import
+import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -102,19 +103,13 @@ export const FeedingLogScreens = () => {
       <View style={styles.content}>
         {/* Date Range Picker Mockup */}
         <View style={styles.filterContainer}>
-          <TouchableOpacity style={styles.dateSelector}>
-            <View style={styles.dateRangeContainer}>
-              <Text style={styles.dateText}>{startDate}</Text>
-              <Ionicons
-                name="arrow-forward"
-                size={14}
-                color={colors.gray[400]}
-                style={styles.arrowIcon}
-              />
-              <Text style={styles.dateText}>{endDate}</Text>
-            </View>
-            <Ionicons name="calendar-outline" size={20} color={colors.gray[400]} />
-          </TouchableOpacity>
+          <DateRangeFilter
+            startLabel={startDate}
+            endLabel={endDate}
+            onPressStart={() => console.log('Start Date pressed')}
+            onPressEnd={() => console.log('End Date pressed')}
+            onPressCalendar={() => console.log('Calendar pressed')}
+          />
         </View>
 
         {/* Content List */}
@@ -154,28 +149,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[100],
-  },
-  dateSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    height: 44,
-  },
-  dateRangeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dateText: {
-    fontSize: 14,
-    color: colors.text,
-  },
-  arrowIcon: {
-    marginHorizontal: spacing.sm,
   },
   scrollContent: {
     paddingTop: 16,

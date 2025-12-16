@@ -31,7 +31,7 @@ import { GeneralInfoBox } from '@/features/farm/components/GeneralInfoBox';
 import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionFoodCheckBox';
 import { ShrimpInspectionObservationBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionObservationBox';
 import { ShrimpInspectionNotesBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionNotesBox';
-import { DeleteTaskModal } from '@/features/farm/components/shrimp-inspection/DeleteTaskModal';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { ImagePreviewModal } from '@/features/farm/components/shrimp-inspection/ImagePreviewModal';
 import { IconTrashOutlined } from '@/assets/icons';
 
@@ -392,7 +392,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
       />
 
       {/* Delete Confirmation Modal */}
-      <DeleteTaskModal
+      <ConfirmationDeleteModal
         visible={deleteModalVisible}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}

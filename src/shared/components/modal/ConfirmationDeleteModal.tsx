@@ -11,9 +11,9 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { IconWarning } from '@/assets/icons';
 
 /**
- * Props for DeleteTaskModal component
+ * Props for ConfirmationDeleteModal component
  */
-interface DeleteTaskModalProps {
+interface ConfirmationDeleteModalProps {
   /** Whether the modal is visible */
   visible: boolean;
   /** Callback function called when user confirms deletion */
@@ -31,23 +31,12 @@ interface DeleteTaskModalProps {
 }
 
 /**
- * A reusable modal component for confirming task deletion.
+ * A reusable modal component for confirming deletion actions.
  *
  * Displays a warning icon, title, message, and two action buttons (cancel and confirm).
  * The confirm button has a red background to indicate a destructive action.
- *
- * @example
- * ```tsx
- * <DeleteTaskModal
- *   visible={isVisible}
- *   onConfirm={handleDelete}
- *   onCancel={handleCancel}
- *   title="Xoá tác vụ"
- *   message="Bạn có chắc chắn muốn xoá tác vụ này không?"
- * />
- * ```
  */
-export const DeleteTaskModal: React.FC<DeleteTaskModalProps> = ({
+export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = ({
   visible,
   onConfirm,
   onCancel,

@@ -78,9 +78,9 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.borderLight,
+    borderColor: colors.borderDark,
     backgroundColor: colors.white,
     flexDirection: 'row',
     alignItems: 'center',
