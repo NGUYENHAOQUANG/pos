@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { colors } from '@/styles';
-import { PondData } from '../../types/farm.types';
+import { PondData } from '@/features/farm/types/farm.types';
 
 interface InfoFieldProps {
   label: string;

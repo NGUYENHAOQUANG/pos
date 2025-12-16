@@ -7,8 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { FarmStackParamList } from '../../navigation/FarmNavigator';
-import { PondInfoCard } from '../../components/info/PondInfoCard';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { PondInfoCard } from '@/features/farm/components/info/PondInfoCard';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondInfo'>;

@@ -14,9 +14,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropDownButtonBasic, DropDownItem } from './DropDownButtonBasic';
-import { ButtonHeader } from './ButtonHeader';
-import { PondTypeTag, PondType } from './pond/PondTypeTag';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
 
 interface HeaderFarmProps {
   // Common

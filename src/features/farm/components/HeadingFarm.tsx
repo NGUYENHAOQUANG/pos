@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { HeaderFarm } from './HeaderFarm';
-import { PondData } from '../types/farm.types';
+import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { PondData } from '@/features/farm/types/farm.types';
 
 export interface TabItem {
   key: string;

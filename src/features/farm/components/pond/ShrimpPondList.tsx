@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
 
 import { spacing } from '@/styles';
-import { useFarm } from '../../context/FarmContext';
-import { ShrimpPond } from './ShrimpPond';
-import { PondType } from './PondTypeTag';
-import { TagStatus } from './Tag';
+import { useFarm } from '@/features/farm/context/FarmContext';
+import { ShrimpPond } from '@/features/farm/components/pond/ShrimpPond';
+import { PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { TagStatus } from '@/features/farm/components/pond/Tag';
 
 interface PondData {
   id: string;

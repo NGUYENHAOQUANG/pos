@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeadingFarm } from '../components/HeadingFarm';
-import { PondCycleEmptyState } from '../components/EmptyStateCard';
-import { JobType, JobExecution } from '../components/pondwork/JobItem';
-import { JobListCard } from '../components/pondwork/JobListCard';
+import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
+import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
+import { JobType, JobExecution } from '@/features/farm/components/pondwork/JobItem';
+import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { Button } from '@/shared/components/buttons/Button';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '@/features/farm/context/FarmContext';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FarmStackParamList } from '../navigation/FarmNavigator';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 
 // Initial Jobs Configuration (Template)
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [

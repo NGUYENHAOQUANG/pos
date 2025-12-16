@@ -1,11 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { FarmProvider } from '../context/FarmContext';
-import { ShrimpPondListScreens } from '../screens/pond/ShrimpPondListScreens';
-import { ShrimpFarmScreens } from '../screens/ShrimpFarmScreens';
-import { PondInfoScreen } from '../screens/info/PondInfoScreen';
-import { FarmInfoScreen } from '../screens/info/FarmInfoScreen';
+import { FarmProvider } from '@/features/farm/context/FarmContext';
+import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
+import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
+import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
+import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;

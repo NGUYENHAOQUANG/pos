@@ -15,9 +15,9 @@ import {
 } from 'react-native';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import { PondTypeTag, PondType } from './PondTypeTag';
-import { Tag, TagStatus } from './Tag';
-import { ButtonHeader } from '../ButtonHeader';
+import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
+import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
 
 interface ShrimpPondProps {
   name: string;

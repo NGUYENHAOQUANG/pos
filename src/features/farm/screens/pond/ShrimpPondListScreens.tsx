@@ -8,7 +8,7 @@ import { ShrimpPondList } from '@/features/farm/components/pond/ShrimpPondList';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { FarmStackParamList } from '../../navigation/FarmNavigator';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 
 interface ShrimpPondListScreensProps {}
 
