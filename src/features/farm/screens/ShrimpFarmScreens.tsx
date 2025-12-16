@@ -15,6 +15,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 // Initial Jobs Configuration (Template)
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: 'FEED', items: [] },
+  { type: 'SHRIMP_INSPECTION', items: [] },
   { type: 'ENVIRONMENT', items: [] },
   { type: 'WATER_TREATMENT', items: [] },
   { type: 'WATER_CHANGE', items: [] },
@@ -72,6 +73,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   const handleAddJobItem = (type: JobType) => {
     if (!pond?.id) return;
 
+    // For shrimp inspection, go to inspection screen to enter details
+    if (type === 'SHRIMP_INSPECTION') {
+      navigation.navigate('ShrimpInspection', { pond });
+      return;
+    }
+
     const currentItems = getPondJobItems(pond.id, type);
     const nextIndex = currentItems.length + 1;
     const now = new Date();
@@ -86,13 +93,26 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     updatePondJob(pond.id, type, [...currentItems, newItem]);
   };
 
-  const handleEditJobItem = (type: JobType, itemToDelete: JobExecution) => {
+  const handleEditJobItem = (type: JobType, itemToEdit: JobExecution) => {
     if (!pond?.id) return;
 
-    const currentItems = getPondJobItems(pond.id, type);
-    const newItems = currentItems.filter(i => i.id !== itemToDelete.id);
+    // For shrimp inspection, navigate to edit screen
+    if (type === 'SHRIMP_INSPECTION') {
+      navigation.navigate('ShrimpInspection', { pond, itemToEdit });
+      return;
+    }
 
+    // For other job types, keep the delete behavior (or implement edit later)
+    const currentItems = getPondJobItems(pond.id, type);
+    const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
     updatePondJob(pond.id, type, newItems);
+  };
+
+  const handleJobPress = (type: JobType) => {
+    if (type === 'SHRIMP_INSPECTION' && pond) {
+      navigation.navigate('ShrimpInspectionLog', { pond });
+    }
+    console.log(`Pressed ${type}`);
   };
 
   return (
@@ -122,7 +142,7 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
               {/* Job List Card Container */}
               <JobListCard
                 jobs={jobs}
-                onPressJob={type => console.log(`Pressed ${type}`)}
+                onPressJob={handleJobPress}
                 onPressAddJob={handleAddJobItem}
                 onEditJobItem={handleEditJobItem}
               />

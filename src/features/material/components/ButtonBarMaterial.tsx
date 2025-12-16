@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
 
@@ -13,6 +13,9 @@ interface ButtonBarMaterialProps {
   onSecondaryPress?: () => void;
   totalLabel?: string;
   totalValue?: string | number;
+  primaryButtonDisabled?: boolean;
+  primaryButtonStyle?: ViewStyle;
+  primaryButtonTextStyle?: TextStyle;
 }
 
 export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
@@ -23,6 +26,9 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
   onSecondaryPress,
   totalLabel = 'Tổng tiền:',
   totalValue = '0đ',
+  primaryButtonDisabled = false,
+  primaryButtonStyle,
+  primaryButtonTextStyle,
 }) => {
   const renderContent = () => {
     switch (mode) {
@@ -38,7 +44,9 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
               onPress={onPrimaryPress || (() => {})}
               variant="primary"
               size="medium"
-              style={styles.primaryButton}
+              disabled={primaryButtonDisabled}
+              style={StyleSheet.flatten([styles.primaryButton, primaryButtonStyle])}
+              textStyle={primaryButtonTextStyle}
             />
           </View>
         );
@@ -59,7 +67,9 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
               onPress={onPrimaryPress || (() => {})}
               variant="primary"
               size="medium"
-              style={styles.flexButton}
+              disabled={primaryButtonDisabled}
+              style={StyleSheet.flatten([styles.flexButton, primaryButtonStyle])}
+              textStyle={primaryButtonTextStyle}
             />
           </View>
         );
@@ -71,7 +81,9 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
             onPress={onPrimaryPress || (() => {})}
             variant="primary"
             size="medium"
-            style={styles.fullButton}
+            disabled={primaryButtonDisabled}
+            style={StyleSheet.flatten([styles.fullButton, primaryButtonStyle])}
+            textStyle={primaryButtonTextStyle}
           />
         );
     }
