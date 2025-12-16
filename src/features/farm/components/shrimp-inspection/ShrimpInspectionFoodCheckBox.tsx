@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/shrimp-inspection/components/ShrimpInspectionInfoBox';
+import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
 
 interface ShrimpInspectionFoodCheckBoxProps {
   foodAmount: string;

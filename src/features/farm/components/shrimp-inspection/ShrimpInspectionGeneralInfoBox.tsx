@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/shrimp-inspection/components/ShrimpInspectionInfoBox';
+import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
 import { IconCalender, IconCloseOutlined } from '@/assets/icons';
 
 type ShrimpInspectionBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';

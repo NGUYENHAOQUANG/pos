@@ -1,5 +1,12 @@
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IconWarning } from '@/assets/icons';
 
@@ -51,44 +58,48 @@ export const DeleteTaskModal: React.FC<DeleteTaskModalProps> = ({
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={styles.overlay} onPress={onCancel}>
-        <Pressable style={styles.container} onPress={e => e.stopPropagation()}>
-          <View style={styles.content}>
-            {/* Row: Icon, Column(title, message, buttons) */}
-            <View style={styles.mainRow}>
-              {/* Icon */}
-              <IconWarning width={21} height={21} style={styles.warningIcon} />
+      <TouchableWithoutFeedback onPress={onCancel}>
+        <View style={styles.overlay}>
+          <TouchableWithoutFeedback>
+            <View style={styles.container}>
+              <View style={styles.content}>
+                {/* Row: Icon, Column(title, message, buttons) */}
+                <View style={styles.mainRow}>
+                  {/* Icon */}
+                  <IconWarning width={21} height={21} style={styles.warningIcon} />
 
-              {/* Column: Title, Message, Buttons */}
-              <View style={styles.column}>
-                {/* Title */}
-                <Text style={styles.title}>{title}</Text>
+                  {/* Column: Title, Message, Buttons */}
+                  <View style={styles.column}>
+                    {/* Title */}
+                    <Text style={styles.title}>{title}</Text>
 
-                {/* Message */}
-                <Text style={styles.message}>{message}</Text>
+                    {/* Message */}
+                    <Text style={styles.message}>{message}</Text>
 
-                {/* Buttons Row */}
-                <View style={styles.footer}>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={onCancel}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.cancelButtonText}>{cancelText}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={onConfirm}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.confirmButtonText}>{confirmText}</Text>
-                  </TouchableOpacity>
+                    {/* Buttons Row */}
+                    <View style={styles.footer}>
+                      <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={onCancel}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.cancelButtonText}>{cancelText}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.confirmButton}
+                        onPress={onConfirm}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.confirmButtonText}>{confirmText}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </Pressable>
-      </Pressable>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -99,9 +110,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
   },
   container: {
-    width: '90%',
+    width: '100%',
     maxWidth: 341,
   },
   content: {

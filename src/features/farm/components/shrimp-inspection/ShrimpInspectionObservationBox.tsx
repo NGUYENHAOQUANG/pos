@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/shrimp-inspection/components/ShrimpInspectionInfoBox';
+import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
 
 interface ShrimpInspectionObservationBoxProps {
   intestine: string;

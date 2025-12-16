@@ -9,7 +9,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { ShrimpInspectionLogItem } from '@/features/farm/components/pondwork/ShrimpInspectionLogItem';
+import { ShrimpInspectionLogItem } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionLogItem';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 

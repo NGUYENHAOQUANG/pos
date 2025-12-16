@@ -6,7 +6,7 @@ import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondLi
 import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
-import { ShrimpInspectionScreen } from '@/features/shrimp-inspection/screens/ShrimpInspectionScreen';
+import { ShrimpInspectionScreen } from '@/features/farm/screens/shrimp-inspection/ShrimpInspectionScreen';
 import { ShrimpInspectionLogScreen } from '@/features/farm/screens/pondwork/ShrimpInspectionLogScreen';
 
 export type FarmStackParamList = {
