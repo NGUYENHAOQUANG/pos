@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { HeaderFarm } from './HeaderFarm';
-import { PondData } from '../types/farm.types';
+import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { PondData } from '@/features/farm/types/farm.types';
 
 export interface TabItem {
   key: string;
@@ -28,7 +28,7 @@ interface HeadingFarmProps {
   // Header props for 'pond-detail'
   pond?: PondData;
   onBack?: () => void;
-  onMenuPress?: () => void;
+  menuOptions?: { value: string; onMenuOptionPress: () => void }[];
 }
 
 export const HeadingFarm: React.FC<HeadingFarmProps> = ({
@@ -40,7 +40,7 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
   tabType = 'dashboard',
   pond,
   onBack,
-  onMenuPress,
+  menuOptions,
 }) => {
   const dashboardTabs: TabItem[] = [
     { key: 'all', label: 'Tất cả', count: counts.all },
@@ -65,7 +65,7 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
           subtitle={pond?.area || '784 m²'}
           tagType={pond?.type || 'Ao vèo'}
           onBack={onBack}
-          onMenuPress={onMenuPress}
+          menuOptions={menuOptions}
         />
       )}
       <ScrollView

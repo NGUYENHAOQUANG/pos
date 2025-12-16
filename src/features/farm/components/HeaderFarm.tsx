@@ -1,15 +1,27 @@
-import React from 'react';
-import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
+  Dimensions,
+  Platform,
+  StatusBar,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropDownButtonBasic, DropDownItem } from './DropDownButtonBasic';
-import { ButtonHeader } from './ButtonHeader';
-import { PondTypeTag, PondType } from './pond/PondTypeTag';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
 
 interface HeaderFarmProps {
   // Common
   onMenuPress?: () => void;
+  menuOptions?: { value: string; onMenuOptionPress: () => void }[];
 
   // Mode: 'list' (default) or 'detail'
   type?: 'list' | 'detail';
@@ -32,40 +44,98 @@ export const HeaderFarm = ({
   value,
   onSelect,
   onMenuPress,
+  menuOptions,
   title,
   subtitle,
   tagType,
   onBack,
 }: HeaderFarmProps) => {
   const insets = useSafeAreaInsets();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [dropdownTop, setDropdownTop] = useState(0);
+  const [dropdownRight, setDropdownRight] = useState(24);
+  const buttonRef = React.useRef<View>(null);
+
+  const openMenu = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measure((fx, fy, width, height, px, py) => {
+        const windowWidth = Dimensions.get('window').width;
+        const rightSpace = windowWidth - (px + width);
+
+        setDropdownRight(rightSpace >= 0 ? rightSpace : 24);
+
+        const statusbarHeight = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
+        const top = py ? py + height - statusbarHeight + 4 : fy + height + 100;
+        setDropdownTop(top || 200);
+
+        setMenuVisible(true);
+      });
+    } else {
+      setMenuVisible(true);
+    }
+  };
+
+  const handleMenuOptionPress = (onMenuOptionPress: () => void) => {
+    onMenuOptionPress();
+    setMenuVisible(false);
+  };
 
   /**
    * Render Detail Mode (Back, Icon, Info, Tag, Menu)
    */
   if (type === 'detail') {
     return (
-      <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.detailLeft}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <View style={styles.iconContainer}>
-            <Image
-              source={require('@/assets/images/Icon/IconFarm/Pond.png')}
-              style={styles.icon}
-              resizeMode="contain"
-            />
+      <>
+        <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+          <View style={styles.detailLeft}>
+            <TouchableOpacity onPress={onBack} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <View style={styles.iconContainer}>
+              <Image
+                source={require('@/assets/images/Icon/IconFarm/Pond.png')}
+                style={styles.icon}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.infoContainer}>
+              <Text style={styles.pondName}>{title || '---'}</Text>
+              <Text style={styles.pondArea}>{subtitle || '---'}</Text>
+            </View>
           </View>
-          <View style={styles.infoContainer}>
-            <Text style={styles.pondName}>{title || '---'}</Text>
-            <Text style={styles.pondArea}>{subtitle || '---'}</Text>
+          <View style={styles.detailRight}>
+            {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
+            <View ref={buttonRef} collapsable={false}>
+              <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
+            </View>
           </View>
         </View>
-        <View style={styles.detailRight}>
-          {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
-          <ButtonHeader onPress={onMenuPress} style={styles.menuButtonDetail} />
-        </View>
-      </View>
+
+        {menuOptions && menuOptions.length > 0 && (
+          <Modal
+            visible={menuVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setMenuVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+              <View style={styles.modalOverlay}>
+                <View style={[styles.menuContainer, { top: dropdownTop, right: dropdownRight }]}>
+                  {menuOptions.map((option, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.menuItem}
+                      onPress={() => handleMenuOptionPress(option.onMenuOptionPress)}
+                    >
+                      <Text style={styles.menuText}>{option.value}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        )}
+      </>
     );
   }
 
@@ -162,5 +232,34 @@ const styles = StyleSheet.create({
     // Override default ButtonHeader styles if needed specific for this screen
     // width: 36, // Removed to match default 40
     // height: 36, // Removed to match default 40
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+  menuContainer: {
+    position: 'absolute',
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    paddingVertical: 4,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 5,
+    minWidth: 200,
+    zIndex: 100,
+  },
+  menuItem: {
+    padding: 4,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  menuText: {
+    fontSize: 16,
+    color: colors.gray[800],
+    fontWeight: '400',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
 });
