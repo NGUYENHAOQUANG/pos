@@ -11,8 +11,8 @@ interface HeaderFarmProps {
   // Common
   onMenuPress?: () => void;
 
-  // Mode: 'list' (default) or 'detail'
-  type?: 'list' | 'detail';
+  // Mode: 'list' (default) or 'detail' or 'simple'
+  type?: 'list' | 'detail' | 'simple';
 
   // Specific to 'list' mode
   data?: DropDownItem[];
@@ -24,6 +24,7 @@ interface HeaderFarmProps {
   subtitle?: string; // e.g. Area
   tagType?: PondType;
   onBack?: () => void;
+  rightAction?: React.ReactNode;
 }
 
 export const HeaderFarm = ({
@@ -36,8 +37,28 @@ export const HeaderFarm = ({
   subtitle,
   tagType,
   onBack,
+  rightAction,
 }: HeaderFarmProps) => {
   const insets = useSafeAreaInsets();
+
+  /**
+   * Render Simple Mode (Back, Title Center)
+   */
+  if (type === 'simple') {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity onPress={onBack} style={styles.backButtonSimple}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.simpleTitle}>{title}</Text>
+        {rightAction ? (
+          <View style={styles.rightActionContainer}>{rightAction}</View>
+        ) : (
+          <View style={styles.placeholderButton} />
+        )}
+      </View>
+    );
+  }
 
   /**
    * Render Detail Mode (Back, Icon, Info, Tag, Menu)
@@ -162,5 +183,29 @@ const styles = StyleSheet.create({
     // Override default ButtonHeader styles if needed specific for this screen
     // width: 36, // Removed to match default 40
     // height: 36, // Removed to match default 40
+  },
+  backButtonSimple: {
+    padding: 0,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    borderRadius: borderRadius.sm,
+  },
+  simpleTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    textAlign: 'center',
+    flex: 1,
+  },
+  placeholderButton: {
+    width: 40,
+  },
+  rightActionContainer: {
+    width: 40,
+    alignItems: 'flex-end',
   },
 });

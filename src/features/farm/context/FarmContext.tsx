@@ -1,10 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { JobType } from '../components/pondwork/JobItem';
+import { IMaterial } from '@/features/material/types/material.types';
 
 export interface JobExecution {
   id: string;
   label: string;
   time: string;
+  date?: string; // Add optional date for backward compatibility, but we will populate it.
+  note?: string;
+  materials?: {
+    material: IMaterial;
+    quantity: number;
+    unit: string;
+  }[];
 }
 
 export interface PondJobData {

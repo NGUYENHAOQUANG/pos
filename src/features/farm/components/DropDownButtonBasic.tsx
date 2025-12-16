@@ -25,6 +25,7 @@ interface DropDownButtonBasicProps {
   value?: DropDownItem;
   onSelect?: (item: DropDownItem) => void;
   style?: StyleProp<ViewStyle>;
+  showIcon?: boolean;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -38,6 +39,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
   value,
   onSelect,
   style,
+  showIcon = true,
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
@@ -88,8 +90,10 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
           onPress={handleDropdownPress}
           activeOpacity={0.7}
         >
-          <IconEnvironment width={18} height={18} style={styles.locationIcon} />
-          <Text style={styles.locationText}>{currentItem.label}</Text>
+          {showIcon && <IconEnvironment width={18} height={18} style={styles.locationIcon} />}
+          <Text style={styles.locationText} numberOfLines={1}>
+            {currentItem.label}
+          </Text>
           <Ionicons
             name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
             size={16}
@@ -145,11 +149,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.white,
-    paddingVertical: spacing.sm,
+    height: 44,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.gray[200],
   },
   locationIcon: {
     width: 18,
