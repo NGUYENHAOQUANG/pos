@@ -2,19 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeadingFarm } from '../components/HeadingFarm';
-import { PondCycleEmptyState } from '../components/EmptyStateCard';
-import { JobType, JobExecution } from '../components/pondwork/JobItem';
-import { JobListCard } from '../components/pondwork/JobListCard';
+import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
+import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
+import { JobType, JobExecution } from '@/features/farm/components/pondwork/JobItem';
+import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { Button } from '@/shared/components/buttons/Button';
-import { useFarm } from '../context/FarmContext';
+import { useFarm } from '@/features/farm/context/FarmContext';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FarmStackParamList } from '../navigation/FarmNavigator';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 
 // Initial Jobs Configuration (Template)
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: 'FEED', items: [] },
+  { type: 'SHRIMP_INSPECTION', items: [] },
   { type: 'ENVIRONMENT', items: [] },
   { type: 'WATER_TREATMENT', items: [] },
   { type: 'WATER_CHANGE', items: [] },
@@ -50,9 +51,20 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     };
   }, [setTabBarVisible]);
 
-  const handleMenuPress = () => {
-    navigation.goBack();
+  const handleInfoPress = () => {
+    if (pond) {
+      navigation.navigate('PondInfo', { pond });
+    }
   };
+
+  const handleCyclePress = () => {
+    console.log('Các chu kì nuôi pressed');
+  };
+
+  const menuOptions = [
+    { value: 'Thông tin ao', onMenuOptionPress: handleInfoPress },
+    { value: 'Các chu kì nuôi', onMenuOptionPress: handleCyclePress },
+  ];
 
   const handleStartCycle = () => {
     console.log('Start Cycle pressed');
@@ -63,6 +75,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
 
     if (type === 'FEED') {
       navigation.navigate('FeedTheShrimp', { pondId: pond.id });
+      return;
+    }
+
+    // For shrimp inspection, go to inspection screen to enter details
+    if (type === 'SHRIMP_INSPECTION') {
+      navigation.navigate('ShrimpInspection', { pond });
       return;
     }
 
@@ -100,13 +118,29 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
-    // For other types, current logic was deleting.
-    // If that was intended as "Edit means Delete for now", we keep it or comment it out.
-    // Based on previous code, it was deleting. I will keep it but maybe it should be renamed in future.
-    const currentItems = getPondJobItems(pond.id, type);
-    const newItems = currentItems.filter(i => i.id !== item.id);
+    // For shrimp inspection, navigate to edit screen
+    if (type === 'SHRIMP_INSPECTION') {
+      navigation.navigate('ShrimpInspection', { pond, itemToEdit: item });
+      return;
+    }
 
+    const itemToEdit = item; // Alias for compatibility with below code if needed
+
+    // For other job types, keep the delete behavior (or implement edit later)
+    const currentItems = getPondJobItems(pond.id, type);
+    const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
     updatePondJob(pond.id, type, newItems);
+  };
+
+  const handleJobPress = (type: JobType) => {
+    if (type === 'FEED' && pond?.id) {
+      navigation.navigate('FeedingLog', { pondId: pond.id });
+      return;
+    }
+    if (type === 'SHRIMP_INSPECTION' && pond) {
+      navigation.navigate('ShrimpInspectionLog', { pond });
+    }
+    console.log(`Pressed ${type}`);
   };
 
   return (
@@ -119,7 +153,7 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
         fullWidth
         pond={pond}
         onBack={() => navigation.goBack()}
-        onMenuPress={handleMenuPress}
+        menuOptions={menuOptions}
       />
 
       {/* Content */}
@@ -136,13 +170,7 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
               {/* Job List Card Container */}
               <JobListCard
                 jobs={jobs}
-                onPressJob={type => {
-                  if (type === 'FEED' && pond?.id) {
-                    navigation.navigate('FeedingLog', { pondId: pond.id });
-                  } else {
-                    console.log(`Pressed ${type}`);
-                  }
-                }}
+                onPressJob={handleJobPress}
                 onPressAddJob={handleAddJobItem}
                 onEditJobItem={handleEditJobItem}
               />

@@ -3,8 +3,8 @@
  * @description Phone input component matching the Mebione design
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, Text, StyleSheet, TextInput } from 'react-native';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 // Giả định bạn đã có các biến này trong project, nếu chưa hãy thay bằng mã màu cứng
 import { colors, spacing, typography, borderRadius } from '@/styles';
 
@@ -26,7 +26,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
   onChangeText,
   error,
-  onClear,
+  // onClear,
   countryCode: _countryCode,
   onCountryCodeChange: _onCountryCodeChange,
   required: _required,
@@ -91,11 +91,11 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
         />
 
         {/* Hiển thị icon X đỏ nếu có lỗi */}
-        {!!error && (
+        {/* {!!error && (
           <TouchableOpacity onPress={onClear} style={styles.errorIcon}>
             <Ionicons name="close-circle" size={20} color={colors.error} />
           </TouchableOpacity>
-        )}
+        )} */}
       </View>
 
       {/* Dòng chữ báo lỗi bên dưới */}

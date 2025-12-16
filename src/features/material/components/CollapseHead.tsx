@@ -25,11 +25,7 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
       <Text style={[styles.title, titleStyle]}>{title}</Text>
 
       {showIcon && (
-        <Ionicons
-          name={isExpanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={colors.text || '#333'}
-        />
+        <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={colors.text} />
       )}
     </TouchableOpacity>
   );
@@ -42,7 +38,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.gray[50],
+    backgroundColor: colors.white,
     borderRadius: borderRadius.md,
   },
   title: {

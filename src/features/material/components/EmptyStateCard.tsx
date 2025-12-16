@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export type MaterialTabType = 'list' | 'history' | 'inventory';
+export type MaterialTabType = 'list' | 'history' | 'inventory' | 'shrimp-inspection';
 
 interface MaterialEmptyStateProps {
   tab: MaterialTabType;
@@ -101,6 +101,11 @@ export const MaterialEmptyState: React.FC<MaterialEmptyStateProps> = ({ tab, onP
       message: 'Chưa có phiếu điều chỉnh tồn kho nào được tạo.',
       buttonTitle: 'Tạo Phiếu Điều Chỉnh Tồn Kho',
       buttonStyle: { width: '100%' } as ViewStyle,
+    },
+    'shrimp-inspection': {
+      message: 'Chưa có dữ liệu kiểm tra tôm',
+      buttonTitle: 'Bắt đầu kiểm tra tôm',
+      buttonStyle: undefined,
     },
   };
 

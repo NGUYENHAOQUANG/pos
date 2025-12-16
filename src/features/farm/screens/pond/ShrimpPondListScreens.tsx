@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { colors } from '@/styles';
 import { ShrimpPondList } from '@/features/farm/components/pond/ShrimpPondList';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { FarmStackParamList } from '../../navigation/FarmNavigator';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 
 interface ShrimpPondListScreensProps {}
 
@@ -32,6 +33,21 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     navigation.navigate('PondDetail', { pond });
   };
 
+  const handlePondInfoPress = (pond: any) => {
+    navigation.navigate('PondInfo', { pond });
+  };
+
+  const handleFarmInfoPress = () => {
+    const farmData = {
+      id: selectedFarm.id,
+      name: selectedFarm.label,
+      code: selectedFarm.value,
+      area: '',
+      address: '',
+    };
+    navigation.navigate('FarmInfo', { farm: farmData });
+  };
+
   return (
     <View style={styles.container}>
       <HeaderFarm
@@ -39,7 +55,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         data={farmOptions}
         value={selectedFarm}
         onSelect={setSelectedFarm}
-        onMenuPress={() => console.log('Menu pressed')}
+        onMenuPress={handleFarmInfoPress}
       />
       <HeadingFarm
         selectedTab={selectedTab}
@@ -47,7 +63,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         tabType="dashboard"
         counts={{ all: 5, active: 1, preparing: 4 }}
       />
-      <ShrimpPondList onPondPress={handlePondPress} />
+      <ShrimpPondList onPondPress={handlePondPress} onInfoPress={handlePondInfoPress} />
     </View>
   );
 };
