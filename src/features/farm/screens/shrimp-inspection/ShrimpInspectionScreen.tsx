@@ -27,9 +27,9 @@ import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { ShrimpInspectionGeneralInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionGeneralInfoBox';
+import { GeneralInfoBox } from '@/features/farm/components/GeneralInfoBox';
 import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionFoodCheckBox';
-import { ShrimpInspectionSampleObservationBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionObservationBox';
+import { ShrimpInspectionObservationBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionObservationBox';
 import { ShrimpInspectionNotesBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionNotesBox';
 import { DeleteTaskModal } from '@/features/farm/components/shrimp-inspection/DeleteTaskModal';
 import { ImagePreviewModal } from '@/features/farm/components/shrimp-inspection/ImagePreviewModal';
@@ -317,7 +317,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
       {/* Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent]}>
         {/* Thông tin chung Box */}
-        <ShrimpInspectionGeneralInfoBox
+        <GeneralInfoBox
           dateDisplay={formatDateTime(selectedDate)}
           onPressDate={() => setIsDatePickerVisible(true)}
           type="withImage"
@@ -339,7 +339,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         />
 
         {/* Quan sát mẫu Box */}
-        <ShrimpInspectionSampleObservationBox
+        <ShrimpInspectionObservationBox
           intestine={intestine}
           onIntestineChange={setIntestine}
           intestineColor={intestineColor}

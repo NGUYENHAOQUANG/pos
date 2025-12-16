@@ -6,10 +6,10 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
 import { IconCalender, IconCloseOutlined } from '@/assets/icons';
 
-type ShrimpInspectionBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
+type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
-interface ShrimpInspectionGeneralInfoBoxProps {
-  type?: ShrimpInspectionBoxType;
+interface GeneralInfoBox {
+  type?: GeneralInfoBoxType;
   dateDisplay: string;
   onPressDate: () => void;
   imageUris?: string[];
@@ -22,7 +22,7 @@ interface ShrimpInspectionGeneralInfoBoxProps {
   onSelectActivity?: (val: string) => void;
 }
 
-export const ShrimpInspectionGeneralInfoBox: React.FC<ShrimpInspectionGeneralInfoBoxProps> = ({
+export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   type = 'default',
   dateDisplay,
   onPressDate,

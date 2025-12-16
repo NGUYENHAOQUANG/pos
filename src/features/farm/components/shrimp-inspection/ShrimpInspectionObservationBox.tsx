@@ -37,9 +37,7 @@ const renderRadioGroup = (options: string[], selected: string, onSelect: (val: s
   </View>
 );
 
-export const ShrimpInspectionSampleObservationBox: React.FC<
-  ShrimpInspectionObservationBoxProps
-> = ({
+export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservationBoxProps> = ({
   intestine,
   onIntestineChange,
   intestineColor,
