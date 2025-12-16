@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DatePickerModal } from '../../../home/components/DatePickerModal';
-
-import { colors } from '../../../../styles/colors';
+import { LayoutChangeEvent } from 'react-native';
+import { colors } from '@/styles';
 
 export default function FilterDate() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalVisible, setModalVisible] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [textWidth, setTextWidth] = useState(0);
+
+  const ICON_WIDTH = 26;
 
   const formatDate = (date: Date) => {
     const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
@@ -36,9 +40,26 @@ export default function FilterDate() {
       </TouchableOpacity>
 
       {/* Hiển thị ngày đã chọn */}
-      <TouchableOpacity style={styles.dateDisplay} onPress={() => setModalVisible(true)}>
-        <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
-        <Ionicons style={styles.icon} name="calendar-outline" size={18} color={colors.gray[400]} />
+      <TouchableOpacity
+        style={styles.dateDisplay}
+        onPress={() => setModalVisible(true)}
+        onLayout={(e: LayoutChangeEvent) => setContainerWidth(e.nativeEvent.layout.width)}
+      >
+        <Text
+          style={styles.dateText}
+          onLayout={(e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width)}
+        >
+          {formatDate(selectedDate)}
+        </Text>
+
+        {textWidth + ICON_WIDTH + 32 < containerWidth && (
+          <Ionicons
+            name="calendar-outline"
+            size={18}
+            color={colors.gray[400]}
+            style={styles.icon}
+          />
+        )}
       </TouchableOpacity>
 
       {/* Nút tiến ngày */}

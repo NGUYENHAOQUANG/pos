@@ -19,68 +19,74 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
   showBackButton = true,
 }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const handleBack = () => {
     if (onBackPress) {
       onBackPress();
-    } else {
-      if (navigation.canGoBack()) {
-        navigation.goBack();
-      }
+    } else if (navigation.canGoBack()) {
+      navigation.goBack();
     }
   };
 
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-      <View style={styles.leftContainer}>
+    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
+      <View style={styles.side}>
         {showBackButton && (
           <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
         )}
       </View>
-      <View style={styles.centerContainer}>
+
+      <View style={styles.center}>
         <Text style={styles.title}>{title}</Text>
       </View>
-      <View style={styles.rightContainer}>{rightComponent}</View>
+
+      <View style={[styles.side, styles.right]}>{rightComponent}</View>
     </View>
   );
 };
+
+const SIDE_WIDTH = 44;
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    // Add padding for status bar on Android
-    paddingTop: spacing.md,
-    paddingBottom: 12,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    zIndex: 1000, // Ensure header (and its dropdowns) stay on top
+    zIndex: 1000,
   },
-  leftContainer: {
-    width: 40,
+
+  side: {
+    width: SIDE_WIDTH,
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
-  centerContainer: {
+
+  right: {
+    alignItems: 'flex-end',
+  },
+
+  center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
   },
-  rightContainer: {
-    width: 40,
-    alignItems: 'flex-end',
-  },
+
   title: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
+    textAlign: 'center',
+    flexWrap: 'wrap',
   },
+
   iconButton: {
     width: 40,
     height: 40,

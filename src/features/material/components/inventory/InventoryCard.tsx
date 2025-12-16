@@ -11,12 +11,10 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
-// Kích hoạt LayoutAnimation trên Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// Định nghĩa kiểu dữ liệu cho 1 dòng vật tư trong phiếu
 export interface InventoryDetailItem {
   id: string;
   materialName: string;
@@ -24,7 +22,6 @@ export interface InventoryDetailItem {
   afterQuantity: number;
 }
 
-// Định nghĩa kiểu dữ liệu cho Phiếu kiểm kê
 export interface InventoryTicket {
   id: string;
   checkerName: string;
@@ -40,6 +37,7 @@ interface InventoryCardProps {
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isLongNote, setIsLongNote] = useState(false);
 
   const toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -48,7 +46,6 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header: Người kiểm & Ngày kiểm */}
       <View style={styles.col}>
         <View style={styles.row}>
           <Text style={styles.label}>Người kiểm:</Text>
@@ -59,22 +56,37 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
           <Text style={styles.value}>{data.date}</Text>
         </View>
       </View>
+
       <View style={styles.separator} />
-      {/* Body: Ghi chú & Tổng chênh lệch */}
+
       <View style={[styles.col, styles.colWithMargin]}>
-        <View style={[styles.row, styles.rowFlex2]}>
-          <Text style={styles.label}>Ghi chú</Text>
-          <Text style={styles.noteText} numberOfLines={2}>
-            {data.note}
-          </Text>
-        </View>
-        <View style={[styles.row, styles.alignRight, styles.rowFlex1]}>
+        <Text
+          style={styles.noteTextMeasure}
+          onTextLayout={e => {
+            setIsLongNote(e.nativeEvent.lines.length > 1);
+          }}
+        >
+          {data.note}
+        </Text>
+
+        {!isLongNote ? (
+          <View style={styles.noteRow}>
+            <Text style={styles.label}>Ghi chú</Text>
+            <Text style={styles.noteTextInline}>{data.note}</Text>
+          </View>
+        ) : (
+          <View style={styles.noteColumn}>
+            <Text style={styles.label}>Ghi chú</Text>
+            <Text style={styles.noteTextBlock}>{data.note}</Text>
+          </View>
+        )}
+
+        <View style={[styles.row, styles.alignRight]}>
           <Text style={styles.label}>Tổng chênh lệch:</Text>
           <Text style={[styles.value, styles.valueBold]}>{data.totalDifference}</Text>
         </View>
       </View>
 
-      {/* Expanded Content: Chi tiết vật tư */}
       {isExpanded && (
         <View style={styles.expandedContainer}>
           {data.items.map(item => (
@@ -95,13 +107,12 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         </View>
       )}
 
-      {/* Footer: Toggle Button */}
       <TouchableOpacity style={styles.toggleButton} onPress={toggleExpand} activeOpacity={0.7}>
         <Text style={styles.toggleText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
         <Ionicons
           name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={colors.primary || '#1890FF'}
+          color={colors.primary}
         />
       </TouchableOpacity>
     </View>
@@ -116,7 +127,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -141,15 +152,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 2,
   },
   value: {
     fontSize: 14,
     color: colors.text,
   },
-  noteText: {
+  noteRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.xs,
+  },
+  noteColumn: {
+    marginBottom: spacing.xs,
+  },
+  noteTextInline: {
+    maxWidth: '70%',
     fontSize: 14,
-    color: colors.textSecondary || '#666',
+    color: colors.text,
+    textAlign: 'right',
+    flexWrap: 'wrap',
+  },
+  noteTextBlock: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.text,
+    flexWrap: 'wrap',
+    width: '100%',
+  },
+  noteTextMeasure: {
+    position: 'absolute',
+    opacity: 0,
+    zIndex: -1,
+    fontSize: 14,
+    width: '70%',
   },
   toggleButton: {
     flexDirection: 'row',
@@ -160,30 +196,29 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 14,
-    color: colors.primary || '#1890FF',
+    color: colors.primary,
     marginRight: 4,
   },
-  // Styles cho phần mở rộng
   expandedContainer: {
     marginTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: colors.borderLight,
     paddingTop: spacing.md,
   },
   detailItemContainer: {
-    backgroundColor: '#FAFAFA', // Màu nền nhạt cho item con
+    backgroundColor: colors.backgroundSecondary,
     padding: spacing.sm,
     borderRadius: borderRadius.sm,
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: colors.borderLight,
   },
   materialName: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.text,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.borderLight,
     paddingBottom: spacing.xs,
     marginBottom: spacing.xs,
   },
@@ -194,7 +229,7 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 13,
-    color: '#666',
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   detailValue: {
@@ -204,16 +239,10 @@ const styles = StyleSheet.create({
   separator: {
     marginTop: spacing.sm,
     height: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderLight,
   },
   colWithMargin: {
     marginTop: spacing.sm,
-  },
-  rowFlex2: {
-    flex: 2,
-  },
-  rowFlex1: {
-    flex: 1,
   },
   valueBold: {
     fontWeight: 'bold',
