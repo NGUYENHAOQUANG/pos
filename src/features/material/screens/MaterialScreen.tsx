@@ -191,7 +191,7 @@ export const MeterialScreen = () => {
                 data={inventoryList}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => <InventoryCard data={item} />}
-                contentContainerStyle={{ paddingBottom: spacing.xl }}
+                contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
                 showsVerticalScrollIndicator={false}
               />
             ) : (
