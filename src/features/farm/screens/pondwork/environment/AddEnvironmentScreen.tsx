@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/environment/EnvironmentParametersBox';
@@ -31,7 +30,6 @@ export const AddEnvironmentScreen: React.FC = () => {
   // Initialize state from itemToEdit if available
   const meta = useMemo(() => itemToEdit?.meta || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState(meta.date ? new Date(meta.date) : new Date());
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
   // Environment parameters state
   const [pH, setPH] = useState(meta.pH || '');
@@ -68,15 +66,6 @@ export const AddEnvironmentScreen: React.FC = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
     }
-  };
-
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}-${month}-${year}, ${hours}:${minutes} (hiện tại)`;
   };
 
   const handleSave = () => {
@@ -233,11 +222,7 @@ export const AddEnvironmentScreen: React.FC = () => {
       {/* Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.infoBoxContainer}>
-          <GeneralInfoBox
-            type="default"
-            dateDisplay={formatDateTime(selectedDate)}
-            onPressDate={() => setIsDatePickerVisible(true)}
-          />
+          <GeneralInfoBox type="default" date={selectedDate} onDateChange={setSelectedDate} />
         </View>
 
         <View style={styles.infoBoxContainer}>
@@ -297,14 +282,6 @@ export const AddEnvironmentScreen: React.FC = () => {
           primaryButtonTextStyle={shouldShowDisabledStyle ? styles.disabledButtonText : undefined}
         />
       </View>
-
-      {/* Date Picker Modal */}
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setIsDatePickerVisible(false)}
-        date={selectedDate}
-        onSelectDate={setSelectedDate}
-      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmationDeleteModal
