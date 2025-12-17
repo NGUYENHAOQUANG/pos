@@ -10,7 +10,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { ShrimpInspectionLogItem } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionLogItem';
+import { ShrimpInspectionLogItem } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionLogItem';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   sectionHeaderCollapsed: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   itemsContainer: {
     paddingTop: 8,
     backgroundColor: colors.white,
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,

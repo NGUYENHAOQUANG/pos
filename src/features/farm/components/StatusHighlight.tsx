@@ -29,14 +29,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFBE6',
+    backgroundColor: colors.status.warningHighlightBg,
     paddingVertical: 4,
     paddingHorizontal: 8,
   },
   label: {
     fontSize: 14,
     fontWeight: '400',
-    color: colors.orange[500],
+    color: colors.status.warningHighlightText,
     lineHeight: 22,
   },
   valueContainer: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 14,
     fontWeight: '400',
-    color: colors.orange[500],
+    color: colors.status.warningHighlightText,
     lineHeight: 22,
   },
   icon: {

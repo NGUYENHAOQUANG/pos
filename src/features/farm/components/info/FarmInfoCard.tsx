@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 8,
     // Shadow equivalent to box-shadow: 0px 1px 6px -1px #00000005
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 1,

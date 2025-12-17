@@ -9,7 +9,7 @@ import { ActivityData } from '@/features/farm/components/ActivityCard';
 
 interface EnvironmentLogItemProps {
   item: JobExecution;
-  meta?: any;
+  meta?: EnvironmentMeta;
   style?: any;
   onEdit?: (item: JobExecution) => void;
 }
@@ -49,7 +49,7 @@ export const EnvironmentLogItem: React.FC<EnvironmentLogItemProps> = ({
   onEdit,
 }) => {
   const activityData: ActivityData[] = useMemo(() => {
-    return convertEnvironmentMetaToActivityData(meta as EnvironmentMeta);
+    return convertEnvironmentMetaToActivityData(meta);
   }, [meta]);
 
   return (

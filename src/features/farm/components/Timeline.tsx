@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#000000E0',
+    color: colors.text,
     lineHeight: 22,
   },
   timelineGraphic: {
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     borderWidth: 2,
-    borderColor: '#00000040',
+    borderColor: colors.borderSubtle,
     backgroundColor: colors.white,
     top: 4,
     zIndex: 1,

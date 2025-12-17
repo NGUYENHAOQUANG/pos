@@ -186,14 +186,14 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#DEE4ED',
-    backgroundColor: '#FFFFFF',
+    borderColor: colors.defaultBorder,
+    backgroundColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   required: {
-    color: colors.error || '#FF4D4F',
+    color: colors.error,
   },
   radioGroup: {
     flexDirection: 'row',

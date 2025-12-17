@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   sectionHeaderCollapsed: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,

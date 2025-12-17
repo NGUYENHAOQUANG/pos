@@ -12,7 +12,7 @@ import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/environment/EnvironmentParametersBox';
-import { SelectionNotesBox } from '@/features/farm/components/pondwork/SelectionNotesBox';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
@@ -378,12 +378,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   disabledButton: {
-    backgroundColor: '#0000000A',
+    backgroundColor: colors.backgroundSubtle,
     borderWidth: 1,
     borderColor: colors.defaultBorder,
   },
   disabledButtonText: {
-    color: '#00000040',
+    color: colors.borderSubtle,
     lineHeight: 24,
     fontWeight: '400',
     fontSize: 16,

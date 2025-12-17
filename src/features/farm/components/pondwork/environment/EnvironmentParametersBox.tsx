@@ -41,7 +41,7 @@ const InputField: React.FC<InputFieldProps> = ({
       <TextInput
         style={styles.textInput}
         placeholder="Input"
-        placeholderTextColor="#00000040"
+        placeholderTextColor={colors.borderSubtle}
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF1F0',
+    backgroundColor: colors.errorBackground,
     borderWidth: 1,
     borderColor: colors.error,
     borderRadius: borderRadius.sm,

@@ -9,7 +9,7 @@ import { ActivityData } from '@/features/farm/components/ActivityCard';
 
 interface ShrimpInspectionLogItemProps {
   item: JobExecution;
-  meta?: any;
+  meta?: ShrimpInspectionMeta;
   style?: ViewStyle;
   onEdit?: (item: JobExecution) => void;
 }
@@ -44,7 +44,7 @@ export const ShrimpInspectionLogItem: React.FC<ShrimpInspectionLogItemProps> = (
 }) => {
   // Convert meta to ActivityData
   const activityData: ActivityData[] = useMemo(() => {
-    return convertShrimpInspectionMetaToActivityData(meta as ShrimpInspectionMeta);
+    return convertShrimpInspectionMetaToActivityData(meta);
   }, [meta]);
 
   return (

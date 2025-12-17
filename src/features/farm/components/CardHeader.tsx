@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors } from '@/styles/colors';
+import { colors } from '@/styles';
 import EditIcon from '@/assets/images/Icon/IconFarm/Edit.svg';
 
 interface CardHeaderProps {
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 5,
     paddingHorizontal: 8,
-    backgroundColor: '#00000005',
+    backgroundColor: colors.backgroundSubtle,
   },
   title: {
     fontSize: 14,

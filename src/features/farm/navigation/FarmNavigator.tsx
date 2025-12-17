@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { FarmProvider } from '@/features/farm/context/FarmContext';
+import { FarmProvider, JobExecution } from '@/features/farm/context/FarmContext';
+import { PondData, FarmData } from '@/features/farm/types/farm.types';
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
 import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
@@ -13,17 +14,17 @@ import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environme
 
 export type FarmStackParamList = {
   FarmList: undefined;
-  PondDetail: { pond: any };
+  PondDetail: { pond: PondData };
   FeedTheShrimp: { pondId: string };
   EditFeeder: { pondId: string; jobId?: string };
   FeedingLog: { pondId: string };
-  PondInfo: { pond: any };
-  FarmInfo: { farm: any };
-  ShrimpInspectionScreen: { pond: any; itemToEdit?: any };
-  PondworkLogScreen: { pond: any };
-  AddEnvironmentScreen: { pond: any; itemToEdit?: any };
+  PondInfo: { pond: PondData };
+  FarmInfo: { farm: FarmData };
+  ShrimpInspectionScreen: { pond: PondData; itemToEdit?: JobExecution };
+  PondworkLogScreen: { pond: PondData };
+  AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
   SettingEnvironment: undefined;
-  EnvironmentLogScreen: { pond: any };
+  EnvironmentLogScreen: { pond: PondData };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();

@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   sectionHeaderCollapsed: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#000000A6',
+    color: colors.textMuted,
     lineHeight: 22,
   },
   childRowWrapper: {
@@ -164,14 +164,14 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontSize: 14,
     lineHeight: 22,
-    color: '#000000A6',
+    color: colors.textMuted,
   },
   childSubtitle: {
     fontWeight: '400',
     fontStyle: 'normal',
     fontSize: 14,
     lineHeight: 22,
-    color: '#000000A6',
+    color: colors.textMuted,
   },
   editButton: {
     width: 32,

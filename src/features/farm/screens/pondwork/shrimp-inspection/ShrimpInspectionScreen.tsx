@@ -30,7 +30,7 @@ import { useFarm } from '@/features/farm/context/FarmContext';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
 import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
-import { SelectionNotesBox } from '@/features/farm/components/pondwork/SelectionNotesBox';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { IconTrashOutlined } from '@/assets/icons';
@@ -457,12 +457,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   disabledButton: {
-    backgroundColor: '#0000000A',
+    backgroundColor: colors.backgroundSubtle,
     borderWidth: 1,
     borderColor: colors.defaultBorder,
   },
   disabledButtonText: {
-    color: '#00000040',
+    color: colors.borderSubtle,
     lineHeight: 24,
     fontWeight: '400',
     fontSize: 16,
