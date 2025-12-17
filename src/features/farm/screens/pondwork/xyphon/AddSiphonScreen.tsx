@@ -39,7 +39,7 @@ export const AddSiphonScreen: React.FC = () => {
     meta.date ? new Date(meta.date) : new Date()
   );
   const [lossAmount, setLossAmount] = useState<string>(meta.lossAmount || '');
-  const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
+  const [notes, setNotes] = useState<string>(meta.notes || '');
   const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>(
     itemToEdit?.materials || []
@@ -52,7 +52,7 @@ export const AddSiphonScreen: React.FC = () => {
     return {
       date: meta.date ? new Date(meta.date) : new Date(),
       lossAmount: meta.lossAmount || '',
-      notes: itemToEdit.note || '',
+      notes: meta.notes || '',
       images: meta.images || [],
       materials: itemToEdit.materials || [],
     };
@@ -144,12 +144,12 @@ export const AddSiphonScreen: React.FC = () => {
       label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
       time: timeString,
       date: dateString,
-      note: notes || undefined,
       materials: selectedMaterials,
       meta: {
         ...(itemToEdit?.meta || {}),
         date: selectedDate,
         lossAmount,
+        notes: notes || undefined,
         images: imageUris,
       } as SiphonMeta,
     };
