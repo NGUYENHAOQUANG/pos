@@ -5,6 +5,7 @@ import {
   useRoute,
   RouteProp,
   CompositeNavigationProp,
+  CommonActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -52,14 +53,15 @@ export const ConnectDeviceScreens = () => {
   const handleConnect = (code: string) => {
     // Handle connection logic here
     console.log('Connected with code:', code);
-    connectDeviceToPond(pondName);
+    connectDeviceToPond(pondName, code);
 
-    // Force navigation to the specific tab and screen to prevent reset loop
-    // Typed correctly using CompositeNavigationProp
-    navigation.navigate('Devices', {
-      screen: 'ControlList',
-      params: { connectedPondName: pondName },
-    });
+    // Force reset the navigation stack to ensure we are exactly where we want to be
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1,
+        routes: [{ name: 'ControlList' }, { name: 'ControlDetail', params: { pondName } }],
+      })
+    );
   };
 
   const toggleFlash = () => {

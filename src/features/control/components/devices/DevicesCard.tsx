@@ -1,62 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { DeviceCard, DeviceData } from './Devices';
-import { EControlMode } from '../../types/control.types';
+import { DeviceCard } from './Devices';
+import { EControlMode, DeviceData } from '../../types/control.types';
 import { ButtonControlSwitch } from './ButtonControlSwitch';
 import { spacing } from '@/styles';
 
-import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
-
-// Mock Data
-const MOCK_FEEDERS: DeviceData[] = [
-  {
-    id: 'f1',
-    name: 'Máy cho ăn',
-    icon: FeederIcon,
-    mode: EControlMode.MANUAL,
-    isOn: true,
-  },
-];
-
-const MOCK_OTHERS: DeviceData[] = [
-  {
-    id: 'o1',
-    name: 'Quạt nước 1',
-    icon: FanIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: true,
-  },
-  {
-    id: 'o2',
-    name: 'Quạt nước 2',
-    icon: FanIcon,
-    mode: EControlMode.LOCAL,
-    isOn: true,
-  },
-  {
-    id: 'o3',
-    name: 'Máy thổi khí',
-    icon: OxyIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: true,
-    errorMessage: 'Bị mất khí!',
-  },
-  {
-    id: 'o4',
-    name: 'Syphon',
-    icon: SyphonIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: false,
-  },
-];
+// Mock Data Removed
 
 interface DevicesCardProps {
   title: string;
   devices?: DeviceData[]; // Optional now
-  type?: 'feeder' | 'other'; // New prop to select mock data
   layout?: 'list' | 'grid';
   style?: import('react-native').ViewStyle;
   onToggle?: (id: string, val: boolean) => void;
@@ -70,7 +23,6 @@ interface DevicesCardProps {
 export const DevicesCard: React.FC<DevicesCardProps> = ({
   title,
   devices,
-  type,
   layout = 'list',
   style,
   onToggle,
@@ -80,8 +32,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
   onSwitchToManual,
 }) => {
   // Determine initial data
-  const initialData =
-    devices || (type === 'feeder' ? MOCK_FEEDERS : type === 'other' ? MOCK_OTHERS : []);
+  const initialData = devices || [];
   const [localDevices, setLocalDevices] = useState<DeviceData[]>(initialData);
 
   // Update local state if props change (optional, but good for robustness)

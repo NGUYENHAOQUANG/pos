@@ -187,8 +187,20 @@ const getBackgroundColor = (device: DeviceColumnData, time: string): string => {
 
 export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
   devices = DEFAULT_DEVICES,
-  currentTime = '01:00', // Matches red line in image
 }) => {
+  const [now, setNow] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
+
   return (
     <View style={styles.container}>
       {/* Legend Component */}
@@ -215,7 +227,17 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {DEFAULT_TIME_SLOTS.map((time, index) => {
             const isFullHour = time.endsWith(':00');
-            const isCurrentTime = time === currentTime;
+
+            // Check if this slot contains the current time
+            const [slotHour, slotMinute] = time.split(':').map(Number);
+            const slotTotalMinutes = slotHour * 60 + slotMinute;
+            const isCurrentSlot =
+              currentTotalMinutes >= slotTotalMinutes &&
+              currentTotalMinutes < slotTotalMinutes + 15;
+
+            // Calculate top offset: (minutes into slot / 15) * 20 (height)
+            const minutesIntoSlot = currentTotalMinutes - slotTotalMinutes;
+            const topOffset = (minutesIntoSlot / 15) * 20;
 
             return (
               <View key={index} style={styles.timeRow}>
@@ -231,16 +253,24 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                   const deviceActivities = device.activities || [];
                   const showIndicator = hasActivity(time, deviceActivities);
 
-                  // Check neighbors for connectivity
+                  // Dynamic background color
+                  const backgroundColor = getBackgroundColor(device, time);
+
+                  // Check neighbors for connectivity AND same background color
                   const prevTime = index > 0 ? DEFAULT_TIME_SLOTS[index - 1] : null;
                   const nextTime =
                     index < DEFAULT_TIME_SLOTS.length - 1 ? DEFAULT_TIME_SLOTS[index + 1] : null;
 
-                  const isPrevActive = prevTime ? hasActivity(prevTime, deviceActivities) : false;
-                  const isNextActive = nextTime ? hasActivity(nextTime, deviceActivities) : false;
+                  const prevBg = prevTime ? getBackgroundColor(device, prevTime) : null;
+                  const nextBg = nextTime ? getBackgroundColor(device, nextTime) : null;
 
-                  // Dynamic background color
-                  const backgroundColor = getBackgroundColor(device, time);
+                  // Active if neighbors have activity AND same background color
+                  const isPrevActive = prevTime
+                    ? hasActivity(prevTime, deviceActivities) && prevBg === backgroundColor
+                    : false;
+                  const isNextActive = nextTime
+                    ? hasActivity(nextTime, deviceActivities) && nextBg === backgroundColor
+                    : false;
 
                   return (
                     <View key={deviceIndex} style={[styles.gridCell, { backgroundColor }]}>
@@ -257,8 +287,8 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                   );
                 })}
 
-                {/* Current time line */}
-                {isCurrentTime && <View style={styles.currentTimeLine} />}
+                {/* Current time line - Absolute over the whole row if this is the current slot */}
+                {isCurrentSlot && <View style={[styles.currentTimeLine, { top: topOffset }]} />}
               </View>
             );
           })}

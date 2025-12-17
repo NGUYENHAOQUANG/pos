@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DatePickerModal } from '../../../home/components/DatePickerModal';
-import { LayoutChangeEvent } from 'react-native';
+// removed LayoutChangeEvent
 import { colors } from '@/styles';
+import CalenderIcon from '@/assets/images/Icon/IconDevices/Calender.svg';
 
 export default function FilterDate() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalVisible, setModalVisible] = useState(false);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [textWidth, setTextWidth] = useState(0);
-
-  const ICON_WIDTH = 26;
 
   const formatDate = (date: Date) => {
     const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
@@ -40,26 +37,12 @@ export default function FilterDate() {
       </TouchableOpacity>
 
       {/* Hiển thị ngày đã chọn */}
-      <TouchableOpacity
-        style={styles.dateDisplay}
-        onPress={() => setModalVisible(true)}
-        onLayout={(e: LayoutChangeEvent) => setContainerWidth(e.nativeEvent.layout.width)}
-      >
-        <Text
-          style={styles.dateText}
-          onLayout={(e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width)}
-        >
+      <TouchableOpacity style={styles.dateDisplay} onPress={() => setModalVisible(true)}>
+        <Text style={styles.dateText} numberOfLines={1} adjustsFontSizeToFit>
           {formatDate(selectedDate)}
         </Text>
 
-        {textWidth + ICON_WIDTH + 32 < containerWidth && (
-          <Ionicons
-            name="calendar-outline"
-            size={18}
-            color={colors.gray[400]}
-            style={styles.icon}
-          />
-        )}
+        <CalenderIcon width={18} height={18} style={styles.icon} />
       </TouchableOpacity>
 
       {/* Nút tiến ngày */}
@@ -85,7 +68,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: 12, // Reduced gap
     backgroundColor: colors.white,
     padding: 16,
     elevation: 2,
@@ -106,7 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 40, // Add padding to centered text to avoid overlap with absolute icon
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
@@ -115,10 +98,12 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     color: colors.text,
-    fontWeight: '500',
+    fontWeight: '400',
+    flexShrink: 1,
+    textAlign: 'center',
   },
   icon: {
     position: 'absolute',
-    right: 16,
+    right: 12,
   },
 });
