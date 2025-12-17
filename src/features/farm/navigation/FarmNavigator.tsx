@@ -7,7 +7,8 @@ import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 import { ShrimpInspectionScreen } from '@/features/farm/screens/shrimp-inspection/ShrimpInspectionScreen';
 import { ShrimpInspectionLogScreen } from '@/features/farm/screens/pondwork/ShrimpInspectionLogScreen';
-
+import { WaterSupplyScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyScreen';
+import { WaterSupplyLogScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyLogScreen';
 export type FarmStackParamList = {
   FarmList: undefined;
   PondDetail: { pond: any };
@@ -18,6 +19,8 @@ export type FarmStackParamList = {
   FarmInfo: { farm: any };
   ShrimpInspection: { pond: any; itemToEdit?: any };
   ShrimpInspectionLog: { pond: any };
+  WaterSupply: { pond?: any; item?: any };
+  WaterSupplyLog: { pond: any };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -44,6 +47,8 @@ export const FarmNavigator = () => {
         <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
         <Stack.Screen name="ShrimpInspection" component={ShrimpInspectionScreen} />
         <Stack.Screen name="ShrimpInspectionLog" component={ShrimpInspectionLogScreen} />
+        <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
+        <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );
