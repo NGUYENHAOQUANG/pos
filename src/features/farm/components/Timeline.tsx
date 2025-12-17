@@ -20,14 +20,20 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
 }) => {
   return (
     <View style={styles.row}>
-      {/* Cột thời gian bên trái */} <Text style={styles.timeText}>{time}</Text>
-      <View style={styles.timeColumn}>
-        <View style={styles.timelineGraphic}>
-          <View style={styles.dot} />
-          <View style={styles.line} />
-        </View>
+      {/* 1. Cột thời gian (Cố định chiều rộng) */}
+      <View style={styles.timeContainer}>
+        <Text style={styles.timeText}>{time}</Text>
       </View>
-      {/* Nội dung Card bên phải */}
+
+      {/* 2. Cột Graphic (Line + Dot) */}
+      <View style={styles.graphicColumn}>
+        {/* Continuous Line */}
+        <View style={styles.line} />
+        {/* Dot on top */}
+        <View style={styles.dot} />
+      </View>
+
+      {/* 3. Nội dung Card bên phải */}
       <View style={styles.contentColumn}>
         <ActivityCard title={title} data={data} onEdit={onEdit} note={note} />
       </View>
@@ -38,20 +44,35 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
+    alignItems: 'stretch', // Ensure columns stretch full height
   },
-  timeColumn: {
-    width: 60,
-    alignItems: 'center',
+  timeContainer: {
+    width: 50,
+    alignItems: 'flex-end',
     paddingRight: 8,
+    paddingTop: 0,
   },
   timeText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '400',
+    color: colors.text,
+    textAlign: 'right',
+    lineHeight: 18, // Fixed line height for easier alignment
   },
-  timelineGraphic: {
+  graphicColumn: {
+    width: 20,
     alignItems: 'center',
-    flex: 1,
+    position: 'relative', // For absolute line
+  },
+  line: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: colors.gray[200],
+    left: '50%',
+    marginLeft: -1, // Center the 2px line
+    zIndex: 0,
   },
   dot: {
     width: 10,
@@ -61,15 +82,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.gray[300],
     zIndex: 1,
-  },
-  line: {
-    width: 2,
-    flex: 1,
-    backgroundColor: colors.gray[200],
-    marginTop: -2,
+    marginTop: 4, // Align with text: lineHeight 18 -> center ~9. Dot 10 -> center 5. Top ~4.
   },
   contentColumn: {
     flex: 1,
     paddingBottom: 16,
+    paddingLeft: 8,
   },
 });

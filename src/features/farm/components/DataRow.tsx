@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text,
     flex: 1,
   },
   valueWrapper: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '400',
     color: colors.text,
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { colors } from '@/styles/colors';
+import EditIcon from '@/assets/images/Icon/IconFarm/Edit.svg';
 
 interface CardHeaderProps {
   title: string;
@@ -15,7 +15,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ title, onEdit, style }) 
       <Text style={styles.title}>{title}</Text>
       {onEdit && (
         <TouchableOpacity onPress={onEdit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Icon name="edit-2" size={16} color={colors.textSecondary} />
+          <EditIcon style={styles.editIcon} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
     </View>
@@ -37,5 +37,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: colors.text,
+  },
+  editIcon: {
+    width: '100%',
+    height: '100%',
   },
 });

@@ -57,6 +57,12 @@ export const colors = {
     300: '#FFADD2',
     600: '#EB2F96',
   },
+  red: {
+    50: '#FFF0F6',
+    300: '#FFADD2',
+    600: '#EB2F96',
+    900: '#FF4D4F',
+  },
   // Semantic colors
   success: '#34C759',
   warning: '#FF9500',

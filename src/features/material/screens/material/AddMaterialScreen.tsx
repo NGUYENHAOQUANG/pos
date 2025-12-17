@@ -64,7 +64,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
             onTypeChange={setType}
             unit={unit}
             onUnitChange={setUnit}
-            unitOptions={['Kg', 'G', 'Lít', 'Ml', 'Bao', 'Gói']}
+            unitOptions={['Kg', 'Lít', 'ml', 'g', 'mg']}
             usage={usage}
             onUsageChange={setUsage}
             unitOfUse={unitOfUse}
