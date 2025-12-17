@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 
 interface CollapseHeadProps {
   title: string;
@@ -42,16 +42,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
     borderRadius: 8,
   },
   title: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '400',
+    lineHeight: 22,
     color: colors.text,
     flex: 1,
-    marginRight: 8,
   },
 });

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { IconCalender, IconCloseOutlined } from '@/assets/icons';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
@@ -36,7 +36,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   onSelectActivity,
 }) => {
   return (
-    <ShrimpInspectionInfoBox title="Thông tin chung">
+    <SelectionInfoBox title="Thông tin chung">
       {/* Thời gian thực hiện */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Thời gian thực hiện</Text>
@@ -114,7 +114,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
           </View>
         </View>
       )}
-    </ShrimpInspectionInfoBox>
+    </SelectionInfoBox>
   );
 };
 

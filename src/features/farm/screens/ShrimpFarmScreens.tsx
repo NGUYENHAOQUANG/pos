@@ -80,7 +80,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
 
     // For shrimp inspection, go to inspection screen to enter details
     if (type === 'SHRIMP_INSPECTION') {
-      navigation.navigate('ShrimpInspection', { pond });
+      navigation.navigate('ShrimpInspectionScreen', { pond });
+      return;
+    }
+
+    if (type === 'ENVIRONMENT') {
+      navigation.navigate('AddEnvironmentScreen', { pond });
       return;
     }
 
@@ -120,7 +125,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
 
     // For shrimp inspection, navigate to edit screen
     if (type === 'SHRIMP_INSPECTION') {
-      navigation.navigate('ShrimpInspection', { pond, itemToEdit: item });
+      navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === 'ENVIRONMENT') {
+      navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
       return;
     }
 
@@ -138,9 +148,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
     if (type === 'SHRIMP_INSPECTION' && pond) {
-      navigation.navigate('ShrimpInspectionLog', { pond });
+      navigation.navigate('PondworkLogScreen', { pond });
     }
-    console.log(`Pressed ${type}`);
+    if (type === 'ENVIRONMENT' && pond) {
+      navigation.navigate('EnvironmentLogScreen', { pond });
+    }
   };
 
   return (

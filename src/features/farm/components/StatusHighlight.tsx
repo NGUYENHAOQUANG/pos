@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
+import { IconWarningOutlined } from '@/assets/icons';
 
 interface StatusHighlightProps {
   label: string;
@@ -18,7 +18,7 @@ export const StatusHighlight: React.FC<StatusHighlightProps> = ({ label, value, 
         <Text style={styles.value}>
           {value} {unit}
         </Text>
-        <Ionicons name="warning-outline" size={14} color={colors.warning} style={styles.icon} />
+        <IconWarningOutlined width={16} height={16} style={styles.icon} />
       </View>
     </View>
   );
@@ -29,16 +29,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.schedule.schedule,
+    backgroundColor: '#FFFBE6',
     paddingVertical: 4,
     paddingHorizontal: 8,
-    marginTop: 4,
-    marginBottom: 4,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: colors.warning,
+    fontWeight: '400',
+    color: colors.orange[500],
+    lineHeight: 22,
   },
   valueContainer: {
     flexDirection: 'row',
@@ -46,10 +45,11 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    fontWeight: '700',
-    color: colors.warning,
+    fontWeight: '400',
+    color: colors.orange[500],
+    lineHeight: 22,
   },
   icon: {
-    marginLeft: 6,
+    marginLeft: 8,
   },
 });

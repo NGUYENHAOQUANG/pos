@@ -5,8 +5,11 @@ import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondLi
 import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
-import { ShrimpInspectionScreen } from '@/features/farm/screens/shrimp-inspection/ShrimpInspectionScreen';
-import { ShrimpInspectionLogScreen } from '@/features/farm/screens/pondwork/ShrimpInspectionLogScreen';
+import { ShrimpInspectionScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionScreen';
+import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionLogScreen';
+import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
+import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment/SettingEnvironment';
+import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -16,8 +19,11 @@ export type FarmStackParamList = {
   FeedingLog: { pondId: string };
   PondInfo: { pond: any };
   FarmInfo: { farm: any };
-  ShrimpInspection: { pond: any; itemToEdit?: any };
-  ShrimpInspectionLog: { pond: any };
+  ShrimpInspectionScreen: { pond: any; itemToEdit?: any };
+  PondworkLogScreen: { pond: any };
+  AddEnvironmentScreen: { pond: any; itemToEdit?: any };
+  SettingEnvironment: undefined;
+  EnvironmentLogScreen: { pond: any };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -42,8 +48,11 @@ export const FarmNavigator = () => {
         <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
         <Stack.Screen name="PondInfo" component={PondInfoScreen} />
         <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
-        <Stack.Screen name="ShrimpInspection" component={ShrimpInspectionScreen} />
-        <Stack.Screen name="ShrimpInspectionLog" component={ShrimpInspectionLogScreen} />
+        <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
+        <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
+        <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
+        <Stack.Screen name="SettingEnvironment" component={SettingEnvironment} />
+        <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );

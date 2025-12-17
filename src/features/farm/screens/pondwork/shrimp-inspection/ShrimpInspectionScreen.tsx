@@ -27,16 +27,16 @@ import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { GeneralInfoBox } from '@/features/farm/components/GeneralInfoBox';
-import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionFoodCheckBox';
-import { ShrimpInspectionObservationBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionObservationBox';
-import { ShrimpInspectionNotesBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionNotesBox';
+import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
+import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
+import { SelectionNotesBox } from '@/features/farm/components/pondwork/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { ImagePreviewModal } from '@/features/farm/components/shrimp-inspection/ImagePreviewModal';
+import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { IconTrashOutlined } from '@/assets/icons';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspection'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
 
 export const ShrimpInspectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -82,9 +82,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
   // Hide tab bar when this screen is mounted
   useEffect(() => {
     setTabBarVisible(false);
-    return () => {
-      setTabBarVisible(true);
-    };
   }, [setTabBarVisible]);
 
   const handleBack = () => {
@@ -351,7 +348,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         />
 
         {/* Ghi chú Box */}
-        <ShrimpInspectionNotesBox notes={notes} onNotesChange={setNotes} />
+        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
       </ScrollView>
 
       {/* Footer Buttons */}
