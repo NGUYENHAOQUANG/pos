@@ -67,6 +67,7 @@ export const colors = {
   success: '#34C759',
   warning: '#FF9500',
   error: '#FF3B30',
+  errorBackground: '#FFF1F0', // Light error background
   info: '#007AFF',
 
   // Background colors
@@ -76,22 +77,27 @@ export const colors = {
   backgroundTertiary: '#F3F4F6',
   backgroundButton: '#F9FAFB',
   backgroundIconBtn: '#FAFAFA',
+  backgroundSubtle: '#00000005', // Very light black background (5% opacity)
 
   // Text colors
   text: '#000000E0',
   textSecondary: '#6B7280',
   textTertiary: '#9CA3AF',
+  textMuted: '#000000A6', // Text with reduced opacity (65% opacity)
   textInverse: '#FFFFFF',
 
   // Border colors
   defaultBorder: '#DEE4ED',
   border: '#E5E7EB',
+  borderMedium: '#E2E8F0', // Medium border color
   borderLight: '#F3F4F6',
   borderDark: '#D1D5DB',
+  borderSubtle: '#00000040', // Subtle black border (40% opacity)
 
   // Utilities
   shadow: '#000000',
   overlay: 'rgba(0, 0, 0, 0.5)',
+  overlayLight: 'rgba(0, 0, 0, 0.45)', // Lighter overlay for modals
 
   // Status colors (for DevicesStatus)
   status: {
@@ -104,6 +110,9 @@ export const colors = {
     // Warning - Red
     warningText: '#D32F2F',
     warningBg: '#FFEBEE',
+    // Warning highlight (yellow background for warnings like pH)
+    warningHighlightBg: '#FFFBE6',
+    warningHighlightText: '#D48806', // Using orange[500]
     // Other - Gray
     otherText: '#1F2937',
     otherBg: '#F9FAFB',

@@ -69,7 +69,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: colors.overlayLight,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 0,
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.borderMedium,
     justifyContent: 'center',
     alignItems: 'center',
   },

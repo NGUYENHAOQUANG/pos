@@ -1,19 +1,16 @@
 import React from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
-interface ShrimpInspectionNotesBoxProps {
+interface SelectionNotesBoxProps {
   notes: string;
   onNotesChange: (value: string) => void;
 }
 
-export const ShrimpInspectionNotesBox: React.FC<ShrimpInspectionNotesBoxProps> = ({
-  notes,
-  onNotesChange,
-}) => {
+export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onNotesChange }) => {
   return (
-    <ShrimpInspectionInfoBox title="Ghi chú">
+    <SelectionInfoBox title="Ghi chú">
       <View style={styles.inputGroup}>
         <TextInput
           style={styles.textArea}
@@ -25,7 +22,7 @@ export const ShrimpInspectionNotesBox: React.FC<ShrimpInspectionNotesBoxProps> =
           textAlignVertical="top"
         />
       </View>
-    </ShrimpInspectionInfoBox>
+    </SelectionInfoBox>
   );
 };
 
