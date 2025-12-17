@@ -38,7 +38,7 @@ export default function FilterDate() {
 
       {/* Hiển thị ngày đã chọn */}
       <TouchableOpacity style={styles.dateDisplay} onPress={() => setModalVisible(true)}>
-        <Text style={styles.dateText} numberOfLines={1} adjustsFontSizeToFit>
+        <Text style={styles.dateText} numberOfLines={1}>
           {formatDate(selectedDate)}
         </Text>
 
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 40, // Add padding to centered text to avoid overlap with absolute icon
+    paddingHorizontal: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
