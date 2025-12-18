@@ -1,21 +1,26 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  StyleProp,
+  Dimensions,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { SvgProps } from 'react-native-svg';
 import { ButtonControlMode } from './ButtonControlMode';
 import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
-import { EControlMode } from '../../types/control.types';
+import { DeviceData } from '../../types/control.types';
 import { colors } from '@/styles/colors';
+import { AutoScrollText } from './AutoScrollText';
 
-export interface DeviceData {
-  id: string;
-  name: string;
-  icon: React.FC<SvgProps>;
-  mode: EControlMode;
-  isOn: boolean;
-  errorMessage?: string;
-}
+// Responsive Scaling Helper
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BASE_WIDTH = 375; // Standard design width (e.g., iPhone X/11/12/13/14 Pro)
+const scaleFactor = Math.min(SCREEN_WIDTH / BASE_WIDTH, 1.2); // Cap scaling to avoid excessive size on tablets
+
+const s = (size: number) => Math.round(size * scaleFactor);
 
 export interface DeviceCardProps {
   data: DeviceData;
@@ -51,6 +56,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 
   const Icon = data.icon;
 
+  if (!Icon) return null;
+
   return (
     <View style={[containerStyle, style]}>
       {/* Left Content: Icon & Name */}
@@ -59,11 +66,11 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           icon={Icon}
           isOn={data.isOn}
           errorMessage={data.errorMessage}
-          size={48}
+          size={s(48)}
         />
         <View style={styles.infoContainer}>
           {data.errorMessage && <Text style={styles.errorText}>{data.errorMessage}</Text>}
-          <Text style={styles.deviceName}>{data.name}</Text>
+          <AutoScrollText text={data.name} style={styles.deviceName} />
         </View>
       </View>
 
@@ -77,18 +84,20 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           onPress={() => onSettingsPress?.(data.id)}
           activeOpacity={0.7}
         >
-          <Ionicons name="settings-outline" size={18} color={colors.gray[600]} />
+          <Ionicons name="settings-outline" size={s(18)} color={colors.gray[600]} />
         </TouchableOpacity>
 
+        {/* Buttons with Scale Transform for small screens */}
         <ButtonControlMode
           mode={data.mode}
           onPress={() => onModePress?.(data.id)}
-          style={styles.modeButton}
+          style={styles.scaledButton}
         />
         <ButtonDevices
           value={data.isOn}
           onValueChange={val => onToggle(data.id, val)}
           trackColor={switchTrackColor}
+          style={styles.scaledButton}
         />
       </View>
     </View>
@@ -98,8 +107,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: s(16),
+    padding: s(12),
     borderWidth: 1,
     borderColor: colors.border,
     width: '100%', // Fill the grid wrapper
@@ -122,22 +131,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     height: '100%',
-    paddingRight: 60, // Avoid overlap with absolute right items
+    paddingRight: s(60), // Avoid overlap with absolute right items
   },
   icon: {
-    width: 48,
-    height: 48,
+    width: s(48),
+    height: s(48),
   },
   infoContainer: {
     justifyContent: 'flex-end',
   },
   deviceName: {
-    fontSize: 14,
+    fontSize: s(14),
     fontWeight: '400',
     color: colors.text,
   },
   errorText: {
-    fontSize: 13,
+    fontSize: s(13),
     color: colors.error,
     fontWeight: '500',
     marginBottom: 2,
@@ -146,25 +155,28 @@ const styles = StyleSheet.create({
   // Right Control Container
   rightControlContainer: {
     position: 'absolute',
-    top: 12,
-    bottom: 12,
-    right: 12,
+    top: s(12),
+    bottom: s(12),
+    right: s(12),
     justifyContent: 'space-between',
     alignItems: 'flex-end', // Align all items to the right edge
     zIndex: 1,
-    width: 66,
+    width: s(66), // Scale the container width too
   },
   modeButton: {
     // marginBottom removed as space-between handles it
   },
   settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: s(40),
+    height: s(40),
+    borderRadius: s(8),
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  scaledButton: {
+    transform: [{ scale: scaleFactor < 1 ? scaleFactor : 1 }],
   },
 });

@@ -110,6 +110,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond });
+      return;
+    }
+
     const currentItems = getPondJobItems(pond.id, type);
 
     // Calculate next index based on max existing label
@@ -155,6 +160,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
+      return;
+    }
+
     const itemToEdit = item; // Alias for compatibility with below code if needed
 
     // For other job types, keep the delete behavior (or implement edit later)
@@ -173,6 +183,9 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     }
     if (type === JOB_TYPES.ENVIRONMENT && pond) {
       navigation.navigate('EnvironmentLogScreen', { pond });
+    }
+    if (type === JOB_TYPES.SIPHON && pond) {
+      navigation.navigate('SiphonLog', { pond });
     }
   };
 

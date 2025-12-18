@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,18 +9,23 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
-import { useFarm } from '@/features/farm/context/FarmContext';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
-import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
-import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
+import { SiphonLossBox } from '@/features/farm/components/pondwork/xyphon/SiphonLossBox';
+import {
+  MaterialSelectionBox,
+  SelectedMaterialItem,
+} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { IMaterial } from '@/features/material/types/material.types';
+import { useFarm } from '@/features/farm/context/FarmContext';
+import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddSiphonScreen'>;
 
-export const ShrimpInspectionScreen: React.FC = () => {
+export const AddSiphonScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { pond, itemToEdit } = route.params || {};
@@ -29,16 +34,16 @@ export const ShrimpInspectionScreen: React.FC = () => {
   const { getPondJobItems, updatePondJob } = useFarm();
 
   // Initialize state from itemToEdit if available
-  const meta = useMemo(() => itemToEdit?.meta || {}, [itemToEdit?.meta]);
-  const [selectedDate, setSelectedDate] = useState(meta.date ? new Date(meta.date) : new Date());
-  const [foodAmount, setFoodAmount] = useState(meta.foodAmount || '');
-  const [leftoverFood, setLeftoverFood] = useState(meta.leftoverFood || 'Hết');
-  const [intestine, setIntestine] = useState(meta.intestine || 'Đầy');
-  const [intestineColor, setIntestineColor] = useState(meta.intestineColor || 'Màu thức ăn');
-  const [stoolColor, setStoolColor] = useState(meta.stoolColor || 'Màu thức ăn');
-  const [liver, setLiver] = useState(meta.liver || 'Bình thường');
-  const [notes, setNotes] = useState(meta.notes || '');
+  const meta = useMemo(() => (itemToEdit?.meta as SiphonMeta) || {}, [itemToEdit?.meta]);
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    meta.date ? new Date(meta.date) : new Date()
+  );
+  const [lossAmount, setLossAmount] = useState<string>(meta.lossAmount || '');
+  const [notes, setNotes] = useState<string>(meta.notes || '');
   const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
+  const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>(
+    itemToEdit?.materials || []
+  );
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // Store initial data for comparison when editing
@@ -46,16 +51,20 @@ export const ShrimpInspectionScreen: React.FC = () => {
     if (!itemToEdit) return null;
     return {
       date: meta.date ? new Date(meta.date) : new Date(),
-      foodAmount: meta.foodAmount || '',
-      leftoverFood: meta.leftoverFood || 'Hết',
-      intestine: meta.intestine || 'Đầy',
-      intestineColor: meta.intestineColor || 'Màu thức ăn',
-      stoolColor: meta.stoolColor || 'Màu thức ăn',
-      liver: meta.liver || 'Bình thường',
+      lossAmount: meta.lossAmount || '',
       notes: meta.notes || '',
       images: meta.images || [],
+      materials: itemToEdit.materials || [],
     };
   }, [itemToEdit, meta]);
+
+  // Mock materials (replace with real data or API later)
+  const MOCK_MATERIALS: IMaterial[] = [
+    { id: '1', name: 'Thức ăn tôm thẻ', group: 'Nuôi', unit: 'kg', remaining: 100 },
+    { id: '2', name: 'Khoáng tạt', group: 'Nuôi', unit: 'kg', remaining: 50 },
+    { id: '3', name: 'Vôi nóng', group: 'Nuôi', unit: 'kg', remaining: 200 },
+    { id: '4', name: 'Khoáng tạc', group: 'Nuôi', unit: 'kg', remaining: 0 },
+  ];
 
   // Hide tab bar when this screen is mounted
   useEffect(() => {
@@ -68,51 +77,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    if (pond?.id) {
-      const currentItems = getPondJobItems(pond.id, 'SHRIMP_INSPECTION');
-      const timeString = selectedDate.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-
-      const itemData = {
-        label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
-        time: timeString,
-        meta: {
-          date: selectedDate,
-          foodAmount,
-          leftoverFood,
-          intestine,
-          intestineColor,
-          stoolColor,
-          liver,
-          notes,
-          images: imageUris,
-        },
-      };
-
-      if (itemToEdit) {
-        // Update existing item
-        const updatedItems = currentItems.map(item =>
-          item.id === itemToEdit.id ? { ...item, ...itemData } : item
-        );
-        updatePondJob(pond.id, 'SHRIMP_INSPECTION', updatedItems);
-      } else {
-        // Create new item
-        const nextIndex = currentItems.length + 1;
-        const newItem = {
-          id: Date.now().toString(),
-          ...itemData,
-          label: `Lần ${nextIndex}`,
-        };
-        updatePondJob(pond.id, 'SHRIMP_INSPECTION', [...currentItems, newItem]);
-      }
-    }
-
-    navigation.goBack();
-  };
-
   const handleCancel = () => {
     navigation.goBack();
   };
@@ -123,9 +87,9 @@ export const ShrimpInspectionScreen: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (pond?.id && itemToEdit) {
-      const currentItems = getPondJobItems(pond.id, 'SHRIMP_INSPECTION');
+      const currentItems = getPondJobItems(pond.id, 'SIPHON');
       const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
-      updatePondJob(pond.id, 'SHRIMP_INSPECTION', updatedItems);
+      updatePondJob(pond.id, 'SIPHON', updatedItems);
       setDeleteModalVisible(false);
       navigation.goBack();
     }
@@ -134,9 +98,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
   const handleCancelDelete = () => {
     setDeleteModalVisible(false);
   };
-
-  // Check if form is filled completely (foodAmount is required only when creating new)
-  const isFormComplete = itemToEdit ? true : foodAmount.trim().length > 0;
 
   // Check if data has changed from initial (when editing)
   const hasChanges = useMemo(() => {
@@ -148,38 +109,80 @@ export const ShrimpInspectionScreen: React.FC = () => {
     if (currentDateStr !== initialDateStr) return true;
 
     // Compare other fields
-    if (foodAmount !== initialData.foodAmount) return true;
-    if (leftoverFood !== initialData.leftoverFood) return true;
-    if (intestine !== initialData.intestine) return true;
-    if (intestineColor !== initialData.intestineColor) return true;
-    if (stoolColor !== initialData.stoolColor) return true;
-    if (liver !== initialData.liver) return true;
+    if (lossAmount !== initialData.lossAmount) return true;
     if (notes !== initialData.notes) return true;
 
-    // Compare images array
-    if (imageUris.length !== initialData.images.length) return true;
-    const imagesChanged = imageUris.some((uri, index) => uri !== initialData.images[index]);
-    if (imagesChanged) return true;
+    // Compare images arrays
+    if (JSON.stringify(imageUris) !== JSON.stringify(initialData.images)) return true;
+
+    // Compare materials arrays
+    if (JSON.stringify(selectedMaterials) !== JSON.stringify(initialData.materials)) return true;
 
     return false;
-  }, [
-    itemToEdit,
-    initialData,
-    selectedDate,
-    foodAmount,
-    leftoverFood,
-    intestine,
-    intestineColor,
-    stoolColor,
-    liver,
-    notes,
-    imageUris,
-  ]);
+  }, [itemToEdit, initialData, selectedDate, lossAmount, notes, imageUris, selectedMaterials]);
 
-  const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
-
-  // Only show disabled background style when editing and no changes
+  const isButtonDisabled = itemToEdit && !hasChanges;
   const shouldShowDisabledStyle = itemToEdit && !hasChanges;
+
+  const handleSave = () => {
+    if (!pond?.id) {
+      navigation.goBack();
+      return;
+    }
+
+    const pondId = pond.id;
+    const currentItems = getPondJobItems(pondId, 'SIPHON');
+
+    // Time & date formatting (reuse pattern from feeding)
+    const timeString = selectedDate.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const dateString = selectedDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+
+    const baseData = {
+      label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
+      time: timeString,
+      date: dateString,
+      materials: selectedMaterials,
+      meta: {
+        ...(itemToEdit?.meta || {}),
+        date: selectedDate,
+        lossAmount,
+        notes: notes || undefined,
+        images: imageUris,
+      } as SiphonMeta,
+    };
+
+    if (itemToEdit) {
+      // Update existing SIPHON job
+      const updatedItems = currentItems.map(item =>
+        item.id === itemToEdit.id ? { ...item, ...baseData } : item
+      );
+      updatePondJob(pondId, 'SIPHON', updatedItems);
+    } else {
+      // Create new SIPHON job with proper next index
+      let maxIndex = 0;
+      currentItems.forEach(item => {
+        const match = item.label.match(/Lần (\d+)/);
+        if (match) {
+          const index = parseInt(match[1], 10);
+          if (index > maxIndex) maxIndex = index;
+        }
+      });
+      const nextIndex = maxIndex + 1;
+
+      const newItem = {
+        id: Date.now().toString(),
+        ...baseData,
+        label: `Lần ${nextIndex}`,
+      };
+
+      updatePondJob(pondId, 'SIPHON', [...currentItems, newItem]);
+    }
+
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
@@ -188,7 +191,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Kiểm tra tôm</Text>
+        <Text style={styles.headerTitle}>Xi-Phông</Text>
         {itemToEdit ? (
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
             <IconTrashOutlined width={18} height={18} />
@@ -199,37 +202,23 @@ export const ShrimpInspectionScreen: React.FC = () => {
       </View>
 
       {/* Content */}
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent]}>
-        {/* Thông tin chung Box */}
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <GeneralInfoBox
+          type="withImage"
           date={selectedDate}
           onDateChange={setSelectedDate}
-          type="withImage"
           imageUris={imageUris}
           onImagesChange={setImageUris}
         />
 
-        {/* Kiểm tra thức ăn Box */}
-        <ShrimpInspectionFoodCheckBox
-          foodAmount={foodAmount}
-          onFoodAmountChange={setFoodAmount}
-          leftoverFood={leftoverFood}
-          onLeftoverFoodChange={setLeftoverFood}
+        <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
+
+        <MaterialSelectionBox
+          selectedMaterials={selectedMaterials}
+          onMaterialsChange={setSelectedMaterials}
+          materials={MOCK_MATERIALS}
         />
 
-        {/* Quan sát mẫu Box */}
-        <ShrimpInspectionObservationBox
-          intestine={intestine}
-          onIntestineChange={setIntestine}
-          intestineColor={intestineColor}
-          onIntestineColorChange={setIntestineColor}
-          stoolColor={stoolColor}
-          onStoolColorChange={setStoolColor}
-          liver={liver}
-          onLiverChange={setLiver}
-        />
-
-        {/* Ghi chú Box */}
         <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
       </ScrollView>
 
@@ -241,7 +230,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
           secondaryTitle="Huỷ"
           onPrimaryPress={handleSave}
           onSecondaryPress={handleCancel}
-          primaryButtonDisabled={itemToEdit ? isButtonDisabled : false}
+          primaryButtonDisabled={isButtonDisabled}
           primaryButtonStyle={shouldShowDisabledStyle ? styles.disabledButton : undefined}
           primaryButtonTextStyle={shouldShowDisabledStyle ? styles.disabledButtonText : undefined}
         />
@@ -282,16 +271,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  deleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.error,
-  },
   headerTitle: {
     flex: 1,
     fontSize: 18,
@@ -301,6 +280,16 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.error,
   },
   scrollView: {
     flex: 1,
@@ -312,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingTop: spacing.md,
+    paddingTop: 12 - 4,
     paddingBottom: spacing.xs,
   },
   disabledButton: {
