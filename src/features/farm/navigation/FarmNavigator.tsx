@@ -11,6 +11,8 @@ import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspe
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
 import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment/SettingEnvironment';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
+import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
+import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -25,6 +27,8 @@ export type FarmStackParamList = {
   AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
   SettingEnvironment: undefined;
   EnvironmentLogScreen: { pond: PondData };
+  AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
+  SiphonLog: { pond: PondData };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -54,6 +58,8 @@ export const FarmNavigator = () => {
         <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
         <Stack.Screen name="SettingEnvironment" component={SettingEnvironment} />
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
+        <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
+        <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );
