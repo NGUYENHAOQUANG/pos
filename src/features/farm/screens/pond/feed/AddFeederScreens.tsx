@@ -11,13 +11,15 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+import {
+  MaterialSelectionBox,
+  SelectedMaterialItem,
+} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 
 // Mock data (replace with real data or API later)
 const MOCK_MATERIALS: IMaterial[] = [
@@ -26,12 +28,6 @@ const MOCK_MATERIALS: IMaterial[] = [
   { id: '3', name: 'Vôi nóng', group: 'Nuôi', unit: 'kg', remaining: 200 },
   { id: '4', name: 'Khoáng tạc', group: 'Nuôi', unit: 'kg', remaining: 0 },
 ];
-
-interface SelectedMaterialItem {
-  material: IMaterial;
-  quantity: number;
-  unit: string;
-}
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'FeedTheShrimp'>;
 
@@ -42,7 +38,6 @@ export const AddFeederScreens = () => {
   const { updatePondJob, getPondJobItems } = useFarm();
 
   const [note, setNote] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false);
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
   const [executionDate, setExecutionDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -67,15 +62,6 @@ export const AddFeederScreens = () => {
     newDate.setMonth(date.getMonth());
     newDate.setDate(date.getDate());
     setExecutionDate(newDate);
-  };
-
-  const handleAddMaterial = (data: SelectedMaterialItem) => {
-    // Add new item to the list
-    setSelectedMaterials(prev => [...prev, data]);
-  };
-
-  const handleRemoveMaterial = (index: number) => {
-    setSelectedMaterials(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSaveInfo = () => {
@@ -150,41 +136,11 @@ export const AddFeederScreens = () => {
 
           {/* Select Material Section */}
           <View style={styles.section}>
-            <Text style={styles.label}>
-              <Text style={styles.required}>* </Text>
-              Chọn vật tư
-            </Text>
-            <View style={styles.divider} />
-
-            {/* List of selected materials */}
-            {selectedMaterials.length > 0 && (
-              <View style={styles.materialList}>
-                {selectedMaterials.map((item, index) => (
-                  <View key={`${item.material.id}-${index}`} style={styles.materialItem}>
-                    <Text style={styles.materialName}>{item.material.name}</Text>
-                    <View style={styles.materialActions}>
-                      <View style={styles.quantityBox}>
-                        <Text style={styles.quantityText}>
-                          {item.quantity}
-                          {item.unit}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => handleRemoveMaterial(index)}
-                        style={styles.deleteButton}
-                      >
-                        <DeleteIcon width={18} height={18} />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-              <Ionicons name="add" size={20} color={colors.primary} />
-              <Text style={styles.addButtonText}>Thêm vật tư</Text>
-            </TouchableOpacity>
+            <MaterialSelectionBox
+              selectedMaterials={selectedMaterials}
+              onMaterialsChange={setSelectedMaterials}
+              materials={MOCK_MATERIALS}
+            />
           </View>
 
           {/* Note Section */}
@@ -221,12 +177,6 @@ export const AddFeederScreens = () => {
         onClose={() => setShowDatePicker(false)}
         date={executionDate}
         onSelectDate={handleDateSelect}
-      />
-      <SelectMaterial
-        isVisible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={handleAddMaterial}
-        materials={MOCK_MATERIALS}
       />
     </View>
   );
@@ -355,50 +305,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.white,
-  },
-  materialList: {
-    marginBottom: spacing.md,
-  },
-  materialItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  materialName: {
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  materialActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityBox: {
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.md,
-    height: 40,
-    width: 110,
-    marginRight: spacing.sm,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  quantityText: {
-    fontSize: 16,
-    color: colors.text,
-  },
-  deleteButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.sm,
   },
   spacer: {
     height: 80,

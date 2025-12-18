@@ -70,5 +70,13 @@ export interface EnvironmentMeta {
   notes?: string;
 }
 
+// Siphon Meta
+export interface SiphonMeta {
+  date?: Date | string;
+  lossAmount?: string;
+  images?: string[];
+  notes?: string;
+}
+
 // Union type for all meta types
-export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta;
+export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta;

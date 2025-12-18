@@ -2,8 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { FarmProvider, JobExecution } from '@/features/farm/context/FarmContext';
 import { PondData, FarmData } from '@/features/farm/types/farm.types';
-import { ShrimpPondListScreens } from '../screens/pond/ShrimpPondListScreens';
-import { ShrimpFarmScreens } from '../screens/ShrimpFarmScreens';
+import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
+import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 import { ShrimpInspectionScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionScreen';
@@ -11,7 +11,9 @@ import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspe
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
 import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment/SettingEnvironment';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
-import { CreateCycleScreen } from '../screens/pond/CreateCycleScreen';
+import { CreateCycleScreen } from '@/features/farm/screens/pond/CreateCycleScreen';
+import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
+import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -27,6 +29,8 @@ export type FarmStackParamList = {
   SettingEnvironment: undefined;
   EnvironmentLogScreen: { pond: PondData };
   CreateCycle: { pondId: string };
+  AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
+  SiphonLog: { pond: PondData };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -34,8 +38,6 @@ const Stack = createNativeStackNavigator<FarmStackParamList>();
 import { AddFeederScreens } from '@/features/farm/screens/pond/feed/AddFeederScreens';
 import { EditFeederScreens } from '@/features/farm/screens/pond/feed/EditFeederScreens';
 import { FeedingLogScreens } from '@/features/farm/screens/pond/feed/FeedingLogScreens';
-
-
 export const FarmNavigator = () => {
   return (
     <FarmProvider>
@@ -59,6 +61,9 @@ export const FarmNavigator = () => {
         <Stack.Screen name="SettingEnvironment" component={SettingEnvironment} />
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
         <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
+        <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
+        <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
+
       </Stack.Navigator>
     </FarmProvider>
   );

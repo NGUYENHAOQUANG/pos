@@ -1,86 +1,52 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  TouchableHighlight,
+} from 'react-native';
 import { HeaderDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
-import { colors, spacing } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import CustomFeedingMachine from '../CustomFeedingMachine/CustomFeedingMachineScreen';
-import { DeviceData } from '../../components/devices/Devices';
-import { EControlMode } from '../../types/control.types';
+import { EControlMode, DeviceData } from '../../types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
-import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useControl } from '../../context/ControlContext';
 
-// Mock Data (moved from DevicesCard)
-const MOCK_FEEDERS: DeviceData[] = [
-  {
-    id: 'f1',
-    name: 'Máy cho ăn',
-    icon: FeederIcon,
-    mode: EControlMode.MANUAL,
-    isOn: true,
-  },
-];
-
-const MOCK_OTHERS: DeviceData[] = [
-  {
-    id: 'o1',
-    name: 'Quạt nước 1',
-    icon: FanIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: true,
-  },
-  {
-    id: 'o2',
-    name: 'Quạt nước 2',
-    icon: FanIcon,
-    mode: EControlMode.LOCAL,
-    isOn: true,
-  },
-  {
-    id: 'o3',
-    name: 'Máy thổi khí',
-    icon: OxyIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: true,
-    errorMessage: 'Bị mất khí!',
-  },
-  {
-    id: 'o4',
-    name: 'Syphon',
-    icon: SyphonIcon,
-    mode: EControlMode.SCHEDULE,
-    isOn: false,
-  },
-];
+// Removed Mocks
 
 interface DevicesInPondScreensProps {
   // onBack?: () => void;
   // pondName?: string;
 }
 
-type ViewMode = 'list' | 'customFeeding'; // Removed schedule/history from internal state
+type ViewMode = 'list' | 'customFeeding';
 
 export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
   const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
   const { pondName = 'Ao 1' } = route.params || {};
 
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [feeders, setFeeders] = useState<DeviceData[]>(MOCK_FEEDERS);
-  const [otherDevices, setOtherDevices] = useState<DeviceData[]>(MOCK_OTHERS);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const { ponds, toggleDevice } = useControl();
+  const currentPond = ponds.find(p => p.name === pondName);
+  const allDevices = currentPond?.devices || [];
 
-  // Show Custom Feeding Machine Screen (Keep as internal modal for now or move to stack properly later if needed)
+  const feeders: DeviceData[] = allDevices.filter(d => d.type === 'feeder');
+  const otherDevices: DeviceData[] = allDevices.filter(d => d.type !== 'feeder');
+
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [showAddPopup, setShowAddPopup] = useState(false);
+
+  // Show Custom Feeding Machine Screen
   if (viewMode === 'customFeeding') {
-    // ... same logic
-    const selectedDevice =
-      feeders.find(d => d.id === selectedDeviceId) ||
-      otherDevices.find(d => d.id === selectedDeviceId);
+    const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
     const initialMode = selectedDevice?.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual';
 
     return (
@@ -91,18 +57,8 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
           setSelectedDeviceId(null);
         }}
         onSave={newMode => {
-          // ... same logic
-          const updatedMode = newMode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
-
-          if (feeders.some(d => d.id === selectedDeviceId)) {
-            setFeeders(prev =>
-              prev.map(d => (d.id === selectedDeviceId ? { ...d, mode: updatedMode } : d))
-            );
-          } else {
-            setOtherDevices(prev =>
-              prev.map(d => (d.id === selectedDeviceId ? { ...d, mode: updatedMode } : d))
-            );
-          }
+          // Note: In a real app we'd update context here
+          console.log('Mode updated:', newMode);
           setViewMode('list');
           setSelectedDeviceId(null);
         }}
@@ -115,9 +71,46 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     setViewMode('customFeeding');
   };
 
+  const handleToggleDevice = (id: string, isOn: boolean) => {
+    if (currentPond) {
+      toggleDevice(currentPond.id, id, isOn);
+    }
+  };
+
+  const renderRightHeader = () => (
+    <View style={styles.headerRightContainer}>
+      <TouchableOpacity
+        style={[styles.addButton, showAddPopup && styles.addButtonActive]}
+        onPress={() => setShowAddPopup(!showAddPopup)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="add" size={24} color={colors.text} />
+      </TouchableOpacity>
+
+      {showAddPopup && (
+        <View style={styles.popupContainer}>
+          <TouchableHighlight
+            style={styles.popupItem}
+            underlayColor={colors.gray[100]}
+            onPress={() => {
+              setShowAddPopup(false);
+              navigation.navigate('ConnectDevice', { pondName });
+            }}
+          >
+            <Text style={styles.popupText}>Thêm thiết bị</Text>
+          </TouchableHighlight>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <HeaderDevices title={`Thiết Bị - ${pondName}`} onBackPress={() => navigation.goBack()} />
+      <HeaderDevices
+        title={`Thiết Bị - ${pondName}`}
+        onBackPress={() => navigation.goBack()}
+        rightComponent={renderRightHeader()}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* History Buttons Section */}
@@ -135,15 +128,9 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
           devices={feeders}
           layout="grid"
           onSettingsPress={handleSettingsPress}
-          onSwitchToSchedule={() =>
-            setFeeders(prev => prev.map(d => ({ ...d, mode: EControlMode.SCHEDULE })))
-          }
-          onSwitchToManual={() =>
-            setFeeders(prev => prev.map(d => ({ ...d, mode: EControlMode.MANUAL })))
-          }
-          onToggle={(id, val) =>
-            setFeeders(prev => prev.map(d => (d.id === id ? { ...d, isOn: val } : d)))
-          }
+          onSwitchToSchedule={() => {}}
+          onSwitchToManual={() => {}}
+          onToggle={handleToggleDevice}
           style={styles.extendedCard}
         />
 
@@ -153,15 +140,9 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
           devices={otherDevices}
           layout="grid"
           onSettingsPress={handleSettingsPress}
-          onSwitchToSchedule={() =>
-            setOtherDevices(prev => prev.map(d => ({ ...d, mode: EControlMode.SCHEDULE })))
-          }
-          onSwitchToManual={() =>
-            setOtherDevices(prev => prev.map(d => ({ ...d, mode: EControlMode.MANUAL })))
-          }
-          onToggle={(id, val) =>
-            setOtherDevices(prev => prev.map(d => (d.id === id ? { ...d, isOn: val } : d)))
-          }
+          onSwitchToSchedule={() => {}}
+          onSwitchToManual={() => {}}
+          onToggle={handleToggleDevice}
           style={styles.extendedCard}
         />
       </ScrollView>
@@ -190,5 +171,46 @@ const styles = StyleSheet.create({
   extendedCard: {
     marginHorizontal: -spacing.md,
     paddingHorizontal: spacing.md,
+  },
+  headerRightContainer: {
+    zIndex: 1001,
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+  },
+  addButtonActive: {
+    borderColor: colors.primary,
+  },
+  popupContainer: {
+    position: 'absolute',
+    top: 48,
+    right: 0,
+    backgroundColor: colors.white,
+    borderRadius: 8,
+    padding: spacing.xs,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 140,
+    zIndex: 1002,
+  },
+  popupItem: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+  },
+  popupText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '400',
   },
 });
