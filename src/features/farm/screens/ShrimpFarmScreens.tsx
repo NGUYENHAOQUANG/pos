@@ -80,7 +80,15 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   ];
 
   const handleStartCycle = () => {
-    console.log('Start Cycle pressed');
+    if (pond?.id) {
+      // Điều hướng sang màn hình CreateCycle và truyền pondId của ao hiện tại
+      navigation.navigate('CreateCycle', {
+        pondId: pond.id,
+        initialData: null // Đảm bảo là tạo mới, không phải chỉnh sửa
+      });
+    } else {
+      console.log('Không tìm thấy thông tin ao (pond.id)');
+    }
   };
 
   const handleAddJobItem = (type: JobType) => {

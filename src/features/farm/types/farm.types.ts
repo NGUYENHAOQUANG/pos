@@ -9,6 +9,20 @@ export interface PondData {
   lastActivity?: string;
 }
 
+export interface CycleData {
+  id: string;
+  breedSource: string; // Chọn tôm giống
+  season: string; // Chọn vụ nuôi
+  cycleName: string;
+  stockingDate: string; // Ngày thả
+  stockingQuantity: number; // Tổng số lượng thả (PLs)
+  age: number; // Ngày tuổi (PLS)
+  density: number; // Mật độ (con/m2)
+  estimatedCost: number; // Tổng chi phí giống ước tính
+  notes: string; // Ghi chú
+  pondId: string;
+}
+
 export interface FarmData {
   id: string;
   name: string;
