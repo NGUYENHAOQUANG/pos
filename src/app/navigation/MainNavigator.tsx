@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     elevation: 10,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    position: 'absolute',
+    position: 'relative',
     bottom: 0,
     left: 0,
     right: 0,

@@ -22,10 +22,11 @@ export const ScheduleActivityPill: React.FC<ScheduleActivityPillProps> = ({
     borderTopRightRadius: isPrevActive ? 0 : 16,
     borderBottomLeftRadius: isNextActive ? 0 : 16,
     borderBottomRightRadius: isNextActive ? 0 : 16,
-    marginTop: isPrevActive ? 0 : 1, // Visual gap corrections if needed
-    marginBottom: isNextActive ? 0 : 1,
-    top: isPrevActive ? 0 : 1,
-    bottom: isNextActive ? 0 : 1,
+    // Remove gaps so they touch the grid lines/boundaries
+    marginTop: 0,
+    marginBottom: 0,
+    top: 0,
+    bottom: 0,
   };
 
   return <View style={[styles.activeIndicator, indicatorStyle, { backgroundColor: color }]} />;
