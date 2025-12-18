@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { colors, spacing, typography, borderRadius } from '@/styles';
-
+import Calendar from '@/assets/images/Icon/IconDevices/Calender.svg';
 interface Props {
   label?: string;
   value: Date | null;
@@ -32,7 +32,7 @@ export const DateTimePickerField: React.FC<Props> = ({
     const y = date.getFullYear();
     const h = String(date.getHours()).padStart(2, '0');
     const min = String(date.getMinutes()).padStart(2, '0');
-    return `${d}-${m}-${y}, ${h}:${min}`;
+    return `${d}/${m}/${y}, ${h}.${min}`;
   };
 
   const openPicker = () => {
@@ -53,12 +53,12 @@ export const DateTimePickerField: React.FC<Props> = ({
             ? formatDateTime(value)
             : 'dd-mm-yyyy, hr:mm (hiện tại)'}
         </Text>
-        <Ionicons
-          name="calendar-outline"
-          size={20}
-          color={colors.textSecondary}
-          style={styles.icon}
-        />
+        <Calendar
+            width={20}
+            height={20}
+            style={styles.icon}
+            fill={colors.textSecondary}
+          />
       </TouchableOpacity>
 
       {/* ===== ANDROID DATE ===== */}
