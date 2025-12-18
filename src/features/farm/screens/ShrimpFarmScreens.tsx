@@ -4,10 +4,10 @@ import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
-import { JobType, JobExecution } from '@/features/farm/components/pondwork/JobItem';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { Button } from '@/shared/components/buttons/Button';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -80,7 +80,15 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   ];
 
   const handleStartCycle = () => {
-    console.log('Start Cycle pressed');
+    if (pond?.id) {
+      // Điều hướng sang màn hình CreateCycle và truyền pondId của ao hiện tại
+      navigation.navigate('CreateCycle', {
+        pondId: pond.id,
+        initialData: null, // Đảm bảo là tạo mới, không phải chỉnh sửa
+      });
+    } else {
+      console.log('Không tìm thấy thông tin ao (pond.id)');
+    }
   };
 
   const handleAddJobItem = (type: JobType) => {
@@ -107,8 +115,13 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
-    if (type === JOB_TYPES.WATER_TREATMENT || type === JOB_TYPES.WATER_CHANGE) {
+    if (type === JOB_TYPES.WATER_TREATMENT) {
       navigation.navigate('AddWaterTreatmentScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.WATER_CHANGE) {
+      navigation.navigate('WaterSupply', { pond });
       return;
     }
 
@@ -167,6 +180,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
+    if (type === JOB_TYPES.WATER_CHANGE) {
+      // Truyền item sang để fill dữ liệu cũ vào màn hình nhập
+      navigation.navigate('WaterSupply', { pond, item });
+      return;
+    }
+
     const itemToEdit = item; // Alias for compatibility with below code if needed
 
     // For other job types, keep the delete behavior (or implement edit later)
@@ -192,6 +211,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     }
     if (type === JOB_TYPES.SIPHON && pond) {
       navigation.navigate('SiphonLog', { pond });
+    }
+
+    console.log(`Pressed ${type}`);
+    if (type === JOB_TYPES.WATER_CHANGE && pond) {
+      navigation.navigate('WaterSupplyLog', { pond });
+      return;
     }
   };
 
