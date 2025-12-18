@@ -58,10 +58,11 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
     const firstDay = getFirstDayOfMonth(year, month);
 
     const days = [];
+    const totalCells = 42;
 
     // Empty slots for previous month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<View key={`empty-${i}`} style={styles.dayCell} />);
+      days.push(<View key={`empty-start-${i}`} style={styles.dayCell} />);
     }
 
     // Days of current month
@@ -98,6 +99,12 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
           </Text>
         </TouchableOpacity>
       );
+    }
+
+    // Fill remaining slots to complete 6 rows
+    const currentCells = firstDay + daysInMonth;
+    for (let i = currentCells; i < totalCells; i++) {
+      days.push(<View key={`empty-end-${i}`} style={styles.dayCell} />);
     }
 
     return days;
@@ -214,6 +221,7 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    minHeight: 280, // Fixed height for 6 rows to prevent resizing
   },
   dayCell: {
     width: '14.28%',

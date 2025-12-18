@@ -1,4 +1,5 @@
 import React from 'react';
+import Toast from 'react-native-toast-message';
 import {
   Modal,
   View,
@@ -45,6 +46,16 @@ export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = (
   confirmText = 'Đồng ý',
   cancelText = 'Không',
 }) => {
+  const handleConfirm = () => {
+    onConfirm();
+    Toast.show({
+      type: 'success',
+      text1: 'Đã xóa tác vụ thành công',
+      position: 'top',
+      visibilityTime: 3000,
+    });
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <TouchableWithoutFeedback onPress={onCancel}>
@@ -76,7 +87,7 @@ export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = (
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.confirmButton}
-                        onPress={onConfirm}
+                        onPress={handleConfirm}
                         activeOpacity={0.7}
                       >
                         <Text style={styles.confirmButtonText}>{confirmText}</Text>

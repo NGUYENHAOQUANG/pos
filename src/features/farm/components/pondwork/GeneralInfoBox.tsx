@@ -373,13 +373,13 @@ const styles = StyleSheet.create({
   radioGroup: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    columnGap: spacing.sm, // Khoảng cách cột
+    rowGap: spacing.sm, // Khoảng cách hàng
   },
   radioItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: spacing.lg,
-    marginBottom: spacing.sm,
+    width: '48%', // Chia đôi màn hình
   },
   radioOuter: {
     width: 20,

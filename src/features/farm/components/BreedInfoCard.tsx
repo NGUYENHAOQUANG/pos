@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, borderRadius, shadows } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 
 interface Props {
   materialCode: string;
@@ -8,11 +8,7 @@ interface Props {
   supplier: string;
 }
 
-const BreedInfoCard: React.FC<Props> = ({
-  materialCode,
-  price,
-  supplier,
-}) => {
+const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -51,7 +47,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'visible',
-    shadows: shadows.md,
   },
 
   header: {

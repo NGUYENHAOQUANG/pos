@@ -14,7 +14,7 @@ export interface BreedOption extends DropdownItem {
 export interface FormData {
   cycleName?: string;
   breedSource?: string;
-  seasonSource?: string;
+  season?: string;
   stockingDate?: string | null;
   stockingQuantity?: number | null;
   age?: number | null;
@@ -35,27 +35,46 @@ interface CycleContextValue {
 
 const CycleContext = createContext<CycleContextValue | undefined>(undefined);
 
-export const CycleProvider: React.FC<{ children: ReactNode; initial?: Partial<FormData> }> = ({
-  children,
-  initial = {},
-}) => {
+export const CycleProvider: React.FC<{
+  children: ReactNode;
+  pondId: string;
+  initialData?: any;
+  onChange?: (data: any) => void;
+}> = ({ children, initialData = {}, onChange }) => {
   const [formData, setFormData] = useState<FormData>({
     cycleName: '',
     breedSource: undefined,
-    seasonSource: undefined,
+    season: undefined,
     stockingDate: null,
     stockingQuantity: null,
     age: null,
     density: undefined,
     estimatedCost: undefined,
     notes: undefined,
-    ...initial,
+    ...initialData,
   });
+
+  // Effect to notify parent of changes
+  React.useEffect(() => {
+    onChange?.(formData);
+  }, [formData, onChange]);
 
   // Example breed options (replace with real data/fetch)
   const [breedOptions] = useState<BreedOption[]>([
-    { label: 'Tôm thẻ chân trắng - SIS PL12', value: 'A', materialCode: 'SIS-PL12', price: 120, supplier: 'Shrimp Improvement Systems' },
-    { label: 'Tôm sú - SIS PL13', value: 'B', materialCode: 'SIS-PL13', price: 150, supplier: 'Shrimp Improvement Systems' },
+    {
+      label: 'Tôm thẻ chân trắng - SIS PL12',
+      value: 'A',
+      materialCode: 'SIS-PL12',
+      price: 120,
+      supplier: 'Shrimp Improvement Systems',
+    },
+    {
+      label: 'Tôm sú - SIS PL13',
+      value: 'B',
+      materialCode: 'SIS-PL13',
+      price: 150,
+      supplier: 'Shrimp Improvement Systems',
+    },
   ]);
 
   const [seasonOptions, setSeasonOptions] = useState<DropdownItem[]>([
@@ -74,15 +93,23 @@ export const CycleProvider: React.FC<{ children: ReactNode; initial?: Partial<Fo
       value: Date.now().toString(),
     };
     setSeasonOptions(prev => [...prev, newItem]);
-    setFormData(prev => ({ ...prev, seasonSource: newItem.value }));
+    setFormData(prev => ({ ...prev, season: newItem.value }));
   };
 
   const selectedBreed = breedOptions.find(b => b.value === formData.breedSource) ?? null;
-  const selectedSeason = seasonOptions.find(s => s.value === formData.seasonSource) ?? null;
+  const selectedSeason = seasonOptions.find(s => s.value === formData.season) ?? null;
 
   return (
     <CycleContext.Provider
-      value={{ formData, updateField, breedOptions, seasonOptions, handleCreateSeason, selectedBreed, selectedSeason }}
+      value={{
+        formData,
+        updateField,
+        breedOptions,
+        seasonOptions,
+        handleCreateSeason,
+        selectedBreed,
+        selectedSeason,
+      }}
     >
       {children}
     </CycleContext.Provider>
