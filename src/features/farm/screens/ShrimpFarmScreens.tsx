@@ -107,6 +107,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
+    if (type === JOB_TYPES.WATER_TREATMENT || type === JOB_TYPES.WATER_CHANGE) {
+      navigation.navigate('AddWaterTreatmentScreen', { pond });
+      return;
+    }
+
     const currentItems = getPondJobItems(pond.id, type);
 
     // Calculate next index based on max existing label
@@ -157,6 +162,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
+    if (type === JOB_TYPES.WATER_TREATMENT) {
+      navigation.navigate('EditWaterTreatmentScreens', { pondId: pond.id, jobId: item.id });
+      return;
+    }
+
     const itemToEdit = item; // Alias for compatibility with below code if needed
 
     // For other job types, keep the delete behavior (or implement edit later)
@@ -168,6 +178,10 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   const handleJobPress = (type: JobType) => {
     if (type === JOB_TYPES.FEED && pond?.id) {
       navigation.navigate('FeedingLog', { pondId: pond.id });
+      return;
+    }
+    if (type === JOB_TYPES.WATER_TREATMENT && pond) {
+      navigation.navigate('WaterTreatmentLog', { pond });
       return;
     }
     if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {

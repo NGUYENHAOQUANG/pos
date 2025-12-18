@@ -29,13 +29,19 @@ export type FarmStackParamList = {
   EnvironmentLogScreen: { pond: PondData };
   AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
   SiphonLog: { pond: PondData };
+  AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
+  EditWaterTreatmentScreens: { pondId: string; jobId: string };
+  WaterTreatmentLog: { pondId?: string; pond?: PondData };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
 
-import { AddFeederScreens } from '@/features/farm/screens/pond/feed/AddFeederScreens';
-import { EditFeederScreens } from '@/features/farm/screens/pond/feed/EditFeederScreens';
-import { FeedingLogScreens } from '@/features/farm/screens/pond/feed/FeedingLogScreens';
+import { AddFeederScreens } from '@/features/farm/screens/pondwork/feed/AddFeederScreens';
+import { EditFeederScreens } from '@/features/farm/screens/pondwork/feed/EditFeederScreens';
+import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
+import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
+import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 export const FarmNavigator = () => {
   return (
     <FarmProvider>
@@ -60,6 +66,9 @@ export const FarmNavigator = () => {
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
         <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
         <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
+        <Stack.Screen name="AddWaterTreatmentScreen" component={AddWaterTreatmentScreens} />
+        <Stack.Screen name="EditWaterTreatmentScreens" component={EditWaterTreatmentScreens} />
+        <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
       </Stack.Navigator>
     </FarmProvider>
   );

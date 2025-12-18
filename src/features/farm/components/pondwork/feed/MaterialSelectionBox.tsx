@@ -73,8 +73,6 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
           </View>
         )}
 
-        <View style={styles.divider} />
-
         {/* Add Button */}
         <TouchableOpacity
           style={styles.addButton}
@@ -156,20 +154,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.primary,
-    borderRadius: 6,
-    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
     gap: spacing.sm,
     height: 32,
+    width: '100%',
+    paddingHorizontal: spacing.md,
   },
   addButtonText: {
     fontSize: 14,
     fontWeight: '400',
     color: colors.primary,
     lineHeight: 22,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: -spacing.md,
   },
 });
