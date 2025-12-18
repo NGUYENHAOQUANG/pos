@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 interface ShrimpInspectionFoodCheckBoxProps {
   foodAmount: string;
@@ -37,7 +37,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
   onLeftoverFoodChange,
 }) => {
   return (
-    <ShrimpInspectionInfoBox title="Kiểm tra thức ăn">
+    <SelectionInfoBox title="Kiểm tra thức ăn">
       {/* Lượng thức ăn cho vào nhá */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>
@@ -59,7 +59,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
         <Text style={styles.label}>Thức ăn thừa</Text>
         {renderRadioGroup(leftoverFoodOptions, leftoverFood, onLeftoverFoodChange)}
       </View>
-    </ShrimpInspectionInfoBox>
+    </SelectionInfoBox>
   );
 };
 

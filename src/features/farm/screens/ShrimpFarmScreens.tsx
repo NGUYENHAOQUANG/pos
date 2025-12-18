@@ -12,15 +12,28 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 
+// Job Type Constants
+const JOB_TYPES = {
+  FEED: 'FEED' as const,
+  SHRIMP_INSPECTION: 'SHRIMP_INSPECTION' as const,
+  ENVIRONMENT: 'ENVIRONMENT' as const,
+  WATER_TREATMENT: 'WATER_TREATMENT' as const,
+  WATER_CHANGE: 'WATER_CHANGE' as const,
+  SIPHON: 'SIPHON' as const,
+  CLEAN_POND: 'CLEAN_POND' as const,
+  SUN_DRY_POND: 'SUN_DRY_POND' as const,
+};
+
 // Initial Jobs Configuration (Template)
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
-  { type: 'FEED', items: [] },
-  { type: 'SHRIMP_INSPECTION', items: [] },
-  { type: 'ENVIRONMENT', items: [] },
-  { type: 'WATER_TREATMENT', items: [] },
-  { type: 'WATER_CHANGE', items: [] },
-  { type: 'CLEAN_POND', items: [] },
-  { type: 'SUN_DRY_POND', items: [] },
+  { type: JOB_TYPES.FEED, items: [] },
+  { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
+  { type: JOB_TYPES.ENVIRONMENT, items: [] },
+  { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+  { type: JOB_TYPES.WATER_CHANGE, items: [] },
+  { type: JOB_TYPES.SIPHON, items: [] },
+  { type: JOB_TYPES.CLEAN_POND, items: [] },
+  { type: JOB_TYPES.SUN_DRY_POND, items: [] },
 ];
 
 interface ShrimpFarmScreensProps {}
@@ -73,14 +86,24 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   const handleAddJobItem = (type: JobType) => {
     if (!pond?.id) return;
 
-    if (type === 'FEED') {
+    if (type === JOB_TYPES.FEED) {
       navigation.navigate('FeedTheShrimp', { pondId: pond.id });
       return;
     }
 
     // For shrimp inspection, go to inspection screen to enter details
-    if (type === 'SHRIMP_INSPECTION') {
-      navigation.navigate('ShrimpInspection', { pond });
+    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+      navigation.navigate('ShrimpInspectionScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.ENVIRONMENT) {
+      navigation.navigate('AddEnvironmentScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond });
       return;
     }
     if (type === 'WATER_CHANGE') {
@@ -115,15 +138,25 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   const handleEditJobItem = (type: JobType, item: JobExecution) => {
     if (!pond?.id) return;
 
-    if (type === 'FEED') {
+    if (type === JOB_TYPES.FEED) {
       // Navigate to Edit screen for Feed
       navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
       return;
     }
 
     // For shrimp inspection, navigate to edit screen
-    if (type === 'SHRIMP_INSPECTION') {
-      navigation.navigate('ShrimpInspection', { pond, itemToEdit: item });
+    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+      navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.ENVIRONMENT) {
+      navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
       return;
     }
     if (type === 'WATER_CHANGE') {
@@ -140,13 +173,20 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
   };
 
   const handleJobPress = (type: JobType) => {
-    if (type === 'FEED' && pond?.id) {
+    if (type === JOB_TYPES.FEED && pond?.id) {
       navigation.navigate('FeedingLog', { pondId: pond.id });
       return;
     }
-    if (type === 'SHRIMP_INSPECTION' && pond) {
-      navigation.navigate('ShrimpInspectionLog', { pond });
+    if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
+      navigation.navigate('PondworkLogScreen', { pond });
     }
+    if (type === JOB_TYPES.ENVIRONMENT && pond) {
+      navigation.navigate('EnvironmentLogScreen', { pond });
+    }
+    if (type === JOB_TYPES.SIPHON && pond) {
+      navigation.navigate('SiphonLog', { pond });
+    }
+
     console.log(`Pressed ${type}`);
     if (type === 'WATER_CHANGE' && pond) {
       navigation.navigate('WaterSupplyLog', { pond });

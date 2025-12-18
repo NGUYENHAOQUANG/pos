@@ -34,8 +34,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     borderRadius: 4,
   },
   label: {
@@ -51,5 +50,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
     color: colors.text,
+    lineHeight: 22,
   },
 });

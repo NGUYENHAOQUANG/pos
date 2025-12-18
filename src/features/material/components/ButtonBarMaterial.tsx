@@ -16,6 +16,8 @@ interface ButtonBarMaterialProps {
   primaryButtonDisabled?: boolean;
   primaryButtonStyle?: ViewStyle;
   primaryButtonTextStyle?: TextStyle;
+  secondaryButtonStyle?: ViewStyle;
+  secondaryButtonTextStyle?: TextStyle;
 }
 
 export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
@@ -29,6 +31,8 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
   primaryButtonDisabled = false,
   primaryButtonStyle,
   primaryButtonTextStyle,
+  secondaryButtonStyle,
+  secondaryButtonTextStyle,
 }) => {
   const renderContent = () => {
     switch (mode) {
@@ -58,8 +62,8 @@ export const ButtonBarMaterial: React.FC<ButtonBarMaterialProps> = ({
               onPress={onSecondaryPress || (() => {})}
               variant="outline"
               size="medium"
-              style={styles.secondaryButton}
-              textStyle={{ color: colors.text }}
+              style={StyleSheet.flatten([styles.secondaryButton, secondaryButtonStyle])}
+              textStyle={StyleSheet.flatten([{ color: colors.text }, secondaryButtonTextStyle])}
             />
             <View style={styles.spacer} />
             <Button

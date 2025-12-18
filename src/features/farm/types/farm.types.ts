@@ -16,3 +16,53 @@ export interface FarmData {
   area?: string;
   address?: string;
 }
+
+export interface ShrimpInspectionData {
+  id: string;
+  pondId: string;
+  pondName?: string;
+  date?: string;
+  time?: string;
+  notes?: string;
+}
+
+/**
+ * Meta data types for different job types
+ */
+
+// Shrimp Inspection Meta
+export interface ShrimpInspectionMeta {
+  date?: Date | string;
+  foodAmount?: string;
+  leftoverFood?: string;
+  intestine?: string;
+  intestineColor?: string;
+  stoolColor?: string;
+  liver?: string;
+  notes?: string;
+  images?: string[];
+}
+
+// Environment Meta
+export interface EnvironmentMeta {
+  date?: Date | string;
+  pH?: string;
+  pHWarning?: boolean;
+  do?: string;
+  temperature?: string;
+  salinity?: string;
+  alkalinity?: string;
+  transparency?: string;
+  notes?: string;
+}
+
+// Siphon Meta
+export interface SiphonMeta {
+  date?: Date | string;
+  lossAmount?: string;
+  images?: string[];
+  notes?: string;
+}
+
+// Union type for all meta types
+export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta;

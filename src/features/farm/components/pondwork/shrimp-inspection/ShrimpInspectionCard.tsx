@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles';
-import { ShrimpInspectionData } from '@/features/farm/types/shrimp-inspection.types';
+import { ShrimpInspectionData } from '@/features/farm/types/farm.types';
 
 interface ShrimpInspectionCardProps {
   inspection: ShrimpInspectionData;

@@ -1,42 +1,24 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-  PermissionsAndroid,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  launchCamera,
-  launchImageLibrary,
-  ImagePickerResponse,
-  MediaType,
-} from 'react-native-image-picker';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
-import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { GeneralInfoBox } from '@/features/farm/components/GeneralInfoBox';
-import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionFoodCheckBox';
-import { ShrimpInspectionObservationBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionObservationBox';
-import { ShrimpInspectionNotesBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionNotesBox';
+import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
+import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { ImagePreviewModal } from '@/features/farm/components/shrimp-inspection/ImagePreviewModal';
 import { IconTrashOutlined } from '@/assets/icons';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspection'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
 
 export const ShrimpInspectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -49,7 +31,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
   // Initialize state from itemToEdit if available
   const meta = useMemo(() => itemToEdit?.meta || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState(meta.date ? new Date(meta.date) : new Date());
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [foodAmount, setFoodAmount] = useState(meta.foodAmount || '');
   const [leftoverFood, setLeftoverFood] = useState(meta.leftoverFood || 'Hết');
   const [intestine, setIntestine] = useState(meta.intestine || 'Đầy');
@@ -58,9 +39,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
   const [liver, setLiver] = useState(meta.liver || 'Bình thường');
   const [notes, setNotes] = useState(meta.notes || '');
   const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
-  const [actionSheetVisible, setActionSheetVisible] = useState(false);
-  const [previewUri, setPreviewUri] = useState<string | null>(null);
-  const [previewVisible, setPreviewVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // Store initial data for comparison when editing
@@ -82,24 +60,12 @@ export const ShrimpInspectionScreen: React.FC = () => {
   // Hide tab bar when this screen is mounted
   useEffect(() => {
     setTabBarVisible(false);
-    return () => {
-      setTabBarVisible(true);
-    };
   }, [setTabBarVisible]);
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
     }
-  };
-
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}-${month}-${year}, ${hours}:${minutes} (hiện tại)`;
   };
 
   const handleSave = () => {
@@ -215,88 +181,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
   // Only show disabled background style when editing and no changes
   const shouldShowDisabledStyle = itemToEdit && !hasChanges;
 
-  const requestCameraPermission = async (): Promise<boolean> => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
-          title: 'Quyền truy cập camera',
-          message: 'Ứng dụng cần quyền truy cập camera để chụp ảnh',
-          buttonNeutral: 'Để sau',
-          buttonNegative: 'Hủy',
-          buttonPositive: 'OK',
-        });
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const handleTakePhoto = async () => {
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
-      Alert.alert('Thông báo', 'Cần quyền truy cập camera để chụp ảnh');
-      return;
-    }
-
-    launchCamera(
-      {
-        mediaType: 'photo' as MediaType,
-        quality: 0.8,
-        saveToPhotos: true,
-      },
-      (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-          return;
-        }
-        if (response.errorMessage) {
-          Alert.alert('Lỗi', response.errorMessage);
-          return;
-        }
-        if (response.assets && response.assets[0]?.uri) {
-          const uri = response.assets[0].uri;
-          if (uri) {
-            setImageUris(prev => [...prev, uri]);
-          }
-        }
-      }
-    );
-  };
-
-  const handleChooseFromLibrary = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo' as MediaType,
-        quality: 0.8,
-      },
-      (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-          return;
-        }
-        if (response.errorMessage) {
-          Alert.alert('Lỗi', response.errorMessage);
-          return;
-        }
-        if (response.assets && response.assets[0]?.uri) {
-          const uri = response.assets[0].uri;
-          if (uri) {
-            setImageUris(prev => [...prev, uri]);
-          }
-        }
-      }
-    );
-  };
-
-  const handleImagePress = () => {
-    setActionSheetVisible(true);
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setImageUris(prev => prev.filter((_, i) => i !== index));
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -318,16 +202,11 @@ export const ShrimpInspectionScreen: React.FC = () => {
       <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent]}>
         {/* Thông tin chung Box */}
         <GeneralInfoBox
-          dateDisplay={formatDateTime(selectedDate)}
-          onPressDate={() => setIsDatePickerVisible(true)}
+          date={selectedDate}
+          onDateChange={setSelectedDate}
           type="withImage"
           imageUris={imageUris}
-          onPressAddImage={handleImagePress}
-          onPressImage={uri => {
-            setPreviewUri(uri);
-            setPreviewVisible(true);
-          }}
-          onRemoveImage={handleRemoveImage}
+          onImagesChange={setImageUris}
         />
 
         {/* Kiểm tra thức ăn Box */}
@@ -351,7 +230,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         />
 
         {/* Ghi chú Box */}
-        <ShrimpInspectionNotesBox notes={notes} onNotesChange={setNotes} />
+        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
       </ScrollView>
 
       {/* Footer Buttons */}
@@ -367,29 +246,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
           primaryButtonTextStyle={shouldShowDisabledStyle ? styles.disabledButtonText : undefined}
         />
       </View>
-
-      {/* Date Picker Modal */}
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setIsDatePickerVisible(false)}
-        date={selectedDate}
-        onSelectDate={setSelectedDate}
-      />
-
-      {/* Image Picker Action Sheet */}
-      <ImagePickerActionSheet
-        visible={actionSheetVisible}
-        onClose={() => setActionSheetVisible(false)}
-        onTakePhoto={handleTakePhoto}
-        onChooseFromLibrary={handleChooseFromLibrary}
-      />
-
-      {/* Image Preview Modal */}
-      <ImagePreviewModal
-        visible={previewVisible}
-        imageUri={previewUri}
-        onClose={() => setPreviewVisible(false)}
-      />
 
       {/* Delete Confirmation Modal */}
       <ConfirmationDeleteModal
@@ -460,12 +316,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   disabledButton: {
-    backgroundColor: '#0000000A',
+    backgroundColor: colors.backgroundSubtle,
     borderWidth: 1,
     borderColor: colors.defaultBorder,
   },
   disabledButtonText: {
-    color: '#00000040',
+    color: colors.borderSubtle,
     lineHeight: 24,
     fontWeight: '400',
     fontSize: 16,

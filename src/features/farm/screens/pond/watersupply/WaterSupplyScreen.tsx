@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { GeneralInfoBox } from '@/features/farm/components/GeneralInfoBox';
+import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';

@@ -9,8 +9,10 @@ export { default as IconMaterialActive } from './images/Icon/IconMainNavigator/I
 export { default as IconSetting } from './images/Icon/IconMainNavigator/Icon-Setting.svg';
 export { default as IconSettingActive } from './images/Icon/IconMainNavigator/Icon-Setting-Active.svg';
 export { default as IconWarning } from './images/Icon/IconDevices/Warning.svg';
+export { default as IconWarningOutlined } from './images/Icon/IconFarm/WarningOutlined.svg';
 export { default as IconVector } from './images/Icon/IconDevices/Vector.svg';
 export { default as IconTrashOutlined } from './images/Icon/IconDevices/TrashOutlined.svg';
 export { default as IconEditOutlined } from './images/Icon/IconDevices/EditOutlined.svg';
 export { default as IconCloseOutlined } from './images/Icon/IconDevices/CloseOutlined.svg';
 export { default as IconCalender } from './images/Icon/IconDevices/Calender.svg';
+export { default as IconError } from './images/Icon/IconFarm/IconError.svg';

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -6,28 +6,34 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius } from '@/styles';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { ShrimpInspectionLogItem } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionLogItem';
+import { EnvironmentLogItem } from '@/features/farm/components/pondwork/environment/EnvironmentLogItem';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/features/material/components/EmptyStateCard';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionLog'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'EnvironmentLogScreen'>;
 
-export const ShrimpInspectionLogScreen: React.FC = () => {
+export const EnvironmentLogScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { pond } = route.params || {};
   const insets = useSafeAreaInsets();
+  const { setTabBarVisible } = useTabBarVisibility();
   const { getPondJobItemsGroupedByDate } = useFarm();
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
   const [activeField, setActiveField] = useState<'start' | 'end'>('start');
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
+  // Hide tab bar when this screen is mounted
+  useEffect(() => {
+    setTabBarVisible(false);
+  }, [setTabBarVisible]);
 
   const formatDate = (date: Date) => {
     const day = String(date.getDate()).padStart(2, '0');
@@ -58,8 +64,10 @@ export const ShrimpInspectionLogScreen: React.FC = () => {
   // Get items grouped by date from context
   const itemsByDate = useMemo(() => {
     if (!pond?.id) return new Map<string, JobExecution[]>();
-    return getPondJobItemsGroupedByDate(pond.id, 'SHRIMP_INSPECTION', startDate, endDate);
+    return getPondJobItemsGroupedByDate(pond.id, 'ENVIRONMENT', startDate, endDate);
   }, [getPondJobItemsGroupedByDate, pond?.id, startDate, endDate]);
+
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
   const handleBack = () => {
     if (navigation.canGoBack()) navigation.goBack();
@@ -72,15 +80,15 @@ export const ShrimpInspectionLogScreen: React.FC = () => {
     }));
   };
 
-  const handleStartInspection = () => {
+  const handleStartEnvironment = () => {
     if (pond) {
-      navigation.navigate('ShrimpInspection', { pond });
+      navigation.navigate('AddEnvironmentScreen', { pond });
     }
   };
 
-  const handleEditInspection = (item: JobExecution) => {
+  const handleEditEnvironment = (item: JobExecution) => {
     if (pond) {
-      navigation.navigate('ShrimpInspection', { pond, itemToEdit: item });
+      navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
     }
   };
 
@@ -91,7 +99,7 @@ export const ShrimpInspectionLogScreen: React.FC = () => {
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nhật ký kiểm tra tôm</Text>
+          <Text style={styles.headerTitle}>Nhật ký đo môi trường</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -126,8 +134,11 @@ export const ShrimpInspectionLogScreen: React.FC = () => {
       >
         {itemsByDate.size === 0 ? (
           <View style={styles.emptyContainer}>
-            {' '}
-            <MaterialEmptyState tab="shrimp-inspection" onPress={handleStartInspection} />
+            <EmptyStateCard
+              message="Chưa có dữ liệu đo môi trường"
+              buttonTitle="Bắt đầu đo thông số môi trường"
+              onPress={handleStartEnvironment}
+            />
           </View>
         ) : (
           Array.from(itemsByDate.entries()).map(
@@ -153,11 +164,11 @@ export const ShrimpInspectionLogScreen: React.FC = () => {
                   {isExpanded && (
                     <View style={styles.itemsContainer}>
                       {dateItems.map((item: JobExecution) => (
-                        <ShrimpInspectionLogItem
+                        <EnvironmentLogItem
                           key={item.id}
                           item={item}
                           meta={item.meta || {}}
-                          onEdit={handleEditInspection}
+                          onEdit={handleEditEnvironment}
                         />
                       ))}
                     </View>
@@ -233,6 +244,11 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.borderLight,
   },
+  dateRangeWrapper: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -244,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   sectionHeaderCollapsed: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -256,19 +272,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     lineHeight: 22,
   },
-  dateRangeWrapper: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
   itemsContainer: {
     paddingTop: 8,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+  },
+  itemWrapper: {
+    marginBottom: spacing.sm,
   },
   emptyContainer: {
     marginHorizontal: spacing.md,

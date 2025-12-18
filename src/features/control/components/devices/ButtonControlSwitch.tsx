@@ -54,7 +54,7 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
     <View style={styles.container}>
       <View ref={buttonRef} collapsable={false} style={styles.buttonWrapper}>
         <TouchableOpacity style={styles.button} onPress={openMenu} activeOpacity={0.7}>
-          <Ionicons name="ellipsis-vertical" size={20} color={colors.gray[500]} />
+          <Ionicons name="ellipsis-vertical" size={16} color={colors.gray[500]} />
         </TouchableOpacity>
       </View>
 
@@ -102,12 +102,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   button: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     borderRadius: 8,
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderDark,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -88,8 +88,20 @@ const hasActivity = (time: string, activities: ActivitySlot[]): boolean => {
 export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({
   devices = DEFAULT_DEVICES,
   activities = DEFAULT_ACTIVITIES,
-  currentTime = '01:00',
 }) => {
+  const [now, setNow] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 60000); // Update every minute
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTotalMinutes = currentHour * 60 + currentMinute;
+
   return (
     <View style={styles.container}>
       {/* Legend Component */}
@@ -116,7 +128,17 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {DEFAULT_TIME_SLOTS.map((time, index) => {
             const isFullHour = time.endsWith(':00');
-            const isCurrentTime = time === currentTime;
+
+            // Check if this slot contains the current time
+            const [slotHour, slotMinute] = time.split(':').map(Number);
+            const slotTotalMinutes = slotHour * 60 + slotMinute;
+            const isCurrentSlot =
+              currentTotalMinutes >= slotTotalMinutes &&
+              currentTotalMinutes < slotTotalMinutes + 15;
+
+            // Calculate top offset: (minutes into slot / 15) * 20 (height)
+            const minutesIntoSlot = currentTotalMinutes - slotTotalMinutes;
+            const topOffset = (minutesIntoSlot / 15) * 20;
 
             // Current slot active?
             const showIndicator = hasActivity(time, activities);
@@ -154,7 +176,7 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({
                 ))}
 
                 {/* Current time line */}
-                {isCurrentTime && <View style={styles.currentTimeLine} />}
+                {isCurrentSlot && <View style={[styles.currentTimeLine, { top: topOffset }]} />}
               </View>
             );
           })}

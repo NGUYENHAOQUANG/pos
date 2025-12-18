@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { ShrimpInspectionInfoBox } from '@/features/farm/components/shrimp-inspection/ShrimpInspectionInfoBox';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 interface ShrimpInspectionObservationBoxProps {
   intestine: string;
@@ -48,7 +48,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
   onLiverChange,
 }) => {
   return (
-    <ShrimpInspectionInfoBox title="Quan sát mẫu">
+    <SelectionInfoBox title="Quan sát mẫu">
       {/* Đường ruột */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Đường ruột</Text>
@@ -72,7 +72,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
         <Text style={styles.label}>Gan</Text>
         {renderRadioGroup(liverOptions, liver, onLiverChange)}
       </View>
-    </ShrimpInspectionInfoBox>
+    </SelectionInfoBox>
   );
 };
 

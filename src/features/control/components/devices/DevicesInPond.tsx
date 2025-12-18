@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { DeviceCard, DeviceData } from './Devices';
+import { DeviceCard } from './Devices';
 import { ButtonControlSwitch } from './ButtonControlSwitch'; // Assuming it's in the same folder or adjusted path
-import { EControlMode } from '../../types/control.types';
+import { EControlMode, DeviceData } from '../../types/control.types';
 
 import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
 import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
@@ -18,6 +18,7 @@ export const DevicesInPond = () => {
       icon: FeederIcon,
       mode: EControlMode.MANUAL,
       isOn: true,
+      type: 'feeder',
     },
   ]);
 
@@ -29,6 +30,7 @@ export const DevicesInPond = () => {
       icon: FanIcon,
       mode: EControlMode.SCHEDULE,
       isOn: true,
+      type: 'fan',
     },
     {
       id: 'o2',
@@ -36,6 +38,7 @@ export const DevicesInPond = () => {
       icon: FanIcon,
       mode: EControlMode.LOCAL,
       isOn: true,
+      type: 'fan',
     },
     {
       id: 'o3',
@@ -44,6 +47,7 @@ export const DevicesInPond = () => {
       mode: EControlMode.SCHEDULE,
       isOn: true,
       errorMessage: 'Bị mất khí!',
+      type: 'oxy',
     },
     {
       id: 'o4',
@@ -51,6 +55,7 @@ export const DevicesInPond = () => {
       icon: SyphonIcon,
       mode: EControlMode.SCHEDULE,
       isOn: false,
+      type: 'syphon',
     },
   ]);
 

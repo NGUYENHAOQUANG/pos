@@ -47,7 +47,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ title, data, onEdit,
         {/* Note Area */}
         {note && (
           <View style={styles.noteBox}>
-            <Text style={styles.noteLabel}>Ghi chú:</Text>
+            <Text style={styles.noteLabel}>Ghi chú</Text>
             <Text style={styles.noteContent}>{note}</Text>
           </View>
         )}
@@ -74,41 +74,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
-    marginBottom: 12,
     overflow: 'hidden',
   },
   body: {
-    padding: 12,
+    paddingVertical: 4,
+    gap: 2,
   },
   noteBox: {
-    marginTop: 8,
-    padding: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    marginHorizontal: 8,
     backgroundColor: colors.gray[50],
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.defaultBorder,
   },
   noteLabel: {
     fontSize: 12,
     color: colors.textSecondary,
-    marginBottom: 2,
-    fontWeight: '600',
+    fontWeight: '400',
+    lineHeight: 22,
   },
   noteContent: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.text,
+    lineHeight: 22,
+    fontWeight: '400',
   },
   toggleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.gray[100],
   },
   toggleText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.primary,
-    fontWeight: '500',
-    marginRight: 4,
+    fontWeight: '400',
+    gap: 8,
+    lineHeight: 22,
   },
 });
