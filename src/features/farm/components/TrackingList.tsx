@@ -17,6 +17,7 @@ export interface TimelineActivity {
   title: string;
   data: ActivityData[];
   note?: string;
+  onEdit?: () => void;
 }
 
 export interface TrackingGroup {
@@ -58,7 +59,9 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }
               title={activity.title}
               data={activity.data}
               note={activity.note}
-              onEdit={() => console.log('Edit activity', activity.id)}
+              onEdit={
+                activity.onEdit ? activity.onEdit : () => console.log('Edit activity', activity.id)
+              }
             />
           ))}
 

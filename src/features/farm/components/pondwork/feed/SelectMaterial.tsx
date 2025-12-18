@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   fieldGroup: {
     marginBottom: spacing.md,
-    zIndex: 10,
+    zIndex: 100, // Dropdown needs higher index
   },
   label: {
     fontSize: 14,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    zIndex: 9,
+    zIndex: 1,
   },
   inputContainer: {
     height: 44,

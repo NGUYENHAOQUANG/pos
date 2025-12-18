@@ -13,6 +13,7 @@ export interface JobExecution {
     quantity: number;
     unit: string;
   }[];
+  waterTreatmentType?: string;
   meta?: any;
 }
 
