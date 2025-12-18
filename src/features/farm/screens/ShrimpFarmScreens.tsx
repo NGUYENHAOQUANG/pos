@@ -106,7 +106,10 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       navigation.navigate('AddSiphonScreen', { pond });
       return;
     }
-
+    if (type === 'WATER_CHANGE') {
+      navigation.navigate('WaterSupply', { pond });
+      return;
+    }
     const currentItems = getPondJobItems(pond.id, type);
 
     // Calculate next index based on max existing label
@@ -156,7 +159,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
       return;
     }
-
+    if (type === 'WATER_CHANGE') {
+      // Truyền item sang để fill dữ liệu cũ vào màn hình nhập
+      navigation.navigate('WaterSupply', { pond, item });
+      return;
+    }
     const itemToEdit = item; // Alias for compatibility with below code if needed
 
     // For other job types, keep the delete behavior (or implement edit later)
@@ -178,6 +185,12 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     }
     if (type === JOB_TYPES.SIPHON && pond) {
       navigation.navigate('SiphonLog', { pond });
+    }
+
+    console.log(`Pressed ${type}`);
+    if (type === 'WATER_CHANGE' && pond) {
+      navigation.navigate('WaterSupplyLog', { pond });
+      return;
     }
   };
 

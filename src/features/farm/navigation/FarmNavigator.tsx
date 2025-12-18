@@ -13,6 +13,8 @@ import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
+import { WaterSupplyScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyScreen';
+import { WaterSupplyLogScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyLogScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -20,6 +22,7 @@ export type FarmStackParamList = {
   FeedTheShrimp: { pondId: string };
   EditFeeder: { pondId: string; jobId?: string };
   FeedingLog: { pondId: string };
+
   PondInfo: { pond: PondData };
   FarmInfo: { farm: FarmData };
   ShrimpInspectionScreen: { pond: PondData; itemToEdit?: JobExecution };
@@ -29,6 +32,8 @@ export type FarmStackParamList = {
   EnvironmentLogScreen: { pond: PondData };
   AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
   SiphonLog: { pond: PondData };
+  WaterSupply: { pond?: any; item?: any };
+  WaterSupplyLog: { pond: any };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -60,6 +65,8 @@ export const FarmNavigator = () => {
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
         <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
         <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
+        <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
+        <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );
