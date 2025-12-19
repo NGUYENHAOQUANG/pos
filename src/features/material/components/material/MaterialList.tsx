@@ -102,7 +102,7 @@ export const MaterialList: React.FC<MaterialListProps> = ({
         <Ionicons
           name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={colors.primary || '#1890FF'}
+          color={colors.primary}
         />
       </TouchableOpacity>
 
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -215,13 +215,13 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderLight,
     marginVertical: spacing.xs,
     marginHorizontal: -spacing.md,
   },
   separatorCenter: {
     height: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: colors.borderLight,
     marginVertical: spacing.xs,
   },
 });
