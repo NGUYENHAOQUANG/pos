@@ -16,6 +16,7 @@ import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiph
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyScreen';
 import { WaterSupplyLogScreen } from '@/features/farm/screens/pond/watersupply/WaterSupplyLogScreen';
+import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 
 import { AddFeederScreens } from '@/features/farm/screens/pondwork/feed/AddFeederScreens';
 import { EditFeederScreens } from '@/features/farm/screens/pondwork/feed/EditFeederScreens';
@@ -46,6 +47,7 @@ export type FarmStackParamList = {
   WaterTreatmentLog: { pondId?: string; pond?: PondData };
   WaterSupply: { pond?: any; item?: any };
   WaterSupplyLog: { pond: any };
+  AddTransferScreen: { pond: PondData; itemToEdit?: JobExecution };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -80,6 +82,7 @@ export const FarmNavigator = () => {
         <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
         <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
         <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
+        <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );
