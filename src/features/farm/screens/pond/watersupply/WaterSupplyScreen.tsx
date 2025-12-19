@@ -95,14 +95,23 @@ export const WaterSupplyScreen = () => {
 
   // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
   const calculateInfo = useMemo(() => {
-    // 1. Lấy dữ liệu đầu vào
-    const H_target = parseFloat(targetLevel) || 0; // Mực nước mục tiêu
-    const H_add = parseFloat(supplyLevel) || 0; // Số cm cấp
+    // 1. Kiểm tra nếu chưa nhập liệu thì trả về '-'
+    if (targetLevel === '' || supplyLevel === '') {
+      return {
+        drainLevel: '-',
+        volumeAfterDrain: '-',
+        volumeSupply: '-',
+        volumeAfterSupply: '-',
+      };
+    }
 
-    // 2. Xác định Diện tích ao (S)
-    let S = 1000; // Giá trị mặc định nếu không có dữ liệu ao
+    // 2. Lấy dữ liệu đầu vào
+    const H_target = parseFloat(targetLevel);
+    const H_add = parseFloat(supplyLevel);
+
+    // Xác định Diện tích ao (S)
+    let S = 1000; // Giá trị mặc định
     if (pond?.area) {
-      // Parse diện tích từ string (ví dụ "1,200 m2" -> 1200)
       const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
       const parsedArea = parseFloat(areaStr);
       if (!isNaN(parsedArea) && parsedArea > 0) {
