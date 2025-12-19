@@ -84,7 +84,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
     textAlign: 'center',
-    flexWrap: 'wrap',
   },
 
   iconButton: {

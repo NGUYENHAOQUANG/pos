@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { Button } from '@/shared/components/buttons/Button';
-import { spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
@@ -29,6 +29,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     setTabBarVisible(false);
     return () => setTabBarVisible(true);
   }, [setTabBarVisible]);
+
   // --- States ---
   const [date, setDate] = useState(new Date());
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -48,20 +49,19 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
   const handleMaterialSelect = (val: string) => {
     setMaterialName(val);
-    // Giả lập lấy tồn kho cũ từ API khi chọn vật tư
-    // Logic thực tế: fetch oldStock based on materialId
+    // Giả lập logic lấy tồn kho cũ
     if (val === 'CP 09 – Thức ăn tôm giai đoạn 2') setOldStock(4);
     else if (val === 'Vật tư B') setOldStock(10);
     else setOldStock(0);
 
-    setNewStock(''); // Reset tồn kho mới khi đổi vật tư
+    setNewStock('');
   };
 
   const handleSave = () => {
     const newTicket: IInventoryTicket = {
       id: Date.now().toString(),
-      checkerName: 'Nguyễn Phương Duy', // Hardcoded for now as per original code
-      date: formatDate(date),
+      checkerName: 'Nguyễn Phương Duy',
+      date: formatDateTime(date),
       note: note || 'Phiếu mới',
       totalDifference: Number(newStock) - oldStock,
       items: [
@@ -79,12 +79,20 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     navigation.goBack();
   };
 
-  // Format Date YYYY-MM-DD
   const formatDate = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${day}-${month}-${year}`;
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatDateTime = (d: Date) => {
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
   };
 
   return (
@@ -99,6 +107,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Thông tin chung */}
           <InventoryGeneralInfo
@@ -109,14 +118,17 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
           />
 
           {/* Nhập liệu vật tư */}
-          <InventoryMaterialInput
-            materialName={materialName}
-            oldStock={oldStock}
-            newStock={newStock}
-            onMaterialSelect={handleMaterialSelect}
-            onNewStockChange={setNewStock}
-          />
+          <View style={styles.dropdownSection}>
+            <InventoryMaterialInput
+              materialName={materialName}
+              oldStock={oldStock}
+              newStock={newStock}
+              onMaterialSelect={handleMaterialSelect}
+              onNewStockChange={setNewStock}
+            />
+          </View>
         </ScrollView>
+
         {/* Nút Gửi Phiếu */}
         <View style={styles.footerContainer}>
           <Button
@@ -125,10 +137,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             variant="primary"
             size="large"
             style={styles.button}
-            // Disable nút nếu chưa chọn vật tư hoặc chưa nhập số lượng (cho phép nhập 0)
             disabled={!materialName || newStock === ''}
           />
         </View>
+
         {/* Modal Chọn Ngày */}
         <DatePickerModal
           visible={isDatePickerVisible}
@@ -144,29 +156,40 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   container: {
     flex: 1,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
   scrollView: {
     flex: 1,
   },
   contentContainer: {
     padding: spacing.md,
-    paddingBottom: 40,
+    paddingBottom: 350,
+  },
+  dropdownSection: {
+    zIndex: 100,
+    ...Platform.select({
+      android: { elevation: 5 },
+      ios: { zIndex: 100 },
+    }),
   },
   footerContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: colors.gray[200],
     padding: spacing.md,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 10,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   button: {
     width: '100%',

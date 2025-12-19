@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   expandText: {
     fontSize: 14,
-    color: colors.primary || '#1890FF',
+    color: colors.primary,
     marginRight: 4,
     fontWeight: '600',
   },
@@ -223,6 +223,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#F0F0F0',
     marginVertical: spacing.xs,
-    marginHorizontal: spacing.md,
   },
 });

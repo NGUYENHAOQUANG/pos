@@ -60,7 +60,7 @@ export const WaterSupplyScreen = () => {
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
   const [isMaterialModalVisible, setMaterialModalVisible] = useState(false);
   const [note, setNote] = useState('');
-  const [imageUris] = useState<string[]>([]);
+  const [imageUris, setImageUris] = useState<string[]>([]);
 
   // Modal Delete
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -146,16 +146,6 @@ export const WaterSupplyScreen = () => {
       volumeAfterSupply: V_total.toFixed(0),
     };
   }, [targetLevel, supplyLevel, pond]);
-
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const isToday = new Date().toDateString() === date.toDateString();
-    return `${day}/${month}/${year}, ${hours}:${minutes}${isToday ? ' (hiện tại)' : ''}`;
-  };
 
   const handleDateSelect = (date: Date) => {
     const newDate = new Date(selectedDate);
@@ -268,13 +258,11 @@ export const WaterSupplyScreen = () => {
         >
           {/* 1. Thông tin chung */}
           <GeneralInfoBox
-            dateDisplay={formatDateTime(selectedDate)}
-            onPressDate={() => setShowDatePicker(true)}
             type="withImage"
+            date={selectedDate}
+            onDateChange={setSelectedDate}
             imageUris={imageUris}
-            onPressAddImage={() => {}}
-            onPressImage={() => {}}
-            onRemoveImage={() => {}}
+            onImagesChange={setImageUris}
           />
 
           {/* 2. Mực nước & Thể tích */}
