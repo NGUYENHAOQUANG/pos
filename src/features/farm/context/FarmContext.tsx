@@ -162,6 +162,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       SIPHON: 'Xi-phông',
       TROUBLESHOOTING: 'Xử lý sự cố',
       TRANSFER_POND: 'Sang ao',
+      HARVEST: 'Thu hoạch',
     };
 
     let maxDate = new Date(0);

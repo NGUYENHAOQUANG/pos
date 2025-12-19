@@ -21,6 +21,10 @@ import { useFarm } from '@/features/farm/context/FarmContext';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import {
+  showAddJobSuccessToast,
+  showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddSiphonScreen'>;
@@ -160,6 +164,7 @@ export const AddSiphonScreen: React.FC = () => {
         item.id === itemToEdit.id ? { ...item, ...baseData } : item
       );
       updatePondJob(pondId, 'SIPHON', updatedItems);
+      showEditJobSuccessToast('SIPHON');
     } else {
       // Create new SIPHON job with proper next index
       let maxIndex = 0;
@@ -179,6 +184,7 @@ export const AddSiphonScreen: React.FC = () => {
       };
 
       updatePondJob(pondId, 'SIPHON', [...currentItems, newItem]);
+      showAddJobSuccessToast('SIPHON');
     }
 
     navigation.goBack();

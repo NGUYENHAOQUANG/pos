@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,24 +11,19 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { CurrentPondInfoBox } from '@/features/farm/components/pondwork/transfer/CurrentPondInfoBox';
-import {
-  TransferInfoBox,
-  ReceivingPondItem,
-} from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
+import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
 import { TransferConfirmationModal } from '@/features/farm/components/pondwork/transfer/TransferConfirmationModal';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { IconTrashOutlined } from '@/assets/icons';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { TransferMeta } from '@/features/farm/types/farm.types';
-import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import {
-  showAddJobSuccessToast,
-  showEditJobSuccessToast,
-} from '@/features/farm/utils/toastMessages';
+import { HarvestMeta } from '@/features/farm/types/farm.types';
+import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
+import Toast from 'react-native-toast-message';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddTransferScreen'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
 
-export const AddTransferScreen: React.FC = () => {
+export const AddHarvestScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { pond, itemToEdit } = route.params || {};
@@ -36,56 +31,19 @@ export const AddTransferScreen: React.FC = () => {
   const { setTabBarVisible } = useTabBarVisibility();
   const { getPondJobItems, updatePondJob } = useFarm();
 
-  // Mock data for receiving ponds
-  const MOCK_POND_OPTIONS: DropDownItem[] = [
-    { id: '1', label: 'Ao 1' },
-    { id: '2', label: 'Ao 2' },
-    { id: '3', label: 'Ao 3' },
-    { id: '4', label: 'Ao 4' },
-    { id: '5', label: 'Ao 5' },
-  ];
-
   // Initialize state from itemToEdit if available
-  const meta = useMemo(() => (itemToEdit?.meta as TransferMeta) || {}, [itemToEdit?.meta]);
+  const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState<Date>(
     meta.date ? new Date(meta.date) : new Date()
   );
   const [notes, setNotes] = useState<string>(meta.notes || '');
-  const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize?.toString() || '60');
-  const [transferMethod] = useState<string>(meta.transferMethod || 'Sang hết');
+  const [harvestType, setHarvestType] = useState<string>(meta.harvestType || 'Thu hết');
+  const [yieldAmount, setYieldAmount] = useState<string>(meta.yieldAmount || '');
+  const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize || '');
+  const [referencePrice, setReferencePrice] = useState<string>(meta.referencePrice || '');
 
-  const actualStockingQuantity = 400000;
-  const shrimpBreed = 'Tôm thẻ chân trắng – SIS PL12';
-
-  // Formula: (actualStockingQuantity * 1000) / shrimpSize
-  const totalEstimatedShrimp = useMemo(() => {
-    if (actualStockingQuantity && shrimpSize && parseFloat(shrimpSize) > 0) {
-      return Math.round((actualStockingQuantity * 1000) / parseFloat(shrimpSize));
-    }
-    return 0;
-  }, [shrimpSize]);
-
-  const [receivingPonds, setReceivingPonds] = useState<ReceivingPondItem[]>(() => {
-    if (meta.receivingPonds && meta.receivingPonds.length > 0) {
-      return meta.receivingPonds;
-    }
-    return [{ id: Date.now().toString(), quantity: '' }];
-  });
-
-  const hasInitialized = useRef(false);
-
-  // Initialize first row with totalEstimatedShrimp when component mounts or totalEstimatedShrimp changes
-  useEffect(() => {
-    if (!hasInitialized.current && totalEstimatedShrimp > 0) {
-      setReceivingPonds(prev => {
-        if (prev.length === 1 && prev[0].quantity === '') {
-          hasInitialized.current = true;
-          return [{ ...prev[0], quantity: totalEstimatedShrimp.toString() }];
-        }
-        return prev;
-      });
-    }
-  }, [totalEstimatedShrimp]);
+  // Harvest type options
+  const harvestTypeOptions = ['Thu hết', 'Thu tỉa', 'Đóng chu kỳ'];
 
   // Store initial data for comparison when editing
   const initialData = useMemo(() => {
@@ -93,9 +51,10 @@ export const AddTransferScreen: React.FC = () => {
     return {
       date: meta.date ? new Date(meta.date) : new Date(),
       notes: meta.notes || '',
-      shrimpSize: meta.shrimpSize || '60',
-      transferMethod: meta.transferMethod || 'Sang hết',
-      receivingPonds: meta.receivingPonds || [],
+      harvestType: meta.harvestType || 'Thu hết',
+      yieldAmount: meta.yieldAmount || '',
+      shrimpSize: meta.shrimpSize || '',
+      referencePrice: meta.referencePrice || '',
     };
   }, [itemToEdit, meta]);
 
@@ -114,6 +73,24 @@ export const AddTransferScreen: React.FC = () => {
     navigation.goBack();
   };
 
+  const handleDeletePress = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (pond?.id && itemToEdit) {
+      const currentItems = getPondJobItems(pond.id, 'HARVEST');
+      const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
+      updatePondJob(pond.id, 'HARVEST', updatedItems);
+      setDeleteModalVisible(false);
+      navigation.goBack();
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalVisible(false);
+  };
+
   // Check if data has changed from initial (when editing)
   const hasChanges = useMemo(() => {
     if (!itemToEdit || !initialData) return true; // New item always has "changes"
@@ -126,26 +103,42 @@ export const AddTransferScreen: React.FC = () => {
     // Compare notes
     if (notes !== initialData.notes) return true;
 
-    // Compare shrimpSize
+    // Compare harvestType
+    if (harvestType !== initialData.harvestType) return true;
+
+    // Compare harvest data
+    if (yieldAmount !== initialData.yieldAmount) return true;
     if (shrimpSize !== initialData.shrimpSize) return true;
-
-    // Compare transferMethod
-    if (transferMethod !== initialData.transferMethod) return true;
-
-    // Compare receivingPonds
-    if (JSON.stringify(receivingPonds) !== JSON.stringify(initialData.receivingPonds)) return true;
+    if (referencePrice !== initialData.referencePrice) return true;
 
     return false;
-  }, [itemToEdit, initialData, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
+  }, [
+    itemToEdit,
+    initialData,
+    selectedDate,
+    notes,
+    harvestType,
+    yieldAmount,
+    shrimpSize,
+    referencePrice,
+  ]);
 
   const isButtonDisabled = itemToEdit && !hasChanges;
   const shouldShowDisabledStyle = itemToEdit && !hasChanges;
 
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
+  const [confirmationModalType, setConfirmationModalType] = useState<
+    'harvest_full' | 'harvest_close_cycle' | null
+  >(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const handleSavePress = () => {
-    // Only show confirmation modal for new transfers (not when editing)
-    if (!itemToEdit) {
+    // Show confirmation modal if harvestType is 'Thu hết' or 'Đóng chu kỳ' and it's a new item
+    if (harvestType === 'Thu hết' && !itemToEdit) {
+      setConfirmationModalType('harvest_full');
+      setIsConfirmationModalVisible(true);
+    } else if (harvestType === 'Đóng chu kỳ' && !itemToEdit) {
+      setConfirmationModalType('harvest_close_cycle');
       setIsConfirmationModalVisible(true);
     } else {
       handleSave();
@@ -154,11 +147,13 @@ export const AddTransferScreen: React.FC = () => {
 
   const handleConfirmSave = () => {
     setIsConfirmationModalVisible(false);
+    setConfirmationModalType(null);
     handleSave();
   };
 
   const handleCancelConfirmation = () => {
     setIsConfirmationModalVisible(false);
+    setConfirmationModalType(null);
   };
 
   const handleSave = () => {
@@ -168,9 +163,9 @@ export const AddTransferScreen: React.FC = () => {
     }
 
     const pondId = pond.id;
-    const currentItems = getPondJobItems(pondId, 'TRANSFER_POND');
+    const currentItems = getPondJobItems(pondId, 'HARVEST');
 
-    // Time & date formatting (reuse pattern from feeding)
+    // Time & date formatting
     const timeString = selectedDate.toLocaleTimeString('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
@@ -185,21 +180,27 @@ export const AddTransferScreen: React.FC = () => {
         ...(itemToEdit?.meta || {}),
         date: selectedDate,
         notes: notes || undefined,
+        harvestType,
+        yieldAmount,
         shrimpSize,
-        transferMethod,
-        receivingPonds,
-      } as TransferMeta,
+        referencePrice,
+      },
     };
 
     if (itemToEdit) {
-      // Update existing TRANSFER_POND job
+      // Update existing HARVEST job
       const updatedItems = currentItems.map(item =>
         item.id === itemToEdit.id ? { ...item, ...baseData } : item
       );
-      updatePondJob(pondId, 'TRANSFER_POND', updatedItems);
-      showEditJobSuccessToast('TRANSFER_POND');
+      updatePondJob(pondId, 'HARVEST', updatedItems);
+      Toast.show({
+        type: 'success',
+        text1: getHarvestSuccessMessage(harvestType),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     } else {
-      // Create new TRANSFER_POND job with proper next index
+      // Create new HARVEST job with proper next index
       let maxIndex = 0;
       currentItems.forEach(item => {
         const match = item.label.match(/Lần (\d+)/);
@@ -216,8 +217,13 @@ export const AddTransferScreen: React.FC = () => {
         label: `Lần ${nextIndex}`,
       };
 
-      updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
-      showAddJobSuccessToast('TRANSFER_POND');
+      updatePondJob(pondId, 'HARVEST', [...currentItems, newItem]);
+      Toast.show({
+        type: 'success',
+        text1: getHarvestSuccessMessage(harvestType),
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
 
     navigation.goBack();
@@ -230,37 +236,39 @@ export const AddTransferScreen: React.FC = () => {
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Sang ao</Text>
-        <View style={styles.headerSpacer} />
+        <Text style={styles.headerTitle}>Thu hoạch</Text>
+        {itemToEdit ? (
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
+            <IconTrashOutlined width={18} height={18} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.headerSpacer} />
+        )}
       </View>
 
       {/* Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <GeneralInfoBox type="default" date={selectedDate} onDateChange={setSelectedDate} />
-
-        <CurrentPondInfoBox
-          shrimpBreed={shrimpBreed}
-          actualStockingQuantity={actualStockingQuantity}
-          shrimpSize={shrimpSize}
-          onShrimpSizeChange={setShrimpSize}
-          totalEstimatedShrimp={totalEstimatedShrimp}
+        <GeneralInfoBox
+          type="harvest"
+          date={selectedDate}
+          onDateChange={setSelectedDate}
+          activityLabel="Chọn loại thu hoạch"
+          activityOptions={harvestTypeOptions}
+          selectedActivity={harvestType}
+          onSelectActivity={setHarvestType}
         />
 
-        <TransferInfoBox
-          transferMethod={transferMethod}
-          onTransferMethodPress={() => {
-            // TODO: Implement transfer method selection
-            console.log('Select transfer method');
-          }}
-          receivingPonds={receivingPonds}
-          onReceivingPondsChange={setReceivingPonds}
-          onReceivingPondPress={id => {
-            // TODO: Implement pond selection
-            console.log('Select receiving pond for id:', id);
-          }}
-          totalEstimatedShrimp={totalEstimatedShrimp}
-          pondOptions={MOCK_POND_OPTIONS}
-        />
+        {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
+        {harvestType !== 'Đóng chu kỳ' && (
+          <HarvestDataBox
+            yieldAmount={yieldAmount}
+            onYieldAmountChange={setYieldAmount}
+            shrimpSize={shrimpSize}
+            onShrimpSizeChange={setShrimpSize}
+            referencePrice={referencePrice}
+            onReferencePriceChange={setReferencePrice}
+          />
+        )}
 
         <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
       </ScrollView>
@@ -279,12 +287,21 @@ export const AddTransferScreen: React.FC = () => {
         />
       </View>
 
-      {/* Confirmation Modal */}
-      <TransferConfirmationModal
-        visible={isConfirmationModalVisible}
-        onConfirm={handleConfirmSave}
-        onCancel={handleCancelConfirmation}
-        type="transfer"
+      {/* Confirmation Modal for "Thu hết" and "Đóng chu kỳ" */}
+      {confirmationModalType && (
+        <TransferConfirmationModal
+          visible={isConfirmationModalVisible}
+          onConfirm={handleConfirmSave}
+          onCancel={handleCancelConfirmation}
+          type={confirmationModalType}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationDeleteModal
+        visible={deleteModalVisible}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </View>
   );
@@ -324,6 +341,16 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  deleteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.error,
   },
   scrollView: {
     flex: 1,

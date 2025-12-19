@@ -10,17 +10,67 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
+export type ConfirmationModalType = 'transfer' | 'harvest_full' | 'harvest_close_cycle';
+
+interface ConfirmationConfig {
+  title: string;
+  message: string;
+  confirmText: string;
+  cancelText: string;
+}
+
+const CONFIRMATION_CONFIGS: Record<ConfirmationModalType, ConfirmationConfig> = {
+  transfer: {
+    title: 'Xác nhận sang ao',
+    message: `Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở ao nuôi.
+Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
+Bạn có chắc muốn sang ao không?`,
+    confirmText: 'Sang ao',
+    cancelText: 'Không',
+  },
+  harvest_full: {
+    title: 'Xác nhận thu hoạch hết',
+    message: `Việc thu hoạch hết sẽ kết thúc chu kỳ nuôi hiện tại và không thể hoàn tác.
+Bạn có chắc chắn muốn thu hoạch hết không?`,
+    confirmText: 'Thu hết',
+    cancelText: 'Không',
+  },
+  harvest_close_cycle: {
+    title: 'Xác nhận đóng chu kỳ',
+    message: `Việc đóng chu kỳ sẽ kết thúc chu kỳ nuôi hiện tại và không thể hoàn tác.
+Bạn có chắc chắn muốn đóng chu kỳ không?`,
+    confirmText: 'Đóng chu kỳ',
+    cancelText: 'Không',
+  },
+};
+
 interface TransferConfirmationModalProps {
   visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  type: ConfirmationModalType;
+  // Optional overrides for custom messages
+  title?: string;
+  message?: string;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps> = ({
   visible,
   onConfirm,
   onCancel,
+  type,
+  title,
+  message,
+  confirmText,
+  cancelText,
 }) => {
+  const config = CONFIRMATION_CONFIGS[type];
+  const finalTitle = title || config.title;
+  const finalMessage = message || config.message;
+  const finalConfirmText = confirmText || config.confirmText;
+  const finalCancelText = cancelText || config.cancelText;
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <TouchableWithoutFeedback onPress={onCancel}>
@@ -30,7 +80,7 @@ export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps>
               <View style={styles.content}>
                 {/* Header */}
                 <View style={styles.header}>
-                  <Text style={styles.title}>Xác nhận sang ao</Text>
+                  <Text style={styles.title}>{finalTitle}</Text>
                   <TouchableOpacity onPress={onCancel} activeOpacity={0.7}>
                     <Ionicons name="close" size={14} color={colors.textSecondary} />
                   </TouchableOpacity>
@@ -38,14 +88,7 @@ export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps>
 
                 {/* Message */}
                 <View style={styles.messageContainer}>
-                  <Text style={styles.message}>
-                    Việc sang ao sẽ kết thúc chu kỳ hiện tại ở ao vèo và tiếp tục giai đoạn nuôi ở
-                    ao nuôi.
-                    {'\n'}
-                    Sau khi thực hiện, bạn sẽ không thể chỉnh sửa lại dữ liệu của giai đoạn vèo.
-                    {'\n'}
-                    Bạn có chắc muốn sang ao không?
-                  </Text>
+                  <Text style={styles.message}>{finalMessage}</Text>
                 </View>
 
                 {/* Buttons */}
@@ -55,14 +98,14 @@ export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps>
                     onPress={onCancel}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.cancelButtonText}>Không</Text>
+                    <Text style={styles.cancelButtonText}>{finalCancelText}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.confirmButton}
                     onPress={onConfirm}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.confirmButtonText}>Sang ao</Text>
+                    <Text style={styles.confirmButtonText}>{finalConfirmText}</Text>
                   </TouchableOpacity>
                 </View>
               </View>

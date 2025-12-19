@@ -91,5 +91,21 @@ export interface TransferMeta {
   }>;
 }
 
+// Harvest Meta
+export interface HarvestMeta {
+  date?: Date | string;
+  notes?: string;
+  harvestType?: string; // 'Thu hết' | 'Thu tỉa' | 'Đóng chu kỳ'
+  yieldAmount?: string; // Sản lượng (kg)
+  shrimpSize?: string; // Cỡ tôm (con/kg)
+  referencePrice?: string; // Giá tôm tham khảo (VNĐ/kg)
+  revenue?: number; // Doanh thu (VNĐ) - calculated field
+}
+
 // Union type for all meta types
-export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta | TransferMeta;
+export type JobMeta =
+  | ShrimpInspectionMeta
+  | EnvironmentMeta
+  | SiphonMeta
+  | TransferMeta
+  | HarvestMeta;

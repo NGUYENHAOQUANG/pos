@@ -16,6 +16,10 @@ import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondw
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import {
+  showAddJobSuccessToast,
+  showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -98,6 +102,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
           item.id === itemToEdit.id ? { ...item, ...itemData } : item
         );
         updatePondJob(pond.id, 'SHRIMP_INSPECTION', updatedItems);
+        showEditJobSuccessToast('SHRIMP_INSPECTION');
       } else {
         // Create new item
         const nextIndex = currentItems.length + 1;
@@ -107,6 +112,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
           label: `Lần ${nextIndex}`,
         };
         updatePondJob(pond.id, 'SHRIMP_INSPECTION', [...currentItems, newItem]);
+        showAddJobSuccessToast('SHRIMP_INSPECTION');
       }
     }
 

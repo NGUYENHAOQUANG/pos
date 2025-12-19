@@ -15,6 +15,10 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import {
+  showAddJobSuccessToast,
+  showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddEnvironmentScreen'>;
@@ -105,6 +109,7 @@ export const AddEnvironmentScreen: React.FC = () => {
           item.id === itemToEdit.id ? { ...item, ...itemData } : item
         );
         updatePondJob(pond.id, 'ENVIRONMENT', updatedItems);
+        showEditJobSuccessToast('ENVIRONMENT');
       } else {
         // Create new item
         // Calculate next index based on max existing label
@@ -124,6 +129,7 @@ export const AddEnvironmentScreen: React.FC = () => {
           label: `Lần ${nextIndex}`,
         };
         updatePondJob(pond.id, 'ENVIRONMENT', [...currentItems, newItem]);
+        showAddJobSuccessToast('ENVIRONMENT');
       }
     }
 

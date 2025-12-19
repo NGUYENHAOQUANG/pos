@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,19 +23,70 @@ import { IconCalender, IconCloseOutlined } from '@/assets/icons';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+import { formatDateTime } from '@/features/farm/utils/dateUtils';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
+/**
+ * GeneralInfoBox Component
+ *
+ * A reusable component for displaying general information fields including:
+ * - Date/time picker
+ * - Activity type selection (radio buttons) for water_treatment and harvest
+ * - Image picker (for withImage and harvest types)
+ *
+ * @example
+ * // Default type - only date picker
+ * <GeneralInfoBox
+ *   type="default"
+ *   date={selectedDate}
+ *   onDateChange={setSelectedDate}
+ * />
+ *
+ * @example
+ * // With image support
+ * <GeneralInfoBox
+ *   type="withImage"
+ *   date={selectedDate}
+ *   onDateChange={setSelectedDate}
+ *   imageUris={imageUris}
+ *   onImagesChange={setImageUris}
+ * />
+ *
+ * @example
+ * // Water treatment type - with activity selection
+ * <GeneralInfoBox
+ *   type="water_treatment"
+ *   date={selectedDate}
+ *   onDateChange={setSelectedDate}
+ *   activityLabel="Chọn loại xử lý nước"
+ *   activityOptions={['Xử lý hóa chất', 'Xử lý vi sinh', 'Xử lý khác']}
+ *   selectedActivity={selectedTreatment}
+ *   onSelectActivity={setSelectedTreatment}
+ * />
+ *
+ * @example
+ * // Harvest type - with activity selection (no image)
+ * <GeneralInfoBox
+ *   type="harvest"
+ *   date={selectedDate}
+ *   onDateChange={setSelectedDate}
+ *   activityLabel="Chọn loại thu hoạch"
+ *   activityOptions={['Thu hết', 'Thu tỉa', 'Đóng chu kỳ']}
+ *   selectedActivity={harvestType}
+ *   onSelectActivity={setHarvestType}
+ * />
+ */
 interface GeneralInfoBox {
   type?: GeneralInfoBoxType;
   date?: Date; // Initial date (for edit mode)
   onDateChange?: (date: Date) => void; // Callback when date changes
-  imageUris?: string[]; // Initial images (for edit mode)
+  imageUris?: string[]; // Initial images (for edit mode) - used for 'withImage' and 'harvest' types
   onImagesChange?: (images: string[]) => void; // Callback when images change
-  activityLabel?: string;
-  activityOptions?: string[];
-  selectedActivity?: string;
-  onSelectActivity?: (val: string) => void;
+  activityLabel?: string; // Label for activity selection (e.g., "Chọn loại thu hoạch")
+  activityOptions?: string[]; // Options for activity selection (radio buttons)
+  selectedActivity?: string; // Currently selected activity option
+  onSelectActivity?: (val: string) => void; // Callback when activity is selected
 }
 
 export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
@@ -50,8 +101,12 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   onSelectActivity,
 }) => {
   // Internal state for date
-  const [selectedDate, setSelectedDate] = useState<Date>(initialDate || new Date());
+  const initialDateValue = useRef<Date>(initialDate || new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDateValue.current);
   const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+
+  // Track if date has been changed from initial value
+  const [hasDateChanged, setHasDateChanged] = useState(false);
 
   // Internal state for images
   const [imageUris, setImageUris] = useState<string[]>(initialImageUris || []);
@@ -62,7 +117,9 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   // Sync with external date prop (for edit mode)
   useEffect(() => {
     if (initialDate) {
+      initialDateValue.current = initialDate;
       setSelectedDate(initialDate);
+      setHasDateChanged(false);
     }
   }, [initialDate]);
 
@@ -82,15 +139,6 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   useEffect(() => {
     onImagesChange?.(imageUris);
   }, [imageUris, onImagesChange]);
-
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year}, ${hours}:${minutes} (hiện tại)`;
-  };
 
   const requestCameraPermission = async (): Promise<boolean> => {
     if (Platform.OS === 'android') {
@@ -190,12 +238,16 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
             onPress={() => setIsDatePickerVisible(true)}
             activeOpacity={0.7}
           >
-            <Text style={styles.dateText}>{formatDateTime(selectedDate)}</Text>
+            <Text style={styles.dateText}>
+              {formatDateTime(selectedDate, {
+                showCurrentLabel: hasDateChanged ? false : 'auto',
+              })}
+            </Text>
             <IconCalender width={15} height={15} />
           </TouchableOpacity>
         </View>
 
-        {/* Chọn loại hoạt động - dùng cho xử lý nước, thu hoạch, ... */}
+        {/* Chọn loại hoạt động - dùng cho xử lý nước */}
         {type === 'water_treatment' && activityOptions && onSelectActivity && (
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
@@ -225,8 +277,38 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
           </View>
         )}
 
-        {/* Hình ảnh - chỉ dùng cho type có hình */}
-        {(type === 'withImage' || type === 'harvest') && (
+        {/* Chọn loại hoạt động - dùng cho thu hoạch */}
+        {type === 'harvest' && activityOptions && onSelectActivity && (
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>
+              {activityLabel}
+            </Text>
+            <View style={styles.harvestRadioGroup}>
+              {activityOptions.map(option => (
+                <TouchableOpacity
+                  key={option}
+                  style={styles.harvestRadioItem}
+                  onPress={() => onSelectActivity(option)}
+                  activeOpacity={0.8}
+                >
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      selectedActivity === option && styles.radioOuterSelected,
+                    ]}
+                  >
+                    {selectedActivity === option && <View style={styles.radioInner} />}
+                  </View>
+                  <Text style={styles.radioLabel}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Hình ảnh - chỉ dùng cho type withImage */}
+        {type === 'withImage' && (
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Hình ảnh</Text>
             <View style={styles.imagesContainer}>
@@ -264,7 +346,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
       </SelectionInfoBox>
 
       {/* Image Picker Action Sheet */}
-      {(type === 'withImage' || type === 'harvest') && (
+      {type === 'withImage' && (
         <ImagePickerActionSheet
           visible={actionSheetVisible}
           onClose={() => setActionSheetVisible(false)}
@@ -274,7 +356,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
       )}
 
       {/* Image Preview Modal */}
-      {(type === 'withImage' || type === 'harvest') && (
+      {type === 'withImage' && (
         <ImagePreviewModal
           visible={previewVisible}
           imageUri={previewUri}
@@ -287,7 +369,10 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
         visible={isDatePickerVisible}
         onClose={() => setIsDatePickerVisible(false)}
         date={selectedDate}
-        onSelectDate={setSelectedDate}
+        onSelectDate={date => {
+          setSelectedDate(date);
+          setHasDateChanged(true);
+        }}
       />
     </>
   );
@@ -381,6 +466,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '48%', // Chia đôi màn hình
   },
+  harvestRadioGroup: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 32,
+  },
+  harvestRadioItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   radioOuter: {
     width: 20,
     height: 20,
@@ -404,5 +498,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text,
     fontWeight: '400',
+    lineHeight: 22,
   },
 });

@@ -10,14 +10,14 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { TransferLogItem } from '@/features/farm/components/pondwork/transfer/TransferLogItem';
+import { HarvestLogItem } from '@/features/farm/components/pondwork/harvest/HarvestLogItem';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { EmptyStateCard } from '@/features/material/components/EmptyStateCard';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'TransferLog'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'HarvestLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
-export const TransferLogScreen: React.FC = () => {
+export const HarvestLogScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { pond } = route.params || {};
@@ -63,9 +63,24 @@ export const TransferLogScreen: React.FC = () => {
   const endLabel = formatLabel(endDate);
 
   // Build grouped data from context (Map<string, JobExecution[]>)
+  // Only show items with harvestType === 'Thu tỉa'
   const itemsByDate = useMemo(() => {
     if (!pond?.id) return new Map<string, JobExecution[]>();
-    return getPondJobItemsGroupedByDate(pond.id, 'TRANSFER_POND', startDate, endDate);
+    const allItems = getPondJobItemsGroupedByDate(pond.id, 'HARVEST', startDate, endDate);
+
+    // Filter to only show 'Thu tỉa' items
+    const filteredMap = new Map<string, JobExecution[]>();
+    allItems.forEach((items, dateKey) => {
+      const filteredItems = items.filter(item => {
+        const meta = item.meta as any;
+        return meta?.harvestType === 'Thu tỉa';
+      });
+      if (filteredItems.length > 0) {
+        filteredMap.set(dateKey, filteredItems);
+      }
+    });
+
+    return filteredMap;
   }, [pond?.id, getPondJobItemsGroupedByDate, startDate, endDate]);
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -81,15 +96,15 @@ export const TransferLogScreen: React.FC = () => {
     }));
   };
 
-  const handleStartTransfer = () => {
+  const handleStartHarvest = () => {
     if (pond) {
-      navigation.navigate('AddTransferScreen', { pond });
+      navigation.navigate('AddHarvestScreen', { pond });
     }
   };
 
-  const handleEditTransfer = (item: JobExecution) => {
+  const handleEditHarvest = (item: JobExecution) => {
     if (pond) {
-      navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+      navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
     }
   };
 
@@ -100,7 +115,7 @@ export const TransferLogScreen: React.FC = () => {
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nhật ký sang ao</Text>
+          <Text style={styles.headerTitle}>Nhật ký thu hoạch</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -136,9 +151,9 @@ export const TransferLogScreen: React.FC = () => {
         {itemsByDate.size === 0 ? (
           <View style={styles.emptyContainer}>
             <EmptyStateCard
-              message="Chưa có dữ liệu sang ao"
-              buttonTitle="Bắt đầu sang ao"
-              onPress={handleStartTransfer}
+              message="Chưa có dữ liệu thu hoạch"
+              buttonTitle="Bắt đầu thu hoạch"
+              onPress={handleStartHarvest}
             />
           </View>
         ) : (
@@ -165,11 +180,11 @@ export const TransferLogScreen: React.FC = () => {
                   {isExpanded && (
                     <View style={styles.itemsContainer}>
                       {dateItems.map((item: JobExecution) => (
-                        <TransferLogItem
+                        <HarvestLogItem
                           key={item.id}
                           item={item}
                           meta={item.meta || {}}
-                          onEdit={handleEditTransfer}
+                          onEdit={handleEditHarvest}
                         />
                       ))}
                     </View>

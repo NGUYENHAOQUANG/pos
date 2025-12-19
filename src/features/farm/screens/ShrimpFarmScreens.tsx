@@ -23,6 +23,7 @@ const JOB_TYPES = {
   TRANSFER_POND: 'TRANSFER_POND' as const,
   CLEAN_POND: 'CLEAN_POND' as const,
   SUN_DRY_POND: 'SUN_DRY_POND' as const,
+  HARVEST: 'HARVEST' as const,
 };
 
 // Initial Jobs Configuration (Template)
@@ -36,6 +37,7 @@ const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: JOB_TYPES.TRANSFER_POND, items: [] },
   { type: JOB_TYPES.CLEAN_POND, items: [] },
   { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+  { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
 interface ShrimpFarmScreensProps {}
@@ -100,7 +102,6 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       return;
     }
 
-    // For shrimp inspection, go to inspection screen to enter details
     if (type === JOB_TYPES.SHRIMP_INSPECTION) {
       navigation.navigate('ShrimpInspectionScreen', { pond });
       return;
@@ -128,6 +129,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
 
     if (type === JOB_TYPES.TRANSFER_POND) {
       navigation.navigate('AddTransferScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.HARVEST) {
+      navigation.navigate('AddHarvestScreen', { pond });
       return;
     }
 
@@ -160,12 +166,10 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     if (!pond?.id) return;
 
     if (type === JOB_TYPES.FEED) {
-      // Navigate to Edit screen for Feed
       navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
       return;
     }
 
-    // For shrimp inspection, navigate to edit screen
     if (type === JOB_TYPES.SHRIMP_INSPECTION) {
       navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
       return;
@@ -187,13 +191,17 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     }
 
     if (type === JOB_TYPES.WATER_CHANGE) {
-      // Truyền item sang để fill dữ liệu cũ vào màn hình nhập
       navigation.navigate('WaterSupply', { pond, item });
       return;
     }
 
     if (type === JOB_TYPES.TRANSFER_POND) {
       navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.HARVEST) {
+      navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
       return;
     }
 
@@ -223,8 +231,10 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     if (type === JOB_TYPES.SIPHON && pond) {
       navigation.navigate('SiphonLog', { pond });
     }
+    if (type === JOB_TYPES.HARVEST && pond) {
+      navigation.navigate('HarvestLog', { pond });
+    }
 
-    console.log(`Pressed ${type}`);
     if (type === JOB_TYPES.WATER_CHANGE && pond) {
       navigation.navigate('WaterSupplyLog', { pond });
       return;
