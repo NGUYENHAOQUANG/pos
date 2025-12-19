@@ -60,7 +60,7 @@ export const colors = {
   red: {
     50: '#FFF0F6',
     300: '#FFADD2',
-    600: '#EB2F96',
+    600: '#eb2f2fff',
     900: '#FF4D4F',
   },
   // Semantic colors

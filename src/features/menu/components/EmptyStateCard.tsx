@@ -1,0 +1,71 @@
+import React from 'react';
+import { View, Text, StyleSheet, Platform, ViewStyle } from 'react-native';
+import { Button } from '@/shared/components/buttons/Button';
+import { colors, spacing, borderRadius, typography } from '@/styles';
+import EmptyStateIcon from '@/assets/images/Icon/EmptyStateIcon.svg';
+
+interface EmptyStateCardProps {
+  message: string;
+  buttonTitle: string;
+  onPress: () => void;
+  buttonStyle?: ViewStyle;
+}
+
+export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
+  message,
+  buttonTitle,
+  onPress,
+  buttonStyle,
+}) => {
+  return (
+    <View style={styles.container}>
+      <View style={styles.iconContainer}>
+        <EmptyStateIcon width={120} height={120} />
+      </View>
+      <Text style={styles.text}>{message}</Text>
+      <Button
+        title={buttonTitle}
+        onPress={onPress}
+        iconLeft="add"
+        variant="primary"
+        size="medium"
+        style={StyleSheet.flatten([styles.button, buttonStyle])}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    padding: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 14,
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    fontFamily: typography.fontFamily.regular,
+  },
+  button: {
+    minWidth: 160,
+  },
+});

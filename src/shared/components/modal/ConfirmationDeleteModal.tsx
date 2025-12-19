@@ -28,7 +28,10 @@ interface ConfirmationDeleteModalProps {
   /** Text for the confirm button (default: 'Đồng ý') */
   confirmText?: string;
   /** Text for the cancel button (default: 'Không') */
+  /** Text for the cancel button (default: 'Không') */
   cancelText?: string;
+  /** Toast message on success (default: 'Đã xóa tác vụ thành công') */
+  successMessage?: string;
 }
 
 /**
@@ -45,12 +48,13 @@ export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = (
   message = 'Bạn có chắc chắn muốn xoá tác vụ này không?',
   confirmText = 'Đồng ý',
   cancelText = 'Không',
+  successMessage = 'Đã xóa tác vụ thành công',
 }) => {
   const handleConfirm = () => {
     onConfirm();
     Toast.show({
       type: 'success',
-      text1: 'Đã xóa tác vụ thành công',
+      text1: successMessage,
       position: 'top',
       visibilityTime: 3000,
     });

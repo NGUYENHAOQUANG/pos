@@ -15,9 +15,9 @@ import { ReportsScreen } from '@/features/reports';
 import { MaterialNavigator } from '@/features/material/navigation/MaterialNavigator';
 import { ControlNavigator } from '@/features/control/navigation/ControlNavigator';
 import { FarmNavigator } from '@/features/farm/navigation/FarmNavigator';
-import SettingsScreen from '@/features/settings/screens/SettingsScreen';
 import { colors } from '@/styles';
-
+import { MenuNavigator } from '@/features/menu/navigation/MenuNavigator';
+import { SvgProps } from 'react-native-svg';
 // Import Icons
 import {
   IconReport,
@@ -31,7 +31,6 @@ import {
   IconSetting,
   IconSettingActive,
 } from '@/assets/icons';
-import { SvgProps } from 'react-native-svg';
 
 const TAB_HEIGHT = 70;
 
@@ -73,11 +72,11 @@ const navigationItems: NavigationItem[] = [
     component: MaterialNavigator,
   },
   {
-    key: 'Settings',
+    key: 'Menu',
     label: 'Menu',
     Icon: IconSetting,
     IconActive: IconSettingActive,
-    component: SettingsScreen,
+    component: MenuNavigator,
   },
 ];
 
