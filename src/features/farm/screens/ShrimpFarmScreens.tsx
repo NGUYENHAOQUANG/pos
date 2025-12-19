@@ -20,6 +20,7 @@ const JOB_TYPES = {
   WATER_TREATMENT: 'WATER_TREATMENT' as const,
   WATER_CHANGE: 'WATER_CHANGE' as const,
   SIPHON: 'SIPHON' as const,
+  TRANSFER_POND: 'TRANSFER_POND' as const,
   CLEAN_POND: 'CLEAN_POND' as const,
   SUN_DRY_POND: 'SUN_DRY_POND' as const,
 };
@@ -32,6 +33,7 @@ const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: JOB_TYPES.WATER_TREATMENT, items: [] },
   { type: JOB_TYPES.WATER_CHANGE, items: [] },
   { type: JOB_TYPES.SIPHON, items: [] },
+  { type: JOB_TYPES.TRANSFER_POND, items: [] },
   { type: JOB_TYPES.CLEAN_POND, items: [] },
   { type: JOB_TYPES.SUN_DRY_POND, items: [] },
 ];
@@ -84,7 +86,6 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
       // Điều hướng sang màn hình CreateCycle và truyền pondId của ao hiện tại
       navigation.navigate('CreateCycle', {
         pondId: pond.id,
-        initialData: null, // Đảm bảo là tạo mới, không phải chỉnh sửa
       });
     } else {
       console.log('Không tìm thấy thông tin ao (pond.id)');
@@ -122,6 +123,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
 
     if (type === JOB_TYPES.WATER_CHANGE) {
       navigation.navigate('WaterSupply', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.TRANSFER_POND) {
+      navigation.navigate('AddTransferScreen', { pond });
       return;
     }
 
@@ -183,6 +189,11 @@ export const ShrimpFarmScreens: React.FC<ShrimpFarmScreensProps> = () => {
     if (type === JOB_TYPES.WATER_CHANGE) {
       // Truyền item sang để fill dữ liệu cũ vào màn hình nhập
       navigation.navigate('WaterSupply', { pond, item });
+      return;
+    }
+
+    if (type === JOB_TYPES.TRANSFER_POND) {
+      navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
       return;
     }
 

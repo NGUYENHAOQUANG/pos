@@ -89,7 +89,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
     const year = date.getFullYear();
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${day}-${month}-${year}, ${hours}:${minutes} (hiện tại)`;
+    return `${day}/${month}/${year}, ${hours}:${minutes} (hiện tại)`;
   };
 
   const requestCameraPermission = async (): Promise<boolean> => {
@@ -245,7 +245,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
                     onPress={() => handleRemoveImage(index)}
                     activeOpacity={0.7}
                   >
-                    <IconCloseOutlined width={10} height={10} />
+                    <IconCloseOutlined width={10} height={10} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -256,7 +256,7 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
                 onPress={handleImagePress}
                 activeOpacity={0.7}
               >
-                <Ionicons name="add" size={16} color={colors.textSecondary} />
+                <Ionicons name="add" size={16} color={colors.black} />
               </TouchableOpacity>
             </View>
           </View>
