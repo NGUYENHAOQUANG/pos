@@ -78,5 +78,18 @@ export interface SiphonMeta {
   notes?: string;
 }
 
+// Transfer Pond Meta
+export interface TransferMeta {
+  date?: Date | string;
+  notes?: string;
+  shrimpSize?: string;
+  transferMethod?: string;
+  receivingPonds?: Array<{
+    id: string;
+    receivingPond?: string;
+    quantity: string;
+  }>;
+}
+
 // Union type for all meta types
-export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta;
+export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta | TransferMeta;
