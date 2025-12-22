@@ -1,0 +1,77 @@
+import React from 'react';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { colors, spacing, borderRadius } from '@/styles';
+
+export type TagStatus = 'pending' | 'active' | 'paused' | 'ended';
+
+interface TagProps {
+  status: TagStatus;
+  style?: ViewStyle;
+}
+
+export const Tag: React.FC<TagProps> = ({ status, style }) => {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'pending':
+        return {
+          label: 'Chờ xác nhận',
+          color: colors.orange[500],
+          backgroundColor: colors.orange[50], // Very light orange/yellow
+          borderColor: colors.orange[200],
+        };
+      case 'active':
+        return {
+          label: 'Hoạt động',
+          color: colors.green[600],
+          backgroundColor: colors.green[50],
+          borderColor: colors.green[300],
+        };
+      case 'paused':
+        return {
+          label: 'Tạm ngưng',
+          color: colors.text,
+          backgroundColor: colors.gray[100],
+          borderColor: colors.borderDark,
+        };
+      case 'ended':
+        return {
+          label: 'Đã kết thúc',
+          color: colors.text,
+          backgroundColor: colors.gray[100],
+          borderColor: colors.borderDark,
+        };
+      default:
+        return {
+          label: '',
+          color: colors.text,
+          backgroundColor: colors.gray[100],
+          borderColor: colors.border,
+        };
+    }
+  };
+
+  const { label, color, backgroundColor, borderColor } = getStatusConfig();
+
+  return (
+    <View style={[styles.container, { backgroundColor, borderColor }, style]}>
+      <Text style={[styles.text, { color }]}>{label}</Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: spacing.md,
+    // paddingVertical: spacing.xs, // Removed to use fixed height
+    height: 22,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 12,
+    fontWeight: '400',
+  },
+});
