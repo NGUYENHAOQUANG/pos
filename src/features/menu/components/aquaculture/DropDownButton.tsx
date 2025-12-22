@@ -9,10 +9,8 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import IconEnvironment from '@/assets/images/Icon/IconDevices/EnvironmentOutlined.svg';
 
 export interface DropDownItem {
   id: string | number;
@@ -20,12 +18,12 @@ export interface DropDownItem {
   value?: any;
 }
 
-interface DropDownButtonBasicProps {
+interface DropDownButtonProps {
   data?: DropDownItem[];
   value?: DropDownItem;
   onSelect?: (item: DropDownItem) => void;
   style?: StyleProp<ViewStyle>;
-  showIcon?: boolean;
+  placeholder?: string;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -34,15 +32,15 @@ const DEFAULT_DATA: DropDownItem[] = [
   { id: '3', label: 'Trại Bạc Liêu' },
 ];
 
-export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
+export const DropDownButton: React.FC<DropDownButtonProps> = ({
   data = DEFAULT_DATA,
   value,
   onSelect,
   style,
-  showIcon = true,
+  placeholder = 'Chọn trại',
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
+  const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value || data[0]);
   const dropdownButtonRef = useRef<View>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
@@ -66,7 +64,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
   };
 
   const renderItem = ({ item }: { item: DropDownItem }) => {
-    const isSelected = item.id === currentItem.id;
+    const isSelected = item.id === currentItem?.id;
     return (
       <TouchableOpacity
         style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
@@ -76,7 +74,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
         <Text style={[styles.dropdownItemText, isSelected && styles.dropdownItemTextSelected]}>
           {item.label}
         </Text>
-        {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
+        {isSelected && <AntDesign name="check" size={18} color={colors.primary} />}
       </TouchableOpacity>
     );
   };
@@ -86,19 +84,14 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
       {/* Dropdown Picker */}
       <View ref={dropdownButtonRef} collapsable={false}>
         <TouchableOpacity
-          style={styles.locationButton}
+          style={styles.dropdownButton}
           onPress={handleDropdownPress}
           activeOpacity={0.7}
         >
-          {showIcon && <IconEnvironment width={18} height={18} style={styles.locationIcon} />}
-          <Text style={styles.locationText} numberOfLines={1}>
-            {currentItem.label}
+          <Text style={styles.buttonText} numberOfLines={1}>
+            {currentItem ? currentItem.label : placeholder}
           </Text>
-          <Ionicons
-            name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
-            size={16}
-            color={colors.textSecondary}
-          />
+          <AntDesign name={isDropdownVisible ? 'up' : 'down'} size={14} color={colors.gray[400]} />
         </TouchableOpacity>
       </View>
 
@@ -120,7 +113,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
               {
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,
-                minWidth: dropdownPosition.width,
+                width: dropdownPosition.width, // Match width exactly
               },
             ]}
           >
@@ -140,32 +133,24 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // Just a wrapper mostly for positioning the modal relative to button if needed,
-    // but measureInWindow is used so simpler view is fine.
-    // Removing header styles.
     zIndex: 1000,
   },
-  locationButton: {
+  dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
-    height: 44,
+    height: 48,
     paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.borderDark,
+    justifyContent: 'space-between',
   },
-  locationIcon: {
-    width: 18,
-    height: 18,
-    marginRight: spacing.xs,
-  },
-  locationText: {
+  buttonText: {
     fontSize: 14,
-    fontWeight: '500',
     color: colors.text,
-    marginRight: spacing.xs,
+    flex: 1,
+    marginRight: spacing.sm,
   },
   modalOverlay: {
     flex: 1,
@@ -175,8 +160,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gray[200],
+    borderColor: colors.borderDark,
     ...shadows.md,
+    maxHeight: 250,
   },
   dropdownScrollContent: {
     paddingVertical: spacing.xs,
@@ -191,7 +177,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   dropdownItemSelected: {
-    backgroundColor: colors.blue[50],
+    backgroundColor: colors.blue[50], // Light blue bg for selected
   },
   dropdownItemText: {
     fontSize: 14,
@@ -199,6 +185,6 @@ const styles = StyleSheet.create({
   },
   dropdownItemTextSelected: {
     fontWeight: '500',
-    color: colors.text,
+    color: colors.primary,
   },
 });

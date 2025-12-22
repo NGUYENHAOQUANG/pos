@@ -19,13 +19,7 @@ import {
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 
 // Interface mở rộng
-interface CLEAN_PONDJob extends JobExecution {
-  materials?: {
-    material: { name: string };
-    quantity: string | number;
-    unit: string;
-  }[];
-}
+interface CLEAN_PONDJob extends JobExecution {}
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblemLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
