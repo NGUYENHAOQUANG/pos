@@ -9,6 +9,8 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute, Route } from '@react-navigation/native';
+
 import { useTabBarVisibility } from './TabBarVisibilityContext';
 import { ReportsScreen } from '@/features/reports';
 // import DevicesScreen from '@/features/devices/screens/DevicesScreen';
@@ -43,6 +45,7 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
+  // ... items
   {
     key: 'Reports',
     label: 'Báo cáo',
@@ -84,11 +87,15 @@ const Tab = createBottomTabNavigator();
 
 const PADDING_BOTTOM = 12;
 
-const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
+const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
   const { isTabBarVisible } = useTabBarVisibility();
   const insets = useSafeAreaInsets();
 
-  if (!isTabBarVisible) return null;
+  const focusedOptions = descriptors[state.routes[state.index].key].options;
+  // @ts-ignore
+  if (!isTabBarVisible || focusedOptions.tabBarStyle?.display === 'none') {
+    return null;
+  }
 
   const safeBottom = Math.max(insets.bottom, PADDING_BOTTOM);
 
@@ -103,7 +110,6 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
       ]}
     >
       {state.routes.map((route, index) => {
-        // const { options } = descriptors[route.key]; // Unused
         const isFocused = state.index === index;
         const item = navigationItems.find(i => i.key === route.name);
 
@@ -144,6 +150,46 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
 const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
 
+// Helper to determine visibility for the Menu tab
+const getMenuTabBarVisibility = (route: Partial<Route<string>>) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'MenuMain';
+  // Allow tab bar only on the main menu screen
+  if (routeName === 'MenuMain') {
+    return undefined; // Default style (visible)
+  }
+  return { display: 'none' } as const;
+};
+
+// Helper to determine visibility for the Material tab
+const getMaterialTabBarVisibility = (route: Partial<Route<string>>) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'MaterialList';
+  // Allow tab bar only on the main material list screen
+  if (routeName === 'MaterialList') {
+    return undefined; // Default style (visible)
+  }
+  return { display: 'none' } as const;
+};
+
+// Helper to determine visibility for the Control tab
+const getControlTabBarVisibility = (route: Partial<Route<string>>) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'ControlList';
+  // Allow tab bar on ControlList AND ControlDetail
+  if (routeName === 'ControlList' || routeName === 'ControlDetail') {
+    return undefined; // Default style (visible)
+  }
+  return { display: 'none' } as const;
+};
+
+// Helper to determine visibility for the Farm tab
+const getFarmTabBarVisibility = (route: Partial<Route<string>>) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'FarmList';
+  // Allow tab bar on FarmList and PondDetail
+  if (routeName === 'FarmList' || routeName === 'PondDetail') {
+    return undefined; // Default style (visible)
+  }
+  return { display: 'none' } as const;
+};
+
 export function MainNavigator() {
   return (
     <View style={styles.container}>
@@ -155,7 +201,26 @@ export function MainNavigator() {
         tabBar={renderTabBar}
       >
         {navigationItems.map(item => (
-          <Tab.Screen key={item.key} name={item.key} component={item.component} />
+          <Tab.Screen
+            key={item.key}
+            name={item.key}
+            component={item.component}
+            options={({ route }) => {
+              if (item.key === 'Menu') {
+                return { tabBarStyle: getMenuTabBarVisibility(route) };
+              }
+              if (item.key === 'Material') {
+                return { tabBarStyle: getMaterialTabBarVisibility(route) };
+              }
+              if (item.key === 'Devices') {
+                return { tabBarStyle: getControlTabBarVisibility(route) };
+              }
+              if (item.key === 'Farm') {
+                return { tabBarStyle: getFarmTabBarVisibility(route) };
+              }
+              return {};
+            }}
+          />
         ))}
       </Tab.Navigator>
     </View>
@@ -165,7 +230,7 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.white,
   },
   bottomContainer: {
     flexDirection: 'row',

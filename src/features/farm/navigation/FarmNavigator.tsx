@@ -9,7 +9,7 @@ import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 import { ShrimpInspectionScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionScreen';
 import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionLogScreen';
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
-import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment/SettingEnvironment';
+import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/pond/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
@@ -57,7 +57,6 @@ export const FarmNavigator = () => {
         initialRouteName="FarmList"
         screenOptions={{
           headerShown: false,
-          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="FarmList" component={ShrimpPondListScreens} />
@@ -70,7 +69,7 @@ export const FarmNavigator = () => {
         <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
         <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
         <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
-        <Stack.Screen name="SettingEnvironment" component={SettingEnvironment} />
+        <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
         <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
         <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />

@@ -55,6 +55,7 @@ export const FarmOperation: React.FC = () => {
       iconName: 'tune',
       iconColor: colors.blue[600],
       iconBgColor: colors.blue[50],
+      screen: 'SettingEnvironment',
     },
   ];
 

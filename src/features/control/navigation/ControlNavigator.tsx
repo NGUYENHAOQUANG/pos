@@ -5,11 +5,18 @@ import { DevicesInPondScreens } from '../screens/devices/DeviceInPondScreens';
 import { ScheduleActivitieScreens } from '../screens/schedule/ScheduleActivitieScreens';
 import { HistoryActivitieScreens } from '../screens/schedule/HistoryActivitieScreens';
 import { ConnectDeviceScreens } from '../screens/devices/ConnectDeviceScreens';
+import CustomFeedingMachine from '../screens/CustomFeedingMachine/CustomFeedingMachineScreen';
 
 export type ControlStackParamList = {
   ControlList: { connectedPondName?: string } | undefined;
   ControlDetail: { pondName: string };
   ConnectDevice: { pondName: string };
+  CustomFeedingMachine: {
+    initialMode: 'manual' | 'schedule';
+    deviceId: string;
+    pondName: string;
+    pondId: string;
+  };
   Schedule: { pondName: string };
   History: { pondName: string };
 };
@@ -27,7 +34,6 @@ export const ControlNavigator = () => {
         initialRouteName="ControlList"
         screenOptions={{
           headerShown: false,
-          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="ControlList" component={DeviceControlScreens} />
@@ -41,6 +47,7 @@ export const ControlNavigator = () => {
           }}
         />
         <Stack.Screen name="ControlDetail" component={DevicesInPondScreens} />
+        <Stack.Screen name="CustomFeedingMachine" component={CustomFeedingMachine} />
         <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
         <Stack.Screen name="History" component={HistoryActivitieScreens} />
       </Stack.Navigator>

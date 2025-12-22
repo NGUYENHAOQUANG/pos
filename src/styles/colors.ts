@@ -63,6 +63,12 @@ export const colors = {
     600: '#eb2f2fff',
     900: '#FF4D4F',
   },
+  yellow: {
+    50: '#FFFBE6',
+    300: '#FFE58F',
+    600: '#FFC107',
+    900: '#FFD700',
+  },
   // Semantic colors
   success: '#34C759',
   warning: '#FF9500',

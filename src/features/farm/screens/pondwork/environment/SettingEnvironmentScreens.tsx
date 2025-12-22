@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,16 +14,21 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+// import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
+import { CompositeNavigationProp } from '@react-navigation/native';
 import {
   EnvironmentParameterSection,
   EnvironmentParameter,
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type NavigationProp = CompositeNavigationProp<
+  NativeStackNavigationProp<FarmStackParamList>,
+  NativeStackNavigationProp<MenuStackParamList>
+>;
 
 const DEFAULT_LOCATIONS: FarmLocation[] = [
   { id: '1', name: 'Trại Kiên Giang' },
@@ -48,10 +53,10 @@ const ADVANCED_PARAMETERS: EnvironmentParameter[] = [
   { id: '10', name: 'NO3 (mg/L)', limit: '0 - 10', isChecked: false },
 ];
 
-export const SettingEnvironment: React.FC = () => {
+export const SettingEnvironmentScreens: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
-  const { setTabBarVisible } = useTabBarVisibility();
+  // const { setTabBarVisible } = useTabBarVisibility();
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(DEFAULT_LOCATIONS[0]);
@@ -61,10 +66,7 @@ export const SettingEnvironment: React.FC = () => {
   const [advancedParameters, setAdvancedParameters] =
     useState<EnvironmentParameter[]>(ADVANCED_PARAMETERS);
 
-  // Hide tab bar when this screen is mounted
-  useEffect(() => {
-    setTabBarVisible(false);
-  }, [setTabBarVisible]);
+  // No local tab bar visibility logic needed anymore
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -100,6 +102,18 @@ export const SettingEnvironment: React.FC = () => {
     setAdvancedParameters(prev =>
       prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
     );
+  };
+
+  const handleUpdateParameter = (updatedParam: EnvironmentParameter) => {
+    setParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
+    setAdvancedParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
+  };
+
+  const handleEdit = (parameter: EnvironmentParameter) => {
+    navigation.navigate('EditEnvironment', {
+      parameter,
+      onSave: handleUpdateParameter,
+    });
   };
 
   const handleSave = () => {
@@ -169,6 +183,7 @@ export const SettingEnvironment: React.FC = () => {
           subtitle="Bộ thông số chuẩn khi đo môi trường."
           parameters={parameters}
           onToggleParameter={handleToggleParameter}
+          onEdit={handleEdit}
         />
 
         {/* Section - Nhóm nâng cao */}
@@ -177,20 +192,19 @@ export const SettingEnvironment: React.FC = () => {
           subtitle="Bộ thông số mở rộng để theo dõi."
           parameters={advancedParameters}
           onToggleParameter={handleToggleAdvancedParameter}
+          onEdit={handleEdit}
         />
       </ScrollView>
 
       {/* Footer Buttons */}
       <View style={[styles.footerContainer, { paddingBottom: insets.bottom }]}>
-        <ButtonBarMaterial
-          mode="double"
+        <ButtonBarFarm
           primaryTitle="Lưu thông tin"
           secondaryTitle="Thiết lập lại"
           onPrimaryPress={handleSave}
           onSecondaryPress={handleReset}
-          primaryButtonDisabled={false}
-          secondaryButtonStyle={styles.resetButton}
-          secondaryButtonTextStyle={styles.resetButtonText}
+          primaryDisabled={false}
+          secondaryType="primary"
         />
       </View>
 
@@ -340,11 +354,5 @@ const styles = StyleSheet.create({
   dropdownItemTextSelected: {
     fontWeight: '500',
     color: colors.text,
-  },
-  resetButton: {
-    borderColor: colors.primary,
-  },
-  resetButtonText: {
-    color: colors.primary,
   },
 });
