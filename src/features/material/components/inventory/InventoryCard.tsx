@@ -83,7 +83,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
         <View style={[styles.row, styles.alignRight]}>
           <Text style={styles.label}>Tổng chênh lệch:</Text>
-          <Text style={[styles.value, styles.valueBold]}>{data.totalDifference}</Text>
+          <Text style={styles.value}>{data.totalDifference}</Text>
         </View>
       </View>
 
@@ -144,13 +144,14 @@ const styles = StyleSheet.create({
   },
   col: {
     flex: 1,
+    gap: spacing.xs,
   },
   alignRight: {
     alignItems: 'flex-end',
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text,
   },
   value: {
@@ -206,8 +207,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   detailItemContainer: {
-    backgroundColor: colors.backgroundSecondary,
-    padding: spacing.sm,
     borderRadius: borderRadius.sm,
     marginBottom: spacing.sm,
     borderWidth: 1,
@@ -215,22 +214,22 @@ const styles = StyleSheet.create({
   },
   materialName: {
     fontSize: 14,
-    fontWeight: '500',
     color: colors.text,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-    paddingBottom: spacing.xs,
-    marginBottom: spacing.xs,
+    padding: spacing.sm,
+    marginBottom: spacing.sm,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 2,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.sm,
   },
   detailLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: '600',
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '700',
   },
   detailValue: {
     fontSize: 13,
@@ -240,11 +239,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     height: 1,
     backgroundColor: colors.borderLight,
+    marginHorizontal: -spacing.md,
   },
   colWithMargin: {
     marginTop: spacing.sm,
-  },
-  valueBold: {
-    fontWeight: 'bold',
   },
 });

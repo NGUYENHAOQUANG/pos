@@ -55,7 +55,7 @@ export const HandleProblemScreen = () => {
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
   const [isMaterialModalVisible, setMaterialModalVisible] = useState(false);
   const [note, setNote] = useState('');
-  //   const [imageUris, setImageUris] = useState<string[]>([]);
+  const [imageUris, setImageUris] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Load Data for Edit
@@ -83,17 +83,6 @@ export const HandleProblemScreen = () => {
       // Load images if any
     }
   }, [item]);
-
-  // Handlers
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const isToday = new Date().toDateString() === date.toDateString();
-    return `${day}/${month}/${year}, ${hours}:${minutes}${isToday ? ' (hiện tại)' : ''}`;
-  };
 
   const handleSave = () => {
     if (!pond?.id) return;
@@ -171,15 +160,12 @@ export const HandleProblemScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* 1. Thông tin chung */}
         <GeneralInfoBox
-          dateDisplay={formatDateTime(selectedDate)}
-          onPressDate={() => setShowDatePicker(true)}
           type="withImage"
+          date={selectedDate}
+          onDateChange={setSelectedDate}
           imageUris={imageUris}
-          onPressAddImage={() => {}}
-          onPressImage={() => {}}
-          onRemoveImage={() => {}}
+          onImagesChange={setImageUris}
         />
-
         {/* 2. Chọn vật tư */}
         <View style={styles.section}>
           <Text style={styles.label}>

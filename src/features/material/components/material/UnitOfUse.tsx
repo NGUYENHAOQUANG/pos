@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -33,6 +41,11 @@ export const UnitOfUse: React.FC<UnitOfUseProps> = ({
 
   return (
     <View style={styles.container}>
+      {showTooltip && (
+        <TouchableWithoutFeedback onPress={() => setShowTooltip(false)}>
+          <View style={styles.overlay} />
+        </TouchableWithoutFeedback>
+      )}
       {label && (
         <View style={styles.labelContainer}>
           <Text style={styles.label}>{label}</Text>
@@ -144,6 +157,15 @@ const styles = StyleSheet.create({
     marginBottom: -10,
     zIndex: 2000,
     alignItems: 'flex-start',
+  },
+  overlay: {
+    position: 'absolute',
+    top: -1000,
+    bottom: -1000,
+    left: -1000,
+    right: -1000,
+    backgroundColor: 'transparent',
+    zIndex: 1900,
   },
   tooltipContent: {
     backgroundColor: '#1F2937',
