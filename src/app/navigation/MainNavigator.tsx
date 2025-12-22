@@ -230,13 +230,13 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.gray[100],
   },
   bottomContainer: {
     flexDirection: 'row',
     backgroundColor: 'white',
     borderTopWidth: 0,
-    shadowColor: '#000',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '80%',
     height: 3,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary,
     borderTopLeftRadius: 3,
     borderTopRightRadius: 3,
   },
@@ -273,10 +273,10 @@ const styles = StyleSheet.create({
     height: 24,
   },
   iconActive: {
-    tintColor: '#007AFF',
+    tintColor: colors.primary,
   },
   iconInactive: {
-    tintColor: '#8E8E93',
+    tintColor: colors.text,
   },
   tabLabel: {
     fontSize: 12,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   tabLabelActive: {
-    color: '#007AFF',
+    color: colors.primary,
     fontWeight: '600',
   },
 });
