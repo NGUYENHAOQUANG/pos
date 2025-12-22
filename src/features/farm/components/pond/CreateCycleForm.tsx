@@ -29,17 +29,31 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
   const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return 'dd-mm-yyyy, hr:mm (hiện tại)';
     const date = new Date(dateString);
-    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}, ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}/${date.getFullYear()}, ${String(date.getHours()).padStart(2, '0')}:${String(
+      date.getMinutes()
+    ).padStart(2, '0')}`;
   };
 
   return (
     <ScrollView style={styles.container}>
       <SelectionInfoBox title="Chọn nguồn giống và vụ nuôi">
         <View style={styles.inputGroup}>
-          <Text style={styles.label}><Text style={styles.required}>* </Text>Chọn tôm giống</Text>
+          <Text style={styles.label}>
+            <Text style={styles.required}>* </Text>Chọn tôm giống
+          </Text>
           <DropDownButtonBasic
             data={breedOptions.map(opt => ({ id: opt.value, label: opt.label }))}
-            value={formData.breedSource ? { id: formData.breedSource, label: breedOptions.find(o => o.value === formData.breedSource)?.label || '' } : undefined}
+            value={
+              formData.breedSource
+                ? {
+                    id: formData.breedSource,
+                    label: breedOptions.find(o => o.value === formData.breedSource)?.label || '',
+                  }
+                : undefined
+            }
             onSelect={item => updateField('breedSource', String(item.id))}
             style={styles.dropdown}
             showIcon={false}
@@ -48,7 +62,9 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
 
         {formData.breedSource && (
           <BreedInfoCard
-            materialCode={breedOptions.find(o => o.value === formData.breedSource)?.materialCode || ''}
+            materialCode={
+              breedOptions.find(o => o.value === formData.breedSource)?.materialCode || ''
+            }
             price={breedOptions.find(o => o.value === formData.breedSource)?.price || 0}
             supplier={breedOptions.find(o => o.value === formData.breedSource)?.supplier || ''}
           />
@@ -56,17 +72,28 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
 
         <View style={styles.row}>
           <View style={[styles.col, { paddingRight: spacing.xs }]}>
-            <Text style={styles.label}><Text style={styles.required}>* </Text>Chọn vụ nuôi</Text>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>Chọn vụ nuôi
+            </Text>
             <DropDownButtonBasic
               data={seasonOptions.map(opt => ({ id: opt.value, label: opt.label }))}
-              value={formData.season ? { id: formData.season, label: seasonOptions.find(o => o.value === formData.season)?.label || '' } : undefined}
+              value={
+                formData.season
+                  ? {
+                      id: formData.season,
+                      label: seasonOptions.find(o => o.value === formData.season)?.label || '',
+                    }
+                  : undefined
+              }
               onSelect={item => updateField('season', String(item.id))}
               style={styles.dropdown}
               showIcon={false}
             />
           </View>
           <View style={[styles.col, { paddingLeft: spacing.xs }]}>
-            <Text style={styles.label}><Text style={styles.required}>* </Text>Tên chu kỳ</Text>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>Tên chu kỳ
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Tên chu kỳ"
@@ -88,7 +115,9 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
 
         <View style={styles.row}>
           <View style={[styles.col65, { paddingRight: spacing.xs }]}>
-            <Text style={styles.label}><Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)</Text>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Vd: 200.000"
@@ -98,7 +127,9 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
             />
           </View>
           <View style={[styles.col35, { paddingLeft: spacing.xs }]}>
-            <Text style={styles.label}><Text style={styles.required}>* </Text>Ngày tuổi (PLs)</Text>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Vd: 10"

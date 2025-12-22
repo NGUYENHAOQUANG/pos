@@ -98,8 +98,7 @@ export const HeaderFarm = ({
         <Text
           style={[
             styles.simpleTitle,
-            { textAlign: titleAlign === 'left' ? 'left' : 'center' },
-            titleAlign === 'left' && { paddingLeft: spacing.sm }
+            titleAlign === 'left' ? styles.simpleTitleLeft : styles.simpleTitleCenter,
           ]}
         >
           {title}
@@ -282,8 +281,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    textAlign: 'center',
     flex: 1,
+  },
+  simpleTitleCenter: {
+    textAlign: 'center',
+  },
+  simpleTitleLeft: {
+    textAlign: 'left',
+    paddingLeft: spacing.sm,
   },
   placeholderButton: {
     width: 40,

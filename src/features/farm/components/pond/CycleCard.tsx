@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, borderRadius } from '@/styles';
+import { colors, spacing, typography } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CycleCardProps {
@@ -21,11 +21,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
   onPress,
 }) => {
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
       {/* Header chia làm 2 cột */}
       <View style={styles.header}>
         {/* Cột trái: Tên và Ngày thả */}
@@ -39,12 +35,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
           <View style={styles.statusBadge}>
             <Text style={styles.statusText}>Chưa hoàn thành</Text>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color="#9CA3AF"
-            style={styles.arrowIcon}
-          />
+          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" style={styles.arrowIcon} />
         </View>
       </View>
 

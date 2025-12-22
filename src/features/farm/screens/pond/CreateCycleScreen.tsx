@@ -29,14 +29,16 @@ export const CreateCycleScreen: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Sử dụng state cục bộ để quản lý dữ liệu form trước khi lưu
-  const [cycleData, setCycleData] = useState<FormData>(initialData ?? {
-    cycleName: '',
-    breedSource: undefined,
-    season: undefined,
-    stockingDate: new Date().toISOString(),
-    stockingQuantity: null,
-    age: null,
-  });
+  const [cycleData, setCycleData] = useState<FormData>(
+    initialData ?? {
+      cycleName: '',
+      breedSource: undefined,
+      season: undefined,
+      stockingDate: new Date().toISOString(),
+      stockingQuantity: null,
+      age: null,
+    }
+  );
 
   const checkFields = () => {
     return (
@@ -73,7 +75,7 @@ export const CreateCycleScreen: React.FC = () => {
 
       // Navigate về màn hình ao nuôi để hiện Toast thành công
       navigation.navigate('PondDetail', {
-        pondId: pondId
+        pondId: pondId,
       } as any);
     }
   };
@@ -86,10 +88,7 @@ export const CreateCycleScreen: React.FC = () => {
         type="simple"
         rightAction={
           isEdit ? (
-            <TouchableOpacity
-              style={styles.iconBtn}
-              onPress={() => setShowDeleteModal(true)}
-            >
+            <TouchableOpacity style={styles.iconBtn} onPress={() => setShowDeleteModal(true)}>
               <TrashOutlined width={24} height={24} fill={colors.red[600]} />
             </TouchableOpacity>
           ) : null
@@ -101,10 +100,7 @@ export const CreateCycleScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CreateCycleForm
-          formData={cycleData}
-          setFormData={setCycleData}
-        />
+        <CreateCycleForm formData={cycleData} setFormData={setCycleData} />
       </ScrollView>
 
       <ButtonBarFarm

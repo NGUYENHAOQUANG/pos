@@ -33,7 +33,10 @@ export const CycleDetailScreen: React.FC = () => {
           <View style={styles.leftTitleContainer}>
             <Text style={styles.headerTitle}>{cycleData?.cycleName}</Text>
             <Text style={styles.headerSubtitle}>
-              {cycleData?.stockingDate ? new Date(cycleData.stockingDate).toLocaleDateString('vi-VN') : '---'} - nay
+              {cycleData?.stockingDate
+                ? new Date(cycleData.stockingDate).toLocaleDateString('vi-VN')
+                : '---'}{' '}
+              - nay
             </Text>
           </View>
         }
@@ -49,17 +52,16 @@ export const CycleDetailScreen: React.FC = () => {
         }
       />
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <View style={styles.cardHeaderWithBorder}>
             <Text style={styles.cardTitle}>Thông tin thả giống</Text>
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.iconBtn}
-                onPress={() => navigation.navigate('CreateCycle', { pondId, initialData: cycleData })}
+                onPress={() =>
+                  navigation.navigate('CreateCycle', { pondId, initialData: cycleData })
+                }
               >
                 <EditIcon />
               </TouchableOpacity>
@@ -86,7 +88,9 @@ export const CycleDetailScreen: React.FC = () => {
           <View style={styles.infoRow}>
             <Text style={styles.label}>Ngày thả:</Text>
             <Text style={styles.value}>
-              {cycleData?.stockingDate ? new Date(cycleData.stockingDate).toLocaleDateString('vi-VN') : '---'}
+              {cycleData?.stockingDate
+                ? new Date(cycleData.stockingDate).toLocaleDateString('vi-VN')
+                : '---'}
             </Text>
           </View>
           <View style={styles.infoRow}>

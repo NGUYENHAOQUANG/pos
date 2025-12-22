@@ -24,6 +24,7 @@ const JOB_TYPES = {
   TRANSFER_POND: 'TRANSFER_POND' as const,
   CLEAN_POND: 'CLEAN_POND' as const,
   SUN_DRY_POND: 'SUN_DRY_POND' as const,
+  HARVEST: 'HARVEST' as const,
 };
 
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
@@ -36,6 +37,7 @@ const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: JOB_TYPES.TRANSFER_POND, items: [] },
   { type: JOB_TYPES.CLEAN_POND, items: [] },
   { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+  { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -75,7 +77,7 @@ export const ShrimpFarmScreens: React.FC = () => {
       });
       setHasCycleBefore(false);
     }
-  }, [currentCycle]);
+  }, [currentCycle, hasCycleBefore]);
   const jobs = JOB_TEMPLATE.map(template => ({
     ...template,
     items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
@@ -83,7 +85,9 @@ export const ShrimpFarmScreens: React.FC = () => {
 
   useEffect(() => {
     setTabBarVisible(false);
-    return () => { setTabBarVisible(true); };
+    return () => {
+      setTabBarVisible(true);
+    };
   }, [setTabBarVisible]);
 
   const calculateDOC = (startDateString: string | null | undefined) => {
@@ -100,9 +104,152 @@ export const ShrimpFarmScreens: React.FC = () => {
     }
   };
 
-  const handleAddJobItem = (type: JobType) => { /* Logic giữ nguyên */ };
-  const handleEditJobItem = (type: JobType, item: JobExecution) => { /* Logic giữ nguyên */ };
-  const handleJobPress = (type: JobType) => { /* Logic giữ nguyên */ };
+  const handleAddJobItem = (type: JobType) => {
+    if (!pond?.id) return;
+
+    if (type === JOB_TYPES.FEED) {
+      navigation.navigate('FeedTheShrimp', { pondId: pond.id });
+      return;
+    }
+
+    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+      navigation.navigate('ShrimpInspectionScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.ENVIRONMENT) {
+      navigation.navigate('AddEnvironmentScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.WATER_TREATMENT) {
+      navigation.navigate('AddWaterTreatmentScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.WATER_CHANGE) {
+      navigation.navigate('WaterSupply', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.TRANSFER_POND) {
+      navigation.navigate('AddTransferScreen', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.HARVEST) {
+      navigation.navigate('AddHarvestScreen', { pond });
+      return;
+    }
+
+    const currentItems = getPondJobItems(pond.id, type);
+
+    // Calculate next index based on max existing label
+    let maxIndex = 0;
+    currentItems.forEach(item => {
+      const match = item.label.match(/Lần (\d+)/);
+      if (match) {
+        const index = parseInt(match[1], 10);
+        if (index > maxIndex) maxIndex = index;
+      }
+    });
+    const nextIndex = maxIndex + 1;
+
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    const newItem: JobExecution = {
+      id: Date.now().toString(),
+      label: `Lần ${nextIndex}`,
+      time: timeString,
+    };
+
+    updatePondJob(pond.id, type, [...currentItems, newItem]);
+  };
+
+  const handleEditJobItem = (type: JobType, item: JobExecution) => {
+    if (!pond?.id) return;
+
+    if (type === JOB_TYPES.FEED) {
+      navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
+      return;
+    }
+
+    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+      navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.ENVIRONMENT) {
+      navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.SIPHON) {
+      navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.WATER_TREATMENT) {
+      navigation.navigate('EditWaterTreatmentScreens', { pondId: pond.id, jobId: item.id });
+      return;
+    }
+
+    if (type === JOB_TYPES.WATER_CHANGE) {
+      navigation.navigate('WaterSupply', { pond, item });
+      return;
+    }
+
+    if (type === JOB_TYPES.TRANSFER_POND) {
+      navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    if (type === JOB_TYPES.HARVEST) {
+      navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
+      return;
+    }
+
+    const itemToEdit = item; // Alias for compatibility with below code if needed
+
+    // For other job types, keep the delete behavior (or implement edit later)
+    const currentItems = getPondJobItems(pond.id, type);
+    const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
+    updatePondJob(pond.id, type, newItems);
+  };
+
+  const handleJobPress = (type: JobType) => {
+    if (type === JOB_TYPES.FEED && pond?.id) {
+      navigation.navigate('FeedingLog', { pondId: pond.id });
+      return;
+    }
+    if (type === JOB_TYPES.WATER_TREATMENT && pond) {
+      navigation.navigate('WaterTreatmentLog', { pond });
+      return;
+    }
+    if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
+      navigation.navigate('PondworkLogScreen', { pond });
+    }
+    if (type === JOB_TYPES.ENVIRONMENT && pond) {
+      navigation.navigate('EnvironmentLogScreen', { pond });
+    }
+    if (type === JOB_TYPES.SIPHON && pond) {
+      navigation.navigate('SiphonLog', { pond });
+    }
+    if (type === JOB_TYPES.HARVEST && pond) {
+      navigation.navigate('HarvestLog', { pond });
+    }
+
+    if (type === JOB_TYPES.WATER_CHANGE && pond) {
+      navigation.navigate('WaterSupplyLog', { pond });
+      return;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -113,11 +260,19 @@ export const ShrimpFarmScreens: React.FC = () => {
         fullWidth
         pond={pond}
         onBack={() => navigation.goBack()}
-        menuOptions={[{ value: 'Thông tin ao', onMenuOptionPress: () => navigation.navigate('PondInfo', { pond }) }]}
+        menuOptions={[
+          {
+            value: 'Thông tin ao',
+            onMenuOptionPress: () => navigation.navigate('PondInfo', { pond }),
+          },
+        ]}
       />
 
       <View style={styles.content}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           {selectedTab === 'work' ? (
             <>
               {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
@@ -125,15 +280,23 @@ export const ShrimpFarmScreens: React.FC = () => {
                 <View style={styles.cycleCardWrapper}>
                   <CycleCard
                     cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                    startDate={currentCycle.stockingDate ? new Date(currentCycle.stockingDate).toLocaleDateString('vi-VN') : ''}
+                    startDate={
+                      currentCycle.stockingDate
+                        ? new Date(currentCycle.stockingDate).toLocaleDateString('vi-VN')
+                        : ''
+                    }
                     doc={calculateDOC(currentCycle.stockingDate)}
                     stockingQuantity={currentCycle.stockingQuantity || 0}
-                    breed={breedOptions.find(b => b.value === currentCycle.breedSource)?.label || 'N/A'}
+                    breed={
+                      breedOptions.find(b => b.value === currentCycle.breedSource)?.label || 'N/A'
+                    }
                     // Cho phép bấm vào thẻ để sửa
-                    onPress={() => navigation.navigate('CycleDetail', {
-                      pondId: pond.id,
-                      cycleData: currentCycle
-                    })}
+                    onPress={() =>
+                      navigation.navigate('CycleDetail', {
+                        pondId: pond.id,
+                        cycleData: currentCycle,
+                      })
+                    }
                   />
                 </View>
               ) : (
@@ -174,7 +337,7 @@ export const ShrimpFarmScreens: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary || '#F4F6F8',
+    backgroundColor: colors.backgroundPrimary,
   },
   content: {
     flex: 1,

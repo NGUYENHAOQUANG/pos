@@ -14,7 +14,8 @@ export type JobType =
   | 'TROUBLESHOOTING'
   | 'TRANSFER_POND'
   | 'CLEAN_POND'
-  | 'SUN_DRY_POND';
+  | 'SUN_DRY_POND'
+  | 'HARVEST';
 
 interface JobConfig {
   icon: ImageSourcePropType;
@@ -77,6 +78,11 @@ const JOB_CONFIG: Record<JobType, JobConfig> = {
     icon: require('../../../../assets/images/Icon/IconFarm/DryingThePond.png'),
     backgroundColor: colors.orange[50],
     defaultTitle: 'Phơi ao',
+  },
+  HARVEST: {
+    icon: require('../../../../assets/images/Icon/IconFarm/Harvest.png'),
+    backgroundColor: colors.cyan[50],
+    defaultTitle: 'Thu hoạch',
   },
 };
 

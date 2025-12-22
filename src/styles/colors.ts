@@ -31,6 +31,9 @@ export const colors = {
     800: '#1F2937',
     900: '#111827',
   },
+  cyan: {
+    50: '#E6FFFB',
+  },
   blue: {
     50: '#E6F4FF',
     200: '#C3E6FF',

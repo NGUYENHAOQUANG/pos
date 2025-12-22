@@ -1,10 +1,4 @@
-import React,
-{
-  createContext,
-  useContext,
-  useState,
-  ReactNode
-} from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { IMaterial } from '@/features/material/types/material.types';
 
@@ -66,7 +60,7 @@ interface FarmContextType {
   ) => Map<string, JobExecution[]>;
   getLatestPondActivity: (pondId: string) => {
     lastUpdate: string;
-    lastActivity: string
+    lastActivity: string;
   } | null;
 
   // Quản lý chu kỳ nuôi (Cycles)
@@ -92,14 +86,14 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value: 'A',
       materialCode: 'SIS-PL12',
       price: 120,
-      supplier: 'Shrimp Improvement Systems'
+      supplier: 'Shrimp Improvement Systems',
     },
     {
       label: 'Tôm sú - SIS PL13',
       value: 'B',
       materialCode: 'SIS-PL13',
       price: 150,
-      supplier: 'Shrimp Improvement Systems'
+      supplier: 'Shrimp Improvement Systems',
     },
   ]);
 
@@ -109,11 +103,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   ]);
 
   // --- HÀM CƠ BẢN ---
-  const updatePondJob = (
-    pondId: string,
-    jobType: JobType,
-    items: JobExecution[]
-  ) => {
+  const updatePondJob = (pondId: string, jobType: JobType, items: JobExecution[]) => {
     if (!pondId) return;
     setPondJobs(prev => ({
       ...prev,
@@ -132,7 +122,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!pondId) return;
     setActiveCycles(prev => ({
       ...prev,
-      [pondId]: data
+      [pondId]: data,
     }));
   };
 
@@ -220,6 +210,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       SIPHON: 'Xi-phông',
       TROUBLESHOOTING: 'Xử lý sự cố',
       TRANSFER_POND: 'Sang ao',
+      HARVEST: 'Thu hoạch',
     };
 
     let maxDate = new Date(0);
@@ -243,7 +234,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (latestActivityStr) {
       return {
         lastUpdate: latestUpdateStr,
-        lastActivity: latestActivityStr
+        lastActivity: latestActivityStr,
       };
     }
 
