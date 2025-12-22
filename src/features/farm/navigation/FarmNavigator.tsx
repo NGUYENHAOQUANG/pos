@@ -20,6 +20,8 @@ import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/Add
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
 import { CycleDetailScreen } from '@/features/farm/screens/pond/CycleDetailScreen';
+import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
+import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -31,6 +33,8 @@ export type FarmStackParamList = {
   PondInfo: { pond: PondData };
   FarmInfo: { farm: FarmData };
   ShrimpInspectionScreen: { pond: PondData; itemToEdit?: JobExecution };
+  MeasureShrimpSizeLogScreen: { pond: PondData };
+  MeasureShrimpSizeScreen: { pond: PondData; itemToEdit?: JobExecution };
   PondworkLogScreen: { pond: PondData };
   AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
   SettingEnvironment: undefined;
@@ -88,6 +92,8 @@ export const FarmNavigator = () => {
         <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
         <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
         <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
+        <Stack.Screen name="MeasureShrimpSizeLogScreen" component={MeasureShrimpSizeLogScreen} />
+        <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
         <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
         <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
         <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />

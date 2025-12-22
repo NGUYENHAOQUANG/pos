@@ -17,6 +17,7 @@ import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 const JOB_TYPES = {
   FEED: 'FEED' as const,
   SHRIMP_INSPECTION: 'SHRIMP_INSPECTION' as const,
+  MEASURE_SIZE: 'MEASURE_SIZE' as const,
   ENVIRONMENT: 'ENVIRONMENT' as const,
   WATER_TREATMENT: 'WATER_TREATMENT' as const,
   WATER_CHANGE: 'WATER_CHANGE' as const,
@@ -30,6 +31,7 @@ const JOB_TYPES = {
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
   { type: JOB_TYPES.FEED, items: [] },
   { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
+  { type: JOB_TYPES.MEASURE_SIZE, items: [] },
   { type: JOB_TYPES.ENVIRONMENT, items: [] },
   { type: JOB_TYPES.WATER_TREATMENT, items: [] },
   { type: JOB_TYPES.WATER_CHANGE, items: [] },
@@ -117,6 +119,11 @@ export const ShrimpFarmScreens: React.FC = () => {
       return;
     }
 
+    if (type === JOB_TYPES.MEASURE_SIZE) {
+      navigation.navigate('MeasureShrimpSizeScreen', { pond });
+      return;
+    }
+
     if (type === JOB_TYPES.ENVIRONMENT) {
       navigation.navigate('AddEnvironmentScreen', { pond });
       return;
@@ -185,6 +192,11 @@ export const ShrimpFarmScreens: React.FC = () => {
       return;
     }
 
+    if (type === JOB_TYPES.MEASURE_SIZE) {
+      navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
+      return;
+    }
+
     if (type === JOB_TYPES.ENVIRONMENT) {
       navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
       return;
@@ -234,12 +246,23 @@ export const ShrimpFarmScreens: React.FC = () => {
     }
     if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
       navigation.navigate('PondworkLogScreen', { pond });
+      return;
+    }
+    if (type === JOB_TYPES.MEASURE_SIZE && pond) {
+      navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+      return;
+    }
+    if (type === JOB_TYPES.MEASURE_SIZE && pond) {
+      navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+      return;
     }
     if (type === JOB_TYPES.ENVIRONMENT && pond) {
       navigation.navigate('EnvironmentLogScreen', { pond });
+      return;
     }
     if (type === JOB_TYPES.SIPHON && pond) {
       navigation.navigate('SiphonLog', { pond });
+      return;
     }
     if (type === JOB_TYPES.HARVEST && pond) {
       navigation.navigate('HarvestLog', { pond });
