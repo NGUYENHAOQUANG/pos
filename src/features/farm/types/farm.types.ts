@@ -23,12 +23,114 @@ export interface CycleData {
   pondId: string;
 }
 
+/**
+ * Cycle form data for creating/editing farm cycles
+ */
+export interface CycleFormData {
+  cycleName?: string;
+  breedSource?: string;
+  season?: string;
+  stockingDate?: string | null;
+  stockingQuantity?: number | null;
+  age?: number | null;
+  density?: string;
+  estimatedCost?: string;
+  notes?: string;
+}
+
 export interface FarmData {
   id: string;
   name: string;
   code: string;
   area?: string;
   address?: string;
+}
+
+export interface DropdownItem {
+  label: string;
+  value: string;
+}
+
+export interface BreedOption extends DropdownItem {
+  materialCode?: string;
+  price?: number;
+  supplier?: string;
+}
+
+export interface ShrimpInspectionMeta {
+  foodAmount?: string;
+  leftoverFood?: string;
+  intestine?: string;
+  intestineColor?: string;
+  stoolColor?: string;
+  liver?: string;
+  images?: string[];
+}
+
+export interface EnvironmentMeta {
+  pH?: string;
+  pHWarning?: boolean;
+  do?: string;
+  temperature?: string;
+  salinity?: string;
+  alkalinity?: string;
+  transparency?: string;
+}
+
+export interface SiphonMeta {
+  lossAmount?: string;
+  images?: string[];
+}
+
+export interface TransferMeta {
+  shrimpSize?: string;
+  transferMethod?: string;
+  receivingPonds?: Array<{
+    id: string;
+    receivingPond?: string;
+    quantity: string;
+  }>;
+}
+
+export interface HarvestMeta {
+  harvestType?: string;
+  yieldAmount?: string;
+  shrimpSize?: string;
+  referencePrice?: string;
+  revenue?: number;
+}
+
+export interface WaterSupplyMeta {
+  targetLevel?: string | number;
+  supplyLevel?: string | number;
+  drainLevel?: string | number;
+  volumeAfterDrain?: string | number;
+  volumeSupply?: string | number;
+  volumeAfterSupply?: string | number;
+}
+
+export type JobMeta =
+  | ShrimpInspectionMeta
+  | EnvironmentMeta
+  | SiphonMeta
+  | TransferMeta
+  | HarvestMeta
+  | WaterSupplyMeta;
+
+export interface JobExecution {
+  id: string;
+  label: string;
+  time: string;
+  date?: string;
+  note?: string;
+  materials?: {
+    material: any;
+    quantity: number;
+    unit: string;
+  }[];
+  images?: string[];
+  waterTreatmentType?: string;
+  meta?: JobMeta;
 }
 
 export interface ShrimpInspectionData {
@@ -39,44 +141,3 @@ export interface ShrimpInspectionData {
   time?: string;
   notes?: string;
 }
-
-/**
- * Meta data types for different job types
- */
-
-// Shrimp Inspection Meta
-export interface ShrimpInspectionMeta {
-  date?: Date | string;
-  foodAmount?: string;
-  leftoverFood?: string;
-  intestine?: string;
-  intestineColor?: string;
-  stoolColor?: string;
-  liver?: string;
-  notes?: string;
-  images?: string[];
-}
-
-// Environment Meta
-export interface EnvironmentMeta {
-  date?: Date | string;
-  pH?: string;
-  pHWarning?: boolean;
-  do?: string;
-  temperature?: string;
-  salinity?: string;
-  alkalinity?: string;
-  transparency?: string;
-  notes?: string;
-}
-
-// Siphon Meta
-export interface SiphonMeta {
-  date?: Date | string;
-  lossAmount?: string;
-  images?: string[];
-  notes?: string;
-}
-
-// Union type for all meta types
-export type JobMeta = ShrimpInspectionMeta | EnvironmentMeta | SiphonMeta;

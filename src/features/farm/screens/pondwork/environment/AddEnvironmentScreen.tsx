@@ -15,6 +15,12 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import {
+  showAddJobSuccessToast,
+  showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
+import { EnvironmentMeta } from '@/features/farm/types/farm.types';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddEnvironmentScreen'>;
@@ -27,9 +33,13 @@ export const AddEnvironmentScreen: React.FC = () => {
   const { setTabBarVisible } = useTabBarVisibility();
   const { getPondJobItems, updatePondJob } = useFarm();
 
-  // Initialize state from itemToEdit if available
-  const meta = useMemo(() => itemToEdit?.meta || {}, [itemToEdit?.meta]);
-  const [selectedDate, setSelectedDate] = useState(meta.date ? new Date(meta.date) : new Date());
+  const meta = useMemo(
+    () => (itemToEdit?.meta as EnvironmentMeta) || ({} as EnvironmentMeta),
+    [itemToEdit?.meta]
+  );
+  const [selectedDate, setSelectedDate] = useState(
+    itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
+  );
 
   // Environment parameters state
   const [pH, setPH] = useState(meta.pH || '');
@@ -38,7 +48,7 @@ export const AddEnvironmentScreen: React.FC = () => {
   const [salinity, setSalinity] = useState(meta.salinity || '');
   const [alkalinity, setAlkalinity] = useState(meta.alkalinity || '');
   const [transparency, setTransparency] = useState(meta.transparency || '');
-  const [notes, setNotes] = useState(meta.notes || '');
+  const [notes, setNotes] = useState(itemToEdit?.note || '');
   const [showParameterError, setShowParameterError] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -46,14 +56,14 @@ export const AddEnvironmentScreen: React.FC = () => {
   const initialData = useMemo(() => {
     if (!itemToEdit) return null;
     return {
-      date: meta.date ? new Date(meta.date) : new Date(),
+      date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
       pH: meta.pH || '',
       do: meta.do || '',
       temperature: meta.temperature || '',
       salinity: meta.salinity || '',
       alkalinity: meta.alkalinity || '',
       transparency: meta.transparency || '',
-      notes: meta.notes || '',
+      notes: itemToEdit?.note || '',
     };
   }, [itemToEdit, meta]);
 
@@ -87,15 +97,16 @@ export const AddEnvironmentScreen: React.FC = () => {
       const itemData = {
         label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
         time: timeString,
+        date: formatDate(selectedDate),
+        note: notes.trim() || undefined,
         meta: {
-          date: selectedDate,
           pH: pH.trim() || undefined,
+          pHWarning: true,
           do: dissolvedOxygen.trim() || undefined,
           temperature: temperature.trim() || undefined,
           salinity: salinity.trim() || undefined,
           alkalinity: alkalinity.trim() || undefined,
           transparency: transparency.trim() || undefined,
-          notes: notes.trim() || undefined,
         },
       };
 
@@ -105,6 +116,7 @@ export const AddEnvironmentScreen: React.FC = () => {
           item.id === itemToEdit.id ? { ...item, ...itemData } : item
         );
         updatePondJob(pond.id, 'ENVIRONMENT', updatedItems);
+        showEditJobSuccessToast('ENVIRONMENT');
       } else {
         // Create new item
         // Calculate next index based on max existing label
@@ -124,6 +136,7 @@ export const AddEnvironmentScreen: React.FC = () => {
           label: `Lần ${nextIndex}`,
         };
         updatePondJob(pond.id, 'ENVIRONMENT', [...currentItems, newItem]);
+        showAddJobSuccessToast('ENVIRONMENT');
       }
     }
 
@@ -221,52 +234,46 @@ export const AddEnvironmentScreen: React.FC = () => {
 
       {/* Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.infoBoxContainer}>
-          <GeneralInfoBox type="default" date={selectedDate} onDateChange={setSelectedDate} />
-        </View>
+        <GeneralInfoBox type="default" date={selectedDate} onDateChange={setSelectedDate} />
 
-        <View style={styles.infoBoxContainer}>
-          <EnvironmentParametersBox
-            pH={pH}
-            onPHChange={value => {
-              setPH(value);
-              setShowParameterError(false);
-            }}
-            do={dissolvedOxygen}
-            onDOChange={value => {
-              setDissolvedOxygen(value);
-              setShowParameterError(false);
-            }}
-            temperature={temperature}
-            onTemperatureChange={value => {
-              setTemperature(value);
-              setShowParameterError(false);
-            }}
-            salinity={salinity}
-            onSalinityChange={value => {
-              setSalinity(value);
-              setShowParameterError(false);
-            }}
-            alkalinity={alkalinity}
-            onAlkalinityChange={value => {
-              setAlkalinity(value);
-              setShowParameterError(false);
-            }}
-            transparency={transparency}
-            onTransparencyChange={value => {
-              setTransparency(value);
-              setShowParameterError(false);
-            }}
-            onSetupPress={() => {
-              navigation.navigate('SettingEnvironment');
-            }}
-            showError={showParameterError}
-          />
-        </View>
+        <EnvironmentParametersBox
+          pH={pH}
+          onPHChange={value => {
+            setPH(value);
+            setShowParameterError(false);
+          }}
+          do={dissolvedOxygen}
+          onDOChange={value => {
+            setDissolvedOxygen(value);
+            setShowParameterError(false);
+          }}
+          temperature={temperature}
+          onTemperatureChange={value => {
+            setTemperature(value);
+            setShowParameterError(false);
+          }}
+          salinity={salinity}
+          onSalinityChange={value => {
+            setSalinity(value);
+            setShowParameterError(false);
+          }}
+          alkalinity={alkalinity}
+          onAlkalinityChange={value => {
+            setAlkalinity(value);
+            setShowParameterError(false);
+          }}
+          transparency={transparency}
+          onTransparencyChange={value => {
+            setTransparency(value);
+            setShowParameterError(false);
+          }}
+          onSetupPress={() => {
+            navigation.navigate('SettingEnvironment');
+          }}
+          showError={showParameterError}
+        />
 
-        <View style={styles.infoBoxContainer}>
-          <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
-        </View>
+        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
       </ScrollView>
 
       {/* Footer Buttons */}
@@ -343,9 +350,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 0,
-  },
-  infoBoxContainer: {
-    marginTop: 8,
   },
   footer: {
     backgroundColor: colors.white,

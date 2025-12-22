@@ -24,6 +24,7 @@ import {
   EnvironmentParameter,
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import Toast from 'react-native-toast-message';
 
 type NavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<FarmStackParamList>,
@@ -117,6 +118,12 @@ export const SettingEnvironmentScreens: React.FC = () => {
   };
 
   const handleSave = () => {
+    Toast.show({
+      type: 'success',
+      text1: 'Đã thêm chỉ số',
+      position: 'top',
+      visibilityTime: 3000,
+    });
     navigation.goBack();
   };
 

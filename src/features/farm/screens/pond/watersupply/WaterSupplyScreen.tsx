@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   Platform,
-  Alert,
   TextInput,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -18,8 +17,8 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -50,7 +49,6 @@ export const WaterSupplyScreen = () => {
   const { updatePondJob, getPondJobItems } = useFarm();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Thông số nước
   const [targetLevel, setTargetLevel] = useState(''); // H_target
@@ -60,7 +58,7 @@ export const WaterSupplyScreen = () => {
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
   const [isMaterialModalVisible, setMaterialModalVisible] = useState(false);
   const [note, setNote] = useState('');
-  const [imageUris] = useState<string[]>([]);
+  const [imageUris, setImageUris] = useState<string[]>([]);
 
   // Modal Delete
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -95,14 +93,23 @@ export const WaterSupplyScreen = () => {
 
   // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
   const calculateInfo = useMemo(() => {
-    // 1. Lấy dữ liệu đầu vào
-    const H_target = parseFloat(targetLevel) || 0; // Mực nước mục tiêu
-    const H_add = parseFloat(supplyLevel) || 0; // Số cm cấp
+    // 1. Kiểm tra nếu chưa nhập liệu thì trả về '-'
+    if (targetLevel === '' || supplyLevel === '') {
+      return {
+        drainLevel: '-',
+        volumeAfterDrain: '-',
+        volumeSupply: '-',
+        volumeAfterSupply: '-',
+      };
+    }
 
-    // 2. Xác định Diện tích ao (S)
-    let S = 1000; // Giá trị mặc định nếu không có dữ liệu ao
+    // 2. Lấy dữ liệu đầu vào
+    const H_target = parseFloat(targetLevel);
+    const H_add = parseFloat(supplyLevel);
+
+    // Xác định Diện tích ao (S)
+    let S = 1000; // Giá trị mặc định
     if (pond?.area) {
-      // Parse diện tích từ string (ví dụ "1,200 m2" -> 1200)
       const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
       const parsedArea = parseFloat(areaStr);
       if (!isNaN(parsedArea) && parsedArea > 0) {
@@ -138,23 +145,13 @@ export const WaterSupplyScreen = () => {
     };
   }, [targetLevel, supplyLevel, pond]);
 
-  const formatDateTime = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const isToday = new Date().toDateString() === date.toDateString();
-    return `${day}/${month}/${year}, ${hours}:${minutes}${isToday ? ' (hiện tại)' : ''}`;
-  };
-
-  const handleDateSelect = (date: Date) => {
-    const newDate = new Date(selectedDate);
-    newDate.setFullYear(date.getFullYear());
-    newDate.setMonth(date.getMonth());
-    newDate.setDate(date.getDate());
-    setSelectedDate(newDate);
-  };
+  // const handleDateSelect = (date: Date) => {
+  //   const newDate = new Date(selectedDate);
+  //   newDate.setFullYear(date.getFullYear());
+  //   newDate.setMonth(date.getMonth());
+  //   newDate.setDate(date.getDate());
+  //   setSelectedDate(newDate);
+  // };
 
   const handleAddMaterial = (data: SelectedMaterialItem) => {
     setSelectedMaterials(prev => [...prev, data]);
@@ -166,12 +163,6 @@ export const WaterSupplyScreen = () => {
 
   const handleSave = () => {
     if (!pond?.id) return;
-
-    // Validate
-    if (!targetLevel || !supplyLevel) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập Mực nước mục tiêu và Số cm cấp');
-      return;
-    }
 
     const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
     const timeString = selectedDate.toLocaleTimeString('en-GB', {
@@ -259,13 +250,11 @@ export const WaterSupplyScreen = () => {
         >
           {/* 1. Thông tin chung */}
           <GeneralInfoBox
-            dateDisplay={formatDateTime(selectedDate)}
-            onPressDate={() => setShowDatePicker(true)}
             type="withImage"
+            date={selectedDate}
+            onDateChange={setSelectedDate}
             imageUris={imageUris}
-            onPressAddImage={() => {}}
-            onPressImage={() => {}}
-            onRemoveImage={() => {}}
+            onImagesChange={setImageUris}
           />
 
           {/* 2. Mực nước & Thể tích */}
@@ -282,13 +271,14 @@ export const WaterSupplyScreen = () => {
           />
 
           {/* 3. Chọn vật tư */}
-          <View style={styles.section}>
-            <Text style={styles.label}>
-              <Text style={styles.required}>* </Text>
-              Chọn vật tư
-            </Text>
-            <View style={styles.divider} />
-
+          <SelectionInfoBox
+            title={
+              <Text style={styles.materialTitle}>
+                <Text style={styles.required}>* </Text>
+                Chọn vật tư
+              </Text>
+            }
+          >
             {selectedMaterials.length > 0 && (
               <View style={styles.materialList}>
                 {selectedMaterials.map((mat, index) => (
@@ -319,7 +309,7 @@ export const WaterSupplyScreen = () => {
               <Ionicons name="add" size={20} color={colors.primary} />
               <Text style={styles.addButtonText}>Thêm vật tư</Text>
             </TouchableOpacity>
-          </View>
+          </SelectionInfoBox>
 
           {/* 4. Ghi chú */}
           <View style={styles.section}>
@@ -349,13 +339,6 @@ export const WaterSupplyScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Modals */}
-      <DatePickerModal
-        visible={showDatePicker}
-        onClose={() => setShowDatePicker(false)}
-        date={selectedDate}
-        onSelectDate={handleDateSelect}
-      />
       <SelectMaterial
         isVisible={isMaterialModalVisible}
         onClose={() => setMaterialModalVisible(false)}
@@ -385,7 +368,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: colors.white,
     padding: spacing.md,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
@@ -412,6 +395,12 @@ const styles = StyleSheet.create({
   },
   required: {
     color: colors.error,
+  },
+  materialTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 22,
+    color: colors.text,
   },
   divider: {
     height: 1,

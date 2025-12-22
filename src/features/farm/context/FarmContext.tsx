@@ -1,29 +1,15 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
-import { IMaterial } from '@/features/material/types/material.types';
-
-export interface JobExecution {
-  id: string;
-  label: string;
-  time: string;
-  date?: string; // Add optional date for backward compatibility, but we will populate it.
-  note?: string;
-  materials?: {
-    material: IMaterial;
-    quantity: number;
-    unit: string;
-  }[];
-  waterTreatmentType?: string;
-  meta?: any;
-}
-
-export interface PondJobData {
-  type: JobType;
-  items: JobExecution[];
-}
+import {
+  CycleFormData,
+  DropdownItem,
+  BreedOption,
+  JobExecution,
+} from '@/features/farm/types/farm.types';
+import { formatDate, parseDate, compareTime } from '@/features/farm/utils/dateUtils';
 
 interface FarmContextType {
-  // Map of pondId -> Record<JobType, JobExecution[]>
+  // Job Management
   pondJobs: Record<string, Record<JobType, JobExecution[]>>;
   updatePondJob: (pondId: string, jobType: JobType, items: JobExecution[]) => void;
   getPondJobItems: (pondId: string, jobType: JobType) => JobExecution[];
@@ -39,19 +25,56 @@ interface FarmContextType {
     startDate: Date,
     endDate: Date
   ) => Map<string, JobExecution[]>;
-  getLatestPondActivity: (pondId: string) => { lastUpdate: string; lastActivity: string } | null;
+  getLatestPondActivity: (pondId: string) => {
+    lastUpdate: string;
+    lastActivity: string;
+  } | null;
+
+  // Cycle Management
+  activeCycles: Record<string, CycleFormData>;
+  saveActiveCycle: (pondId: string, data: CycleFormData) => void;
+  deleteActiveCycle: (pondId: string) => void;
+
+  // Data Options
+  breedOptions: BreedOption[];
+  seasonOptions: DropdownItem[];
+  createSeason: () => void;
 }
 
 const FarmContext = createContext<FarmContextType | undefined>(undefined);
 
 export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [pondJobs, setPondJobs] = useState<Record<string, Record<JobType, JobExecution[]>>>({});
+  const [activeCycles, setActiveCycles] = useState<Record<string, CycleFormData>>({});
+
+  const [breedOptions] = useState<BreedOption[]>([
+    {
+      label: 'Tôm thẻ chân trắng - SIS PL12',
+      value: 'A',
+      materialCode: 'SIS-PL12',
+      price: 120,
+      supplier: 'Shrimp Improvement Systems',
+    },
+    {
+      label: 'Tôm sú - SIS PL13',
+      value: 'B',
+      materialCode: 'SIS-PL13',
+      price: 150,
+      supplier: 'Shrimp Improvement Systems',
+    },
+  ]);
+
+  const [seasonOptions, setSeasonOptions] = useState<DropdownItem[]>([
+    { label: 'Vụ nuôi 1', value: '1' },
+    { label: 'Vụ nuôi 2', value: '2' },
+  ]);
 
   const updatePondJob = (pondId: string, jobType: JobType, items: JobExecution[]) => {
+    if (!pondId) return;
     setPondJobs(prev => ({
       ...prev,
       [pondId]: {
-        ...prev[pondId],
+        ...(prev[pondId] || {}),
         [jobType]: items,
       },
     }));
@@ -59,6 +82,31 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getPondJobItems = (pondId: string, jobType: JobType) => {
     return pondJobs[pondId]?.[jobType] || [];
+  };
+
+  const saveActiveCycle = (pondId: string, data: CycleFormData) => {
+    if (!pondId) return;
+    setActiveCycles(prev => ({
+      ...prev,
+      [pondId]: data,
+    }));
+  };
+
+  const deleteActiveCycle = (pondId: string) => {
+    if (!pondId) return;
+    setActiveCycles(prev => {
+      const newState = { ...prev };
+      delete newState[pondId];
+      return newState;
+    });
+  };
+
+  const createSeason = () => {
+    const newSeason: DropdownItem = {
+      label: `Vụ nuôi ${seasonOptions.length + 1}`,
+      value: Date.now().toString(),
+    };
+    setSeasonOptions(prev => [...prev, newSeason]);
   };
 
   const getPondJobItemsByDateRange = (
@@ -77,8 +125,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     endOfEndDate.setHours(23, 59, 59, 999);
 
     return items.filter(item => {
-      // Get date from meta.date or use current date if not available
-      const itemDate = item.meta?.date ? new Date(item.meta.date) : new Date();
+      const itemDate = item.date ? parseDate(item.date) : new Date();
       const startOfItemDate = new Date(itemDate);
       startOfItemDate.setHours(0, 0, 0, 0);
 
@@ -94,17 +141,10 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   ): Map<string, JobExecution[]> => {
     const raw = getPondJobItemsByDateRange(pondId, jobType, startDate, endDate);
 
-    const formatDate = (date: Date): string => {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-
     const grouped = new Map<string, JobExecution[]>();
 
     raw.forEach(item => {
-      const date = item.meta?.date ? new Date(item.meta.date) : new Date();
+      const date = item.date ? parseDate(item.date) : new Date();
       const dateKey = formatDate(date);
 
       if (!grouped.has(dateKey)) {
@@ -113,43 +153,17 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       grouped.get(dateKey)!.push(item);
     });
 
-    // Sort items within each date group by time descending
     grouped.forEach(items => {
-      items.sort((a, b) => {
-        const ta = a.time ?? '';
-        const tb = b.time ?? '';
-        return tb.localeCompare(ta);
-      });
+      items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'));
     });
 
-    const today = new Date();
-    const todayKey = formatDate(today);
-
-    const sortedEntries = Array.from(grouped.entries()).sort((a, b) => {
-      const dateKeyA = a[0];
-      const dateKeyB = b[0];
-
-      // Today always comes first
-      if (dateKeyA === todayKey) return -1;
-      if (dateKeyB === todayKey) return 1;
-
-      // Other dates: sort ascending (oldest first)
-      const dateA = new Date(dateKeyA.split('-').reverse().join('-'));
-      const dateB = new Date(dateKeyB.split('-').reverse().join('-'));
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    return new Map(sortedEntries);
+    return grouped;
   };
 
   const getLatestPondActivity = (pondId: string) => {
     const jobs = pondJobs[pondId];
     if (!jobs) return null;
 
-    let latestActivityStr = '';
-    let latestUpdateStr = '';
-
-    // JobType display names mapping (simplified)
     const jobNames: Record<string, string> = {
       FEED: 'Cho ăn',
       ENVIRONMENT: 'Đo môi trường',
@@ -162,27 +176,32 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       SIPHON: 'Xi-phông',
       TROUBLESHOOTING: 'Xử lý sự cố',
       TRANSFER_POND: 'Sang ao',
+      HARVEST: 'Thu hoạch',
     };
 
     let maxDate = new Date(0);
+    let latestActivityStr = '';
+    let latestUpdateStr = '';
 
     Object.entries(jobs).forEach(([type, items]) => {
       items.forEach(item => {
-        // Parse time "HH:mm" assuming today
         const [hours, minutes] = item.time.split(':').map(Number);
-        const date = new Date();
+        const date = item.date ? parseDate(item.date) : new Date();
         date.setHours(hours, minutes, 0, 0);
 
         if (date > maxDate) {
           maxDate = date;
-          latestUpdateStr = `${date.toLocaleDateString('en-GB')}, ${item.time}`; // dd/mm/yyyy, hh:mm
+          latestUpdateStr = `${date.toLocaleDateString('vi-VN')}, ${item.time}`;
           latestActivityStr = jobNames[type] || type;
         }
       });
     });
 
     if (latestActivityStr) {
-      return { lastUpdate: latestUpdateStr, lastActivity: latestActivityStr };
+      return {
+        lastUpdate: latestUpdateStr,
+        lastActivity: latestActivityStr,
+      };
     }
 
     return null;
@@ -197,6 +216,14 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         getPondJobItemsByDateRange,
         getPondJobItemsGroupedByDate,
         getLatestPondActivity,
+        // Cycle Management
+        activeCycles,
+        saveActiveCycle,
+        deleteActiveCycle,
+        // Data Options
+        breedOptions,
+        seasonOptions,
+        createSeason,
       }}
     >
       {children}

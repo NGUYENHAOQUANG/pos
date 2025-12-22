@@ -18,6 +18,7 @@ export const colors = {
   // Neutral colors
   white: '#FFFFFF',
   black: '#000000',
+  neutral: '#F7FAFD',
   gray: {
     50: '#F9FAFB',
     100: '#F3F4F6',
@@ -29,6 +30,9 @@ export const colors = {
     700: '#374151',
     800: '#1F2937',
     900: '#111827',
+  },
+  cyan: {
+    50: '#E6FFFB',
   },
   blue: {
     50: '#E6F4FF',

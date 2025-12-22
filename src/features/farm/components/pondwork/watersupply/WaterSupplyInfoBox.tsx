@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface WaterSupplyInfoBoxProps {
   // Inputs
@@ -94,14 +95,16 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.white,
-    padding: 16,
-    marginTop: 16,
-
+    padding: spacing.md,
+    marginTop: spacing.sm,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 1,
   },
   title: {
     fontSize: 14,
@@ -145,9 +148,10 @@ const styles = StyleSheet.create({
   },
   infoBlock: {
     backgroundColor: colors.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: 6,
     padding: 12,
-    marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   infoRow: {
     flexDirection: 'row',
@@ -171,6 +175,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textTertiary,
     marginTop: 8,
-    fontStyle: 'italic',
   },
 });

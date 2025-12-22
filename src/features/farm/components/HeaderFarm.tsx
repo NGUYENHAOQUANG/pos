@@ -25,6 +25,7 @@ interface HeaderFarmProps {
 
   // Mode: 'list' (default) or 'detail' or 'simple'
   type?: 'list' | 'detail' | 'simple';
+  titleAlign?: 'center' | 'left'; // Thêm prop căn lề
 
   // Specific to 'list' mode
   data?: DropDownItem[];
@@ -41,6 +42,7 @@ interface HeaderFarmProps {
 
 export const HeaderFarm = ({
   type = 'list',
+  titleAlign = 'center', // Mặc định là center
   data,
   value,
   onSelect,
@@ -83,7 +85,7 @@ export const HeaderFarm = ({
   };
 
   /**
-   * Render Simple Mode (Back, Title Center)
+   * Render Simple Mode (Back, Title Center/Left)
    */
   if (type === 'simple') {
     return (
@@ -91,7 +93,17 @@ export const HeaderFarm = ({
         <TouchableOpacity onPress={onBack} style={styles.backButtonSimple}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.simpleTitle}>{title}</Text>
+
+        {/* Chỉ thay đổi style để căn lề dựa trên titleAlign, không bọc thêm View */}
+        <Text
+          style={[
+            styles.simpleTitle,
+            titleAlign === 'left' ? styles.simpleTitleLeft : styles.simpleTitleCenter,
+          ]}
+        >
+          {title}
+        </Text>
+
         {rightAction ? (
           <View style={styles.rightActionContainer}>{rightAction}</View>
         ) : (
@@ -269,8 +281,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    textAlign: 'center',
     flex: 1,
+  },
+  simpleTitleCenter: {
+    textAlign: 'center',
+  },
+  simpleTitleLeft: {
+    textAlign: 'left',
+    paddingLeft: spacing.sm,
   },
   placeholderButton: {
     width: 40,

@@ -9,6 +9,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { FarmData } from '@/features/farm/types/farm.types';
 
 interface ShrimpPondListScreensProps {}
 
@@ -38,8 +39,8 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
   };
 
   const handleFarmInfoPress = () => {
-    const farmData = {
-      id: selectedFarm.id,
+    const farmData: FarmData = {
+      id: selectedFarm.id.toString(),
       name: selectedFarm.label,
       code: selectedFarm.value,
       area: '',
