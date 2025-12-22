@@ -19,6 +19,7 @@ export const WaterTreatmentLogScreens = () => {
 
   const config: LogScreenConfig = {
     jobType: 'WATER_TREATMENT',
+    pond: pond, // Pass pond object if available, otherwise use pondId
     pondId: targetPondId,
     metaConverter: (item: JobExecution) => convertWaterTreatmentJobToActivityData(item),
     editRoute: 'EditWaterTreatmentScreens',

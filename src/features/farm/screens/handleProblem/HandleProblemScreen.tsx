@@ -19,6 +19,7 @@ import { GeneralInfoBox } from '../../components/pondwork/GeneralInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -164,13 +165,14 @@ export const HandleProblemScreen = () => {
           onImagesChange={setImageUris}
         />
         {/* 2. Chọn vật tư */}
-        <View style={styles.section}>
-          <Text style={styles.label}>
-            <Text style={styles.required}>* </Text>
-            Chọn vật tư
-          </Text>
-          <View style={styles.divider} />
-
+        <SelectionInfoBox
+          title={
+            <Text style={styles.materialTitle}>
+              <Text style={styles.required}>* </Text>
+              Chọn vật tư
+            </Text>
+          }
+        >
           {selectedMaterials.length > 0 && (
             <View style={styles.materialList}>
               {selectedMaterials.map((mat, index) => (
@@ -200,7 +202,7 @@ export const HandleProblemScreen = () => {
             <Ionicons name="add" size={20} color={colors.primary} />
             <Text style={styles.addButtonText}>Thêm vật tư</Text>
           </TouchableOpacity>
-        </View>
+        </SelectionInfoBox>
 
         {/* 3. Ghi chú (Mô tả sự cố) */}
         <View style={styles.section}>
@@ -274,7 +276,12 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 14, color: colors.text, marginBottom: spacing.xs, fontWeight: '500' },
   required: { color: colors.error },
-  divider: { height: 1, backgroundColor: colors.gray[100], marginBottom: spacing.md },
+  materialTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 22,
+    color: colors.text,
+  },
   materialList: { marginBottom: spacing.md },
   materialItem: {
     flexDirection: 'row',
