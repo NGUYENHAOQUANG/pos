@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { colors, spacing, typography, borderRadius } from '@/styles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CycleCardProps {
   cycleName: string;
@@ -8,7 +9,7 @@ interface CycleCardProps {
   doc: number;
   stockingQuantity: number;
   breed: string;
-  style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
 }
 
 export const CycleCard: React.FC<CycleCardProps> = ({
@@ -17,17 +18,40 @@ export const CycleCard: React.FC<CycleCardProps> = ({
   doc,
   stockingQuantity,
   breed,
-  style,
+  onPress,
 }) => {
   return (
-    <View style={[styles.container, style]}>
-      {/* Header */}
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      {/* Header chia làm 2 cột */}
       <View style={styles.header}>
-        <Text style={styles.cycleName}>{cycleName}</Text>
-        <Text style={styles.dateText}>{startDate} - nay</Text>
+        {/* Cột trái: Tên và Ngày thả */}
+        <View style={styles.leftColumn}>
+          <Text style={styles.cycleName}>{cycleName}</Text>
+          <Text style={styles.dateText}>{startDate} - nay</Text>
+        </View>
+
+        {/* Cột phải: Badge trạng thái & Mũi tên (Căn phải + Giữa dọc) */}
+        <View style={styles.rightColumn}>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>Chưa hoàn thành</Text>
+          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color="#9CA3AF"
+            style={styles.arrowIcon}
+          />
+        </View>
       </View>
 
-      {/* Body */}
+      {/* Borderline tách biệt Header và Body */}
+      <View style={styles.divider} />
+
+      {/* Body: Thông tin chi tiết */}
       <View style={styles.body}>
         <View style={styles.row}>
           <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
@@ -41,36 +65,64 @@ export const CycleCard: React.FC<CycleCardProps> = ({
 
         <View style={styles.row}>
           <Text style={styles.label}>Tôm giống:</Text>
-          <Text style={[styles.value, styles.breedValue]}>{breed}</Text>
+          <Text style={styles.value}>{breed}</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
+    backgroundColor: '#FFFFFF', // Nền trắng
+    width: '100%',
     borderWidth: 1,
-    borderColor: colors.borderDark,
-    ...shadows.sm,
+    borderColor: '#F3F4F6',
+    borderRadius: 0, // Không bo góc
   },
   header: {
-    backgroundColor: colors.backgroundPrimary,
+    flexDirection: 'row', // Chia cột ngang
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    alignItems: 'center', // Căn giữa các cột theo chiều dọc
+  },
+  leftColumn: {
+    flex: 1, // Chiếm không gian bên trái
   },
   cycleName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: typography.fontSize.sm,
+    fontWeight: '700',
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   dateText: {
-    fontSize: 13,
+    fontSize: typography.fontSize.sm,
     color: colors.textSecondary,
+  },
+  rightColumn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  statusBadge: {
+    backgroundColor: '#FFFBE6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 1,
+    borderWidth: 1,
+    borderColor: '#FFE58F',
+  },
+  statusText: {
+    fontSize: typography.fontSize.regular,
+    color: '#D48806',
+    fontWeight: typography.fontWeight.regular,
+  },
+  arrowIcon: {
+    marginLeft: 8, // Khoảng cách giữa badge và mũi tên
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F3F4F6', // Borderline ngăn cách
   },
   body: {
     padding: spacing.md,
@@ -78,23 +130,16 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-    alignItems: 'flex-start', // Align start to handle multi-line value like breed
+    marginBottom: spacing.xs, // Khoảng cách giữa các dòng thông tin
   },
   label: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
     color: colors.text,
-    fontWeight: '500',
-    flex: 1, // Allow label to take space but usually it's fixed width or ratio
+    fontWeight: typography.fontWeight.bold,
   },
   value: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
     color: colors.text,
-    textAlign: 'right',
-    flex: 1, // Value takes remaining space
-    paddingLeft: spacing.sm,
-  },
-  breedValue: {
-    color: colors.text, // Normal text color or maybe darker
+    fontWeight: typography.fontWeight.regular,
   },
 });

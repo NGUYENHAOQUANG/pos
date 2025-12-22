@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
   locationButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.white,
     height: 44,
     paddingHorizontal: spacing.md,
