@@ -16,14 +16,16 @@ interface HeadingMenuProps {
     active: number;
     ended: number;
   };
+  tabs?: MenuTabItem[];
 }
 
 export const HeadingMenu: React.FC<HeadingMenuProps> = ({
   selectedTab,
   onTabSelect,
   counts = { all: 0, active: 0, ended: 0 },
+  tabs: customTabs,
 }) => {
-  const tabs: MenuTabItem[] = [
+  const tabs: MenuTabItem[] = customTabs || [
     { key: 'all', label: 'Tất cả', count: counts.all },
     { key: 'active', label: 'Hoạt động', count: counts.active },
     { key: 'ended', label: 'Đã kết thúc', count: counts.ended },

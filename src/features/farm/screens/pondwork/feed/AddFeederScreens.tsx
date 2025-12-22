@@ -14,6 +14,7 @@ import {
   MaterialSelectionBox,
   SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 
 // Mock data (replace with real data or API later)
 const MOCK_MATERIALS: IMaterial[] = [
@@ -56,15 +57,15 @@ export const AddFeederScreens = () => {
         hour: '2-digit',
         minute: '2-digit',
       });
-      // Format date as DD/MM/YYYY for grouping
-      const dateString = executionDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+      // Format date as DD/MM/YYYY for grouping using formatDate utility
+      const dateString = formatDate(executionDate);
 
       const newItem = {
         id: Date.now().toString(),
         label: `Lần ${nextIndex}`,
         time: timeString,
         date: dateString,
-        note: note,
+        note: note || undefined,
         materials: selectedMaterials,
       };
 

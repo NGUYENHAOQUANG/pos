@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import LogoSvg from '@/assets/images/Mebione-logo-auth.svg';
+import LogoSvg from '@/assets/MebiEco-Logo.svg';
 
 interface LogoProps {
   size?: 'small' | 'medium' | 'large';

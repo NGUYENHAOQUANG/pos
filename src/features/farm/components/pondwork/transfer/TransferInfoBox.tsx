@@ -7,6 +7,7 @@ import { IconTrashOutlined } from '@/assets/icons';
 import { IconError } from '@/assets/icons';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ReceivingPondDropdown } from './ReceivingPondDropdown';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 export interface ReceivingPondItem {
   id: string;
@@ -35,13 +36,6 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
   pondOptions,
   containerStyle,
 }) => {
-  // Format number with dots as thousand separators
-  const formatNumber = (num: string): string => {
-    const numericValue = num.replace(/\D/g, '');
-    if (!numericValue) return '';
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
-
   // Calculate total quantity from all rows
   const totalQuantity = useMemo(() => {
     return receivingPonds.reduce((sum, pond) => {

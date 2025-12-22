@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFE58F',
   },
   statusText: {
-    fontSize: typography.fontSize.regular,
+    fontSize: typography.fontSize.sm,
     color: '#D48806',
     fontWeight: typography.fontWeight.regular,
   },

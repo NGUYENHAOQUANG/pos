@@ -16,8 +16,8 @@ export const Tag: React.FC<TagProps> = ({ status, style }) => {
         return {
           label: 'Chờ xác nhận',
           color: colors.orange[500],
-          backgroundColor: colors.orange[50], // Very light orange/yellow
-          borderColor: colors.orange[200],
+          backgroundColor: colors.yellow[50],
+          borderColor: colors.yellow[300],
         };
       case 'active':
         return {
@@ -61,10 +61,9 @@ export const Tag: React.FC<TagProps> = ({ status, style }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.md,
-    // paddingVertical: spacing.xs, // Removed to use fixed height
+    paddingHorizontal: spacing.sm,
     height: 22,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.xs,
     borderWidth: 1,
     alignSelf: 'flex-start',
     alignItems: 'center',

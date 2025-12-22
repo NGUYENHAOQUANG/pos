@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
+import { useControl } from '../../context/ControlContext';
+import { EControlMode } from '../../types/control.types';
 
 import ActivitySchedule, {
   ScheduleItem,
@@ -20,19 +22,25 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
 
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { ControlStackParamList } from '../../navigation/ControlNavigator';
+
 interface CustomFeedingMachineProps {
   onBack?: () => void;
   initialMode?: 'manual' | 'schedule';
   onSave?: (mode: 'manual' | 'schedule') => void;
 }
 
-export default function CustomFeedingMachine({
-  onBack,
-  initialMode = 'manual',
-  onSave,
-}: CustomFeedingMachineProps) {
+export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<ControlStackParamList, 'CustomFeedingMachine'>>();
+
+  // Prioritize route params, fallback to props (to keep backward compatibility if needed temporarily, but main use is navigation)
+  const initialMode = route.params?.initialMode || props.initialMode || 'manual';
+  const { onBack, onSave } = props;
   const { setTabBarVisible } = useTabBarVisibility();
+  const { updateDeviceMode } = useControl();
+
   const [mode, setMode] = useState<'manual' | 'schedule'>(initialMode);
   const [runDuration, setRunDuration] = useState('');
   const [stopDuration, setStopDuration] = useState('');
@@ -49,6 +57,18 @@ export default function CustomFeedingMachine({
 
   const handleSave = () => {
     console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
+
+    // Convert 'manual' | 'schedule' string to EControlMode enum if needed,
+    // or ensure types match. EControlMode is 'MANUAL' | 'SCHEDULE' (uppercase).
+    // The component uses lowercase 'manual' | 'schedule'.
+    // Let's import EControlMode and map it.
+
+    const controlMode = mode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
+
+    if (route.params?.pondId && route.params?.deviceId) {
+      updateDeviceMode(route.params.pondId, route.params.deviceId, controlMode);
+    }
+
     onSave?.(mode);
     setIsDirty(false); // Reset dirty state on save
     if (onBack) {

@@ -25,6 +25,7 @@ import {
   showAddJobSuccessToast,
   showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddSiphonScreen'>;
@@ -40,10 +41,10 @@ export const AddSiphonScreen: React.FC = () => {
   // Initialize state from itemToEdit if available
   const meta = useMemo(() => (itemToEdit?.meta as SiphonMeta) || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState<Date>(
-    meta.date ? new Date(meta.date) : new Date()
+    itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
   );
   const [lossAmount, setLossAmount] = useState<string>(meta.lossAmount || '');
-  const [notes, setNotes] = useState<string>(meta.notes || '');
+  const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
   const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
   const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>(
     itemToEdit?.materials || []
@@ -54,9 +55,9 @@ export const AddSiphonScreen: React.FC = () => {
   const initialData = useMemo(() => {
     if (!itemToEdit) return null;
     return {
-      date: meta.date ? new Date(meta.date) : new Date(),
+      date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
       lossAmount: meta.lossAmount || '',
-      notes: meta.notes || '',
+      notes: itemToEdit?.note || '',
       images: meta.images || [],
       materials: itemToEdit.materials || [],
     };
@@ -142,18 +143,16 @@ export const AddSiphonScreen: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-    const dateString = selectedDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
 
     const baseData = {
       label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
       time: timeString,
-      date: dateString,
+      date: formatDate(selectedDate),
+      note: notes || undefined,
       materials: selectedMaterials,
       meta: {
         ...(itemToEdit?.meta || {}),
-        date: selectedDate,
         lossAmount,
-        notes: notes || undefined,
         images: imageUris,
       } as SiphonMeta,
     };

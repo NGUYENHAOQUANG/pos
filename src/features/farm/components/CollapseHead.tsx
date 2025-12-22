@@ -45,11 +45,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
-    borderRadius: 8,
   },
   title: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '700',
     lineHeight: 22,
     color: colors.text,
     flex: 1,

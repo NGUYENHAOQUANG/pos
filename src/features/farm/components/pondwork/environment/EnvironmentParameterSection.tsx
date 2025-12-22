@@ -16,6 +16,7 @@ interface EnvironmentParameterSectionProps {
   subtitle: string;
   parameters: EnvironmentParameter[];
   onToggleParameter: (id: string) => void;
+  onEdit?: (parameter: EnvironmentParameter) => void;
 }
 
 export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionProps> = ({
@@ -23,6 +24,7 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
   subtitle,
   parameters,
   onToggleParameter,
+  onEdit,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -70,7 +72,11 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
                 </View>
 
                 {/* Edit Button */}
-                <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  activeOpacity={0.7}
+                  onPress={() => onEdit && onEdit(param)}
+                >
                   <IconEditOutlined width={16} height={16} />
                 </TouchableOpacity>
               </View>

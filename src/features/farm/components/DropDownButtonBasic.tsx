@@ -26,6 +26,8 @@ interface DropDownButtonBasicProps {
   onSelect?: (item: DropDownItem) => void;
   style?: StyleProp<ViewStyle>;
   showIcon?: boolean;
+  height?: number;
+  borderRadius?: number;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -40,6 +42,8 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
   onSelect,
   style,
   showIcon = true,
+  height = 44,
+  borderRadius: customBorderRadius = borderRadius.md,
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
@@ -48,9 +52,9 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
 
   const handleDropdownPress = () => {
     if (dropdownButtonRef.current) {
-      dropdownButtonRef.current.measureInWindow((x, y, width, height) => {
+      dropdownButtonRef.current.measureInWindow((x, y, width, measuredHeight) => {
         setDropdownPosition({
-          top: y + height + 4,
+          top: y + measuredHeight + 4,
           left: x,
           width: width,
         });
@@ -86,7 +90,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
       {/* Dropdown Picker */}
       <View ref={dropdownButtonRef} collapsable={false}>
         <TouchableOpacity
-          style={styles.locationButton}
+          style={[styles.locationButton, { height, borderRadius: customBorderRadius }]}
           onPress={handleDropdownPress}
           activeOpacity={0.7}
         >
@@ -121,6 +125,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,
                 minWidth: dropdownPosition.width,
+                borderRadius: customBorderRadius,
               },
             ]}
           >
@@ -150,9 +155,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: colors.white,
-    height: 44,
     paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.gray[200],
   },
@@ -173,7 +176,6 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     position: 'absolute',
     backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.gray[200],
     ...shadows.md,

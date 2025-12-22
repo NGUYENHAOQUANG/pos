@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/components/pond/CreateCycleForm';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import TrashOutlined from '@/assets/images/Icon/IconDevices/TrashOutlined.svg';
 import Toast from 'react-native-toast-message';
-import { useFarm, FormData } from '../../context/FarmContext';
+import { useFarm } from '../../context/FarmContext';
+import { CycleFormData } from '../../types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
@@ -28,16 +29,34 @@ export const CreateCycleScreen: React.FC = () => {
   // State quản lý ẩn/hiện Modal xác nhận xóa
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Sử dụng state cục bộ để quản lý dữ liệu form trước khi lưu
-  const [cycleData, setCycleData] = useState<FormData>(
-    initialData ?? {
-      cycleName: '',
-      breedSource: undefined,
-      season: undefined,
-      stockingDate: new Date().toISOString(),
-      stockingQuantity: null,
-      age: null,
+  // Convert CycleData to CycleFormData if initialData exists
+  const convertCycleDataToFormData = (data: any): CycleFormData => {
+    if (!data) {
+      return {
+        cycleName: '',
+        breedSource: undefined,
+        season: undefined,
+        stockingDate: new Date().toISOString(),
+        stockingQuantity: null,
+        age: null,
+      };
     }
+    return {
+      cycleName: data.cycleName || '',
+      breedSource: data.breedSource,
+      season: data.season,
+      stockingDate: data.stockingDate || new Date().toISOString(),
+      stockingQuantity: data.stockingQuantity ?? null,
+      age: data.age ?? null,
+      density: data.density?.toString(),
+      estimatedCost: data.estimatedCost?.toString(),
+      notes: data.notes,
+    };
+  };
+
+  // Sử dụng state cục bộ để quản lý dữ liệu form trước khi lưu
+  const [cycleData, setCycleData] = useState<CycleFormData>(
+    convertCycleDataToFormData(initialData)
   );
 
   const checkFields = () => {
@@ -74,9 +93,7 @@ export const CreateCycleScreen: React.FC = () => {
       setShowDeleteModal(false); // Đóng modal
 
       // Navigate về màn hình ao nuôi để hiện Toast thành công
-      navigation.navigate('PondDetail', {
-        pondId: pondId,
-      } as any);
+      navigation.goBack();
     }
   };
 
@@ -95,11 +112,7 @@ export const CreateCycleScreen: React.FC = () => {
         }
       />
 
-      <ScrollView
-        contentContainerStyle={styles.formContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <CreateCycleForm formData={cycleData} setFormData={setCycleData} />
       </ScrollView>
 
@@ -128,9 +141,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.backgroundPrimary,
-  },
-  formContainer: {
-    paddingVertical: spacing.xs,
   },
   iconBtn: {
     width: 40,

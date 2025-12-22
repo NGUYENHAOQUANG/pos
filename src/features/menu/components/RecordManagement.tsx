@@ -30,17 +30,27 @@ const RecordManagementItem: React.FC<RecordManagementItemProps> = ({
   );
 };
 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
+
+// ... (RecordManagementItem remains same)
+
 export const RecordManagement: React.FC = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<MenuStackParamList>>();
+
   const records = [
     {
       id: 'profile',
       title: 'Thông tin cá nhân',
       iconName: 'user',
+      onPress: () => navigation.navigate('PersonalInformation'),
     },
     {
       id: 'members',
       title: 'Quản lý thành viên',
       iconName: 'team',
+      onPress: () => navigation.navigate('MemberManagement'),
     },
   ];
 
@@ -55,9 +65,7 @@ export const RecordManagement: React.FC = () => {
             iconName={item.iconName}
             title={item.title}
             isLast={index === records.length - 1}
-            onPress={() => {
-              // Handle navigation here
-            }}
+            onPress={item.onPress}
           />
         ))}
       </View>

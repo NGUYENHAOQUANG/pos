@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { CollapseHead } from './CollapseHead';
 import { TimelineEntry } from './Timeline';
 import { ActivityData } from './ActivityCard';
+import { parseDate } from '@/features/farm/utils/dateUtils';
 
 // Kích hoạt LayoutAnimation
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -31,6 +32,23 @@ interface TrackingDayCardProps {
   style?: any;
 }
 
+const isToday = (date: Date): boolean => {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+};
+
+const formatSectionTitle = (dateKey: string): string => {
+  const date = parseDate(dateKey);
+  if (isToday(date)) {
+    return `Hôm nay, ${dateKey}`;
+  }
+  return dateKey;
+};
+
 export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }) => {
   const [expanded, setExpanded] = useState(true);
 
@@ -39,11 +57,13 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }
     setExpanded(!expanded);
   };
 
+  const displayDate = formatSectionTitle(group.date);
+
   return (
-    <View style={[styles.cardContainer, style]}>
+    <View style={style}>
       {/* Header */}
       <CollapseHead
-        title={group.date}
+        title={displayDate}
         isExpanded={expanded}
         onToggle={toggleExpand}
         style={expanded ? styles.headerExpanded : styles.headerCollapsed}
@@ -75,37 +95,32 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }
 };
 
 const styles = StyleSheet.create({
-  cardContainer: {
-    width: '100%',
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    // Shadow
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-
   headerExpanded: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    backgroundColor: colors.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.borderLight,
+    backgroundColor: colors.white,
   },
   headerCollapsed: {
-    borderRadius: 8,
-    backgroundColor: colors.white,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-
   cardBody: {
-    padding: 12,
+    paddingTop: 12,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.white,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   emptyText: {
     textAlign: 'center',

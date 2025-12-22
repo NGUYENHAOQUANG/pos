@@ -7,7 +7,8 @@ import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { Button } from '@/shared/components/buttons/Button';
-import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -154,6 +155,16 @@ export const ShrimpFarmScreens: React.FC = () => {
       return;
     }
 
+    if (type === JOB_TYPES.CLEAN_POND) {
+      navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
+      return;
+    }
+
+    if (type === JOB_TYPES.SUN_DRY_POND) {
+      navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+      return;
+    }
+
     const currentItems = getPondJobItems(pond.id, type);
 
     // Calculate next index based on max existing label
@@ -227,6 +238,16 @@ export const ShrimpFarmScreens: React.FC = () => {
       return;
     }
 
+    if (type === JOB_TYPES.CLEAN_POND) {
+      navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
+      return;
+    }
+
+    if (type === JOB_TYPES.SUN_DRY_POND) {
+      navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
+      return;
+    }
+
     const itemToEdit = item; // Alias for compatibility with below code if needed
 
     // For other job types, keep the delete behavior (or implement edit later)
@@ -266,10 +287,26 @@ export const ShrimpFarmScreens: React.FC = () => {
     }
     if (type === JOB_TYPES.HARVEST && pond) {
       navigation.navigate('HarvestLog', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.TRANSFER_POND && pond) {
+      navigation.navigate('TransferLog', { pond });
+      return;
     }
 
     if (type === JOB_TYPES.WATER_CHANGE && pond) {
       navigation.navigate('WaterSupplyLog', { pond });
+      return;
+    }
+
+    if (type === JOB_TYPES.CLEAN_POND && pond) {
+      navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
+      return;
+    }
+
+    if (type === JOB_TYPES.SUN_DRY_POND && pond) {
+      navigation.navigate('SunDryPondLog', { pond });
       return;
     }
   };

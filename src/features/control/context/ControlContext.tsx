@@ -10,6 +10,7 @@ interface ControlContextType {
   addPond: () => void;
   connectDeviceToPond: (pondName: string, code?: string) => void;
   toggleDevice: (pondId: string, deviceId: string, isOn: boolean) => void;
+  updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => void;
 }
 
 const ControlContext = createContext<ControlContextType | undefined>(undefined);
@@ -258,14 +259,36 @@ export const ControlProvider: React.FC<{ children: ReactNode }> = ({ children })
     );
   }, []);
 
+  const updateDeviceMode = React.useCallback(
+    (pondId: string, deviceId: string, mode: EControlMode) => {
+      setPonds(prevPonds =>
+        prevPonds.map(pond => {
+          if (pond.id !== pondId) return pond;
+
+          const updatedDevices = pond.devices.map(device =>
+            device.id === deviceId ? { ...device, mode } : device
+          );
+
+          return {
+            ...pond,
+            devices: updatedDevices,
+            deviceStats: calculatePondStats(updatedDevices),
+          };
+        })
+      );
+    },
+    []
+  );
+
   const value = React.useMemo(
     () => ({
       ponds,
       addPond,
       connectDeviceToPond,
       toggleDevice,
+      updateDeviceMode,
     }),
-    [ponds, addPond, connectDeviceToPond, toggleDevice]
+    [ponds, addPond, connectDeviceToPond, toggleDevice, updateDeviceMode]
   );
 
   return <ControlContext.Provider value={value}>{children}</ControlContext.Provider>;

@@ -48,7 +48,10 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   /** Custom container styles */
   containerStyle?: ViewStyle;
   /** Custom input styles */
+  /** Custom input styles */
   inputStyle?: ViewStyle;
+  /** Custom input container styles (inner box) */
+  inputContainerStyle?: ViewStyle;
 }
 
 /**
@@ -69,6 +72,7 @@ export function Input({
   required = false,
   disabled = false,
   containerStyle,
+  inputContainerStyle,
   inputStyle,
   keyboardType = 'default',
   autoCapitalize = 'sentences',
@@ -121,6 +125,7 @@ export function Input({
           isFocused && styles.inputContainerFocused,
           error && styles.inputContainerError,
           disabled && styles.inputContainerDisabled,
+          inputContainerStyle,
         ]}
       >
         {/* Left Icon */}
