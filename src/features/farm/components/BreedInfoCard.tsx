@@ -42,11 +42,11 @@ export default BreedInfoCard;
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.sm,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
     borderColor: colors.border,
-    overflow: 'visible',
+    backgroundColor: colors.white,
+    overflow: 'hidden',
   },
 
   header: {
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    backgroundColor: '#F0F5FF',
+    backgroundColor: colors.backgroundPrimary,
   },
 
   headerText: {
@@ -64,8 +64,10 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    padding: spacing.md,
-    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.xs,
+    backgroundColor: colors.white,
   },
 
   row: {

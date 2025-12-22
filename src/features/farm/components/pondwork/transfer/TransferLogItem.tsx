@@ -2,10 +2,11 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 
 import { colors, spacing } from '@/styles';
-import { JobExecution } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { TransferMeta } from '@/features/farm/types/farm.types';
 import { TimelineEntry } from '@/features/farm/components/Timeline';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface TransferLogItemProps {
   item: JobExecution;
@@ -13,15 +14,6 @@ interface TransferLogItemProps {
   style?: ViewStyle;
   onEdit?: (item: JobExecution) => void;
 }
-
-/**
- * Format number with dots as thousand separators
- */
-const formatNumber = (num: string | number): string => {
-  const numStr = typeof num === 'string' ? num.replace(/\D/g, '') : num.toString();
-  if (!numStr) return '';
-  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-};
 
 /**
  * Convert TransferMeta to ActivityData array for ActivityCard
@@ -75,7 +67,7 @@ export const TransferLogItem: React.FC<TransferLogItemProps> = ({
         time={item.time}
         title={item.label}
         data={activityData}
-        note={meta.notes}
+        note={item.note}
         onEdit={onEdit ? () => onEdit(item) : undefined}
       />
     </View>

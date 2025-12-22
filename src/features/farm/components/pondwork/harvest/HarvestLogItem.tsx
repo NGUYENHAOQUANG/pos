@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { JobExecution } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { TimelineEntry } from '@/features/farm/components/Timeline';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface HarvestLogItemProps {
   item: JobExecution;
@@ -36,9 +37,7 @@ const convertHarvestMetaToActivityData = (
   }
 
   if (meta.revenue) {
-    // Format revenue with thousand separators
-    const formattedRevenue = meta.revenue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    data.push({ label: 'Doanh thu (VNĐ):', value: formattedRevenue });
+    data.push({ label: 'Doanh thu (VNĐ):', value: formatNumber(meta.revenue) });
   }
 
   return data;
@@ -60,7 +59,7 @@ export const HarvestLogItem: React.FC<HarvestLogItemProps> = ({
         time={item.time}
         title={item.label}
         data={activityData}
-        note={meta.notes}
+        note={item.note}
         onEdit={onEdit ? () => onEdit(item) : undefined}
       />
     </View>

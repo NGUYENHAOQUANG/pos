@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 
 import { colors, spacing } from '@/styles';
-import { JobExecution } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { TimelineEntry } from '@/features/farm/components/Timeline';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
@@ -57,7 +57,7 @@ export const SiphonLogItem: React.FC<SiphonLogItemProps> = ({ item, meta = {}, s
         time={item.time}
         title={item.label}
         data={activityData}
-        note={meta.notes}
+        note={item.note}
         onEdit={onEdit ? () => onEdit(item) : undefined}
       />
     </View>

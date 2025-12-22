@@ -1,4 +1,26 @@
 /**
+ * Format date as dd/mm/yyyy string
+ * @param date - Date object to format
+ * @returns Formatted date string (dd/mm/yyyy)
+ */
+export const formatDate = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+/**
+ * Parse date string from dd/mm/yyyy format to Date object
+ * @param dateStr - Date string in dd/mm/yyyy format
+ * @returns Date object
+ */
+export const parseDate = (dateStr: string): Date => {
+  const [day, month, year] = dateStr.split('/').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+/**
  * Format date and time for display in farm screens
  * @param date - Date object or date string to format
  * @param options - Formatting options
@@ -64,4 +86,20 @@ export const formatDateTime = (
   }
 
   return `${datePart}, ${timePart}${currentLabel}`;
+};
+
+/**
+ * Compare two time strings in "HH:mm" format
+ * @param timeA - First time string (e.g., "09:30")
+ * @param timeB - Second time string (e.g., "10:00")
+ * @returns Negative if timeA < timeB, positive if timeA > timeB, 0 if equal
+ */
+export const compareTime = (timeA: string, timeB: string): number => {
+  const [hoursA, minutesA] = timeA.split(':').map(Number);
+  const [hoursB, minutesB] = timeB.split(':').map(Number);
+
+  const totalMinutesA = hoursA * 60 + minutesA;
+  const totalMinutesB = hoursB * 60 + minutesB;
+
+  return totalMinutesA - totalMinutesB;
 };

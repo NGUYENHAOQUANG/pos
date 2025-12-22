@@ -18,7 +18,6 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -50,7 +49,6 @@ export const WaterSupplyScreen = () => {
   const { updatePondJob, getPondJobItems } = useFarm();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Thông số nước
   const [targetLevel, setTargetLevel] = useState(''); // H_target
@@ -147,13 +145,13 @@ export const WaterSupplyScreen = () => {
     };
   }, [targetLevel, supplyLevel, pond]);
 
-  const handleDateSelect = (date: Date) => {
-    const newDate = new Date(selectedDate);
-    newDate.setFullYear(date.getFullYear());
-    newDate.setMonth(date.getMonth());
-    newDate.setDate(date.getDate());
-    setSelectedDate(newDate);
-  };
+  // const handleDateSelect = (date: Date) => {
+  //   const newDate = new Date(selectedDate);
+  //   newDate.setFullYear(date.getFullYear());
+  //   newDate.setMonth(date.getMonth());
+  //   newDate.setDate(date.getDate());
+  //   setSelectedDate(newDate);
+  // };
 
   const handleAddMaterial = (data: SelectedMaterialItem) => {
     setSelectedMaterials(prev => [...prev, data]);
@@ -346,13 +344,6 @@ export const WaterSupplyScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Modals */}
-      <DatePickerModal
-        visible={showDatePicker}
-        onClose={() => setShowDatePicker(false)}
-        date={selectedDate}
-        onSelectDate={handleDateSelect}
-      />
       <SelectMaterial
         isVisible={isMaterialModalVisible}
         onClose={() => setMaterialModalVisible(false)}

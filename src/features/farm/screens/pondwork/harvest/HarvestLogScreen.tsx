@@ -1,18 +1,13 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { colors, spacing, borderRadius } from '@/styles';
-import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
+import React from 'react';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarm, JobExecution } from '@/features/farm/context/FarmContext';
-import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { HarvestLogItem } from '@/features/farm/components/pondwork/harvest/HarvestLogItem';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
-import { EmptyStateCard } from '@/features/material/components/EmptyStateCard';
+import { HarvestMeta } from '@/features/farm/types/farm.types';
+import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
+import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
+import { convertHarvestMetaToActivityData } from '@/features/farm/utils/metaConverters';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { JobExecution } from '@/features/farm/types/farm.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HarvestLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -21,80 +16,18 @@ export const HarvestLogScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { pond } = route.params || {};
-  const insets = useSafeAreaInsets();
-  const { setTabBarVisible } = useTabBarVisibility();
-  const { getPondJobItemsGroupedByDate } = useFarm();
 
-  // Date range state
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState<Date>(new Date());
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-  const [activeField, setActiveField] = useState<'start' | 'end'>('start');
-
-  // Hide tab bar when this screen is mounted
-  useEffect(() => {
-    setTabBarVisible(false);
-  }, [setTabBarVisible]);
-
-  const formatLabel = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+  const config: LogScreenConfig<HarvestMeta> = {
+    jobType: 'HARVEST',
+    pond,
+    metaConverter: (item: JobExecution, meta: HarvestMeta) =>
+      convertHarvestMetaToActivityData(item, meta),
+    itemFilter: (_item, meta) => meta?.harvestType === 'Thu tỉa',
+    editRoute: 'AddHarvestScreen',
+    getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
   };
 
-  const isToday = (date: Date): boolean => {
-    const today = new Date();
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  };
-
-  const formatSectionTitle = (date: Date): string => {
-    if (isToday(date)) {
-      return `Hôm nay, ${formatLabel(date)}`;
-    }
-    return formatLabel(date);
-  };
-
-  const startLabel = formatLabel(startDate);
-  const endLabel = formatLabel(endDate);
-
-  // Build grouped data from context (Map<string, JobExecution[]>)
-  // Only show items with harvestType === 'Thu tỉa'
-  const itemsByDate = useMemo(() => {
-    if (!pond?.id) return new Map<string, JobExecution[]>();
-    const allItems = getPondJobItemsGroupedByDate(pond.id, 'HARVEST', startDate, endDate);
-
-    // Filter to only show 'Thu tỉa' items
-    const filteredMap = new Map<string, JobExecution[]>();
-    allItems.forEach((items, dateKey) => {
-      const filteredItems = items.filter(item => {
-        const meta = item.meta as any;
-        return meta?.harvestType === 'Thu tỉa';
-      });
-      if (filteredItems.length > 0) {
-        filteredMap.set(dateKey, filteredItems);
-      }
-    });
-
-    return filteredMap;
-  }, [pond?.id, getPondJobItemsGroupedByDate, startDate, endDate]);
-
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-
-  const handleBack = () => {
-    if (navigation.canGoBack()) navigation.goBack();
-  };
-
-  const handleToggleSection = (dateKey: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [dateKey]: !prev[dateKey],
-    }));
-  };
+  const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
 
   const handleStartHarvest = () => {
     if (pond) {
@@ -102,203 +35,17 @@ export const HarvestLogScreen: React.FC = () => {
     }
   };
 
-  const handleEditHarvest = (item: JobExecution) => {
-    if (pond) {
-      navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <View style={styles.headerSection}>
-        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nhật ký thu hoạch</Text>
-          <View style={styles.headerSpacer} />
-        </View>
-
-        {/* Divider between header and date range */}
-        <View style={styles.headerDivider} />
-
-        {/* Date range filter */}
-        <DateRangeFilter
-          startLabel={startLabel}
-          endLabel={endLabel}
-          onPressStart={() => {
-            setActiveField('start');
-            setIsDatePickerVisible(true);
-          }}
-          onPressEnd={() => {
-            setActiveField('end');
-            setIsDatePickerVisible(true);
-          }}
-          onPressCalendar={() => {
-            setActiveField('start');
-            setIsDatePickerVisible(true);
-          }}
-          style={styles.dateRangeWrapper}
-        />
-      </View>
-
-      <ScrollView
-        contentContainerStyle={{
-          paddingTop: spacing.sm,
-          paddingBottom: insets.bottom + spacing.lg,
-        }}
-      >
-        {itemsByDate.size === 0 ? (
-          <View style={styles.emptyContainer}>
-            <EmptyStateCard
-              message="Chưa có dữ liệu thu hoạch"
-              buttonTitle="Bắt đầu thu hoạch"
-              onPress={handleStartHarvest}
-            />
-          </View>
-        ) : (
-          Array.from(itemsByDate.entries()).map(
-            ([dateKey, dateItems]: [string, JobExecution[]]) => {
-              const date = new Date(dateKey.split('-').reverse().join('-'));
-              const isExpanded = expandedSections[dateKey] !== false; // Default to expanded
-
-              return (
-                <View key={dateKey} style={{ marginBottom: spacing.sm }}>
-                  <TouchableOpacity
-                    style={[styles.sectionHeader, !isExpanded && styles.sectionHeaderCollapsed]}
-                    onPress={() => handleToggleSection(dateKey)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.sectionTitle}>{formatSectionTitle(date)}</Text>
-                    <Ionicons
-                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={16}
-                      color={colors.textSecondary}
-                    />
-                  </TouchableOpacity>
-
-                  {isExpanded && (
-                    <View style={styles.itemsContainer}>
-                      {dateItems.map((item: JobExecution) => (
-                        <HarvestLogItem
-                          key={item.id}
-                          item={item}
-                          meta={item.meta || {}}
-                          onEdit={handleEditHarvest}
-                        />
-                      ))}
-                    </View>
-                  )}
-                </View>
-              );
-            }
-          )
-        )}
-      </ScrollView>
-
-      {/* Date Range Picker */}
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setIsDatePickerVisible(false)}
-        date={activeField === 'start' ? startDate : endDate}
-        onSelectDate={date => {
-          if (activeField === 'start') {
-            setStartDate(date);
-            if (date > endDate) {
-              setEndDate(date);
-            }
-          } else {
-            setEndDate(date);
-            if (date < startDate) {
-              setStartDate(date);
-            }
-          }
-          setIsDatePickerVisible(false);
-        }}
-      />
-    </View>
+    <BaseLogScreen
+      title="Nhật ký thu hoạch"
+      startDate={startDate}
+      endDate={endDate}
+      onStartDateChange={setStartDate}
+      onEndDateChange={setEndDate}
+      groupedData={groupedData}
+      emptyMessage="Chưa có dữ liệu thu hoạch"
+      emptyButtonTitle="Bắt đầu thu hoạch"
+      onEmptyButtonPress={handleStartHarvest}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  headerSection: {
-    backgroundColor: colors.white,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 12,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  headerDivider: {
-    height: 1,
-    backgroundColor: colors.borderLight,
-  },
-  dateRangeWrapper: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderLight,
-    backgroundColor: colors.white,
-  },
-  sectionHeaderCollapsed: {
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    lineHeight: 22,
-  },
-  itemsContainer: {
-    paddingTop: 8,
-    backgroundColor: colors.white,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  emptyContainer: {
-    marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
-  },
-});

@@ -79,8 +79,10 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
           onPress={() => setModalVisible(true)}
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={16} color={colors.primary} />
-          <Text style={styles.addButtonText}>Thêm vật tư</Text>
+          <Ionicons name="add" size={16} color={colors.primary} style={styles.addIcon} />
+          <Text style={styles.addButtonText} numberOfLines={1}>
+            Thêm vật tư
+          </Text>
         </TouchableOpacity>
       </SelectionInfoBox>
 
@@ -155,15 +157,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary,
     borderRadius: borderRadius.sm,
-    gap: spacing.sm,
     height: 32,
     width: '100%',
     paddingHorizontal: spacing.md,
+  },
+  addIcon: {
+    marginRight: spacing.sm,
   },
   addButtonText: {
     fontSize: 14,
     fontWeight: '400',
     color: colors.primary,
     lineHeight: 22,
+    flexShrink: 0,
   },
 });

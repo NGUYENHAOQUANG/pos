@@ -12,32 +12,27 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblemLog'>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
-export const HandleProblemLogScreen = () => {
+export const SunDryPondLogScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
-  const { pond, jobType = 'CLEAN_POND' } = route.params || {};
+  const { pond } = route.params || {};
   const { getPondJobItemsGroupedByDate } = useFarm();
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
-  const currentJobType: 'CLEAN_POND' | 'SUN_DRY_POND' = jobType as 'CLEAN_POND' | 'SUN_DRY_POND';
-  const screenTitle = 'Nhật ký xử lý sự cố';
-  const emptyMessage = 'Chưa có dữ liệu xử lý sự cố';
-  const buttonTitle = 'Bắt đầu ghi lại sự cố';
-
   const handleCreateNew = () => {
-    if (pond) navigation.navigate('HandleProblem', { pond, jobType: currentJobType });
+    if (pond) navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
   };
 
   // Logic Grouping Data
   const groupedData: TrackingGroup[] = useMemo(() => {
     if (!pond?.id) return [];
 
-    const itemsByDate = getPondJobItemsGroupedByDate(pond.id, currentJobType, startDate, endDate);
+    const itemsByDate = getPondJobItemsGroupedByDate(pond.id, 'SUN_DRY_POND', startDate, endDate);
 
     if (itemsByDate.size === 0) return [];
 
@@ -68,7 +63,7 @@ export const HandleProblemLogScreen = () => {
               navigation.navigate('HandleProblem', {
                 pond,
                 item: job,
-                jobType: currentJobType,
+                jobType: 'SUN_DRY_POND',
               });
             }
           },
@@ -88,18 +83,18 @@ export const HandleProblemLogScreen = () => {
       const dateB = parseDate(b.date);
       return dateA.getTime() - dateB.getTime();
     });
-  }, [pond, navigation, getPondJobItemsGroupedByDate, startDate, endDate, currentJobType]);
+  }, [pond, navigation, getPondJobItemsGroupedByDate, startDate, endDate]);
 
   return (
     <BaseLogScreen
-      title={screenTitle}
+      title="Nhật ký phơi ao"
       startDate={startDate}
       endDate={endDate}
       onStartDateChange={setStartDate}
       onEndDateChange={setEndDate}
       groupedData={groupedData}
-      emptyMessage={emptyMessage}
-      emptyButtonTitle={buttonTitle}
+      emptyMessage="Chưa có dữ liệu phơi ao"
+      emptyButtonTitle="Bắt đầu phơi ao"
       onEmptyButtonPress={handleCreateNew}
       useFlatCardStyle={true}
     />

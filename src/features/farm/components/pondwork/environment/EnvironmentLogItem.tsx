@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { colors } from '@/styles';
-import { JobExecution } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { TimelineEntry } from '@/features/farm/components/Timeline';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
@@ -58,7 +58,7 @@ export const EnvironmentLogItem: React.FC<EnvironmentLogItemProps> = ({
         time={item.time}
         title={item.label}
         data={activityData}
-        note={meta.notes}
+        note={item.note}
         onEdit={onEdit ? () => onEdit(item) : undefined}
       />
     </View>

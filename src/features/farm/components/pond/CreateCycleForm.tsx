@@ -1,77 +1,67 @@
-import React, { useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import React from 'react';
+import { ScrollView, View, Text, StyleSheet, TextInput } from 'react-native';
+import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '../pondwork/SelectionInfoBox';
 import { SelectionNotesBox } from '../SelectionNotesBox';
 import { DropDownButtonBasic } from '../DropDownButtonBasic';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
-import { IconCalender } from '@/assets/icons';
+import { DateInputButton } from '../pondwork/DateInputButton';
 import BreedInfoCard from '../BreedInfoCard';
 
-// Import useFarm thay vì useCycle
-import { useFarm, FormData } from '../../context/FarmContext';
+import { useFarm } from '../../context/FarmContext';
+import { CycleFormData } from '../../types/farm.types';
 
 interface Props {
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  formData: CycleFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CycleFormData>>;
 }
 
 const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
   // Lấy danh mục từ FarmContext
   const { breedOptions, seasonOptions } = useFarm();
 
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-
-  const updateField = (key: keyof FormData, value: any) => {
+  const updateField = (key: keyof CycleFormData, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
-  };
-
-  const formatDateTime = (dateString?: string | null) => {
-    if (!dateString) return 'dd-mm-yyyy, hr:mm (hiện tại)';
-    const date = new Date(dateString);
-    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(
-      2,
-      '0'
-    )}/${date.getFullYear()}, ${String(date.getHours()).padStart(2, '0')}:${String(
-      date.getMinutes()
-    ).padStart(2, '0')}`;
   };
 
   return (
     <ScrollView style={styles.container}>
       <SelectionInfoBox title="Chọn nguồn giống và vụ nuôi">
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>
-            <Text style={styles.required}>* </Text>Chọn tôm giống
-          </Text>
-          <DropDownButtonBasic
-            data={breedOptions.map(opt => ({ id: opt.value, label: opt.label }))}
-            value={
-              formData.breedSource
-                ? {
-                    id: formData.breedSource,
-                    label: breedOptions.find(o => o.value === formData.breedSource)?.label || '',
-                  }
-                : undefined
-            }
-            onSelect={item => updateField('breedSource', String(item.id))}
-            style={styles.dropdown}
-            showIcon={false}
-          />
+        <View style={styles.breedSection}>
+          <View style={styles.inputGroupNoMargin}>
+            <Text style={styles.label}>
+              <Text style={styles.required}>* </Text>Chọn tôm giống
+            </Text>
+            <DropDownButtonBasic
+              data={breedOptions.map(opt => ({ id: opt.value, label: opt.label }))}
+              value={
+                formData.breedSource
+                  ? {
+                      id: formData.breedSource,
+                      label: breedOptions.find(o => o.value === formData.breedSource)?.label || '',
+                    }
+                  : undefined
+              }
+              onSelect={item => updateField('breedSource', String(item.id))}
+              style={styles.dropdown}
+              showIcon={false}
+              height={40}
+              borderRadius={6}
+            />
+          </View>
+
+          {formData.breedSource && (
+            <BreedInfoCard
+              materialCode={
+                breedOptions.find(o => o.value === formData.breedSource)?.materialCode || ''
+              }
+              price={breedOptions.find(o => o.value === formData.breedSource)?.price || 0}
+              supplier={breedOptions.find(o => o.value === formData.breedSource)?.supplier || ''}
+            />
+          )}
         </View>
 
-        {formData.breedSource && (
-          <BreedInfoCard
-            materialCode={
-              breedOptions.find(o => o.value === formData.breedSource)?.materialCode || ''
-            }
-            price={breedOptions.find(o => o.value === formData.breedSource)?.price || 0}
-            supplier={breedOptions.find(o => o.value === formData.breedSource)?.supplier || ''}
-          />
-        )}
-
         <View style={styles.row}>
-          <View style={[styles.col, { paddingRight: spacing.xs }]}>
+          <View style={styles.col}>
             <Text style={styles.label}>
               <Text style={styles.required}>* </Text>Chọn vụ nuôi
             </Text>
@@ -88,9 +78,11 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
               onSelect={item => updateField('season', String(item.id))}
               style={styles.dropdown}
               showIcon={false}
+              height={40}
+              borderRadius={6}
             />
           </View>
-          <View style={[styles.col, { paddingLeft: spacing.xs }]}>
+          <View style={styles.col}>
             <Text style={styles.label}>
               <Text style={styles.required}>* </Text>Tên chu kỳ
             </Text>
@@ -105,16 +97,14 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
       </SelectionInfoBox>
 
       <SelectionInfoBox title="Thông tin thả giống">
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Ngày thả</Text>
-          <TouchableOpacity style={styles.dateInput} onPress={() => setDatePickerVisible(true)}>
-            <Text style={styles.dateText}>{formatDateTime(formData.stockingDate)}</Text>
-            <IconCalender width={20} height={20} />
-          </TouchableOpacity>
-        </View>
+        <DateInputButton
+          label="Ngày thả"
+          date={formData.stockingDate ? new Date(formData.stockingDate) : null}
+          onDateChange={date => updateField('stockingDate', date.toISOString())}
+        />
 
         <View style={styles.row}>
-          <View style={[styles.col65, { paddingRight: spacing.xs }]}>
+          <View style={styles.col65}>
             <Text style={styles.label}>
               <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)
             </Text>
@@ -126,7 +116,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
               onChangeText={text => updateField('stockingQuantity', text)}
             />
           </View>
-          <View style={[styles.col35, { paddingLeft: spacing.xs }]}>
+          <View style={styles.col35}>
             <Text style={styles.label}>
               <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
             </Text>
@@ -139,21 +129,28 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
             />
           </View>
         </View>
+
+        {/* Calculated Info Box */}
+        <View style={styles.calcWrapper}>
+          <View style={styles.calcBox}>
+            <View style={styles.calcRow}>
+              <Text style={styles.calcLabel}>Mật độ (con/m²)</Text>
+              <Text style={styles.calcValue}>{formData.density || '-'}</Text>
+            </View>
+            <View style={styles.calcRowLast}>
+              <Text style={styles.calcLabel}>Tổng chi phí giống ước tính (VNĐ)</Text>
+              <Text style={styles.calcValue}>{formData.estimatedCost || '-'}</Text>
+            </View>
+          </View>
+          <Text style={styles.calcHint}>
+            Kết quả được hệ thống tính tự động từ các số liệu bạn đã nhập
+          </Text>
+        </View>
       </SelectionInfoBox>
 
       <SelectionNotesBox
         notes={formData.notes || ''}
         onNotesChange={text => updateField('notes', text)}
-      />
-
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setDatePickerVisible(false)}
-        date={formData.stockingDate ? new Date(formData.stockingDate) : new Date()}
-        onSelectDate={date => {
-          updateField('stockingDate', date.toISOString());
-          setDatePickerVisible(false);
-        }}
       />
     </ScrollView>
   );
@@ -166,21 +163,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.backgroundPrimary,
   },
+  breedSection: {
+    gap: spacing.sm,
+  },
   inputGroup: {
-    marginBottom: spacing.sm,
+    width: '100%',
+  },
+  inputGroupNoMargin: {
     width: '100%',
   },
   label: {
     fontSize: 14,
     color: colors.text,
     marginBottom: spacing.sm,
+    lineHeight: 22,
   },
   required: {
     color: colors.error,
   },
   row: {
     flexDirection: 'row',
-    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
   col: {
     flex: 1,
@@ -195,46 +198,41 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    height: 44,
+    height: 40,
     borderWidth: 1,
     borderColor: colors.gray[200],
-    borderRadius: borderRadius.md,
+    borderRadius: 6,
     paddingHorizontal: spacing.md,
     fontSize: 14,
     color: colors.text,
     backgroundColor: colors.white,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 44,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-  },
-  dateText: {
-    fontSize: 14,
-    color: colors.text,
   },
   placeholderText: {
     color: colors.textSecondary,
   },
+  calcWrapper: {
+    gap: spacing.xs,
+  },
   calcBox: {
     backgroundColor: colors.gray[50],
     padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginTop: spacing.sm,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: colors.defaultBorder,
   },
   calcRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: spacing.xs,
   },
+  calcRowLast: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   calcLabel: {
     fontSize: 14,
+    fontWeight: '400',
+    lineHeight: 22,
     color: colors.text,
   },
   calcValue: {
@@ -243,7 +241,9 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   calcHint: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: '400',
+    lineHeight: 14,
     color: colors.textSecondary,
     marginTop: spacing.xs,
   },
