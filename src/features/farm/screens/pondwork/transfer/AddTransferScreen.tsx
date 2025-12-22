@@ -16,7 +16,7 @@ import {
   TransferInfoBox,
   ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
-import { TransferConfirmationModal } from '@/features/farm/components/pondwork/transfer/TransferConfirmationModal';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { TransferMeta } from '@/features/farm/types/farm.types';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
@@ -24,6 +24,7 @@ import {
   showAddJobSuccessToast,
   showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddTransferScreen'>;
@@ -48,9 +49,9 @@ export const AddTransferScreen: React.FC = () => {
   // Initialize state from itemToEdit if available
   const meta = useMemo(() => (itemToEdit?.meta as TransferMeta) || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState<Date>(
-    meta.date ? new Date(meta.date) : new Date()
+    itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
   );
-  const [notes, setNotes] = useState<string>(meta.notes || '');
+  const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
   const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize?.toString() || '60');
   const [transferMethod] = useState<string>(meta.transferMethod || 'Sang hết');
 
@@ -91,8 +92,8 @@ export const AddTransferScreen: React.FC = () => {
   const initialData = useMemo(() => {
     if (!itemToEdit) return null;
     return {
-      date: meta.date ? new Date(meta.date) : new Date(),
-      notes: meta.notes || '',
+      date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+      notes: itemToEdit?.note || '',
       shrimpSize: meta.shrimpSize || '60',
       transferMethod: meta.transferMethod || 'Sang hết',
       receivingPonds: meta.receivingPonds || [],
@@ -175,16 +176,14 @@ export const AddTransferScreen: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-    const dateString = selectedDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
 
     const baseData = {
       label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
       time: timeString,
-      date: dateString,
+      date: formatDate(selectedDate),
+      note: notes || undefined,
       meta: {
         ...(itemToEdit?.meta || {}),
-        date: selectedDate,
-        notes: notes || undefined,
         shrimpSize,
         transferMethod,
         receivingPonds,
@@ -280,7 +279,7 @@ export const AddTransferScreen: React.FC = () => {
       </View>
 
       {/* Confirmation Modal */}
-      <TransferConfirmationModal
+      <ConfirmationModal
         visible={isConfirmationModalVisible}
         onConfirm={handleConfirmSave}
         onCancel={handleCancelConfirmation}

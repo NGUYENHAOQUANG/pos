@@ -12,3 +12,15 @@ export interface Aquaculture {
   note?: string;
   createdAt: Date;
 }
+
+export interface Member {
+  id: string;
+  name: string;
+  role: string;
+  managementLevel: string;
+  contact: string;
+  status: TagStatus;
+  createdAt: Date;
+  permissions?: string[];
+  unitIds?: string[];
+}

@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   Platform,
-  Alert,
   TextInput,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -18,8 +17,8 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -50,7 +49,6 @@ export const WaterSupplyScreen = () => {
   const { updatePondJob, getPondJobItems } = useFarm();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Thông số nước
   const [targetLevel, setTargetLevel] = useState(''); // H_target
@@ -147,13 +145,13 @@ export const WaterSupplyScreen = () => {
     };
   }, [targetLevel, supplyLevel, pond]);
 
-  const handleDateSelect = (date: Date) => {
-    const newDate = new Date(selectedDate);
-    newDate.setFullYear(date.getFullYear());
-    newDate.setMonth(date.getMonth());
-    newDate.setDate(date.getDate());
-    setSelectedDate(newDate);
-  };
+  // const handleDateSelect = (date: Date) => {
+  //   const newDate = new Date(selectedDate);
+  //   newDate.setFullYear(date.getFullYear());
+  //   newDate.setMonth(date.getMonth());
+  //   newDate.setDate(date.getDate());
+  //   setSelectedDate(newDate);
+  // };
 
   const handleAddMaterial = (data: SelectedMaterialItem) => {
     setSelectedMaterials(prev => [...prev, data]);
@@ -165,12 +163,6 @@ export const WaterSupplyScreen = () => {
 
   const handleSave = () => {
     if (!pond?.id) return;
-
-    // Validate
-    if (!targetLevel || !supplyLevel) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập Mực nước mục tiêu và Số cm cấp');
-      return;
-    }
 
     const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
     const timeString = selectedDate.toLocaleTimeString('en-GB', {
@@ -279,13 +271,14 @@ export const WaterSupplyScreen = () => {
           />
 
           {/* 3. Chọn vật tư */}
-          <View style={styles.section}>
-            <Text style={styles.label}>
-              <Text style={styles.required}>* </Text>
-              Chọn vật tư
-            </Text>
-            <View style={styles.divider} />
-
+          <SelectionInfoBox
+            title={
+              <Text style={styles.materialTitle}>
+                <Text style={styles.required}>* </Text>
+                Chọn vật tư
+              </Text>
+            }
+          >
             {selectedMaterials.length > 0 && (
               <View style={styles.materialList}>
                 {selectedMaterials.map((mat, index) => (
@@ -316,7 +309,7 @@ export const WaterSupplyScreen = () => {
               <Ionicons name="add" size={20} color={colors.primary} />
               <Text style={styles.addButtonText}>Thêm vật tư</Text>
             </TouchableOpacity>
-          </View>
+          </SelectionInfoBox>
 
           {/* 4. Ghi chú */}
           <View style={styles.section}>
@@ -346,13 +339,6 @@ export const WaterSupplyScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Modals */}
-      <DatePickerModal
-        visible={showDatePicker}
-        onClose={() => setShowDatePicker(false)}
-        date={selectedDate}
-        onSelectDate={handleDateSelect}
-      />
       <SelectMaterial
         isVisible={isMaterialModalVisible}
         onClose={() => setMaterialModalVisible(false)}
@@ -382,7 +368,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: colors.white,
     padding: spacing.md,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
@@ -409,6 +395,12 @@ const styles = StyleSheet.create({
   },
   required: {
     color: colors.error,
+  },
+  materialTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 22,
+    color: colors.text,
   },
   divider: {
     height: 1,

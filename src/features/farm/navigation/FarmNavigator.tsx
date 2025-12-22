@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { FarmProvider, JobExecution } from '@/features/farm/context/FarmContext';
+import { FarmProvider } from '@/features/farm/context/FarmContext';
+import { JobExecution } from '@/features/farm/types/farm.types';
 import { PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
 import { ShrimpFarmScreens } from '@/features/farm/screens/ShrimpFarmScreens';
@@ -9,7 +10,7 @@ import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 import { ShrimpInspectionScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionScreen';
 import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionLogScreen';
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
-import { SettingEnvironment } from '@/features/farm/screens/pondwork/environment/SettingEnvironment';
+import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/pond/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
@@ -20,6 +21,9 @@ import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/Add
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
 import { CycleDetailScreen } from '@/features/farm/screens/pond/CycleDetailScreen';
+import { HandleProblemScreen } from '@/features/farm/screens/handleProblem/HandleProblemScreen';
+import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
+import { SunDryPondLogScreen } from '@/features/farm/screens/handleProblem/SunDryPondLogScreen';
 
 export type FarmStackParamList = {
   FarmList: undefined;
@@ -44,9 +48,13 @@ export type FarmStackParamList = {
   WaterSupply: { pond?: any; item?: any };
   WaterSupplyLog: { pond: any };
   AddTransferScreen: { pond: PondData; itemToEdit?: JobExecution };
+  TransferLog: { pond: PondData };
   AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
   HarvestLog: { pond: PondData };
   CycleDetail: { pondId: string; cycleData: any };
+  HandleProblem: { pond: PondData; item?: JobExecution; jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' };
+  HandleProblemLog: { pond: PondData; jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' };
+  SunDryPondLog: { pond: PondData };
 };
 
 const Stack = createNativeStackNavigator<FarmStackParamList>();
@@ -65,7 +73,6 @@ export const FarmNavigator = () => {
         initialRouteName="FarmList"
         screenOptions={{
           headerShown: false,
-          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="FarmList" component={ShrimpPondListScreens} />
@@ -78,7 +85,7 @@ export const FarmNavigator = () => {
         <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
         <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
         <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
-        <Stack.Screen name="SettingEnvironment" component={SettingEnvironment} />
+        <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
         <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
         <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
         <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
@@ -92,6 +99,9 @@ export const FarmNavigator = () => {
         <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
         <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
         <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />
+        <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
+        <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
+        <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
       </Stack.Navigator>
     </FarmProvider>
   );

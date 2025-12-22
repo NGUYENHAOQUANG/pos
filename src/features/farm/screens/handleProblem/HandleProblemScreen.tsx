@@ -19,11 +19,14 @@ import { GeneralInfoBox } from '../../components/pondwork/GeneralInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 // Mock Data
 const MOCK_MATERIALS: IMaterial[] = [
@@ -46,8 +49,12 @@ export const HandleProblemScreen = () => {
   const route = useRoute<ScreenRouteProp>();
   const insets = useSafeAreaInsets();
 
-  const { pond, item } = route.params || {};
+  const { pond, item, jobType = 'CLEAN_POND' } = route.params || {};
   const { updatePondJob, getPondJobItems } = useFarm();
+
+  // Determine job type and title
+  const currentJobType: JobType = jobType as JobType;
+  const screenTitle = item ? 'Chỉnh sửa Xử lý sự cố' : 'Xử lý sự cố';
 
   // State
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -62,42 +69,33 @@ export const HandleProblemScreen = () => {
   useEffect(() => {
     if (item) {
       if (item.date) {
-        const parts = item.date.split('/');
-        if (parts.length === 3) {
-          const d = new Date(
-            parseInt(parts[2], 10),
-            parseInt(parts[1], 10) - 1,
-            parseInt(parts[0], 10)
-          );
-          if (item.time) {
-            const [h, m] = item.time.split(':').map(Number);
-            d.setHours(h, m);
-          }
-          setSelectedDate(d);
-        }
+        setSelectedDate(parseDate(item.date));
       }
       setNote(item.note || '');
       if (item.materials) {
         setSelectedMaterials(item.materials);
       }
       // Load images if any
+      if (item.images) {
+        setImageUris(item.images);
+      }
     }
   }, [item]);
 
   const handleSave = () => {
     if (!pond?.id) return;
 
-    const currentItems = getPondJobItems(pond.id, 'CLEAN_POND');
+    const currentItems = getPondJobItems(pond.id, currentJobType);
     const timeString = selectedDate.toLocaleTimeString('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
     });
-    const dateString = selectedDate.toLocaleDateString('en-GB');
+    const dateString = formatDate(selectedDate);
 
     const jobData = {
       materials: selectedMaterials,
-      note: note, // Nội dung sự cố
-      // images: imageUris
+      note: note || undefined,
+      images: imageUris.length > 0 ? imageUris : undefined,
     };
 
     if (item) {
@@ -105,7 +103,7 @@ export const HandleProblemScreen = () => {
       const updatedItems = currentItems.map(i =>
         i.id === item.id ? { ...i, time: timeString, date: dateString, ...jobData } : i
       );
-      updatePondJob(pond.id, 'CLEAN_POND', updatedItems);
+      updatePondJob(pond.id, currentJobType, updatedItems);
     } else {
       // CREATE
       let maxIndex = 0;
@@ -125,7 +123,7 @@ export const HandleProblemScreen = () => {
         date: dateString,
         ...jobData,
       };
-      updatePondJob(pond.id, 'CLEAN_POND', [...currentItems, newItem]);
+      updatePondJob(pond.id, currentJobType, [...currentItems, newItem]);
     }
     navigation.goBack();
   };
@@ -134,9 +132,9 @@ export const HandleProblemScreen = () => {
 
   const confirmDelete = () => {
     if (pond?.id && item?.id) {
-      const currentItems = getPondJobItems(pond.id, 'CLEAN_POND');
+      const currentItems = getPondJobItems(pond.id, currentJobType);
       const updatedItems = currentItems.filter(i => i.id !== item.id);
-      updatePondJob(pond.id, 'CLEAN_POND', updatedItems);
+      updatePondJob(pond.id, currentJobType, updatedItems);
       navigation.goBack();
     }
     setShowDeleteModal(false);
@@ -146,7 +144,7 @@ export const HandleProblemScreen = () => {
     <View style={styles.container}>
       <HeaderFarm
         type="simple"
-        title={item ? 'Chỉnh sửa Xử lý sự cố' : 'Xử lý sự cố'}
+        title={screenTitle}
         onBack={() => navigation.goBack()}
         rightAction={
           item ? (
@@ -167,13 +165,14 @@ export const HandleProblemScreen = () => {
           onImagesChange={setImageUris}
         />
         {/* 2. Chọn vật tư */}
-        <View style={styles.section}>
-          <Text style={styles.label}>
-            <Text style={styles.required}>* </Text>
-            Chọn vật tư
-          </Text>
-          <View style={styles.divider} />
-
+        <SelectionInfoBox
+          title={
+            <Text style={styles.materialTitle}>
+              <Text style={styles.required}>* </Text>
+              Chọn vật tư
+            </Text>
+          }
+        >
           {selectedMaterials.length > 0 && (
             <View style={styles.materialList}>
               {selectedMaterials.map((mat, index) => (
@@ -203,7 +202,7 @@ export const HandleProblemScreen = () => {
             <Ionicons name="add" size={20} color={colors.primary} />
             <Text style={styles.addButtonText}>Thêm vật tư</Text>
           </TouchableOpacity>
-        </View>
+        </SelectionInfoBox>
 
         {/* 3. Ghi chú (Mô tả sự cố) */}
         <View style={styles.section}>
@@ -277,7 +276,12 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 14, color: colors.text, marginBottom: spacing.xs, fontWeight: '500' },
   required: { color: colors.error },
-  divider: { height: 1, backgroundColor: colors.gray[100], marginBottom: spacing.md },
+  materialTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 22,
+    color: colors.text,
+  },
   materialList: { marginBottom: spacing.md },
   materialItem: {
     flexDirection: 'row',
@@ -319,6 +323,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderStyle: 'solid',
     backgroundColor: colors.white,
+    height: 40,
   },
   addButtonText: { fontSize: 14, color: colors.primary, fontWeight: '500', marginLeft: spacing.xs },
   noteInput: {

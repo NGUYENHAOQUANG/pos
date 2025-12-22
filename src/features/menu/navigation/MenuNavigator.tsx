@@ -2,23 +2,34 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
-
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
-
+import { MemberManagementScreens } from '@/features/menu/screens/member/MemberManagementScreens';
+import { AddMemberScreens } from '@/features/menu/screens/member/AddMemberScreens';
+import { EditMemberScreens } from '@/features/menu/screens/member/EditMemberScreens';
+import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
+import { Aquaculture, Member } from '@/features/menu/types/menu.types';
+import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
+import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
+import { MenuProvider } from '@/features/menu/context/MenuContext';
 export type MenuStackParamList = {
   MenuMain: undefined;
   PersonalInformation: undefined;
   AquacultureManagement: undefined;
+  MemberManagement: undefined;
   AddAquaculture: undefined;
-  EditAquaculture: { aquaculture: any }; // Using any to avoid circular dependency or import ease, or verify import
+  EditAquaculture: { aquaculture: Aquaculture };
+  AddMember: undefined;
+  EditMember: { member: Member };
+  SettingEnvironment: undefined;
+  EditEnvironment: {
+    parameter: EnvironmentParameter;
+    onSave: (data: EnvironmentParameter) => void;
+  };
 };
 
 const Stack = createNativeStackNavigator<MenuStackParamList>();
-
-import { MenuProvider } from '@/features/menu/context/MenuContext';
 
 export const MenuNavigator = () => {
   return (
@@ -31,9 +42,14 @@ export const MenuNavigator = () => {
       >
         <Stack.Screen name="MenuMain" component={MenuScreens} />
         <Stack.Screen name="PersonalInformation" component={PersonalInformationScreens} />
+        <Stack.Screen name="MemberManagement" component={MemberManagementScreens} />
         <Stack.Screen name="AquacultureManagement" component={AquacultureManagementScreens} />
         <Stack.Screen name="AddAquaculture" component={AddAquacultureScreens} />
         <Stack.Screen name="EditAquaculture" component={EditAquacultureScreens} />
+        <Stack.Screen name="AddMember" component={AddMemberScreens} />
+        <Stack.Screen name="EditMember" component={EditMemberScreens} />
+        <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
+        <Stack.Screen name="EditEnvironment" component={EditEnvironmentScreens} />
       </Stack.Navigator>
     </MenuProvider>
   );

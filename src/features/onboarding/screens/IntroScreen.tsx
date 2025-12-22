@@ -1,5 +1,6 @@
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
 import { colors, spacing, typography } from '@/styles';
+import { Logo } from '@/shared/components/brand/Logo';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useMemo } from 'react';
 import { Dimensions, StatusBar, StyleSheet, Text, View } from 'react-native';
@@ -164,10 +165,7 @@ export function IntroScreen() {
 
       {/* Logo */}
       <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-        <Text style={styles.logoText}>
-          <Text style={styles.logoBlue}>MEBI</Text>
-          <Text style={styles.logoOrange}>ONE</Text>
-        </Text>
+        <Logo size="large" />
       </Animated.View>
 
       {/* Slogan */}
@@ -202,17 +200,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.md,
     zIndex: 1,
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: typography.fontWeight.bold,
-    letterSpacing: 2,
-  },
-  logoBlue: {
-    color: colors.primary,
-  },
-  logoOrange: {
-    color: '#FFA769',
   },
   sloganContainer: {
     alignItems: 'center',

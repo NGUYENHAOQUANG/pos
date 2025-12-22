@@ -44,7 +44,7 @@ Bạn có chắc chắn muốn đóng chu kỳ không?`,
   },
 };
 
-interface TransferConfirmationModalProps {
+interface ConfirmationModalProps {
   visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -56,7 +56,7 @@ interface TransferConfirmationModalProps {
   cancelText?: string;
 }
 
-export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps> = ({
+export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   visible,
   onConfirm,
   onCancel,
@@ -80,7 +80,9 @@ export const TransferConfirmationModal: React.FC<TransferConfirmationModalProps>
               <View style={styles.content}>
                 {/* Header */}
                 <View style={styles.header}>
-                  <Text style={styles.title}>{finalTitle}</Text>
+                  <Text style={styles.title} numberOfLines={1}>
+                    {finalTitle}
+                  </Text>
                   <TouchableOpacity onPress={onCancel} activeOpacity={0.7}>
                     <Ionicons name="close" size={14} color={colors.textSecondary} />
                   </TouchableOpacity>
@@ -140,10 +142,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   title: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '700',
     color: colors.text,
     lineHeight: 24,
+    marginRight: spacing.sm,
   },
   messageContainer: {
     gap: spacing.sm,

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Toast from 'react-native-toast-message';
 import { StyleSheet, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
@@ -10,6 +9,8 @@ import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatm
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { formatDate } from '@/features/farm/utils/dateUtils';
+import { showAddJobSuccessToast } from '@/features/farm/utils/toastMessages';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
@@ -50,35 +51,21 @@ export const AddWaterTreatmentScreens: React.FC = () => {
         hour: '2-digit',
         minute: '2-digit',
       });
-      const dateString = executionDate.toLocaleDateString('en-GB');
+      const dateString = formatDate(executionDate);
 
       const newItem = {
         id: Date.now().toString(),
         label: `Lần ${nextIndex}`,
         time: timeString,
         date: dateString,
-        note: note,
+        note: note || undefined,
         waterTreatmentType: activityType,
         materials: selectedMaterials,
       };
 
       updatePondJob(pondId, 'WATER_TREATMENT', [...currentItems, newItem]);
+      showAddJobSuccessToast('WATER_TREATMENT');
     }
-
-    console.log('Save Water Treatment', {
-      pondId,
-      executionDate,
-      activityType,
-      selectedMaterials,
-      note,
-    });
-
-    Toast.show({
-      type: 'success',
-      text1: 'Đã xử lý nước thành công',
-      position: 'top',
-      visibilityTime: 3000,
-    });
 
     navigation.goBack();
   };

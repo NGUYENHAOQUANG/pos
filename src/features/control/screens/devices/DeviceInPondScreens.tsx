@@ -11,7 +11,6 @@ import { HeaderDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
 import { colors, spacing, borderRadius } from '@/styles';
-import CustomFeedingMachine from '../CustomFeedingMachine/CustomFeedingMachineScreen';
 import { EControlMode, DeviceData } from '../../types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,8 +25,6 @@ interface DevicesInPondScreensProps {
   // pondName?: string;
 }
 
-type ViewMode = 'list' | 'customFeeding';
-
 export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
   const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
@@ -40,35 +37,19 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
   const feeders: DeviceData[] = allDevices.filter(d => d.type === 'feeder');
   const otherDevices: DeviceData[] = allDevices.filter(d => d.type !== 'feeder');
 
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
   const [showAddPopup, setShowAddPopup] = useState(false);
 
   // Show Custom Feeding Machine Screen
-  if (viewMode === 'customFeeding') {
-    const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
+  const handleSettingsPress = (id: string) => {
+    const selectedDevice = allDevices.find(d => d.id === id);
     const initialMode = selectedDevice?.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual';
 
-    return (
-      <CustomFeedingMachine
-        initialMode={initialMode}
-        onBack={() => {
-          setViewMode('list');
-          setSelectedDeviceId(null);
-        }}
-        onSave={newMode => {
-          // Note: In a real app we'd update context here
-          console.log('Mode updated:', newMode);
-          setViewMode('list');
-          setSelectedDeviceId(null);
-        }}
-      />
-    );
-  }
-
-  const handleSettingsPress = (id: string) => {
-    setSelectedDeviceId(id);
-    setViewMode('customFeeding');
+    navigation.navigate('CustomFeedingMachine', {
+      initialMode,
+      deviceId: id,
+      pondName,
+      pondId: currentPond?.id || '',
+    });
   };
 
   const handleToggleDevice = (id: string, isOn: boolean) => {

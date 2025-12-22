@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, ViewStyle } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface CurrentPondInfoBoxProps {
   shrimpBreed?: string;
@@ -20,11 +21,6 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
   totalEstimatedShrimp,
   containerStyle,
 }) => {
-  // Format number with dots as thousand separators
-  const formatNumber = (num: number): string => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
-
   // Calculate total estimated shrimp if not provided
   // Formula: (actualStockingQuantity * 1000) / shrimpSize
   const calculatedTotal =

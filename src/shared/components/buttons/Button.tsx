@@ -17,6 +17,7 @@ import {
   View,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -43,7 +44,7 @@ export interface ButtonProps {
   /** Icon name from Ionicons (right side) */
   iconRight?: string;
   /** Custom styles */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /** Custom text styles */
   textStyle?: TextStyle;
 }

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TextInput, ViewStyle } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface HarvestDataBoxProps {
   yieldAmount?: string; // Sản lượng (kg)
@@ -33,9 +34,9 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
   }, [yieldAmount, referencePrice]);
 
   // Format number with dots as thousand separators
-  const formatNumber = (num: number | null): string => {
+  const formatNumberDisplay = (num: number | null): string => {
     if (num === null) return '-';
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return formatNumber(num) || '-';
   };
 
   return (
@@ -95,7 +96,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
       <View style={styles.resultSectionContainer}>
         <View style={styles.resultSection}>
           <Text style={styles.resultLabel}>Doanh thu (VNĐ)</Text>
-          <Text style={styles.resultValue}>{formatNumber(revenue)}</Text>
+          <Text style={styles.resultValue}>{formatNumberDisplay(revenue)}</Text>
         </View>
         {/* Disclaimer */}
         <Text style={styles.disclaimer}>

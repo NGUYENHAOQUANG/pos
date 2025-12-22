@@ -12,13 +12,14 @@ import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMater
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
-import { TransferConfirmationModal } from '@/features/farm/components/pondwork/transfer/TransferConfirmationModal';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
@@ -29,14 +30,14 @@ export const AddHarvestScreen: React.FC = () => {
   const { pond, itemToEdit } = route.params || {};
   const insets = useSafeAreaInsets();
   const { setTabBarVisible } = useTabBarVisibility();
-  const { getPondJobItems, updatePondJob } = useFarm();
+  const { getPondJobItems, updatePondJob, deleteActiveCycle } = useFarm();
 
   // Initialize state from itemToEdit if available
   const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
   const [selectedDate, setSelectedDate] = useState<Date>(
-    meta.date ? new Date(meta.date) : new Date()
+    itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
   );
-  const [notes, setNotes] = useState<string>(meta.notes || '');
+  const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
   const [harvestType, setHarvestType] = useState<string>(meta.harvestType || 'Thu hết');
   const [yieldAmount, setYieldAmount] = useState<string>(meta.yieldAmount || '');
   const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize || '');
@@ -49,8 +50,8 @@ export const AddHarvestScreen: React.FC = () => {
   const initialData = useMemo(() => {
     if (!itemToEdit) return null;
     return {
-      date: meta.date ? new Date(meta.date) : new Date(),
-      notes: meta.notes || '',
+      date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+      notes: itemToEdit?.note || '',
       harvestType: meta.harvestType || 'Thu hết',
       yieldAmount: meta.yieldAmount || '',
       shrimpSize: meta.shrimpSize || '',
@@ -146,8 +147,15 @@ export const AddHarvestScreen: React.FC = () => {
   };
 
   const handleConfirmSave = () => {
+    const currentType = confirmationModalType;
     setIsConfirmationModalVisible(false);
     setConfirmationModalType(null);
+
+    // Nếu là "Đóng chu kỳ", xóa chu kỳ hiện tại trước khi lưu
+    if (currentType === 'harvest_close_cycle' && pond?.id) {
+      deleteActiveCycle(pond.id);
+    }
+
     handleSave();
   };
 
@@ -170,16 +178,14 @@ export const AddHarvestScreen: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-    const dateString = selectedDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
 
     const baseData = {
       label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
       time: timeString,
-      date: dateString,
+      date: formatDate(selectedDate),
+      note: notes || undefined,
       meta: {
         ...(itemToEdit?.meta || {}),
-        date: selectedDate,
-        notes: notes || undefined,
         harvestType,
         yieldAmount,
         shrimpSize,
@@ -289,7 +295,7 @@ export const AddHarvestScreen: React.FC = () => {
 
       {/* Confirmation Modal for "Thu hết" and "Đóng chu kỳ" */}
       {confirmationModalType && (
-        <TransferConfirmationModal
+        <ConfirmationModal
           visible={isConfirmationModalVisible}
           onConfirm={handleConfirmSave}
           onCancel={handleCancelConfirmation}

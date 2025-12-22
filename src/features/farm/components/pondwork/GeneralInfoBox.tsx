@@ -19,11 +19,10 @@ import {
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { IconCalender, IconCloseOutlined } from '@/assets/icons';
+import { IconCloseOutlined } from '@/assets/icons';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
-import { formatDateTime } from '@/features/farm/utils/dateUtils';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
@@ -103,7 +102,6 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
   // Internal state for date
   const initialDateValue = useRef<Date>(initialDate || new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(initialDateValue.current);
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
   // Track if date has been changed from initial value
   const [hasDateChanged, setHasDateChanged] = useState(false);
@@ -231,21 +229,17 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
     <>
       <SelectionInfoBox title="Thông tin chung">
         {/* Thời gian thực hiện */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Thời gian thực hiện</Text>
-          <TouchableOpacity
-            style={styles.dateInput}
-            onPress={() => setIsDatePickerVisible(true)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.dateText}>
-              {formatDateTime(selectedDate, {
-                showCurrentLabel: hasDateChanged ? false : 'auto',
-              })}
-            </Text>
-            <IconCalender width={15} height={15} />
-          </TouchableOpacity>
-        </View>
+        <DateInputButton
+          label="Thời gian thực hiện"
+          date={selectedDate}
+          onDateChange={date => {
+            setSelectedDate(date);
+            setHasDateChanged(true);
+          }}
+          formatOptions={{
+            showCurrentLabel: hasDateChanged ? false : 'auto',
+          }}
+        />
 
         {/* Chọn loại hoạt động - dùng cho xử lý nước */}
         {type === 'water_treatment' && activityOptions && onSelectActivity && (
@@ -363,17 +357,6 @@ export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
           onClose={() => setPreviewVisible(false)}
         />
       )}
-
-      {/* Date Picker Modal */}
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setIsDatePickerVisible(false)}
-        date={selectedDate}
-        onSelectDate={date => {
-          setSelectedDate(date);
-          setHasDateChanged(true);
-        }}
-      />
     </>
   );
 };
@@ -387,22 +370,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: colors.text,
     lineHeight: 22,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 44,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.sm,
-  },
-  dateText: {
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
   },
   imagesContainer: {
     flexDirection: 'row',

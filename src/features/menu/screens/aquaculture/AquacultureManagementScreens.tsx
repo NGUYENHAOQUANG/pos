@@ -110,7 +110,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 0, // Removed padding to let items fill width
+    padding: spacing.md,
+    backgroundColor: colors.backgroundPrimary,
   },
   filterSection: {
     backgroundColor: colors.white,
@@ -119,9 +120,9 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   cardContainer: {
-    // Center the card visually if desired, or just let it sit at top
-    // Image shows it with significant top margin or just following filter
-    // EmptyStateCard itself has padding, so just placing it is fine.
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.md,
   },
   addButton: {
     width: 40,

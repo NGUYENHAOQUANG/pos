@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Toast from 'react-native-toast-message';
 import {
   StyleSheet,
   ScrollView,
@@ -18,6 +17,8 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 
 import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
 
@@ -50,8 +51,17 @@ export const EditWaterTreatmentScreens: React.FC = () => {
           setActivityType(itemToEdit.waterTreatmentType);
         }
 
-        // Parse time string back to Date
-        if (itemToEdit.time) {
+        // Parse date and time from itemToEdit
+        if (itemToEdit.date) {
+          const dateObj = parseDate(itemToEdit.date);
+          // Set time if available
+          if (itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            dateObj.setHours(hours, minutes);
+          }
+          setExecutionDate(dateObj);
+        } else if (itemToEdit.time) {
+          // Fallback: if no date, just set time to current date
           const [hours, minutes] = itemToEdit.time.split(':').map(Number);
           const date = new Date();
           date.setHours(hours, minutes);
@@ -73,15 +83,15 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         hour: '2-digit',
         minute: '2-digit',
       });
-      // const dateString = executionDate.toLocaleDateString('en-GB');
+      const dateString = formatDate(executionDate);
 
       const updatedItems = items.map(item => {
         if (item.id === jobId) {
           return {
             ...item,
             time: timeString,
-            //  date: dateString, // If we want to update the date as well
-            note: note,
+            date: dateString,
+            note: note || undefined,
             waterTreatmentType: activityType,
             materials: selectedMaterials,
           };
@@ -90,13 +100,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
       });
 
       updatePondJob(pondId, 'WATER_TREATMENT', updatedItems);
-
-      Toast.show({
-        type: 'success',
-        text1: 'Đã cập nhật thông tin thành công',
-        position: 'top',
-        visibilityTime: 3000,
-      });
+      showEditJobSuccessToast('WATER_TREATMENT');
 
       navigation.goBack();
     }

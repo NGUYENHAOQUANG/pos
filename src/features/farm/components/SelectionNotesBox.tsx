@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 interface SelectionNotesBoxProps {
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.sm,
+    borderRadius: 6,
     fontSize: 16,
     color: colors.text,
     textAlignVertical: 'top',

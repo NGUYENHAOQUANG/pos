@@ -20,6 +20,8 @@ import {
   showAddJobSuccessToast,
   showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -32,16 +34,20 @@ export const ShrimpInspectionScreen: React.FC = () => {
   const { setTabBarVisible } = useTabBarVisibility();
   const { getPondJobItems, updatePondJob } = useFarm();
 
-  // Initialize state from itemToEdit if available
-  const meta = useMemo(() => itemToEdit?.meta || {}, [itemToEdit?.meta]);
-  const [selectedDate, setSelectedDate] = useState(meta.date ? new Date(meta.date) : new Date());
+  const meta = useMemo(
+    () => (itemToEdit?.meta as ShrimpInspectionMeta) || ({} as ShrimpInspectionMeta),
+    [itemToEdit?.meta]
+  );
+  const [selectedDate, setSelectedDate] = useState(
+    itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
+  );
   const [foodAmount, setFoodAmount] = useState(meta.foodAmount || '');
   const [leftoverFood, setLeftoverFood] = useState(meta.leftoverFood || 'Hết');
   const [intestine, setIntestine] = useState(meta.intestine || 'Đầy');
   const [intestineColor, setIntestineColor] = useState(meta.intestineColor || 'Màu thức ăn');
   const [stoolColor, setStoolColor] = useState(meta.stoolColor || 'Màu thức ăn');
   const [liver, setLiver] = useState(meta.liver || 'Bình thường');
-  const [notes, setNotes] = useState(meta.notes || '');
+  const [notes, setNotes] = useState(itemToEdit?.note || '');
   const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -49,14 +55,14 @@ export const ShrimpInspectionScreen: React.FC = () => {
   const initialData = useMemo(() => {
     if (!itemToEdit) return null;
     return {
-      date: meta.date ? new Date(meta.date) : new Date(),
+      date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
       foodAmount: meta.foodAmount || '',
       leftoverFood: meta.leftoverFood || 'Hết',
       intestine: meta.intestine || 'Đầy',
       intestineColor: meta.intestineColor || 'Màu thức ăn',
       stoolColor: meta.stoolColor || 'Màu thức ăn',
       liver: meta.liver || 'Bình thường',
-      notes: meta.notes || '',
+      notes: itemToEdit?.note || '',
       images: meta.images || [],
     };
   }, [itemToEdit, meta]);
@@ -83,15 +89,15 @@ export const ShrimpInspectionScreen: React.FC = () => {
       const itemData = {
         label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
         time: timeString,
+        date: formatDate(selectedDate),
+        note: notes || undefined,
         meta: {
-          date: selectedDate,
           foodAmount,
           leftoverFood,
           intestine,
           intestineColor,
           stoolColor,
           liver,
-          notes,
           images: imageUris,
         },
       };

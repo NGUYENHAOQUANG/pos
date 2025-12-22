@@ -1,76 +1,131 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 import { IconCalender, IconVector } from '@/assets/icons';
+import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 
 /**
  * Props for DateRangeFilter component
  */
 interface DateRangeFilterProps {
-  /** Label text for the start date */
-  startLabel: string;
-  /** Label text for the end date */
-  endLabel: string;
-  /** Callback function called when start date is pressed */
-  onPressStart?: () => void;
-  /** Callback function called when end date is pressed */
-  onPressEnd?: () => void;
-  /** Callback function called when calendar icon is pressed */
-  onPressCalendar?: () => void;
+  /** Start date value */
+  startDate: Date;
+  /** End date value */
+  endDate: Date;
+  /** Callback function called when start date changes */
+  onStartDateChange: (date: Date) => void;
+  /** Callback function called when end date changes */
+  onEndDateChange: (date: Date) => void;
+  /** Label text for the start date (optional, will be formatted if not provided) */
+  startLabel?: string;
+  /** Label text for the end date (optional, will be formatted if not provided) */
+  endLabel?: string;
   /** Additional styles for the container */
   style?: ViewStyle;
 }
 
 /**
- * A reusable date range filter component.
+ * A reusable date range filter component with integrated date picker.
  *
  * Displays two date labels (start and end) with an arrow icon between them,
  * and a calendar icon on the right. Each element can be individually pressed
- * to trigger date selection.
+ * to trigger date selection via an integrated DatePickerModal.
  *
  * @example
  * ```tsx
  * <DateRangeFilter
- *   startLabel="01-01-2024"
- *   endLabel="31-01-2024"
- *   onPressStart={() => setActiveField('start')}
- *   onPressEnd={() => setActiveField('end')}
- *   onPressCalendar={() => setIsDatePickerVisible(true)}
+ *   startDate={startDate}
+ *   endDate={endDate}
+ *   onStartDateChange={setStartDate}
+ *   onEndDateChange={setEndDate}
  * />
  * ```
  */
 export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
   startLabel,
   endLabel,
-  onPressStart,
-  onPressEnd,
-  onPressCalendar,
   style,
 }) => {
+  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+  const [activeField, setActiveField] = useState<'start' | 'end'>('start');
+
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const displayStartLabel = startLabel || formatDate(startDate);
+  const displayEndLabel = endLabel || formatDate(endDate);
+
+  const handlePressStart = () => {
+    setActiveField('start');
+    setIsDatePickerVisible(true);
+  };
+
+  const handlePressEnd = () => {
+    setActiveField('end');
+    setIsDatePickerVisible(true);
+  };
+
+  const handlePressCalendar = () => {
+    setActiveField('start');
+    setIsDatePickerVisible(true);
+  };
+
+  const handleSelectDate = (date: Date) => {
+    if (activeField === 'start') {
+      onStartDateChange(date);
+      if (date > endDate) {
+        onEndDateChange(date);
+      }
+    } else {
+      onEndDateChange(date);
+      if (date < startDate) {
+        onStartDateChange(date);
+      }
+    }
+    setIsDatePickerVisible(false);
+  };
+
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.textRow}>
-        <TouchableOpacity
-          style={styles.dateTouchable}
-          onPress={onPressStart}
-          activeOpacity={onPressStart ? 0.7 : 1}
-        >
-          <Text style={styles.dateText}>{startLabel}</Text>
-        </TouchableOpacity>
-        <IconVector width={12} height={5} style={styles.arrowIcon} />
-        <TouchableOpacity
-          style={styles.dateTouchable}
-          onPress={onPressEnd}
-          activeOpacity={onPressEnd ? 0.7 : 1}
-        >
-          <Text style={styles.dateText}>{endLabel}</Text>
+    <>
+      <View style={[styles.container, style]}>
+        <View style={styles.textRow}>
+          <TouchableOpacity
+            style={styles.dateTouchable}
+            onPress={handlePressStart}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.dateText}>{displayStartLabel}</Text>
+          </TouchableOpacity>
+          <IconVector width={12} height={5} style={styles.arrowIcon} />
+          <TouchableOpacity
+            style={styles.dateTouchable}
+            onPress={handlePressEnd}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.dateText}>{displayEndLabel}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={handlePressCalendar} activeOpacity={0.7}>
+          <IconCalender width={15} height={15} style={styles.calendarIcon} />
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={onPressCalendar} activeOpacity={onPressCalendar ? 0.7 : 1}>
-        <IconCalender width={15} height={15} style={styles.calendarIcon} />
-      </TouchableOpacity>
-    </View>
+      <DatePickerModal
+        visible={isDatePickerVisible}
+        onClose={() => setIsDatePickerVisible(false)}
+        date={activeField === 'start' ? startDate : endDate}
+        onSelectDate={handleSelectDate}
+      />
+    </>
   );
 };
 

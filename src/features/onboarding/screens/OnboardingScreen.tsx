@@ -12,7 +12,6 @@ import {
   Text,
   View,
   StatusBar,
-  Image,
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +30,7 @@ import OnboardingBackgroundTwo from '@/features/onboarding/components/Onboarding
 import OnboardingBackgroundOne from '@/features/onboarding/components/OnboardingBackgroundOne.tsx';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import OnboardingBackgroundThree from '@/features/onboarding/components/OnboardingBackgroundThree.tsx';
+import { Logo } from '@/shared/components/brand/Logo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -39,11 +39,7 @@ const SlideContent = ({ title, description }: { title: string; description: stri
   <View style={styles.slideContentContainer}>
     {/* Logo Section - Giữ nguyên như yêu cầu */}
     <View style={styles.logoContainer}>
-      <Image
-        source={require('@/assets/images/logo.jpg')}
-        style={styles.logoImage}
-        resizeMode="contain"
-      />
+      <Logo size="large" />
     </View>
 
     {/* Nội dung thay đổi */}
@@ -240,9 +236,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
     height: 60,
-  },
-  logoImage: {
-    width: 160,
   },
   slideTitle: {
     fontSize: 24,
