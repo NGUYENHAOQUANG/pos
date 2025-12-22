@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "🔍 Đang kiểm tra ESLint cho toàn bộ project..."
 
 # Chạy ESLint với --max-warnings=0 để fail nếu có warnings
