@@ -109,7 +109,7 @@ export const ReportsScreen = () => {
                 {/*                               PACED FOR REPORTS COMPONENTS                          */}
                 {/* ---------------------------------------------------------------------------------- */}
 
-                <EnvironmentChart />
+                <CompilationEnvChart />
 
                 {/*
             2. <FeedProdChart />
