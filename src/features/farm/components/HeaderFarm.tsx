@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: spacing.md, // fallback if insets not used/zero
     paddingBottom: 12,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 16,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   rightContainer: {
     alignItems: 'flex-end',
     justifyContent: 'center',
-    paddingRight: 4,
+    paddingRight: 0,
   },
 
   // --- Detail Mode Styles ---

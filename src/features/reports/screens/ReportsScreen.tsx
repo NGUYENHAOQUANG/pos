@@ -1,182 +1,166 @@
-import { colors, spacing, typography } from '@/styles';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FilterRow, GrowthSection, SelectorModal, SelectorOption } from '../components';
+import { View, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { colors } from '@/styles';
+import { HeadingReports } from '@/features/reports/components/HeadingReports';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { FarmData } from '@/features/farm/types/farm.types';
 
-const BREEDING_AREAS: SelectorOption[] = [
-  { label: 'Vùng nuôi A1', value: 'Vùng nuôi A1' },
-  { label: 'Vùng nuôi A2', value: 'Vùng nuôi A2' },
-  { label: 'Vùng nuôi A3', value: 'Vùng nuôi A3' },
-  { label: 'Vùng nuôi B1', value: 'Vùng nuôi B1' },
-  { label: 'Vùng nuôi B2', value: 'Vùng nuôi B2' },
-  { label: 'Vùng nuôi C1', value: 'Vùng nuôi C1' },
-  { label: 'Vùng nuôi C2', value: 'Vùng nuôi C2' },
-];
+// ----------------------------------------------------------------
+// SPACE FOR IMPORTING REPORT COMPONENTS
+// ----------------------------------------------------------------
+// import { EnvironmentChart } from '../components/env-chart';
+// import { FeedProdChart } from '../components/feed-prod';
+// import { ActivePondChart } from '../components/active-pond';
+// import { ProdChart } from '../components/prod-chart';
+// import { ProfitChart } from '../components/profit-chart';
+// import { CostChart } from '../components/cost-chart';
+// import { HarvestChart } from '../components/harvest-chart';
+// import { WaterUsage } from '../components/water-usage';
+// import { PondTransfer } from '../components/pond-transfer';
+// import { HarvestStat } from '../components/harvest-stat';
+// ----------------------------------------------------------------
 
-const PONDS: SelectorOption[] = [
-  { label: 'Ao A1N1', value: 'Ao A1N1' },
-  { label: 'Ao A1N2', value: 'Ao A1N2' },
-  { label: 'Ao A1N3', value: 'Ao A1N3' },
-  { label: 'Ao A1N4', value: 'Ao A1N4' },
-  { label: 'Ao A2N1', value: 'Ao A2N1' },
-  { label: 'Ao A2N2', value: 'Ao A2N2' },
-  { label: 'Ao A2N3', value: 'Ao A2N3' },
-  { label: 'Ao B1N1', value: 'Ao B1N1' },
-  { label: 'Ao B1N2', value: 'Ao B1N2' },
-  { label: 'Ao B2N1', value: 'Ao B2N1' },
-  { label: 'Ao C1N1', value: 'Ao C1N1' },
-  { label: 'Ao C1N2', value: 'Ao C1N2' },
-];
+type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
-const CROPS: SelectorOption[] = [
-  { label: 'Vụ 4 - 2025 (17/08 - N/A)', value: 'Vụ 4 - 2025 (17/08 - N/A)' },
-  { label: 'Vụ 3 - 2025 (15/06 - 17/08)', value: 'Vụ 3 - 2025 (15/06 - 17/08)' },
-  { label: 'Vụ 2 - 2025 (10/04 - 15/06)', value: 'Vụ 2 - 2025 (10/04 - 15/06)' },
-  { label: 'Vụ 1 - 2025 (01/02 - 10/04)', value: 'Vụ 1 - 2025 (01/02 - 10/04)' },
-  { label: 'Vụ 4 - 2024 (20/08 - 15/11)', value: 'Vụ 4 - 2024 (20/08 - 15/11)' },
-  { label: 'Vụ 3 - 2024 (15/06 - 20/08)', value: 'Vụ 3 - 2024 (15/06 - 20/08)' },
-];
+export const ReportsScreen = () => {
+  const navigation = useNavigation<NavigationProp>();
+  const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
+    id: '1',
+    label: 'Trại Kiên Giang',
+    value: '1',
+  });
 
-export function ReportsScreen() {
-  const insets = useSafeAreaInsets();
-  const [selectedBreedingArea, setSelectedBreedingArea] = useState<string | undefined>(
-    'Vùng nuôi A1'
-  );
-  const [selectedPond, setSelectedPond] = useState<string | undefined>('Ao A1N2');
-  const [selectedCrop, setSelectedCrop] = useState<string | undefined>('Vụ 4 - 2025 (17/08 - N/A)');
+  // Mock data for DropDownReports matching the design image (hinh 2)
+  // Pond Types: Ao vèo, Ao nuôi, Ao sẵn sàng
+  const pondTypeData: DropDownItem[] = [
+    { id: '1', label: 'Loại ao' }, // Placeholder/Default
+    { id: '2', label: 'Ao vèo' },
+    { id: '3', label: 'Ao nuôi' },
+    { id: '4', label: 'Ao sẵn sàng' },
+  ];
+  const [selectedPondType, setSelectedPondType] = useState<DropDownItem>(pondTypeData[0]);
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalType, setModalType] = useState<'breedingArea' | 'pond' | 'crop' | null>(null);
+  // Ponds: {tên ao}
+  const pondData: DropDownItem[] = [
+    { id: '1', label: 'Chọn ao' }, // Placeholder/Default
+    { id: '2', label: 'Ao 1' },
+    { id: '3', label: 'Ao 2' },
+    { id: '4', label: 'Ao 3' },
+  ];
+  const [selectedPond, setSelectedPond] = useState<DropDownItem>(pondData[0]);
 
-  const handleBreedingAreaPress = () => {
-    setModalType('breedingArea');
-    setModalVisible(true);
-  };
+  // Seasons: Vụ 1 - 2025, Vụ 2 - 2025, etc.
+  const seasonData: DropDownItem[] = [
+    { id: '1', label: 'Vụ 1 - 2025' },
+    { id: '2', label: 'Vụ 2 - 2025' },
+    { id: '3', label: 'Vụ 3 - 2025' },
+    { id: '4', label: 'Vụ 4 - 2025' },
+  ];
+  const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
 
-  const handlePondPress = () => {
-    setModalType('pond');
-    setModalVisible(true);
-  };
+  const farmOptions: DropDownItem[] = [
+    { id: '1', label: 'Trại Kiên Giang', value: '1' },
+    { id: '2', label: 'Trại Cà Mau', value: '2' },
+    { id: '3', label: 'Trại Bạc Liêu', value: '3' },
+  ];
 
-  const handleCropPress = () => {
-    setModalType('crop');
-    setModalVisible(true);
-  };
-
-  const handleModalSelect = (value: string) => {
-    if (modalType === 'breedingArea') {
-      setSelectedBreedingArea(value);
-    } else if (modalType === 'pond') {
-      setSelectedPond(value);
-    } else if (modalType === 'crop') {
-      setSelectedCrop(value);
-    }
-  };
-
-  const getModalOptions = (): SelectorOption[] => {
-    if (modalType === 'breedingArea') return BREEDING_AREAS;
-    if (modalType === 'pond') return PONDS;
-    if (modalType === 'crop') return CROPS;
-    return [];
-  };
-
-  const getModalTitle = (): string => {
-    if (modalType === 'breedingArea') return 'Chọn Vùng nuôi';
-    if (modalType === 'pond') return 'Chọn Ao';
-    if (modalType === 'crop') return 'Chọn Vụ';
-    return '';
-  };
-
-  const getSelectedValue = (): string | undefined => {
-    if (modalType === 'breedingArea') return selectedBreedingArea;
-    if (modalType === 'pond') return selectedPond;
-    if (modalType === 'crop') return selectedCrop;
-    return undefined;
+  const handleRightPress = () => {
+    // Navigate to Farm Info (Thông tin trại) as per request context "button bên phải dẫn ra màn hình thông tin ao"
+    // Since we are selecting a Farm, it makes sense to go to FarmInfo.
+    // If specific PondInfo is needed, we would need a selected Pond context.
+    const farmData: FarmData = {
+      id: selectedFarm.id.toString(),
+      name: selectedFarm.label,
+      code: selectedFarm.value,
+      area: '',
+      address: '',
+    };
+    navigation.navigate('FarmInfo', { farm: farmData });
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={Platform.OS === 'ios' ? ['top'] : []}>
-      <StatusBar barStyle="light-content" backgroundColor="#007CFF" translucent />
-      {Platform.OS === 'android' && (
-        <View style={[styles.androidStatusBar, { height: insets.top }]} />
-      )}
-
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <Text style={styles.headerTitle}>Báo cáo</Text>
-      </View>
-
-      {/* Content */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Filter Selectors */}
-        <FilterRow
-          breedingArea={{
-            value: selectedBreedingArea,
-            onPress: handleBreedingAreaPress,
-            onClear: () => setSelectedBreedingArea(undefined),
-          }}
-          pond={{
-            value: selectedPond,
-            onPress: handlePondPress,
-            onClear: () => setSelectedPond(undefined),
-          }}
-          crop={{
-            value: selectedCrop,
-            onPress: handleCropPress,
-            onClear: () => setSelectedCrop(undefined),
-          }}
-        />
-
-        {/* Growth Section */}
-        <GrowthSection />
-      </ScrollView>
-
-      {/* Selector Modal */}
-      <SelectorModal
-        visible={modalVisible}
-        title={getModalTitle()}
-        options={getModalOptions()}
-        selectedValue={getSelectedValue()}
-        onSelect={handleModalSelect}
-        onClose={() => {
-          setModalVisible(false);
-          setModalType(null);
-        }}
+    <View style={styles.container}>
+      <HeadingReports
+        farmData={farmOptions}
+        selectedFarm={selectedFarm}
+        onSelectFarm={setSelectedFarm}
+        onRightPress={handleRightPress}
+        pondTypeData={pondTypeData}
+        selectedPondType={selectedPondType}
+        onSelectPondType={setSelectedPondType}
+        pondData={pondData}
+        selectedPond={selectedPond}
+        onSelectPond={setSelectedPond}
+        seasonData={seasonData}
+        selectedSeason={selectedSeason}
+        onSelectSeason={setSelectedSeason}
       />
-    </SafeAreaView>
+
+      <View style={styles.content}>
+        {/* ---------------------------------------------------------------------------------- */}
+        {/*                               PACED FOR REPORTS COMPONENTS                          */}
+        {/* ---------------------------------------------------------------------------------- */}
+        {/* 
+            1. <EnvironmentChart /> 
+        */}
+
+        {/* 
+            2. <FeedProdChart />
+        */}
+
+        {/* 
+            3. <ActivePondChart />
+        */}
+
+        {/* 
+            4. <ProdChart />
+        */}
+
+        {/* 
+            5. <ProfitChart />
+        */}
+
+        {/* 
+            6. <CostChart />
+        */}
+
+        {/* 
+            7. <HarvestChart />
+        */}
+
+        {/* 
+            8. <WaterUsage />
+        */}
+
+        {/* 
+            9. <PondTransfer />
+        */}
+
+        {/* 
+            10. <HarvestStat />
+        */}
+
+        {/* ---------------------------------------------------------------------------------- */}
+      </View>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.backgroundPrimary,
   },
-  androidStatusBar: {
-    backgroundColor: '#007CFF',
-  },
-  header: {
-    backgroundColor: '#007CFF',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.white,
-  },
-  scrollView: {
+  content: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  scrollContent: {
-    paddingTop: spacing.sm,
-    paddingBottom: 100, 
+  text: {
+    color: colors.text,
   },
 });

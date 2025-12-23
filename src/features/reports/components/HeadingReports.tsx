@@ -1,0 +1,145 @@
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors, spacing } from '@/styles';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+
+interface HeadingReportsProps {
+  // Header Props
+  farmData?: DropDownItem[];
+  selectedFarm?: DropDownItem;
+  onSelectFarm?: (item: DropDownItem) => void;
+  onRightPress?: () => void;
+
+  // DropDownReports Props
+  pondTypeData?: DropDownItem[];
+  selectedPondType?: DropDownItem;
+  onSelectPondType?: (item: DropDownItem) => void;
+
+  pondData?: DropDownItem[];
+  selectedPond?: DropDownItem;
+  onSelectPond?: (item: DropDownItem) => void;
+
+  seasonData?: DropDownItem[];
+  selectedSeason?: DropDownItem;
+  onSelectSeason?: (item: DropDownItem) => void;
+}
+
+export const HeadingReports = ({
+  farmData,
+  selectedFarm,
+  onSelectFarm,
+  onRightPress,
+  pondTypeData,
+  selectedPondType,
+  onSelectPondType,
+  pondData,
+  selectedPond,
+  onSelectPond,
+  seasonData,
+  selectedSeason,
+  onSelectSeason,
+}: HeadingReportsProps) => {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Top Row: Farm Selector and Action Button */}
+      <View style={styles.headerRow}>
+        <View style={styles.leftContainer}>
+          {onSelectFarm && (
+            <DropDownButtonBasic data={farmData} value={selectedFarm} onSelect={onSelectFarm} />
+          )}
+        </View>
+
+        <View style={styles.rightContainer}>
+          <ButtonHeader onPress={onRightPress} />
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      {/* Row 1: Pond Type and Pond Select */}
+      <View style={styles.dropdownRow}>
+        <View style={styles.halfWidth}>
+          <DropDownButtonBasic
+            data={pondTypeData}
+            value={selectedPondType}
+            onSelect={onSelectPondType}
+            showIcon={false}
+            height={40}
+          />
+        </View>
+        <View style={styles.spacer} />
+        <View style={styles.halfWidth}>
+          <DropDownButtonBasic
+            data={pondData}
+            value={selectedPond}
+            onSelect={onSelectPond}
+            showIcon={false}
+            height={40}
+          />
+        </View>
+      </View>
+
+      {/* Row 2: Season Select */}
+      <View style={styles.seasonRow}>
+        <DropDownButtonBasic
+          data={seasonData}
+          value={selectedSeason}
+          onSelect={onSelectSeason}
+          showIcon={false}
+          height={40}
+        />
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white, // White background for the whole block
+    paddingHorizontal: 16,
+    paddingBottom: spacing.md, // Add bottom padding
+    zIndex: 100, // Ensure dropdowns can float above content below
+    // No borderRadius as requested
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    paddingTop: 12, // Ensure 12px padding top and bottom
+  },
+  leftContainer: {
+    flex: 1,
+    marginRight: 16,
+    alignItems: 'flex-start',
+  },
+  rightContainer: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.borderLight,
+    marginBottom: spacing.md, // Spacing after divider
+  },
+  dropdownRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 2, // Higher zIndex for upper dropdowns
+  },
+  halfWidth: {
+    flex: 1,
+  },
+  spacer: {
+    width: spacing.sm,
+  },
+  seasonRow: {
+    marginTop: spacing.md, // Spacing between rows
+    zIndex: 1,
+  },
+});

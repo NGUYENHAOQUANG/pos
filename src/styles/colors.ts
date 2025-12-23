@@ -37,19 +37,25 @@ export const colors = {
   blue: {
     50: '#E6F4FF',
     200: '#C3E6FF',
+    300: '#BAE0FF',
     400: '#91CAFF',
     600: '#1677FF',
+    700: '#003EB3',
+    800: '#061178',
   },
   orange: {
     50: '#FFF2E8',
+    100: '#FFE7BA',
     200: '#FFBB96',
     500: '#D48806',
     600: '#FA541C',
+    700: '#FF7A45',
   },
   green: {
     50: '#F6FFED',
     300: '#B7EB8F',
     600: '#389E0D',
+    800: '#237804',
   },
   purple: {
     50: '#F9F0FF',
@@ -70,8 +76,12 @@ export const colors = {
   yellow: {
     50: '#FFFBE6',
     300: '#FFE58F',
-    600: '#FFC107',
-    900: '#FFD700',
+    600: '#FFD700',
+    700: '#FFC107',
+    800: '#876800',
+  },
+  brown: {
+    900: '#610B00',
   },
   // Semantic colors
   success: '#34C759',
