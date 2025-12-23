@@ -12,10 +12,10 @@ import { FarmData } from '@/features/farm/types/farm.types';
 // ----------------------------------------------------------------
 // SPACE FOR IMPORTING REPORT COMPONENTS
 // ----------------------------------------------------------------
-import { EnvironmentChart } from '@/features/reports/components/env-chart/index';
-import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
+// import { EnvironmentChart } from '../components/env-chart';
 // import { FeedProdChart } from '../components/feed-prod';
 // import { ActivePondChart } from '../components/active-pond';
+import { ProdChart } from '@features/reports/components/prod-chart/ProdChart';
 // import { ProfitChart } from '../components/profit-chart';
 // import { CostChart } from '../components/cost-chart';
 // import { HarvestChart } from '../components/harvest-chart';
