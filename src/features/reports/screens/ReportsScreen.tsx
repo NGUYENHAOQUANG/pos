@@ -12,7 +12,7 @@ import { FarmData } from '@/features/farm/types/farm.types';
 // ----------------------------------------------------------------
 // SPACE FOR IMPORTING REPORT COMPONENTS
 // ----------------------------------------------------------------
-// import { EnvironmentChart } from '../components/env-chart';
+import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
 // import { FeedProdChart } from '../components/feed-prod';
 // import { ActivePondChart } from '../components/active-pond';
 // import { ProdChart } from '../components/prod-chart';
@@ -108,9 +108,8 @@ export const ReportsScreen = () => {
                 {/* ---------------------------------------------------------------------------------- */}
                 {/*                               PACED FOR REPORTS COMPONENTS                          */}
                 {/* ---------------------------------------------------------------------------------- */}
-                {/*
-            1. <EnvironmentChart />
-        */}
+
+                <CompilationEnvChart />
 
                 {/*
             2. <FeedProdChart />
@@ -132,11 +131,11 @@ export const ReportsScreen = () => {
             6. <CostChart />
         */}
 
+
+            <HarvestChart />
+
+
                 {/*
-            7. <HarvestChart />
-        */}
-        <HarvestChart />
-        {/*
             8. <WaterUsage />
         */}
 
