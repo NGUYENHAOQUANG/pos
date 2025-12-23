@@ -16,419 +16,425 @@ import Toast from 'react-native-toast-message';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 
 const JOB_TYPES = {
-  FEED: 'FEED' as const,
-  SHRIMP_INSPECTION: 'SHRIMP_INSPECTION' as const,
-  MEASURE_SIZE: 'MEASURE_SIZE' as const,
-  ENVIRONMENT: 'ENVIRONMENT' as const,
-  WATER_TREATMENT: 'WATER_TREATMENT' as const,
-  WATER_CHANGE: 'WATER_CHANGE' as const,
-  SIPHON: 'SIPHON' as const,
-  TRANSFER_POND: 'TRANSFER_POND' as const,
-  CLEAN_POND: 'CLEAN_POND' as const,
-  SUN_DRY_POND: 'SUN_DRY_POND' as const,
-  HARVEST: 'HARVEST' as const,
+    FEED: 'FEED' as const,
+    SHRIMP_INSPECTION: 'SHRIMP_INSPECTION' as const,
+    MEASURE_SIZE: 'MEASURE_SIZE' as const,
+    ENVIRONMENT: 'ENVIRONMENT' as const,
+    WATER_TREATMENT: 'WATER_TREATMENT' as const,
+    WATER_CHANGE: 'WATER_CHANGE' as const,
+    SIPHON: 'SIPHON' as const,
+    TRANSFER_POND: 'TRANSFER_POND' as const,
+    CLEAN_POND: 'CLEAN_POND' as const,
+    SUN_DRY_POND: 'SUN_DRY_POND' as const,
+    HARVEST: 'HARVEST' as const,
 };
 
 const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
-  { type: JOB_TYPES.FEED, items: [] },
-  { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
-  { type: JOB_TYPES.MEASURE_SIZE, items: [] },
-  { type: JOB_TYPES.ENVIRONMENT, items: [] },
-  { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-  { type: JOB_TYPES.WATER_CHANGE, items: [] },
-  { type: JOB_TYPES.SIPHON, items: [] },
-  { type: JOB_TYPES.TRANSFER_POND, items: [] },
-  { type: JOB_TYPES.CLEAN_POND, items: [] },
-  { type: JOB_TYPES.SUN_DRY_POND, items: [] },
-  { type: JOB_TYPES.HARVEST, items: [] },
+    { type: JOB_TYPES.FEED, items: [] },
+    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
+    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+    { type: JOB_TYPES.WATER_CHANGE, items: [] },
+    { type: JOB_TYPES.SIPHON, items: [] },
+    { type: JOB_TYPES.TRANSFER_POND, items: [] },
+    { type: JOB_TYPES.CLEAN_POND, items: [] },
+    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+    { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
 
 export const ShrimpFarmScreens: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<ScreenRouteProp>();
-  const { pond } = route.params || {};
+    const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<ScreenRouteProp>();
+    const { pond } = route.params || {};
 
-  const [selectedTab, setSelectedTab] = useState<string>('work');
-  const { setTabBarVisible } = useTabBarVisibility();
+    const [selectedTab, setSelectedTab] = useState<string>('work');
+    const { setTabBarVisible } = useTabBarVisibility();
 
-  const { getPondJobItems, updatePondJob, activeCycles, breedOptions } = useFarm();
-  const currentCycle = pond?.id ? activeCycles[pond.id] : null;
+    const { getPondJobItems, updatePondJob, activeCycles, breedOptions } = useFarm();
+    const currentCycle = pond?.id ? activeCycles[pond.id] : null;
 
-  const [hasCycleBefore, setHasCycleBefore] = useState(!!currentCycle);
+    const [hasCycleBefore, setHasCycleBefore] = useState(!!currentCycle);
 
-  useEffect(() => {
-    // TRƯỜNG HỢP 1: Tạo mới thành công (Từ không có -> Có)
-    if (!hasCycleBefore && currentCycle) {
-      Toast.show({
-        type: 'success',
-        text1: 'Đã tạo chu kỳ nuôi thành công',
-        position: 'top',
-        topOffset: 60,
-      });
-      setHasCycleBefore(true);
-    }
-    // TRƯỜNG HỢP 2: Xóa thành công (Từ đang có -> Mất tiêu)
-    else if (hasCycleBefore && !currentCycle) {
-      Toast.show({
-        type: 'success',
-        text1: 'Đã xóa chu kỳ nuôi thành công',
-        position: 'top',
-        topOffset: 60,
-      });
-      setHasCycleBefore(false);
-    }
-  }, [currentCycle, hasCycleBefore]);
-  const jobs = JOB_TEMPLATE.map(template => ({
-    ...template,
-    items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
-  }));
+    useEffect(() => {
+        // TRƯỜNG HỢP 1: Tạo mới thành công (Từ không có -> Có)
+        if (!hasCycleBefore && currentCycle) {
+            Toast.show({
+                type: 'success',
+                text1: 'Đã tạo chu kỳ nuôi thành công',
+                position: 'top',
+                topOffset: 60,
+            });
+            setHasCycleBefore(true);
+        }
+        // TRƯỜNG HỢP 2: Xóa thành công (Từ đang có -> Mất tiêu)
+        else if (hasCycleBefore && !currentCycle) {
+            Toast.show({
+                type: 'success',
+                text1: 'Đã xóa chu kỳ nuôi thành công',
+                position: 'top',
+                topOffset: 60,
+            });
+            setHasCycleBefore(false);
+        }
+    }, [currentCycle, hasCycleBefore]);
+    const jobs = JOB_TEMPLATE.map(template => ({
+        ...template,
+        items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
+    }));
 
-  useEffect(() => {
-    setTabBarVisible(false);
-    return () => {
-      setTabBarVisible(true);
-    };
-  }, [setTabBarVisible]);
+    useEffect(() => {
+        setTabBarVisible(false);
+        return () => {
+            setTabBarVisible(true);
+        };
+    }, [setTabBarVisible]);
 
-  const calculateDOC = (startDateString: string | null | undefined) => {
-    if (!startDateString) return 0;
-    const start = new Date(startDateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - start.getTime());
-    return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-  };
-
-  const handleStartCycle = () => {
-    if (pond?.id) {
-      navigation.navigate('CreateCycle', { pondId: pond.id });
-    }
-  };
-
-  const handleAddJobItem = (type: JobType) => {
-    if (!pond?.id) return;
-
-    if (type === JOB_TYPES.FEED) {
-      navigation.navigate('FeedTheShrimp', { pondId: pond.id });
-      return;
-    }
-
-    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
-      navigation.navigate('ShrimpInspectionScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.MEASURE_SIZE) {
-      navigation.navigate('MeasureShrimpSizeScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.ENVIRONMENT) {
-      navigation.navigate('AddEnvironmentScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.SIPHON) {
-      navigation.navigate('AddSiphonScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.WATER_TREATMENT) {
-      navigation.navigate('AddWaterTreatmentScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.WATER_CHANGE) {
-      navigation.navigate('WaterSupply', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.TRANSFER_POND) {
-      navigation.navigate('AddTransferScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.HARVEST) {
-      navigation.navigate('AddHarvestScreen', { pond });
-      return;
-    }
-
-    if (type === JOB_TYPES.CLEAN_POND) {
-      navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
-      return;
-    }
-
-    if (type === JOB_TYPES.SUN_DRY_POND) {
-      navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
-      return;
-    }
-
-    const currentItems = getPondJobItems(pond.id, type);
-
-    // Calculate next index based on max existing label
-    let maxIndex = 0;
-    currentItems.forEach(item => {
-      const match = item.label.match(/Lần (\d+)/);
-      if (match) {
-        const index = parseInt(match[1], 10);
-        if (index > maxIndex) maxIndex = index;
-      }
-    });
-    const nextIndex = maxIndex + 1;
-
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-    const newItem: JobExecution = {
-      id: Date.now().toString(),
-      label: `Lần ${nextIndex}`,
-      time: timeString,
+    const calculateDOC = (startDateString: string | null | undefined) => {
+        if (!startDateString) return 0;
+        const start = new Date(startDateString);
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - start.getTime());
+        return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
     };
 
-    updatePondJob(pond.id, type, [...currentItems, newItem]);
-  };
+    const handleStartCycle = () => {
+        if (pond?.id) {
+            navigation.navigate('CreateCycle', { pondId: pond.id });
+        }
+    };
 
-  const handleEditJobItem = (type: JobType, item: JobExecution) => {
-    if (!pond?.id) return;
+    const handleAddJobItem = (type: JobType) => {
+        if (!pond?.id) return;
 
-    if (type === JOB_TYPES.FEED) {
-      navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
-      return;
-    }
+        if (type === JOB_TYPES.FEED) {
+            navigation.navigate('FeedTheShrimp', { pondId: pond.id });
+            return;
+        }
 
-    if (type === JOB_TYPES.SHRIMP_INSPECTION) {
-      navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+            navigation.navigate('ShrimpInspectionScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.MEASURE_SIZE) {
-      navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.MEASURE_SIZE) {
+            navigation.navigate('MeasureShrimpSizeScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.ENVIRONMENT) {
-      navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.ENVIRONMENT) {
+            navigation.navigate('AddEnvironmentScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.SIPHON) {
-      navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.SIPHON) {
+            navigation.navigate('AddSiphonScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.WATER_TREATMENT) {
-      navigation.navigate('EditWaterTreatmentScreens', { pondId: pond.id, jobId: item.id });
-      return;
-    }
+        if (type === JOB_TYPES.WATER_TREATMENT) {
+            navigation.navigate('AddWaterTreatmentScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.WATER_CHANGE) {
-      navigation.navigate('WaterSupply', { pond, item });
-      return;
-    }
+        if (type === JOB_TYPES.WATER_CHANGE) {
+            navigation.navigate('WaterSupply', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.TRANSFER_POND) {
-      navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.TRANSFER_POND) {
+            navigation.navigate('AddTransferScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.HARVEST) {
-      navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
-      return;
-    }
+        if (type === JOB_TYPES.HARVEST) {
+            navigation.navigate('AddHarvestScreen', { pond });
+            return;
+        }
 
-    if (type === JOB_TYPES.CLEAN_POND) {
-      navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
-      return;
-    }
+        if (type === JOB_TYPES.CLEAN_POND) {
+            navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
+            return;
+        }
 
-    if (type === JOB_TYPES.SUN_DRY_POND) {
-      navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
-      return;
-    }
+        if (type === JOB_TYPES.SUN_DRY_POND) {
+            navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+            return;
+        }
 
-    const itemToEdit = item; // Alias for compatibility with below code if needed
+        const currentItems = getPondJobItems(pond.id, type);
 
-    // For other job types, keep the delete behavior (or implement edit later)
-    const currentItems = getPondJobItems(pond.id, type);
-    const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
-    updatePondJob(pond.id, type, newItems);
-  };
+        // Calculate next index based on max existing label
+        let maxIndex = 0;
+        currentItems.forEach(item => {
+            const match = item.label.match(/Lần (\d+)/);
+            if (match) {
+                const index = parseInt(match[1], 10);
+                if (index > maxIndex) maxIndex = index;
+            }
+        });
+        const nextIndex = maxIndex + 1;
 
-  const handleJobPress = (type: JobType) => {
-    if (type === JOB_TYPES.FEED && pond?.id) {
-      navigation.navigate('FeedingLog', { pondId: pond.id });
-      return;
-    }
-    if (type === JOB_TYPES.WATER_TREATMENT && pond) {
-      navigation.navigate('WaterTreatmentLog', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
-      navigation.navigate('PondworkLogScreen', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.MEASURE_SIZE && pond) {
-      navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.MEASURE_SIZE && pond) {
-      navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.ENVIRONMENT && pond) {
-      navigation.navigate('EnvironmentLogScreen', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.SIPHON && pond) {
-      navigation.navigate('SiphonLog', { pond });
-      return;
-    }
-    if (type === JOB_TYPES.HARVEST && pond) {
-      navigation.navigate('HarvestLog', { pond });
-      return;
-    }
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
-    if (type === JOB_TYPES.TRANSFER_POND && pond) {
-      navigation.navigate('TransferLog', { pond });
-      return;
-    }
+        const newItem: JobExecution = {
+            id: Date.now().toString(),
+            label: `Lần ${nextIndex}`,
+            time: timeString,
+        };
 
-    if (type === JOB_TYPES.WATER_CHANGE && pond) {
-      navigation.navigate('WaterSupplyLog', { pond });
-      return;
-    }
+        updatePondJob(pond.id, type, [...currentItems, newItem]);
+    };
 
-    if (type === JOB_TYPES.CLEAN_POND && pond) {
-      navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
-      return;
-    }
+    const handleEditJobItem = (type: JobType, item: JobExecution) => {
+        if (!pond?.id) return;
 
-    if (type === JOB_TYPES.SUN_DRY_POND && pond) {
-      navigation.navigate('SunDryPondLog', { pond });
-      return;
-    }
-  };
+        if (type === JOB_TYPES.FEED) {
+            navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
+            return;
+        }
 
-  return (
-    <View style={styles.container}>
-      <HeadingFarm
-        selectedTab={selectedTab}
-        onTabSelect={setSelectedTab}
-        tabType="pond-detail"
-        fullWidth
-        pond={pond}
-        onBack={() => navigation.goBack()}
-        menuOptions={[
-          {
-            value: 'Thông tin ao',
-            onMenuOptionPress: () => navigation.navigate('PondInfo', { pond }),
-          },
-        ]}
-      />
+        if (type === JOB_TYPES.SHRIMP_INSPECTION) {
+            navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+            return;
+        }
 
-      <View style={styles.content}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {selectedTab === 'work' ? (
-            <>
-              {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
-              {currentCycle ? (
-                <View style={styles.cycleCardWrapper}>
-                  <CycleCard
-                    cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                    startDate={
-                      currentCycle.stockingDate
-                        ? new Date(currentCycle.stockingDate).toLocaleDateString('vi-VN')
-                        : ''
-                    }
-                    doc={calculateDOC(currentCycle.stockingDate)}
-                    stockingQuantity={currentCycle.stockingQuantity || 0}
-                    breed={
-                      breedOptions.find(b => b.value === currentCycle.breedSource)?.label || 'N/A'
-                    }
-                    // Cho phép bấm vào thẻ để sửa
-                    onPress={() =>
-                      navigation.navigate('CycleDetail', {
-                        pondId: pond.id,
-                        cycleData: currentCycle,
-                      })
-                    }
-                  />
-                </View>
-              ) : (
-                <PondCycleEmptyState />
-              )}
+        if (type === JOB_TYPES.MEASURE_SIZE) {
+            navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
+            return;
+        }
 
-              <JobListCard
-                jobs={jobs}
-                onPressJob={handleJobPress}
-                onPressAddJob={handleAddJobItem}
-                onEditJobItem={handleEditJobItem}
-              />
-            </>
-          ) : (
-            <View style={styles.placeholderContainer}>
-              <Text style={styles.placeholderText}>Nhật ký công việc chưa có dữ liệu</Text>
+        if (type === JOB_TYPES.ENVIRONMENT) {
+            navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
+            return;
+        }
+
+        if (type === JOB_TYPES.SIPHON) {
+            navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
+            return;
+        }
+
+        if (type === JOB_TYPES.WATER_TREATMENT) {
+            navigation.navigate('EditWaterTreatmentScreens', { pondId: pond.id, jobId: item.id });
+            return;
+        }
+
+        if (type === JOB_TYPES.WATER_CHANGE) {
+            navigation.navigate('WaterSupply', { pond, item });
+            return;
+        }
+
+        if (type === JOB_TYPES.TRANSFER_POND) {
+            navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+            return;
+        }
+
+        if (type === JOB_TYPES.HARVEST) {
+            navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
+            return;
+        }
+
+        if (type === JOB_TYPES.CLEAN_POND) {
+            navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
+            return;
+        }
+
+        if (type === JOB_TYPES.SUN_DRY_POND) {
+            navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
+            return;
+        }
+
+        const itemToEdit = item; // Alias for compatibility with below code if needed
+
+        // For other job types, keep the delete behavior (or implement edit later)
+        const currentItems = getPondJobItems(pond.id, type);
+        const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
+        updatePondJob(pond.id, type, newItems);
+    };
+
+    const handleJobPress = (type: JobType) => {
+        if (type === JOB_TYPES.FEED && pond?.id) {
+            navigation.navigate('FeedingLog', { pondId: pond.id });
+            return;
+        }
+        if (type === JOB_TYPES.WATER_TREATMENT && pond) {
+            navigation.navigate('WaterTreatmentLog', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
+            navigation.navigate('PondworkLogScreen', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.MEASURE_SIZE && pond) {
+            navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.MEASURE_SIZE && pond) {
+            navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.ENVIRONMENT && pond) {
+            navigation.navigate('EnvironmentLogScreen', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.SIPHON && pond) {
+            navigation.navigate('SiphonLog', { pond });
+            return;
+        }
+        if (type === JOB_TYPES.HARVEST && pond) {
+            navigation.navigate('HarvestLog', { pond });
+            return;
+        }
+
+        if (type === JOB_TYPES.TRANSFER_POND && pond) {
+            navigation.navigate('TransferLog', { pond });
+            return;
+        }
+
+        if (type === JOB_TYPES.WATER_CHANGE && pond) {
+            navigation.navigate('WaterSupplyLog', { pond });
+            return;
+        }
+
+        if (type === JOB_TYPES.CLEAN_POND && pond) {
+            navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
+            return;
+        }
+
+        if (type === JOB_TYPES.SUN_DRY_POND && pond) {
+            navigation.navigate('SunDryPondLog', { pond });
+            return;
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <HeadingFarm
+                selectedTab={selectedTab}
+                onTabSelect={setSelectedTab}
+                tabType="pond-detail"
+                fullWidth
+                pond={pond}
+                onBack={() => navigation.goBack()}
+                menuOptions={[
+                    {
+                        value: 'Thông tin ao',
+                        onMenuOptionPress: () => navigation.navigate('PondInfo', { pond }),
+                    },
+                ]}
+            />
+
+            <View style={styles.content}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {selectedTab === 'work' ? (
+                        <>
+                            {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
+                            {currentCycle ? (
+                                <View style={styles.cycleCardWrapper}>
+                                    <CycleCard
+                                        cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
+                                        startDate={
+                                            currentCycle.stockingDate
+                                                ? new Date(
+                                                      currentCycle.stockingDate
+                                                  ).toLocaleDateString('vi-VN')
+                                                : ''
+                                        }
+                                        doc={calculateDOC(currentCycle.stockingDate)}
+                                        stockingQuantity={currentCycle.stockingQuantity || 0}
+                                        breed={
+                                            breedOptions.find(
+                                                b => b.value === currentCycle.breedSource
+                                            )?.label || 'N/A'
+                                        }
+                                        // Cho phép bấm vào thẻ để sửa
+                                        onPress={() =>
+                                            navigation.navigate('CycleDetail', {
+                                                pondId: pond.id,
+                                                cycleData: currentCycle,
+                                            })
+                                        }
+                                    />
+                                </View>
+                            ) : (
+                                <PondCycleEmptyState />
+                            )}
+
+                            <JobListCard
+                                jobs={jobs}
+                                onPressJob={handleJobPress}
+                                onPressAddJob={handleAddJobItem}
+                                onEditJobItem={handleEditJobItem}
+                            />
+                        </>
+                    ) : (
+                        <View style={styles.placeholderContainer}>
+                            <Text style={styles.placeholderText}>
+                                Nhật ký công việc chưa có dữ liệu
+                            </Text>
+                        </View>
+                    )}
+                </ScrollView>
             </View>
-          )}
-        </ScrollView>
-      </View>
 
-      {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ */}
-      {selectedTab === 'work' && !currentCycle && (
-        <View style={styles.footer}>
-          <Button
-            title="Bắt đầu chu kỳ nuôi"
-            onPress={handleStartCycle}
-            variant="primary"
-            iconLeft="add"
-            style={styles.startButton}
-          />
+            {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ */}
+            {selectedTab === 'work' && !currentCycle && (
+                <View style={styles.footer}>
+                    <Button
+                        title="Bắt đầu chu kỳ nuôi"
+                        onPress={handleStartCycle}
+                        variant="primary"
+                        iconLeft="add"
+                        style={styles.startButton}
+                    />
+                </View>
+            )}
         </View>
-      )}
-    </View>
-  );
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 100, // Space for footer
-    flexGrow: 1,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: spacing.md,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  startButton: {
-    width: '100%',
-  },
-  placeholderContainer: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: colors.text,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    content: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 100, // Space for footer
+        flexGrow: 1,
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: spacing.md,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    startButton: {
+        width: '100%',
+    },
+    placeholderContainer: {
+        padding: spacing.xl,
+        alignItems: 'center',
+    },
+    placeholderText: {
+        color: colors.text,
+    },
 
-  cycleCardWrapper: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm, // Khoảng hở nhỏ so với danh sách công việc bên dưới
-  },
+    cycleCardWrapper: {
+        marginTop: spacing.sm,
+        marginBottom: spacing.sm, // Khoảng hở nhỏ so với danh sách công việc bên dưới
+    },
 });

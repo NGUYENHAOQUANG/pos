@@ -10,10 +10,8 @@ import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute, Route } from '@react-navigation/native';
-
+import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { useTabBarVisibility } from './TabBarVisibilityContext';
-import { ReportsScreen } from '@/features/reports';
-// import DevicesScreen from '@/features/devices/screens/DevicesScreen';
 import { MaterialNavigator } from '@/features/material/navigation/MaterialNavigator';
 import { ControlNavigator } from '@/features/control/navigation/ControlNavigator';
 import { FarmNavigator } from '@/features/farm/navigation/FarmNavigator';

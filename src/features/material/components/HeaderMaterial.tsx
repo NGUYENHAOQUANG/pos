@@ -30,7 +30,7 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
+    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
       <View style={styles.side}>
         {showBackButton && (
           <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
