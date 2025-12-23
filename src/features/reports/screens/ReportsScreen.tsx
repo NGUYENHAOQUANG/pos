@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -14,6 +14,8 @@ import { FarmData } from '@/features/farm/types/farm.types';
 // ----------------------------------------------------------------
 // import { EnvironmentChart } from '../components/env-chart';
 import { FeedProdChart } from '../components/feed-prod';
+import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
+// import { FeedProdChart } from '../components/feed-prod';
 // import { ActivePondChart } from '../components/active-pond';
 // import { ProdChart } from '../components/prod-chart';
 // import { ProfitChart } from '../components/profit-chart';
@@ -108,44 +110,56 @@ export const ReportsScreen = () => {
             1. <EnvironmentChart /> 
         */}
 
-                {/* 
+                <ScrollView
+                    style={styles.content}
+                    contentContainerStyle={styles.contentContainer}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* ---------------------------------------------------------------------------------- */}
+                    {/*                               PACED FOR REPORTS COMPONENTS                          */}
+                    {/* ---------------------------------------------------------------------------------- */}
+
+                    <CompilationEnvChart />
+
+                    {/* 
             2. <FeedProdChart />
         */}
-                <FeedProdChart />
+                    <FeedProdChart />
 
-                {/* 
+                    {/* 
             3. <ActivePondChart />
         */}
 
-                {/* 
+                    {/* 
             4. <ProdChart />
         */}
 
-                {/* 
+                    {/* 
             5. <ProfitChart />
         */}
 
-                {/* 
+                    {/* 
             6. <CostChart />
         */}
 
-                {/* 
+                    {/* 
             7. <HarvestChart />
         */}
 
-                {/* 
+                    {/* 
             8. <WaterUsage />
         */}
 
-                {/* 
+                    {/* 
             9. <PondTransfer />
         */}
 
-                {/* 
+                    {/* 
             10. <HarvestStat />
         */}
 
-                {/* ---------------------------------------------------------------------------------- */}
+                    {/* ---------------------------------------------------------------------------------- */}
+                </ScrollView>
             </View>
         </View>
     );
@@ -160,6 +174,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    contentContainer: {
+        paddingBottom: 20,
     },
     text: {
         color: colors.text,
