@@ -80,19 +80,21 @@ const btnStyles = StyleSheet.create({
 const DATA = [
     { date: new Date(2023, 9, 16), active: 1, prep: 0, functional: 0 },
     { date: new Date(2023, 9, 18), active: 3, prep: 0, functional: 0 },
-    { date: new Date(2023, 9, 20), active: 6, prep: 0, functional: 0 },
-    { date: new Date(2023, 9, 24), active: 8, prep: 0, functional: 0 },
-    { date: new Date(2023, 9, 28), active: 8, prep: 0, functional: 1 },
-    { date: new Date(2023, 10, 6), active: 8, prep: 0, functional: 3 },
-    { date: new Date(2023, 10, 8), active: 8, prep: 0, functional: 3 },
-    { date: new Date(2023, 10, 16), active: 8, prep: 0, functional: 3 },
-    { date: new Date(2023, 10, 18), active: 29, prep: 0, functional: 2 },
+    { date: new Date(2023, 9, 19), active: 6, prep: 0, functional: 0 },
+    { date: new Date(2023, 9, 27), active: 8, prep: 0, functional: 0 },
+    { date: new Date(2023, 9, 28), active: 8, prep: 0, functional: 2 },
+    { date: new Date(2023, 10, 6), active: 8, prep: 0, functional: 6 },
+    { date: new Date(2023, 10, 8), active: 8, prep: 0, functional: 6 },
+    { date: new Date(2023, 10, 8), active: 8, prep: 0, functional: 6 },
+    { date: new Date(2023, 10, 18), active: 8, prep: 0, functional: 6 },
+    { date: new Date(2023, 10, 19), active: 29, prep: 0, functional: 2 },
+    { date: new Date(2023, 10, 20), active: 29, prep: 0, functional: 2 },
 ];
 
 // --- CẤU HÌNH MÀU SẮC ---
 const CHART_COLORS = {
     activeFill: colors.green[300],
-    activeStroke: colors.success,
+    activeStroke: colors.green[800],
     prep: colors.orange[200],
     functional: colors.gray[200],
     functionalStroke: colors.gray[400],
@@ -103,12 +105,12 @@ const CHART_COLORS = {
     border: colors.border,
     textMain: colors.text,
     borderCircle: colors.gray[100],
+    black: colors.black,
 };
 
 const CHART_HEIGHT = 300;
 const PADDING = { top: 70, right: 20, bottom: 40, left: 35 };
 
-// --- 2. COMPONENT CHÍNH ---
 export const ActivePondChart = () => {
     const [expanded, setExpanded] = useState(true);
     const [width, setWidth] = useState(0);
@@ -118,15 +120,26 @@ export const ActivePondChart = () => {
     };
 
     // --- TÍNH TOÁN D3 ---
-    const { pathActive, pathFunctional, ticks, xScale, yScale, currentX } = useMemo(() => {
+    const {
+        pathActive,
+        pathFunctional,
+        yTicks,
+        xTicks,
+        xScale,
+        yScale,
+        currentX,
+        targetDataPoint,
+    } = useMemo(() => {
         if (width === 0)
             return {
                 pathActive: '',
                 pathFunctional: '',
-                ticks: [],
+                yTicks: [],
+                xTicks: [],
                 xScale: null,
                 yScale: null,
                 currentX: 0,
+                targetDataPoint: { active: 0, functional: 0, prep: 0 },
             };
 
         const chartWidth = width - PADDING.left - PADDING.right;
@@ -150,23 +163,50 @@ export const ActivePondChart = () => {
         const areaActive = d3Shape
             .area<any>()
             .x(d => x(d.date))
-            .y0(y(0))
+            .y0(_ => y(0))
             .y1(d => y(d.active))
             .curve(d3Shape.curveStepAfter);
 
-        const currentXPos = x(maxDate);
+        // --- TÍNH TOÁN VỊ TRÍ CHẤM TRÒN VÀ ĐƯỜNG KẺ ---
+
+        // 1. Xác định ngày mục tiêu: 18/11
+        const targetDate = new Date(2023, 10, 18);
+
+        // 2. Tính vị trí X của đường kẻ dọc
+        const currentXPos = x(targetDate);
+
+        // 3. Lấy dữ liệu tại đúng ngày 17/11
+        const targetItem = DATA.find(d => d.date.getTime() === targetDate.getTime()) || {
+            active: 0,
+            functional: 0,
+            prep: 0,
+        };
+
+        // 4. Mốc thời gian hiển thị trục X
+        const tickValues = [
+            new Date(2023, 9, 16), // 16/10
+            new Date(2023, 9, 24), // 24/10
+            new Date(2023, 10, 8), // 08/11
+            new Date(2023, 10, 16), // 16/11
+        ];
 
         return {
             pathActive: areaActive(DATA) || '',
             pathFunctional: areaFunctional(DATA) || '',
-            ticks: [0, 8, 16, 24, 32],
+            yTicks: [0, 8, 16, 24, 32],
+            xTicks: tickValues,
             xScale: x,
             yScale: y,
             currentX: currentXPos,
+            targetDataPoint: targetItem,
         };
     }, [width]);
 
-    const formatDate = (date: Date) => `${date.getDate()}/${date.getMonth() + 1}`;
+    const formatDate = (date: Date) => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        return `${day}/${month}`;
+    };
 
     return (
         <View style={styles.container} onLayout={onLayout}>
@@ -204,7 +244,7 @@ export const ActivePondChart = () => {
                                     dx="0"
                                     dy="2"
                                     stdDeviation="2"
-                                    floodColor="#000000"
+                                    floodColor={CHART_COLORS.black}
                                     floodOpacity="0.25"
                                 />
                             </Filter>
@@ -212,7 +252,7 @@ export const ActivePondChart = () => {
 
                         <G x={PADDING.left} y={PADDING.top}>
                             {/* Grid & Y Axis */}
-                            {ticks.map(tick => (
+                            {yTicks.map(tick => (
                                 <G key={tick}>
                                     <Line
                                         x1={0}
@@ -258,45 +298,15 @@ export const ActivePondChart = () => {
                                 strokeWidth={2}
                             />
 
-                            {/* Indicator */}
+                            {/* Indicator Line (Nét đứt) */}
                             <Line
                                 x1={currentX}
                                 y1={0}
                                 x2={currentX}
                                 y2={yScale(0)}
                                 stroke={CHART_COLORS.indicator}
-                                strokeWidth={1}
-                                strokeDasharray="4 2"
-                            />
-
-                            {/* Dots */}
-                            <Circle
-                                cx={currentX}
-                                cy={yScale(
-                                    DATA[DATA.length - 1].active + DATA[DATA.length - 1].functional
-                                )}
-                                r={4}
-                                fill={CHART_COLORS.white}
-                                stroke={CHART_COLORS.functional}
-                                strokeWidth={2}
-                            />
-                            <Circle
-                                cx={currentX}
-                                cy={yScale(DATA[DATA.length - 1].active)}
-                                r={4}
-                                fill={CHART_COLORS.white}
-                                stroke={CHART_COLORS.activeFill}
-                                strokeWidth={2}
-                            />
-
-                            <Circle
-                                cx={currentX}
-                                cy={yScale(0)}
-                                r={4}
-                                fill={CHART_COLORS.prep}
-                                stroke={colors.white}
-                                strokeWidth={1}
-                                filter="url(#lightShadow)"
+                                strokeWidth={0.5}
+                                strokeDasharray="3 1"
                             />
 
                             {/* --- X-AXIS LINE --- */}
@@ -309,35 +319,64 @@ export const ActivePondChart = () => {
                                 strokeWidth={0.5}
                             />
 
-                            {/* X Axis & Ticks */}
-                            {DATA.map((d, index) => {
-                                if (index % 2 !== 0 && index !== DATA.length - 1) return null;
+                            {/* --- X Axis Labels & Ticks --- */}
+                            {xTicks.map((tickDate, index) => {
                                 return (
                                     <G key={index}>
                                         <Line
-                                            x1={xScale(d.date)}
+                                            x1={xScale(tickDate)}
                                             y1={yScale(0) + 4}
-                                            x2={xScale(d.date)}
+                                            x2={xScale(tickDate)}
                                             y2={yScale(0) + 9}
                                             stroke={colors.gray[600]}
                                             strokeWidth={0.5}
                                         />
 
                                         <SvgText
-                                            x={xScale(d.date)}
+                                            x={xScale(tickDate)}
                                             y={yScale(0) + 20}
                                             fontSize="10"
                                             fill={CHART_COLORS.text}
-                                            textAnchor="middle"
+                                            textAnchor={'middle'}
                                         >
-                                            {formatDate(d.date)}
+                                            {formatDate(tickDate)}
                                         </SvgText>
                                     </G>
                                 );
                             })}
+
+                            <Circle
+                                cx={currentX}
+                                cy={yScale(targetDataPoint.active + targetDataPoint.functional)}
+                                r={4}
+                                fill={CHART_COLORS.functional}
+                                stroke={CHART_COLORS.white}
+                                strokeWidth={1}
+                                filter="url(#lightShadow)"
+                            />
+
+                            <Circle
+                                cx={currentX}
+                                cy={yScale(targetDataPoint.active)}
+                                r={4}
+                                fill={CHART_COLORS.activeFill}
+                                stroke={CHART_COLORS.white}
+                                strokeWidth={1}
+                                filter="url(#lightShadow)"
+                            />
+
+                            <Circle
+                                cx={currentX}
+                                cy={yScale(0)}
+                                r={4}
+                                fill={CHART_COLORS.prep}
+                                stroke={colors.white}
+                                strokeWidth={1}
+                                filter="url(#lightShadow)"
+                            />
                         </G>
                     </Svg>
-
+                    <View style={styles.spacer}></View>
                     {/* Legend */}
                     <View style={styles.legendContainer}>
                         <LegendItem color={CHART_COLORS.activeFill} label="Đang hoạt động" />
@@ -350,7 +389,6 @@ export const ActivePondChart = () => {
     );
 };
 
-// Component Legend Item
 const LegendItem = ({ color, label }: { color: string; label: string }) => (
     <View style={styles.legendItem}>
         <View style={[styles.legendDot, { backgroundColor: color }]} />
@@ -383,7 +421,6 @@ const styles = StyleSheet.create({
         height: 50,
         zIndex: 10,
     },
-
     labelGroupLeft: {
         position: 'absolute',
         left: '20%',
@@ -394,7 +431,6 @@ const styles = StyleSheet.create({
         left: '65%',
         alignItems: 'center',
     },
-
     labelTitle: {
         fontSize: 12,
         color: colors.textSecondary,
@@ -430,10 +466,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     legendDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: 15,
+        height: 15,
+        borderRadius: 100,
         marginRight: 6,
+    },
+    spacer: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginBottom: 20,
+        opacity: 0.5,
     },
     legendText: {
         fontSize: 11,
