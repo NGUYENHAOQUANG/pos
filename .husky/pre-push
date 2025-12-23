@@ -1,10 +1,7 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "🔍 Đang kiểm tra ESLint cho toàn bộ project..."
 
 # Chạy ESLint với --max-warnings=0 để fail nếu có warnings
-npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
+npx eslint . --max-warnings=0
 
 # Kiểm tra exit code
 EXIT_CODE=$?

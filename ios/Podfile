@@ -14,8 +14,15 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+
 target 'MebiOne' do
   config = use_native_modules!
+
+  # Explicit pod declaration with modular headers for GoogleUtilities
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleDataTransport', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -30,5 +37,14 @@ target 'MebiOne' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Enable modular headers only for Firebase and Google pods to fix Swift integration
+    installer.pods_project.targets.each do |target|
+      if target.name.start_with?('Firebase') || target.name == 'GoogleUtilities' || target.name == 'GoogleDataTransport'
+        target.build_configurations.each do |config|
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+        end
+      end
+    end
   end
 end
