@@ -12,16 +12,12 @@ import { FarmData } from '@/features/farm/types/farm.types';
 // ----------------------------------------------------------------
 // SPACE FOR IMPORTING REPORT COMPONENTS
 // ----------------------------------------------------------------
-import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
-// import { FeedProdChart } from '../components/feed-prod';
-// import { ActivePondChart } from '../components/active-pond';
-// import { ProdChart } from '../components/prod-chart';
-// import { ProfitChart } from '../components/profit-chart';
-// import { CostChart } from '../components/cost-chart';
-// import { HarvestChart } from '../components/harvest-chart';
-// import { WaterUsage } from '../components/water-usage';
-// import { PondTransfer } from '../components/pond-transfer';
-// import { HarvestStat } from '../components/harvest-stat';
+// import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
+
+// [THÊM MỚI] Import wrapper và chart cần test
+
+import ActivePondChart from '@/features/reports/components/active-pond/ActivePondChart';
+
 // ----------------------------------------------------------------
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -69,9 +65,6 @@ export const ReportsScreen = () => {
     ];
 
     const handleRightPress = () => {
-        // Navigate to Farm Info (Thông tin trại) as per request context "button bên phải dẫn ra màn hình thông tin ao"
-        // Since we are selecting a Farm, it makes sense to go to FarmInfo.
-        // If specific PondInfo is needed, we would need a selected Pond context.
         const farmData: FarmData = {
             id: selectedFarm.id.toString(),
             name: selectedFarm.label,
@@ -106,46 +99,37 @@ export const ReportsScreen = () => {
                 showsVerticalScrollIndicator={false}
             >
                 {/* ---------------------------------------------------------------------------------- */}
-                {/*                               PACED FOR REPORTS COMPONENTS                          */}
+                {/* PACED FOR REPORTS COMPONENTS                          */}
                 {/* ---------------------------------------------------------------------------------- */}
 
-                <CompilationEnvChart />
+                {/* <CompilationEnvChart /> */}
 
-                {/* 
-            2. <FeedProdChart />
-        */}
+                {/* 2. <FeedProdChart />
+                 */}
 
-                {/* 
-            3. <ActivePondChart />
-        */}
+                {/* 3. <ActivePondChart /> */}
+                <ActivePondChart />
 
-                {/* 
-            4. <ProdChart />
-        */}
+                {/* 4. <ProdChart />
+                 */}
 
-                {/* 
-            5. <ProfitChart />
-        */}
+                {/* 5. <ProfitChart />
+                 */}
 
-                {/* 
-            6. <CostChart />
-        */}
+                {/* 6. <CostChart />
+                 */}
 
-                {/* 
-            7. <HarvestChart />
-        */}
+                {/* 7. <HarvestChart />
+                 */}
 
-                {/* 
-            8. <WaterUsage />
-        */}
+                {/* 8. <WaterUsage />
+                 */}
 
-                {/* 
-            9. <PondTransfer />
-        */}
+                {/* 9. <PondTransfer />
+                 */}
 
-                {/* 
-            10. <HarvestStat />
-        */}
+                {/* 10. <HarvestStat />
+                 */}
 
                 {/* ---------------------------------------------------------------------------------- */}
             </ScrollView>
