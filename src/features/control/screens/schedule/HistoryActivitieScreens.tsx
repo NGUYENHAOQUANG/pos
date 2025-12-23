@@ -6,81 +6,91 @@ import FilterDate from '../../components/schedule/FilterDate';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { colors, spacing } from '@/styles';
 import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
+import { Loading } from '@/shared/components/ui/Loading';
 
 interface HistoryActivitieScreensProps {
-  pondName?: string;
-  onBack?: () => void;
+    pondName?: string;
+    onBack?: () => void;
 }
 
 export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({
-  pondName = 'Ao 1',
-  onBack,
+    pondName = 'Ao 1',
+    onBack,
 }) => {
-  const { setTabBarVisible } = useTabBarVisibility();
-  const [activeTab, setActiveTab] = React.useState(CONTROL_TABS[0].key);
+    const { setTabBarVisible } = useTabBarVisibility();
+    const [activeTab, setActiveTab] = React.useState(CONTROL_TABS[0].key);
+    const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    // Hide custom tab bar
-    setTabBarVisible(false);
+    React.useEffect(() => {
+        // Hide custom tab bar
+        setTabBarVisible(false);
 
-    return () => {
-      // Restore custom tab bar
-      setTabBarVisible(true);
-    };
-  }, [setTabBarVisible]);
+        // Mock loading delay
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
 
-  const renderRightComponent = () => (
-    <View style={styles.rightComponentContainer}>
-      <Text style={styles.rightText}>{pondName}</Text>
-    </View>
-  );
+        return () => {
+            // Restore custom tab bar
+            setTabBarVisible(true);
+            clearTimeout(timer);
+        };
+    }, [setTabBarVisible]);
 
-  return (
-    <View style={styles.container}>
-      <HeaderDevices
-        tabs={CONTROL_TABS}
-        selectedTab={activeTab}
-        onTabSelect={setActiveTab}
-        onBackPress={onBack}
-        rightComponent={renderRightComponent()}
-      />
-      <View style={styles.content}>
-        {activeTab === 'history' ? (
-          <>
-            <View style={styles.filterWrapper}>
-              <FilterDate />
+    const renderRightComponent = () => (
+        <View style={styles.rightComponentContainer}>
+            <Text style={styles.rightText}>{pondName}</Text>
+        </View>
+    );
+
+    return (
+        <View style={styles.container}>
+            <HeaderDevices
+                tabs={CONTROL_TABS}
+                selectedTab={activeTab}
+                onTabSelect={setActiveTab}
+                onBackPress={onBack}
+                rightComponent={renderRightComponent()}
+            />
+            <View style={styles.content}>
+                {isLoading ? (
+                    <Loading />
+                ) : activeTab === 'history' ? (
+                    <>
+                        <View style={styles.filterWrapper}>
+                            <FilterDate />
+                        </View>
+                        <HistoryActivitie />
+                    </>
+                ) : (
+                    <SensorStatisticsScreen />
+                )}
             </View>
-            <HistoryActivitie />
-          </>
-        ) : (
-          <SensorStatisticsScreen />
-        )}
-      </View>
-    </View>
-  );
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  content: {
-    flex: 1,
-    paddingBottom: 0,
-  },
-  filterWrapper: {
-    marginTop: spacing.md,
-    marginBottom: spacing.xs, // Small gap before list
-  },
-  rightComponentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  rightText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    content: {
+        flex: 1,
+        paddingBottom: 0,
+    },
+    filterWrapper: {
+        marginTop: spacing.md,
+        marginBottom: spacing.xs, // Small gap before list
+    },
+    rightComponentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    rightText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+    },
 });
