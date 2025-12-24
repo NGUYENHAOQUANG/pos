@@ -17,9 +17,9 @@ import CompilationEnvChart from '@/features/reports/components/env-chart/Compila
 // import { ActivePondChart } from '../components/active-pond';
 // import { ProdChart } from '../components/prod-chart';
 // import { ProfitChart } from '../components/profit-chart';
-// import { CostChart } from '../components/cost-chart';
+import CompilationCostChart from '@/features/reports/components/cost-chart/CompilationCostChart';
 // import { HarvestChart } from '../components/harvest-chart';
-// import { WaterUsage } from '../components/water-usage';
+import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 // import { PondTransfer } from '../components/pond-transfer';
 // import { HarvestStat } from '../components/harvest-stat';
 // ----------------------------------------------------------------
@@ -127,17 +127,13 @@ export const ReportsScreen = () => {
             5. <ProfitChart />
         */}
 
-                {/* 
-            6. <CostChart />
-        */}
+                <CompilationCostChart />
 
                 {/* 
             7. <HarvestChart />
         */}
 
-                {/* 
-            8. <WaterUsage />
-        */}
+                <WaterUsageChart />
 
                 {/* 
             9. <PondTransfer />
