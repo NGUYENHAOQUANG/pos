@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { CollapseHead } from '@/features/farm/components/CollapseHead';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
-import { Legend } from '@/features/reports/components/feed-prod/Legend';
+import { Legend, getFeedProdLegendItems } from '@/features/reports/components/Legend';
 import { Chart } from '@/features/reports/components/feed-prod/Chart';
 import {
     CHART_WIDTH,
@@ -12,6 +12,7 @@ import {
     PADDING_RIGHT,
     PADDING_TOP,
     PADDING_BOTTOM,
+    RAW_DATA,
 } from '@/features/reports/components/feed-prod/chartData';
 
 export const FeedProdChart = () => {
@@ -19,6 +20,30 @@ export const FeedProdChart = () => {
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+
+    // Calculate metrics from RAW_DATA
+    const getLatestProduction = (): number => {
+        if (RAW_DATA.length === 0) return 0;
+        return RAW_DATA[RAW_DATA.length - 1].production;
+    };
+
+    const getLatestConsumed = (): number => {
+        if (RAW_DATA.length === 0) return 0;
+        return RAW_DATA[RAW_DATA.length - 1].consumed;
+    };
+
+    const getLatestFCR = (): number => {
+        if (RAW_DATA.length === 0) return 0;
+        return RAW_DATA[RAW_DATA.length - 1].fcr;
+    };
+
+    const formatMetricValue = (value: number): string => {
+        return `${value.toFixed(2)} tấn`;
+    };
+
+    const formatFCR = (fcr: number): string => {
+        return fcr.toFixed(2);
+    };
 
     return (
         <View style={styles.container}>
@@ -33,9 +58,13 @@ export const FeedProdChart = () => {
 
                 {isExpanded && (
                     <>
-                        <MetricsRow />
+                        <MetricsRow
+                            production={formatMetricValue(getLatestProduction())}
+                            consumed={formatMetricValue(getLatestConsumed())}
+                            fcr={formatFCR(getLatestFCR())}
+                        />
                         <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                        <Legend />
+                        <Legend items={getFeedProdLegendItems()} />
                     </>
                 )}
             </View>
