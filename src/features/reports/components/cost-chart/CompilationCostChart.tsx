@@ -5,6 +5,7 @@ import { typography } from '@/styles/typography';
 import { CollapseHead } from '@/features/farm/components/CollapseHead';
 import CostChart from './CostChart';
 import BottomCostChart from './BottomCostChart';
+import { COST_DATA } from './costChartData';
 
 const CompilationCostChart = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -39,12 +40,15 @@ const CompilationCostChart = () => {
 
                     {/* Chart */}
                     <View style={styles.chartContainer}>
-                        <CostChart size={300} />
+                        <CostChart size={300} data={COST_DATA} totalDisplay="2.24 tỉ" />
                     </View>
+
+                    {/* Divider */}
+                    <View style={styles.divider} />
 
                     {/* Legend */}
                     <View style={styles.excludeContainer}>
-                        <BottomCostChart />
+                        <BottomCostChart data={COST_DATA} />
                     </View>
                 </View>
             )}
@@ -97,6 +101,11 @@ const styles = StyleSheet.create({
     },
     excludeContainer: {
         paddingHorizontal: 8,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginBottom: 8,
     },
 });
 

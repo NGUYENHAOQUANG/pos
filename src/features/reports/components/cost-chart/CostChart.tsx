@@ -4,33 +4,15 @@ import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import * as shape from 'd3-shape';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
-
-// Define the data interface
-interface ChartData {
-    value: number;
-    color: string;
-    label: string;
-    key: string;
-}
-
-// Data matching the image percentages and colors
-// Order approximates the clockwise arrangement starting from top
-const DATA: ChartData[] = [
-    { key: 'dark_green', value: 11.4, color: colors.green[800], label: '11.4%' },
-    { key: 'sliver_orange', value: 1.5, color: colors.orange[600], label: '' }, // Small sliver
-    { key: 'light_orange', value: 7.8, color: colors.orange[200], label: '7.8%' },
-    { key: 'dark_blue', value: 6.1, color: colors.blue[700], label: '6.1%' },
-    { key: 'light_blue', value: 4.3, color: colors.blue[400], label: '4.3%' },
-    { key: 'sliver_blue', value: 2.0, color: colors.blue[50], label: '' }, // Small sliver
-    { key: 'big_red', value: 45.4, color: colors.red[600], label: '45.4%' }, // Using red[600] for Thức ăn cho tôm
-    { key: 'light_green', value: 21.5, color: colors.success, label: '21.5%' }, // Using success for bright green
-];
+import { CostItem } from './costChartData';
 
 interface CostChartProps {
     size?: number;
+    data: CostItem[];
+    totalDisplay?: string;
 }
 
-const CostChart = ({ size = 300 }: CostChartProps) => {
+const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => {
     // Dimensions
     const width = size;
     const height = size;
@@ -41,24 +23,24 @@ const CostChart = ({ size = 300 }: CostChartProps) => {
 
     // D3 Generators
     const pie = shape
-        .pie<ChartData>()
+        .pie<CostItem>()
         .value(d => d.value)
         .sort(null) // Keep defined order
         .startAngle(0)
         .endAngle(2 * Math.PI);
 
     const arcGenerator = shape
-        .arc<shape.PieArcDatum<ChartData>>()
+        .arc<shape.PieArcDatum<CostItem>>()
         .innerRadius(innerRadius)
         .outerRadius(outerRadius)
         .padAngle(0);
 
-    const arcs = pie(DATA);
+    const arcs = pie(data);
 
     // Calculate label position
     const labelRadius = innerRadius + (outerRadius - innerRadius) * 0.6;
     const labelArcGenerator = shape
-        .arc<shape.PieArcDatum<ChartData>>()
+        .arc<shape.PieArcDatum<CostItem>>()
         .innerRadius(labelRadius)
         .outerRadius(labelRadius);
 
@@ -69,13 +51,14 @@ const CostChart = ({ size = 300 }: CostChartProps) => {
                     {arcs.map((arc, index) => {
                         const d = arcGenerator(arc);
                         const labelCentroid = labelArcGenerator.centroid(arc);
-                        const showLabel = DATA[index].label !== '';
+                        const item = data[index];
+                        const showLabel = item.percentage >= 3; // Show label if > 3% or manually checked
 
                         return (
                             <G key={`arc-${index}`}>
                                 <Path
                                     d={d || ''}
-                                    fill={DATA[index].color}
+                                    fill={item.color}
                                     stroke={colors.white}
                                     strokeWidth={strokeWidth}
                                 />
@@ -90,7 +73,7 @@ const CostChart = ({ size = 300 }: CostChartProps) => {
                                         textAnchor="middle"
                                         alignmentBaseline="middle"
                                     >
-                                        {DATA[index].label}
+                                        {`${item.percentage}%`}
                                     </SvgText>
                                 )}
                             </G>
@@ -102,7 +85,7 @@ const CostChart = ({ size = 300 }: CostChartProps) => {
             {/* Center Info */}
             <View style={styles.centerContainer}>
                 <Text style={styles.totalLabel}>TỔNG CỘNG</Text>
-                <Text style={styles.totalValue}>2.24 tỉ</Text>
+                <Text style={styles.totalValue}>{totalDisplay}</Text>
             </View>
         </View>
     );
@@ -118,9 +101,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: -1, // Ensure it is behind if we had touch events, but actually it should be fine. Or zIndex 1 to be on top?
-        // Text should be on top of the hole (which is transparent).
-        // zIndex: 1.
+        zIndex: -1,
     },
     totalLabel: {
         fontSize: typography.fontSize.sm,

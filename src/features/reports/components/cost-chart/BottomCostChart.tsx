@@ -1,23 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
+import { CostItem } from './costChartData';
 
-const LEGEND_ITEMS = [
-    { label: 'Chất xử lý nước đầu vào', color: colors.green[800] },
-    { label: 'Trị bệnh', color: colors.orange[600] },
-    { label: 'Chế phẩm sinh học', color: colors.orange[200] },
-    { label: 'Chất cải thiện ao nuôi', color: colors.blue[700] },
-    { label: 'Khoáng chất', color: colors.blue[400] },
-    { label: 'Dinh dưỡng bổ sung', color: colors.blue[50] },
-    { label: 'Thức ăn cho tôm', color: colors.red[600] },
-    { label: 'Tôm giống', color: colors.success },
+interface Props {
+    data: CostItem[];
+}
+
+const DISPLAY_ORDER = [
+    'Chất xử lý nước đầu vào',
+    'Trị bệnh',
+    'Chế phẩm sinh học',
+    'Chất cải thiện ao nuôi',
+    'Khoáng chất',
+    'Dinh dưỡng bổ sung',
+    'Thức ăn cho tôm',
+    'Tôm giống',
 ];
 
-const BottomCostChart = () => {
+const BottomCostChart = ({ data }: Props) => {
+    const sortedData = useMemo(() => {
+        return DISPLAY_ORDER.map(label => 
+            data.find(item => item.label === label)
+        ).filter((item): item is CostItem => !!item);
+    }, [data]);
+
     return (
         <View style={styles.container}>
-            {LEGEND_ITEMS.map((item, index) => (
+            {sortedData.map((item, index) => (
                 <View key={index} style={styles.itemContainer}>
                     <View style={[styles.dot, { backgroundColor: item.color }]} />
                     <Text style={styles.label}>{item.label}</Text>
@@ -32,22 +43,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 8, // Reduced padding to fit 3 items
         paddingVertical: 12,
-        gap: 12, // Using gap for easier spacing
+        gap: 10, // Adjusted gap
     },
     itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     dot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
+        width: 10,
+        height: 10,
+        borderRadius: 5,
         marginRight: 6,
     },
     label: {
-        fontSize: typography.fontSize.xs, // Small text as per chart legends usually
+        fontSize: typography.fontSize.xs,
         fontFamily: typography.fontFamily.regular,
         color: colors.textSecondary,
     },

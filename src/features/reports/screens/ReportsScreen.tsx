@@ -15,10 +15,10 @@ import { FarmData } from '@/features/farm/types/farm.types';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
 // import { FeedProdChart } from '../components/feed-prod';
 // import { ActivePondChart } from '../components/active-pond';
-// import { ProdChart } from '../components/prod-chart';
+import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
 // import { ProfitChart } from '../components/profit-chart';
 import CompilationCostChart from '@/features/reports/components/cost-chart/CompilationCostChart';
-// import { HarvestChart } from '../components/harvest-chart';
+import { HarvestChart } from '../components/harvest-chart/HarvestChart';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 // import { PondTransfer } from '../components/pond-transfer';
 // import { HarvestStat } from '../components/harvest-stat';
@@ -111,35 +111,31 @@ export const ReportsScreen = () => {
 
                 <CompilationEnvChart />
 
-                {/* 
+                {/*
             2. <FeedProdChart />
         */}
 
-                {/* 
+                {/*
             3. <ActivePondChart />
         */}
 
-                {/* 
-            4. <ProdChart />
-        */}
+                <ProdChart />
 
-                {/* 
+                {/*
             5. <ProfitChart />
         */}
 
                 <CompilationCostChart />
 
-                {/* 
-            7. <HarvestChart />
-        */}
+                <HarvestChart />
 
                 <WaterUsageChart />
 
-                {/* 
+                {/*
             9. <PondTransfer />
         */}
 
-                {/* 
+                {/*
             10. <HarvestStat />
         */}
 

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
 import Svg, { Path, Line, Circle, G } from 'react-native-svg';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 import * as shape from 'd3-shape';
-// import { scaleTime, scaleLinear } from 'd3-scale'; // Removed to avoid d3-array resolution issues
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
+import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
+import { TooltipEnvChart } from './TooltipEnvChart';
 
 // --- Utils: Robust Manual Scales ---
 const scaleLinear = ({ domain, range }: { domain: number[]; range: number[] }) => {
@@ -38,79 +39,38 @@ const formatDate = (date: Date) => {
     return `${d}/${m}`;
 };
 
+const parseDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day);
+};
+
 // --- Types ---
 interface DataPoint {
     date: Date;
-    pH: number; // Light Blue (Flat/Wavy)
-    DO: number; // Orange (Medium)
-    Temp: number; // Green (Tall Spikes) - actually "Nhiệt độ" usually isn't this spiky, but mapping to image visual
-    Alk: number; // Brown (Stepped)
-    Clear: number; // Dark Blue (High Freq)
-    Salt: number; // Dark Red (Flat)
-    Ammonia: number; // Dark Green (Bottom Flat)
+    value: number;
+    pond: string;
 }
 
-// --- Mock Data Pattern Generators ---
-const generateData = (): DataPoint[] => {
-    const data: DataPoint[] = [];
-    const baseDate = new Date(2025, 10, 1); // Nov 1st
+interface EnvCharProps {
+    selected?: string;
+}
 
-    // Adjusted to 45 days for better performance (less lag) while allowing some scrolling
-    for (let i = 0; i < 45; i++) {
-        const date = new Date(baseDate);
-        date.setDate(baseDate.getDate() + i);
-
-        // 1. Brown (Stepped)
-        let alk = 3.2;
-        if (i > 15) alk = 4.0;
-        if (i > 25) alk = 4.9;
-        if (i > 60) alk = 5.5;
-        if (i > 100) alk = 6.0; // New step
-        if (i > 150) alk = 5.8; // Dropdown
-
-        // 2. Light Green (Spiky)
-        const temp = 6 + (Math.random() > 0.7 ? Math.random() * 4 : Math.random() * 2 - 1);
-
-        // 3. Orange (Steady)
-        let doVal = 6.5 + Math.random() * 1.2 - 0.5;
-        if (i > 120) doVal -= 0.5; // Slight trend change
-
-        // 4. Light Blue (Wavy)
-        const ph = 6 + Math.sin(i * 0.1) * 0.5 + Math.random() * 0.1; // Slower wave
-
-        // 5. Dark Red (Flat High)
-        const salt = 1.8;
-
-        // 6. Dark Blue (High Freq - Irregular/Chaotic)
-        // Range 0.8 - 1.5 (Strictly below Salt at 1.8)
-        const clear = 0.8 + Math.random() * 0.7;
-
-        // 7. Dark Green (Flat Low)
-        let ammonia = 0.1;
-        if (i === 18 || i === 25 || i === 70 || i === 140) ammonia = 0.5;
-
-        data.push({
-            date: date,
-            pH: ph,
-            DO: doVal,
-            Temp: temp,
-            Alk: alk,
-            Clear: clear,
-            Salt: salt,
-            Ammonia: ammonia,
-        });
-    }
-    return data;
+// --- Mapping Configuration ---
+const METRIC_MAP: Record<string, { key: keyof EnvLog; label: string; unit: string }> = {
+    'pH': { key: 'pH', label: 'pH', unit: '' },
+    'DO': { key: 'do', label: 'DO', unit: 'mg/L' },
+    'Nhiệt độ': { key: 'temp', label: 'Nhiệt độ', unit: '°C' },
+    'Độ kiềm': { key: 'alk', label: 'Độ kiềm', unit: 'mg/L' },
+    'Độ trong': { key: 'clear', label: 'Độ trong', unit: 'cm' },
+    'Độ mặn': { key: 'salt', label: 'Độ mặn', unit: 'ppt' },
 };
 
-const DATA = generateData();
 const GRAPH_HEIGHT = 380;
 
 // Helper for Animated Label (Now Static)
 const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
     return (
         <View style={{ position: 'absolute', left: baseX, bottom: 0 }}>
-            {/* Center the text: marginLeft: -30 to center a width 60 view */}
             <View style={{ width: 60, marginLeft: -30 }}>
                 <Text style={styles.axisLabelCenter}>{formatDate(date)}</Text>
             </View>
@@ -118,36 +78,58 @@ const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
     );
 };
 
-export default function EnvChar() {
+export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
+    const metric = METRIC_MAP[selected] || METRIC_MAP['pH'];
+
+    // --- Data Preparation ---
+    // Group data by Pond
+    const seriesData = useMemo(() => {
+        const ponds = Array.from(new Set(ENV_DATA.map(d => d.pond)));
+        return ponds.map(pond => {
+            const data = ENV_DATA
+                .filter(d => d.pond === pond)
+                .map(item => ({
+                    date: parseDate(item.date),
+                    value: Number(item[metric.key]),
+                    pond: item.pond
+                }))
+                .sort((a, b) => a.date.getTime() - b.date.getTime());
+            return { pond, data };
+        });
+    }, [metric.key]);
+
+    // Flatten for scales using reduce instead of flatMap
+    const allPoints = seriesData.reduce<DataPoint[]>((acc, s) => acc.concat(s.data), []);
+
     const [layout, setLayout] = useState({ width: 0, height: 0 });
 
     // Shared Values for Gestures
     const translateX = useSharedValue(0);
     const savedTranslateX = useSharedValue(0);
 
-    // Derived dimensions for clamping
-    const density = 9; // Increased spacing to allow scrolling with few data points
-    const axisWidth = 30; // Left and Right fixed width
-
-    // The visible viewport width for the chart content
+    // Derived dimensions
+    const density = 40; // Spacing per point
+    const axisWidth = 30;
     const chartAreaWidth = Math.max(0, layout.width - axisWidth * 2);
-
-    const contentWidth = Math.max(chartAreaWidth, DATA.length * density);
+    
+    const pointsCount = seriesData[0]?.data.length || 0;
+    const contentWidth = Math.max(chartAreaWidth, pointsCount * density);
+    
     const maxTranslateX = 0;
     const minTranslateX = Math.min(0, chartAreaWidth - contentWidth);
 
-    // Extended type for tooltip state
-    type SelectedPoint = DataPoint & { x: number; y: number };
-    const [selectedPoint, setSelectedPoint] = useState<SelectedPoint | null>(null);
+    // Selected Point for Tooltip (Date index)
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
     // Gestures
     const pan = Gesture.Pan()
         .onChange(e => {
             const nextTranslate = savedTranslateX.value + e.translationX;
             if (nextTranslate > maxTranslateX) {
-                translateX.value = maxTranslateX; // Right edge (start of chart)
+                translateX.value = maxTranslateX;
             } else if (nextTranslate < minTranslateX) {
-                translateX.value = minTranslateX; // Left edge (end of chart)
+                translateX.value = minTranslateX;
             } else {
                 translateX.value = nextTranslate;
             }
@@ -156,84 +138,120 @@ export default function EnvChar() {
             savedTranslateX.value = translateX.value;
         });
 
-    // Tap Gesture for Tooltip
     const tap = Gesture.Tap().onEnd(e => {
-        const internalX = e.x - translateX.value; // Scale is 1, so removed division
+        const internalX = e.x - translateX.value;
         const index = Math.round(internalX / density);
 
-        if (index >= 0 && index < DATA.length) {
-            const item = DATA[index];
-            runOnJS(setSelectedPoint)({
-                ...item,
-                x: e.x,
-                y: e.y,
-            });
+        if (index >= 0 && index < pointsCount) {
+             runOnJS(setSelectedIndex)(index);
+             // Position relative to the *visible* view, need to account for scroll if inside the container?
+             // Actually e.x is relative to the GestureDetector which wraps the whole scrollable content?
+             // Wait, the GestureDetector wraps Animated.View?
+             // No, GestureDetector wraps the outer container. `chartArea`.
+             // So e.x is absolute in the Viewport. 
+             // BUT `translateX` moves the content. 
+             // If we place the tooltip INSIDE the Animated.View, it will move with scroll. That's annoying.
+             // Better to place tooltip OUTSIDE the Animated.View (floating).
+             // If outside, we just need `e.x` and `e.y`.
+             runOnJS(setTooltipPos)({ x: e.x, y: e.y });
         } else {
-            runOnJS(setSelectedPoint)(null);
+             runOnJS(setSelectedIndex)(null);
         }
     });
 
     const composed = Gesture.Race(pan, tap);
-    const handleCloseTooltip = () => setSelectedPoint(null);
+    const handleCloseTooltip = () => setSelectedIndex(null);
 
-    // Split animations
     const scrollStyle = useAnimatedStyle(() => {
         return {
             transform: [{ translateX: translateX.value }],
         };
     });
 
-    // Use values calculated top-level
     const height = layout.height || GRAPH_HEIGHT;
-
-    const minDate = DATA[0].date;
-    const maxDate = DATA[DATA.length - 1].date;
+    
+    // Scales
+    const minDate = allPoints[0]?.date || new Date();
+    const maxDate = allPoints[allPoints.length - 1]?.date || new Date();
 
     const scaleX = scaleTime({
         domain: [minDate, maxDate],
-        range: [20, contentWidth],
+        range: [20, contentWidth - 20],
     });
+
+    // Custom Y-Axis Logic
+    let yDomain = [0, 10];
+    let yTicks: number[] = [0, 2, 4, 6, 8, 10];
+
+    // Step Configuration
+    const stepMap: Record<string, number> = {
+        'pH': 0.2,
+        'DO': 0.2,
+        'Nhiệt độ': 2,
+        'Độ kiềm': 10,
+        'Độ trong': 2,
+        'Độ mặn': 2,
+    };
+    
+    const vals = allPoints.map(d => d.value);
+    if (vals.length > 0) {
+        let minValRaw = Math.min(...vals);
+        let maxValRaw = Math.max(...vals);
+
+        const step = stepMap[selected] || 1;
+
+        // Round min down and max up to nearest step
+        let start = Math.floor(minValRaw / step) * step;
+        let end = Math.ceil(maxValRaw / step) * step;
+
+        // Safety: if start == end (flat line), expand
+        if (start === end) {
+            start -= step;
+            end += step;
+        }
+
+        yTicks = [];
+        // Use epsilon to avoid floating point issues
+        for (let v = start; v < end + step * 0.5; v += step) {
+             yTicks.push(v);
+        }
+
+        yDomain = [yTicks[0], yTicks[yTicks.length - 1]];
+    }
 
     const scaleY = scaleLinear({
-        domain: [0, 12],
-        range: [height - 40, 10], // Leave room for axis labels
+        domain: yDomain,
+        range: [height - 40, 10], 
     });
 
-    // Helper to render Just the Line (Scaled)
-    // Removed zoomStyle usage since scale is fixed to 1
-
-    // Helper to render Just the Line (Scaled)
-
-    // Helper to render Just the Line (Scaled)
     const RenderLineSeries = ({
-        dataKey,
+        data,
         color,
         strokeWidth = 1,
     }: {
-        dataKey: keyof DataPoint;
+        data: DataPoint[];
         color: string;
         strokeWidth?: number;
     }) => {
         const lineGen = shape
             .line<DataPoint>()
             .x(d => scaleX(d.date))
-            .y(d => scaleY(d[dataKey] as number))
+            .y(d => scaleY(d.value))
             .curve(shape.curveLinear);
 
-        const path = lineGen(DATA);
+        const path = lineGen(data);
 
-        return <Path d={path || ''} stroke={color} strokeWidth={strokeWidth} fill="none" />;
+        return <Path d={path || ''} stroke={color} strokeWidth={strokeWidth} fill="none" opacity={0.8} />;
     };
 
-    // Helper to render Just the Dots (Static Position)
-    const RenderDotSeries = ({ dataKey, color }: { dataKey: keyof DataPoint; color: string }) => {
+    const RenderDotSeries = ({ data, color }: { data: DataPoint[], color: string }) => {
         return (
             <G>
-                {DATA.map((d, i) => (
+                {data.map((d, i) => (
                     <Circle
                         key={i}
                         cx={scaleX(d.date)}
-                        cy={scaleY(d[dataKey] as number)}
+                        cy={scaleY(d.value)}
                         r={2.5}
                         fill={color}
                         stroke={colors.white}
@@ -244,195 +262,134 @@ export default function EnvChar() {
         );
     };
 
-    // Layout handling
     const onLayout = (event: LayoutChangeEvent) => {
         setLayout(event.nativeEvent.layout);
     };
 
-    const xTicks = DATA.filter((_, i) => i % 14 === 0);
+    // Ticks (using first series dates)
+    const xTicks = seriesData[0]?.data || [];
+
+    // Tooltip Logic
+    const tooltipData = selectedIndex !== null ? seriesData.map(s => ({
+        pond: s.pond,
+        value: s.data[selectedIndex]?.value,
+        color: POND_COLORS[s.pond],
+        unit: metric.unit
+    })).filter(d => d.value !== undefined) : [];
+    
+    const selectedDate = selectedIndex !== null ? xTicks[selectedIndex]?.date : null;
 
     return (
         <GestureHandlerRootView style={styles.container} onLayout={onLayout}>
             {/* Y Axis Labels (Fixed) */}
             <View style={styles.yAxisContainer} pointerEvents="none">
-                {[0, 2, 4, 6, 8, 10, 12].map(val => (
+                {yTicks.map((val, i) => (
                     <Text
-                        key={val}
+                        key={i}
                         style={[styles.axisLabel, { position: 'absolute', top: scaleY(val) - 10 }]}
                     >
-                        {val}
+                        {Number.isInteger(val) ? val : val.toFixed(1)}
                     </Text>
                 ))}
             </View>
 
             <View style={styles.chartArea}>
                 <GestureDetector gesture={composed}>
-                    {/* Scroll Container (Handles TranslateX) */}
-                    <Animated.View style={[styles.chartContent, scrollStyle]}>
-                        {/* Layer 1: Lines/Grid (Previously Zoom Container, now just Svg) */}
-                        <View>
-                            <Svg width={contentWidth} height={height}>
-                                {/* Vertical Grid Lines */}
+                    <View style={{ flex: 1 }}>
+                        <Animated.View style={[styles.chartContent, scrollStyle]}>
+                            <View>
+                                <Svg width={contentWidth} height={height}>
+                                    {/* Vertical Grid Lines */}
+                                    {xTicks.map((d, i) => (
+                                        <Line
+                                            key={`v-${i}`}
+                                            x1={scaleX(d.date)}
+                                            y1={0}
+                                            x2={scaleX(d.date)}
+                                            y2={height - 30}
+                                            stroke={colors.borderDark}
+                                            strokeWidth={0.5}
+                                        />
+                                    ))}
+                                    {/* Horizontal Grid Lines */}
+                                    {yTicks.map((v, i) => (
+                                        <Line
+                                            key={`h-${i}`}
+                                            x1={0}
+                                            y1={scaleY(v)}
+                                            x2={contentWidth}
+                                            y2={scaleY(v)}
+                                            stroke={colors.borderDark}
+                                            strokeWidth={0.5}
+                                        />
+                                    ))}
+
+                                    {/* Data Lines */}
+                                    {seriesData.map(series => (
+                                        <RenderLineSeries
+                                            key={series.pond}
+                                            data={series.data}
+                                            color={POND_COLORS[series.pond] || '#999'}
+                                            strokeWidth={2}
+                                        />
+                                    ))}
+                                </Svg>
+                            </View>
+
+                            {/* Dots */}
+                            <View
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    { width: contentWidth, height: height },
+                                ]}
+                                pointerEvents="none"
+                            >
+                                <Svg width={contentWidth} height={height}>
+                                    {seriesData.map(series => (
+                                        <RenderDotSeries 
+                                            key={series.pond}
+                                            data={series.data}
+                                            color={POND_COLORS[series.pond] || '#999'} 
+                                        />
+                                    ))}
+                                </Svg>
+                            </View>
+
+                            {/* Text Label Container */}
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 10,
+                                    height: '100%',
+                                }}
+                                pointerEvents="none"
+                            >
                                 {xTicks.map((d, i) => (
-                                    <Line
-                                        key={`v-${i}`}
-                                        x1={scaleX(d.date)}
-                                        y1={0}
-                                        x2={scaleX(d.date)}
-                                        y2={height - 30}
-                                        stroke={colors.borderDark}
-                                        strokeWidth={0.5}
+                                    <AnimatedLabel
+                                        key={`l-${i}`}
+                                        date={d.date}
+                                        baseX={scaleX(d.date)}
                                     />
                                 ))}
-                                {/* Horizontal Grid Lines */}
-                                {[0, 2, 4, 6, 8, 10, 12].map(v => (
-                                    <Line
-                                        key={`h-${v}`}
-                                        x1={0}
-                                        y1={scaleY(v)}
-                                        x2={contentWidth}
-                                        y2={scaleY(v)}
-                                        stroke={colors.borderDark}
-                                        strokeWidth={0.5}
-                                    />
-                                ))}
+                            </View>
+                        </Animated.View>
 
-                                {/* Data Lines */}
-                                <RenderLineSeries
-                                    dataKey="Temp"
-                                    color={colors.green[300]}
-                                    strokeWidth={0.8}
-                                />
-                                <RenderLineSeries
-                                    dataKey="DO"
-                                    color={colors.orange[700]}
-                                    strokeWidth={0.8}
-                                />
-                                <RenderLineSeries
-                                    dataKey="pH"
-                                    color={colors.blue[300]}
-                                    strokeWidth={1}
-                                />
-                                <RenderLineSeries
-                                    dataKey="Alk"
-                                    color={colors.yellow[800]}
-                                    strokeWidth={1.5}
-                                />
-                                <RenderLineSeries
-                                    dataKey="Salt"
-                                    color={colors.brown[900]}
-                                    strokeWidth={1.5}
-                                />
-                                <RenderLineSeries
-                                    dataKey="Clear"
-                                    color={colors.blue[700]}
-                                    strokeWidth={0.8}
-                                />
-                                <RenderLineSeries
-                                    dataKey="Ammonia"
-                                    color={colors.green[800]}
-                                    strokeWidth={1.2}
-                                />
-                            </Svg>
-                        </View>
-
-                        {/* Layer 2: DOTS Container (Static Position) */}
-                        <View
-                            style={[
-                                StyleSheet.absoluteFill,
-                                { width: contentWidth, height: height },
-                            ]}
-                            pointerEvents="none"
-                        >
-                            <Svg width={contentWidth} height={height}>
-                                <RenderDotSeries dataKey="Temp" color={colors.green[300]} />
-                                <RenderDotSeries dataKey="DO" color={colors.orange[700]} />
-                                <RenderDotSeries dataKey="pH" color={colors.blue[300]} />
-                                <RenderDotSeries dataKey="Alk" color={colors.yellow[800]} />
-                                <RenderDotSeries dataKey="Salt" color={colors.brown[900]} />
-                                <RenderDotSeries dataKey="Clear" color={colors.blue[700]} />
-                                <RenderDotSeries dataKey="Ammonia" color={colors.green[800]} />
-                            </Svg>
-                        </View>
-
-                        {/* Layer 3: Text Label Container (Handles PositionX) */}
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 10,
-                                height: '100%',
-                            }}
-                            pointerEvents="none"
-                        >
-                            {xTicks.map((d, i) => (
-                                <AnimatedLabel
-                                    key={`l-${i}`}
-                                    date={d.date}
-                                    baseX={scaleX(d.date)}
-                                />
-                            ))}
-                        </View>
-                    </Animated.View>
-                </GestureDetector>
-
-                {/* Tooltip Overlay (Fixed on screen or uses absolute coords from tap, simplified here) */}
-                {selectedPoint && (
-                    <View style={[styles.tooltipContainer, { left: 10, top: 10 }]}>
-                        <View style={styles.tooltipHeader}>
-                            <Text style={styles.tooltipDate}>{formatDate(selectedPoint.date)}</Text>
-                            <Text style={styles.tooltipClose} onPress={handleCloseTooltip}>
-                                ×
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.green[300] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                Temp: {selectedPoint.Temp.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.orange[700] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                DO: {selectedPoint.DO.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.blue[300] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                pH: {selectedPoint.pH.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.yellow[800] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                Alk: {selectedPoint.Alk.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.brown[900] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                Salt: {selectedPoint.Salt.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.blue[700] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                Clear: {selectedPoint.Clear.toFixed(1)}
-                            </Text>
-                        </View>
-                        <View style={styles.tooltipRow}>
-                            <View style={[styles.dot, { backgroundColor: colors.green[800] }]} />
-                            <Text style={styles.tooltipLabel}>
-                                Ammonia: {selectedPoint.Ammonia.toFixed(1)}
-                            </Text>
-                        </View>
+                        {/* Tooltip (Extracted) */}
+                        <TooltipEnvChart
+                            visible={selectedIndex !== null && !!selectedDate}
+                            date={selectedDate || new Date()}
+                            data={tooltipData}
+                            position={tooltipPos}
+                            onClose={handleCloseTooltip}
+                            chartWidth={layout.width}
+                        />
                     </View>
-                )}
+                </GestureDetector>
             </View>
-            {/* Right Axis Mask (Fixed Right) */}
+            {/* Right Axis Mask */}
             <View style={styles.yAxisContainer} pointerEvents="none" />
         </GestureHandlerRootView>
     );
