@@ -1,16 +1,80 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { colors, spacing } from '@/styles';
+import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
+import { Legend } from '@/features/reports/components/feed-prod/Legend';
+import { Chart } from '@/features/reports/components/feed-prod/Chart';
+import {
+    CHART_WIDTH,
+    CHART_HEIGHT,
+    PADDING_LEFT,
+    PADDING_RIGHT,
+    PADDING_TOP,
+    PADDING_BOTTOM,
+} from '@/features/reports/components/feed-prod/chartData';
 
 export const FeedProdChart = () => {
-  return (
-    <View style={styles.container}>
-      <Text>Feed - Production Chart Component</Text>
-    </View>
-  );
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
+    const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+
+    return (
+        <View style={styles.container}>
+            {/* Collapsible Chart Section */}
+            <View style={styles.chartSection}>
+                <CollapseHead
+                    title="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
+                    isExpanded={isExpanded}
+                    onToggle={() => setIsExpanded(!isExpanded)}
+                    style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
+                />
+
+                {isExpanded && (
+                    <>
+                        <MetricsRow />
+                        <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                        <Legend />
+                    </>
+                )}
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    headerExpanded: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: spacing.md,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        backgroundColor: colors.white,
+    },
+    headerCollapsed: {
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+        paddingVertical: 16,
+    },
+    chartSection: {
+        backgroundColor: colors.white,
+        marginTop: spacing.sm,
+        // Box shadow: 0px 2px 4px 0px #00000005
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.02, // 05 in hex = 5/255 ≈ 0.02
+        shadowRadius: 4,
+        elevation: 2, // For Android
+        overflow: 'hidden',
+    },
 });

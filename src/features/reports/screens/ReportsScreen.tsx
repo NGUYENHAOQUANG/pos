@@ -12,14 +12,15 @@ import { FarmData } from '@/features/farm/types/farm.types';
 // ----------------------------------------------------------------
 // SPACE FOR IMPORTING REPORT COMPONENTS
 // ----------------------------------------------------------------
+// import { EnvironmentChart } from '../components/env-chart';
+import { FeedProdChart } from '../components/feed-prod';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
 // import { FeedProdChart } from '../components/feed-prod';
 // import { ActivePondChart } from '../components/active-pond';
-import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
 // import { ProfitChart } from '../components/profit-chart';
-import CompilationCostChart from '@/features/reports/components/cost-chart/CompilationCostChart';
-import { HarvestChart } from '../components/harvest-chart/HarvestChart';
-import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
+// import { CostChart } from '../components/cost-chart';
+// import { HarvestChart } from '../components/harvest-chart/HarvestChart';
+// import { WaterUsage } from '../components/water-usage';
 // import { PondTransfer } from '../components/pond-transfer';
 // import { HarvestStat } from '../components/harvest-stat';
 // ----------------------------------------------------------------
@@ -100,47 +101,65 @@ export const ReportsScreen = () => {
                 onSelectSeason={setSelectedSeason}
             />
 
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.content}>
                 {/* ---------------------------------------------------------------------------------- */}
                 {/*                               PACED FOR REPORTS COMPONENTS                          */}
                 {/* ---------------------------------------------------------------------------------- */}
-
-                <CompilationEnvChart />
-
-                {/*
-            2. <FeedProdChart />
+                {/* 
+            1. <EnvironmentChart /> 
         */}
 
-                {/*
+                <ScrollView
+                    style={styles.content}
+                    contentContainerStyle={styles.contentContainer}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* ---------------------------------------------------------------------------------- */}
+                    {/*                               PACED FOR REPORTS COMPONENTS                          */}
+                    {/* ---------------------------------------------------------------------------------- */}
+
+                    <CompilationEnvChart />
+
+                    {/* 
+            2. <FeedProdChart />
+        */}
+                    <FeedProdChart />
+
+                    {/* 
             3. <ActivePondChart />
         */}
 
-                <ProdChart />
+                    {/* 
+            4. <ProdChart />
+        */}
 
-                {/*
+                    {/* 
             5. <ProfitChart />
         */}
 
-                <CompilationCostChart />
+                    {/* 
+            6. <CostChart />
+        */}
 
-                <HarvestChart />
+                    {/* 
+            7. <HarvestChart />
+        */}
 
-                <WaterUsageChart />
+                    {/* 
+            8. <WaterUsage />
+        */}
 
-                {/*
+                    {/* 
             9. <PondTransfer />
         */}
 
-                {/*
+                    {/* 
             10. <HarvestStat />
         */}
 
-                {/* ---------------------------------------------------------------------------------- */}
-            </ScrollView>
+                    {/* ---------------------------------------------------------------------------------- */}
+                </ScrollView>
+            </View>
         </View>
     );
 };
