@@ -1,178 +1,120 @@
 import { Dimensions } from 'react-native';
 import { spacing } from '@/styles';
 
-// Chart dimensions
+export interface FeedProdDataPoint {
+    date: string; // Format: MM/DD/YYYY
+    production: number; // Sản lượng (tấn)
+    consumed: number; // Đã ăn (tấn)
+    forecast?: number; // Dự báo (tấn) - optional
+    fcr: number; // Feed Conversion Ratio
+    note: string; // Ghi chú
+}
+
 export const SCREEN_WIDTH = Dimensions.get('window').width;
 export const CHART_WIDTH = SCREEN_WIDTH - spacing.lg * 2;
 export const CHART_HEIGHT = 280;
 
-// Chart configuration
-export const DAY_MARKS = [0, 11, 22, 33, 44, 55, 66, 77, 88, 99, 110];
-export const TOTAL_DAYS = 110;
-export const START_DATE = new Date(2025, 8, 7); // Month is 0-indexed (8 = September)
-export const DIVIDER_DAY = 77; // Divider position: predicts 4 columns (day 77)
-
-// Chart padding
 export const PADDING_LEFT = 40;
 export const PADDING_RIGHT = 20;
 export const PADDING_TOP = 30;
 export const PADDING_BOTTOM = 40;
 
-// Date helper
-export const getDateForDay = (day: number): string => {
-    const date = new Date(START_DATE);
-    date.setDate(date.getDate() + day);
-
-    const dayStr = String(date.getDate()).padStart(2, '0');
-    const monthStr = String(date.getMonth() + 1).padStart(2, '0');
-    const yearStr = String(date.getFullYear());
-
-    return `${dayStr}/${monthStr}/${yearStr}`;
-};
-
-// Day labels
-export const DAY_LABELS = DAY_MARKS.map(day => getDateForDay(day));
-
-// Orange line: stops at divider (historical data)
-export const ORANGE_DATA_HISTORICAL = (() => {
-    const data = [];
-    let currentValue = 0.02; // Starting value
-
-    for (let day = 0; day <= 110; day++) {
-        data.push({ day, value: Math.round(currentValue * 100) / 100 });
-
-        if (day < 110) {
-            // Increase 1-20% randomly compared to previous day
-            const increaseRate = 0.01 + Math.random() * 0.19; // 1% to 20%
-            currentValue = currentValue * (1 + increaseRate);
-        }
-    }
-
-    return data;
-})();
-
-// Blue line: crosses divider (historical + forecast)
-export const BLUE_DATA_HISTORICAL = Array.from({ length: 78 }, (_, i) => {
-    const day = i;
-    const progress = day / 77;
-
-    // Start from low value, gradually increase with fluctuations
-    const startValue = 6; // Low value at start
-    const midValue = 16; // Mid value
-    const endValue = 14; // Value at end of historical (after peaks/valleys)
-
-    // Create base increasing curve
-    let baseValue;
-    if (progress < 0.4) {
-        // First part: slight increase
-        baseValue = startValue + (midValue - startValue) * (progress / 0.4);
-    } else {
-        // Later part: with fluctuations
-        baseValue = midValue - (midValue - endValue) * ((progress - 0.4) / 0.6);
-    }
-
-    // Add specific peaks and valleys
-    let fluctuation = 0;
-
-    // Peak 1: around 30-40% progress
-    if (progress >= 0.25 && progress <= 0.4) {
-        const peakProgress = (progress - 0.25) / 0.15;
-        fluctuation = Math.sin(peakProgress * Math.PI) * 3; // High peak
-    }
-
-    // Valley after peak 1: around 40-50%
-    if (progress >= 0.4 && progress <= 0.5) {
-        const valleyProgress = (progress - 0.4) / 0.1;
-        fluctuation = -Math.sin(valleyProgress * Math.PI) * 2; // Valley
-    }
-
-    // Peak 2 (higher than peak 1): around 50-65%
-    if (progress >= 0.5 && progress <= 0.65) {
-        const peakProgress = (progress - 0.5) / 0.15;
-        fluctuation = Math.sin(peakProgress * Math.PI) * 4; // Higher peak
-    }
-
-    // Deep valley: around 65-75%
-    if (progress >= 0.65 && progress <= 0.75) {
-        const valleyProgress = (progress - 0.65) / 0.1;
-        fluctuation = -Math.sin(valleyProgress * Math.PI) * 3.5; // Deep valley
-    }
-
-    // Peak 3: around 75-85%
-    if (progress >= 0.75 && progress <= 0.85) {
-        const peakProgress = (progress - 0.75) / 0.1;
-        fluctuation = Math.sin(peakProgress * Math.PI) * 2.5;
-    }
-
-    // Final valley: around 85-95%
-    if (progress >= 0.85 && progress <= 0.95) {
-        const valleyProgress = (progress - 0.85) / 0.1;
-        fluctuation = -Math.sin(valleyProgress * Math.PI) * 2;
-    }
-
-    return { day, value: Math.max(0, baseValue + fluctuation) };
-});
-
-// Forecast: strong increase, almost linear upward
-export const BLUE_DATA_FORECAST = Array.from({ length: 33 }, (_, i) => {
-    const day = i + 78; // Start from day 78
-    const progress = (day - 78) / 32; // 0 to 1 in forecast period
-
-    // Strong increase, almost linear from end of historical
-    const startValue = 12; // Continue from historical (after final valley)
-    const endValue = 32; // High value at end
-
-    // Almost linear increase with slight smoothness
-    const baseValue = startValue + (endValue - startValue) * progress;
-
-    // Very slight fluctuation for smoothness
-    const smoothVariation = Math.sin(progress * Math.PI * 4) * 0.5;
-
-    return { day, value: Math.max(0, baseValue + smoothVariation) };
-});
-
-// Calculate Y_MAX from maximum value in data
-export const calculateYMax = () => {
-    // Max from ORANGE_DATA_HISTORICAL (only up to DIVIDER_DAY)
-    const orangeMax = Math.max(
-        ...ORANGE_DATA_HISTORICAL.filter(p => p.day <= DIVIDER_DAY).map(p => p.value)
-    );
-
-    // Max from BLUE_DATA_HISTORICAL and BLUE_DATA_FORECAST
-    const blueMax = Math.max(
-        ...BLUE_DATA_HISTORICAL.map(p => p.value),
-        ...BLUE_DATA_FORECAST.map(p => p.value)
-    );
-
-    // Get maximum value
-    const maxValue = Math.max(orangeMax, blueMax);
-
-    if (!maxValue) return 80; // Fallback if no data
-
-    // Divide by 4 (for 4 parts on Y-axis), round up, then multiply by 4
-    const valuePerPart = maxValue / 4;
-
-    // Round up each part value by step:
-    // - If < 100: round up to step 10 (e.g., 55 -> 60, 45 -> 60)
-    // - If >= 100: round up to step 100 (e.g., 105 -> 200, 700 -> 800)
-    let roundedPerPart;
-    if (valuePerPart < 100) {
-        roundedPerPart = Math.ceil(valuePerPart / 10) * 10;
-    } else {
-        roundedPerPart = Math.ceil(valuePerPart / 100) * 100;
-    }
-
-    // Multiply back by 4 to get Y_MAX
-    return roundedPerPart * 4;
-};
-
-export const Y_MAX_CHART1 = calculateYMax();
-
-// Calculate Y-axis label values: divide max into 4 equal parts
-export const getYAxisLabels = () => {
-    const labels = [];
-    for (let i = 0; i <= 4; i++) {
-        labels.push((Y_MAX_CHART1 / 4) * i);
-    }
-    return labels;
-};
+export const RAW_DATA: Omit<FeedProdDataPoint, 'forecast'>[] = [
+    {
+        date: '10/1/2025',
+        production: 12.0,
+        consumed: 8.7,
+        fcr: 1.38,
+        note: 'Bắt đầu có sản lượng thực tế',
+    },
+    { date: '10/2/2025', production: 12.3, consumed: 8.9, fcr: 1.38, note: 'Tôm phát triển đều' },
+    { date: '10/3/2025', production: 12.6, consumed: 9.2, fcr: 1.37, note: 'Nước ổn định' },
+    { date: '10/4/2025', production: 12.9, consumed: 9.5, fcr: 1.36, note: 'Ăn mạnh hơn' },
+    { date: '10/5/2025', production: 13.2, consumed: 9.8, fcr: 1.35, note: 'Bổ sung khoáng' },
+    { date: '10/6/2025', production: 13.5, consumed: 10.1, fcr: 1.34, note: 'Nước màu xanh' },
+    {
+        date: '10/7/2025',
+        production: 13.8,
+        consumed: 10.4,
+        fcr: 1.37,
+        note: 'Tăng tần suất cho ăn',
+    },
+    { date: '10/8/2025', production: 14.1, consumed: 10.7, fcr: 1.37, note: 'Kiểm soát đáy ao' },
+    { date: '10/9/2025', production: 14.4, consumed: 11.0, fcr: 1.36, note: 'Nước trong' },
+    {
+        date: '10/10/2025',
+        production: 14.7,
+        consumed: 11.3,
+        fcr: 1.37,
+        note: 'Điều chỉnh khẩu phần',
+    },
+    { date: '10/11/2025', production: 15.0, consumed: 11.6, fcr: 1.36, note: 'Tôm phát triển đều' },
+    { date: '10/12/2025', production: 15.3, consumed: 11.9, fcr: 1.35, note: 'Sau mưa nhẹ' },
+    {
+        date: '10/13/2025',
+        production: 15.6,
+        consumed: 12.2,
+        fcr: 1.35,
+        note: 'Kiểm soát đáy ao tốt',
+    },
+    { date: '10/14/2025', production: 15.9, consumed: 12.5, fcr: 1.34, note: 'Nước ổn định' },
+    { date: '10/15/2025', production: 16.2, consumed: 12.8, fcr: 1.34, note: 'Đợt thu tỉa nhỏ' },
+    {
+        date: '10/16/2025',
+        production: 16.5,
+        consumed: 13.1,
+        fcr: 1.35,
+        note: 'Sau thu tỉa, ăn vẫn tốt',
+    },
+    { date: '10/17/2025', production: 16.8, consumed: 13.4, fcr: 1.35, note: 'Nước màu xanh' },
+    { date: '10/18/2025', production: 17.1, consumed: 13.7, fcr: 1.36, note: 'Tăng trọng đều' },
+    {
+        date: '10/19/2025',
+        production: 17.4,
+        consumed: 14.0,
+        fcr: 1.37,
+        note: 'Nước ổn định, màu đẹp',
+    },
+    { date: '10/20/2025', production: 17.7, consumed: 14.3, fcr: 1.37, note: 'Chuẩn bị thay nước' },
+    { date: '10/21/2025', production: 18.0, consumed: 14.6, fcr: 1.36, note: 'Sau thay nước' },
+    { date: '10/22/2025', production: 18.3, consumed: 14.9, fcr: 1.35, note: 'Tôm ăn mạnh' },
+    { date: '10/23/2025', production: 18.6, consumed: 15.2, fcr: 1.35, note: 'Nước trong' },
+    { date: '10/24/2025', production: 18.9, consumed: 15.5, fcr: 1.34, note: 'Bổ sung vi sinh' },
+    { date: '10/25/2025', production: 19.2, consumed: 15.8, fcr: 1.34, note: 'Nước màu xanh' },
+    { date: '10/26/2025', production: 19.5, consumed: 16.1, fcr: 1.33, note: 'Ăn đều' },
+    { date: '10/27/2025', production: 19.8, consumed: 16.4, fcr: 1.33, note: 'Tăng trọng rõ rệt' },
+    { date: '10/28/2025', production: 20.1, consumed: 16.7, fcr: 1.34, note: 'Nước ổn định' },
+    { date: '10/29/2025', production: 20.4, consumed: 17.0, fcr: 1.35, note: 'Chuẩn bị thu tỉa' },
+    { date: '10/30/2025', production: 20.7, consumed: 17.3, fcr: 1.35, note: 'Tôm phát triển đều' },
+    { date: '10/31/2025', production: 21.0, consumed: 17.6, fcr: 1.36, note: 'Nước màu xanh' },
+    { date: '11/1/2025', production: 21.3, consumed: 17.9, fcr: 1.36, note: 'Bổ sung khoáng' },
+    { date: '11/2/2025', production: 21.6, consumed: 18.2, fcr: 1.36, note: 'Nước trong' },
+    { date: '11/3/2025', production: 21.9, consumed: 18.5, fcr: 1.36, note: 'Kiểm tra tôm' },
+    { date: '11/4/2025', production: 22.2, consumed: 18.8, fcr: 1.36, note: 'Ăn đều' },
+    { date: '11/5/2025', production: 22.5, consumed: 19.1, fcr: 1.36, note: 'Sau mưa nhẹ' },
+    { date: '11/6/2025', production: 22.8, consumed: 19.4, fcr: 1.36, note: 'Thay nước' },
+    { date: '11/7/2025', production: 23.1, consumed: 19.7, fcr: 1.36, note: 'Bổ sung vi sinh' },
+    { date: '11/8/2025', production: 23.4, consumed: 20.0, fcr: 1.36, note: 'Nước màu xanh' },
+    { date: '11/9/2025', production: 23.7, consumed: 20.3, fcr: 1.36, note: 'Ăn mạnh' },
+    { date: '11/10/2025', production: 24.0, consumed: 20.6, fcr: 1.36, note: 'Kiểm tra tôm' },
+    { date: '11/11/2025', production: 24.3, consumed: 20.9, fcr: 1.36, note: 'Nước ổn định' },
+    { date: '11/12/2025', production: 24.6, consumed: 21.2, fcr: 1.36, note: 'Tăng khẩu phần' },
+    { date: '11/13/2025', production: 24.9, consumed: 21.5, fcr: 1.36, note: 'Sau mưa nhẹ' },
+    { date: '11/14/2025', production: 25.2, consumed: 21.8, fcr: 1.36, note: 'Thay nước' },
+    { date: '11/15/2025', production: 25.5, consumed: 22.1, fcr: 1.36, note: 'Bổ sung khoáng' },
+    { date: '11/16/2025', production: 25.8, consumed: 22.4, fcr: 1.36, note: 'Nước trong' },
+    { date: '11/17/2025', production: 26.1, consumed: 22.7, fcr: 1.36, note: 'Kiểm tra tôm' },
+    { date: '11/18/2025', production: 26.4, consumed: 23.0, fcr: 1.36, note: 'Nước ổn định' },
+    { date: '11/19/2025', production: 26.7, consumed: 23.3, fcr: 1.36, note: 'Kiểm tra tôm' },
+    { date: '11/20/2025', production: 27.0, consumed: 23.6, fcr: 1.36, note: 'Thay nước' },
+    { date: '11/21/2025', production: 27.3, consumed: 23.9, fcr: 1.36, note: 'Bổ sung khoáng' },
+    { date: '11/22/2025', production: 27.6, consumed: 24.2, fcr: 1.36, note: 'Sau mưa nhẹ' },
+    { date: '11/23/2025', production: 27.9, consumed: 24.5, fcr: 1.36, note: 'Nước màu xanh' },
+    { date: '11/24/2025', production: 28.2, consumed: 24.8, fcr: 1.36, note: 'Ăn đều' },
+    { date: '11/25/2025', production: 28.5, consumed: 25.1, fcr: 1.36, note: 'Kiểm tra tôm' },
+    { date: '11/26/2025', production: 28.8, consumed: 25.4, fcr: 1.36, note: 'Nước trong' },
+    { date: '11/27/2025', production: 29.1, consumed: 25.7, fcr: 1.36, note: 'Thay nước' },
+    { date: '11/28/2025', production: 29.4, consumed: 26.0, fcr: 1.36, note: 'Bổ sung vi sinh' },
+    { date: '11/29/2025', production: 29.7, consumed: 26.3, fcr: 1.36, note: 'Ăn mạnh' },
+    { date: '11/30/2025', production: 30.0, consumed: 26.6, fcr: 1.36, note: 'Trước khi thu tỉa' },
+];
