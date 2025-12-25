@@ -4,55 +4,36 @@ import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
 const LEGEND_ITEMS = [
-    { color: colors.orange[700], label: '{tên ao}' },
-    { color: colors.green[300], label: '{tên ao}' },
-    { color: colors.blue[700], label: '{tên ao}' },
-    { color: colors.green[800], label: '{tên ao}' },
-    { color: colors.brown[900], label: '{tên ao}' },
-    { color: colors.blue[300], label: '{tên ao}' },
-    { color: colors.yellow[800], label: '{tên ao}' },
+    { color: colors.orange[700], label: 'N01' },
+    { color: colors.green[300], label: 'N02' },
+    { color: colors.blue[700], label: 'N03' },
+    { color: colors.green[800], label: 'V01' },
+    { color: colors.brown[900], label: 'V02' },
+    { color: colors.blue[300], label: 'V03' },
+    { color: colors.yellow[800], label: 'V04' },
 ];
 
 export const BottomEnvChart = () => {
-    const row1 = LEGEND_ITEMS.slice(0, 5);
-    const row2 = LEGEND_ITEMS.slice(5);
-
     return (
         <View style={styles.container}>
-            {/* Row 1: 5 Items */}
-            <View style={styles.row}>
-                {row1.map((item, index) => (
-                    <View key={`r1-${index}`} style={styles.item}>
-                        <View style={[styles.dot, { backgroundColor: item.color }]} />
-                        <Text style={styles.text}>{item.label}</Text>
-                    </View>
-                ))}
-            </View>
-
-            {/* Row 2: 2 Items */}
-            <View style={styles.row}>
-                {row2.map((item, index) => (
-                    <View key={`r2-${index}`} style={styles.item}>
-                        <View style={[styles.dot, { backgroundColor: item.color }]} />
-                        <Text style={styles.text}>{item.label}</Text>
-                    </View>
-                ))}
-            </View>
+            {LEGEND_ITEMS.map((item, index) => (
+                <View key={index} style={styles.item}>
+                    <View style={[styles.dot, { backgroundColor: item.color }]} />
+                    <Text style={styles.text}>{item.label}</Text>
+                </View>
+            ))}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        paddingVertical: 12,
-        gap: 8, // Vertical gap between rows
-    },
-    row: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'center',
-        alignItems: 'center',
-        flexWrap: 'nowrap', // Ensure single line per row
-        gap: 16, // Horizontal gap between items
+        paddingVertical: 12,
+        paddingHorizontal: 8,
+        gap: 16, // Consistent gap between items
     },
     item: {
         flexDirection: 'row',

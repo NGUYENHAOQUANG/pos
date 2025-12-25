@@ -15,13 +15,13 @@ interface PondIndexProps {
 }
 
 const DEFAULT_DATA: PondData[] = [
-    { id: '1', name: '{tên ao}', value: '{chỉ số}', color: colors.orange[700] },
-    { id: '2', name: '{tên ao}', value: '{chỉ số}', color: colors.green[300] },
-    { id: '3', name: '{tên ao}', value: '{chỉ số}', color: colors.blue[700] },
-    { id: '4', name: '{tên ao}', value: '{chỉ số}', color: colors.green[800] },
-    { id: '5', name: '{tên ao}', value: '{chỉ số}', color: colors.brown[900] },
-    { id: '6', name: '{tên ao}', value: '{chỉ số}', color: colors.blue[300] },
-    { id: '7', name: '{tên ao}', value: '{chỉ số}', color: colors.yellow[800] },
+    { id: '1', name: 'N01', value: '{chỉ số}', color: colors.orange[700] },
+    { id: '2', name: 'N02', value: '{chỉ số}', color: colors.green[300] },
+    { id: '3', name: 'N03', value: '{chỉ số}', color: colors.blue[700] },
+    { id: '4', name: 'V01', value: '{chỉ số}', color: colors.green[800] },
+    { id: '5', name: 'V02', value: '{chỉ số}', color: colors.brown[900] },
+    { id: '6', name: 'V03', value: '{chỉ số}', color: colors.blue[300] },
+    { id: '7', name: 'V04', value: '{chỉ số}', color: colors.yellow[800] },
 ];
 
 export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {

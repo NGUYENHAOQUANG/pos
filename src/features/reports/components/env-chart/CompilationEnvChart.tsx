@@ -45,8 +45,10 @@ const CompilationEnvChart = () => {
                             <PondIndex />
 
                             <View style={styles.chartContainer}>
-                                <EnvChar />
+                                <EnvChar selected={selectedTab} />
                             </View>
+
+                            <View style={styles.divider} />
 
                             <BottomEnvChart />
                         </>
@@ -81,5 +83,10 @@ const styles = StyleSheet.create({
     },
     chartContainer: {
         marginVertical: 16,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginBottom: 8,
     },
 });
