@@ -1,8 +1,8 @@
 /**
  * @file HarvestItemCard.tsx
- * @description CARD ITEM
+ * @description Card item hiển thị thông tin thu hoạch chi tiết
  * @author NGUYENHAOQUANG
- * @created 2025-12-24
+ * @created 2025-12-25
  */
 
 import React, { useState } from 'react';
@@ -12,15 +12,15 @@ import { colors } from '@/styles';
 
 export interface HarvestData {
     id: string;
-    pond: string;
     harvestDate: string;
-    doc: number;
-    receivedAmount: string;
-    size: string;
-    receivedDate: string;
+    cycleId: string;
+    pondId: string;
     harvestType: string;
-    yield: string;
+    output: string;
+    size: number;
+    price: string;
     revenue: string;
+    cumulativeCost: string;
 }
 
 interface Props {
@@ -35,7 +35,7 @@ export const HarvestItemCard = ({ item }: Props) => {
         setExpanded(!expanded);
     };
 
-    const renderRow = (label: string, value: string) => (
+    const renderRow = (label: string, value: string | number) => (
         <View style={styles.row}>
             <Text style={styles.label}>{label}:</Text>
             <Text style={styles.value}>{value}</Text>
@@ -44,31 +44,33 @@ export const HarvestItemCard = ({ item }: Props) => {
 
     return (
         <View style={styles.card}>
-            {/* Title */}
+            {/* Title: Mã Ao - Mã Chu Kỳ */}
             <Text style={styles.cardTitle}>
-                <Text style={styles.bold}>Ao nuôi: </Text>
-                {item.pond}
+                <Text style={styles.bold}>Ao: </Text>
+                {item.pondId} -<Text style={styles.bold}> Chu kỳ: </Text>
+                {item.cycleId}
             </Text>
 
-            {/* Subtitle */}
+            {/* Subtitle: Ngày thu - Loại thu hoạch */}
             <Text style={styles.cardSubtitle}>
                 <Text style={styles.bold}>Ngày thu:</Text> {item.harvestDate} -
-                <Text style={styles.bold}> Ngày nuôi (DOC): </Text>
-                {item.doc}
+                <Text style={styles.bold}> Loại: </Text>
+                {item.harvestType}
             </Text>
 
             <View style={styles.divider} />
 
             <View style={styles.content}>
-                {renderRow('Lượng nhận (con)', item.receivedAmount)}
+                {/* Thông tin chính hiển thị ngay */}
+                {renderRow('Sản lượng (kg)', item.output)}
                 {renderRow('Cỡ tôm (con/kg)', item.size)}
+                {renderRow('Doanh thu (VNĐ)', item.revenue)}
 
+                {/* Thông tin chi tiết khi mở rộng */}
                 {expanded && (
                     <View style={styles.expandedContent}>
-                        {renderRow('Ngày nhận', item.receivedDate)}
-                        {renderRow('Loại thu hoạch', item.harvestType)}
-                        {renderRow('Sản lượng (kg)', item.yield)}
-                        {renderRow('Doanh thu (VNĐ)', item.revenue)}
+                        {renderRow('Đơn giá (VNĐ/kg)', item.price)}
+                        {renderRow('Chi phí lũy kế (VNĐ)', item.cumulativeCost)}
                     </View>
                 )}
             </View>
