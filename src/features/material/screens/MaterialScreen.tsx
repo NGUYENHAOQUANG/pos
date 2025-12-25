@@ -16,18 +16,24 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { InventoryCard } from '../components/inventory/InventoryCard';
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
+import { mockMaterialList } from '../mockData/materialData';
 
 export const MeterialScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
   const { setTabBarVisible } = useTabBarVisibility();
 
   const [selectedTab, setSelectedTab] = useState<TabType>('list');
-  const [materials, setMaterials] = useState<IMaterial[]>([]);
+  const [materials, setMaterials] = useState<IMaterial[]>(mockMaterialList);
   const [searchText, setSearchText] = useState('');
   const [filterGroup, setFilterGroup] = useState('');
   const [inventoryList, setInventoryList] = useState<IInventoryTicket[]>([]);
   const [warehouseList, setWarehouseList] = useState<IWarehouseReceipt[]>([]);
   const [filterMaterialName, setFilterMaterialName] = useState<string | null>(null);
+
+  // Force update materials on mount to handle Fast Refresh state preservation
+  React.useEffect(() => {
+    setMaterials(mockMaterialList);
+  }, []);
 
   useLayoutEffect(() => {
     // Always show tab bar on list screen
