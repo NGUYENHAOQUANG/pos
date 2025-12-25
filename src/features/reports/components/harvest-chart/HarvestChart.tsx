@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, layout, shadows, typography } from '@/styles';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
-import { mockHarvestChartData } from './mockData';
+import { mockHarvestChartData } from './harvestData';
 
 const CHART_CONTENT_HEIGHT = 394;
 const BAR_MAX_HEIGHT = 340.61;
