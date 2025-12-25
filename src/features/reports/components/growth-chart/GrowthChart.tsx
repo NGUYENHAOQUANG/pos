@@ -22,36 +22,15 @@ import Animated, {
     useAnimatedStyle,
 } from 'react-native-reanimated';
 
-// ----------------------------------------------------------------------
-// TYPES & MOCK DATA
-// ----------------------------------------------------------------------
-
-type DataPoint = {
-    date: string;
-    actual: number | null;
-    expected: number;
-    dayAge: number;
-};
-
-// Mock data matching the curve in the image
-const MOCK_DATA: DataPoint[] = [
-    { date: '2025-12-02', actual: 0, expected: 0, dayAge: 2 },
-    { date: '2025-12-03', actual: 0.3, expected: 0.8, dayAge: 3 },
-    { date: '2025-12-04', actual: 1.2, expected: 2.2, dayAge: 4 },
-    { date: '2025-12-05', actual: null, expected: 4.5, dayAge: 5 },
-    { date: '2025-12-06', actual: null, expected: 8.0, dayAge: 6 },
-    { date: '2025-12-07', actual: null, expected: 13.0, dayAge: 7 },
-    { date: '2025-12-08', actual: null, expected: 19.5, dayAge: 8 },
-    { date: '2025-12-09', actual: null, expected: 27.0, dayAge: 9 },
-    { date: '2025-12-10', actual: null, expected: 35.0, dayAge: 10 },
-    { date: '2025-12-11', actual: null, expected: 43.0, dayAge: 11 },
-    { date: '2025-12-12', actual: null, expected: 50.0, dayAge: 12 },
-    { date: '2025-12-13', actual: null, expected: 56.0, dayAge: 13 },
-    { date: '2025-12-14', actual: null, expected: 60.0, dayAge: 14 },
-    { date: '2025-12-15', actual: null, expected: 63.0, dayAge: 15 },
-];
-
-const TABS = ['Sản lượng', 'Tỷ lệ sống', 'Trọng lượng con'];
+import {
+    productionData,
+    survivalData,
+    weightData,
+    GrowthDataPoint,
+    CHART_HEIGHT,
+    PADDING,
+    TABS,
+} from './growthData';
 
 // ----------------------------------------------------------------------
 // CONSTANTS
@@ -60,9 +39,6 @@ const TABS = ['Sản lượng', 'Tỷ lệ sống', 'Trọng lượng con'];
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedView = Animated.createAnimatedComponent(View);
-
-const CHART_HEIGHT = 380;
-const PADDING = { top: 30, right: 16, bottom: 40, left: 16 };
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -83,7 +59,21 @@ export const GrowthChart = () => {
     const [expanded, setExpanded] = useState(true);
     const [selectedTab, setSelectedTab] = useState('Sản lượng');
     const [chartWidth, setChartWidth] = useState(Dimensions.get('window').width);
-    const [activeDataPoint, setActiveDataPoint] = useState<DataPoint | null>(null);
+    const [activeGrowthDataPoint, setActiveGrowthDataPoint] = useState<GrowthDataPoint | null>(
+        null
+    );
+
+    // Dynamic data selection
+    const activeData = useMemo(() => {
+        switch (selectedTab) {
+            case 'Tỷ lệ sống':
+                return survivalData;
+            case 'Trọng lượng con':
+                return weightData;
+            default:
+                return productionData;
+        }
+    }, [selectedTab]);
 
     // Shared Values for safe UI interactions
     const opacitySV = useSharedValue(0);
@@ -98,38 +88,56 @@ export const GrowthChart = () => {
     // ----------------------------------------------------------------------
     // SCALES & PATHS
     // ----------------------------------------------------------------------
+    const { yMax, yLabels } = useMemo(() => {
+        const allValues = activeData.reduce((acc: number[], d: GrowthDataPoint) => {
+            acc.push(d.expected);
+            if (d.actual !== null) acc.push(d.actual);
+            return acc;
+        }, [] as number[]);
+
+        const maxVal = Math.max(...allValues, 1);
+        const computedMax = Math.ceil(maxVal * 1.1 * 10) / 10; // 10% headroom, rounded to 0.1
+
+        const labelCount = 5;
+        const labels = Array.from({ length: labelCount }, (_, i) => {
+            const val = (computedMax / (labelCount - 1)) * (labelCount - 1 - i);
+            return val % 1 === 0 ? val.toString() : val.toFixed(1).replace('.', ',');
+        });
+
+        return { yMax: computedMax, yLabels: labels };
+    }, [activeData]);
+
     const scales = useMemo(() => {
         const effectiveWidth = chartWidth - PADDING.left - PADDING.right;
-        const yMax = Math.max(...MOCK_DATA.map(d => Math.max(d.expected, d.actual || 0)), 1);
 
         const x = scaleLinear()
-            .domain([0, MOCK_DATA.length - 1])
+            .domain([0, activeData.length - 1])
             .range([PADDING.left, PADDING.left + effectiveWidth]);
 
         const y = scaleLinear()
-            .domain([0, yMax * 1.1])
+            .domain([0, yMax])
             .range([CHART_HEIGHT - PADDING.bottom, PADDING.top]);
 
         return { x, y };
-    }, [chartWidth]);
+    }, [chartWidth, yMax, activeData.length]);
 
     const paths = useMemo(() => {
-        const makeExpectedLine = line<DataPoint>()
+        const makeExpectedLine = line<GrowthDataPoint>()
             .x((_, i) => scales.x(i))
             .y(d => scales.y(d.expected))
             .curve(curveMonotoneX);
 
-        const actualData = MOCK_DATA.filter(d => d.actual !== null);
-        const makeActualLine = line<DataPoint>()
-            .x(d => scales.x(MOCK_DATA.indexOf(d)))
+        const actualData = activeData.filter(d => d.actual !== null);
+        const makeActualLine = line<GrowthDataPoint>()
+            .x(d => scales.x(activeData.indexOf(d)))
             .y(d => scales.y(d.actual || 0))
             .curve(curveMonotoneX);
 
         return {
-            expectedPath: makeExpectedLine(MOCK_DATA),
+            expectedPath: makeExpectedLine(activeData),
             actualPath: actualData.length > 1 ? makeActualLine(actualData) : null,
         };
-    }, [scales]);
+    }, [scales, activeData]);
 
     const onLayout = (event: any) => {
         setChartWidth(event.nativeEvent.layout.width);
@@ -145,7 +153,7 @@ export const GrowthChart = () => {
     const top = PADDING.top;
     const bottom = PADDING.bottom;
     // Pre-calculate y-range for linear interpolation in worklet
-    const yDomainMax = Math.max(...MOCK_DATA.map(d => d.expected), 1) * 1.1;
+    const yDomainMax = yMax;
     const yRangeMin = CHART_HEIGHT - PADDING.bottom; // Bottom pixel (value 0)
     const yRangeMax = PADDING.top; // Top pixel (value Max)
 
@@ -153,43 +161,43 @@ export const GrowthChart = () => {
         .onBegin(e => {
             opacitySV.value = 1;
             const effectiveW = chartWidth - left - right;
-            const step = effectiveW / (MOCK_DATA.length - 1);
+            const step = effectiveW / (activeData.length - 1);
 
             const relativeX = e.x - left;
             const index = Math.round(relativeX / step);
-            const clampedIndex = Math.max(0, Math.min(index, MOCK_DATA.length - 1));
+            const clampedIndex = Math.max(0, Math.min(index, activeData.length - 1));
 
             // Calculate X
             const finalX = left + clampedIndex * step;
             pointerX.value = finalX;
 
             // Calculate Y
-            const d = MOCK_DATA[clampedIndex];
+            const d = activeData[clampedIndex];
             const val = d.actual !== null ? d.actual : d.expected;
             const ratio = val! / yDomainMax;
             const finalY = yRangeMin - ratio * (yRangeMin - yRangeMax);
             pointerY.value = finalY;
 
-            runOnJS(setActiveDataPoint)(d);
+            runOnJS(setActiveGrowthDataPoint)(d);
         })
         .onUpdate(e => {
             const effectiveW = chartWidth - left - right;
-            const step = effectiveW / (MOCK_DATA.length - 1);
+            const step = effectiveW / (activeData.length - 1);
 
             const relativeX = e.x - left;
             const index = Math.round(relativeX / step);
-            const clampedIndex = Math.max(0, Math.min(index, MOCK_DATA.length - 1));
+            const clampedIndex = Math.max(0, Math.min(index, activeData.length - 1));
 
             const finalX = left + clampedIndex * step;
             pointerX.value = finalX;
 
-            const d = MOCK_DATA[clampedIndex];
+            const d = activeData[clampedIndex];
             const val = d.actual !== null ? d.actual : d.expected;
             const ratio = val! / yDomainMax;
             const finalY = yRangeMin - ratio * (yRangeMin - yRangeMax);
             pointerY.value = finalY;
 
-            runOnJS(setActiveDataPoint)(d);
+            runOnJS(setActiveGrowthDataPoint)(d);
         })
         .onEnd(() => {
             // Kept visible deliberately for 'tap to select' behavior
@@ -267,31 +275,34 @@ export const GrowthChart = () => {
                             <GestureDetector gesture={gesture}>
                                 <View style={{ flex: 1 }}>
                                     <Svg width={chartWidth} height={CHART_HEIGHT}>
-                                        {/* Grids */}
-                                        {[0, 1, 2, 3, 4].map(i => {
-                                            const y = top + ((CHART_HEIGHT - top - bottom) / 4) * i;
+                                        {/* Grids & Y-Axis Labels */}
+                                        {yLabels.map((label, i) => {
+                                            const y =
+                                                top +
+                                                ((CHART_HEIGHT - top - bottom) /
+                                                    (yLabels.length - 1)) *
+                                                    i;
                                             return (
-                                                <Line
-                                                    key={`grid-${i}`}
-                                                    x1={left}
-                                                    x2={chartWidth - right}
-                                                    y1={y}
-                                                    y2={y}
-                                                    stroke={colors.gray[100]}
-                                                    strokeWidth={1}
-                                                />
+                                                <React.Fragment key={`grid-group-${i}`}>
+                                                    <Line
+                                                        x1={left}
+                                                        x2={chartWidth - right}
+                                                        y1={y}
+                                                        y2={y}
+                                                        stroke={colors.gray[100]}
+                                                        strokeWidth={1}
+                                                    />
+                                                    <SvgText
+                                                        x={left}
+                                                        y={y - 5}
+                                                        fill={colors.gray[500]}
+                                                        fontSize="10"
+                                                    >
+                                                        {label}
+                                                    </SvgText>
+                                                </React.Fragment>
                                             );
                                         })}
-
-                                        {/* 0 Label */}
-                                        <SvgText
-                                            x={left}
-                                            y={top + 15}
-                                            fill={colors.gray[500]}
-                                            fontSize="10"
-                                        >
-                                            0
-                                        </SvgText>
 
                                         {/* Paths */}
                                         <Path
@@ -310,8 +321,8 @@ export const GrowthChart = () => {
                                         )}
 
                                         {/* X Axis Labels */}
-                                        {MOCK_DATA.map((d, i) => {
-                                            if (i % 3 !== 0 && i !== MOCK_DATA.length - 1)
+                                        {activeData.map((d: GrowthDataPoint, i: number) => {
+                                            if (i % 7 !== 0 && i !== activeData.length - 1)
                                                 return null;
                                             return (
                                                 <SvgText
@@ -348,31 +359,31 @@ export const GrowthChart = () => {
                                     {/* OVERLAY TOOLTIP & DATE BOX */}
                                     <AnimatedView style={[styles.activeDateBox, dateBoxStyle]}>
                                         <Text style={styles.activeDateText}>
-                                            {activeDataPoint
-                                                ? formatDate(activeDataPoint.date)
+                                            {activeGrowthDataPoint
+                                                ? formatDate(activeGrowthDataPoint.date)
                                                 : '--/--/----'}
                                         </Text>
                                     </AnimatedView>
 
                                     <AnimatedView style={[styles.tooltip, tooltipStyle]}>
                                         <Text style={styles.tooltipTitle}>
-                                            {activeDataPoint
-                                                ? `Ngày tuổi ${activeDataPoint.dayAge}`
+                                            {activeGrowthDataPoint
+                                                ? `Ngày tuổi ${activeGrowthDataPoint.dayAge}`
                                                 : '...'}
                                         </Text>
                                         <View style={styles.tooltipRow}>
                                             <Text style={styles.tooltipLabel}>Kỳ vọng: </Text>
                                             <Text style={styles.tooltipValueOrange}>
-                                                {activeDataPoint
-                                                    ? `${activeDataPoint.expected} (kg)`
+                                                {activeGrowthDataPoint
+                                                    ? `${activeGrowthDataPoint.expected} (kg)`
                                                     : '...'}
                                             </Text>
                                         </View>
                                         <View style={styles.tooltipRow}>
                                             <Text style={styles.tooltipLabel}>Thực tế: </Text>
                                             <Text style={styles.tooltipValueBlue}>
-                                                {activeDataPoint
-                                                    ? `${activeDataPoint.actual ?? 0} (kg)`
+                                                {activeGrowthDataPoint
+                                                    ? `${activeGrowthDataPoint.actual ?? 0} (kg)`
                                                     : '...'}
                                             </Text>
                                         </View>
