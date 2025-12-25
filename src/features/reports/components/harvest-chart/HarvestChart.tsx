@@ -1,30 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, layout, shadows, typography } from '@/styles';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
-const harvestData = [
-    { id: '1', value: 1460, label: 'N05', displayValue: '1,460' },
-    { id: '2', value: 1340, label: 'N07', displayValue: '1,340' },
-    { id: '3', value: 1030, label: 'N06', displayValue: '1,030' },
-    { id: '4', value: 1030, label: 'N02', displayValue: '1,030' },
-];
+import { mockHarvestChartData } from './mockData';
 
-const MAX_VALUE = 1600;
 const CHART_CONTENT_HEIGHT = 394;
 const BAR_MAX_HEIGHT = 340.61;
 
 export const HarvestChart: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    const totalYield = useMemo(() => {
+        return mockHarvestChartData.reduce((acc, curr) => acc + curr.yield, 0).toFixed(2);
+    }, []);
+
+    const yAxisConfig = useMemo(() => {
+        const maxValue = Math.max(...mockHarvestChartData.map(d => d.yield));
+        const roundMax = Math.ceil(maxValue / 10) * 10 || 10;
+
+        // Create 4 steps
+        const step = roundMax / 4;
+        const labels = [roundMax, roundMax - step, roundMax - step * 2, roundMax - step * 3, 0];
+
+        return { max: roundMax, labels };
+    }, []);
+
     const getBarHeight = (value: number) => {
-        return (value / MAX_VALUE) * BAR_MAX_HEIGHT;
+        return (value / yAxisConfig.max) * BAR_MAX_HEIGHT;
     };
 
     return (
         <View style={styles.card}>
             {/* Header-Section */}
             <BasicDropDownButton
-                label={<Text style={styles.headerTitle}>BIỂU ĐỒ THU HOẠCH</Text>}
+                label="BIỂU ĐỒ THU HOẠCH"
                 onPress={() => setIsCollapsed(!isCollapsed)}
                 style={styles.headerButton}
             />
@@ -33,12 +42,12 @@ export const HarvestChart: React.FC = () => {
                 <View style={styles.body}>
                     <View style={styles.summaryContainer}>
                         <Text style={styles.summaryLabel}>Sản lượng đã thu hoạch</Text>
-                        <Text style={styles.summaryValue}>4.86 tấn</Text>
+                        <Text style={styles.summaryValue}>{totalYield} tấn</Text>
                     </View>
 
                     <View style={styles.chartAreaWrapper}>
                         <View style={styles.yAxisLabels}>
-                            {[1600, 1200, 800, 400, 0].map(val => (
+                            {yAxisConfig.labels.map(val => (
                                 <View key={val} style={styles.yLabelWrapper}>
                                     <Text style={styles.yLabelText}>{val.toLocaleString()}</Text>
                                 </View>
@@ -56,16 +65,16 @@ export const HarvestChart: React.FC = () => {
                                 ))}
                             </View>
                             <View style={styles.barsWrapper}>
-                                {harvestData.map(item => (
-                                    <View key={item.id} style={styles.barColumn}>
-                                        <Text style={styles.topValueText}>{item.displayValue}</Text>
+                                {mockHarvestChartData.map(item => (
+                                    <View key={item.pond} style={styles.barColumn}>
+                                        <Text style={styles.topValueText}>{item.yield.toFixed(2)}</Text>
                                         <View
                                             style={[
                                                 styles.bar,
-                                                { height: getBarHeight(item.value) },
+                                                { height: getBarHeight(item.yield) },
                                             ]}
                                         />
-                                        <Text style={styles.bottomLabelText}>{item.label}</Text>
+                                        <Text style={styles.bottomLabelText}>{item.pond}</Text>
                                     </View>
                                 ))}
                             </View>
@@ -83,7 +92,7 @@ const styles = StyleSheet.create({
         width: '100%',
         alignSelf: 'center',
         marginVertical: spacing.sm,
-        shadow: shadows.sm,
+        ...shadows.sm,
         borderWidth: 1,
         borderColor: colors.borderLight,
     },
@@ -152,7 +161,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         marginTop: 20,
         height: BAR_MAX_HEIGHT,
-        justifyContent: layout.justify.between,
+        justifyContent: 'space-between',
     },
     gridLine: {
         height: 0.75,
@@ -162,8 +171,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'flex-end',
-        height: BAR_MAX_HEIGHT + 31,
-        paddingBottom: 7,
+        height: BAR_MAX_HEIGHT,
+        marginTop: 20,
     },
     barColumn: {
         alignItems: 'center',
