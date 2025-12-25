@@ -7,7 +7,23 @@ import { PondIndex } from './PondIndex';
 import EnvChar from './EnvChar';
 import { BottomEnvChart } from './BottomEnvChart';
 
+import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
 import { Loading } from '@/shared/components/ui/Loading';
+
+// Metric Map (duplicated from EnvChar for independence, or could be shared)
+const METRIC_MAP: Record<string, { key: keyof EnvLog; label: string; unit: string }> = {
+    pH: { key: 'pH', label: 'pH', unit: '' },
+    DO: { key: 'do', label: 'DO', unit: 'mg/L' },
+    'Nhiệt độ': { key: 'temp', label: 'Nhiệt độ', unit: '°C' },
+    'Độ kiềm': { key: 'alk', label: 'Độ kiềm', unit: 'mg/L' },
+    'Độ trong': { key: 'clear', label: 'Độ trong', unit: 'cm' },
+    'Độ mặn': { key: 'salt', label: 'Độ mặn', unit: 'ppt' },
+};
+
+const parseDate = (dateStr: string) => {
+    const [day, month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1, day);
+};
 
 const CompilationEnvChart = () => {
     const [isExpanded, setIsExpanded] = useState(true);
@@ -21,6 +37,32 @@ const CompilationEnvChart = () => {
         }, 1000);
         return () => clearTimeout(timer);
     }, []);
+
+    // Calculate latest data for PondIndex
+    const pondData = React.useMemo(() => {
+        const metricInfo = METRIC_MAP[selectedTab] || METRIC_MAP['pH'];
+        const metricKey = metricInfo.key;
+
+        // Get unique ponds from colors or data
+        const pondIds = Object.keys(POND_COLORS);
+
+        return pondIds.map(pondId => {
+            const pondLogs = ENV_DATA.filter(d => d.pond === pondId);
+            // Sort by date descending to get latest
+            pondLogs.sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime());
+
+            const latest = pondLogs[0];
+            const value = latest ? latest[metricKey] : '--';
+            const unit = value !== '--' && metricInfo.unit ? ` ${metricInfo.unit}` : '';
+
+            return {
+                id: pondId,
+                name: pondId,
+                value: `${value}${unit}`,
+                color: POND_COLORS[pondId],
+            };
+        });
+    }, [selectedTab]);
 
     return (
         <View style={styles.container}>
@@ -42,7 +84,7 @@ const CompilationEnvChart = () => {
                         <>
                             <HeadingEnvChart selected={selectedTab} onSelect={setSelectedTab} />
 
-                            <PondIndex />
+                            <PondIndex data={pondData} />
 
                             <View style={styles.chartContainer}>
                                 <EnvChar selected={selectedTab} />
