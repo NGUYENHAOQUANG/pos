@@ -32,53 +32,74 @@ const VisualChart = ({
     height = 220,
     barWidth = 20,
 }: VisualChartProps) => {
-    const renderBar = (item: ItemData, index: number) => {
-        if (!item) {
-            return (
-                <View key={`spacer-${index}`} style={[styles.barWrapper, { width: barWidth }]} />
-            );
-        }
-
-        const barHeight = (item.value / maxValue) * height;
-        return (
-            <View key={index} style={[styles.barWrapper, { width: barWidth }]}>
-                <Text style={styles.barValue}>{item.label}</Text>
-                <View
-                    style={[
-                        styles.bar,
-                        {
-                            height: barHeight,
-                            backgroundColor: item.color,
-                        },
-                    ]}
-                />
-            </View>
-        );
-    };
+    const TOP_PADDING = 25; // Space for values on top of bars
+    const X_AXIS_HEIGHT = 20; // Space for pond names below bars
 
     return (
-        <View style={[styles.chartMainArea, { height }]}>
-            <View style={styles.yAxisContainer}>
-                {yLabels.map((label, index) => (
-                    <Text key={index} style={styles.yAxisLabel}>
-                        {label}
-                    </Text>
-                ))}
+        <View style={styles.chartMainArea}>
+            {/* Y Axis Labels */}
+            <View style={[styles.yAxisContainer, { height: height, marginTop: TOP_PADDING }]}>
+                {yLabels.map((label, index) => {
+                    const topPos = index * (height / (yLabels.length - 1));
+                    return (
+                        <View key={index} style={[styles.yLabelWrapper, { top: topPos }]}>
+                            <Text style={styles.yAxisLabel}>{label}</Text>
+                        </View>
+                    );
+                })}
             </View>
 
-            <View style={styles.chartContentContainer}>
-                <View style={styles.gridContainer}>
-                    {yLabels.map((_, index) => (
-                        <View key={index} style={styles.gridLine} />
+            {/* Chart Area */}
+            <View
+                style={[
+                    styles.chartContentContainer,
+                    { height: height + TOP_PADDING + X_AXIS_HEIGHT },
+                ]}
+            >
+                {/* Grid Lines */}
+                <View style={[styles.gridContainer, { top: TOP_PADDING, height: height }]}>
+                    {yLabels.map((_, index) => {
+                        const topPos = index * (height / (yLabels.length - 1));
+                        return <View key={index} style={[styles.gridLine, { top: topPos }]} />;
+                    })}
+                </View>
+
+                {/* Bars Area */}
+                <View style={[styles.barsArea, { height: height + TOP_PADDING }]}>
+                    {data.map((group, groupIndex) => (
+                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
+                            <View style={styles.barsRow}>
+                                {group.items.map((item, itemIndex) => {
+                                    if (!item)
+                                        return <View key={itemIndex} style={{ width: barWidth }} />;
+                                    const bHeight = (item.value / maxValue) * height;
+                                    return (
+                                        <View
+                                            key={itemIndex}
+                                            style={[styles.barWrapper, { width: barWidth }]}
+                                        >
+                                            <Text style={styles.barValue}>{item.label}</Text>
+                                            <View
+                                                style={[
+                                                    styles.bar,
+                                                    {
+                                                        height: bHeight,
+                                                        backgroundColor: item.color,
+                                                    },
+                                                ]}
+                                            />
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        </View>
                     ))}
                 </View>
 
-                <View style={styles.barsArea}>
+                {/* X Axis Labels */}
+                <View style={styles.xAxisRow}>
                     {data.map((group, groupIndex) => (
-                        <View key={groupIndex} style={[styles.barGroup, { flex: 1 / data.length }]}>
-                            <View style={styles.barsRow}>
-                                {group.items.map((item, itemIndex) => renderBar(item, itemIndex))}
-                            </View>
+                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
                             <Text style={styles.xAxisLabel} numberOfLines={1}>
                                 {group.label}
                             </Text>
@@ -131,22 +152,25 @@ const Legend = () => {
 // HELPERS
 // ----------------------------------------------------------------------
 
-const calculateScale = (data: ProdDataPoint[]) => {
-    const allValues = data.reduce((acc, d) => {
-        acc.push(d.collected);
-        acc.push(d.remaining);
-        return acc;
-    }, [] as number[]);
+const calculateScale = (values: number[]) => {
+    const maxVal = values.length > 0 ? Math.max(...values, 1) : 1;
 
-    const maxVal = Math.max(...allValues, 1);
-    const yMax = Math.ceil(maxVal * 1.1 * 2) / 2; // Add 10% headroom
+    // Choose suitable step: 0.5 for small range, 1 or 2 for large
+    let step = 0.5;
+    if (maxVal > 8) step = 2;
+    else if (maxVal > 4) step = 1;
 
-    const labelCount = 9;
-    const step = yMax / (labelCount - 1);
-    const yLabels = Array.from({ length: labelCount }, (_, i) => {
-        const val = yMax - i * step;
-        return val % 1 === 0 ? val.toString() : val.toFixed(1).replace('.', ',');
-    });
+    // yMax with headroom, rounded up to next step
+    const yMax = Math.ceil((maxVal * 1.15) / step) * step;
+
+    // Labels from bottom (0) to top (yMax)
+    const labels: string[] = [];
+    for (let v = 0; v <= yMax + 0.001; v += step) {
+        labels.push(v % 1 === 0 ? v.toFixed(0) : v.toFixed(1).replace('.', ','));
+    }
+
+    // yLabels for top-to-bottom rendering
+    const yLabels = [...labels].reverse();
 
     return { yMax, yLabels };
 };
@@ -155,13 +179,70 @@ const calculateScale = (data: ProdDataPoint[]) => {
 // MAIN COMPONENT
 // ----------------------------------------------------------------------
 
+const getAgeGroupColor = (ageGroup: string, type: 'remaining' | 'collected') => {
+    if (type === 'collected') return colors.orange[500];
+
+    switch (ageGroup) {
+        case '>80':
+            return colors.blue[800];
+        case '70-80':
+            return colors.blue[600];
+        case '60-70':
+            return colors.blue[400];
+        case '<40':
+            return colors.blue[50];
+        default:
+            return colors.blue[200];
+    }
+};
+
 export const ProdChart = () => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeTab, setActiveTab] = useState<'Ngày tuổi' | 'Khu vực'>('Khu vực');
 
-    const { yMax, yLabels } = useMemo(() => calculateScale(prodChartData), []);
+    // 1. Group data by age group
+    const ageGroupData = useMemo(() => {
+        const groups: Record<string, { collected: number; remaining: number }> = {};
+        prodChartData.forEach(d => {
+            if (!groups[d.ageGroup]) {
+                groups[d.ageGroup] = { collected: 0, remaining: 0 };
+            }
+            groups[d.ageGroup].collected += d.collected;
+            groups[d.ageGroup].remaining += d.remaining;
+        });
 
-    const chartData = useMemo(
+        const order = ['<40', '60-70', '70-80', '>80'];
+        return order
+            .map(age => {
+                const group = groups[age];
+                if (!group || (group.collected === 0 && group.remaining === 0)) return null;
+
+                const item: GroupData = {
+                    label: age,
+                    items: [
+                        group.collected > 0
+                            ? {
+                                  value: group.collected,
+                                  color: String(getAgeGroupColor(age, 'collected')),
+                                  label: group.collected.toFixed(2).replace('.', ',') + ' T',
+                              }
+                            : null,
+                        group.remaining > 0
+                            ? {
+                                  value: group.remaining,
+                                  color: String(getAgeGroupColor(age, 'remaining')),
+                                  label: group.remaining.toFixed(2).replace('.', ',') + ' T',
+                              }
+                            : null,
+                    ],
+                };
+                return item;
+            })
+            .filter((item): item is GroupData => item !== null);
+    }, []);
+
+    // 2. Data for Pond tab
+    const pondData = useMemo(
         () =>
             prodChartData.map((d: ProdDataPoint) => ({
                 label: d.pondName,
@@ -169,21 +250,40 @@ export const ProdChart = () => {
                     d.collected > 0
                         ? {
                               value: d.collected,
-                              color: d.colorCollected || colors.orange[500],
-                              label: d.collected + ' T',
+                              color: d.colorCollected || getAgeGroupColor(d.ageGroup, 'collected'),
+                              label: d.collected.toFixed(2).replace('.', ',') + ' T',
                           }
                         : null,
                     d.remaining > 0
                         ? {
                               value: d.remaining,
-                              color: d.colorRemaining || colors.blue[600],
-                              label: d.remaining + ' T',
+                              color: d.colorRemaining || getAgeGroupColor(d.ageGroup, 'remaining'),
+                              label: d.remaining.toFixed(2).replace('.', ',') + ' T',
                           }
                         : null,
                 ],
             })) as GroupData[],
         []
     );
+
+    // 3. Select active data
+    const activeData = activeTab === 'Khu vực' ? pondData : ageGroupData;
+
+    // 4. Calculate scale based on active data
+    const { yMax, yLabels } = useMemo(() => {
+        const allValues: number[] = [];
+        activeData.forEach(group => {
+            if (group && group.items) {
+                group.items.forEach(item => {
+                    if (item) allValues.push(item.value);
+                });
+            }
+        });
+        return calculateScale(allValues);
+    }, [activeData]);
+
+    // 5. Dynamic height for visual consistency
+    const chartHeight = useMemo(() => Math.max(200, yMax * 55), [yMax]);
 
     return (
         <View style={styles.container}>
@@ -226,29 +326,24 @@ export const ProdChart = () => {
                         </TouchableOpacity>
                     </View>
 
-                    {activeTab === 'Khu vực' ? (
-                        <>
-                            <View style={styles.summaryContainer}>
-                                {prodChartSummary.map((item, index) => (
-                                    <View key={index} style={styles.summaryItem}>
-                                        <Text style={styles.summaryLabel}>{item.label}</Text>
-                                        <Text style={styles.summaryValue}>{item.value}</Text>
-                                    </View>
-                                ))}
+                    <View style={styles.summaryContainer}>
+                        {prodChartSummary.map((item, index) => (
+                            <View key={index} style={styles.summaryItem}>
+                                <Text style={styles.summaryLabel}>{item.label}</Text>
+                                <Text style={styles.summaryValue}>{item.value}</Text>
                             </View>
+                        ))}
+                    </View>
 
-                            <VisualChart
-                                data={chartData}
-                                yLabels={yLabels}
-                                maxValue={yMax}
-                                barWidth={20}
-                            />
+                    <VisualChart
+                        data={activeData}
+                        yLabels={yLabels}
+                        maxValue={yMax}
+                        height={chartHeight}
+                        barWidth={activeTab === 'Khu vực' ? 20 : 30}
+                    />
 
-                            <Legend />
-                        </>
-                    ) : (
-                        <View style={{ height: 200 }} />
-                    )}
+                    <Legend />
                 </View>
             )}
         </View>
@@ -337,15 +432,22 @@ const styles = StyleSheet.create({
         paddingRight: spacing.md,
     },
     yAxisContainer: {
-        justifyContent: 'space-between',
-        paddingRight: spacing.sm,
-        alignItems: 'flex-end',
-        width: 40,
+        width: 35,
+        position: 'relative',
+        marginRight: spacing.xs,
+    },
+    yLabelWrapper: {
+        position: 'absolute',
+        right: 0,
+        height: 20,
+        justifyContent: 'center',
+        marginTop: -10, // Half of height to center on the point
     },
     yAxisLabel: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textSecondary,
+        fontSize: 10,
+        color: colors.gray[500],
         fontFamily: typography.fontFamily.regular,
+        textAlign: 'right',
     },
     chartContentContainer: {
         flex: 1,
@@ -353,23 +455,19 @@ const styles = StyleSheet.create({
     },
     gridContainer: {
         position: 'absolute',
-        top: 0,
         left: 0,
         right: 0,
-        bottom: 0,
-        justifyContent: 'space-between',
     },
     gridLine: {
+        position: 'absolute',
         height: 1,
         backgroundColor: colors.gray[100],
-        width: '100%',
+        left: 0,
+        right: 0,
     },
     barsArea: {
-        flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-around',
         alignItems: 'flex-end',
-        marginBottom: -spacing.xs,
     },
     barGroup: {
         alignItems: 'center',
@@ -400,8 +498,12 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 2,
         borderTopRightRadius: 2,
     },
+    xAxisRow: {
+        flexDirection: 'row',
+        height: 20,
+        alignItems: 'center',
+    },
     xAxisLabel: {
-        marginTop: spacing.sm,
         fontSize: typography.fontSize.xs,
         color: colors.gray[600],
         textAlign: 'center',

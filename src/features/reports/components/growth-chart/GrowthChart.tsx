@@ -8,6 +8,7 @@ import {
     LayoutAnimation,
     UIManager,
     Dimensions,
+    LayoutChangeEvent,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
@@ -89,19 +90,27 @@ export const GrowthChart = () => {
     // SCALES & PATHS
     // ----------------------------------------------------------------------
     const { yMax, yLabels } = useMemo(() => {
+        if (activeData.length === 0) return { yMax: 1, yLabels: ['1', '0,75', '0,5', '0,25', '0'] };
+
         const allValues = activeData.reduce((acc: number[], d: GrowthDataPoint) => {
-            acc.push(d.expected);
+            acc.push(d.expected || 0);
             if (d.actual !== null) acc.push(d.actual);
             return acc;
         }, [] as number[]);
 
-        const maxVal = Math.max(...allValues, 1);
+        const maxVal = allValues.length > 0 ? Math.max(...allValues, 1) : 1;
         const computedMax = Math.ceil(maxVal * 1.1 * 10) / 10; // 10% headroom, rounded to 0.1
 
         const labelCount = 5;
         const labels = Array.from({ length: labelCount }, (_, i) => {
             const val = (computedMax / (labelCount - 1)) * (labelCount - 1 - i);
-            return val % 1 === 0 ? val.toString() : val.toFixed(1).replace('.', ',');
+            if (val >= 1000000) {
+                return (val / 1000000).toFixed(1).replace('.', ',') + 'Tr';
+            }
+            if (val > 0 && val < 1) {
+                return val.toFixed(2).replace('.', ',');
+            }
+            return Math.round(val).toLocaleString('vi-VN');
         });
 
         return { yMax: computedMax, yLabels: labels };
@@ -130,7 +139,7 @@ export const GrowthChart = () => {
         const actualData = activeData.filter(d => d.actual !== null);
         const makeActualLine = line<GrowthDataPoint>()
             .x(d => scales.x(activeData.indexOf(d)))
-            .y(d => scales.y(d.actual || 0))
+            .y((d: GrowthDataPoint) => scales.y(d.actual || 0))
             .curve(curveMonotoneX);
 
         return {
@@ -139,7 +148,7 @@ export const GrowthChart = () => {
         };
     }, [scales, activeData]);
 
-    const onLayout = (event: any) => {
+    const onLayout = (event: LayoutChangeEvent) => {
         setChartWidth(event.nativeEvent.layout.width);
     };
 
@@ -174,7 +183,7 @@ export const GrowthChart = () => {
             // Calculate Y
             const d = activeData[clampedIndex];
             const val = d.actual !== null ? d.actual : d.expected;
-            const ratio = val! / yDomainMax;
+            const ratio = yDomainMax > 0 ? val / yDomainMax : 0;
             const finalY = yRangeMin - ratio * (yRangeMin - yRangeMax);
             pointerY.value = finalY;
 
@@ -193,7 +202,7 @@ export const GrowthChart = () => {
 
             const d = activeData[clampedIndex];
             const val = d.actual !== null ? d.actual : d.expected;
-            const ratio = val! / yDomainMax;
+            const ratio = yDomainMax > 0 ? val / yDomainMax : 0;
             const finalY = yRangeMin - ratio * (yRangeMin - yRangeMax);
             pointerY.value = finalY;
 
@@ -375,7 +384,11 @@ export const GrowthChart = () => {
                                             <Text style={styles.tooltipLabel}>Kỳ vọng: </Text>
                                             <Text style={styles.tooltipValueOrange}>
                                                 {activeGrowthDataPoint
-                                                    ? `${activeGrowthDataPoint.expected} (kg)`
+                                                    ? `${activeGrowthDataPoint.expected.toLocaleString(
+                                                          'vi-VN'
+                                                      )} (${
+                                                          selectedTab === 'Sản lượng' ? 'con' : 'kg'
+                                                      })`
                                                     : '...'}
                                             </Text>
                                         </View>
@@ -383,7 +396,11 @@ export const GrowthChart = () => {
                                             <Text style={styles.tooltipLabel}>Thực tế: </Text>
                                             <Text style={styles.tooltipValueBlue}>
                                                 {activeGrowthDataPoint
-                                                    ? `${activeGrowthDataPoint.actual ?? 0} (kg)`
+                                                    ? `${(
+                                                          activeGrowthDataPoint.actual ?? 0
+                                                      ).toLocaleString('vi-VN')} (${
+                                                          selectedTab === 'Sản lượng' ? 'con' : 'kg'
+                                                      })`
                                                     : '...'}
                                             </Text>
                                         </View>
