@@ -19,7 +19,6 @@ import {
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { TransferMeta } from '@/features/farm/types/farm.types';
-import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -30,52 +29,123 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddTransferScreen'>;
 
 export const AddTransferScreen: React.FC = () => {
+    // ========== HOOKS ==========
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob } = useFarm();
+    const {
+        getPondJobItems,
+        updatePondJob,
+        ponds,
+        getCurrentCycleForPond,
+        breedOptions,
+        handleTransferPond,
+        calculateTotalEstimatedShrimp,
+        activeCycles,
+        getCyclesByPondId,
+        deleteCycle,
+        deleteActiveCycle,
+    } = useFarm();
 
-    // Mock data for receiving ponds
-    const MOCK_POND_OPTIONS: DropDownItem[] = [
-        { id: '1', label: 'Ao 1' },
-        { id: '2', label: 'Ao 2' },
-        { id: '3', label: 'Ao 3' },
-        { id: '4', label: 'Ao 4' },
-        { id: '5', label: 'Ao 5' },
-    ];
+    // ========== ROUTE PARAMS ==========
+    const {
+        pond,
+        itemToEdit,
+        latestShrimpSize: latestShrimpSizeFromParams,
+        cycleData: cycleDataFromParams,
+    } = route.params || {};
 
-    // Initialize state from itemToEdit if available
+    // ========== COMPUTED VALUES ==========
+    // Meta data from itemToEdit
     const meta = useMemo(() => (itemToEdit?.meta as TransferMeta) || {}, [itemToEdit?.meta]);
+
+    // ========== STATE ==========
     const [selectedDate, setSelectedDate] = useState<Date>(
         itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
     );
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
-    const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize?.toString() || '60');
+    const [shrimpSize, setShrimpSize] = useState<string>(
+        meta.shrimpSize?.toString() || latestShrimpSizeFromParams || '60'
+    );
     const [transferMethod] = useState<string>(meta.transferMethod || 'Sang hết');
-
-    const actualStockingQuantity = 400000;
-    const shrimpBreed = 'Tôm thẻ chân trắng – SIS PL12';
-
-    // Formula: (actualStockingQuantity * 1000) / shrimpSize
-    const totalEstimatedShrimp = useMemo(() => {
-        if (actualStockingQuantity && shrimpSize && parseFloat(shrimpSize) > 0) {
-            return Math.round((actualStockingQuantity * 1000) / parseFloat(shrimpSize));
-        }
-        return 0;
-    }, [shrimpSize]);
-
     const [receivingPonds, setReceivingPonds] = useState<ReceivingPondItem[]>(() => {
         if (meta.receivingPonds && meta.receivingPonds.length > 0) {
             return meta.receivingPonds;
         }
         return [{ id: Date.now().toString(), quantity: '' }];
     });
-
+    const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
     const hasInitialized = useRef(false);
 
-    // Initialize first row with totalEstimatedShrimp when component mounts or totalEstimatedShrimp changes
+    // Pond options for receiving ponds dropdown (exclude current pond)
+    const pondOptions = useMemo(() => {
+        if (!pond?.id) return [];
+        return ponds
+            .filter(p => p.id !== pond.id)
+            .map(p => ({
+                id: p.id,
+                label: p.name,
+            }));
+    }, [ponds, pond?.id]);
+
+    // Get cycle data from params or calculate if not provided (fallback for edit mode)
+    const cycleData = useMemo(() => {
+        if (cycleDataFromParams !== undefined) {
+            return cycleDataFromParams; // Data provided from parent
+        }
+        if (!pond?.id) return null;
+        return getCurrentCycleForPond(pond.id);
+    }, [cycleDataFromParams, pond?.id, getCurrentCycleForPond]);
+
+    const shrimpBreed = cycleData?.breedSource
+        ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
+        : undefined;
+
+    const actualStockingQuantity = cycleData?.stockingQuantity ?? 0;
+
+    // Calculate total estimated shrimp (kg): (Số lượng thả thực tế × Tỉ lệ sống dự kiến) / Cỡ tôm (con/kg)
+    const totalEstimatedShrimp = useMemo(() => {
+        return calculateTotalEstimatedShrimp(actualStockingQuantity, shrimpSize, pond?.id);
+    }, [actualStockingQuantity, shrimpSize, pond?.id, calculateTotalEstimatedShrimp]);
+
+    // Initial data for comparison when editing
+    const initialData = useMemo(() => {
+        if (!itemToEdit) return null;
+        return {
+            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+            notes: itemToEdit?.note || '',
+            shrimpSize: meta.shrimpSize || '60',
+            transferMethod: meta.transferMethod || 'Sang hết',
+            receivingPonds: meta.receivingPonds || [],
+        };
+    }, [itemToEdit, meta]);
+
+    // Check if data has changed from initial (when editing)
+    const hasChanges = useMemo(() => {
+        if (!itemToEdit || !initialData) return true;
+
+        const currentDateStr = selectedDate.toDateString();
+        const initialDateStr = initialData.date.toDateString();
+        if (currentDateStr !== initialDateStr) return true;
+        if (notes !== initialData.notes) return true;
+        if (shrimpSize !== initialData.shrimpSize) return true;
+        if (transferMethod !== initialData.transferMethod) return true;
+        if (JSON.stringify(receivingPonds) !== JSON.stringify(initialData.receivingPonds))
+            return true;
+
+        return false;
+    }, [itemToEdit, initialData, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
+
+    const isButtonDisabled = itemToEdit && !hasChanges;
+
+    // ========== EFFECTS ==========
+    // Hide tab bar when this screen is mounted
+    useEffect(() => {
+        setTabBarVisible(false);
+    }, [setTabBarVisible]);
+
+    // Initialize first row with totalEstimatedShrimp when component mounts
     useEffect(() => {
         if (!hasInitialized.current && totalEstimatedShrimp > 0) {
             setReceivingPonds(prev => {
@@ -88,23 +158,7 @@ export const AddTransferScreen: React.FC = () => {
         }
     }, [totalEstimatedShrimp]);
 
-    // Store initial data for comparison when editing
-    const initialData = useMemo(() => {
-        if (!itemToEdit) return null;
-        return {
-            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
-            notes: itemToEdit?.note || '',
-            shrimpSize: meta.shrimpSize || '60',
-            transferMethod: meta.transferMethod || 'Sang hết',
-            receivingPonds: meta.receivingPonds || [],
-        };
-    }, [itemToEdit, meta]);
-
-    // Hide tab bar when this screen is mounted
-    useEffect(() => {
-        setTabBarVisible(false);
-    }, [setTabBarVisible]);
-
+    // ========== HANDLERS ==========
     const handleBack = () => {
         if (navigation.canGoBack()) {
             navigation.goBack();
@@ -115,37 +169,7 @@ export const AddTransferScreen: React.FC = () => {
         navigation.goBack();
     };
 
-    // Check if data has changed from initial (when editing)
-    const hasChanges = useMemo(() => {
-        if (!itemToEdit || !initialData) return true; // New item always has "changes"
-
-        // Compare dates (only date part, not time)
-        const currentDateStr = selectedDate.toDateString();
-        const initialDateStr = initialData.date.toDateString();
-        if (currentDateStr !== initialDateStr) return true;
-
-        // Compare notes
-        if (notes !== initialData.notes) return true;
-
-        // Compare shrimpSize
-        if (shrimpSize !== initialData.shrimpSize) return true;
-
-        // Compare transferMethod
-        if (transferMethod !== initialData.transferMethod) return true;
-
-        // Compare receivingPonds
-        if (JSON.stringify(receivingPonds) !== JSON.stringify(initialData.receivingPonds))
-            return true;
-
-        return false;
-    }, [itemToEdit, initialData, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
-
-    const isButtonDisabled = itemToEdit && !hasChanges;
-
-    const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
-
     const handleSavePress = () => {
-        // Only show confirmation modal for new transfers (not when editing)
         if (!itemToEdit) {
             setIsConfirmationModalVisible(true);
         } else {
@@ -217,6 +241,40 @@ export const AddTransferScreen: React.FC = () => {
 
             updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
             showAddJobSuccessToast('TRANSFER_POND');
+
+            // Handle transfer: create cycles for receiving ponds
+            handleTransferPond(
+                pondId,
+                receivingPonds.map(p => ({
+                    receivingPond: p.receivingPond,
+                    quantity: p.quantity,
+                })),
+                formatDate(selectedDate)
+            );
+
+            // Close source cycle (delete from cycles and activeCycles) - same logic as harvest
+            const currentCycle = activeCycles[pondId];
+            const cyclesForPond = getCyclesByPondId(pondId);
+
+            // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
+            const cycleToDelete =
+                currentCycle ||
+                cyclesForPond.find(cycle => cycle.sourcePonds?.includes(pondId)) ||
+                cyclesForPond[0];
+
+            if (cycleToDelete && cycleToDelete.id) {
+                // Xóa cycle khỏi cycles array
+                console.log('Xóa cycle khỏi cycles array:', cycleToDelete.id);
+                deleteCycle(cycleToDelete.id);
+
+                // Tìm tất cả các ponds có cycle này trong activeCycles và xóa chúng
+                Object.keys(activeCycles).forEach(pondIdKey => {
+                    const cycleInActive = activeCycles[pondIdKey];
+                    if (cycleInActive && cycleInActive.id === cycleToDelete.id) {
+                        deleteActiveCycle(pondIdKey);
+                    }
+                });
+            }
         }
 
         navigation.goBack();
@@ -248,17 +306,15 @@ export const AddTransferScreen: React.FC = () => {
                 <TransferInfoBox
                     transferMethod={transferMethod}
                     onTransferMethodPress={() => {
-                        // TODO: Implement transfer method selection
                         console.log('Select transfer method');
                     }}
                     receivingPonds={receivingPonds}
                     onReceivingPondsChange={setReceivingPonds}
                     onReceivingPondPress={id => {
-                        // TODO: Implement pond selection
                         console.log('Select receiving pond for id:', id);
                     }}
                     totalEstimatedShrimp={totalEstimatedShrimp}
-                    pondOptions={MOCK_POND_OPTIONS}
+                    pondOptions={pondOptions}
                 />
 
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />

@@ -7,35 +7,31 @@ export interface PondData {
     type: PondType;
     lastUpdate?: string;
     lastActivity?: string;
+    size?: string; // Kích thước (m) - ví dụ: "50×28"
+    zone?: string; // Khu vực - ví dụ: "KV-A"
+    status?: string; // Trạng thái - ví dụ: "Đang hoạt động", "Chuẩn bị"
+    farmCode?: string; // Mã trại - ví dụ: "KG-01"
+    shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
+    depth?: string | number; // Độ sâu (m) - ví dụ: "1.5" hoặc 1.5
 }
 
 export interface CycleData {
-    id: string;
-    breedSource: string; // Chọn tôm giống
-    season: string; // Chọn vụ nuôi
+    id: string; // Mã chu kỳ - ví dụ: "VH2025-A-VEO1"
+    breedSource: string; // Chọn tôm giống - ví dụ: "A" (SIS PL12)
+    season: string; // Chọn vụ nuôi - ví dụ: "VH2025-A"
     cycleName: string;
-    stockingDate: string; // Ngày thả
-    stockingQuantity: number; // Tổng số lượng thả (PLs)
-    age: number; // Ngày tuổi (PLS)
-    density: number; // Mật độ (con/m2)
-    estimatedCost: number; // Tổng chi phí giống ước tính
-    notes: string; // Ghi chú
-    pondId: string;
-}
-
-/**
- * Cycle form data for creating/editing farm cycles
- */
-export interface CycleFormData {
-    cycleName?: string;
-    breedSource?: string;
-    season?: string;
-    stockingDate?: string | null;
-    stockingQuantity?: number | null;
-    age?: number | null;
-    density?: string;
-    estimatedCost?: string;
-    notes?: string;
+    stockingDate: string; // Ngày bắt đầu - ví dụ: "12/1/2025"
+    endDate?: string; // Ngày kết thúc - ví dụ: "12/22/2025"
+    stockingQuantity: number; // Tổng số lượng thả (PLs) - ví dụ: 870000
+    age: number; // Ngày tuổi (PLS) - ví dụ: 12
+    density: number; // Mật độ (con/m²) - ví dụ: 1109.693878
+    estimatedCost: number; // Chi phí giống (VNĐ) - ví dụ: 130500000
+    notes?: string; // Ghi chú
+    pondId?: string; // Ao chính (deprecated, dùng sourcePonds/receivingPonds)
+    sourcePonds?: string[]; // Ao nguồn - ví dụ: ["V01", "V02"]
+    receivingPonds?: string[]; // Ao nhận - ví dụ: ["N01", "N02"]
+    status?: 'Hoàn thành' | 'Chưa hoàn thành'; // Trạng thái
+    doc?: number; // DOC (ngày) - ví dụ: 21
 }
 
 export interface FarmData {
@@ -44,6 +40,15 @@ export interface FarmData {
     code: string;
     area?: string;
     address?: string;
+}
+
+export interface SeasonData {
+    id: string; // Mã vụ nuôi - ví dụ: "VH2025-A"
+    name: string; // Tên vụ nuôi - ví dụ: "Vụ Hè 2025 – Khu A"
+    farmCode: string; // Mã trại - ví dụ: "KG-01"
+    startDate: string; // Ngày khởi tạo - ví dụ: "1/12/2025"
+    endDate: string; // Ngày kết thúc - ví dụ: "04/30/2025"
+    status: 'Đang hoạt động' | 'Đã kết thúc'; // Trạng thái
 }
 
 export interface DropdownItem {

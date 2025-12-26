@@ -51,7 +51,12 @@ export type FarmStackParamList = {
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: any; item?: any };
     WaterSupplyLog: { pond: any };
-    AddTransferScreen: { pond: PondData; itemToEdit?: JobExecution };
+    AddTransferScreen: {
+        pond: PondData;
+        itemToEdit?: JobExecution;
+        latestShrimpSize?: string;
+        cycleData?: CycleData | null;
+    };
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };

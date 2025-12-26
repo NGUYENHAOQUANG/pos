@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     asterisk: {
-        color: colors.danger || 'red',
+        color: colors.error,
     },
     input: {
         backgroundColor: colors.white,

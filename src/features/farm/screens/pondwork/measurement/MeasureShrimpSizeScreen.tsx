@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,13 +24,28 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
     // Correctly destructure only the needed functions
-    const { updatePondJob, getPondJobItems } = useFarm();
+    const { updatePondJob, getPondJobItems, activeCycles, getCyclesByPondId } = useFarm();
 
     const { itemToEdit, pond: routePond } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
 
     const currentPond = routePond;
+
+    // Get stocking quantity from cycle data
+    const stockingQuantity = useMemo(() => {
+        if (!currentPond?.id) return undefined;
+        const currentCycle = activeCycles[currentPond.id];
+        const cyclesForPond = getCyclesByPondId(currentPond.id);
+
+        // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
+        const cycle =
+            currentCycle ||
+            cyclesForPond.find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
+            cyclesForPond[0];
+
+        return cycle?.stockingQuantity;
+    }, [currentPond?.id, activeCycles, getCyclesByPondId]);
 
     // --- State ---
     const [time, setTime] = useState(itemToEdit?.date ? new Date(itemToEdit.date) : new Date());
@@ -61,7 +76,12 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         const size = parseFloat(shrimpSize);
         const weight = parseFloat(remainingWeight);
         const totalShrimp = !isNaN(size) && !isNaN(weight) ? size * weight : null;
-        const survivalRate = null; // Survival rate calculation can be added when initialShrimpCount is available
+
+        // Calculate survival rate: (Số con thu / Số con thả ban đầu) × 100
+        let survivalRate: number | null = null;
+        if (totalShrimp !== null && stockingQuantity && stockingQuantity > 0) {
+            survivalRate = (totalShrimp / stockingQuantity) * 100;
+        }
 
         const timeString = time.toLocaleTimeString('en-GB', {
             hour: '2-digit',
@@ -161,6 +181,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onShrimpSizeChange={setShrimpSize}
                     remainingWeight={remainingWeight}
                     onRemainingWeightChange={setRemainingWeight}
+                    stockingQuantity={stockingQuantity}
                 />
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </ScrollView>

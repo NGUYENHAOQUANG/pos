@@ -6,118 +6,76 @@ import { useFarm } from '@/features/farm/context/FarmContext';
 import { ShrimpPond } from '@/features/farm/components/pond/ShrimpPond';
 import { PondType } from '@/features/farm/components/pond/PondTypeTag';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
-
-interface PondData {
-  id: string;
-  name: string;
-  area: string;
-  type: PondType;
-  lastUpdate?: string;
-  lastActivity?: string;
-  status?: TagStatus; // From Tag.tsx
-}
-
-const DUMMY_DATA: PondData[] = [
-  {
-    id: '1',
-    name: 'Tên ao',
-    area: '{diện tích ao}',
-    type: 'Ao vèo',
-    lastUpdate: '01/12/2025, 08:00',
-    lastActivity: 'Đo thông số môi trường',
-  },
-  {
-    id: '2',
-    name: 'Tên ao',
-    area: '{diện tích ao}',
-    type: 'Ao nuôi',
-    lastUpdate: '12/12/2025, 19:40',
-    lastActivity: 'Cho ăn',
-  },
-  {
-    id: '3',
-    name: 'Tên ao',
-    area: '{diện tích ao}',
-    type: 'Ao sẵn sàng',
-    lastUpdate: '-',
-    lastActivity: '-',
-  },
-  {
-    id: '4', // Ao lắng - Empty state
-    name: 'Tên ao',
-    area: '{diện tích ao}',
-    type: 'Ao lắng',
-  },
-  {
-    id: '5', // Ao thải - Empty state
-    name: 'Tên ao',
-    area: '{diện tích ao}',
-    type: 'Ao thải',
-  },
-];
+import { PondData } from '@/features/farm/types/farm.types';
 
 interface ShrimpPondListProps {
-  onPondPress?: (pond: PondData) => void;
-  onInfoPress?: (pond: PondData) => void;
+    data: PondData[];
+    onPondPress?: (pond: PondData) => void;
+    onInfoPress?: (pond: PondData) => void;
 }
 
-export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({ onPondPress, onInfoPress }) => {
-  const { getLatestPondActivity } = useFarm();
+export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
+    data,
+    onPondPress,
+    onInfoPress,
+}) => {
+    const { getLatestPondActivity } = useFarm();
 
-  const getStatus = (pondType: PondType, activityName?: string): TagStatus | undefined => {
-    if (!activityName || activityName === '-') return undefined;
+    const getStatus = (pondType: PondType, activityName?: string): TagStatus | undefined => {
+        if (!activityName || activityName === '-') return undefined;
 
-    // Logic based on PondType and/or activity
-    // Ao vèo (Nursery) and Ao sẵn sàng (Ready) should be 'preparing'
-    if (pondType === 'Ao vèo' || pondType === 'Ao sẵn sàng' || pondType === 'Ao lắng') {
-      return 'preparing';
-    }
+        // Logic based on PondType and/or activity
+        // Ao vèo (Nursery) and Ao sẵn sàng (Ready) should be 'preparing'
+        if (pondType === 'Ao vèo' || pondType === 'Ao sẵn sàng' || pondType === 'Ao lắng') {
+            return 'preparing';
+        }
 
-    // Ao nuôi (Grow-out) -> Active
-    if (pondType === 'Ao nuôi') {
-      return 'active';
-    }
+        // Ao nuôi (Grow-out) -> Active
+        if (pondType === 'Ao nuôi') {
+            return 'active';
+        }
 
-    return 'preparing'; // Default fallback
-  };
+        return 'preparing'; // Default fallback
+    };
 
-  const renderItem: ListRenderItem<PondData> = ({ item }) => {
-    const latestActivity = getLatestPondActivity(item.id);
-    const displayActivity = latestActivity?.lastActivity || item.lastActivity;
-    const computedStatus = getStatus(item.type, displayActivity);
+    const renderItem: ListRenderItem<PondData> = ({ item }) => {
+        const latestActivity = getLatestPondActivity(item.id);
+        const displayActivity = latestActivity?.lastActivity || item.lastActivity;
+        const computedStatus = getStatus(item.type, displayActivity);
+
+        return (
+            <ShrimpPond
+                name={item.name}
+                area={item.area}
+                type={item.type}
+                lastUpdate={latestActivity?.lastUpdate || item.lastUpdate}
+                lastActivity={displayActivity}
+                status={computedStatus}
+                style={styles.item}
+                pondId={item.id}
+                onInfoPress={() => onInfoPress?.(item)}
+                onCyclePress={() => {}}
+                onDetailPress={() => onPondPress?.(item)}
+            />
+        );
+    };
 
     return (
-      <ShrimpPond
-        name={item.name}
-        area={item.area}
-        type={item.type}
-        lastUpdate={latestActivity?.lastUpdate || item.lastUpdate}
-        lastActivity={displayActivity}
-        status={computedStatus}
-        style={styles.item}
-        onInfoPress={() => onInfoPress?.(item)}
-        onCyclePress={() => {}}
-        onDetailPress={() => onPondPress?.(item)}
-      />
+        <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+        />
     );
-  };
-
-  return (
-    <FlatList
-      data={DUMMY_DATA}
-      renderItem={renderItem}
-      keyExtractor={item => item.id}
-      contentContainerStyle={styles.listContent}
-      showsVerticalScrollIndicator={false}
-    />
-  );
 };
 
 const styles = StyleSheet.create({
-  listContent: {
-    padding: spacing.md,
-  },
-  item: {
-    marginBottom: spacing.md,
-  },
+    listContent: {
+        padding: spacing.md,
+    },
+    item: {
+        marginBottom: spacing.md,
+    },
 });
