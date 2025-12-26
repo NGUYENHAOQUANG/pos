@@ -16,6 +16,8 @@ import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/Track
 import { useMenuContext } from '@/features/menu/context/MenuContext';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 
+import { INSTALLATION_HISTORY, MAINTENANCE_HISTORY } from '@/features/control/data/devicesData';
+
 export const HistoryDevicesScreens = () => {
     const navigation = useNavigation();
     const route = useRoute<HistoryDevicesScreenRouteProp>();
@@ -61,7 +63,7 @@ export const HistoryDevicesScreens = () => {
                             time: `${String(maintenanceDate.getHours()).padStart(2, '0')}:${String(
                                 maintenanceDate.getMinutes()
                             ).padStart(2, '0')}`,
-                            title: '[Tên ao]', // Assuming standard title for now
+                            title: '[Tên ao]', 
                             note: `Mô tả công việc|${description}`,
                             data: [
                                 {
@@ -101,26 +103,46 @@ export const HistoryDevicesScreens = () => {
     const displayData: TrackingGroup[] = [];
 
     if (device && selectedTab === 'installed') {
-        // Determine status: "Không có dữ liệu chỉ áp dụng với thiết bị nào có tag là lưu kho thôi"
         const isInstalled = device.status !== 'warehouse';
 
         if (isInstalled) {
+             // Find specific installation history using correct lookup
+            const installHistory = INSTALLATION_HISTORY.find(h => h.deviceId === device.id);
+            
+            // Helper to get date string
+            const getDisplayDate = () => {
+                if (installHistory) return installHistory.date;
+                if (device.importDate) return device.importDate;
+                return 'N/A';
+            };
+            
+            const displayDate = getDisplayDate();
+
             displayData.push({
                 id: 'install_event',
-                date: device.importDate ? formatDate(new Date(device.importDate)) : 'N/A', // Use formatDate
+                date: displayDate, 
                 activities: [
                     {
                         id: `install_${device.id}`,
                         time: '08:00',
-                        title: device.name,
+                        title: installHistory ? `Lắp đặt tại ${installHistory.location}` : device.name,
                         data: [
                             {
                                 label: 'Ngày lắp',
-                                value: device.importDate
-                                    ? formatDate(new Date(device.importDate))
-                                    : 'N/A',
+                                value: displayDate,
                             },
-                            { label: 'Ngày thay', value: '---' },
+                            {
+                                label: 'Kỹ thuật viên',
+                                value: installHistory ? installHistory.technician : '---',
+                            },
+                            { 
+                                label: 'Giới hạn ngày SD', 
+                                value: installHistory ? `${installHistory.limitUsageDays} ngày` : '---' 
+                            },
+                             { 
+                                label: 'Giới hạn giờ hoạt động', 
+                                value: installHistory ? `${installHistory.limitOperatingHours} giờ` : '---' 
+                            },
                         ],
                     },
                 ],
@@ -128,9 +150,36 @@ export const HistoryDevicesScreens = () => {
         }
     }
 
-    if (selectedTab === 'maintenance' && device?.maintenanceHistory) {
-        // Push local maintenance records
-        displayData.push(...device.maintenanceHistory);
+    if (selectedTab === 'maintenance') {
+        const mockMaintenance = MAINTENANCE_HISTORY.filter(h => h.deviceId === device?.id);
+        
+        if (mockMaintenance.length > 0) {
+             mockMaintenance.forEach((record, index) => {
+                displayData.push({
+                    id: `maintenance_mock_${index}`,
+                    date: record.startDate,
+                    activities: [
+                        {
+                            id: `m_activity_${index}`,
+                            time: '08:00', // Default time as not provided in mock
+                            title: 'Bảo trì sửa chữa',
+                            note: `Lý do: ${record.reason}`,
+                            data: [
+                                { label: 'Ngày bắt đầu', value: record.startDate },
+                                { label: 'Ngày hoàn thành', value: record.endDate },
+                                { label: 'Chi phí', value: record.estimatedCost },
+                                { label: 'TGHĐ lúc lỗi', value: `${record.operatingHoursAtFault} giờ` },
+                                { label: 'TGSD lúc lỗi', value: `${record.usageDaysAtFault} ngày` },
+                            ]
+                        }
+                    ]
+                });
+             });
+        }
+
+        if (device?.maintenanceHistory) {
+             displayData.push(...device.maintenanceHistory);
+        }
     }
 
     const tabs = [
@@ -144,7 +193,7 @@ export const HistoryDevicesScreens = () => {
                     ? 1
                     : 0,
         },
-        { key: 'maintenance', label: 'Bảo trì', count: device?.maintenanceHistory?.length || 0 },
+        { key: 'maintenance', label: 'Bảo trì', count: (MAINTENANCE_HISTORY.filter(h => h.deviceId === device?.id).length || 0) + (device?.maintenanceHistory?.length || 0) },
     ];
 
     const handleEmptyStatePress = () => {

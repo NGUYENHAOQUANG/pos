@@ -1,59 +1,59 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
-import { colors } from '@/styles';
+import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { FarmData } from '@/features/farm/types/farm.types';
-
-// ----------------------------------------------------------------
-// SPACE FOR IMPORTING REPORT COMPONENTS
-// ----------------------------------------------------------------
-// import { EnvironmentChart } from '../components/env-chart';
-import { FeedProdChart } from '../components/feed-prod';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
-// import { FeedProdChart } from '../components/feed-prod';
-// import { ProfitChart } from '../components/profit-chart';
-// import { CostChart } from '../components/cost-chart';
-// import { HarvestChart } from '../components/harvest-chart/HarvestChart';
-// import { WaterUsage } from '../components/water-usage';
-// import { PondTransfer } from '../components/pond-transfer';
-// import { HarvestStat } from '../components/harvest-stat';
-// ----------------------------------------------------------------
+import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
+import { GrowthChart } from '@/features/reports/components/growth-chart/GrowthChart';
+import { CompilationFeedProd } from '@/features/reports/components/feed-prod/CompilationFeedProd';
+import { CompilationProfitChart } from '@/features/reports/components/profit-chart/CompilationProfitChart';
+import CompilationCostChart from '@/features/reports/components/cost-chart/CompilationCostChart';
+import { ActivePondChart } from '@/features/reports/components/active-pond/ActivePondChart';
+import { HarvestChart } from '@/features/reports/components/harvest-chart/HarvestChart';
+import { FoodChart } from '@/features/reports/components/food-chart/FoodChart';
+import { HarvestStat } from '@/features/reports/components/harvest-stat/HarvestStat';
+import { PondTransfer } from '@/features/reports/components/pond-transfer/PondTransfer';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ReportStackParamList } from '@/features/reports/navigation/ReportNavigator';
+import { PondInfor } from '@/features/reports/components/PondInfor';
+import { OverView } from '@/features/reports/components/OverView';
+import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
-export const ReportsScreen = () => {
-    const navigation = useNavigation<NavigationProp>();
+interface FarmData {
+    id: string;
+    name: string;
+    code: string;
+    area: string;
+    address: string;
+}
+
+export const ReportsScreen = ({ navigation }: Props) => {
+    const insets = useSafeAreaInsets();
     const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
         id: '1',
         label: 'Trại Kiên Giang',
-        value: '1',
+        value: 'KG',
     });
-
-    // Mock data for DropDownReports matching the design image (hinh 2)
-    // Pond Types: Ao vèo, Ao nuôi, Ao sẵn sàng
+    const [selectedPond, setSelectedPond] = useState<DropDownItem>({ id: '1', label: 'Chọn ao' });
     const pondTypeData: DropDownItem[] = [
-        { id: '1', label: 'Loại ao' }, // Placeholder/Default
+        { id: '1', label: 'Ao nuôi' },
         { id: '2', label: 'Ao vèo' },
-        { id: '3', label: 'Ao nuôi' },
-        { id: '4', label: 'Ao sẵn sàng' },
+        { id: '3', label: 'Ao lắng' },
+        { id: '4', label: 'Ao xử lý' },
     ];
     const [selectedPondType, setSelectedPondType] = useState<DropDownItem>(pondTypeData[0]);
 
-    // Ponds: {tên ao}
     const pondData: DropDownItem[] = [
-        { id: '1', label: 'Chọn ao' }, // Placeholder/Default
-        { id: '2', label: 'Ao 1' },
-        { id: '3', label: 'Ao 2' },
-        { id: '4', label: 'Ao 3' },
+        { id: '1', label: 'Chọn ao' },
+        { id: 'ck1', label: 'Vụ I - CK1' },
+        { id: '2', label: 'Ao 2' },
+        { id: '3', label: 'Ao 3' },
     ];
-    const [selectedPond, setSelectedPond] = useState<DropDownItem>(pondData[0]);
 
-    // Seasons: Vụ 1 - 2025, Vụ 2 - 2025, etc.
     const seasonData: DropDownItem[] = [
         { id: '1', label: 'Vụ 1 - 2025' },
         { id: '2', label: 'Vụ 2 - 2025' },
@@ -61,6 +61,7 @@ export const ReportsScreen = () => {
         { id: '4', label: 'Vụ 4 - 2025' },
     ];
     const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
+    const [isSeasonDisabled, setIsSeasonDisabled] = useState(false);
 
     const farmOptions: DropDownItem[] = [
         { id: '1', label: 'Trại Kiên Giang', value: '1' },
@@ -68,10 +69,21 @@ export const ReportsScreen = () => {
         { id: '3', label: 'Trại Bạc Liêu', value: '3' },
     ];
 
+    const handleSelectPondType = (item: DropDownItem) => {
+        setSelectedPondType(item);
+        if (item.label === 'Ao vèo') {
+            const autoSelectPond = { id: 'ck1', label: 'Vụ I - CK1' };
+            setSelectedPond(autoSelectPond);
+            setIsSeasonDisabled(true);
+        } else {
+            setIsSeasonDisabled(false);
+            if (selectedPond.id === 'ck1') {
+                setSelectedPond(pondData[0]); // Reset to "Chọn ao"
+            }
+        }
+    };
+
     const handleRightPress = () => {
-        // Navigate to Farm Info (Thông tin trại) as per request context "button bên phải dẫn ra màn hình thông tin ao"
-        // Since we are selecting a Farm, it makes sense to go to FarmInfo.
-        // If specific PondInfo is needed, we would need a selected Pond context.
         const farmData: FarmData = {
             id: selectedFarm.id.toString(),
             name: selectedFarm.label,
@@ -79,8 +91,38 @@ export const ReportsScreen = () => {
             area: '',
             address: '',
         };
+        // @ts-ignore
         navigation.navigate('FarmInfo', { farm: farmData });
     };
+
+    const renderAoVeoContent = () => (
+        <>
+            <PondInfor />
+            <OverView />
+            <CompilationEnvChart />
+            <GrowthChart />
+            <CompilationFeedProd />
+            <CompilationProfitChart />
+            <CompilationCostChart />
+            <WaterUsageChart />
+            <FoodChart />
+            <PondTransfer />
+        </>
+    );
+
+    const renderStandardContent = () => (
+        <>
+            <CompilationEnvChart />
+            <CompilationFeedProd />
+            <ActivePondChart />
+            <ProdChart />
+            <CompilationProfitChart />
+            <CompilationCostChart />
+            <HarvestChart />
+            <PondTransfer />
+            <HarvestStat />
+        </>
+    );
 
     return (
         <View style={styles.container}>
@@ -91,71 +133,24 @@ export const ReportsScreen = () => {
                 onRightPress={handleRightPress}
                 pondTypeData={pondTypeData}
                 selectedPondType={selectedPondType}
-                onSelectPondType={setSelectedPondType}
+                onSelectPondType={handleSelectPondType}
                 pondData={pondData}
                 selectedPond={selectedPond}
                 onSelectPond={setSelectedPond}
                 seasonData={seasonData}
                 selectedSeason={selectedSeason}
                 onSelectSeason={setSelectedSeason}
+                seasonDisabled={isSeasonDisabled}
             />
 
             <View style={styles.content}>
-                {/* ---------------------------------------------------------------------------------- */}
-                {/*                               PACED FOR REPORTS COMPONENTS                          */}
-                {/* ---------------------------------------------------------------------------------- */}
-                {/* 
-            1. <EnvironmentChart /> 
-        */}
-
                 <ScrollView
-                    style={styles.content}
-                    contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
                 >
-                    {/* ---------------------------------------------------------------------------------- */}
-                    {/*                               PACED FOR REPORTS COMPONENTS                          */}
-                    {/* ---------------------------------------------------------------------------------- */}
-
-                    <CompilationEnvChart />
-
-                    {/* 
-            2. <FeedProdChart />
-        */}
-                    <FeedProdChart />
-
-                    {/* 
-            3. <ActivePondChart />
-        */}
-                    {/* 
-            4. <ProdChart />
-        */}
-
-                    {/* 
-            5. <ProfitChart />
-        */}
-
-                    {/* 
-            6. <CostChart />
-        */}
-
-                    {/* 
-            7. <HarvestChart />
-        */}
-
-                    {/* 
-            8. <WaterUsage />
-        */}
-
-                    {/* 
-            9. <PondTransfer />
-        */}
-
-                    {/* 
-            10. <HarvestStat />
-        */}
-
-                    {/* ---------------------------------------------------------------------------------- */}
+                    {selectedPondType.label === 'Ao vèo'
+                        ? renderAoVeoContent()
+                        : renderStandardContent()}
                 </ScrollView>
             </View>
         </View>
@@ -169,11 +164,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-    },
-    contentContainer: {
-        paddingBottom: 20,
-    },
-    text: {
-        color: colors.text,
+        paddingHorizontal: 0,
     },
 });

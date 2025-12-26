@@ -29,12 +29,14 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                 </View>
                 <View style={styles.headerRight}>
                     <Tag status={device.status} style={{ alignSelf: 'center' }} />
-                    <TouchableOpacity
-                        style={styles.moreButton}
-                        onPress={event => onMorePress?.(event)}
-                    >
-                        <Feather name="more-vertical" size={20} color={colors.text} />
-                    </TouchableOpacity>
+                    <View collapsable={false}>
+                        <TouchableOpacity
+                            style={styles.moreButton}
+                            onPress={event => onMorePress?.(event)}
+                        >
+                            <Feather name="more-vertical" size={20} color={colors.text} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
 

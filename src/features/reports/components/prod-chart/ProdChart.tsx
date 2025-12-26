@@ -5,6 +5,7 @@ import { typography } from '@/styles/typography';
 import { spacing } from '@/styles/spacing';
 import { CollapseHead } from '@/features/farm/components/CollapseHead';
 import { prodChartData, prodChartSummary, ProdDataPoint } from './prodData';
+import { Loading } from '@/shared/components/ui/Loading';
 
 // ----------------------------------------------------------------------
 // TYPES
@@ -197,7 +198,19 @@ const getAgeGroupColor = (ageGroup: string, type: 'remaining' | 'collected') => 
 };
 
 export const ProdChart = () => {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (isExpanded) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isExpanded]);
+
     const [activeTab, setActiveTab] = useState<'Ngày tuổi' | 'Khu vực'>('Khu vực');
 
     // 1. Group data by age group
@@ -297,6 +310,12 @@ export const ProdChart = () => {
 
             {isExpanded && (
                 <View style={styles.content}>
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <Loading />
+                        </View>
+                    ) : (
+                        <>
                     <View style={styles.tabContainer}>
                         <TouchableOpacity
                             style={[styles.tab, activeTab === 'Ngày tuổi' && styles.activeTab]}
@@ -344,6 +363,8 @@ export const ProdChart = () => {
                     />
 
                     <Legend />
+                        </>
+                    )}
                 </View>
             )}
         </View>
@@ -357,7 +378,7 @@ export const ProdChart = () => {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        marginTop: spacing.md,
+        marginBottom: 8,
         borderTopWidth: 1,
         borderBottomWidth: 1,
         borderColor: colors.gray[100],
@@ -544,5 +565,10 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         color: colors.textSecondary,
         fontFamily: typography.fontFamily.regular,
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

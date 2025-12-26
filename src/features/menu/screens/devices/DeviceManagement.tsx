@@ -93,9 +93,10 @@ export const DeviceManagement = () => {
 
     const deviceTypes: DropDownItem[] = [
         { id: '0', label: 'Loại thiết bị' },
-        { id: '1', label: 'Quạt nước' },
-        { id: '2', label: 'Máy sục khí' },
-        { id: '3', label: 'Máy cho ăn' },
+        { id: '1', label: 'Máy cho ăn' },
+        { id: '2', label: 'Xiphong' },
+        { id: '3', label: 'Máy thổi khí' },
+        { id: '4', label: 'Quạt nước' },
     ];
 
     const tabs = [
@@ -174,7 +175,23 @@ export const DeviceManagement = () => {
                         />
                     )}
 
-                    {devices.map((device: DeviceData) => (
+                    {devices
+                        .filter(device => {
+                            // Filter by Tab
+                            let matchesTab = true;
+                            if (selectedTab === 'warehouse') matchesTab = device.status === 'warehouse';
+                            else if (selectedTab === 'installed') matchesTab = device.status === 'installed' || device.status === 'active';
+                            else if (selectedTab === 'maintenance') matchesTab = device.status === 'maintenance';
+
+                            // Filter by Device Type
+                            let matchesType = true;
+                            if (selectedDeviceType.id !== '0') {
+                                matchesType = device.type === selectedDeviceType.label;
+                            }
+
+                            return matchesTab && matchesType;
+                        })
+                        .map((device: DeviceData) => (
                         <DevicesCard
                             key={device.id}
                             device={device}

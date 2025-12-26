@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
+import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { mockFoodChartData } from './foodData';
@@ -8,7 +9,18 @@ import { mockFoodChartData } from './foodData';
 const BAR_MAX_HEIGHT = 200;
 
 export const FoodChart: React.FC = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (!isCollapsed) {
+      setIsLoading(true);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isCollapsed]);
   const [selectedDate, setSelectedDate] = useState(new Date('2025-11-01'));
 
   const formatDate = (date: Date) => {
@@ -76,7 +88,11 @@ export const FoodChart: React.FC = () => {
       </View>
 
       {!isCollapsed && (
-        <View style={styles.body}>
+        <View style={[styles.body, isLoading ? styles.loadingContainer : undefined]}>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <>
           <View style={styles.summaryContainer}>
             <Text style={styles.summaryLabel}>Tổng lượng thức ăn (kg)</Text>
             <Text style={styles.summaryValue}>{totalFood}</Text>
@@ -120,6 +136,8 @@ export const FoodChart: React.FC = () => {
               </View>
             </View>
           </View>
+            </>
+          )}
         </View>
       )}
     </View>
@@ -133,9 +151,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: colors.borderLight,
+    marginBottom: 8,
   },
   headerWrapper: {
     height: 94,
+  },
+  loadingContainer: {
+    minHeight: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  body: {
+    padding: spacing.md,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
@@ -165,12 +192,6 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.text,
     textTransform: 'uppercase',
-  },
-  body: {
-    paddingTop: spacing.lg,
-    paddingRight: spacing.sm,
-    paddingBottom: spacing.md,
-    paddingLeft: spacing.sm,
   },
   datePicker: {
     width: 100,

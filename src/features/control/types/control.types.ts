@@ -22,7 +22,7 @@ export interface PondDeviceStats {
 export interface DeviceData {
   id: string;
   name: string;
-  icon: any; // Using any for SVG component to avoid complex import here, or generic string
+  icon: React.FC<import('react-native-svg').SvgProps>; // Using strict type
   mode: EControlMode;
   isOn: boolean;
   errorMessage?: string;
