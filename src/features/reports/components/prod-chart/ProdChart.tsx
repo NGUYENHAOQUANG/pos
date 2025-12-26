@@ -1,445 +1,306 @@
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    UIManager,
-    Platform,
-    Dimensions,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { colors } from '@/styles/colors';
+import { typography } from '@/styles/typography';
+import { spacing } from '@/styles/spacing';
+import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { prodChartData, prodChartSummary, ProdDataPoint } from './prodData';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
+// ----------------------------------------------------------------------
+// TYPES
+// ----------------------------------------------------------------------
+
+export type ItemData = { value: number; color: string; label: string } | null;
+export type GroupData = { label: string; items: ItemData[] };
+
+interface VisualChartProps {
+    data: GroupData[];
+    yLabels: string[];
+    maxValue: number;
+    height?: number;
+    barWidth?: number;
 }
 
-const chartHeight = 220;
+// ----------------------------------------------------------------------
+// SUB-COMPONENT: VISUAL CHART
+// ----------------------------------------------------------------------
 
-const getStyles = width => {
-    const barWidth = width > 400 ? 30 : 20;
-    return StyleSheet.create({
-        wrapper: {
-            backgroundColor: colors.white,
-            marginHorizontal: spacing.md,
-            marginTop: spacing.md,
-            borderColor: colors.border,
-            borderWidth: 1,
-            borderRadius: 8,
-            overflow: 'hidden',
-        },
-        header: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: spacing.md,
-            backgroundColor: colors.white,
-        },
-        headerText: {
-            fontSize: width > 360 ? 14 : 12,
-            fontWeight: '600',
-            color: colors.text,
-        },
-        content: {
-            paddingHorizontal: spacing.md,
-            paddingBottom: spacing.md,
-            backgroundColor: colors.white,
-        },
-        tabContainer: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            marginVertical: spacing.md,
-            alignSelf: 'center',
-        },
-        tab: {
-            paddingHorizontal: spacing.lg,
-            paddingVertical: spacing.sm,
-        },
-        activeTab: {
-            borderBottomWidth: 2,
-            borderBottomColor: colors.primary,
-        },
-        tabText: {
-            fontSize: width > 360 ? 14 : 12,
-            color: colors.textSecondary,
-        },
-        activeTabText: {
-            color: colors.primary,
-            fontWeight: '600',
-        },
-        chartHeader: {
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            marginVertical: spacing.md,
-        },
-        chartSummary: {
-            alignItems: 'center',
-        },
-        summaryLabel: {
-            fontSize: width > 360 ? 14 : 12,
-            color: colors.textSecondary,
-            marginBottom: spacing.xs,
-        },
-        summaryValue: {
-            fontSize: width > 360 ? 22 : 18,
-            fontWeight: 'bold',
-            color: colors.text,
-        },
-        chartArea: {
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'flex-end',
-            height: chartHeight,
-            paddingHorizontal: spacing.xs,
-        },
-        barGroup: {
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            flex: 1,
-        },
-        barLabel: {
-            marginTop: spacing.sm,
-            fontSize: width > 360 ? 12 : 10,
-            color: colors.textSecondary,
-        },
-        barValueText: {
-            fontSize: width > 360 ? 10 : 8,
-            color: colors.text,
-            marginBottom: 4,
-            fontWeight: '500',
-        },
-        legendContainer: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            marginTop: spacing.lg,
-        },
-        legendItem: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginHorizontal: spacing.sm,
-            marginVertical: spacing.xs,
-        },
-        legendColor: {
-            width: 12,
-            height: 12,
-            marginRight: spacing.sm,
-            borderRadius: 2,
-        },
-        legendText: {
-            fontSize: width > 360 ? 12 : 10,
-            color: colors.textSecondary,
-        },
-        legendWrapper: {
-            marginTop: spacing.lg,
-            paddingHorizontal: spacing.sm,
-        },
-        legendRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: spacing.sm,
-        },
-        legendTitle: {
-            fontSize: width > 360 ? 12 : 10,
-            color: colors.textSecondary,
-            width: width > 360 ? 50 : 40,
-        },
-        yAxisContainer: {
-            height: chartHeight,
-            justifyContent: 'space-between',
-            paddingRight: spacing.sm,
-            alignItems: 'flex-end',
-        },
-        yAxisLabel: {
-            fontSize: width > 360 ? 12 : 10,
-            color: colors.textSecondary,
-        },
-        gridContainer: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: chartHeight,
-            justifyContent: 'space-between',
-        },
-        gridLine: {
-            borderTopWidth: 1,
-            borderColor: colors.border,
-        },
-        bar: {
-            height: (value, maxValue) => (value > 0 ? (value / maxValue) * chartHeight : 0),
-            width: barWidth,
-            backgroundColor: 'transparent',
-            borderRadius: 4,
-        },
-    });
-};
+const VisualChart = ({
+    data,
+    yLabels,
+    maxValue,
+    height = 220,
+    barWidth = 20,
+}: VisualChartProps) => {
+    const TOP_PADDING = 25; // Space for values on top of bars
+    const X_AXIS_HEIGHT = 20; // Space for pond names below bars
 
-const Bar = ({ value, maxValue, color, barWidth, valueOnTop, chartHeight, styles }) => {
-    const barHeight = value > 0 ? (value / maxValue) * chartHeight : 0;
-    const showValue = valueOnTop && value > 0;
     return (
-        <View style={{ alignItems: 'center', marginHorizontal: 4 }}>
-            {showValue && <Text style={styles.barValueText}>{`${value.toFixed(2)}T`}</Text>}
+        <View style={styles.chartMainArea}>
+            {/* Y Axis Labels */}
+            <View style={[styles.yAxisContainer, { height: height, marginTop: TOP_PADDING }]}>
+                {yLabels.map((label, index) => {
+                    const topPos = index * (height / (yLabels.length - 1));
+                    return (
+                        <View key={index} style={[styles.yLabelWrapper, { top: topPos }]}>
+                            <Text style={styles.yAxisLabel}>{label}</Text>
+                        </View>
+                    );
+                })}
+            </View>
+
+            {/* Chart Area */}
             <View
-                style={{
-                    height: barHeight,
-                    width: barWidth,
-                    backgroundColor: color,
-                    borderRadius: 4,
-                }}
-            />
-        </View>
-    );
-};
-
-const YAxisLabels = ({ labels, styles }) => (
-    <View style={styles.yAxisContainer}>
-        {labels.map((label, index) => (
-            <Text key={index} style={styles.yAxisLabel}>
-                {label}
-            </Text>
-        ))}
-    </View>
-);
-
-const GridLines = ({ numberOfLines, styles }) => (
-    <View style={styles.gridContainer}>
-        {[...Array(numberOfLines)].map((_, index) => (
-            <View key={index} style={styles.gridLine} />
-        ))}
-    </View>
-);
-
-const KhuVucChart = ({ styles }) => {
-    const yAxisLabels = ['4', '3.5', '3', '2.5', '2', '1.5', '1', '0.5', '0'];
-    const maxValue = 4;
-    const barWidth = styles.bar.width;
-
-    const data = [
-        { type: 'single', label: 'Pond B5N3', value: 3.02, category: 'conlai', age: '60-70' },
-        { type: 'single', label: 'Pong B5N4', value: 3.73, category: 'conlai', age: '>80' },
-        { type: 'single', label: 'Pond B5NN5', value: 1.46, category: 'dathu', age: '>80' },
-        {
-            type: 'group',
-            label: 'Pond BB5N6',
-            values: [
-                { value: 1.03, category: 'dathu', age: '>80' },
-                { value: 0.65, category: 'conlai', age: '>80' },
-            ],
-        },
-    ];
-
-    const getColor = (category, age) => {
-        if (category === 'conlai') {
-            if (age === '>80') return colors.blue[600];
-            if (age === '70-80') return colors.blue[400];
-            if (age === '60-70') return colors.blue[300];
-            return colors.blue[50];
-        } else {
-            // dathu
-            if (age === '>80') return colors.orange[500];
-            return colors.orange[500];
-        }
-    };
-
-    return (
-        <View>
-            <View style={styles.chartHeader}>
-                <View style={styles.chartSummary}>
-                    <Text style={styles.summaryLabel}>Còn lại</Text>
-                    <Text style={styles.summaryValue}>23.93 tấn</Text>
+                style={[
+                    styles.chartContentContainer,
+                    { height: height + TOP_PADDING + X_AXIS_HEIGHT },
+                ]}
+            >
+                {/* Grid Lines */}
+                <View style={[styles.gridContainer, { top: TOP_PADDING, height: height }]}>
+                    {yLabels.map((_, index) => {
+                        const topPos = index * (height / (yLabels.length - 1));
+                        return <View key={index} style={[styles.gridLine, { top: topPos }]} />;
+                    })}
                 </View>
-                <View style={styles.chartSummary}>
-                    <Text style={styles.summaryLabel}>Đã thu</Text>
-                    <Text style={styles.summaryValue}>4.86 tấn</Text>
-                </View>
-            </View>
 
-            <View style={{ flexDirection: 'row', marginTop: spacing.lg }}>
-                <YAxisLabels labels={yAxisLabels} styles={styles} />
-                <View style={{ flex: 1 }}>
-                    <GridLines numberOfLines={yAxisLabels.length} styles={styles} />
-                    <View style={styles.chartArea}>
-                        {data.map((item, index) => (
-                            <View key={index} style={styles.barGroup}>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                                    {item.type === 'single' ? (
-                                        <Bar
-                                            value={item.value}
-                                            maxValue={maxValue}
-                                            color={getColor(item.category, item.age)}
-                                            valueOnTop
-                                            chartHeight={chartHeight}
-                                            barWidth={barWidth}
-                                            styles={styles}
-                                        />
-                                    ) : (
-                                        item.values.map((bar, i) => (
-                                            <Bar
-                                                key={i}
-                                                value={bar.value}
-                                                maxValue={maxValue}
-                                                color={getColor(bar.category, bar.age)}
-                                                valueOnTop
-                                                chartHeight={chartHeight}
-                                                barWidth={barWidth}
-                                                styles={styles}
+                {/* Bars Area */}
+                <View style={[styles.barsArea, { height: height + TOP_PADDING }]}>
+                    {data.map((group, groupIndex) => (
+                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
+                            <View style={styles.barsRow}>
+                                {group.items.map((item, itemIndex) => {
+                                    if (!item)
+                                        return <View key={itemIndex} style={{ width: barWidth }} />;
+                                    const bHeight = (item.value / maxValue) * height;
+                                    return (
+                                        <View
+                                            key={itemIndex}
+                                            style={[styles.barWrapper, { width: barWidth }]}
+                                        >
+                                            <Text style={styles.barValue}>{item.label}</Text>
+                                            <View
+                                                style={[
+                                                    styles.bar,
+                                                    {
+                                                        height: bHeight,
+                                                        backgroundColor: item.color,
+                                                    },
+                                                ]}
                                             />
-                                        ))
-                                    )}
-                                </View>
-                                <Text style={styles.barLabel}>{item.label}</Text>
+                                        </View>
+                                    );
+                                })}
                             </View>
-                        ))}
-                    </View>
+                        </View>
+                    ))}
                 </View>
-            </View>
 
-            <View style={styles.legendWrapper}>
-                <View style={styles.legendRow}>
-                    <Text style={styles.legendTitle}>Còn lại:</Text>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColor, { backgroundColor: colors.blue[600] }]} />
-                        <Text style={styles.legendText}>{`> 80`}</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColor, { backgroundColor: colors.blue[400] }]} />
-                        <Text style={styles.legendText}>70 - 80</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColor, { backgroundColor: colors.blue[300] }]} />
-                        <Text style={styles.legendText}>60 - 70</Text>
-                    </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendColor, { backgroundColor: colors.blue[50] }]} />
-                        <Text style={styles.legendText}>{`< 40`}</Text>
-                    </View>
-                </View>
-                <View style={styles.legendRow}>
-                    <Text style={styles.legendTitle}>Đã thu:</Text>
-                    <View style={styles.legendItem}>
-                        <View
-                            style={[styles.legendColor, { backgroundColor: colors.orange[500] }]}
-                        />
-                        <Text style={styles.legendText}>{`> 80`}</Text>
-                    </View>
+                {/* X Axis Labels */}
+                <View style={styles.xAxisRow}>
+                    {data.map((group, groupIndex) => (
+                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
+                            <Text style={styles.xAxisLabel} numberOfLines={1}>
+                                {group.label}
+                            </Text>
+                        </View>
+                    ))}
                 </View>
             </View>
         </View>
     );
 };
 
-const NgayTuoiChart = ({ styles }) => {
-    const yAxisLabels = ['20', '15', '10', '5', '0'];
-    const maxValue = 20;
-    const barWidth = styles.bar.width;
-    const data = [
-        { label: '50 - 55', hienTai: 1.46, ngayToi: 1.46 },
-        { label: '70 - 75', hienTai: 17.17, ngayToi: 0 },
-        { label: '75 - 80', hienTai: 6.75, ngayToi: 18.32 },
-        { label: '80 - 85', hienTai: 0, ngayToi: 7.21 },
-    ];
+// ----------------------------------------------------------------------
+// SUB-COMPONENT: LEGEND
+// ----------------------------------------------------------------------
 
+const Legend = () => {
     return (
-        <View>
-            <View style={styles.chartHeader}>
-                <View style={styles.chartSummary}>
-                    <Text style={styles.summaryLabel}>Hiện tại</Text>
-                    <Text style={styles.summaryValue}>25.39 tấn</Text>
-                </View>
-                <View style={styles.chartSummary}>
-                    <Text style={styles.summaryLabel}>5 ngày tới</Text>
-                    <Text style={styles.summaryValue}>26.99 tấn</Text>
-                </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', marginTop: spacing.lg }}>
-                <YAxisLabels labels={yAxisLabels} styles={styles} />
-                <View style={{ flex: 1 }}>
-                    <GridLines numberOfLines={yAxisLabels.length} styles={styles} />
-                    <View style={styles.chartArea}>
-                        {data.map((item, index) => (
-                            <View key={index} style={styles.barGroup}>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                                    <Bar
-                                        value={item.hienTai}
-                                        maxValue={maxValue}
-                                        color={colors.blue[700]}
-                                        valueOnTop
-                                        chartHeight={chartHeight}
-                                        barWidth={barWidth}
-                                        styles={styles}
-                                    />
-                                    <Bar
-                                        value={item.ngayToi}
-                                        maxValue={maxValue}
-                                        color={colors.orange[100]}
-                                        valueOnTop
-                                        chartHeight={chartHeight}
-                                        barWidth={barWidth}
-                                        styles={styles}
-                                    />
-                                </View>
-                                <Text style={styles.barLabel}>{item.label}</Text>
-                            </View>
-                        ))}
-                    </View>
-                </View>
-            </View>
-
-            <View style={styles.legendContainer}>
+        <View style={[styles.legendContainer, { alignItems: 'flex-start' }]}>
+            <View style={styles.legendRow}>
+                <Text style={styles.legendTitle}>Còn lại:</Text>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendColor, { backgroundColor: colors.blue[700] }]} />
-                    <Text style={styles.legendText}>Hiện tại</Text>
+                    <View style={[styles.legendBox, { backgroundColor: colors.blue[800] }]} />
+                    <Text style={styles.legendText}>{'> 80'}</Text>
                 </View>
                 <View style={styles.legendItem}>
-                    <View style={[styles.legendColor, { backgroundColor: colors.orange[100] }]} />
-                    <Text style={styles.legendText}>5 ngày tới</Text>
+                    <View style={[styles.legendBox, { backgroundColor: colors.blue[600] }]} />
+                    <Text style={styles.legendText}>70 - 80</Text>
+                </View>
+                <View style={styles.legendItem}>
+                    <View style={[styles.legendBox, { backgroundColor: colors.blue[400] }]} />
+                    <Text style={styles.legendText}>60 - 70</Text>
+                </View>
+                <View style={styles.legendItem}>
+                    <View style={[styles.legendBox, { backgroundColor: colors.blue[50] }]} />
+                    <Text style={styles.legendText}>{'< 40'}</Text>
+                </View>
+            </View>
+            <View style={styles.legendRow}>
+                <Text style={styles.legendTitle}>Đã thu:</Text>
+                <View style={styles.legendItem}>
+                    <View style={[styles.legendBox, { backgroundColor: colors.orange[500] }]} />
+                    <Text style={styles.legendText}>{'> 80'}</Text>
                 </View>
             </View>
         </View>
     );
+};
+
+// ----------------------------------------------------------------------
+// HELPERS
+// ----------------------------------------------------------------------
+
+const calculateScale = (values: number[]) => {
+    const maxVal = values.length > 0 ? Math.max(...values, 1) : 1;
+
+    // Choose suitable step: 0.5 for small range, 1 or 2 for large
+    let step = 0.5;
+    if (maxVal > 8) step = 2;
+    else if (maxVal > 4) step = 1;
+
+    // yMax with headroom, rounded up to next step
+    const yMax = Math.ceil((maxVal * 1.15) / step) * step;
+
+    // Labels from bottom (0) to top (yMax)
+    const labels: string[] = [];
+    for (let v = 0; v <= yMax + 0.001; v += step) {
+        labels.push(v % 1 === 0 ? v.toFixed(0) : v.toFixed(1).replace('.', ','));
+    }
+
+    // yLabels for top-to-bottom rendering
+    const yLabels = [...labels].reverse();
+
+    return { yMax, yLabels };
+};
+
+// ----------------------------------------------------------------------
+// MAIN COMPONENT
+// ----------------------------------------------------------------------
+
+const getAgeGroupColor = (ageGroup: string, type: 'remaining' | 'collected') => {
+    if (type === 'collected') return colors.orange[500];
+
+    switch (ageGroup) {
+        case '>80':
+            return colors.blue[800];
+        case '70-80':
+            return colors.blue[600];
+        case '60-70':
+            return colors.blue[400];
+        case '<40':
+            return colors.blue[50];
+        default:
+            return colors.blue[200];
+    }
 };
 
 export const ProdChart = () => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [activeTab, setActiveTab] = useState('Khu vực');
-    const [styles, setStyles] = useState(getStyles(Dimensions.get('window').width));
+    const [activeTab, setActiveTab] = useState<'Ngày tuổi' | 'Khu vực'>('Khu vực');
 
-    useEffect(() => {
-        const handleDimChange = ({ window }) => {
-            setStyles(getStyles(window.width));
-        };
-        const subscription = Dimensions.addEventListener('change', handleDimChange);
-        return () => subscription.remove();
+    // 1. Group data by age group
+    const ageGroupData = useMemo(() => {
+        const groups: Record<string, { collected: number; remaining: number }> = {};
+        prodChartData.forEach(d => {
+            if (!groups[d.ageGroup]) {
+                groups[d.ageGroup] = { collected: 0, remaining: 0 };
+            }
+            groups[d.ageGroup].collected += d.collected;
+            groups[d.ageGroup].remaining += d.remaining;
+        });
+
+        const order = ['<40', '60-70', '70-80', '>80'];
+        return order
+            .map(age => {
+                const group = groups[age];
+                if (!group || (group.collected === 0 && group.remaining === 0)) return null;
+
+                const item: GroupData = {
+                    label: age,
+                    items: [
+                        group.collected > 0
+                            ? {
+                                  value: group.collected,
+                                  color: String(getAgeGroupColor(age, 'collected')),
+                                  label: group.collected.toFixed(2).replace('.', ',') + ' T',
+                              }
+                            : null,
+                        group.remaining > 0
+                            ? {
+                                  value: group.remaining,
+                                  color: String(getAgeGroupColor(age, 'remaining')),
+                                  label: group.remaining.toFixed(2).replace('.', ',') + ' T',
+                              }
+                            : null,
+                    ],
+                };
+                return item;
+            })
+            .filter((item): item is GroupData => item !== null);
     }, []);
 
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsExpanded(!isExpanded);
-    };
+    // 2. Data for Pond tab
+    const pondData = useMemo(
+        () =>
+            prodChartData.map((d: ProdDataPoint) => ({
+                label: d.pondName,
+                items: [
+                    d.collected > 0
+                        ? {
+                              value: d.collected,
+                              color: d.colorCollected || getAgeGroupColor(d.ageGroup, 'collected'),
+                              label: d.collected.toFixed(2).replace('.', ',') + ' T',
+                          }
+                        : null,
+                    d.remaining > 0
+                        ? {
+                              value: d.remaining,
+                              color: d.colorRemaining || getAgeGroupColor(d.ageGroup, 'remaining'),
+                              label: d.remaining.toFixed(2).replace('.', ',') + ' T',
+                          }
+                        : null,
+                ],
+            })) as GroupData[],
+        []
+    );
+
+    // 3. Select active data
+    const activeData = activeTab === 'Khu vực' ? pondData : ageGroupData;
+
+    // 4. Calculate scale based on active data
+    const { yMax, yLabels } = useMemo(() => {
+        const allValues: number[] = [];
+        activeData.forEach(group => {
+            if (group && group.items) {
+                group.items.forEach(item => {
+                    if (item) allValues.push(item.value);
+                });
+            }
+        });
+        return calculateScale(allValues);
+    }, [activeData]);
+
+    // 5. Dynamic height for visual consistency
+    const chartHeight = useMemo(() => Math.max(200, yMax * 55), [yMax]);
 
     return (
-        <View style={styles.wrapper}>
-            <TouchableOpacity style={styles.header} onPress={toggleExpand} activeOpacity={0.8}>
-                <Text style={styles.headerText}>BIỂU ĐỒ SẢN LƯỢNG</Text>
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color={colors.text}
-                />
-            </TouchableOpacity>
+        <View style={styles.container}>
+            <CollapseHead
+                title="BIỂU ĐỒ SẢN LƯỢNG"
+                isExpanded={isExpanded}
+                onToggle={() => setIsExpanded(!isExpanded)}
+                style={styles.header}
+                titleStyle={styles.headerTitle}
+            />
 
             {isExpanded && (
                 <View style={styles.content}>
                     <View style={styles.tabContainer}>
                         <TouchableOpacity
-                            onPress={() => setActiveTab('Ngày tuổi')}
                             style={[styles.tab, activeTab === 'Ngày tuổi' && styles.activeTab]}
+                            onPress={() => setActiveTab('Ngày tuổi')}
                         >
                             <Text
                                 style={[
@@ -451,8 +312,8 @@ export const ProdChart = () => {
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => setActiveTab('Khu vực')}
                             style={[styles.tab, activeTab === 'Khu vực' && styles.activeTab]}
+                            onPress={() => setActiveTab('Khu vực')}
                         >
                             <Text
                                 style={[
@@ -465,13 +326,223 @@ export const ProdChart = () => {
                         </TouchableOpacity>
                     </View>
 
-                    {activeTab === 'Ngày tuổi' ? (
-                        <NgayTuoiChart styles={styles} />
-                    ) : (
-                        <KhuVucChart styles={styles} />
-                    )}
+                    <View style={styles.summaryContainer}>
+                        {prodChartSummary.map((item, index) => (
+                            <View key={index} style={styles.summaryItem}>
+                                <Text style={styles.summaryLabel}>{item.label}</Text>
+                                <Text style={styles.summaryValue}>{item.value}</Text>
+                            </View>
+                        ))}
+                    </View>
+
+                    <VisualChart
+                        data={activeData}
+                        yLabels={yLabels}
+                        maxValue={yMax}
+                        height={chartHeight}
+                        barWidth={activeTab === 'Khu vực' ? 20 : 30}
+                    />
+
+                    <Legend />
                 </View>
             )}
         </View>
     );
 };
+
+// ----------------------------------------------------------------------
+// STYLES
+// ----------------------------------------------------------------------
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: colors.white,
+        marginTop: spacing.md,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: colors.gray[100],
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: spacing.md,
+        backgroundColor: colors.white,
+    },
+    headerTitle: {
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.bold,
+        color: colors.text,
+        textTransform: 'uppercase',
+        fontFamily: typography.fontFamily.bold,
+    },
+    content: {
+        paddingBottom: spacing.lg,
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+        marginBottom: spacing.lg,
+    },
+    tab: {
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.xl,
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+        marginBottom: -1,
+    },
+    activeTab: {
+        borderBottomColor: colors.blue[600],
+    },
+    tabText: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        fontWeight: typography.fontWeight.regular,
+        fontFamily: typography.fontFamily.regular,
+    },
+    activeTabText: {
+        color: colors.blue[600],
+        fontWeight: typography.fontWeight.bold,
+        fontFamily: typography.fontFamily.bold,
+    },
+    summaryContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginBottom: spacing.xl,
+    },
+    summaryItem: {
+        alignItems: 'center',
+    },
+    summaryLabel: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        marginBottom: spacing.xs,
+        fontFamily: typography.fontFamily.regular,
+    },
+    summaryValue: {
+        fontSize: typography.fontSize.xl,
+        fontWeight: typography.fontWeight.bold,
+        color: colors.text,
+        fontFamily: typography.fontFamily.bold,
+    },
+    chartMainArea: {
+        flexDirection: 'row',
+        paddingRight: spacing.md,
+    },
+    yAxisContainer: {
+        width: 35,
+        position: 'relative',
+        marginRight: spacing.xs,
+    },
+    yLabelWrapper: {
+        position: 'absolute',
+        right: 0,
+        height: 20,
+        justifyContent: 'center',
+        marginTop: -10, // Half of height to center on the point
+    },
+    yAxisLabel: {
+        fontSize: 10,
+        color: colors.gray[500],
+        fontFamily: typography.fontFamily.regular,
+        textAlign: 'right',
+    },
+    chartContentContainer: {
+        flex: 1,
+        position: 'relative',
+    },
+    gridContainer: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+    },
+    gridLine: {
+        position: 'absolute',
+        height: 1,
+        backgroundColor: colors.gray[100],
+        left: 0,
+        right: 0,
+    },
+    barsArea: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+    },
+    barGroup: {
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        height: '100%',
+    },
+    barsRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    barWrapper: {
+        alignItems: 'center',
+        marginHorizontal: 1,
+    },
+    barValue: {
+        fontSize: 9,
+        color: colors.text,
+        marginBottom: 2,
+        fontWeight: typography.fontWeight.medium,
+        width: 50,
+        textAlign: 'center',
+        fontFamily: typography.fontFamily.medium,
+    },
+    bar: {
+        width: '100%',
+        borderTopLeftRadius: 2,
+        borderTopRightRadius: 2,
+    },
+    xAxisRow: {
+        flexDirection: 'row',
+        height: 20,
+        alignItems: 'center',
+    },
+    xAxisLabel: {
+        fontSize: typography.fontSize.xs,
+        color: colors.gray[600],
+        textAlign: 'center',
+        width: '100%',
+        fontFamily: typography.fontFamily.regular,
+    },
+    legendContainer: {
+        marginTop: spacing.xl,
+        paddingHorizontal: spacing.md,
+        alignItems: 'center',
+    },
+    legendRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+    },
+    legendTitle: {
+        fontSize: typography.fontSize.xs,
+        color: colors.textSecondary,
+        marginRight: spacing.sm,
+        width: 50,
+        fontFamily: typography.fontFamily.regular,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: spacing.md,
+    },
+    legendBox: {
+        width: 12,
+        height: 12,
+        borderRadius: 2,
+        marginRight: spacing.xs,
+    },
+    legendText: {
+        fontSize: typography.fontSize.xs,
+        color: colors.textSecondary,
+        fontFamily: typography.fontFamily.regular,
+    },
+});
