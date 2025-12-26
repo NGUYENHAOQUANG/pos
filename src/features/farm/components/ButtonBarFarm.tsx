@@ -9,7 +9,6 @@ interface ButtonBarFarmProps {
     onPrimaryPress?: () => void;
     onSecondaryPress?: () => void;
     primaryDisabled?: boolean;
-    // secondaryType: 'default' (gray border) | 'primary' (blue border)
     secondaryType?: 'default' | 'primary';
     style?: StyleProp<ViewStyle>;
 }

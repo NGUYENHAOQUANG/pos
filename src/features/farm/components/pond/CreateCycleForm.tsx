@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View, Text, StyleSheet, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -9,20 +9,77 @@ import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { CycleFormData } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/farm.types';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
+import { parseDate, formatDate } from '@/features/farm/utils/dateUtils';
 
 interface Props {
-    formData: CycleFormData;
-    setFormData: React.Dispatch<React.SetStateAction<CycleFormData>>;
+    formData: Partial<CycleData>;
+    setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
+    pondId?: string;
 }
 
-const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
+const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId }) => {
     // Lấy danh mục từ FarmContext
-    const { breedOptions, seasonOptions } = useFarm();
+    const { breedOptions, seasonOptions, getPondById } = useFarm();
 
-    const updateField = (key: keyof CycleFormData, value: any) => {
+    const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
+
+    // Tính tổng chi phí giống ước tính = breedOptions.price * tổng số lượng thả
+    const estimatedCost = useMemo(() => {
+        if (!formData.breedSource || !formData.stockingQuantity) {
+            return 0;
+        }
+
+        const selectedBreed = breedOptions.find(o => o.value === formData.breedSource);
+        if (!selectedBreed?.price) {
+            return 0;
+        }
+
+        const quantity =
+            typeof formData.stockingQuantity === 'string'
+                ? parseFloat(formData.stockingQuantity)
+                : formData.stockingQuantity;
+
+        if (isNaN(quantity) || quantity <= 0) {
+            return 0;
+        }
+
+        return selectedBreed.price * quantity;
+    }, [formData.breedSource, formData.stockingQuantity, breedOptions]);
+
+    // Tính mật độ (con/m²) = Tổng số PL thả / Diện tích ao (m²)
+    const density = useMemo(() => {
+        if (!formData.stockingQuantity || !pondId) {
+            return 0;
+        }
+
+        const pond = getPondById(pondId);
+        if (!pond?.area) {
+            return 0;
+        }
+
+        // Parse area string (e.g., "2400 m²") to number
+        const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
+        const parsedArea = parseFloat(areaStr);
+
+        if (isNaN(parsedArea) || parsedArea <= 0) {
+            return 0;
+        }
+
+        const quantity =
+            typeof formData.stockingQuantity === 'string'
+                ? parseFloat(formData.stockingQuantity)
+                : formData.stockingQuantity;
+
+        if (isNaN(quantity) || quantity <= 0) {
+            return 0;
+        }
+
+        return quantity / parsedArea;
+    }, [formData.stockingQuantity, pondId, getPondById]);
 
     return (
         <ScrollView style={styles.container}>
@@ -111,17 +168,27 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
             <PondDataBox
                 title="Thông tin thả giống"
                 resultItems={[
-                    { label: 'Mật độ (con/m²)', value: formData.density || '-' },
+                    {
+                        label: 'Mật độ (con/m²)',
+                        value: density > 0 ? density.toFixed(6) : '-',
+                    },
                     {
                         label: 'Tổng chi phí giống ước tính (VNĐ)',
-                        value: formData.estimatedCost || '-',
+                        value: estimatedCost > 0 ? formatNumber(estimatedCost) : '-',
                     },
                 ]}
             >
                 <DateInputButton
                     label="Ngày thả"
-                    date={formData.stockingDate ? new Date(formData.stockingDate) : null}
-                    onDateChange={date => updateField('stockingDate', date.toISOString())}
+                    date={
+                        formData.stockingDate
+                            ? typeof formData.stockingDate === 'string' &&
+                              formData.stockingDate.includes('/')
+                                ? parseDate(formData.stockingDate)
+                                : new Date(formData.stockingDate)
+                            : null
+                    }
+                    onDateChange={date => updateField('stockingDate', formatDate(date))}
                 />
 
                 <View style={styles.row}>
@@ -134,9 +201,17 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
                             placeholder="Vd: 200.000"
                             keyboardType="numeric"
                             value={
-                                formData.stockingQuantity ? String(formData.stockingQuantity) : ''
+                                formData.stockingQuantity !== undefined
+                                    ? String(formData.stockingQuantity)
+                                    : ''
                             }
-                            onChangeText={text => updateField('stockingQuantity', text)}
+                            onChangeText={text => {
+                                const num = text ? parseFloat(text) : undefined;
+                                updateField(
+                                    'stockingQuantity',
+                                    isNaN(num as number) ? undefined : num
+                                );
+                            }}
                         />
                     </View>
                     <View style={styles.col35}>
@@ -147,8 +222,11 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData }) => {
                             style={styles.input}
                             placeholder="Vd: 10"
                             keyboardType="numeric"
-                            value={formData.age ? String(formData.age) : ''}
-                            onChangeText={text => updateField('age', text)}
+                            value={formData.age !== undefined ? String(formData.age) : ''}
+                            onChangeText={text => {
+                                const num = text ? parseFloat(text) : undefined;
+                                updateField('age', isNaN(num as number) ? undefined : num);
+                            }}
                         />
                     </View>
                 </View>

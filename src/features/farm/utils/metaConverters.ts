@@ -282,7 +282,7 @@ export const convertMeasureSizeMetaToActivityData = (
     if (meta.survivalRate !== null && meta.survivalRate !== undefined) {
         data.push({
             label: 'Tỉ lệ sống dự kiến (%)',
-            value: `${Math.round(meta.survivalRate)}`,
+            value: `${meta.survivalRate.toFixed(2)}`,
         });
     }
 

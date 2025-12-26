@@ -23,8 +23,8 @@ interface HeaderFarmProps {
     onMenuPress?: () => void;
     menuOptions?: { value: string; onMenuOptionPress: () => void }[];
 
-    // Mode: 'list' (default) or 'detail' or 'simple'
-    type?: 'list' | 'detail' | 'simple';
+    // Mode: 'list' (default) or 'detail' or 'simple' or 'cycle-detail'
+    type?: 'list' | 'detail' | 'simple' | 'cycle-detail';
     titleAlign?: 'center' | 'left'; // Thêm prop căn lề
 
     // Specific to 'list' mode
@@ -33,7 +33,7 @@ interface HeaderFarmProps {
     onSelect?: (item: DropDownItem) => void;
 
     // Specific to 'detail' mode
-    title?: string; // e.g. Pond Name
+    title?: string | React.ReactNode; // e.g. Pond Name or custom ReactNode
     subtitle?: string; // e.g. Area
     tagType?: PondType;
     onBack?: () => void;
@@ -86,6 +86,41 @@ export const HeaderFarm = ({
     };
 
     /**
+     * Render Cycle Detail Mode (Back, Custom Title with Subtitle, Right Action)
+     */
+    if (type === 'cycle-detail') {
+        return (
+            <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+                <TouchableOpacity onPress={onBack} style={styles.backButtonSimple}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+
+                {/* Custom title (ReactNode) */}
+                {typeof title === 'string' ? (
+                    <Text
+                        style={[
+                            styles.simpleTitle,
+                            titleAlign === 'left'
+                                ? styles.simpleTitleLeft
+                                : styles.simpleTitleCenter,
+                        ]}
+                    >
+                        {title}
+                    </Text>
+                ) : (
+                    <View style={styles.customTitleContainer}>{title}</View>
+                )}
+
+                {rightAction ? (
+                    <View style={styles.rightActionContainer}>{rightAction}</View>
+                ) : (
+                    <View style={styles.placeholderButton} />
+                )}
+            </View>
+        );
+    }
+
+    /**
      * Render Simple Mode (Back, Title Center/Left)
      */
     if (type === 'simple') {
@@ -96,14 +131,20 @@ export const HeaderFarm = ({
                 </TouchableOpacity>
 
                 {/* Chỉ thay đổi style để căn lề dựa trên titleAlign, không bọc thêm View */}
-                <Text
-                    style={[
-                        styles.simpleTitle,
-                        titleAlign === 'left' ? styles.simpleTitleLeft : styles.simpleTitleCenter,
-                    ]}
-                >
-                    {title}
-                </Text>
+                {typeof title === 'string' ? (
+                    <Text
+                        style={[
+                            styles.simpleTitle,
+                            titleAlign === 'left'
+                                ? styles.simpleTitleLeft
+                                : styles.simpleTitleCenter,
+                        ]}
+                    >
+                        {title}
+                    </Text>
+                ) : (
+                    <View style={styles.customTitleContainer}>{title}</View>
+                )}
 
                 {rightAction ? (
                     <View style={styles.rightActionContainer}>{rightAction}</View>
@@ -310,6 +351,10 @@ const styles = StyleSheet.create({
     rightActionContainer: {
         width: 40,
         alignItems: 'flex-end',
+    },
+    customTitleContainer: {
+        flex: 1,
+        marginHorizontal: spacing.sm,
     },
     modalOverlay: {
         flex: 1,

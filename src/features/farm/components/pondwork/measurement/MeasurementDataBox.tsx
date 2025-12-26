@@ -9,7 +9,7 @@ interface MeasurementDataBoxProps {
     onShrimpSizeChange: (value: string) => void;
     remainingWeight: string;
     onRemainingWeightChange: (value: string) => void;
-    initialShrimpCount?: number; // Optional initial count for survival rate calculation
+    stockingQuantity?: number; // Số lượng thả ban đầu (PLs) để tính tỉ lệ sống
 }
 
 export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
@@ -17,7 +17,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     onShrimpSizeChange,
     remainingWeight,
     onRemainingWeightChange,
-    initialShrimpCount = 0,
+    stockingQuantity,
 }) => {
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
@@ -27,11 +27,13 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         const weight = parseFloat(remainingWeight);
 
         if (!isNaN(size) && !isNaN(weight) && size > 0 && weight > 0) {
+            // Số con thu = Cỡ tôm (con/kg) × Sản lượng còn lại (kg)
             const currentTotal = size * weight;
             setTotalShrimp(currentTotal);
 
-            if (initialShrimpCount > 0) {
-                const rate = (currentTotal / initialShrimpCount) * 100;
+            // Tỉ lệ sống (%) = (Số con thu / Số con thả ban đầu) × 100
+            if (stockingQuantity && stockingQuantity > 0) {
+                const rate = (currentTotal / stockingQuantity) * 100;
                 setSurvivalRate(rate);
             } else {
                 setSurvivalRate(null);
@@ -40,7 +42,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
             setTotalShrimp(null);
             setSurvivalRate(null);
         }
-    }, [shrimpSize, remainingWeight, initialShrimpCount]);
+    }, [shrimpSize, remainingWeight, stockingQuantity]);
 
     // Build result items
     const resultItems: ResultItem[] = useMemo(() => {
@@ -61,7 +63,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         if (survivalRate !== null) {
             items.push({
                 label: 'Tỉ lệ sống dự kiến (%)',
-                value: parseFloat(survivalRate.toFixed(2)),
+                value: survivalRate.toFixed(2),
             });
         } else {
             items.push({

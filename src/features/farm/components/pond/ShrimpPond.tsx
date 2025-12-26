@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -14,10 +14,11 @@ import {
     StatusBar,
 } from 'react-native';
 
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
 import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { useFarm } from '@/features/farm/context/FarmContext';
 
 interface ShrimpPondProps {
     name: string;
@@ -30,6 +31,7 @@ interface ShrimpPondProps {
     onDetailPress?: () => void;
     style?: StyleProp<ViewStyle>;
     status?: TagStatus;
+    pondId?: string;
 }
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
@@ -43,9 +45,36 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     onDetailPress,
     style,
     status,
+    pondId,
 }) => {
     // If no update/activity provided, consider it empty/no-data mode
-    const hasData = !!lastUpdate || !!lastActivity;
+    const hasData = type === 'Ao nuôi' || type === 'Ao vèo' || type === 'Ao sẵn sàng';
+
+    const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
+
+    // Get cycle data for this pond
+    const cycleData = useMemo(() => {
+        if (!pondId) return null;
+        const currentCycle = activeCycles[pondId];
+        const cyclesForPond = getCyclesByPondId(pondId);
+
+        // Ưu tiên activeCycle, sau đó tìm cycle có pondId trong receivingPonds, cuối cùng lấy cycle đầu tiên
+        return (
+            currentCycle ||
+            cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pondId)) ||
+            cyclesForPond[0] ||
+            null
+        );
+    }, [pondId, activeCycles, getCyclesByPondId]);
+
+    // Calculate DOC
+    const doc = useMemo(() => {
+        return calculateDOC(cycleData?.stockingDate);
+    }, [cycleData?.stockingDate, calculateDOC]);
+
+    const breedLabel = cycleData?.breedSource
+        ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
+        : undefined;
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [dropdownTop, setDropdownTop] = useState(0);
@@ -115,6 +144,40 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                     </Text>
                 )}
             </View>
+
+            {/* Cycle Info Section */}
+            {cycleData && hasData && (
+                <>
+                    <View style={styles.cycleSection}>
+                        <View style={styles.cycleHeader}>
+                            <Text style={styles.cycleName}>
+                                {cycleData.cycleName || 'Chưa đặt tên'}
+                            </Text>
+                            <Text style={styles.cycleDate}>
+                                {cycleData.stockingDate || '-'} - nay
+                            </Text>
+                        </View>
+                        <View style={styles.cycleInfo}>
+                            <View style={styles.cycleInfoRow}>
+                                <Text style={styles.cycleLabel}>Số ngày nuôi (DOC):</Text>
+                                <Text style={styles.cycleValue}>{doc}</Text>
+                            </View>
+                            <View style={styles.cycleInfoRow}>
+                                <Text style={styles.cycleLabel}>Số lượng thả (Pls):</Text>
+                                <Text style={styles.cycleValue}>
+                                    {cycleData.stockingQuantity
+                                        ? cycleData.stockingQuantity.toLocaleString('vi-VN')
+                                        : '-'}
+                                </Text>
+                            </View>
+                            <View style={styles.cycleInfoRow}>
+                                <Text style={styles.cycleLabel}>Tôm giống:</Text>
+                                <Text style={styles.cycleValue}>{breedLabel || '-'}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </>
+            )}
 
             {hasData && (
                 <>
@@ -300,5 +363,49 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         paddingVertical: 4,
         paddingHorizontal: 8,
+    },
+    cycleSection: {
+        borderWidth: 1,
+        borderColor: '#DEE4ED',
+        borderRadius: 8,
+        marginHorizontal: spacing.md,
+        marginBottom: 12,
+    },
+    cycleHeader: {
+        backgroundColor: '#F0F5FF',
+        padding: spacing.sm,
+        borderTopLeftRadius: borderRadius.sm,
+        borderTopRightRadius: borderRadius.sm,
+    },
+    cycleName: {
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.bold,
+        color: colors.text,
+        marginBottom: spacing.xs,
+    },
+    cycleDate: {
+        fontSize: typography.fontSize.xs,
+        color: colors.textSecondary,
+    },
+    cycleInfo: {
+        gap: spacing.xs,
+        padding: spacing.sm,
+    },
+    cycleInfoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    cycleLabel: {
+        fontSize: typography.fontSize.sm,
+        color: colors.text,
+        flex: 1,
+        fontWeight: typography.fontWeight.bold,
+        lineHeight: 22,
+    },
+    cycleValue: {
+        fontSize: typography.fontSize.sm,
+        color: colors.text,
+        fontWeight: typography.fontWeight.regular,
     },
 });
