@@ -132,16 +132,7 @@ export const HeaderFarm = ({
 
                 {/* Chỉ thay đổi style để căn lề dựa trên titleAlign, không bọc thêm View */}
                 {typeof title === 'string' ? (
-                    <Text
-                        style={[
-                            styles.simpleTitle,
-                            titleAlign === 'left'
-                                ? styles.simpleTitleLeft
-                                : styles.simpleTitleCenter,
-                        ]}
-                    >
-                        {title}
-                    </Text>
+                    <Text style={[styles.simpleTitle]}>{title}</Text>
                 ) : (
                     <View style={styles.customTitleContainer}>{title}</View>
                 )}
@@ -227,18 +218,11 @@ export const HeaderFarm = ({
     return (
         <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
             <View style={styles.leftContainer}>
-                {onSelect && (
-                    <DropDownButtonBasic
-                        data={data}
-                        value={value}
-                        onSelect={onSelect}
-                        height={32}
-                    />
-                )}
+                {onSelect && <DropDownButtonBasic data={data} value={value} onSelect={onSelect} />}
             </View>
 
             <View style={styles.rightContainer}>
-                <ButtonHeader onPress={onMenuPress} style={styles.menuButtonDetail} iconSize={16} />
+                <ButtonHeader onPress={onMenuPress} />
             </View>
         </View>
     );
