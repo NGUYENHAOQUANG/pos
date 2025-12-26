@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { StyledInput } from '@/features/farm/components/pondwork/measurement/StyledInput';
-import { DataRow } from '@/features/farm/components/DataRow';
-import { spacing, borderRadius } from '@/styles';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
+import { spacing } from '@/styles';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;
@@ -43,40 +42,60 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         }
     }, [shrimpSize, remainingWeight, initialShrimpCount]);
 
+    // Build result items
+    const resultItems: ResultItem[] = useMemo(() => {
+        const items: ResultItem[] = [];
+
+        if (totalShrimp !== null) {
+            items.push({
+                label: 'Tổng số tôm hiện tại (con)',
+                value: Math.round(totalShrimp),
+            });
+        } else {
+            items.push({
+                label: 'Tổng số tôm hiện tại (con)',
+                value: '-',
+            });
+        }
+
+        if (survivalRate !== null) {
+            items.push({
+                label: 'Tỉ lệ sống dự kiến (%)',
+                value: parseFloat(survivalRate.toFixed(2)),
+            });
+        } else {
+            items.push({
+                label: 'Tỉ lệ sống dự kiến (%)',
+                value: '-',
+            });
+        }
+
+        return items;
+    }, [totalShrimp, survivalRate]);
+
     return (
-        <SelectionInfoBox title="Số liệu đo">
+        <PondDataBox title="Số liệu đo" resultItems={resultItems}>
             <View style={styles.inputRow}>
-                <StyledInput
-                    label="Cỡ tôm (con/kg)"
-                    value={shrimpSize}
-                    onChangeText={onShrimpSizeChange}
-                    keyboardType="numeric"
-                    placeholder="Input"
-                    required
-                />
-                <StyledInput
-                    label="Sản lượng còn lại (kg)"
-                    value={remainingWeight}
-                    onChangeText={onRemainingWeightChange}
-                    keyboardType="numeric"
-                    placeholder="Input"
-                    required
-                />
+                <View style={styles.inputColumn}>
+                    <FarmInput
+                        label="Cỡ tôm (con/kg)"
+                        value={shrimpSize}
+                        onChangeText={onShrimpSizeChange}
+                        keyboardType="numeric"
+                        required
+                    />
+                </View>
+                <View style={styles.inputColumn}>
+                    <FarmInput
+                        label="Sản lượng còn lại (kg)"
+                        value={remainingWeight}
+                        onChangeText={onRemainingWeightChange}
+                        keyboardType="numeric"
+                        required
+                    />
+                </View>
             </View>
-            <View style={styles.autoCalculatedBox}>
-                <DataRow
-                    label="Tổng số tôm hiện tại (con)"
-                    value={totalShrimp !== null ? Math.round(totalShrimp).toLocaleString() : '-'}
-                />
-                <DataRow
-                    label="Tỉ lệ sống dự kiến (%)"
-                    value={survivalRate !== null ? survivalRate.toFixed(2) : '-'}
-                />
-            </View>
-            <Text style={styles.noteText}>
-                Kết quả được hệ thống tính tự động từ các số liệu bạn đã nhập
-            </Text>
-        </SelectionInfoBox>
+        </PondDataBox>
     );
 };
 
@@ -84,17 +103,8 @@ const styles = StyleSheet.create({
     inputRow: {
         flexDirection: 'row',
         gap: spacing.md,
-        marginBottom: spacing.md,
     },
-    autoCalculatedBox: {
-        backgroundColor: '#F7FAFC',
-        borderRadius: borderRadius.sm,
-        padding: spacing.md,
-        gap: spacing.md,
-    },
-    noteText: {
-        fontSize: 12,
-        color: '#828282',
-        marginTop: spacing.sm,
+    inputColumn: {
+        flex: 1,
     },
 });

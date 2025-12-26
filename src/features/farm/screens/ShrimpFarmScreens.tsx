@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
-import { Button } from '@/shared/components/buttons/Button';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -387,13 +387,19 @@ export const ShrimpFarmScreens: React.FC = () => {
             {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ */}
             {selectedTab === 'work' && !currentCycle && (
                 <View style={styles.footer}>
-                    <Button
-                        title="Bắt đầu chu kỳ nuôi"
-                        onPress={handleStartCycle}
-                        variant="primary"
-                        iconLeft="add"
+                    <TouchableOpacity
                         style={styles.startButton}
-                    />
+                        onPress={handleStartCycle}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="add"
+                            size={20}
+                            color={colors.white}
+                            style={styles.startIcon}
+                        />
+                        <Text style={styles.startButtonText}>Bắt đầu chu kỳ nuôi</Text>
+                    </TouchableOpacity>
                 </View>
             )}
         </View>
@@ -424,6 +430,21 @@ const styles = StyleSheet.create({
     },
     startButton: {
         width: '100%',
+        height: 40,
+        backgroundColor: colors.primary,
+        borderRadius: spacing.sm,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    startIcon: {
+        marginRight: spacing.xs,
+    },
+    startButtonText: {
+        fontSize: 16,
+        fontWeight: '400',
+        color: colors.white,
+        lineHeight: 24,
     },
     placeholderContainer: {
         padding: spacing.xl,

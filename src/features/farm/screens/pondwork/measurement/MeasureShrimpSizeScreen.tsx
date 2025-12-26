@@ -33,17 +33,15 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const currentPond = routePond;
 
     // --- State ---
-    const [time, setTime] = useState(
-        itemToEdit?.meta?.date ? new Date(itemToEdit.meta.date) : new Date()
-    );
-    const [imageUris, setImageUris] = useState<string[]>(itemToEdit?.meta?.images || []);
-    const [shrimpSize, setShrimpSize] = useState(itemToEdit?.meta?.shrimpSize || '');
-    const [remainingWeight, setRemainingWeight] = useState(itemToEdit?.meta?.remainingWeight || '');
-    const [notes, setNotes] = useState(itemToEdit?.meta?.notes || '');
+    const [time, setTime] = useState(itemToEdit?.date ? new Date(itemToEdit.date) : new Date());
+    const [imageUris, setImageUris] = useState<string[]>(itemToEdit?.images || []);
+    const meta = itemToEdit?.meta as
+        | { shrimpSize?: string; remainingWeight?: string; notes?: string; images?: string[] }
+        | undefined;
+    const [shrimpSize, setShrimpSize] = useState(meta?.shrimpSize || '');
+    const [remainingWeight, setRemainingWeight] = useState(meta?.remainingWeight || '');
+    const [notes, setNotes] = useState(meta?.notes || '');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-
-    const initialShrimpCount =
-        currentPond?.cycles?.find(c => c.status === 'active')?.initialShrimpCount || 0;
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -63,8 +61,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         const size = parseFloat(shrimpSize);
         const weight = parseFloat(remainingWeight);
         const totalShrimp = !isNaN(size) && !isNaN(weight) ? size * weight : null;
-        const survivalRate =
-            totalShrimp && initialShrimpCount > 0 ? (totalShrimp / initialShrimpCount) * 100 : null;
+        const survivalRate = null; // Survival rate calculation can be added when initialShrimpCount is available
 
         const timeString = time.toLocaleTimeString('en-GB', {
             hour: '2-digit',
@@ -164,12 +161,11 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onShrimpSizeChange={setShrimpSize}
                     remainingWeight={remainingWeight}
                     onRemainingWeightChange={setRemainingWeight}
-                    initialShrimpCount={initialShrimpCount}
                 />
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </ScrollView>
 
-            <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.md }]}>
+            <View style={styles.footer}>
                 <ButtonBarFarm
                     primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                     secondaryTitle="Huỷ"
@@ -241,15 +237,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        padding: spacing.md,
-        paddingBottom: 120,
-        gap: spacing.sm,
+        padding: 0,
     },
     footer: {
         backgroundColor: colors.white,
         borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.sm,
+        borderTopColor: colors.border,
     },
 });
