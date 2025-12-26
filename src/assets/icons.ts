@@ -14,5 +14,5 @@ export { default as IconVector } from './images/Icon/IconDevices/Vector.svg';
 export { default as IconTrashOutlined } from './images/Icon/IconDevices/TrashOutlined.svg';
 export { default as IconEditOutlined } from './images/Icon/IconDevices/EditOutlined.svg';
 export { default as IconCloseOutlined } from './images/Icon/IconDevices/CloseOutlined.svg';
-export { default as IconCalender } from './images/Icon/IconDevices/Calender.svg';
+export { default as IconCalender } from './images/Icon/Calender.svg';
 export { default as IconError } from './images/Icon/IconFarm/IconError.svg';

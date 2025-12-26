@@ -14,127 +14,128 @@ import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownB
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
 
 export const AquacultureManagementScreens: React.FC = () => {
-  const navigation = useNavigation<any>();
-  const { setTabBarVisible } = useTabBarVisibility();
-  const { aquacultures } = useMenuContext();
-  const [selectedTab, setSelectedTab] = useState('all');
+    const navigation = useNavigation<any>();
+    const { setTabBarVisible } = useTabBarVisibility();
+    const { aquacultures } = useMenuContext();
+    const [selectedTab, setSelectedTab] = useState('all');
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const timeout = setTimeout(() => {
-        setTabBarVisible(false);
-      }, 100);
+    useFocusEffect(
+        React.useCallback(() => {
+            const timeout = setTimeout(() => {
+                setTabBarVisible(false);
+            }, 100);
 
-      return () => {
-        clearTimeout(timeout);
-        setTabBarVisible(true);
-      };
-    }, [setTabBarVisible])
-  );
+            return () => {
+                clearTimeout(timeout);
+                setTabBarVisible(true);
+            };
+        }, [setTabBarVisible])
+    );
 
-  // Mock data for dropdown
-  const farmOptions = [
-    { id: '1', label: 'Trại Kiên Giang' },
-    { id: '2', label: 'Trại Cà Mau' },
-  ];
+    // Mock data for dropdown
+    const farmOptions = [
+        { id: '1', label: 'Trại Kiên Giang' },
+        { id: '2', label: 'Trại Cà Mau' },
+    ];
 
-  // Filter logic (optional, for now show all)
-  const filteredList = aquacultures; // Can implement tab filtering if needed
+    // Filter logic (optional, for now show all)
+    const filteredList = aquacultures; // Can implement tab filtering if needed
 
-  return (
-    <View style={styles.container}>
-      {/* Header with Add Button */}
-      <HeaderMenu
-        title="Quản lý vụ nuôi"
-        onBack={() => navigation.goBack()}
-        rightAction={
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => navigation.navigate('AddAquaculture')}
-          >
-            <Ionicons name="add" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        }
-      />
-
-      {/* Tabs */}
-      <HeadingMenu
-        selectedTab={selectedTab}
-        onTabSelect={setSelectedTab}
-        counts={{ all: aquacultures.length, active: 0, ended: 0 }} // Simple count for now
-      />
-
-      {/* Dropdown Filter Section (White Background) */}
-      <View style={styles.filterSection}>
-        <DropDownButton
-          data={farmOptions}
-          value={farmOptions[0]}
-          onSelect={item => console.log('Selected:', item)}
-        />
-      </View>
-
-      <View style={styles.content}>
-        {aquacultures.length === 0 ? (
-          /* Empty State */
-          <View style={styles.cardContainer}>
-            <EmptyStateCard
-              message="Chưa có vụ nuôi nào"
-              buttonTitle="Tạo vụ nuôi"
-              onPress={() => navigation.navigate('AddAquaculture')}
-            />
-          </View>
-        ) : (
-          <FlatList
-            data={filteredList}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <AquacultureItem
-                item={item}
-                onEdit={editItem =>
-                  navigation.navigate('EditAquaculture', { aquaculture: editItem })
+    return (
+        <View style={styles.container}>
+            {/* Header with Add Button */}
+            <HeaderMenu
+                title="Quản lý vụ nuôi"
+                onBack={() => navigation.goBack()}
+                rightAction={
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => navigation.navigate('AddAquaculture')}
+                    >
+                        <Ionicons name="add" size={24} color={colors.primary} />
+                    </TouchableOpacity>
                 }
-              />
-            )}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
-      </View>
-    </View>
-  );
+            />
+
+            {/* Tabs */}
+            <HeadingMenu
+                selectedTab={selectedTab}
+                onTabSelect={setSelectedTab}
+                counts={{ all: aquacultures.length, active: 0, ended: 0 }} // Simple count for now
+            />
+
+            {/* Dropdown Filter Section (White Background) */}
+            <View style={styles.filterSection}>
+                <DropDownButton
+                    data={farmOptions}
+                    value={farmOptions[0]}
+                    onSelect={item => console.log('Selected:', item)}
+                />
+            </View>
+
+            <View style={styles.content}>
+                {aquacultures.length === 0 ? (
+                    /* Empty State */
+                    <View style={styles.cardContainer}>
+                        <EmptyStateCard
+                            message="Chưa có vụ nuôi nào"
+                            buttonTitle="Tạo vụ nuôi"
+                            onPress={() => navigation.navigate('AddAquaculture')}
+                        />
+                    </View>
+                ) : (
+                    <FlatList
+                        data={filteredList}
+                        keyExtractor={item => item.id}
+                        renderItem={({ item }) => (
+                            <AquacultureItem
+                                item={item}
+                                onEdit={editItem =>
+                                    navigation.navigate('EditAquaculture', {
+                                        aquaculture: editItem,
+                                    })
+                                }
+                            />
+                        )}
+                        contentContainerStyle={styles.listContent}
+                    />
+                )}
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.md,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  filterSection: {
-    backgroundColor: colors.white,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    zIndex: 100,
-  },
-  cardContainer: {
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.md,
-    marginTop: spacing.md,
-  },
-  addButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.white,
-  },
-  listContent: {
-    paddingBottom: spacing.xl,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    content: {
+        flex: 1,
+        padding: spacing.md,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    filterSection: {
+        backgroundColor: colors.white,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
+        zIndex: 100,
+    },
+    cardContainer: {
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+    },
+    addButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+    },
+    listContent: {
+        paddingBottom: spacing.xl,
+    },
 });

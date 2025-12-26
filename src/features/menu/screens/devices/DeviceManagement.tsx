@@ -1,0 +1,285 @@
+import React, { useState } from 'react';
+import {
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions,
+    GestureResponderEvent,
+    ScrollView,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { colors, spacing, borderRadius } from '@/styles';
+
+// Components
+import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
+import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
+// import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { DevicesCard } from '@/features/menu/components/devices/DevicesCard';
+import { DeviceData } from '@/features/menu/types/menu.types';
+import { WarningDevices } from '@/features/menu/components/devices/WarningDevices';
+import { DeviceActionMenu } from '@/features/menu/components/devices/DeviceActionMenu';
+import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+
+const { width: windowWidth } = Dimensions.get('window');
+
+export const DeviceManagement = () => {
+    const navigation = useNavigation();
+    const { devices, deleteDevice } = useMenuContext();
+    const [selectedTab, setSelectedTab] = useState('all');
+
+    // States for filter
+    const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
+        id: '1',
+        label: 'Trại Kiên Giang',
+    });
+    const [selectedDeviceType, setSelectedDeviceType] = useState<DropDownItem>({
+        id: '0',
+        label: 'Loại thiết bị',
+    });
+
+    // Menu State
+    const [menuVisible, setMenuVisible] = useState(false);
+    const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+    const [menuPosition, setMenuPosition] = useState<{
+        top?: number;
+        bottom?: number;
+        right: number;
+    }>({ top: 0, right: 0 });
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    const handleMorePress = (event: GestureResponderEvent, deviceId: string) => {
+        const target = event.currentTarget as any;
+        target.measure(
+            (x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+                const windowHeight = Dimensions.get('window').height;
+                const MENU_HEIGHT = 200; // Still used for check, but positioning is strictly anchored now
+
+                const newPosition: { top?: number; bottom?: number; right: number } = {
+                    right: windowWidth - (pageX + width),
+                };
+
+                // Check if menu would go off screen
+                if (pageY + height + MENU_HEIGHT > windowHeight) {
+                    // Position above the button: Anchor to bottom
+                    // Distance from bottom of screen = windowHeight - pageY
+                    // Add spacing: windowHeight - pageY + spacing.xs
+                    newPosition.bottom = windowHeight - pageY + 4; // Use explicit 4px or spacing.xs
+                } else {
+                    // Position below
+                    newPosition.top = pageY + height + 4;
+                }
+
+                setMenuPosition(newPosition as any);
+                setSelectedDeviceId(deviceId);
+                setMenuVisible(true);
+            }
+        );
+    };
+
+    const handleCloseMenu = () => {
+        setMenuVisible(false);
+        setSelectedDeviceId(null);
+    };
+
+    // Mock data for filters
+    const farms: DropDownItem[] = [
+        { id: '1', label: 'Trại Kiên Giang' },
+        { id: '2', label: 'Trại Cà Mau' },
+        { id: '3', label: 'Trại Bạc Liêu' },
+    ];
+
+    const deviceTypes: DropDownItem[] = [
+        { id: '0', label: 'Loại thiết bị' },
+        { id: '1', label: 'Quạt nước' },
+        { id: '2', label: 'Máy sục khí' },
+        { id: '3', label: 'Máy cho ăn' },
+    ];
+
+    const tabs = [
+        { key: 'all', label: 'Tất cả', count: devices.length },
+        {
+            key: 'warehouse',
+            label: 'Lưu kho',
+            count: devices.filter(d => d.status === 'warehouse').length,
+        },
+        {
+            key: 'installed',
+            label: 'Đã lắp đặt',
+            count: devices.filter(d => d.status === 'installed' || d.status === 'active').length,
+        },
+        {
+            key: 'maintenance',
+            label: 'Đến hạn bảo trì',
+            count: devices.filter(d => d.status === 'maintenance').length,
+        },
+    ];
+
+    const renderAddButton = () => (
+        <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('AddDevice' as never)}
+        >
+            <Ionicons name="add" size={24} color={colors.primary} />
+        </TouchableOpacity>
+    );
+
+    return (
+        <View style={styles.container}>
+            <HeaderMenu
+                title="Quản lý bảo trì thiết bị"
+                onBack={() => navigation.goBack()}
+                rightAction={renderAddButton()}
+            />
+
+            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
+
+            <View style={styles.filterContainer}>
+                <View style={styles.filterItem}>
+                    <DropDownButtonBasic
+                        data={farms}
+                        value={selectedFarm}
+                        onSelect={setSelectedFarm}
+                        showIcon={false}
+                        height={40}
+                        borderRadius={borderRadius.md}
+                    />
+                </View>
+                <View style={{ width: spacing.sm }} />
+                <View style={styles.filterItem}>
+                    <DropDownButtonBasic
+                        data={deviceTypes}
+                        value={selectedDeviceType}
+                        onSelect={setSelectedDeviceType}
+                        showIcon={false}
+                        height={40}
+                        borderRadius={borderRadius.md}
+                    />
+                </View>
+            </View>
+
+            <View style={styles.content}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    {/* Warning Banner - Check if any device is in maintenance */}
+                    {devices.some(device => device.status === 'maintenance') && (
+                        <WarningDevices
+                            onPress={() => {
+                                setSelectedTab('maintenance');
+                            }}
+                        />
+                    )}
+
+                    {devices.map((device: DeviceData) => (
+                        <DevicesCard
+                            key={device.id}
+                            device={device}
+                            onPress={() => {}}
+                            onMorePress={event => handleMorePress(event, device.id)}
+                        />
+                    ))}
+                </ScrollView>
+
+                <DeviceActionMenu
+                    visible={menuVisible}
+                    onClose={handleCloseMenu}
+                    onEdit={() => {
+                        handleCloseMenu();
+                        if (selectedDeviceId) {
+                            (navigation.navigate as any)('EditDevice', {
+                                deviceId: selectedDeviceId,
+                            });
+                        }
+                    }}
+                    onMaintain={() => {
+                        handleCloseMenu();
+                        console.log('Maintain device:', selectedDeviceId);
+                        if (selectedDeviceId) {
+                            (navigation.navigate as any)('EquipmentMaintenance', {
+                                deviceId: selectedDeviceId,
+                            });
+                        }
+                    }}
+                    onViewHistory={() => {
+                        handleCloseMenu();
+                        if (selectedDeviceId) {
+                            (navigation.navigate as any)('HistoryDevices', {
+                                deviceId: selectedDeviceId,
+                            });
+                        }
+                    }}
+                    onDelete={() => {
+                        // Don't call handleCloseMenu here to preserve selectedDeviceId for the modal
+                        setMenuVisible(false);
+                        setDeleteModalVisible(true);
+                    }}
+                    position={menuPosition}
+                />
+
+                <ConfirmationDeleteModal
+                    visible={deleteModalVisible}
+                    onConfirm={() => {
+                        if (selectedDeviceId) {
+                            deleteDevice(selectedDeviceId);
+                        }
+                        setDeleteModalVisible(false);
+                        setSelectedDeviceId(null);
+                    }}
+                    onCancel={() => {
+                        setDeleteModalVisible(false);
+                        setSelectedDeviceId(null);
+                    }}
+                    title="Xoá thiết bị"
+                    message="Bạn có chắc chắn muốn xoá thiết bị này không?"
+                    successMessage="Đã xóa thiết bị thành công"
+                />
+            </View>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    addButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
+        backgroundColor: colors.white,
+        zIndex: 10,
+    },
+    filterItem: {
+        flex: 1,
+    },
+    content: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        paddingTop: spacing.sm,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    emptyStateButton: {
+        backgroundColor: colors.primary,
+        borderRadius: borderRadius.md,
+        width: '100%',
+        maxWidth: 200,
+    },
+    scrollContent: {
+        paddingBottom: spacing.xl,
+    },
+});
