@@ -1,33 +1,66 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet} from 'react-native';
-import { colors, spacing, typography} from '@/styles';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { colors, spacing, typography } from '@/styles';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import { mockFoodChartData } from './foodData';
 
-const foodData = [
-  { id: '1', value: 0, label: '00:00' },
-  { id: '2', value: 4.2, label: '06:00' },
-  { id: '3', value: 4.8, label: '08:00' },
-  { id: '4', value: 5.3, label: '10:00' },
-  { id: '5', value: 4.9, label: '12:00' },
-  { id: '6', value: 5.7, label: '14:00' },
-  { id: '7', value: 5.2, label: '16:00' },
-  { id: '8', value: 6.0, label: '18:00' },
-];
-
-const MAX_VALUE = 6;
 const BAR_MAX_HEIGHT = 200;
 
 export const FoodChart: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date('2020-11-02'));
-  const getBarHeight = (value: number) => (value / MAX_VALUE) * BAR_MAX_HEIGHT;
+  const [selectedDate, setSelectedDate] = useState(new Date('2025-11-01'));
+
+  const formatDate = (date: Date) => {
+    const d = date.getDate().toString().padStart(2, '0');
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+  };
+
+  const chartData = useMemo(() => {
+    const dateStr = formatDate(selectedDate);
+    const data = mockFoodChartData.find(d => d.date === dateStr);
+
+    if (!data) return null;
+
+    return [
+      { id: '1', value: data.time06, label: '06:00' },
+      { id: '2', value: data.time08, label: '08:00' },
+      { id: '3', value: data.time10, label: '10:00' },
+      { id: '4', value: data.time12, label: '12:00' },
+      { id: '5', value: data.time14, label: '14:00' },
+      { id: '6', value: data.time16, label: '16:00' },
+      { id: '7', value: data.time18, label: '18:00' },
+      { id: '8', value: data.time20, label: '20:00' },
+    ];
+  }, [selectedDate]);
+
+  const totalFood = useMemo(() => {
+    const dateStr = formatDate(selectedDate);
+    return mockFoodChartData.find(d => d.date === dateStr)?.total || 0;
+  }, [selectedDate]);
+
+  const yAxisConfig = useMemo(() => {
+    if (!chartData) return { max: 40, labels: [40, 30, 20, 10, 0] };
+
+    const maxValue = Math.max(...chartData.map(d => d.value));
+    const roundMax = Math.ceil(maxValue / 10) * 10 || 10; // Round up to nearest 10
+
+    // Create 4 steps
+    const step = roundMax / 4;
+    const labels = [roundMax, roundMax - step, roundMax - step * 2, roundMax - step * 3, 0];
+
+    return { max: roundMax, labels };
+  }, [chartData]);
+
+  const getBarHeight = (value: number) => (value / yAxisConfig.max) * BAR_MAX_HEIGHT;
 
   return (
     <View style={styles.card}>
       <View style={styles.headerWrapper}>
         <BasicDropDownButton
-          label={<Text style={styles.headerTitle}>THỐNG KÊ LƯỢNG THỨC ĂN</Text>}
+          label="THỐNG KÊ LƯỢNG THỨC ĂN"
           onPress={() => setIsCollapsed(!isCollapsed)}
           style={styles.headerButton}
         />
@@ -37,11 +70,7 @@ export const FoodChart: React.FC = () => {
             date={selectedDate}
             onDateChange={setSelectedDate}
             height={32}
-            dateText={
-                <Text style={styles.customDateFontSize}>
-                   {selectedDate.toISOString().split('T')[0]}
-                </Text>
-            }
+            dateText={selectedDate.toISOString().split('T')[0]}
           />
         </View>
       </View>
@@ -50,12 +79,12 @@ export const FoodChart: React.FC = () => {
         <View style={styles.body}>
           <View style={styles.summaryContainer}>
             <Text style={styles.summaryLabel}>Tổng lượng thức ăn (kg)</Text>
-            <Text style={styles.summaryValue}>139.7</Text>
+            <Text style={styles.summaryValue}>{totalFood}</Text>
           </View>
 
           <View style={styles.chartAreaWrapper}>
             <View style={styles.yAxisLabels}>
-              {[6, 4, 2, 0].map((val) => (
+              {yAxisConfig.labels.map((val) => (
                 <View key={val} style={styles.yLabelWrapper}>
                   <Text style={styles.yLabelText}>{val}</Text>
                 </View>
@@ -65,23 +94,29 @@ export const FoodChart: React.FC = () => {
 
             <View style={styles.chartContent}>
               <View style={styles.gridContainer}>
-                {[0, 1, 2, 3].map((i) => (
+                {[0, 1, 2, 3, 4].map((i) => (
                   <View
                     key={i}
-                    style={[styles.gridLine, { top: i * (BAR_MAX_HEIGHT / 3) }]}
+                    style={[styles.gridLine, { top: i * (BAR_MAX_HEIGHT / 4) }]}
                   />
                 ))}
               </View>
 
               <View style={styles.barsWrapper}>
-                {foodData.map((item) => (
-                  <View key={item.id} style={styles.barColumn}>
-                    <View style={[styles.bar, { height: getBarHeight(item.value) }]} />
-                    <View style={styles.labelContainer}>
-                       <Text style={styles.bottomLabelText}>{item.label}</Text>
+                {chartData ? (
+                  chartData.map((item) => (
+                    <View key={item.id} style={styles.barColumn}>
+                      <View style={[styles.bar, { height: getBarHeight(item.value) }]} />
+                      <View style={styles.labelContainer}>
+                        <Text style={styles.bottomLabelText}>{item.label}</Text>
+                      </View>
                     </View>
-                  </View>
-                ))}
+                  ))
+                ) : (
+                  <Text style={{ marginTop: 80, fontSize: 12, color: colors.textSecondary }}>
+                    Không có dữ liệu
+                  </Text>
+                )}
               </View>
             </View>
           </View>
@@ -183,7 +218,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.text,
     position: 'absolute',
-    left: 0,
+    left: -5,
     top: '50%',
     transform: [{ rotate: '-90deg' }],
   },
@@ -237,3 +272,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
