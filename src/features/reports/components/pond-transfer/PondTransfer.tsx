@@ -16,8 +16,8 @@ import {
 } from 'react-native';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
-import { TransferItemCard, TransferData } from './TransferItemCard';
-
+import { TransferItemCard } from './TransferItemCard';
+import { mockData } from './MockData';
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -27,70 +27,6 @@ export const PondTransfer = () => {
     const [showAll, setShowAll] = useState(false);
 
     const INITIAL_SHOW_COUNT = 3;
-
-    // Dữ liệu mẫu
-    const mockData: TransferData[] = [
-        {
-            id: '1',
-            sourcePond: 'A1V1',
-            targetPond: 'A1N2',
-            transferDate: '18/12/2025',
-            doc: 17,
-            amount: '50.000',
-            size: '200',
-            stockingDate: '01/12/2025',
-            stockingAmount: '400.000',
-            expectedAmount: '380.000',
-        },
-        {
-            id: '2',
-            sourcePond: 'A1V1',
-            targetPond: 'A1N3',
-            transferDate: '18/12/2025',
-            doc: 17,
-            amount: '45.000',
-            size: '150',
-            stockingDate: '01/12/2025',
-            stockingAmount: '350.000',
-            expectedAmount: '330.000',
-        },
-        {
-            id: '3',
-            sourcePond: 'A1V2',
-            targetPond: 'A1N3',
-            transferDate: '16/12/2025',
-            doc: 16,
-            amount: '60.000',
-            size: '180',
-            stockingDate: '02/12/2025',
-            stockingAmount: '420.000',
-            expectedAmount: '400.000',
-        },
-        {
-            id: '4',
-            sourcePond: 'A1V2',
-            targetPond: 'A1N4',
-            transferDate: '15/12/2025',
-            doc: 15,
-            amount: '55.000',
-            size: '190',
-            stockingDate: '03/12/2025',
-            stockingAmount: '380.000',
-            expectedAmount: '360.000',
-        },
-        {
-            id: '5',
-            sourcePond: 'A1V3',
-            targetPond: 'A1N5',
-            transferDate: '14/12/2025',
-            doc: 14,
-            amount: '48.000',
-            size: '210',
-            stockingDate: '04/12/2025',
-            stockingAmount: '300.000',
-            expectedAmount: '280.000',
-        },
-    ];
 
     const toggleSection = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
