@@ -13,9 +13,9 @@ interface DevicesItemProps {
     style?: StyleProp<ViewStyle>;
 }
 
-import DeviceActiveIcon from '@/assets/images/Icon/IconDevices/DeviceActive.svg';
-import DeviceErrorIcon from '@/assets/images/Icon/IconDevices/DeviceError.svg';
-import DeviceOffIcon from '@/assets/images/Icon/IconDevices/DeviceOff.svg';
+import DeviceActiveIcon from '@/assets/Icon/IconDevices/DeviceActive.svg';
+import DeviceErrorIcon from '@/assets/Icon/IconDevices/DeviceError.svg';
+import DeviceOffIcon from '@/assets/Icon/IconDevices/DeviceOff.svg';
 
 export const DevicesItem: React.FC<DevicesItemProps> = ({
     icon: Icon,

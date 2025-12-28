@@ -103,7 +103,7 @@ export const ConnectDeviceScreens = () => {
 };
 
 const { width, height } = Dimensions.get('window');
-const QR_FRAME_SIZE = width * 0.7;
+const QR_FRAME_SIZE = width * 0.65;
 
 const styles = StyleSheet.create({
     container: {
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingTop: height * 0.15, // Scale position based on screen height (approx 15% from top)
+        paddingTop: height * 0.1, // Scale position based on screen height (approx 10% from top)
     },
     qrFrame: {
         width: QR_FRAME_SIZE,

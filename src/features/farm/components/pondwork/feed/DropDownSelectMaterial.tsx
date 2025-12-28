@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
-import EmptyState from '@/assets/images/EmptyState.svg';
+import EmptyState from '@/assets/Icon/EmptyState.svg';
 
 interface DropDownSelectMaterialProps {
     data: IMaterial[];

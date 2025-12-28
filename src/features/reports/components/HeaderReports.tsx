@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/styles';
+import { StyleSheet, View } from 'react-native';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 interface HeaderReportsProps {
     data?: DropDownItem[];
@@ -13,48 +12,24 @@ interface HeaderReportsProps {
 }
 
 export const HeaderReports = ({ data, value, onSelect, onRightPress }: HeaderReportsProps) => {
-    const insets = useSafeAreaInsets();
+    const leftNode = onSelect ? (
+        <View style={styles.leftWrapper}>
+            <DropDownButtonBasic data={data} value={value} onSelect={onSelect} height={40} />
+        </View>
+    ) : undefined;
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-            <View style={styles.leftContainer}>
-                {onSelect && (
-                    <DropDownButtonBasic
-                        data={data}
-                        value={value}
-                        onSelect={onSelect}
-                        height={40}
-                    />
-                )}
-            </View>
-
-            <View style={styles.rightContainer}>
-                <ButtonHeader onPress={onRightPress} />
-            </View>
-        </View>
+        <HeaderSection
+            leftComponent={leftNode}
+            rightComponent={<ButtonHeader onPress={onRightPress} />}
+            showBackButton={false}
+        />
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    leftWrapper: {
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        zIndex: 1000,
-    },
-    leftContainer: {
-        flex: 1,
         marginRight: 16,
-        alignItems: 'flex-start',
-    },
-    rightContainer: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        paddingRight: 0, // Reset to 0 as main padding handles it
     },
 });

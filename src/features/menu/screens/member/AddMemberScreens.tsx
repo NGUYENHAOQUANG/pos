@@ -166,6 +166,5 @@ const styles = StyleSheet.create({
         right: 0,
         borderTopWidth: 1,
         borderTopColor: colors.border,
-        paddingBottom: spacing.lg, // Safe area space
     },
 });

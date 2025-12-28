@@ -13,7 +13,7 @@ import { GeneralInformation } from '@/features/menu/components/member/GeneralInf
 import { FeaturePermissions } from '@/features/menu/components/member/FeaturePermissions';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { WorkUnit } from '@/features/menu/components/member/WorkUnit';
-import DeleteIcon from '@/assets/images/Icon/Delete.svg';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';
 
@@ -328,7 +328,6 @@ const styles = StyleSheet.create({
         right: 0,
         borderTopWidth: 1,
         borderTopColor: colors.border,
-        paddingBottom: spacing.lg,
     },
     deleteButton: {
         width: 40,

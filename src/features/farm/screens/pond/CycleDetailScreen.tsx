@@ -9,7 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 // Sử dụng HeaderFarm có sẵn
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 
-import EditIcon from '@/assets/images/Icon/IconFarm/Edit.svg';
+import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CycleDetail'>;
 

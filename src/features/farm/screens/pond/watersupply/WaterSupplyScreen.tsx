@@ -21,7 +21,7 @@ import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
-import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
+import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 
 // Mock data vật tư
 const MOCK_MATERIALS: IMaterial[] = [

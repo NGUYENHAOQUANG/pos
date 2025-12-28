@@ -3,94 +3,98 @@ import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from '
 import { colors, spacing, borderRadius } from '@/styles';
 
 // Import SVG icons
-import FieldTimeIcon from '@/assets/images/Icon/IconDevices/FieldTimeOutlined.svg';
-import LineChartIcon from '@/assets/images/Icon/IconDevices/LineChartOutlined.svg';
+import FieldTimeIcon from '@/assets/Icon/IconDevices/FieldTimeOutlined.svg';
+import LineChartIcon from '@/assets/Icon/IconDevices/LineChartOutlined.svg';
 
 interface ButtonHistoryProps {
-  onSchedulePress?: () => void;
-  onStatisticPress?: () => void;
-  style?: StyleProp<ViewStyle>;
+    onSchedulePress?: () => void;
+    onStatisticPress?: () => void;
+    style?: StyleProp<ViewStyle>;
 }
 
 export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
-  onSchedulePress,
-  onStatisticPress,
-  style,
+    onSchedulePress,
+    onStatisticPress,
+    style,
 }) => {
-  return (
-    <View style={[styles.container, style]}>
-      <TouchableOpacity style={styles.scheduleButton} onPress={onSchedulePress} activeOpacity={0.7}>
-        <FieldTimeIcon width={20} height={20} style={styles.icon} />
-        <Text style={styles.text}>Lịch trình</Text>
-      </TouchableOpacity>
+    return (
+        <View style={[styles.container, style]}>
+            <TouchableOpacity
+                style={styles.scheduleButton}
+                onPress={onSchedulePress}
+                activeOpacity={0.7}
+            >
+                <FieldTimeIcon width={20} height={20} style={styles.icon} />
+                <Text style={styles.text}>Lịch trình</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.statisticButton}
-        onPress={onStatisticPress}
-        activeOpacity={0.7}
-      >
-        <LineChartIcon width={20} height={20} style={styles.icon} />
-        <Text style={styles.text}>Lịch sử & Thống kê</Text>
-      </TouchableOpacity>
-    </View>
-  );
+            <TouchableOpacity
+                style={styles.statisticButton}
+                onPress={onStatisticPress}
+                activeOpacity={0.7}
+            >
+                <LineChartIcon width={20} height={20} style={styles.icon} />
+                <Text style={styles.text}>Lịch sử & Thống kê</Text>
+            </TouchableOpacity>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    padding: spacing.md,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-    gap: spacing.md,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  scheduleButton: {
-    flex: 0.4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  statisticButton: {
-    flex: 0.6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.white,
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    marginRight: spacing.xs,
-  },
-  text: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text,
-  },
+    container: {
+        flexDirection: 'row',
+        backgroundColor: colors.white,
+        padding: spacing.md,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+        gap: spacing.md,
+    },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.sm,
+        borderRadius: borderRadius.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+    },
+    scheduleButton: {
+        flex: 0.4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.sm,
+        borderRadius: borderRadius.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+    },
+    statisticButton: {
+        flex: 0.6,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.sm,
+        borderRadius: borderRadius.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+    },
+    icon: {
+        width: 20,
+        height: 20,
+        marginRight: spacing.xs,
+    },
+    text: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+    },
 });

@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles';
 import BackgroundMenu from '@/assets/backgrounds/BackgroundMenu.svg';
-import LogoutIcon from '@/assets/images/Icon/IconMenu/LogoutOutlined.svg';
-import AvatarIcon from '@/assets/images/Icon/IconMenu/Avatar.svg';
+import LogoutIcon from '@/assets/Icon/IconMenu/LogoutOutlined.svg';
+import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 import { FarmOperation } from '@/features/menu/components/FarmOperation';
 import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
