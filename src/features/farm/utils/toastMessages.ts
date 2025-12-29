@@ -18,7 +18,7 @@ const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>
     edit: 'Đã cập nhật đo thông số thành công',
   },
   WATER_TREATMENT: {
-    add: 'Đã thêm xử lý nước thành công',
+    add: 'Đã xử lý nước thành công',
     edit: 'Đã cập nhật xử lý nước thành công',
   },
   WATER_CHANGE: {
