@@ -27,7 +27,7 @@ export const JobListCard: React.FC<JobListCardProps> = ({
     onPressAddJob,
     onEditJobItem,
 }) => {
-    const displayDateLabel = `Hôm nay, ${new Date().toLocaleDateString('en-GB')}`;
+    const displayDateLabel = `Hôm nay, ${new Date().toLocaleDateString('vi-VN')}`;
 
     return (
         <View style={styles.container}>

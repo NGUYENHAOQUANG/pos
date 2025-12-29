@@ -23,12 +23,7 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
 }) => {
     return (
         <View style={styles.container}>
-            <DateInputButton
-                label="Thời gian thực hiện"
-                date={date}
-                onDateChange={onDateChange}
-                formatOptions={{ dateSeparator: '-' }}
-            />
+            <DateInputButton label="Thời gian thực hiện" date={date} onDateChange={onDateChange} />
 
             {/* Description */}
             <View style={styles.inputGroup}>

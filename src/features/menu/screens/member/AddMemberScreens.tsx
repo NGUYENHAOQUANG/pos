@@ -160,10 +160,6 @@ const styles = StyleSheet.create({
         paddingBottom: 100,
     },
     footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },

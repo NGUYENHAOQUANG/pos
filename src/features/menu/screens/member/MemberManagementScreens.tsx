@@ -208,7 +208,7 @@ export const MemberManagementScreens: React.FC = () => {
                 onCancel={() => setSuspendModalVisible(false)}
                 title="Tạm ngưng tài khoản"
                 message="Bạn có chắc chắn muốn tạm ngưng tài khoản này?"
-                confirmText="Tạm ngưng"
+                confirmText="Đồng ý"
                 cancelText="Huỷ"
                 successMessage="Đã tạm ngưng tài khoản"
             />

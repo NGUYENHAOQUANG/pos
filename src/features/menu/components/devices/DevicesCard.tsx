@@ -63,7 +63,12 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                 <View style={styles.row}>
                     <Text style={styles.label}>Thời gian hoạt động:</Text>
                     <View style={styles.valueContainer}>
-                        <Text style={styles.value}>
+                        <Text
+                            style={[
+                                styles.value,
+                                device.status === 'maintenance' && { color: colors.orange[500] },
+                            ]}
+                        >
                             {device.maintenance.operatingTime.current}/{' '}
                             {device.maintenance.operatingTime.limit} giờ
                         </Text>
@@ -76,7 +81,12 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                 <View style={styles.row}>
                     <Text style={styles.label}>Thời gian sử dụng từ ngày lắp:</Text>
                     <View style={styles.valueContainer}>
-                        <Text style={styles.value}>
+                        <Text
+                            style={[
+                                styles.value,
+                                device.status === 'maintenance' && { color: colors.orange[500] },
+                            ]}
+                        >
                             {device.maintenance.usageTime.current}/{' '}
                             {device.maintenance.usageTime.limit} ngày
                         </Text>
