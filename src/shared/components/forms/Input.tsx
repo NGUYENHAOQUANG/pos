@@ -113,8 +113,8 @@ export function Input({
         <View style={[styles.container, containerStyle]}>
             {/* Label */}
             <Text style={styles.label}>
+                {required && <Text style={styles.required}>* </Text>}
                 {label}
-                {required && <Text style={styles.required}> *</Text>}
             </Text>
 
             {/* Input Container */}

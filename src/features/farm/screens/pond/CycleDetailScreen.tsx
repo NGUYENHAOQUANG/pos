@@ -33,15 +33,27 @@ export const CycleDetailScreen: React.FC = () => {
         <View style={styles.container}>
             <HeaderFarm
                 type="cycle-detail"
+                leftComponent={
+                    <View style={styles.leftHeaderContainer}>
+                        <TouchableOpacity
+                            style={styles.customBackButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        </TouchableOpacity>
+                        <View style={styles.headerSpacer} />
+                    </View>
+                }
                 title={
                     <View style={styles.leftTitleContainer}>
-                        <Text style={styles.headerTitle}>{cycleData?.cycleName}</Text>
-                        <Text style={styles.headerSubtitle}>
+                        <Text style={styles.headerTitle} numberOfLines={1}>
+                            {cycleData?.cycleName}
+                        </Text>
+                        <Text style={styles.headerSubtitle} numberOfLines={1}>
                             {cycleData?.stockingDate ?? '---'} - nay
                         </Text>
                     </View>
                 }
-                onBack={() => navigation.goBack()}
                 rightAction={
                     <View style={styles.badgeWrapper}>
                         <View style={styles.statusBadge}>
@@ -118,20 +130,35 @@ const styles = StyleSheet.create({
     },
     // ... các styles khác giữ nguyên
     badgeWrapper: {
-        width: 0,
         height: 40,
+        minWidth: 110, // Ensure specific width for balance
         justifyContent: 'center',
         alignItems: 'flex-end',
-        position: 'relative',
+    },
+    // ... statusBadge style kept ...
+    leftHeaderContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    customBackButton: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#E5E7EB', // Match border colors
+    },
+    headerSpacer: {
+        width: 70, // 110 (Badge) - 40 (Back) = 70
     },
     statusBadge: {
         backgroundColor: '#FFFBEB',
         paddingHorizontal: spacing.sm,
-        paddingVertical: 1,
+        paddingVertical: 4,
         borderRadius: 4,
         borderWidth: 1,
         borderColor: '#FFE58F',
-        position: 'absolute',
     },
     statusText: {
         fontSize: typography.fontSize.xs,
@@ -205,8 +232,7 @@ const styles = StyleSheet.create({
     },
     leftTitleContainer: {
         flex: 1,
-        alignItems: 'flex-start',
-        marginLeft: spacing.sm,
+        alignItems: 'center',
     },
     headerTitle: {
         fontSize: 16,

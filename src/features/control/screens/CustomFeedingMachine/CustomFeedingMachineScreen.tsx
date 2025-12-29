@@ -50,6 +50,27 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     // Dirty state tracking
     const [isDirty, setIsDirty] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [pendingAction, setPendingAction] = useState<any>(null);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', e => {
+            if (!isDirty) {
+                // If we don't have unsaved changes, then we don't need to do anything
+                return;
+            }
+
+            // Prevent default behavior of leaving the screen
+            e.preventDefault();
+
+            // Stash the action to replay it later
+            setPendingAction(e.data.action);
+
+            // Prompt the user before leaving the screen
+            setShowConfirmModal(true);
+        });
+
+        return unsubscribe;
+    }, [navigation, isDirty]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -103,9 +124,21 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 visible={showConfirmModal}
                 onConfirm={() => {
                     setShowConfirmModal(false);
-                    leaveScreen();
+                    setIsDirty(false);
+                    // Use setTimeout to ensure state updates allow navigation to proceed
+                    setTimeout(() => {
+                        if (pendingAction) {
+                            navigation.dispatch(pendingAction);
+                            setPendingAction(null);
+                        } else {
+                            leaveScreen();
+                        }
+                    }, 100);
                 }}
-                onCancel={() => setShowConfirmModal(false)}
+                onCancel={() => {
+                    setShowConfirmModal(false);
+                    setPendingAction(null);
+                }}
             />
 
             <KeyboardAvoidingView

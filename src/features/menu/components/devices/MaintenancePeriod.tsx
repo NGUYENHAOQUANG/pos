@@ -92,6 +92,11 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.lg,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+        paddingBottom: spacing.sm,
+        marginHorizontal: -spacing.md,
+        paddingHorizontal: spacing.md,
     },
 });

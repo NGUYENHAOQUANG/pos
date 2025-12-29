@@ -158,6 +158,7 @@ export const HandleProblemScreen = () => {
                     onDateChange={setSelectedDate}
                     imageUris={imageUris}
                     onImagesChange={setImageUris}
+                    disabledDate={true}
                 />
                 {/* 2. Chọn vật tư */}
                 <MaterialSelectionBox

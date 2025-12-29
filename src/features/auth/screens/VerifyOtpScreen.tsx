@@ -7,6 +7,7 @@ import {
     View,
     KeyboardAvoidingView,
     TouchableOpacity,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -33,7 +34,26 @@ export default function VerifyOTPScreen() {
     const otpInputRef = useRef<OTPInputHandle>(null);
 
     const isError = !!errorMessage;
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+    useEffect(() => {
+        const keyboardShowListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            () => {
+                setKeyboardVisible(true);
+            }
+        );
+        const keyboardHideListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+            () => {
+                setKeyboardVisible(false);
+            }
+        );
 
+        return () => {
+            keyboardHideListener.remove();
+            keyboardShowListener.remove();
+        };
+    }, []);
     useEffect(() => {
         let timer: ReturnType<typeof setInterval>;
         if (countdown > 0) {
@@ -61,7 +81,7 @@ export default function VerifyOTPScreen() {
         }
 
         if (otpString === '0000') {
-            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
+            setErrorMessage('Mã không chính xác, vui lòng kiểm tra lại.');
             return;
         }
 
@@ -87,9 +107,11 @@ export default function VerifyOTPScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
+            {!isKeyboardVisible && (
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+            )}
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -182,7 +204,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         borderRadius: 16,
-        paddingVertical: 20,
+        paddingVertical: spacing.md,
         alignItems: 'center',
         shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 4 },
@@ -199,7 +221,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
     },
     logoWrapper: {
-        marginBottom: 8,
+        marginBottom: spacing.md,
         paddingHorizontal: 24,
     },
     title: {
@@ -235,7 +257,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         marginTop: 4,
         textAlign: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: 4,
     },
     resendContainer: {
         flexDirection: 'row',

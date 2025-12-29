@@ -231,7 +231,12 @@ export const AddEnvironmentScreen: React.FC = () => {
 
             {/* Content */}
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                <GeneralInfoBox type="default" date={selectedDate} onDateChange={setSelectedDate} />
+                <GeneralInfoBox
+                    type="default"
+                    date={selectedDate}
+                    onDateChange={setSelectedDate}
+                    disabledDate={true}
+                />
 
                 <EnvironmentParametersBox
                     pH={pH}

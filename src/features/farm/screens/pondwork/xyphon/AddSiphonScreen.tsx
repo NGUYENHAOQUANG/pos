@@ -214,6 +214,7 @@ export const AddSiphonScreen: React.FC = () => {
                     onDateChange={setSelectedDate}
                     imageUris={imageUris}
                     onImagesChange={setImageUris}
+                    disabledDate={true}
                 />
 
                 <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />

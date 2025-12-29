@@ -37,6 +37,7 @@ interface HeaderFarmProps {
     subtitle?: string; // e.g. Area
     tagType?: PondType;
     onBack?: () => void;
+    leftComponent?: React.ReactNode;
     rightAction?: React.ReactNode;
 }
 
@@ -52,6 +53,7 @@ export const HeaderFarm = ({
     subtitle,
     tagType,
     onBack,
+    leftComponent,
     rightAction,
 }: HeaderFarmProps) => {
     const [menuVisible, setMenuVisible] = useState(false);
@@ -97,9 +99,10 @@ export const HeaderFarm = ({
                 title={typeof title === 'string' ? title : undefined}
                 centerComponent={centerNode}
                 titleAlign={titleAlign}
+                leftComponent={leftComponent}
                 rightComponent={rightAction || undefined} // HeaderSection handles undefined check, but safe to pass
                 onBack={onBack}
-                showBackButton={true}
+                showBackButton={!leftComponent}
             />
         );
     }

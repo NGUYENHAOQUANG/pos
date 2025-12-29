@@ -88,6 +88,8 @@ interface DateInputButtonProps {
     required?: boolean;
     /** Height of the input button (default: 40) */
     height?: number;
+    /** Whether the input is disabled */
+    disabled?: boolean;
 }
 
 export const DateInputButton: React.FC<DateInputButtonProps> = ({
@@ -99,6 +101,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
     dateOnly = false,
     required = false,
     height = 40,
+    disabled = false,
 }) => {
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
@@ -135,6 +138,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
                     style={[styles.dateInput, { height }]}
                     onPress={() => setIsDatePickerVisible(true)}
                     activeOpacity={0.7}
+                    disabled={disabled}
                 >
                     <Text style={styles.dateText}>{displayText}</Text>
                     <IconCalender width={15} height={15} />

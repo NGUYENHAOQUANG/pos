@@ -101,7 +101,11 @@ export const AddFeederScreens = () => {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* General Info Section */}
-                    <GeneralInfoBox date={executionDate} onDateChange={setExecutionDate} />
+                    <GeneralInfoBox
+                        date={executionDate}
+                        onDateChange={setExecutionDate}
+                        disabledDate={true}
+                    />
 
                     {/* Select Material Section */}
                     <MaterialSelectionBox
@@ -119,7 +123,7 @@ export const AddFeederScreens = () => {
 
             {/* Bottom Action Bar */}
             <ButtonBarFarm
-                primaryTitle="Cập nhật thông tin"
+                primaryTitle="Lưu thông tin"
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSaveInfo}
                 onSecondaryPress={() => navigation.goBack()}

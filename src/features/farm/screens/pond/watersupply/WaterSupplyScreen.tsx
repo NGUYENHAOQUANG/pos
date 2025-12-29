@@ -251,6 +251,7 @@ export const WaterSupplyScreen = () => {
                         onDateChange={setSelectedDate}
                         imageUris={imageUris}
                         onImagesChange={setImageUris}
+                        disabledDate={true}
                     />
 
                     {/* 2. Mực nước & Thể tích */}

@@ -216,6 +216,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                     type="withImage"
                     imageUris={imageUris}
                     onImagesChange={setImageUris}
+                    disabledDate={true}
                 />
 
                 {/* Kiểm tra thức ăn Box */}

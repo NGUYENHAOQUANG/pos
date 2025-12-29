@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     },
     logoSection: {
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
         paddingHorizontal: spacing.lg,
     },
     spacer: {

@@ -6,6 +6,8 @@ import {
     Dimensions,
     GestureResponderEvent,
     ScrollView,
+    Platform,
+    StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -55,7 +57,9 @@ export const DeviceManagement = () => {
         target.measure(
             (x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
                 const windowHeight = Dimensions.get('window').height;
-                const MENU_HEIGHT = 200; // Still used for check, but positioning is strictly anchored now
+                const MENU_HEIGHT = 200;
+                const statusbarHeight =
+                    Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
 
                 const newPosition: { top?: number; bottom?: number; right: number } = {
                     right: windowWidth - (pageX + width),
@@ -63,13 +67,11 @@ export const DeviceManagement = () => {
 
                 // Check if menu would go off screen
                 if (pageY + height + MENU_HEIGHT > windowHeight) {
-                    // Position above the button: Anchor to bottom
-                    // Distance from bottom of screen = windowHeight - pageY
-                    // Add spacing: windowHeight - pageY + spacing.xs
-                    newPosition.bottom = windowHeight - pageY + 4; // Use explicit 4px or spacing.xs
+                    // Position above the button
+                    newPosition.bottom = windowHeight - pageY + 4 - statusbarHeight;
                 } else {
                     // Position below
-                    newPosition.top = pageY + height + 4;
+                    newPosition.top = pageY + height + 4 + statusbarHeight;
                 }
 
                 setMenuPosition(newPosition as any);
@@ -179,9 +181,13 @@ export const DeviceManagement = () => {
                         .filter(device => {
                             // Filter by Tab
                             let matchesTab = true;
-                            if (selectedTab === 'warehouse') matchesTab = device.status === 'warehouse';
-                            else if (selectedTab === 'installed') matchesTab = device.status === 'installed' || device.status === 'active';
-                            else if (selectedTab === 'maintenance') matchesTab = device.status === 'maintenance';
+                            if (selectedTab === 'warehouse')
+                                matchesTab = device.status === 'warehouse';
+                            else if (selectedTab === 'installed')
+                                matchesTab =
+                                    device.status === 'installed' || device.status === 'active';
+                            else if (selectedTab === 'maintenance')
+                                matchesTab = device.status === 'maintenance';
 
                             // Filter by Device Type
                             let matchesType = true;
@@ -192,13 +198,13 @@ export const DeviceManagement = () => {
                             return matchesTab && matchesType;
                         })
                         .map((device: DeviceData) => (
-                        <DevicesCard
-                            key={device.id}
-                            device={device}
-                            onPress={() => {}}
-                            onMorePress={event => handleMorePress(event, device.id)}
-                        />
-                    ))}
+                            <DevicesCard
+                                key={device.id}
+                                device={device}
+                                onPress={() => {}}
+                                onMorePress={event => handleMorePress(event, device.id)}
+                            />
+                        ))}
                 </ScrollView>
 
                 <DeviceActionMenu

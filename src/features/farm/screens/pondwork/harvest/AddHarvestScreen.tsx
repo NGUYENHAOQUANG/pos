@@ -292,6 +292,7 @@ export const AddHarvestScreen: React.FC = () => {
                     activityOptions={harvestTypeOptions}
                     selectedActivity={harvestType}
                     onSelectActivity={setHarvestType}
+                    disabledDate={true}
                 />
 
                 {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
