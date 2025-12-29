@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
     message: {
         fontSize: 16,
-        fontWeight: '500', // Semibold/Medium
+        fontWeight: '400',
         color: colors.text,
         textAlign: 'center',
         marginBottom: spacing.xs,

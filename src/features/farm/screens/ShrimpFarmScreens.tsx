@@ -15,6 +15,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import Toast from 'react-native-toast-message';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
+import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -467,6 +468,12 @@ export const ShrimpFarmScreens: React.FC = () => {
                                 onEditJobItem={handleEditJobItem}
                             />
                         </>
+                    ) : selectedTab === 'log' ? (
+                        <WorkLogScreens
+                            pond={pond}
+                            onEditJobItem={handleEditJobItem}
+                            availableJobTypes={jobs.map(j => j.type)}
+                        />
                     ) : (
                         <View style={styles.placeholderContainer}>
                             <Text style={styles.placeholderText}>
