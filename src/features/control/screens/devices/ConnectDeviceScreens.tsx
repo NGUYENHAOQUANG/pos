@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, Dimensions, Platform, StatusBar, Linking, Alert } from 'react-native';
 import {
     useNavigation,
     useRoute,
     RouteProp,
     CompositeNavigationProp,
     CommonActions,
+    useIsFocused,
 } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -13,6 +14,7 @@ import { ControlStackParamList } from '@/features/control/navigation/ControlNavi
 import { ConnectDevice } from '@/features/control/components/devices/ConnectDevice';
 import { colors } from '@/styles';
 import { useControl } from '@/features/control/context/ControlContext';
+import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 
 // Define MainTabParams since it's not exported globally yet
 type MainTabParamList = {
@@ -34,50 +36,92 @@ type ConnectDeviceScreenNavigationProp = CompositeNavigationProp<
 export const ConnectDeviceScreens = () => {
     const navigation = useNavigation<ConnectDeviceScreenNavigationProp>();
     const route = useRoute<ConnectDeviceScreenRouteProp>();
+    const isFocused = useIsFocused();
+    const isForeground = true; // Simplified for now, usually needs useAppState hook
 
     // Params are required in navigator, so we can access directly
     const { pondName } = route.params;
     const { connectDeviceToPond } = useControl();
     const [isFlashOn, setIsFlashOn] = useState(false);
+    const [hasPermission, setHasPermission] = useState(false);
+
+    const device = useCameraDevice('back');
 
     useEffect(() => {
-        // Simulate camera permission check
-        // In a real app with react-native-vision-camera, we would request permission here
-        console.log('Camera permission requested: GRANTED');
+        const checkPermission = async () => {
+            const status = await Camera.requestCameraPermission();
+            setHasPermission(status === 'granted');
+            if (status === 'denied') {
+                Alert.alert(
+                    'Cần quyền Camera',
+                    'Vui lòng cấp quyền camera trong cài đặt để sử dụng tính năng này.',
+                    [
+                        { text: 'Hủy', style: 'cancel' },
+                        { text: 'Cài đặt', onPress: () => Linking.openSettings() },
+                    ]
+                );
+            }
+        };
+        checkPermission();
     }, []);
 
     const handleClose = () => {
         navigation.goBack();
     };
 
-    const handleConnect = (code: string) => {
-        // Handle connection logic here
-        console.log('Connected with code:', code);
-        connectDeviceToPond(pondName, code);
+    const handleConnect = useCallback(
+        (code: string) => {
+            if (!code) return;
 
-        // Force reset the navigation stack to ensure we are exactly where we want to be
-        navigation.dispatch(
-            CommonActions.reset({
-                index: 1,
-                routes: [{ name: 'ControlList' }, { name: 'ControlDetail', params: { pondName } }],
-            })
-        );
-    };
+            // Handle connection logic here
+            console.log('Connected with code:', code);
+            connectDeviceToPond(pondName, code);
+
+            // Force reset the navigation stack to ensure we are exactly where we want to be
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 1,
+                    routes: [
+                        { name: 'ControlList' },
+                        { name: 'ControlDetail', params: { pondName } },
+                    ],
+                })
+            );
+        },
+        [connectDeviceToPond, navigation, pondName]
+    );
+
+    const codeScanner = useCodeScanner({
+        codeTypes: ['qr', 'ean-13'],
+        onCodeScanned: codes => {
+            if (codes.length > 0 && codes[0].value) {
+                handleConnect(codes[0].value);
+            }
+        },
+    });
 
     const toggleFlash = () => {
         setIsFlashOn(!isFlashOn);
     };
 
+    const isActive = isFocused && isForeground;
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="black" />
 
-            {/* Camera View Placeholder */}
-            {/* In a real implementation, <Camera /> would go here */}
-            <View style={styles.cameraPreview}>
-                {/* Simulated Camera Feed Image or Dark Background */}
-                {/* We just use a dark background to simulate low-light camera feed or waiting for stream */}
-            </View>
+            {/* Camera View */}
+            {device && hasPermission ? (
+                <Camera
+                    style={StyleSheet.absoluteFill}
+                    device={device}
+                    isActive={isActive}
+                    codeScanner={codeScanner}
+                    torch={isFlashOn ? 'on' : 'off'}
+                />
+            ) : (
+                <View style={styles.cameraPreview} />
+            )}
 
             {/* Camera Overlay Content */}
             <View style={styles.overlayLayer}>

@@ -269,14 +269,14 @@ const styles = StyleSheet.create({
     timeColumnHeader: {
         width: 40,
         borderRightWidth: 1,
-        borderRightColor: colors.gray[200],
+        borderRightColor: colors.gray[300],
     },
     deviceColumn: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         borderRightWidth: 1,
-        borderRightColor: colors.gray[200],
+        borderRightColor: colors.gray[300],
         paddingBottom: spacing.sm,
     },
     deviceIcon: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: '100%',
         borderRightWidth: 1,
-        borderRightColor: colors.gray[200],
+        borderRightColor: colors.gray[300],
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
         top: '50%',
         width: 6,
         height: 1,
-        backgroundColor: colors.gray[200],
+        backgroundColor: colors.gray[300],
     },
     timeTextBold: {
         fontWeight: '600',
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         borderRightWidth: 1,
-        borderRightColor: colors.gray[300],
+        borderRightColor: colors.gray[400],
         position: 'relative',
     },
     horizontalLine: {
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
         right: 0,
         top: '50%',
         height: 1,
-        backgroundColor: colors.gray[200],
+        backgroundColor: colors.gray[400],
         zIndex: -1,
     },
     dashedLine: {
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         width: 1,
         borderLeftWidth: 1,
-        borderLeftColor: colors.gray[300],
+        borderLeftColor: colors.gray[400],
         borderStyle: 'dashed',
         zIndex: -1,
     },

@@ -122,7 +122,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                 {/* Device Type */}
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>
-                        Loại thiết bị <Text style={styles.required}>*</Text>
+                        <Text style={styles.required}>* </Text>Loại thiết bị
                     </Text>
                     <DropDownButtonBasic
                         data={DEVICE_TYPES}
@@ -168,7 +168,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                 {/* Import Condition */}
                 <View style={styles.conditionContainer}>
                     <Text style={styles.label}>
-                        Tình trạng nhập kho <Text style={styles.required}>*</Text>
+                        <Text style={styles.required}>* </Text>Tình trạng nhập kho
                     </Text>
                     <View style={styles.radioGroup}>
                         <TouchableOpacity
@@ -230,7 +230,12 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.lg,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+        paddingBottom: spacing.sm,
+        marginHorizontal: -spacing.md,
+        paddingHorizontal: spacing.md,
     },
     formContainer: {
         //

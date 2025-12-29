@@ -131,7 +131,11 @@ export const EditFeederScreens = () => {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* General Info Section */}
-                    <GeneralInfoBox date={executionDate} onDateChange={setExecutionDate} />
+                    <GeneralInfoBox
+                        date={executionDate}
+                        onDateChange={setExecutionDate}
+                        disabledDate={true}
+                    />
 
                     {/* Select Material Section */}
                     <MaterialSelectionBox

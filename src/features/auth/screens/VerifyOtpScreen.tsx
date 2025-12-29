@@ -81,7 +81,7 @@ export default function VerifyOTPScreen() {
         }
 
         if (otpString === '0000') {
-            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
+            setErrorMessage('Mã không chính xác, vui lòng kiểm tra lại.');
             return;
         }
 
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         marginTop: 4,
         textAlign: 'center',
-        paddingHorizontal: 24,
+        paddingHorizontal: 4,
     },
     resendContainer: {
         flexDirection: 'row',

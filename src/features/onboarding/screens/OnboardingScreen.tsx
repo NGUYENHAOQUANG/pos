@@ -142,7 +142,7 @@ export default function OnboardingScreen() {
         const handleMainButtonPress = isLastSlide ? handleFinish : goToNextSlide;
 
         return (
-            <View style={[styles.actionContainer, { paddingBottom: 30 + insets.bottom }]}>
+            <View style={[styles.actionContainer, { paddingBottom: 24 + insets.bottom }]}>
                 {/* Nút Back */}
                 {!isFirstSlide && (
                     <TouchableOpacity
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
 
     // Layer spacer
     spacer: {
-        flex: 1,
+        flex: SCREEN_HEIGHT < 800 ? 0.75 : 1, // Responsive adjustment
         backgroundColor: 'transparent',
     },
 
@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 16,
-        paddingBottom: 24,
+        paddingTop: 14,
+        paddingBottom: 20,
         gap: 8,
     },
     dot: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingBottom: 30,
+        paddingBottom: 24,
     },
     backButton: {
         width: 52,

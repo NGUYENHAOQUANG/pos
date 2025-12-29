@@ -37,9 +37,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                 };
             case 'Chi phí khác':
                 return {
-                    backgroundColor: colors.gray[100],
-                    color: colors.gray[600],
-                    borderColor: colors.borderDark,
+                    backgroundColor: colors.purple[50],
+                    color: colors.purple[600],
+                    borderColor: colors.purple[300],
                 };
             default:
                 return {

@@ -103,7 +103,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Farm Selection */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>
-                        Chọn trại nuôi <Text style={styles.required}>*</Text>
+                        <Text style={styles.required}>* </Text>Chọn trại nuôi
                     </Text>
                     <DropDownButton
                         data={farmOptions}

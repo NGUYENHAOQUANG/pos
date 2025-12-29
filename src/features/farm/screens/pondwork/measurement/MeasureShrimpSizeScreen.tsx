@@ -175,6 +175,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onDateChange={setTime}
                     imageUris={imageUris}
                     onImagesChange={setImageUris}
+                    disabledDate={true}
                 />
                 <MeasurementDataBox
                     shrimpSize={shrimpSize}
