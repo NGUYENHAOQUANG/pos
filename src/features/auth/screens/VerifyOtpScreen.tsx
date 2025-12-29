@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  KeyboardAvoidingView,
-  TouchableOpacity,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+    KeyboardAvoidingView,
+    TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -20,256 +20,256 @@ import OTPInput, { OTPInputHandle } from '../components/OTPInput';
 import { spacing } from '@/styles';
 
 export default function VerifyOTPScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const route = useRoute<RouteProp<AuthStackParamList, 'Verify-otp'>>();
-  const login = useAuthStore(state => state.login);
+    const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+    const route = useRoute<RouteProp<AuthStackParamList, 'Verify-otp'>>();
+    const login = useAuthStore(state => state.login);
 
-  const { contact } = route.params || { contact: '0908 123 456' };
+    const { contact } = route.params || { contact: '0908 123 456' };
 
-  const [otp, setOtp] = useState<string[]>(['', '', '', '']);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [countdown, setCountdown] = useState(59);
+    const [otp, setOtp] = useState<string[]>(['', '', '', '']);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [countdown, setCountdown] = useState(59);
 
-  const otpInputRef = useRef<OTPInputHandle>(null);
+    const otpInputRef = useRef<OTPInputHandle>(null);
 
-  const isError = !!errorMessage;
+    const isError = !!errorMessage;
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (countdown > 0) {
-      timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [countdown]);
+    useEffect(() => {
+        let timer: ReturnType<typeof setInterval>;
+        if (countdown > 0) {
+            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countdown]);
 
-  const handleOtpChange = (newCode: string[]) => {
-    setOtp(newCode);
-    if (errorMessage) setErrorMessage('');
-  };
+    const handleOtpChange = (newCode: string[]) => {
+        setOtp(newCode);
+        if (errorMessage) setErrorMessage('');
+    };
 
-  const handleVerifyOTP = async () => {
-    const otpString = otp.join('');
+    const handleVerifyOTP = async () => {
+        const otpString = otp.join('');
 
-    if (otpString.length === 0) {
-      setErrorMessage('Vui lòng nhập mã để tiếp tục');
-      return;
-    }
+        if (otpString.length === 0) {
+            setErrorMessage('Vui lòng nhập mã để tiếp tục');
+            return;
+        }
 
-    if (otpString.length < 4) {
-      setErrorMessage('Vui lòng nhập đủ 4 số.');
-      return;
-    }
+        if (otpString.length < 4) {
+            setErrorMessage('Vui lòng nhập đủ 4 số.');
+            return;
+        }
 
-    if (otpString === '0000') {
-      setErrorMessage('Mã không chính xác, vui lòng kiểm tra lại.');
-      return;
-    }
+        if (otpString === '0000') {
+            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
+            return;
+        }
 
-    try {
-      console.log('Verify Success:', otpString);
-      await login({ phone: contact, password: '' });
-    } catch (error) {
-      setErrorMessage('Đăng nhập thất bại, vui lòng thử lại.');
-      console.error(error);
-    }
-  };
-  const handleResendOTP = () => {
-    setCountdown(59);
-    setOtp(['', '', '', '']);
-    setErrorMessage('');
+        try {
+            console.log('Verify Success:', otpString);
+            await login({ phone: contact, password: '' });
+        } catch (error) {
+            setErrorMessage('Đăng nhập thất bại, vui lòng thử lại.');
+            console.error(error);
+        }
+    };
+    const handleResendOTP = () => {
+        setCountdown(59);
+        setOtp(['', '', '', '']);
+        setErrorMessage('');
 
-    otpInputRef.current?.focusFirst();
+        otpInputRef.current?.focusFirst();
 
-    console.log('Resend OTP Sent');
-  };
+        console.log('Resend OTP Sent');
+    };
 
-  const displayContact = contact.replace(/\D/g, '').replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+    const displayContact = contact.replace(/\D/g, '').replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 
-  return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
-      </TouchableOpacity>
+    return (
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color="#333" />
+            </TouchableOpacity>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          <View style={styles.card}>
-            <View style={styles.logoWrapper}>
-              <Logo size="medium" />
-            </View>
-            <View style={styles.spacer} />
-            <Text style={styles.title}>Đăng nhập</Text>
-            <Text style={styles.subtitle}>Nhập mã được gửi đến số điện thoại</Text>
-            <Text style={styles.phoneNumber}>{displayContact}</Text>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={styles.keyboardView}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                    bounces={false}
+                >
+                    <View style={styles.card}>
+                        <View style={styles.logoWrapper}>
+                            <Logo size="medium" />
+                        </View>
+                        <View style={styles.spacer} />
+                        <Text style={styles.title}>Đăng nhập</Text>
+                        <Text style={styles.subtitle}>Nhập mã được gửi đến số điện thoại</Text>
+                        <Text style={styles.phoneNumber}>{displayContact}</Text>
 
-            <View style={styles.otpInputSection}>
-              <OTPInput
-                ref={otpInputRef}
-                code={otp}
-                onCodeChanged={handleOtpChange}
-                isError={isError}
-                length={4}
-              />
-            </View>
+                        <View style={styles.otpInputSection}>
+                            <OTPInput
+                                ref={otpInputRef}
+                                code={otp}
+                                onCodeChanged={handleOtpChange}
+                                isError={isError}
+                                length={4}
+                            />
+                        </View>
 
-            {isError ? (
-              <Text style={styles.errorText}>{errorMessage}</Text>
-            ) : (
-              <View style={styles.errorPlaceholder} />
-            )}
+                        {isError ? (
+                            <Text style={styles.errorText}>{errorMessage}</Text>
+                        ) : (
+                            <View style={styles.errorPlaceholder} />
+                        )}
 
-            <View style={styles.resendContainer}>
-              <Text style={styles.resendLabel}>Không nhận được mã? </Text>
-              {countdown > 0 ? (
-                <Text style={styles.timerText}>
-                  <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
-                  {countdown.toString().padStart(2, '0')})
-                </Text>
-              ) : (
-                <TouchableOpacity onPress={handleResendOTP}>
-                  <Text style={styles.activeLink}>Gửi lại mã</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+                        <View style={styles.resendContainer}>
+                            <Text style={styles.resendLabel}>Không nhận được mã? </Text>
+                            {countdown > 0 ? (
+                                <Text style={styles.timerText}>
+                                    <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
+                                    {countdown.toString().padStart(2, '0')})
+                                </Text>
+                            ) : (
+                                <TouchableOpacity onPress={handleResendOTP}>
+                                    <Text style={styles.activeLink}>Gửi lại mã</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
 
-            <View style={styles.buttonWrapper}>
-              <Button
-                title="Tiếp Tục"
-                onPress={handleVerifyOTP}
-                variant="primary"
-                fullWidth
-                style={styles.submitButton}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+                        <View style={styles.buttonWrapper}>
+                            <Button
+                                title="Tiếp Tục"
+                                onPress={handleVerifyOTP}
+                                variant="primary"
+                                fullWidth
+                                style={styles.submitButton}
+                            />
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundPrimary,
-  },
-  backButton: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 30 : 35,
-    left: 20,
-    zIndex: 10,
-    padding: 8,
-    backgroundColor: colors.white,
-    borderRadius: 20,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
-    overflow: 'hidden',
-  },
-  spacer: {
-    width: '100%',
-    marginBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    alignSelf: 'stretch',
-  },
-  logoWrapper: {
-    marginBottom: 8,
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.gray[800],
-    marginBottom: 16,
-    paddingHorizontal: 24,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 4,
-    paddingHorizontal: 24,
-  },
-  phoneNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text,
-    marginBottom: 32,
-    paddingHorizontal: 24,
-  },
-  otpInputSection: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 8,
-    paddingHorizontal: 24,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 13,
-    marginBottom: 16,
-    marginTop: 4,
-    textAlign: 'center',
-    paddingHorizontal: 24,
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 32,
-    paddingHorizontal: 24,
-  },
-  resendLabel: {
-    color: colors.gray[700],
-    fontSize: 14,
-  },
-  timerText: {
-    color: colors.gray[700],
-    fontSize: 14,
-  },
-  disabledLink: {
-    textDecorationLine: 'underline',
-    color: colors.textTertiary,
-  },
-  activeLink: {
-    color: colors.primary,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  buttonWrapper: {
-    width: '100%',
-    paddingHorizontal: 24,
-  },
-  submitButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 25,
-    height: 50,
-  },
-  errorPlaceholder: {
-    height: 24,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    backButton: {
+        position: 'absolute',
+        top: Platform.OS === 'ios' ? 30 : 35,
+        left: 20,
+        zIndex: 10,
+        padding: 8,
+        backgroundColor: colors.white,
+        borderRadius: 20,
+    },
+    keyboardView: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingHorizontal: spacing.lg,
+    },
+    card: {
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        paddingVertical: 20,
+        alignItems: 'center',
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 5,
+        overflow: 'hidden',
+    },
+    spacer: {
+        width: '100%',
+        marginBottom: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        alignSelf: 'stretch',
+    },
+    logoWrapper: {
+        marginBottom: 8,
+        paddingHorizontal: 24,
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: colors.gray[800],
+        marginBottom: 16,
+        paddingHorizontal: 24,
+    },
+    subtitle: {
+        fontSize: 15,
+        color: colors.text,
+        textAlign: 'center',
+        marginBottom: 4,
+        paddingHorizontal: 24,
+    },
+    phoneNumber: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: colors.text,
+        marginBottom: 32,
+        paddingHorizontal: 24,
+    },
+    otpInputSection: {
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 8,
+        paddingHorizontal: 24,
+    },
+    errorText: {
+        color: colors.error,
+        fontSize: 13,
+        marginBottom: 16,
+        marginTop: 4,
+        textAlign: 'center',
+        paddingHorizontal: 24,
+    },
+    resendContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 32,
+        paddingHorizontal: 24,
+    },
+    resendLabel: {
+        color: colors.gray[700],
+        fontSize: 14,
+    },
+    timerText: {
+        color: colors.gray[700],
+        fontSize: 14,
+    },
+    disabledLink: {
+        textDecorationLine: 'underline',
+        color: colors.textTertiary,
+    },
+    activeLink: {
+        color: colors.primary,
+        fontWeight: '600',
+        textDecorationLine: 'underline',
+    },
+    buttonWrapper: {
+        width: '100%',
+        paddingHorizontal: 24,
+    },
+    submitButton: {
+        backgroundColor: colors.primary,
+        borderRadius: 25,
+        height: 50,
+    },
+    errorPlaceholder: {
+        height: 24,
+    },
 });
