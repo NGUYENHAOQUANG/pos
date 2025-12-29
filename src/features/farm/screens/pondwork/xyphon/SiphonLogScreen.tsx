@@ -13,38 +13,42 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'SiphonLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
 export const SiphonLogScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<ScreenRouteProp>();
-  const { pond } = route.params || {};
+    const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<ScreenRouteProp>();
+    const { pond } = route.params || {};
 
-  const config: LogScreenConfig<SiphonMeta> = {
-    jobType: 'SIPHON',
-    pond,
-    metaConverter: (item: JobExecution, meta: SiphonMeta) =>
-      convertSiphonMetaToActivityData(item, meta),
-    editRoute: 'AddSiphonScreen',
-    getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
-  };
+    const config: LogScreenConfig<SiphonMeta> = {
+        jobType: 'SIPHON',
+        pond,
+        metaConverter: (item: JobExecution, meta: SiphonMeta) =>
+            convertSiphonMetaToActivityData(item, meta)
+                .filter(i => i.label !== 'Hình ảnh')
+                .map(i =>
+                    i.label === 'Hao hụt trong ao' ? { ...i, label: 'Số tôm hao (kg)' } : i
+                ),
+        editRoute: 'AddSiphonScreen',
+        getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
+    };
 
-  const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
 
-  const handleStartSiphon = () => {
-    if (pond) {
-      navigation.navigate('AddSiphonScreen', { pond });
-    }
-  };
+    const handleStartSiphon = () => {
+        if (pond) {
+            navigation.navigate('AddSiphonScreen', { pond });
+        }
+    };
 
-  return (
-    <BaseLogScreen
-      title="Nhật ký xi-phông"
-      startDate={startDate}
-      endDate={endDate}
-      onStartDateChange={setStartDate}
-      onEndDateChange={setEndDate}
-      groupedData={groupedData}
-      emptyMessage="Chưa có dữ liệu xi-phông"
-      emptyButtonTitle="Bắt đầu xi-phông"
-      onEmptyButtonPress={handleStartSiphon}
-    />
-  );
+    return (
+        <BaseLogScreen
+            title="Nhật ký xi-phông"
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            groupedData={groupedData}
+            emptyMessage="Chưa có dữ liệu xi-phông"
+            emptyButtonTitle="Bắt đầu xi-phông"
+            onEmptyButtonPress={handleStartSiphon}
+        />
+    );
 };
