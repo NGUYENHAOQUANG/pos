@@ -12,7 +12,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import IconEnvironment from '@/assets/images/Icon/IconDevices/EnvironmentOutlined.svg';
+import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
 
 export interface DropDownItem {
     id: string | number;

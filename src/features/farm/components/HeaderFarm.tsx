@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
-    Image,
     Text,
     TouchableOpacity,
     Modal,
@@ -11,12 +10,13 @@ import {
     Platform,
     StatusBar,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { IconPond } from '@/assets/icons'; // Import new SVG
 import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 interface HeaderFarmProps {
     // Common
@@ -54,7 +54,6 @@ export const HeaderFarm = ({
     onBack,
     rightAction,
 }: HeaderFarmProps) => {
-    const insets = useSafeAreaInsets();
     const [menuVisible, setMenuVisible] = useState(false);
     const [dropdownTop, setDropdownTop] = useState(0);
     const [dropdownRight, setDropdownRight] = useState(24);
@@ -86,63 +85,22 @@ export const HeaderFarm = ({
     };
 
     /**
-     * Render Cycle Detail Mode (Back, Custom Title with Subtitle, Right Action)
+     * Render Cycle Detail Mode & Simple Mode (Back, Custom Title with Subtitle, Right Action)
      */
-    if (type === 'cycle-detail') {
+    if (type === 'cycle-detail' || type === 'simple') {
+        const centerNode = typeof title === 'object' ? title : undefined;
+        // For string title, HeaderSection handles it via 'title' prop.
+        // If title is object (ReactNode), pass as centerComponent.
+
         return (
-            <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity onPress={onBack} style={styles.backButtonSimple}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-
-                {/* Custom title (ReactNode) */}
-                {typeof title === 'string' ? (
-                    <Text
-                        style={[
-                            styles.simpleTitle,
-                            titleAlign === 'left'
-                                ? styles.simpleTitleLeft
-                                : styles.simpleTitleCenter,
-                        ]}
-                    >
-                        {title}
-                    </Text>
-                ) : (
-                    <View style={styles.customTitleContainer}>{title}</View>
-                )}
-
-                {rightAction ? (
-                    <View style={styles.rightActionContainer}>{rightAction}</View>
-                ) : (
-                    <View style={styles.placeholderButton} />
-                )}
-            </View>
-        );
-    }
-
-    /**
-     * Render Simple Mode (Back, Title Center/Left)
-     */
-    if (type === 'simple') {
-        return (
-            <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity onPress={onBack} style={styles.backButtonSimple}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-
-                {/* Chỉ thay đổi style để căn lề dựa trên titleAlign, không bọc thêm View */}
-                {typeof title === 'string' ? (
-                    <Text style={[styles.simpleTitle]}>{title}</Text>
-                ) : (
-                    <View style={styles.customTitleContainer}>{title}</View>
-                )}
-
-                {rightAction ? (
-                    <View style={styles.rightActionContainer}>{rightAction}</View>
-                ) : (
-                    <View style={styles.placeholderButton} />
-                )}
-            </View>
+            <HeaderSection
+                title={typeof title === 'string' ? title : undefined}
+                centerComponent={centerNode}
+                titleAlign={titleAlign}
+                rightComponent={rightAction || undefined} // HeaderSection handles undefined check, but safe to pass
+                onBack={onBack}
+                showBackButton={true}
+            />
         );
     }
 
@@ -150,32 +108,31 @@ export const HeaderFarm = ({
      * Render Detail Mode (Back, Icon, Info, Tag, Menu)
      */
     if (type === 'detail') {
+        const leftNode = (
+            <View style={styles.detailLeft}>
+                <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
+                <View style={styles.infoContainer}>
+                    <Text style={styles.pondName}>{title || '---'}</Text>
+                    <Text style={styles.pondArea}>{subtitle || '---'}</Text>
+                </View>
+            </View>
+        );
+
+        const rightNode = (
+            <View style={styles.detailRight}>
+                {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
+                <View ref={buttonRef} collapsable={false}>
+                    <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
+                </View>
+            </View>
+        );
+
         return (
             <>
-                <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-                    <View style={styles.detailLeft}>
-                        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
-                        </TouchableOpacity>
-                        <View style={styles.iconContainer}>
-                            <Image
-                                source={require('@/assets/images/Icon/IconFarm/Pond.png')}
-                                style={styles.icon}
-                                resizeMode="contain"
-                            />
-                        </View>
-                        <View style={styles.infoContainer}>
-                            <Text style={styles.pondName}>{title || '---'}</Text>
-                            <Text style={styles.pondArea}>{subtitle || '---'}</Text>
-                        </View>
-                    </View>
-                    <View style={styles.detailRight}>
-                        {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
-                        <View ref={buttonRef} collapsable={false}>
-                            <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
-                        </View>
-                    </View>
-                </View>
+                <HeaderSection leftComponent={leftNode} rightComponent={rightNode} />
 
                 {menuOptions && menuOptions.length > 0 && (
                     <Modal
@@ -215,49 +172,28 @@ export const HeaderFarm = ({
     /**
      * Render List Mode (Dropdown, Menu) - Default
      */
-    return (
-        <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-            <View style={styles.leftContainer}>
-                {onSelect && <DropDownButtonBasic data={data} value={value} onSelect={onSelect} />}
-            </View>
-
-            <View style={styles.rightContainer}>
-                <ButtonHeader onPress={onMenuPress} />
-            </View>
+    const listLeft = onSelect ? (
+        <View style={styles.listLeftContainer}>
+            <DropDownButtonBasic data={data} value={value} onSelect={onSelect} />
         </View>
-    );
+    ) : undefined;
+
+    const listRight = <ButtonHeader onPress={onMenuPress} />;
+
+    return <HeaderSection leftComponent={listLeft} rightComponent={listRight} />;
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: spacing.md,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        zIndex: 1000,
-    },
     // --- List Mode Styles ---
-    leftContainer: {
-        flex: 1,
+    listLeftContainer: {
+        flexDirection: 'row', // Ensure it takes necessary width
         marginRight: 16,
-        alignItems: 'flex-start',
-    },
-    rightContainer: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        paddingRight: 0,
     },
 
     // --- Detail Mode Styles ---
     detailLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
     },
     backButton: {
         width: 40,
@@ -267,7 +203,7 @@ const styles = StyleSheet.create({
         marginRight: spacing.md,
         borderRadius: borderRadius.sm,
         borderWidth: 1,
-        borderColor: colors.borderDark, // Matching the user's latest change
+        borderColor: colors.borderDark || colors.border,
     },
     iconContainer: {
         width: 40,
@@ -303,43 +239,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     menuButtonDetail: {
-        width: 32,
-        height: 32,
-    },
-    backButtonSimple: {
-        padding: 0,
         width: 40,
         height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: borderRadius.sm,
     },
-    simpleTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        flex: 1,
-    },
-    simpleTitleCenter: {
-        textAlign: 'center',
-    },
-    simpleTitleLeft: {
-        textAlign: 'left',
-        paddingLeft: spacing.sm,
-    },
-    placeholderButton: {
-        width: 40,
-    },
-    rightActionContainer: {
-        width: 40,
-        alignItems: 'flex-end',
-    },
-    customTitleContainer: {
-        flex: 1,
-        marginHorizontal: spacing.sm,
-    },
+    // Modal Styles
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.05)',

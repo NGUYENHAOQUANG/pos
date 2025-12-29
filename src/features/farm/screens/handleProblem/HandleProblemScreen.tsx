@@ -15,7 +15,7 @@ import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationD
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
-import DeleteIcon from '@/assets/images/Icon/IconFarm/Delete.svg';
+import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 

@@ -7,7 +7,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/components/pond/CreateCycleForm';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import TrashOutlined from '@/assets/images/Icon/IconDevices/TrashOutlined.svg';
+import TrashOutlined from '@/assets/Icon/IconDevices/TrashOutlined.svg';
 import Toast from 'react-native-toast-message';
 import { useFarm } from '../../context/FarmContext';
 import { CycleData } from '../../types/farm.types';

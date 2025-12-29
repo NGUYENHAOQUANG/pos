@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -96,15 +95,14 @@ export const AddDeviceScreens = () => {
                 />
             </ScrollView>
 
-            <SafeAreaView edges={['bottom']} style={styles.footer}>
-                <ButtonBarMenu
-                    primaryTitle="Thêm thiết bị"
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSubmit}
-                    onSecondaryPress={handleBack}
-                    secondaryType="default"
-                />
-            </SafeAreaView>
+            <ButtonBarMenu
+                primaryTitle="Thêm thiết bị"
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleSubmit}
+                onSecondaryPress={handleBack}
+                secondaryType="default"
+                style={styles.footer}
+            />
         </View>
     );
 };
@@ -116,7 +114,6 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: spacing.sm, // Spacing between header and first card
-        paddingBottom: 100, // Space for footer
     },
     footer: {
         backgroundColor: colors.white,

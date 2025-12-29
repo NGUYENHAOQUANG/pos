@@ -3,7 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    Image,
     TouchableOpacity,
     StyleProp,
     ViewStyle,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 
 import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
+import { IconPond } from '@/assets/icons'; // Import new SVG
 import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
@@ -103,13 +103,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         <View style={[styles.container, style]}>
             {/* Header Section */}
             <View style={styles.header}>
-                <View style={styles.iconContainer}>
-                    <Image
-                        source={require('@/assets/images/Icon/IconFarm/Pond.png')}
-                        style={styles.icon}
-                        resizeMode="contain"
-                    />
-                </View>
+                <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
                 <View style={styles.infoContainer}>
                     <Text style={styles.nameText}>{name}</Text>
                     <Text style={styles.areaText}>{area}</Text>

@@ -1,8 +1,22 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ImageSourcePropType } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
 import { spacing } from '@/styles/spacing';
+import {
+    IconFeed,
+    IconShrimpInspection,
+    IconRuler,
+    IconEnvironment,
+    IconWaterTreatment,
+    IconWaterChanger,
+    IconXyPhong,
+    IconTroubleshooting,
+    IconTransferPond,
+    IconCleaningThePond,
+    IconDryingThePond,
+    IconHarvest,
+} from '@/assets/icons';
 
 export type JobType =
     | 'FEED'
@@ -19,69 +33,69 @@ export type JobType =
     | 'HARVEST';
 
 interface JobConfig {
-    icon: ImageSourcePropType;
+    icon: React.FC<any>;
     backgroundColor: string;
     defaultTitle: string;
 }
 
 const JOB_CONFIG: Record<JobType, JobConfig> = {
     FEED: {
-        icon: require('../../../../assets/images/Icon/IconFarm/Feed.png'),
+        icon: IconFeed,
         backgroundColor: colors.blue[50],
         defaultTitle: 'Cho ăn',
     },
     SHRIMP_INSPECTION: {
-        icon: require('../../../../assets/images/Icon/IconFarm/ShrimpInspection.png'),
+        icon: IconShrimpInspection,
         backgroundColor: colors.orange[50],
         defaultTitle: 'Kiểm tra tôm (canh nhá)',
     },
     MEASURE_SIZE: {
-        icon: require('../../../../assets/images/Icon/IconFarm/Ruler.png'),
-        backgroundColor: colors.blue[50], // Or a different blue/purple if available
+        icon: IconRuler,
+        backgroundColor: colors.blue[50],
         defaultTitle: 'Đo kích thước tôm',
     },
     ENVIRONMENT: {
-        icon: require('../../../../assets/images/Icon/IconFarm/Environment.png'),
+        icon: IconEnvironment,
         backgroundColor: colors.orange[50],
         defaultTitle: 'Đo thông số môi trường',
     },
     WATER_TREATMENT: {
-        icon: require('../../../../assets/images/Icon/IconFarm/WaterTreatment.png'),
-        backgroundColor: colors.blue[50], // Using blue[50] as generic light blue
+        icon: IconWaterTreatment,
+        backgroundColor: colors.blue[50],
         defaultTitle: 'Xử lý nước',
     },
     WATER_CHANGE: {
-        icon: require('../../../../assets/images/Icon/IconFarm/WaterChanger.png'),
-        backgroundColor: colors.blue[50], // Using blue[50] (cyan-ish)
+        icon: IconWaterChanger,
+        backgroundColor: colors.blue[50],
         defaultTitle: 'Thay/Cấp nước',
     },
     SIPHON: {
-        icon: require('../../../../assets/images/Icon/IconFarm/XyPhong.png'),
+        icon: IconXyPhong,
         backgroundColor: colors.blue[50],
         defaultTitle: 'Xi - phông',
     },
     TROUBLESHOOTING: {
-        icon: require('../../../../assets/images/Icon/IconFarm/Troubleshooting.png'),
-        backgroundColor: colors.orange[50], // Warning color
+        icon: IconTroubleshooting,
+        backgroundColor: colors.orange[50],
         defaultTitle: 'Xử lý sự cố',
     },
     TRANSFER_POND: {
-        icon: require('../../../../assets/images/Icon/IconFarm/TransferPond.png'),
+        icon: IconTransferPond,
         backgroundColor: colors.pink[50],
         defaultTitle: 'Sang ao',
     },
     CLEAN_POND: {
-        icon: require('../../../../assets/images/Icon/IconFarm/CleaningThePond.png'),
+        icon: IconCleaningThePond,
         backgroundColor: colors.purple[50],
         defaultTitle: 'Rửa ao',
     },
     SUN_DRY_POND: {
-        icon: require('../../../../assets/images/Icon/IconFarm/DryingThePond.png'),
+        icon: IconDryingThePond,
         backgroundColor: colors.orange[50],
         defaultTitle: 'Phơi ao',
     },
     HARVEST: {
-        icon: require('../../../../assets/images/Icon/IconFarm/Harvest.png'),
+        icon: IconHarvest,
         backgroundColor: colors.cyan[50],
         defaultTitle: 'Thu hoạch',
     },
@@ -120,11 +134,7 @@ export const JobCard: React.FC<JobCardProps> = ({
         <View style={styles.container}>
             <TouchableOpacity style={styles.header} onPress={onPress}>
                 <View style={styles.leftContent}>
-                    <View
-                        style={[styles.iconContainer, { backgroundColor: config.backgroundColor }]}
-                    >
-                        <Image source={config.icon} style={styles.icon} resizeMode="contain" />
-                    </View>
+                    <config.icon width={40} height={40} style={{ marginRight: 12 }} />
                     <Text style={styles.title}>{displayTitle}</Text>
                 </View>
                 <View style={styles.actions}>
@@ -184,18 +194,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
     },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    icon: {
-        width: 24,
-        height: 24,
-    },
+
     title: {
         fontSize: 16,
         fontWeight: '600',

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius, typography } from '@/styles';
-import EmptyStateIcon from '@/assets/images/Icon/EmptyStateIcon.svg';
+import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface EmptyStateCardProps {
     message: string;

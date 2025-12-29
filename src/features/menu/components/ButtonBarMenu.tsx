@@ -1,173 +1,55 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { ViewStyle, StyleProp, TextStyle } from 'react-native';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
+import { colors } from '@/styles';
 
 interface ButtonBarMenuProps {
-  primaryTitle?: string;
-  secondaryTitle?: string;
-  onPrimaryPress?: () => void;
-  onSecondaryPress?: () => void;
-  primaryDisabled?: boolean;
-  // secondaryType: 'default' (gray border) | 'primary' (blue border)
-  secondaryType?: 'default' | 'primary';
-  style?: StyleProp<ViewStyle>;
+    primaryTitle?: string;
+    secondaryTitle?: string;
+    onPrimaryPress?: () => void;
+    onSecondaryPress?: () => void;
+    primaryDisabled?: boolean;
+    // secondaryType: 'default' (gray border) | 'primary' (blue border)
+    secondaryType?: 'default' | 'primary';
+    style?: StyleProp<ViewStyle>;
 }
 
 export const ButtonBarMenu: React.FC<ButtonBarMenuProps> = ({
-  primaryTitle,
-  secondaryTitle,
-  onPrimaryPress,
-  onSecondaryPress,
-  primaryDisabled = false,
-  secondaryType = 'default',
-  style,
+    primaryTitle,
+    secondaryTitle,
+    onPrimaryPress,
+    onSecondaryPress,
+    primaryDisabled = false,
+    secondaryType = 'default',
+    style,
 }) => {
-  const hasSecondary = !!secondaryTitle;
-  const hasPrimary = !!primaryTitle;
+    const hasSecondary = !!secondaryTitle;
+    const mode = hasSecondary ? 'double' : 'single';
 
-  // Primary Button Styles
-  const getPrimaryButtonStyle = () => {
-    const stylesList: StyleProp<ViewStyle>[] = [styles.button];
-    if (primaryDisabled) {
-      stylesList.push(styles.primaryButtonDisabled);
-    } else {
-      stylesList.push(styles.primaryButton);
-    }
-    return stylesList;
-  };
+    // Map secondaryType to styles
+    const secondaryButtonStyle: ViewStyle = {};
+    const secondaryButtonTextStyle: TextStyle = {};
 
-  const getPrimaryTextStyle = () => {
-    if (primaryDisabled) {
-      return [styles.buttonText, styles.primaryTextDisabled];
-    }
-    return [styles.buttonText, styles.primaryText];
-  };
-
-  // Secondary Button Styles
-  const getSecondaryButtonStyle = () => {
-    const stylesList: StyleProp<ViewStyle>[] = [styles.button, styles.secondaryButton];
     if (secondaryType === 'primary') {
-      stylesList.push(styles.secondaryButtonPrimary);
+        secondaryButtonStyle.borderColor = colors.primary;
+        secondaryButtonTextStyle.color = colors.primary;
     } else {
-      stylesList.push(styles.secondaryButtonDefault);
+        // default styling is already handled in shared ButtonBar (gray border, black text)
+        secondaryButtonStyle.borderColor = colors.defaultBorder || colors.border;
+        secondaryButtonTextStyle.color = colors.text;
     }
-    return stylesList;
-  };
 
-  const getSecondaryTextStyle = () => {
-    if (secondaryType === 'primary') {
-      return [styles.buttonText, styles.secondaryTextPrimary];
-    }
-    return [styles.buttonText, styles.secondaryTextDefault];
-  };
-
-  if (!hasSecondary && hasPrimary) {
     return (
-      <View style={[styles.container, style]}>
-        <TouchableOpacity
-          style={[getPrimaryButtonStyle(), styles.flex1]}
-          onPress={onPrimaryPress}
-          disabled={primaryDisabled}
-          activeOpacity={0.7}
-        >
-          <Text style={getPrimaryTextStyle()}>{primaryTitle}</Text>
-        </TouchableOpacity>
-      </View>
+        <ButtonBar
+            mode={mode}
+            primaryTitle={primaryTitle}
+            secondaryTitle={secondaryTitle}
+            onPrimaryPress={onPrimaryPress}
+            onSecondaryPress={onSecondaryPress}
+            primaryButtonDisabled={primaryDisabled}
+            secondaryButtonStyle={secondaryButtonStyle}
+            secondaryButtonTextStyle={secondaryButtonTextStyle}
+            containerStyle={style as ViewStyle}
+        />
     );
-  }
-
-  // Double button case
-  return (
-    <View style={[styles.container, style]}>
-      {hasSecondary && (
-        <TouchableOpacity
-          style={[
-            getSecondaryButtonStyle(),
-            secondaryType === 'primary' ? styles.widthPrimary : styles.widthDefault,
-          ]}
-          onPress={onSecondaryPress}
-          activeOpacity={0.7}
-        >
-          <Text style={getSecondaryTextStyle()}>{secondaryTitle}</Text>
-        </TouchableOpacity>
-      )}
-
-      {hasSecondary && hasPrimary && <View style={styles.spacer} />}
-
-      {hasPrimary && (
-        <TouchableOpacity
-          style={[getPrimaryButtonStyle(), styles.flex1]}
-          onPress={onPrimaryPress}
-          disabled={primaryDisabled}
-          activeOpacity={0.7}
-        >
-          <Text style={getPrimaryTextStyle()}>{primaryTitle}</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    padding: spacing.md,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  spacer: {
-    width: spacing.md,
-  },
-  flex1: {
-    flex: 1,
-  },
-  widthPrimary: {
-    width: 120,
-  },
-  widthDefault: {
-    width: 100,
-  },
-  button: {
-    height: 40,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: '400',
-  },
-  // Primary Styles
-  primaryButton: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  primaryButtonDisabled: {
-    backgroundColor: colors.gray[100],
-    borderColor: colors.gray[200],
-  },
-  primaryText: {
-    color: colors.white,
-  },
-  primaryTextDisabled: {
-    color: colors.textTertiary,
-  },
-  // Secondary Styles
-  secondaryButton: {
-    backgroundColor: colors.white,
-  },
-  secondaryButtonDefault: {
-    borderColor: colors.defaultBorder || colors.border,
-  },
-  secondaryButtonPrimary: {
-    borderColor: colors.primary,
-  },
-  secondaryTextDefault: {
-    color: colors.text,
-  },
-  secondaryTextPrimary: {
-    color: colors.primary,
-  },
-});

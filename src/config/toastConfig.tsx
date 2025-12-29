@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { ToastConfig } from 'react-native-toast-message';
 import { borderRadius, colors } from '@/styles';
-import CheckCircleIcon from '@/assets/images/Icon/CheckCircleFilled.svg';
+import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
 
 // We can use a custom view or customize BaseToast.
 // Since the design is simple (Icon + Text), let's make a Custom View for full control.
