@@ -70,6 +70,8 @@ export const AquacultureManagementScreens: React.FC = () => {
                     data={farmOptions}
                     value={farmOptions[0]}
                     onSelect={item => console.log('Selected:', item)}
+                    height={40}
+                    borderRadius={6}
                 />
             </View>
 
