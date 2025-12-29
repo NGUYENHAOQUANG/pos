@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { HeaderDevices } from '../components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
@@ -11,15 +11,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useControl } from '../context/ControlContext';
 
-// Define pond count for each farm - Removed unused config
-
 export const DeviceControlScreens = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
 
-  // Use state only for the setter if reading is not needed, or rename if it should be used.
-  // Assuming we only need to handle selection updates from the header for now.
   const [, setSelectedFarm] = useState<FarmLocation>({
-    id: '1',
+    id: 'KG-01',
     name: 'Trại Kiên Giang',
   });
 
@@ -29,24 +25,33 @@ export const DeviceControlScreens = () => {
     navigation.navigate('ConnectDevice', { pondName });
   };
 
-  // No longer using renderPondCards helper, mapping directly below
-
-  // Only show dashboard (header + stats) if at least one pond has devices
-  // This matches the design flow where the setup phase is cleaner
   const showDashboard = ponds.some(p => p.hasDevices);
 
-  // Calculate total active devices and warnings
-  const totalWarnings = ponds.reduce((acc, pond) => {
-    if (!pond.deviceStats) return acc;
-    const stats = pond.deviceStats;
-    return (
-      acc +
-      (stats.fan.warning || 0) +
-      (stats.feeder.warning || 0) +
-      (stats.oxy.warning || 0) +
-      (stats.syphon.warning || 0)
-    );
-  }, 0);
+  // Calculate total active devices and warnings for summary
+  const totalStats = useMemo(() => {
+     // Calculate total warnings across all ponds (sum of all devices with warning status)
+     const sumWarnings = ponds.reduce((acc, pond) => {
+        if (!pond.deviceStats) return acc;
+        const stats = pond.deviceStats;
+        return (
+          acc +
+          (stats.fan.warning || 0) +
+          (stats.feeder.warning || 0) +
+          (stats.oxy.warning || 0) +
+          (stats.syphon.warning || 0)
+        );
+      }, 0);
+      
+      // Calculate total active ponds (ponds that have at least one device connected)
+      const countPondsWithDevices = ponds.filter(p => p.hasDevices).length;
+
+      return {
+          warning: sumWarnings,
+          active: countPondsWithDevices,
+          other: ponds.length - countPondsWithDevices 
+      };
+  }, [ponds]);
+
 
   return (
     <View style={styles.container}>
@@ -55,24 +60,22 @@ export const DeviceControlScreens = () => {
         title="Điều Khiển Thiết Bị"
         rightComponent={<ButtonHelp />}
         showBackButton={false}
-        includeSafeArea={!showDashboard} // Add padding if top header is missing
+        includeSafeArea={!showDashboard}
       />
       <ScrollView
         style={styles.content}
         contentContainerStyle={[
           styles.scrollContent,
-          styles.scrollContentPadding, // Ensure separation from header
+          styles.scrollContentPadding,
         ]}
       >
         {showDashboard && (
           <>
             <DevicesStatus
               totalPonds={ponds.length}
-              // activePonds currently implies active ponds, but might need adjustment if it means active devices.
-              // Keeping logic as ponds.filter(p => p.hasDevices).length for "Hoạt động" (Active Ponds) based on previous code.
-              activePonds={ponds.filter(p => p.hasDevices).length}
-              warningPonds={totalWarnings} // Mapping total device warnings to this prop
-              otherPonds={0}
+              activePonds={totalStats.active}
+              warningPonds={totalStats.warning}
+              otherPonds={totalStats.other}
             />
             <View style={styles.spacer} />
           </>
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
-    flexGrow: 1, // Ensure content can grow to fill screen for centering
+    flexGrow: 1,
   },
   scrollContentPadding: {
     paddingTop: 16,

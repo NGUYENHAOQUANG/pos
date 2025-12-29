@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { CollapseHead } from '@/features/farm/components/CollapseHead';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
 import { Legend, getFeedProdLegendItems } from '@/features/reports/components/Legend';
@@ -13,10 +13,23 @@ import {
     PADDING_TOP,
     PADDING_BOTTOM,
     RAW_DATA,
-} from '@/features/reports/components/feed-prod/chartData';
+} from '@/features/reports/components/feed-prod/feedprodData';
 
-export const FeedProdChart = () => {
-    const [isExpanded, setIsExpanded] = useState(true);
+import { Loading } from '@/shared/components/ui/Loading';
+
+export const CompilationFeedProd = () => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (isExpanded) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isExpanded]);
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -57,15 +70,21 @@ export const FeedProdChart = () => {
                 />
 
                 {isExpanded && (
-                    <>
-                        <MetricsRow
-                            production={formatMetricValue(getLatestProduction())}
-                            consumed={formatMetricValue(getLatestConsumed())}
-                            fcr={formatFCR(getLatestFCR())}
-                        />
-                        <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                        <Legend items={getFeedProdLegendItems()} />
-                    </>
+                    <View style={isLoading ? styles.loadingContainer : undefined}>
+                        {isLoading ? (
+                            <Loading />
+                        ) : (
+                            <>
+                                <MetricsRow
+                                    production={formatMetricValue(getLatestProduction())}
+                                    consumed={formatMetricValue(getLatestConsumed())}
+                                    fcr={formatFCR(getLatestFCR())}
+                                />
+                                <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                                <Legend items={getFeedProdLegendItems()} />
+                            </>
+                        )}
+                    </View>
                 )}
             </View>
         </View>
@@ -74,36 +93,32 @@ export const FeedProdChart = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
+        backgroundColor: colors.white,
+        marginBottom: 8,
     },
     headerExpanded: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
         backgroundColor: colors.white,
     },
     headerCollapsed: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        backgroundColor: colors.white,
     },
     chartSection: {
         backgroundColor: colors.white,
-        marginTop: spacing.sm,
-        // Box shadow: 0px 2px 4px 0px #00000005
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.02, // 05 in hex = 5/255 ≈ 0.02
-        shadowRadius: 4,
-        elevation: 2, // For Android
-        overflow: 'hidden',
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
+import { Loading } from '@/shared/components/ui/Loading';
 import Svg, { Path, Line, Text as SvgText, Circle } from 'react-native-svg';
 import { line, curveMonotoneX } from 'd3-shape';
 import { scaleLinear } from 'd3-scale';
@@ -57,7 +58,18 @@ const formatDate = (dateStr: string) => {
 // ----------------------------------------------------------------------
 
 export const GrowthChart = () => {
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (expanded) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [expanded]);
     const [selectedTab, setSelectedTab] = useState('Sản lượng');
     const [chartWidth, setChartWidth] = useState(Dimensions.get('window').width);
     const [activeGrowthDataPoint, setActiveGrowthDataPoint] = useState<GrowthDataPoint | null>(
@@ -258,7 +270,11 @@ export const GrowthChart = () => {
                 </TouchableOpacity>
 
                 {expanded && (
-                    <View style={styles.content}>
+                    <View style={[styles.contentContainer, isLoading ? styles.loadingContainer : undefined]}>
+                        {isLoading ? (
+                            <Loading />
+                        ) : (
+                            <>
                         {/* TABS */}
                         <View style={styles.tabContainer}>
                             {TABS.map(tab => (
@@ -424,6 +440,8 @@ export const GrowthChart = () => {
                                 <Text style={styles.legendText}>Thực tế</Text>
                             </View>
                         </View>
+                            </>
+                        )}
                     </View>
                 )}
             </View>
@@ -434,10 +452,7 @@ export const GrowthChart = () => {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        marginTop: 12,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: '#F3F4F6',
+        marginBottom: 8,
     },
     header: {
         flexDirection: 'row',
@@ -453,7 +468,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         textTransform: 'uppercase',
     },
-    content: {
+    contentContainer: {
         backgroundColor: colors.white,
     },
     tabContainer: {
@@ -569,5 +584,10 @@ const styles = StyleSheet.create({
     legendText: {
         fontSize: 13,
         color: '#374151',
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Aquaculture, Member, DeviceData } from '../types/menu.types';
-import { DEVICES_DATA } from '../data/devicesData';
+import { MAINTENANCE_DEVICES } from '@/features/control/data/devicesData';
 import { membersData } from '../data/memberData';
 
 interface MenuContextType {
@@ -73,7 +73,9 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({ children }) => {
     };
 
     // Device Logic
-    const [devices, setDevices] = useState<DeviceData[]>(DEVICES_DATA);
+    // Cast MAINTENANCE_DEVICES to DeviceData[] because they are compatible (IMaintenanceDevice extends DeviceData)
+    const [devices, setDevices] = useState<DeviceData[]>(MAINTENANCE_DEVICES as unknown as DeviceData[]); 
+
 
     const addDevice = (newDevice: Omit<DeviceData, 'id'>) => {
         const device: DeviceData = {

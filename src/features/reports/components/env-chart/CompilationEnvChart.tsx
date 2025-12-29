@@ -106,7 +106,7 @@ export default CompilationEnvChart;
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        marginTop: 12,
+        marginBottom: 8,
     },
     header: {
         paddingVertical: 12,
@@ -132,3 +132,5 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
 });
+
+

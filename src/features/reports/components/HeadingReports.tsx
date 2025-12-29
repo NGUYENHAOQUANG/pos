@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { FarmActionMenu } from './FarmActionMenu';
 
 interface HeadingReportsProps {
   // Header Props
@@ -24,6 +25,7 @@ interface HeadingReportsProps {
   seasonData?: DropDownItem[];
   selectedSeason?: DropDownItem;
   onSelectSeason?: (item: DropDownItem) => void;
+  seasonDisabled?: boolean;
 }
 
 export const HeadingReports = ({
@@ -40,8 +42,20 @@ export const HeadingReports = ({
   seasonData,
   selectedSeason,
   onSelectSeason,
+  seasonDisabled,
 }: HeadingReportsProps) => {
   const insets = useSafeAreaInsets();
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  // Header padding (12) + Button height (40) + Gap (4) = 56
+  const menuPosition = { top: insets.top + 56, right: 16 };
+
+  const handleFarmInfoPress = () => {
+    setMenuVisible(false);
+    if (onRightPress) {
+      onRightPress();
+    }
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -54,9 +68,16 @@ export const HeadingReports = ({
         </View>
 
         <View style={styles.rightContainer}>
-          <ButtonHeader onPress={onRightPress} />
+            <ButtonHeader onPress={() => setMenuVisible(true)} />
         </View>
       </View>
+      
+      <FarmActionMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        onFarmInfo={handleFarmInfoPress}
+        position={menuPosition}
+      />
 
       <View style={styles.divider} />
 
@@ -91,6 +112,7 @@ export const HeadingReports = ({
           onSelect={onSelectSeason}
           showIcon={false}
           height={40}
+          disabled={seasonDisabled}
         />
       </View>
     </View>
@@ -103,6 +125,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: spacing.md, // Add bottom padding
     zIndex: 100, // Ensure dropdowns can float above content below
+    marginBottom: 8,
     // No borderRadius as requested
   },
   headerRow: {

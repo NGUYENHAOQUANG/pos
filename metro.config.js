@@ -14,7 +14,7 @@ const config = {
   },
   resolver: {
     assetExts: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'webm', 'mov'],
-    sourceExts: ['js', 'jsx', 'ts', 'tsx', 'json', 'svg'],
+    sourceExts: ['js', 'jsx', 'ts', 'tsx', 'json', 'svg', 'cjs', 'mjs'],
     blockList: [
       // Exclude build artifacts and temp files (but NOT node_modules/*/build)
       /.*\.cxx\/.*/,

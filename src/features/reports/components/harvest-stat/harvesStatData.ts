@@ -6,7 +6,7 @@
 
 import { HarvestData } from './HarvestItemCard';
 
-export const mockData: HarvestData[] = [
+export const harvestData: HarvestData[] = [
     {
         id: '1',
         harvestDate: '15/01/2025',

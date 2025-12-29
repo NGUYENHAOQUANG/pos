@@ -9,7 +9,7 @@ import {
     PADDING_TOP,
     RAW_DATA,
     FeedProdDataPoint,
-} from './chartData';
+} from './feedprodData';
 
 interface ChartProps {
     chartWidth: number;

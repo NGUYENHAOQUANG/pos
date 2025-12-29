@@ -17,15 +17,27 @@ import {
 } from 'react-native';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
+import { Loading } from '@/shared/components/ui/Loading';
 import { HarvestItemCard } from './HarvestItemCard';
-import { mockData } from './MockData';
+import { harvestData } from './harvesStatData';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 export const HarvestStat = () => {
-    const [isSectionOpen, setIsSectionOpen] = useState(true);
+    const [isSectionOpen, setIsSectionOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (isSectionOpen) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isSectionOpen]);
     const [showAll, setShowAll] = useState(false);
     const INITIAL_SHOW_COUNT = 3;
 
@@ -39,7 +51,7 @@ export const HarvestStat = () => {
         setShowAll(!showAll);
     };
 
-    const displayedData = showAll ? mockData : mockData.slice(0, INITIAL_SHOW_COUNT);
+    const displayedData = showAll ? harvestData : harvestData.slice(0, INITIAL_SHOW_COUNT);
 
     return (
         <View style={styles.container}>
@@ -50,12 +62,16 @@ export const HarvestStat = () => {
             />
 
             {isSectionOpen && (
-                <View style={styles.listContainer}>
+                <View style={[styles.listContainer, isLoading ? styles.loadingContainer : undefined]}>
+                    {isLoading ? (
+                        <Loading />
+                    ) : (
+                        <>
                     {displayedData.map(item => (
                         <HarvestItemCard key={item.id} item={item} />
                     ))}
 
-                    {mockData.length > INITIAL_SHOW_COUNT && (
+                    {harvestData.length > INITIAL_SHOW_COUNT && (
                         <TouchableOpacity
                             style={styles.seeAllButton}
                             onPress={toggleShowAll}
@@ -66,6 +82,8 @@ export const HarvestStat = () => {
                             </Text>
                         </TouchableOpacity>
                     )}
+                        </>
+                    )}
                 </View>
             )}
         </View>
@@ -75,7 +93,7 @@ export const HarvestStat = () => {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        marginBottom: 16,
+        marginBottom: 8,
     },
     sectionHeader: {
         backgroundColor: colors.white,
@@ -84,8 +102,15 @@ const styles = StyleSheet.create({
         borderColor: colors.borderLight,
     },
     listContainer: {
-        padding: 16,
+        paddingTop: 8,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
         gap: 12,
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     seeAllButton: {
         marginTop: 4,

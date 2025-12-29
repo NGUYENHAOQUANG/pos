@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, layout, shadows, typography } from '@/styles';
+import { colors, spacing, layout, typography } from '@/styles';
+import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { mockHarvestChartData } from './harvestData';
 
@@ -8,7 +9,18 @@ const CHART_CONTENT_HEIGHT = 394;
 const BAR_MAX_HEIGHT = 340.61;
 
 export const HarvestChart: React.FC = () => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (!isCollapsed) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isCollapsed]);
 
     const totalYield = useMemo(() => {
         return mockHarvestChartData.reduce((acc, curr) => acc + curr.yield, 0).toFixed(2);
@@ -30,7 +42,7 @@ export const HarvestChart: React.FC = () => {
     };
 
     return (
-        <View style={styles.card}>
+        <View style={styles.container}>
             {/* Header-Section */}
             <BasicDropDownButton
                 label="BIỂU ĐỒ THU HOẠCH"
@@ -39,7 +51,11 @@ export const HarvestChart: React.FC = () => {
             />
 
             {!isCollapsed && (
-                <View style={styles.body}>
+                <View style={[styles.body, isLoading ? styles.loadingContainer : undefined]}>
+                    {isLoading ? (
+                        <Loading />
+                    ) : (
+                        <>
                     <View style={styles.summaryContainer}>
                         <Text style={styles.summaryLabel}>Sản lượng đã thu hoạch</Text>
                         <Text style={styles.summaryValue}>{totalYield} tấn</Text>
@@ -80,6 +96,8 @@ export const HarvestChart: React.FC = () => {
                             </View>
                         </View>
                     </View>
+                        </>
+                    )}
                 </View>
             )}
         </View>
@@ -87,14 +105,9 @@ export const HarvestChart: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.background,
-        width: '100%',
-        alignSelf: 'center',
-        marginVertical: spacing.sm,
-        ...shadows.sm,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
+    container: {
+        backgroundColor: colors.white,
+        marginBottom: 8,
     },
     header: {
         flexDirection: 'row',
@@ -121,6 +134,11 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
         width: '100%',
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     summaryLabel: {
         fontSize: 10,

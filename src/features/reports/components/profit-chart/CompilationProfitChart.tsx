@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
+import { Loading } from '@/shared/components/ui/Loading';
 import { CollapseHead } from '@/features/farm/components/CollapseHead';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
 import { Legend, getProfitChartLegendItems } from '@/features/reports/components/Legend';
@@ -15,7 +16,7 @@ import {
     ProfitChartDataRange,
 } from '@/features/reports/components/profit-chart/chartData';
 
-interface ProfitChartProps {
+interface CompilationProfitChartProps {
     /**
      * Optional data range for filtering chart data
      * This parameter is reserved for future feature development
@@ -23,8 +24,19 @@ interface ProfitChartProps {
     dataRange?: ProfitChartDataRange;
 }
 
-export const ProfitChart: React.FC<ProfitChartProps> = ({}) => {
-    const [isExpanded, setIsExpanded] = useState(true);
+export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    React.useEffect(() => {
+        if (isExpanded) {
+            setIsLoading(true);
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isExpanded]);
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -42,9 +54,17 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({}) => {
 
                 {isExpanded && (
                     <>
-                        <MetricsRow />
-                        <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                        <Legend items={getProfitChartLegendItems()} />
+                        {isLoading ? (
+                            <View style={styles.loadingContainer}>
+                                <Loading />
+                            </View>
+                        ) : (
+                            <>
+                                <MetricsRow />
+                                <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                                <Legend items={getProfitChartLegendItems()} />
+                            </>
+                        )}
                     </>
                 )}
             </View>
@@ -54,35 +74,32 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({}) => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
+        backgroundColor: colors.white,
+        marginBottom: 8,
     },
     headerExpanded: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
         backgroundColor: colors.white,
     },
     headerCollapsed: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-        paddingVertical: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        backgroundColor: colors.white,
     },
     chartSection: {
         backgroundColor: colors.white,
-        marginTop: spacing.sm,
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.02,
-        shadowRadius: 4,
-        elevation: 2,
-        overflow: 'hidden',
+    },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

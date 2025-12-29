@@ -16,23 +16,27 @@ type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon';
 // Control mode types for background colors
 type ControlMode = 'remote' | 'schedule' | 'local';
 
-interface ActivitySlot {
+export interface ModeSlot {
   startTime: string;
+  endTime: string;
+  mode: ControlMode;
+}
+
+interface ActivitySlot {
+  startTime: string; // HH:mm
   endTime: string;
 }
 
 interface DeviceColumnData {
   type: DeviceType;
   count: number;
-  mode: ControlMode; // Base mode, but we might override with time-based logic
+  activities?: ActivitySlot[]; 
+  modeHistory?: ModeSlot[];
   color?: string;
-  activities?: ActivitySlot[]; // Per-device activities
 }
 
 interface HistoryActivitieProps {
   devices?: DeviceColumnData[];
-  activities?: ActivitySlot[]; // Kept for compatibility but might be unused if devices have their own
-  currentTime?: string;
 }
 
 // Device icon mapping
@@ -58,100 +62,6 @@ const generateTimeSlots = (): string[] => {
 
 const DEFAULT_TIME_SLOTS = generateTimeSlots();
 
-// Specific activities matching the image
-const FEEDER_ACTIVITIES: ActivitySlot[] = [
-  { startTime: '00:00', endTime: '00:15' },
-  { startTime: '00:30', endTime: '00:45' },
-  { startTime: '01:30', endTime: '01:45' },
-  { startTime: '02:15', endTime: '02:30' },
-  { startTime: '03:00', endTime: '03:15' },
-  { startTime: '03:45', endTime: '04:00' },
-  // Additional pills
-  { startTime: '04:30', endTime: '04:45' },
-  { startTime: '06:00', endTime: '06:15' },
-  { startTime: '07:30', endTime: '07:45' },
-  { startTime: '09:00', endTime: '09:15' },
-  { startTime: '12:00', endTime: '12:15' },
-  { startTime: '16:00', endTime: '16:15' },
-  { startTime: '18:30', endTime: '18:45' },
-];
-
-const OXY1_ACTIVITIES: ActivitySlot[] = [
-  { startTime: '00:45', endTime: '03:00' },
-  { startTime: '03:00', endTime: '05:15' },
-  // Additional pills
-  { startTime: '08:00', endTime: '11:00' },
-  { startTime: '13:00', endTime: '17:00' },
-  { startTime: '19:00', endTime: '23:00' },
-];
-
-const FAN_ACTIVITIES: ActivitySlot[] = [
-  { startTime: '00:00', endTime: '03:00' },
-  { startTime: '03:00', endTime: '03:45' },
-  // Additional pills
-  { startTime: '06:00', endTime: '09:00' },
-  { startTime: '10:00', endTime: '14:30' },
-  { startTime: '18:00', endTime: '22:00' },
-];
-
-const FAN2_ACTIVITIES: ActivitySlot[] = [
-  { startTime: '04:00', endTime: '06:00' },
-  { startTime: '00:00', endTime: '03:00' },
-  { startTime: '03:00', endTime: '03:45' },
-  // Additional pills
-  { startTime: '07:00', endTime: '10:00' },
-  { startTime: '12:00', endTime: '15:00' },
-  { startTime: '20:00', endTime: '23:45' },
-];
-
-const DEFAULT_DEVICES: DeviceColumnData[] = [
-  {
-    type: 'feeder',
-    count: 1,
-    mode: 'remote',
-    activities: FEEDER_ACTIVITIES,
-  },
-  {
-    type: 'oxy',
-    count: 1,
-    mode: 'remote',
-    color: colors.error,
-    activities: OXY1_ACTIVITIES,
-  },
-  {
-    type: 'oxy',
-    count: 2,
-    mode: 'schedule',
-    activities: [], // Empty
-  },
-  {
-    type: 'fan',
-    count: 1,
-    mode: 'schedule',
-    activities: FAN_ACTIVITIES,
-  },
-  {
-    type: 'fan',
-    count: 2,
-    mode: 'local',
-    activities: FAN2_ACTIVITIES,
-  },
-  {
-    type: 'fan',
-    count: 3,
-    mode: 'local',
-    color: colors.text,
-    activities: [],
-  },
-  {
-    type: 'syphon',
-    count: 1,
-    mode: 'local',
-    color: colors.text,
-    activities: [],
-  },
-];
-
 // Check if a time slot has activity
 const hasActivity = (time: string, activities: ActivitySlot[] = []): boolean => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -166,24 +76,41 @@ const hasActivity = (time: string, activities: ActivitySlot[] = []): boolean => 
   });
 };
 
-// Helper to get background color based on device and time
+const DEFAULT_DEVICES: DeviceColumnData[] = [];
+
+
+// Helper to convert time "HH:mm" to minutes
+const timeToMinutes = (time: string): number => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+};
+
+// Start Helper to get background color based on device mode history
 const getBackgroundColor = (device: DeviceColumnData, time: string): string => {
-  // Feeder always remote (Blue)
-  if (device.type === 'feeder') {
-    return colors.schedule.remote;
+  if (!device.modeHistory || device.modeHistory.length === 0) {
+      // Default fallback
+      return colors.white; // Or some default
   }
 
-  // Parse time
-  const [hours] = time.split(':').map(Number);
+  const slotMinutes = timeToMinutes(time);
 
-  // Logic: < 03:00 is Schedule (Yellow), >= 03:00 is Local (Green)
-  // This matches the image where the color shift happens at 03:00
-  if (hours < 3) {
-    return colors.schedule.schedule;
-  } else {
-    return colors.schedule.local;
+  // Find the mode that covers this time slot
+  const activeMode = device.modeHistory.find(slot => {
+      const start = timeToMinutes(slot.startTime);
+      const end = timeToMinutes(slot.endTime);
+      return slotMinutes >= start && slotMinutes < end;
+  });
+
+  if (!activeMode) return colors.white;
+
+  switch (activeMode.mode) {
+      case 'remote': return colors.schedule.remote;
+      case 'schedule': return colors.schedule.schedule;
+      case 'local': return colors.schedule.local;
+      default: return colors.white;
   }
 };
+// End Helper
 
 export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
   devices = DEFAULT_DEVICES,

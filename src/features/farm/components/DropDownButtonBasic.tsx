@@ -28,6 +28,7 @@ interface DropDownButtonBasicProps {
     showIcon?: boolean;
     height?: number;
     borderRadius?: number;
+    disabled?: boolean;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -44,13 +45,21 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     showIcon = true,
     height = 40,
     borderRadius: customBorderRadius = spacing.sm,
+    disabled = false,
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
     const dropdownButtonRef = useRef<View>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
+    React.useEffect(() => {
+        if (value) {
+            setCurrentItem(value);
+        }
+    }, [value]);
+
     const handleDropdownPress = () => {
+        if (disabled) return;
         if (dropdownButtonRef.current) {
             dropdownButtonRef.current.measureInWindow((x, y, width, measuredHeight) => {
                 setDropdownPosition({
@@ -92,21 +101,30 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
             {/* Dropdown Picker */}
             <View ref={dropdownButtonRef} collapsable={false}>
                 <TouchableOpacity
-                    style={[styles.locationButton, { height, borderRadius: customBorderRadius }]}
+                    style={[
+                        styles.locationButton,
+                        { height, borderRadius: customBorderRadius },
+                        disabled && styles.disabledButton,
+                    ]}
                     onPress={handleDropdownPress}
-                    activeOpacity={0.7}
+                    activeOpacity={disabled ? 1 : 0.7}
                 >
                     {showIcon && (
                         <IconEnvironment width={18} height={18} style={styles.locationIcon} />
                     )}
-                    <Text style={styles.locationText} numberOfLines={1}>
+                    <Text
+                        style={[styles.locationText, disabled && styles.disabledText]}
+                        numberOfLines={1}
+                    >
                         {currentItem.label}
                     </Text>
-                    <Ionicons
-                        name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
-                        size={18}
-                        color={colors.defaultBorder}
-                    />
+                    {!disabled && (
+                        <Ionicons
+                            name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
+                            size={18}
+                            color={colors.defaultBorder}
+                        />
+                    )}
                 </TouchableOpacity>
             </View>
 
@@ -200,5 +218,12 @@ const styles = StyleSheet.create({
     dropdownItemTextSelected: {
         fontWeight: '500',
         color: colors.text,
+    },
+    disabledButton: {
+        backgroundColor: colors.gray[100],
+        borderColor: colors.gray[200],
+    },
+    disabledText: {
+        color: colors.textSecondary,
     },
 });

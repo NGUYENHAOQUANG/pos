@@ -6,7 +6,7 @@
 
 import { TransferData } from './TransferItemCard';
 
-export const mockData: TransferData[] = [
+export const pondTransferData: TransferData[] = [
     {
         id: '1',
         sourcePond: 'V01',

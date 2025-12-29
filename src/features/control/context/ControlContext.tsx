@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { SvgProps } from 'react-native-svg';
 import { Pond, EControlMode, DeviceData, PondDeviceStats } from '../types/control.types';
 import FanIcon from '@/assets/images/Icon/IconDevices/fan.svg';
 import FeederIcon from '@/assets/images/Icon/IconDevices/feeder.svg';
 import OxyIcon from '@/assets/images/Icon/IconDevices/oxy.svg';
 import SyphonIcon from '@/assets/images/Icon/IconDevices/syphon.svg';
+import { PONDS_LIST, DEVICES_LIST } from '../data/devicesData';
 
 interface ControlContextType {
   ponds: Pond[];
@@ -15,136 +17,7 @@ interface ControlContextType {
 
 const ControlContext = createContext<ControlContextType | undefined>(undefined);
 
-const DEFAULT_PONDS: Pond[] = [
-  {
-    id: '1',
-    name: 'Ao 1',
-    hasDevices: true,
-    deviceStats: {
-      fan: { active: 2, warning: 0, inactive: 0 },
-      feeder: { active: 1, warning: 0, inactive: 0 },
-      oxy: { active: 0, warning: 1, inactive: 0 },
-      syphon: { active: 0, warning: 0, inactive: 1 },
-    },
-    devices: [
-      {
-        id: 'f1',
-        name: 'Máy cho ăn',
-        icon: FeederIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'feeder',
-      },
-      {
-        id: 'o1',
-        name: 'Quạt nước 1',
-        icon: FanIcon,
-        mode: EControlMode.SCHEDULE,
-        isOn: true,
-        type: 'fan',
-      },
-      {
-        id: 'o2',
-        name: 'Quạt nước 2',
-        icon: FanIcon,
-        mode: EControlMode.LOCAL,
-        isOn: true,
-        type: 'fan',
-      },
-      {
-        id: 'o3',
-        name: 'Máy thổi khí',
-        icon: OxyIcon,
-        mode: EControlMode.SCHEDULE,
-        isOn: true,
-        errorMessage: 'Bị mất khí!',
-        type: 'oxy',
-      },
-      {
-        id: 'o4',
-        name: 'Syphon',
-        icon: SyphonIcon,
-        mode: EControlMode.SCHEDULE,
-        isOn: false,
-        type: 'syphon',
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Ao 2',
-    hasDevices: true,
-    deviceStats: {
-      fan: { active: 2, warning: 0, inactive: 1 },
-      feeder: { active: 1, warning: 0, inactive: 1 },
-      oxy: { active: 1, warning: 0, inactive: 0 },
-      syphon: { active: 1, warning: 0, inactive: 0 },
-    },
-    devices: [
-      // 2 Feeders: 1 ON, 1 OFF
-      {
-        id: 'a2_f1',
-        name: 'Máy cho ăn 1',
-        icon: FeederIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'feeder',
-      },
-      {
-        id: 'a2_f2',
-        name: 'Máy cho ăn 2',
-        icon: FeederIcon,
-        mode: EControlMode.MANUAL,
-        isOn: false,
-        type: 'feeder',
-      },
-      // 3 Fans: 2 ON, 1 OFF
-      {
-        id: 'a2_fan1',
-        name: 'Quạt nước 1',
-        icon: FanIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'fan',
-      },
-      {
-        id: 'a2_fan2',
-        name: 'Quạt nước 2',
-        icon: FanIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'fan',
-      },
-      {
-        id: 'a2_fan3',
-        name: 'Quạt nước 3',
-        icon: FanIcon,
-        mode: EControlMode.MANUAL,
-        isOn: false,
-        type: 'fan',
-      },
-      // 1 Oxy: ON
-      {
-        id: 'a2_oxy1',
-        name: 'Máy thổi khí',
-        icon: OxyIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'oxy',
-      },
-      // 1 Syphon: ON
-      {
-        id: 'a2_syp1',
-        name: 'Syphon',
-        icon: SyphonIcon,
-        mode: EControlMode.MANUAL,
-        isOn: true,
-        type: 'syphon',
-      },
-    ],
-  },
-];
-
+// Helper to calculate stats
 const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
   const stats: PondDeviceStats = {
     fan: { active: 0, warning: 0, inactive: 0 },
@@ -155,8 +28,11 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
 
   devices.forEach(device => {
     const type = device.type;
-    if (!stats[type]) return; // Should not happen if typed correctly
+    if (!stats[type]) return; 
 
+    // Mapping logic congruent with DeviceControlScreens logic
+    // We rely on standard logic within the component or init.
+    
     if (device.errorMessage) {
       stats[type].warning++;
     } else if (device.isOn) {
@@ -169,8 +45,50 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
   return stats;
 };
 
+// Initialize Ponds from devicesData
+const INITIAL_PONDS: Pond[] = PONDS_LIST.map(pond => {
+    const pondId = pond.id.trim();
+    const rawDevices = DEVICES_LIST.filter(d => d.pondId.trim() === pondId);
+
+    const devices: DeviceData[] = rawDevices.map(d => {
+        // Map raw status to isOn/errorMessage
+        // Raw: 'active', 'maintenance', 'warehouse'...
+        // Context: isOn (boolean), errorMessage (string?)
+        
+        const isActive = d.status === 'active';
+        const isMaintenance = d.status === 'maintenance';
+        
+        let icon: React.FC<SvgProps> = FanIcon; // Default fallback
+        switch (d.type) {
+            case 'feeder': icon = FeederIcon; break;
+            case 'fan': icon = FanIcon; break;
+            case 'oxy': icon = OxyIcon; break;
+            case 'syphon': icon = SyphonIcon; break;
+        }
+
+        return {
+            id: d.id,
+            name: d.name,
+            icon: icon,
+            mode: d.mode,
+            isOn: isActive,
+            errorMessage: isMaintenance ? 'Đang bảo trì' : undefined, // Example error message
+            type: d.type,
+        };
+    });
+
+    return {
+        id: pond.id,
+        name: pond.name,
+        hasDevices: devices.length > 0,
+        devices: devices,
+        deviceStats: calculatePondStats(devices)
+    };
+});
+
 export const ControlProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [ponds, setPonds] = useState<Pond[]>(DEFAULT_PONDS);
+  // Use INITIAL_PONDS calculated from devicesData.tsx
+  const [ponds, setPonds] = useState<Pond[]>(INITIAL_PONDS);
 
   // removed storage useEffect
 
@@ -184,56 +102,54 @@ export const ControlProvider: React.FC<{ children: ReactNode }> = ({ children })
     setPonds(prevPonds =>
       prevPonds.map(p => {
         if (p.name === pondName) {
-          let updatedDevices = [...p.devices];
-          let newDeviceName = '';
-
-          // Determine type and base name
+          // 1. Define Device Map for Codes 1-6
           const typeMap: Record<
             string,
-            { type: 'feeder' | 'fan' | 'oxy' | 'syphon'; name: string; icon: any }
+            { type: 'feeder' | 'fan' | 'oxy' | 'syphon'; defaultName: string; icon: React.FC<SvgProps> }
           > = {
-            '1': { type: 'feeder', name: 'Máy cho ăn', icon: FeederIcon },
-            '2': { type: 'fan', name: 'Quạt nước', icon: FanIcon },
-            '3': { type: 'oxy', name: 'Máy thổi khí', icon: OxyIcon },
-            '4': { type: 'syphon', name: 'Syphon', icon: SyphonIcon },
+            '1': { type: 'feeder', defaultName: 'Máy cho ăn tự động A1', icon: FeederIcon },
+            '2': { type: 'syphon', defaultName: 'Hệ thống Xiphong X1', icon: SyphonIcon },
+            '3': { type: 'fan', defaultName: 'Quạt nước Q1', icon: FanIcon },
+            '4': { type: 'fan', defaultName: 'Quạt nước Q2', icon: FanIcon },
+            '5': { type: 'oxy', defaultName: 'Máy thổi khí Oxy 1', icon: OxyIcon },
+            '6': { type: 'syphon', defaultName: 'Hệ thống Xiphong X2', icon: SyphonIcon },
           };
 
           const config = typeMap[code];
           if (!config) return p;
 
-          const targetType = config.type;
-          const baseName = config.name;
 
-          const existingTypeDevices = p.devices.filter(d => d.type === targetType);
-          const count = existingTypeDevices.length;
-          const nextIndex = count + 1;
+          const proposedName = config.defaultName;
 
-          // Smart Renaming Logic
-          if (['1', '3', '4'].includes(code)) {
-            if (count > 0) {
-              const firstIndex = updatedDevices.findIndex(d => d.type === targetType);
-              if (firstIndex !== -1) {
-                updatedDevices[firstIndex] = {
-                  ...updatedDevices[firstIndex],
-                  name: `${baseName} 1`,
-                };
-              }
-              newDeviceName = `${baseName} ${nextIndex}`;
-            } else {
-              newDeviceName = `${baseName} ${nextIndex}`;
-            }
+          // 2. Naming Logic
+          let finalName = proposedName;
+          
+          // Check if proposedName already exists in this pond
+          const nameExists = p.devices.some(d => d.name === proposedName);
+          
+          if (nameExists) {
+             // If name exists, append a number. e.g. "Máy cho ăn tự động A1 1", "Máy cho ăn tự động A1 2"...
+             // Or maybe user wants to count by type?
+             // "Nếu thiết bị được thêm trùng tên thì thêm sau đó số 1 2 3.."
+             
+             let counter = 1;
+             while (p.devices.some(d => d.name === `${proposedName} ${counter}`)) {
+                 counter++;
+             }
+             finalName = `${proposedName} ${counter}`;
           }
+          // Note: We DO NOT rename existing devices anymore.
 
-          const newDevice = createDeviceFromCode(code, nextIndex, newDeviceName);
+          const newDevice = createDeviceFromCode(code, finalName, config.icon, config.type);
           if (!newDevice) return p;
 
-          const finalDevices = [...updatedDevices, newDevice];
+          const updatedDevices = [...p.devices, newDevice];
 
           return {
             ...p,
-            devices: finalDevices,
+            devices: updatedDevices,
             hasDevices: true,
-            deviceStats: calculatePondStats(finalDevices),
+            deviceStats: calculatePondStats(updatedDevices),
           };
         }
         return p;
@@ -296,48 +212,19 @@ export const ControlProvider: React.FC<{ children: ReactNode }> = ({ children })
 
 const createDeviceFromCode = (
   code: string,
-  nextIndex: number,
-  specificName?: string
+  name: string,
+  icon: React.FC<SvgProps>,
+  type: 'feeder' | 'fan' | 'oxy' | 'syphon'
 ): DeviceData | null => {
-  const base = {
-    id: `new_${Date.now()}`,
-    mode: EControlMode.MANUAL,
-    isOn: true,
-    errorMessage: undefined,
-  };
-
-  switch (code) {
-    case '1':
-      return {
-        ...base,
-        name: specificName || `Máy cho ăn ${nextIndex}`, // Use specific name if provided
-        icon: FeederIcon,
-        type: 'feeder',
-      };
-    case '2':
-      return {
-        ...base,
-        name: `Quạt nước ${nextIndex}`,
-        icon: FanIcon,
-        type: 'fan',
-      };
-    case '3':
-      return {
-        ...base,
-        name: `Máy thổi khí ${nextIndex}`,
-        icon: OxyIcon,
-        type: 'oxy',
-      };
-    case '4':
-      return {
-        ...base,
-        name: `Syphon ${nextIndex}`,
-        icon: SyphonIcon,
-        type: 'syphon',
-      };
-    default:
-      return null;
-  }
+    return {
+        id: `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        mode: EControlMode.MANUAL,
+        isOn: true,
+        errorMessage: undefined,
+        name,
+        icon,
+        type
+    };
 };
 
 export const useControl = () => {

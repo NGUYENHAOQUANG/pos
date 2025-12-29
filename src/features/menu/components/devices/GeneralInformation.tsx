@@ -25,9 +25,9 @@ export interface GeneralInformationData {
 }
 
 const DEVICE_TYPES: DropDownItem[] = [
-    { id: '1', label: 'Cảm biến Oxi' },
-    { id: '2', label: 'Cảm biến pH' },
-    { id: '3', label: 'Cảm biến Nhiệt độ' },
+    { id: '1', label: 'Máy cho ăn' },
+    { id: '2', label: 'Xiphong' },
+    { id: '3', label: 'Máy thổi khí' },
     { id: '4', label: 'Quạt nước' },
 ];
 

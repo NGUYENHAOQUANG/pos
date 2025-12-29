@@ -19,8 +19,8 @@ import Svg, {
     Filter,
     FeDropShadow,
 } from 'react-native-svg';
-import * as d3Shape from 'd3-shape';
-import * as d3Scale from 'd3-scale';
+import { area, curveStepAfter } from 'd3-shape';
+import { scaleLinear, scaleTime } from 'd3-scale';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles/colors';
 
@@ -97,13 +97,27 @@ const CHART_COLORS = {
     black: colors.black,
 };
 
+import { Loading } from '@/shared/components/ui/Loading';
+
 export const ActivePondChart = () => {
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
     const scrollViewRef = useRef<ScrollView>(null);
 
     const onLayout = (event: LayoutChangeEvent) => {
         setContainerWidth(event.nativeEvent.layout.width);
+    };
+
+    const handleToggle = () => {
+        const nextExpanded = !expanded;
+        setExpanded(nextExpanded);
+        if (nextExpanded) {
+            setIsLoading(true);
+            setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+        }
     };
 
     // --- 1. XỬ LÝ DỮ LIỆU ---
@@ -119,12 +133,12 @@ export const ActivePondChart = () => {
 
     // --- 2. TỰ ĐỘNG CUỘN ---
     useEffect(() => {
-        if (expanded && containerWidth > 0) {
+        if (expanded && containerWidth > 0 && !isLoading) {
             setTimeout(() => {
                 scrollViewRef.current?.scrollToEnd({ animated: true });
             }, 100);
         }
-    }, [expanded, containerWidth]);
+    }, [expanded, containerWidth, isLoading]);
 
     // --- 3. TÍNH TOÁN D3 ---
     const {
@@ -162,21 +176,19 @@ export const ActivePondChart = () => {
         const chartHeight = CHART_HEIGHT - VERTICAL_PADDING.top - VERTICAL_PADDING.bottom;
 
         // Scale Y
-        const yScale = d3Scale.scaleLinear().domain([0, Y_DOMAIN_MAX]).range([chartHeight, 0]);
+        const yScale = scaleLinear().domain([0, Y_DOMAIN_MAX]).range([chartHeight, 0]);
 
         // Scale X
         const minDate = processedData[0].date;
         const maxDate = processedData[processedData.length - 1].date;
         const xRangeMax = processedData.length * ITEM_WIDTH;
-        const xScale = d3Scale
-            .scaleTime()
+        const xScale = scaleTime()
             .domain([minDate, maxDate])
             .range([ITEM_WIDTH / 2, xRangeMax - ITEM_WIDTH / 2]);
 
         // Generators
         const areaGenerator = (key: 'total' | 'prep_active' | 'active') =>
-            d3Shape
-                .area<any>()
+            area<any>()
                 .x(d => xScale(d.date))
                 .y0(_ => yScale(0))
                 .y1(d => {
@@ -184,7 +196,7 @@ export const ActivePondChart = () => {
                     if (key === 'prep_active') return yScale(d.active + d.prep);
                     return yScale(d.active);
                 })
-                .curve(d3Shape.curveStepAfter);
+                .curve(curveStepAfter);
 
         const lastItem = processedData[processedData.length - 1];
         const currentX = xScale(lastItem.date);
@@ -219,214 +231,226 @@ export const ActivePondChart = () => {
         <View style={styles.container} onLayout={onLayout}>
             <BasicDropDownButton
                 label={`TỔNG SỐ AO HOẠT ĐỘNG (${currentActiveTotal})`}
-                onPress={() => setExpanded(!expanded)}
+                onPress={handleToggle}
                 style={styles.headerButton}
             />
 
-            {expanded && containerWidth > 0 && xScale && yScale && (
-                <View style={styles.contentContainer}>
-                    <View style={styles.mainWrapper}>
-                        {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
-                        <View
-                            style={{
-                                width: Y_AXIS_WIDTH,
-                                paddingTop: HEADER_HEIGHT,
-                                backgroundColor: colors.white,
-                                zIndex: 2,
-                            }}
-                        >
-                            <Svg width={Y_AXIS_WIDTH} height={CHART_HEIGHT}>
-                                <G x={Y_AXIS_WIDTH} y={VERTICAL_PADDING.top}>
-                                    {yTicks.map(tick => (
-                                        <SvgText
-                                            key={tick}
-                                            x={-5}
-                                            y={yScale(tick) + 4}
-                                            fontSize="10"
-                                            fill={CHART_COLORS.text}
-                                            textAnchor="end"
-                                        >
-                                            {tick}
-                                        </SvgText>
-                                    ))}
-                                    <Line
-                                        x1={0}
-                                        y1={yScale(0) + 4}
-                                        x2={0}
-                                        y2={0}
-                                        stroke={colors.border}
-                                        strokeWidth={1}
-                                    />
-                                </G>
-                            </Svg>
+            {expanded && (
+                <>
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <Loading />
                         </View>
+                    ) : (
+                        containerWidth > 0 &&
+                        xScale &&
+                        yScale && (
+                            <View style={[styles.contentContainer, isLoading ? styles.loadingContainer : undefined]}>
+                                <View style={styles.mainWrapper}>
+                                    {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
+                                    <View
+                                        style={{
+                                            width: Y_AXIS_WIDTH,
+                                            paddingTop: HEADER_HEIGHT,
+                                            backgroundColor: colors.white,
+                                            zIndex: 2,
+                                        }}
+                                    >
+                                        <Svg width={Y_AXIS_WIDTH} height={CHART_HEIGHT}>
+                                            <G x={Y_AXIS_WIDTH} y={VERTICAL_PADDING.top}>
+                                                {yTicks.map(tick => (
+                                                    <SvgText
+                                                        key={tick}
+                                                        x={-5}
+                                                        y={yScale(tick) + 4}
+                                                        fontSize="10"
+                                                        fill={CHART_COLORS.text}
+                                                        textAnchor="end"
+                                                    >
+                                                        {tick}
+                                                    </SvgText>
+                                                ))}
+                                                <Line
+                                                    x1={0}
+                                                    y1={yScale(0) + 4}
+                                                    x2={0}
+                                                    y2={0}
+                                                    stroke={colors.border}
+                                                    strokeWidth={1}
+                                                />
+                                            </G>
+                                        </Svg>
+                                    </View>
 
-                        {/* --- CỘT PHẢI: HEADER CỐ ĐỊNH + BIỂU ĐỒ CUỘN --- */}
-                        <View style={{ flex: 1 }}>
-                            {/* 1. TOP LABELS (CỐ ĐỊNH) */}
-                            <View style={[styles.fixedHeaderLabels, { height: HEADER_HEIGHT }]}>
-                                <View style={styles.labelGroupLeft}>
-                                    <Text style={styles.labelTitle}>Ao vèo</Text>
-                                    <View style={styles.labelRow}>
-                                        <Text style={styles.labelTextBig}>A1V1</Text>
-                                        <View style={styles.divider} />
-                                        <Text style={styles.labelTextBig}>A1V2</Text>
+                                    {/* --- CỘT PHẢI: HEADER CỐ ĐỊNH + BIỂU ĐỒ CUỘN --- */}
+                                    <View style={{ flex: 1 }}>
+                                        {/* 1. TOP LABELS (CỐ ĐỊNH) */}
+                                        <View style={[styles.fixedHeaderLabels, { height: HEADER_HEIGHT }]}>
+                                            <View style={styles.labelGroupLeft}>
+                                                <Text style={styles.labelTitle}>Ao vèo</Text>
+                                                <View style={styles.labelRow}>
+                                                    <Text style={styles.labelTextBig}>A1V1</Text>
+                                                    <View style={styles.divider} />
+                                                    <Text style={styles.labelTextBig}>A1V2</Text>
+                                                </View>
+                                            </View>
+
+                                            <View style={styles.labelGroupRight}>
+                                                <Text style={styles.labelTitle}>Ao nuôi</Text>
+                                                <Text style={styles.labelTextBig}>A1N1</Text>
+                                            </View>
+                                        </View>
+
+                                        {/* 2. BIỂU ĐỒ (CÓ THỂ CUỘN) */}
+                                        <ScrollView
+                                            ref={scrollViewRef}
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            bounces={false}
+                                            contentContainerStyle={{ width: chartContentWidth }}
+                                        >
+                                            <Svg width={chartContentWidth} height={CHART_HEIGHT}>
+                                                <Defs>
+                                                    <Filter
+                                                        id="lightShadow"
+                                                        x="-50%"
+                                                        y="-50%"
+                                                        width="200%"
+                                                        height="200%"
+                                                    >
+                                                        <FeDropShadow
+                                                            dx="0"
+                                                            dy="2"
+                                                            stdDeviation="2"
+                                                            floodColor={CHART_COLORS.black}
+                                                            floodOpacity="0.25"
+                                                        />
+                                                    </Filter>
+                                                </Defs>
+
+                                                <G y={VERTICAL_PADDING.top}>
+                                                    {/* Grid lines cho các tick cố định */}
+                                                    {yTicks.map(tick => (
+                                                        <Line
+                                                            key={tick}
+                                                            x1={0}
+                                                            y1={yScale(tick)}
+                                                            x2={chartContentWidth}
+                                                            y2={yScale(tick)}
+                                                            stroke={CHART_COLORS.grid}
+                                                            strokeWidth={1}
+                                                        />
+                                                    ))}
+
+                                                    <Path
+                                                        d={pathFunctional}
+                                                        fill={CHART_COLORS.functional}
+                                                        stroke={CHART_COLORS.functionalStroke}
+                                                    />
+                                                    <Path
+                                                        d={pathPrep}
+                                                        fill={CHART_COLORS.prep}
+                                                        stroke={colors.orange[600]}
+                                                        strokeWidth={1}
+                                                    />
+                                                    <Path
+                                                        d={pathActive}
+                                                        fill={CHART_COLORS.activeFill}
+                                                        stroke={CHART_COLORS.activeStroke}
+                                                        strokeWidth={1}
+                                                    />
+
+                                                    <Line
+                                                        x1={currentX}
+                                                        y1={0}
+                                                        x2={currentX}
+                                                        y2={yScale(0)}
+                                                        stroke={CHART_COLORS.indicator}
+                                                        strokeWidth={0.5}
+                                                        strokeDasharray="3 1"
+                                                    />
+
+                                                    <Circle
+                                                        cx={currentX}
+                                                        cy={yScale(
+                                                            targetDataPoint.active +
+                                                                targetDataPoint.prep +
+                                                                targetDataPoint.functional
+                                                        )}
+                                                        r={4}
+                                                        fill={CHART_COLORS.functional}
+                                                        stroke={CHART_COLORS.white}
+                                                        strokeWidth={1}
+                                                        filter="url(#lightShadow)"
+                                                    />
+                                                    <Circle
+                                                        cx={currentX}
+                                                        cy={yScale(
+                                                            targetDataPoint.active + targetDataPoint.prep
+                                                        )}
+                                                        r={4}
+                                                        fill={CHART_COLORS.prep}
+                                                        stroke={CHART_COLORS.white}
+                                                        strokeWidth={1}
+                                                        filter="url(#lightShadow)"
+                                                    />
+                                                    <Circle
+                                                        cx={currentX}
+                                                        cy={yScale(targetDataPoint.active)}
+                                                        r={4}
+                                                        fill={CHART_COLORS.activeFill}
+                                                        stroke={CHART_COLORS.white}
+                                                        strokeWidth={1}
+                                                        filter="url(#lightShadow)"
+                                                    />
+
+                                                    <Line
+                                                        x1={0}
+                                                        y1={yScale(0) + 4}
+                                                        x2={chartContentWidth}
+                                                        y2={yScale(0) + 4}
+                                                        stroke={colors.gray[600]}
+                                                        strokeWidth={0.5}
+                                                    />
+
+                                                    {xTicks.map((tickDate, index) => (
+                                                        <G key={index}>
+                                                            <Line
+                                                                x1={xScale(tickDate)}
+                                                                y1={yScale(0) + 4}
+                                                                x2={xScale(tickDate)}
+                                                                y2={yScale(0) + 9}
+                                                                stroke={colors.gray[600]}
+                                                                strokeWidth={0.5}
+                                                            />
+                                                            <SvgText
+                                                                x={xScale(tickDate)}
+                                                                y={yScale(0) + 20}
+                                                                fontSize="10"
+                                                                fill={CHART_COLORS.text}
+                                                                textAnchor="middle"
+                                                            >
+                                                                {formatDate(tickDate)}
+                                                            </SvgText>
+                                                        </G>
+                                                    ))}
+                                                </G>
+                                            </Svg>
+                                        </ScrollView>
                                     </View>
                                 </View>
 
-                                <View style={styles.labelGroupRight}>
-                                    <Text style={styles.labelTitle}>Ao nuôi</Text>
-                                    <Text style={styles.labelTextBig}>A1N1</Text>
+                                <View style={styles.spacer} />
+
+                                <View style={styles.legendWrapper}>
+                                    <LegendItem color={CHART_COLORS.activeFill} label="Đang hoạt động" />
+                                    <LegendItem color={CHART_COLORS.prep} label="Đang chuẩn bị" />
+                                    <LegendItem color={CHART_COLORS.functional} label="Ao chức năng" />
                                 </View>
                             </View>
-
-                            {/* 2. BIỂU ĐỒ (CÓ THỂ CUỘN) */}
-                            <ScrollView
-                                ref={scrollViewRef}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                bounces={false}
-                                contentContainerStyle={{ width: chartContentWidth }}
-                            >
-                                <Svg width={chartContentWidth} height={CHART_HEIGHT}>
-                                    <Defs>
-                                        <Filter
-                                            id="lightShadow"
-                                            x="-50%"
-                                            y="-50%"
-                                            width="200%"
-                                            height="200%"
-                                        >
-                                            <FeDropShadow
-                                                dx="0"
-                                                dy="2"
-                                                stdDeviation="2"
-                                                floodColor={CHART_COLORS.black}
-                                                floodOpacity="0.25"
-                                            />
-                                        </Filter>
-                                    </Defs>
-
-                                    <G y={VERTICAL_PADDING.top}>
-                                        {/* Grid lines cho các tick cố định */}
-                                        {yTicks.map(tick => (
-                                            <Line
-                                                key={tick}
-                                                x1={0}
-                                                y1={yScale(tick)}
-                                                x2={chartContentWidth}
-                                                y2={yScale(tick)}
-                                                stroke={CHART_COLORS.grid}
-                                                strokeWidth={1}
-                                            />
-                                        ))}
-
-                                        <Path
-                                            d={pathFunctional}
-                                            fill={CHART_COLORS.functional}
-                                            stroke={CHART_COLORS.functionalStroke}
-                                        />
-                                        <Path
-                                            d={pathPrep}
-                                            fill={CHART_COLORS.prep}
-                                            stroke={colors.orange[600]}
-                                            strokeWidth={1}
-                                        />
-                                        <Path
-                                            d={pathActive}
-                                            fill={CHART_COLORS.activeFill}
-                                            stroke={CHART_COLORS.activeStroke}
-                                            strokeWidth={1}
-                                        />
-
-                                        <Line
-                                            x1={currentX}
-                                            y1={0}
-                                            x2={currentX}
-                                            y2={yScale(0)}
-                                            stroke={CHART_COLORS.indicator}
-                                            strokeWidth={0.5}
-                                            strokeDasharray="3 1"
-                                        />
-
-                                        <Circle
-                                            cx={currentX}
-                                            cy={yScale(
-                                                targetDataPoint.active +
-                                                    targetDataPoint.prep +
-                                                    targetDataPoint.functional
-                                            )}
-                                            r={4}
-                                            fill={CHART_COLORS.functional}
-                                            stroke={CHART_COLORS.white}
-                                            strokeWidth={1}
-                                            filter="url(#lightShadow)"
-                                        />
-                                        <Circle
-                                            cx={currentX}
-                                            cy={yScale(
-                                                targetDataPoint.active + targetDataPoint.prep
-                                            )}
-                                            r={4}
-                                            fill={CHART_COLORS.prep}
-                                            stroke={CHART_COLORS.white}
-                                            strokeWidth={1}
-                                            filter="url(#lightShadow)"
-                                        />
-                                        <Circle
-                                            cx={currentX}
-                                            cy={yScale(targetDataPoint.active)}
-                                            r={4}
-                                            fill={CHART_COLORS.activeFill}
-                                            stroke={CHART_COLORS.white}
-                                            strokeWidth={1}
-                                            filter="url(#lightShadow)"
-                                        />
-
-                                        <Line
-                                            x1={0}
-                                            y1={yScale(0) + 4}
-                                            x2={chartContentWidth}
-                                            y2={yScale(0) + 4}
-                                            stroke={colors.gray[600]}
-                                            strokeWidth={0.5}
-                                        />
-
-                                        {xTicks.map((tickDate, index) => (
-                                            <G key={index}>
-                                                <Line
-                                                    x1={xScale(tickDate)}
-                                                    y1={yScale(0) + 4}
-                                                    x2={xScale(tickDate)}
-                                                    y2={yScale(0) + 9}
-                                                    stroke={colors.gray[600]}
-                                                    strokeWidth={0.5}
-                                                />
-                                                <SvgText
-                                                    x={xScale(tickDate)}
-                                                    y={yScale(0) + 20}
-                                                    fontSize="10"
-                                                    fill={CHART_COLORS.text}
-                                                    textAnchor="middle"
-                                                >
-                                                    {formatDate(tickDate)}
-                                                </SvgText>
-                                            </G>
-                                        ))}
-                                    </G>
-                                </Svg>
-                            </ScrollView>
-                        </View>
-                    </View>
-
-                    <View style={styles.spacer} />
-
-                    <View style={styles.legendWrapper}>
-                        <LegendItem color={CHART_COLORS.activeFill} label="Đang hoạt động" />
-                        <LegendItem color={CHART_COLORS.prep} label="Đang chuẩn bị" />
-                        <LegendItem color={CHART_COLORS.functional} label="Ao chức năng" />
-                    </View>
-                </View>
+                        )
+                    )}
+                </>
             )}
         </View>
     );
@@ -442,10 +466,7 @@ const LegendItem = ({ color, label }: { color: string; label: string }) => (
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: 16,
-        margin: 10,
+        marginBottom: 8,
     },
     headerButton: { borderWidth: 0, backgroundColor: colors.white },
 
@@ -499,6 +520,11 @@ const styles = StyleSheet.create({
         gap: 16,
         paddingHorizontal: 10,
     },
+    loadingContainer: {
+        minHeight: 300,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     legendItem: { flexDirection: 'row', alignItems: 'center' },
     legendDot: { width: 14, height: 14, borderRadius: 10, marginRight: 6 },
     legendText: { fontSize: 12, color: colors.textSecondary },
@@ -512,4 +538,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ActivePondChart;
+
