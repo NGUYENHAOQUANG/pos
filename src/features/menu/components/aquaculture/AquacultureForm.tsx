@@ -104,7 +104,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
         }));
 
         const formatDate = (date: Date | null) => {
-            if (!date) return 'dd-mm-yyyy';
+            if (!date) return 'dd/mm/yyyy';
             return date.toLocaleDateString('vi-VN', {
                 day: '2-digit',
                 month: '2-digit',

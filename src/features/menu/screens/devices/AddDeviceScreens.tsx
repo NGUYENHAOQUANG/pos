@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: spacing.sm, // Spacing between header and first card
+        paddingBottom: 100, // Ensure space for footer
     },
     footer: {
         backgroundColor: colors.white,

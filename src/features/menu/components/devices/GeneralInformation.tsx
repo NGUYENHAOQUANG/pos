@@ -100,9 +100,9 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     };
 
     const getFormattedDateText = () => {
-        if (!importDate) return 'dd-mm-yyyy';
-        // Format as dd-mm-yyyy
-        return formatDate(importDate).replace(/\//g, '-');
+        if (!importDate) return 'dd/mm/yyyy';
+        // Format as dd/mm/yyyy
+        return formatDate(importDate);
     };
 
     return (
