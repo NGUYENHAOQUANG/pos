@@ -66,7 +66,11 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                             activeOpacity={0.7}
                         >
                             <Text style={styles.inputText}>{date}</Text>
-                            <Ionicons name="calendar-outline" size={20} color="#999" />
+                            <Ionicons
+                                name="calendar-outline"
+                                size={20}
+                                color={colors.textTertiary}
+                            />
                         </TouchableOpacity>
                     </View>
 
@@ -78,7 +82,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                         <TextInput
                             style={styles.textArea}
                             placeholder="Nhập ghi chú"
-                            placeholderTextColor="#ccc"
+                            placeholderTextColor={colors.gray[300]}
                             multiline
                             textAlignVertical="top"
                             value={note}
@@ -103,10 +107,10 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
-        // Shadow nhẹ giống card
+
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
+                shadowColor: colors.shadow,
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.05,
                 shadowRadius: 2,
@@ -123,7 +127,7 @@ const styles = StyleSheet.create({
     body: {
         padding: spacing.md,
         borderTopWidth: 1,
-        borderTopColor: '#F0F0F0',
+        borderTopColor: colors.gray[100],
     },
     row: {
         flexDirection: 'row',
@@ -137,7 +141,7 @@ const styles = StyleSheet.create({
     },
     infoValue: {
         fontSize: 14,
-        color: colors.textSecondary || '#666',
+        color: colors.textSecondary,
         textAlign: 'right',
     },
     inputGroup: {
@@ -150,7 +154,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     required: {
-        color: colors.error || '#FF4D4F',
+        color: colors.red[900],
     },
     dateInput: {
         flexDirection: 'row',
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 44,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         borderRadius: borderRadius.sm,
         paddingHorizontal: 12,
         backgroundColor: colors.white,
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     textArea: {
         height: 80,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         borderRadius: borderRadius.sm,
         padding: 12,
         fontSize: 14,

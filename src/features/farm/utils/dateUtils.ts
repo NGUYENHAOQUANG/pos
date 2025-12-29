@@ -29,9 +29,11 @@ export const parseDate = (dateStr: string): Date => {
 export interface FormatDateTimeOptions {
     /** Date separator: '/' for dd/mm/yyyy or '-' for dd-mm-yyyy. Default: '/' */
     dateSeparator?: '/' | '-';
+    /** Show time part: true (show time), false (only date). Default: true */
+    showTime?: boolean;
     /** Show "(hiện tại)" label: true (always), false (never), 'auto' (only if today). Default: 'auto' */
     showCurrentLabel?: boolean | 'auto';
-    /** Fallback text when date is null/undefined. Default: 'dd-mm-yyyy, hr:mm (hiện tại)' */
+    /** Fallback text when date is null/undefined. Default: 'dd/mm/yyyy, hr:mm (hiện tại)' or 'dd/mm/yyyy' based on showTime */
     fallbackText?: string;
 }
 
@@ -41,13 +43,20 @@ export const formatDateTime = (
 ): string => {
     const {
         dateSeparator = '/',
+        showTime = true,
         showCurrentLabel = 'auto',
-        fallbackText = 'dd/mm/yyyy, hr:mm (hiện tại)',
+        fallbackText,
     } = options;
+
+    // Default fallback text based on showTime
+    const defaultFallbackText = showTime
+        ? `dd${dateSeparator}mm${dateSeparator}yyyy, hr:mm (hiện tại)`
+        : `dd${dateSeparator}mm${dateSeparator}yyyy`;
+    const finalFallbackText = fallbackText || defaultFallbackText;
 
     // Handle null/undefined
     if (!date) {
-        return fallbackText;
+        return finalFallbackText;
     }
 
     // Convert to Date if string
@@ -55,37 +64,50 @@ export const formatDateTime = (
 
     // Validate date
     if (isNaN(dateObj.getTime())) {
-        return fallbackText;
+        return finalFallbackText;
     }
 
     const day = String(dateObj.getDate()).padStart(2, '0');
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const year = dateObj.getFullYear();
-    const hours = String(dateObj.getHours()).padStart(2, '0');
-    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
 
     // Build date part
     const datePart = `${day}${dateSeparator}${month}${dateSeparator}${year}`;
-    const timePart = `${hours}:${minutes}`;
 
     // Handle current label
     let currentLabel = '';
     if (showCurrentLabel === true) {
         currentLabel = ' (hiện tại)';
     } else if (showCurrentLabel === 'auto') {
-        // Only show "(hiện tại)" if date/time exactly matches current date/time (not just the day)
-        // This means if user changes the date/time, even if it's still today, it won't show "(hiện tại)"
         const now = new Date();
-        const isExactCurrentDateTime =
-            dateObj.getFullYear() === now.getFullYear() &&
-            dateObj.getMonth() === now.getMonth() &&
-            dateObj.getDate() === now.getDate() &&
-            dateObj.getHours() === now.getHours() &&
-            dateObj.getMinutes() === now.getMinutes();
-        currentLabel = isExactCurrentDateTime ? ' (hiện tại)' : '';
+        if (showTime) {
+            // Only show "(hiện tại)" if date/time exactly matches current date/time (not just the day)
+            const isExactCurrentDateTime =
+                dateObj.getFullYear() === now.getFullYear() &&
+                dateObj.getMonth() === now.getMonth() &&
+                dateObj.getDate() === now.getDate() &&
+                dateObj.getHours() === now.getHours() &&
+                dateObj.getMinutes() === now.getMinutes();
+            currentLabel = isExactCurrentDateTime ? ' (hiện tại)' : '';
+        } else {
+            // Only show "(hiện tại)" if date matches today
+            const isToday =
+                dateObj.getFullYear() === now.getFullYear() &&
+                dateObj.getMonth() === now.getMonth() &&
+                dateObj.getDate() === now.getDate();
+            currentLabel = isToday ? ' (hiện tại)' : '';
+        }
     }
 
-    return `${datePart}, ${timePart}${currentLabel}`;
+    // Build result based on showTime
+    if (showTime) {
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        const timePart = `${hours}:${minutes}`;
+        return `${datePart}, ${timePart}${currentLabel}`;
+    } else {
+        return `${datePart}${currentLabel}`;
+    }
 };
 
 /**

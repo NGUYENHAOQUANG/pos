@@ -18,6 +18,10 @@ import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import {
+    showAddJobSuccessToast,
+    showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 
 // Mock Data
 const MOCK_MATERIALS: IMaterial[] = [
@@ -90,6 +94,7 @@ export const HandleProblemScreen = () => {
                 i.id === item.id ? { ...i, time: timeString, date: dateString, ...jobData } : i
             );
             updatePondJob(pond.id, currentJobType, updatedItems);
+            showEditJobSuccessToast(currentJobType);
         } else {
             // CREATE
             let maxIndex = 0;
@@ -110,6 +115,7 @@ export const HandleProblemScreen = () => {
                 ...jobData,
             };
             updatePondJob(pond.id, currentJobType, [...currentItems, newItem]);
+            showAddJobSuccessToast(currentJobType);
         }
         navigation.goBack();
     };

@@ -1,13 +1,12 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import CalenderIcon from '@/assets/Icon/Calender.svg';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
     DropDownButton,
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { Aquaculture } from '@/features/menu/types/menu.types';
 import Toast from 'react-native-toast-message';
 
@@ -48,10 +47,6 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 : 'active'
         );
         const [note, setNote] = useState(initialValues?.note || '');
-
-        // Date Picker State
-        const [isStartDatePickerVisible, setStartDatePickerVisible] = useState(false);
-        const [isEndDatePickerVisible, setEndDatePickerVisible] = useState(false);
 
         useImperativeHandle(ref, () => ({
             submit: () => {
@@ -103,15 +98,6 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
             },
         }));
 
-        const formatDate = (date: Date | null) => {
-            if (!date) return 'dd/mm/yyyy';
-            return date.toLocaleDateString('vi-VN', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-            });
-        };
-
         return (
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 {/* Farm Selection */}
@@ -125,12 +111,14 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                         onSelect={setFarm}
                         placeholder="Chọn trại nuôi"
                         style={styles.dropdown}
+                        height={40}
+                        borderRadius={6}
                     />
                 </View>
 
                 {/* Cycle Name & Code */}
                 <View style={styles.row}>
-                    <View style={[styles.flex1, { marginRight: spacing.md }]}>
+                    <View style={styles.flex1}>
                         <Input
                             label="Tên vụ nuôi"
                             required
@@ -154,33 +142,30 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
 
                 {/* Start & End Date */}
                 <View style={styles.row}>
-                    <View style={[styles.flex1, { marginRight: spacing.md }]}>
-                        <Text style={styles.label}>
-                            Ngày bắt đầu <Text style={styles.required}>*</Text>
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.dateInput}
-                            onPress={() => setStartDatePickerVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[styles.dateText, !startDate && styles.placeholderText]}>
-                                {formatDate(startDate)}
-                            </Text>
-                            <CalenderIcon width={20} height={20} />
-                        </TouchableOpacity>
+                    <View style={styles.flex1}>
+                        <DateInputButton
+                            label="Ngày bắt đầu"
+                            date={startDate}
+                            onDateChange={setStartDate}
+                            required
+                            height={40}
+                            dateOnly
+                            formatOptions={{
+                                showCurrentLabel: false,
+                            }}
+                        />
                     </View>
                     <View style={styles.flex1}>
-                        <Text style={styles.label}>Ngày kết thúc</Text>
-                        <TouchableOpacity
-                            style={styles.dateInput}
-                            onPress={() => setEndDatePickerVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[styles.dateText, !endDate && styles.placeholderText]}>
-                                {formatDate(endDate)}
-                            </Text>
-                            <CalenderIcon width={20} height={20} />
-                        </TouchableOpacity>
+                        <DateInputButton
+                            label="Ngày kết thúc"
+                            date={endDate}
+                            onDateChange={setEndDate}
+                            height={40}
+                            dateOnly
+                            formatOptions={{
+                                showCurrentLabel: false,
+                            }}
+                        />
                     </View>
                 </View>
 
@@ -189,55 +174,54 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     <Text style={styles.label}>Chọn trạng thái</Text>
                     <View style={styles.radioGroup}>
                         <TouchableOpacity
-                            style={styles.radioButton}
+                            style={styles.radioItem}
                             onPress={() => setStatus('active')}
-                            activeOpacity={0.7}
+                            activeOpacity={0.8}
                         >
-                            <View style={styles.radioOuter}>
+                            <View
+                                style={[
+                                    styles.radioOuter,
+                                    status === 'active' && styles.radioOuterSelected,
+                                ]}
+                            >
                                 {status === 'active' && <View style={styles.radioInner} />}
                             </View>
-                            <Text style={styles.radioText}>Hoạt động</Text>
+                            <Text style={styles.radioLabel}>Hoạt động</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={styles.radioButton}
+                            style={styles.radioItem}
                             onPress={() => setStatus('ended')}
-                            activeOpacity={0.7}
+                            activeOpacity={0.8}
                         >
-                            <View style={styles.radioOuter}>
+                            <View
+                                style={[
+                                    styles.radioOuter,
+                                    status === 'ended' && styles.radioOuterSelected,
+                                ]}
+                            >
                                 {status === 'ended' && <View style={styles.radioInner} />}
                             </View>
-                            <Text style={styles.radioText}>Đã kết thúc</Text>
+                            <Text style={styles.radioLabel}>Đã kết thúc</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* Note */}
                 <View style={styles.fieldContainer}>
-                    <Input
-                        label="Ghi chú"
-                        value={note}
-                        onChangeText={setNote}
-                        placeholder="Nhập ghi chú"
-                        multiline
-                        numberOfLines={4}
-                        inputStyle={styles.textArea}
-                    />
+                    <Text style={styles.label}>Ghi chú</Text>
+                    <View style={styles.inputGroup}>
+                        <TextInput
+                            style={styles.textArea}
+                            placeholder="Nhập ghi chú"
+                            placeholderTextColor={colors.borderSubtle}
+                            value={note}
+                            onChangeText={setNote}
+                            multiline
+                            textAlignVertical="top"
+                        />
+                    </View>
                 </View>
-
-                {/* Date Picker Modals */}
-                <DatePickerModal
-                    visible={isStartDatePickerVisible}
-                    date={startDate || new Date()}
-                    onClose={() => setStartDatePickerVisible(false)}
-                    onSelectDate={setStartDate}
-                />
-                <DatePickerModal
-                    visible={isEndDatePickerVisible}
-                    date={endDate || new Date()}
-                    onClose={() => setEndDatePickerVisible(false)}
-                    onSelectDate={setEndDate}
-                />
             </ScrollView>
         );
     }
@@ -248,27 +232,40 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         flex: 1,
         paddingTop: spacing.sm,
+        shadowColor: colors.shadow,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 1,
     },
     content: {
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 12,
         backgroundColor: colors.white,
         flexGrow: 0,
+        gap: spacing.md,
     },
     fieldContainer: {
-        marginBottom: spacing.md,
+        gap: spacing.sm,
     },
     row: {
         flexDirection: 'row',
-        marginBottom: spacing.md, // Reduced since Input has its own margin, but carefully managed
+        marginBottom: 0,
+        gap: spacing.sm,
     },
     flex1: {
         flex: 1,
     },
     label: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
+        fontFamily: 'Nunito Sans',
+        fontSize: 14,
+        fontWeight: '400',
+        fontStyle: 'normal',
+        lineHeight: 22,
         color: colors.text,
-        marginBottom: spacing.sm,
     },
     required: {
         color: colors.error,
@@ -276,32 +273,24 @@ const styles = StyleSheet.create({
     dropdown: {
         zIndex: 100,
     },
-    dateInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        paddingHorizontal: spacing.md,
-        height: 48, // Match standard input height
-        backgroundColor: colors.white,
+    inputGroup: {
+        gap: spacing.sm,
     },
-    dateText: {
-        fontSize: typography.fontSize.base,
-        color: colors.text,
+    inputContainer: {
+        marginBottom: 0,
     },
-    placeholderText: {
-        color: colors.textTertiary,
+    inputBoxRadius: {
+        borderRadius: 6,
     },
     radioGroup: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         gap: spacing.xl,
-        marginTop: spacing.xs,
     },
-    radioButton: {
+    radioItem: {
         flexDirection: 'row',
         alignItems: 'center',
+        height: 22,
         gap: spacing.sm,
     },
     radioOuter: {
@@ -309,9 +298,12 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: 10,
         borderWidth: 2,
-        borderColor: colors.primary,
-        alignItems: 'center',
+        borderColor: colors.border,
         justifyContent: 'center',
+        alignItems: 'center',
+    },
+    radioOuterSelected: {
+        borderColor: colors.primary,
     },
     radioInner: {
         width: 10,
@@ -319,14 +311,29 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: colors.primary,
     },
-    radioText: {
-        fontSize: typography.fontSize.base,
+    radioLabel: {
+        fontSize: 14,
         color: colors.text,
-    },
-    textArea: {
-        height: 80,
+        fontWeight: '400',
+        lineHeight: 22,
     },
     noMarginBottom: {
         marginBottom: 0,
+    },
+    textArea: {
+        minHeight: 80,
+        paddingVertical: 5,
+        paddingHorizontal: 12,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 6,
+        fontSize: 16,
+        fontWeight: '400',
+        fontStyle: 'normal',
+        lineHeight: 24,
+        letterSpacing: 0,
+        color: colors.text,
+        textAlignVertical: 'top',
     },
 });

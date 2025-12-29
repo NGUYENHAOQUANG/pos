@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Modal,
-    TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -15,25 +9,23 @@ interface ConfirmSubmissProps {
     onConfirm: () => void;
 }
 
-export const ConfirmSubmiss: React.FC<ConfirmSubmissProps> = ({
-    visible,
-    onClose,
-    onConfirm,
-}) => {
+export const ConfirmSubmiss: React.FC<ConfirmSubmissProps> = ({ visible, onClose, onConfirm }) => {
     return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="fade"
-            onRequestClose={onClose}
-        >
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     {/* Header */}
                     <View style={styles.header}>
                         <Text style={styles.title}>Xác Nhận Gửi Phiếu Nhập Kho</Text>
-                        <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                            <Ionicons name="close" size={20} color={colors.textSecondary || '#999'} />
+                        <TouchableOpacity
+                            onPress={onClose}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            <Ionicons
+                                name="close"
+                                size={20}
+                                color={colors.textSecondary || '#999'}
+                            />
                         </TouchableOpacity>
                     </View>
 
@@ -44,16 +36,10 @@ export const ConfirmSubmiss: React.FC<ConfirmSubmissProps> = ({
 
                     {/* Footer / Buttons */}
                     <View style={styles.footer}>
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={onClose}
-                        >
+                        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                             <Text style={styles.cancelButtonText}>Không</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.confirmButton}
-                            onPress={onConfirm}
-                        >
+                        <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
                             <Text style={styles.confirmButtonText}>Đồng ý</Text>
                         </TouchableOpacity>
                     </View>
@@ -94,6 +80,8 @@ const styles = StyleSheet.create({
     content: {
         padding: spacing.lg,
         paddingVertical: spacing.xl,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
     },
     message: {
         fontSize: 14,
