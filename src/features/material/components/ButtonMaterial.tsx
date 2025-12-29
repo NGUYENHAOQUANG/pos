@@ -69,6 +69,23 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({
 
   return (
     <View style={styles.container}>
+      {/* Menu Overlay */}
+      {isOpen && (
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            top: -1000,
+            bottom: -1000,
+            left: -1000,
+            right: -1000,
+            backgroundColor: 'transparent',
+            zIndex: 98,
+          }}
+          onPress={toggleMenu}
+          activeOpacity={1}
+        />
+      )}
+
       {/* Menu Dropdown */}
       <Animated.View
         style={[
