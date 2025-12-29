@@ -38,7 +38,7 @@ interface JobConfig {
     defaultTitle: string;
 }
 
-const JOB_CONFIG: Record<JobType, JobConfig> = {
+export const JOB_CONFIG: Record<JobType, JobConfig> = {
     FEED: {
         icon: IconFeed,
         backgroundColor: colors.blue[50],
@@ -150,14 +150,19 @@ export const JobCard: React.FC<JobCardProps> = ({
                     <View style={styles.listContent}>
                         <Text style={styles.countText}>{items.length} lượt</Text>
                         {items.map((item, index) => (
-                            <View key={item.id || index} style={styles.itemRow}>
-                                <Text style={styles.itemText}>
-                                    {item.label} - {item.time}
-                                </Text>
-                                <TouchableOpacity onPress={() => onEditItem?.(item)}>
-                                    <AntDesign name="edit" size={18} color={colors.text} />
-                                </TouchableOpacity>
-                            </View>
+                            <React.Fragment key={item.id || index}>
+                                <View style={styles.itemRow}>
+                                    <Text style={styles.itemText}>
+                                        {item.label} - {item.time}
+                                    </Text>
+                                    <TouchableOpacity onPress={() => onEditItem?.(item)}>
+                                        <AntDesign name="edit" size={18} color={colors.text} />
+                                    </TouchableOpacity>
+                                </View>
+                                {items.length > 1 && index < items.length - 1 && (
+                                    <View style={styles.itemDivider} />
+                                )}
+                            </React.Fragment>
                         ))}
                     </View>
                 ) : (
@@ -252,5 +257,10 @@ const styles = StyleSheet.create({
         color: colors.text,
         lineHeight: 22,
         fontWeight: '400',
+    },
+    itemDivider: {
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginVertical: spacing.xs,
     },
 });

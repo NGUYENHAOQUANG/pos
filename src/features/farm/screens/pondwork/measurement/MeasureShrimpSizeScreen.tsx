@@ -139,7 +139,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         updatePondJob(currentPond.id, 'MEASURE_SIZE', relabeledItems);
 
         setIsDeleteModalVisible(false);
-        Toast.show({ type: 'success', text1: 'Đã xóa tác vụ thành công' });
+        Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
         navigation.goBack();
     };
 
@@ -212,7 +212,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: colors.backgroundPrimary,
     },
     header: {
         flexDirection: 'row',

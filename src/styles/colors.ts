@@ -31,6 +31,16 @@ export const colors = {
         800: '#1F2937',
         900: '#111827',
     },
+    volcano: {
+        1: '#FFF2E8',
+        3: '#FFBB96',
+        6: '#FA541C',
+    },
+    magenta: {
+        1: '#FFF0F6',
+        3: '#FFADD2',
+        6: '#EB2F96',
+    },
     cyan: {
         50: '#E6FFFB',
     },
@@ -42,6 +52,11 @@ export const colors = {
         600: '#1677FF',
         700: '#003EB3',
         800: '#061178',
+    },
+    geekblue: {
+        1: '#F0F5FF',
+        3: '#ADC6FF',
+        6: '#2F54EB',
     },
     orange: {
         50: '#FFF2E8',
