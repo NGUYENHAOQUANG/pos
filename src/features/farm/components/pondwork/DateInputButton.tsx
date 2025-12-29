@@ -61,102 +61,122 @@ import { formatDateTime, FormatDateTimeOptions } from '@/features/farm/utils/dat
  *   onDateChange={setSelectedDate}
  *   height={44}
  * />
+ *
+ * @example
+ * // Date only format (dd/mm/yyyy)
+ * <DateInputButton
+ *   label="Ngày bắt đầu"
+ *   date={selectedDate}
+ *   onDateChange={setSelectedDate}
+ *   dateOnly
+ * />
  */
 interface DateInputButtonProps {
-  /** Label text displayed above the input button */
-  label?: string;
-  /** Date value (Date object, ISO string, or null/undefined for empty) */
-  date?: Date | string | null | undefined;
-  /** Callback when date is selected/changed */
-  onDateChange?: (date: Date) => void;
-  /** Optional: Custom date text to display (overrides date formatting) */
-  dateText?: string;
-  /** Optional: Formatting options for date display (see FormatDateTimeOptions) */
-  formatOptions?: FormatDateTimeOptions;
-  /** Whether to show required indicator (*) */
-  required?: boolean;
-  /** Height of the input button (default: 40) */
-  height?: number;
+    /** Label text displayed above the input button */
+    label?: string;
+    /** Date value (Date object, ISO string, or null/undefined for empty) */
+    date?: Date | string | null | undefined;
+    /** Callback when date is selected/changed */
+    onDateChange?: (date: Date) => void;
+    /** Optional: Custom date text to display (overrides date formatting) */
+    dateText?: string;
+    /** Optional: Formatting options for date display (see FormatDateTimeOptions) */
+    formatOptions?: FormatDateTimeOptions;
+    /** Whether to show only date (dd/mm/yyyy) without time. Default: false */
+    dateOnly?: boolean;
+    /** Whether to show required indicator (*) */
+    required?: boolean;
+    /** Height of the input button (default: 40) */
+    height?: number;
 }
 
 export const DateInputButton: React.FC<DateInputButtonProps> = ({
-  label,
-  date,
-  onDateChange,
-  dateText: customDateText,
-  formatOptions,
-  required = false,
-  height = 40,
+    label,
+    date,
+    onDateChange,
+    dateText: customDateText,
+    formatOptions,
+    dateOnly = false,
+    required = false,
+    height = 40,
 }) => {
-  const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
-  // Determine the current date for the picker
-  const currentDate = date instanceof Date ? date : date ? new Date(date) : new Date();
+    // Determine the current date for the picker
+    const currentDate = date instanceof Date ? date : date ? new Date(date) : new Date();
 
-  // Format date text
-  const displayText =
-    customDateText !== undefined ? customDateText : formatDateTime(date || null, formatOptions);
+    // Merge formatOptions with dateOnly option
+    const finalFormatOptions: FormatDateTimeOptions = {
+        ...formatOptions,
+        showTime: dateOnly ? false : formatOptions?.showTime ?? true,
+    };
 
-  const handleDateSelect = (selectedDate: Date) => {
-    onDateChange?.(selectedDate);
-    setIsDatePickerVisible(false);
-  };
+    // Format date text
+    const displayText =
+        customDateText !== undefined
+            ? customDateText
+            : formatDateTime(date || null, finalFormatOptions);
 
-  return (
-    <>
-      <View style={styles.inputGroup}>
-        {label && (
-          <Text style={styles.label}>
-            {required && <Text style={styles.required}>* </Text>}
-            {label}
-          </Text>
-        )}
-        <TouchableOpacity
-          style={[styles.dateInput, { height }]}
-          onPress={() => setIsDatePickerVisible(true)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.dateText}>{displayText}</Text>
-          <IconCalender width={15} height={15} />
-        </TouchableOpacity>
-      </View>
+    const handleDateSelect = (selectedDate: Date) => {
+        onDateChange?.(selectedDate);
+        setIsDatePickerVisible(false);
+    };
 
-      <DatePickerModal
-        visible={isDatePickerVisible}
-        onClose={() => setIsDatePickerVisible(false)}
-        date={currentDate}
-        onSelectDate={handleDateSelect}
-      />
-    </>
-  );
+    return (
+        <>
+            <View style={styles.inputGroup}>
+                {label && (
+                    <Text style={styles.label}>
+                        {required && <Text style={styles.required}>* </Text>}
+                        {label}
+                    </Text>
+                )}
+                <TouchableOpacity
+                    style={[styles.dateInput, { height }]}
+                    onPress={() => setIsDatePickerVisible(true)}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.dateText}>{displayText}</Text>
+                    <IconCalender width={15} height={15} />
+                </TouchableOpacity>
+            </View>
+
+            <DatePickerModal
+                visible={isDatePickerVisible}
+                onClose={() => setIsDatePickerVisible(false)}
+                date={currentDate}
+                onSelectDate={handleDateSelect}
+            />
+        </>
+    );
 };
 
 const styles = StyleSheet.create({
-  inputGroup: {
-    gap: spacing.sm,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: colors.text,
-    lineHeight: 22,
-  },
-  required: {
-    color: colors.error,
-  },
-  dateInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 6,
-  },
-  dateText: {
-    fontSize: 14,
-    color: colors.text,
-    flex: 1,
-  },
+    inputGroup: {
+        gap: spacing.sm,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.text,
+        lineHeight: 22,
+    },
+    required: {
+        color: colors.error,
+    },
+    dateInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 6,
+    },
+    dateText: {
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+    },
 });

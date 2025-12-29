@@ -44,6 +44,22 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
     const [quantity, setQuantity] = useState('');
     const [selectedUnit, setSelectedUnit] = useState<DropDownItem | undefined>();
 
+    // Reset form when modal closes
+    useEffect(() => {
+        if (!isVisible) {
+            setSelectedMaterial(undefined);
+            setQuantity('');
+            setSelectedUnit(undefined);
+        }
+    }, [isVisible]);
+
+    // Initialize default unit when modal opens
+    useEffect(() => {
+        if (isVisible && !selectedUnit && units.length > 0) {
+            setSelectedUnit(units[0]);
+        }
+    }, [isVisible, units, selectedUnit]);
+
     // Auto-fill unit based on selected material
     useEffect(() => {
         if (selectedMaterial && selectedMaterial.unit) {
