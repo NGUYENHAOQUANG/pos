@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         borderRadius: 16,
-        paddingVertical: 20,
+        paddingVertical: spacing.md,
         alignItems: 'center',
         shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 4 },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
     },
     logoWrapper: {
-        marginBottom: 8,
+        marginBottom: spacing.md,
         paddingHorizontal: 24,
     },
     title: {
