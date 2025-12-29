@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
@@ -8,12 +8,13 @@ import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { JobExecution } from '@/features/farm/types/farm.types';
+import { JobExecution, CycleData } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import Toast from 'react-native-toast-message';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
+import { parseDate } from '@/features/farm/utils/dateUtils';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -29,7 +30,8 @@ const JOB_TYPES = {
     HARVEST: 'HARVEST' as const,
 };
 
-const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
+// Common jobs - dùng cho cả ao vèo và ao nuôi
+const COMMON_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.FEED, items: [] },
     { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
     { type: JOB_TYPES.MEASURE_SIZE, items: [] },
@@ -37,9 +39,15 @@ const JOB_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.WATER_TREATMENT, items: [] },
     { type: JOB_TYPES.WATER_CHANGE, items: [] },
     { type: JOB_TYPES.SIPHON, items: [] },
-    { type: JOB_TYPES.TRANSFER_POND, items: [] },
     { type: JOB_TYPES.CLEAN_POND, items: [] },
     { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+];
+
+const NURSERY_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.TRANSFER_POND, items: [] },
+];
+
+const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
@@ -54,8 +62,30 @@ export const ShrimpFarmScreens: React.FC = () => {
     const [selectedTab, setSelectedTab] = useState<string>('work');
     const { setTabBarVisible } = useTabBarVisibility();
 
-    const { getPondJobItems, updatePondJob, activeCycles, breedOptions } = useFarm();
-    const currentCycle = pond?.id ? activeCycles[pond.id] : null;
+    const { getPondJobItems, updatePondJob, activeCycles, breedOptions, getCyclesByPondId } =
+        useFarm();
+
+    // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
+    const foundCycle = useMemo(() => {
+        if (!pond?.id) return null;
+        const cyclesForPond = getCyclesByPondId(pond.id);
+        if (cyclesForPond.length === 0) return null;
+
+        // Tìm chu kỳ có ao này trong receivingPonds trước (ao nhận = ao chính)
+        const cycleInReceiving = cyclesForPond.find(cycle =>
+            cycle.receivingPonds?.includes(pond.id)
+        );
+        if (cycleInReceiving) return cycleInReceiving;
+
+        // Nếu không có, lấy chu kỳ đầu tiên (ao nguồn)
+        return cyclesForPond[0] || null;
+    }, [pond?.id, getCyclesByPondId]);
+
+    // Ưu tiên chu kỳ từ activeCycles, nếu không có thì dùng từ cycles
+    const currentCycle: CycleData | null = useMemo(() => {
+        const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
+        return currentCycleData || foundCycle;
+    }, [pond?.id, activeCycles, foundCycle]);
 
     const [hasCycleBefore, setHasCycleBefore] = useState(!!currentCycle);
 
@@ -81,10 +111,31 @@ export const ShrimpFarmScreens: React.FC = () => {
             setHasCycleBefore(false);
         }
     }, [currentCycle, hasCycleBefore]);
-    const jobs = JOB_TEMPLATE.map(template => ({
-        ...template,
-        items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
-    }));
+
+    // Chọn template dựa vào loại ao và tạo jobs
+    const jobs = useMemo(() => {
+        let jobTemplate: { type: JobType; items: never[] }[];
+
+        if (!pond?.type) {
+            jobTemplate = COMMON_JOBS_TEMPLATE;
+        } else {
+            switch (pond.type) {
+                case 'Ao vèo':
+                    jobTemplate = [...COMMON_JOBS_TEMPLATE, ...NURSERY_POND_JOBS_TEMPLATE];
+                    break;
+                case 'Ao nuôi':
+                    jobTemplate = [...COMMON_JOBS_TEMPLATE, ...CULTIVATION_POND_JOBS_TEMPLATE];
+                    break;
+                default:
+                    jobTemplate = COMMON_JOBS_TEMPLATE;
+            }
+        }
+
+        return jobTemplate.map(template => ({
+            ...template,
+            items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
+        }));
+    }, [pond?.type, pond?.id, getPondJobItems]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -95,7 +146,12 @@ export const ShrimpFarmScreens: React.FC = () => {
 
     const calculateDOC = (startDateString: string | null | undefined) => {
         if (!startDateString) return 0;
-        const start = new Date(startDateString);
+        // Parse date: if string contains "/", it's dd/mm/yyyy format, use parseDate
+        // Otherwise, it's ISO string, use new Date()
+        const start =
+            typeof startDateString === 'string' && startDateString.includes('/')
+                ? parseDate(startDateString)
+                : new Date(startDateString);
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - start.getTime());
         return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
@@ -146,7 +202,50 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
 
         if (type === JOB_TYPES.TRANSFER_POND) {
-            navigation.navigate('AddTransferScreen', { pond });
+            // Get latest shrimp size from MEASURE_SIZE jobs
+            const measureSizeItems = getPondJobItems(pond.id, 'MEASURE_SIZE');
+            let latestShrimpSize: string | undefined = undefined;
+
+            if (measureSizeItems.length > 0) {
+                // Sort by date (newest first), then by time (newest first)
+                const sorted = [...measureSizeItems].sort((a, b) => {
+                    const dateA = a.date ? parseDate(a.date) : new Date(0);
+                    const dateB = b.date ? parseDate(b.date) : new Date(0);
+
+                    if (dateA.getTime() !== dateB.getTime()) {
+                        return dateB.getTime() - dateA.getTime(); // Newest first
+                    }
+
+                    // If same date, sort by time (newest first)
+                    const timeA = a.time || '00:00';
+                    const timeB = b.time || '00:00';
+                    const [hoursA, minutesA] = timeA.split(':').map(Number);
+                    const [hoursB, minutesB] = timeB.split(':').map(Number);
+                    const totalMinutesA = hoursA * 60 + minutesA;
+                    const totalMinutesB = hoursB * 60 + minutesB;
+
+                    return totalMinutesB - totalMinutesA; // Newest first
+                });
+
+                const latestItem = sorted[0];
+                const latestMeta = latestItem?.meta as { shrimpSize?: string } | undefined;
+                latestShrimpSize = latestMeta?.shrimpSize;
+            }
+
+            // Get cycle data for current pond
+            const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
+            const cyclesForPond = getCyclesByPondId(pond.id);
+            const cycleData =
+                currentCycleData ||
+                cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
+                cyclesForPond[0] ||
+                null;
+
+            navigation.navigate('AddTransferScreen', {
+                pond,
+                latestShrimpSize,
+                cycleData,
+            });
             return;
         }
 
@@ -340,15 +439,9 @@ export const ShrimpFarmScreens: React.FC = () => {
                                 <View style={styles.cycleCardWrapper}>
                                     <CycleCard
                                         cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                                        startDate={
-                                            currentCycle.stockingDate
-                                                ? new Date(
-                                                      currentCycle.stockingDate
-                                                  ).toLocaleDateString('vi-VN')
-                                                : ''
-                                        }
-                                        doc={calculateDOC(currentCycle.stockingDate)}
-                                        stockingQuantity={currentCycle.stockingQuantity || 0}
+                                        startDate={currentCycle?.stockingDate ?? ''}
+                                        doc={calculateDOC(currentCycle?.stockingDate ?? '')}
+                                        stockingQuantity={currentCycle?.stockingQuantity || 0}
                                         breed={
                                             breedOptions.find(
                                                 b => b.value === currentCycle.breedSource

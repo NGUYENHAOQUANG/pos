@@ -30,7 +30,14 @@ export const AddHarvestScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob, deleteActiveCycle } = useFarm();
+    const {
+        getPondJobItems,
+        updatePondJob,
+        deleteActiveCycle,
+        deleteCycle,
+        activeCycles,
+        getCyclesByPondId,
+    } = useFarm();
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
@@ -152,7 +159,31 @@ export const AddHarvestScreen: React.FC = () => {
 
         // Nếu là "Đóng chu kỳ", xóa chu kỳ hiện tại trước khi lưu
         if (currentType === 'harvest_close_cycle' && pond?.id) {
-            deleteActiveCycle(pond.id);
+            // Tìm cycle đang active cho pond này
+            const currentCycle = activeCycles[pond.id];
+            const cyclesForPond = getCyclesByPondId(pond.id);
+
+            // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
+            const cycleToDelete =
+                currentCycle ||
+                cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
+                cyclesForPond[0];
+
+            if (cycleToDelete && cycleToDelete.id) {
+                // Xóa cycle khỏi cycles array
+                deleteCycle(cycleToDelete.id);
+
+                // Tìm tất cả các ponds có cycle này trong activeCycles và xóa chúng
+                Object.keys(activeCycles).forEach(pondId => {
+                    const cycleInActive = activeCycles[pondId];
+                    if (cycleInActive && cycleInActive.id === cycleToDelete.id) {
+                        deleteActiveCycle(pondId);
+                    }
+                });
+            } else {
+                // Fallback: xóa cycle của pond hiện tại
+                deleteActiveCycle(pond.id);
+            }
         }
 
         handleSave();
