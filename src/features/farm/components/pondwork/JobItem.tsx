@@ -38,7 +38,7 @@ interface JobConfig {
     defaultTitle: string;
 }
 
-const JOB_CONFIG: Record<JobType, JobConfig> = {
+export const JOB_CONFIG: Record<JobType, JobConfig> = {
     FEED: {
         icon: IconFeed,
         backgroundColor: colors.blue[50],

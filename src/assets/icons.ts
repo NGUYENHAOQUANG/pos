@@ -33,5 +33,7 @@ export { default as IconDryingThePond } from '@/assets/Icon/IconFarm/DryingThePo
 export { default as IconHarvest } from '@/assets/Icon/IconFarm/Harvest.svg';
 export { default as IconPond } from '@/assets/Icon/IconFarm/Pond.svg';
 export { default as IconError } from '@/assets/Icon/IconFarm/IconError.svg';
+export { default as IconFilter } from '@/assets/Icon/IconFarm/Filter.svg';
+export { default as IconFilterActive } from '@/assets/Icon/IconFarm/FilterActive.svg';
 
 export { default as IconCalender } from '@/assets/Icon/Calender.svg';
