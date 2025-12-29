@@ -34,6 +34,9 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
   const [searchText, setSearchText] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+
+
   const [materialGroup, setMaterialGroup] = useState('');
   const [voteStatus, setVoteStatus] = useState('');
 
@@ -90,7 +93,10 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         <View style={styles.expandedContent}>
           {selectedTab === 'history' && (
             <View style={styles.dropdownWrapper}>
-              <DropdownVoteStatus value={voteStatus} onChange={setVoteStatus} />
+              <DropdownVoteStatus
+                value={voteStatus}
+                onChange={setVoteStatus}
+              />
             </View>
           )}
           <View style={styles.dropdownWrapper}>
@@ -100,6 +106,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                 setMaterialGroup(value);
                 onGroupChange?.(value);
               }}
+              isOpen={isGroupDropdownOpen}
+              onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
             />
           </View>
         </View>
@@ -156,8 +164,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E6F7FF', // Light blue background when active
   },
   expandedContent: {
-    marginTop: spacing.md, 
-    marginBottom: spacing['2xl'], 
+    marginTop: spacing.md,
+    marginBottom: spacing['2xl'],
     flexDirection: 'row',
     gap: spacing.md,
     zIndex: 100, // Ensure dropdowns sit on top
