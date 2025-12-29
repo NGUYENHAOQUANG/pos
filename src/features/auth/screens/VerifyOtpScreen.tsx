@@ -7,6 +7,7 @@ import {
     View,
     KeyboardAvoidingView,
     TouchableOpacity,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -33,7 +34,26 @@ export default function VerifyOTPScreen() {
     const otpInputRef = useRef<OTPInputHandle>(null);
 
     const isError = !!errorMessage;
+    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+    useEffect(() => {
+        const keyboardShowListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            () => {
+                setKeyboardVisible(true);
+            }
+        );
+        const keyboardHideListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+            () => {
+                setKeyboardVisible(false);
+            }
+        );
 
+        return () => {
+            keyboardHideListener.remove();
+            keyboardShowListener.remove();
+        };
+    }, []);
     useEffect(() => {
         let timer: ReturnType<typeof setInterval>;
         if (countdown > 0) {
@@ -87,9 +107,11 @@ export default function VerifyOTPScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
-            </TouchableOpacity>
+            {!isKeyboardVisible && (
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+            )}
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}

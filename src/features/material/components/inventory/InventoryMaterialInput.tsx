@@ -79,7 +79,7 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
                                 diff < 0 ? styles.footerValueNegative : styles.footerValuePositive,
                             ]}
                         >
-                            {diff > 0 ? `+${diff}` : diff}
+                            {diff > 0 ? `${diff}` : diff}
                         </Text>
                     </View>
                 </View>
