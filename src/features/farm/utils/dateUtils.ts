@@ -33,7 +33,7 @@ export interface FormatDateTimeOptions {
     showTime?: boolean;
     /** Show "(hiện tại)" label: true (always), false (never), 'auto' (only if today). Default: 'auto' */
     showCurrentLabel?: boolean | 'auto';
-    /** Fallback text when date is null/undefined. Default: 'dd-mm-yyyy, hr:mm (hiện tại)' or 'dd-mm-yyyy' based on showTime */
+    /** Fallback text when date is null/undefined. Default: 'dd/mm/yyyy, hr:mm (hiện tại)' or 'dd/mm/yyyy' based on showTime */
     fallbackText?: string;
 }
 

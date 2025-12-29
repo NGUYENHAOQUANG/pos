@@ -152,11 +152,11 @@ export const WaterSupplyScreen = () => {
         if (!pond?.id) return;
 
         const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
-        const timeString = selectedDate.toLocaleTimeString('en-GB', {
+        const timeString = selectedDate.toLocaleTimeString('vi-VN', {
             hour: '2-digit',
             minute: '2-digit',
         });
-        const dateString = selectedDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+        const dateString = selectedDate.toLocaleDateString('vi-VN'); // dd/mm/yyyy
 
         const itemData = {
             time: timeString,

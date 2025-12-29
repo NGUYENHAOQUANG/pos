@@ -204,7 +204,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                 </View>
 
                 {/* Permissions Section */}
-                <View style={styles.section}>
+                <View style={[styles.section, { marginBottom: 0 }]}>
                     <View style={styles.rowBetween}>
                         <Text style={styles.label}>
                             <Text style={styles.required}>* </Text>Quyền thao tác
@@ -238,7 +238,12 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                     </View>
 
                     <View style={styles.permissionsList}>
-                        {PERMISSIONS.map(permission => {
+                        {PERMISSIONS.filter(p => {
+                            if (managementLevel === 'pond') {
+                                return ['task_execution', 'iot_control'].includes(p.id);
+                            }
+                            return true;
+                        }).map(permission => {
                             const isSelected = selectedPermissions.includes(permission.id);
                             return (
                                 <TouchableOpacity

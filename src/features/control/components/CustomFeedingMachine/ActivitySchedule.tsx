@@ -142,6 +142,8 @@ export default function ActivitySchedule({ schedules, onUpdateSchedules }: Activ
                                 </TouchableOpacity>
                             </View>
 
+                            <View style={styles.modalSeparator} />
+
                             {/* Body Modal */}
                             <View style={styles.modalBody}>
                                 <View style={styles.halfInput}>
@@ -149,7 +151,7 @@ export default function ActivitySchedule({ schedules, onUpdateSchedules }: Activ
                                         label="Bắt đầu"
                                         value={tempStartTime}
                                         onChange={setTempStartTime}
-                                        placeholder="Chọn giờ"
+                                        placeholder="Chọn thời gian"
                                     />
                                 </View>
 
@@ -160,10 +162,12 @@ export default function ActivitySchedule({ schedules, onUpdateSchedules }: Activ
                                         label="Kết thúc"
                                         value={tempEndTime}
                                         onChange={setTempEndTime}
-                                        placeholder="Chọn giờ"
+                                        placeholder="Chọn thời gian"
                                     />
                                 </View>
                             </View>
+
+                            <View style={styles.modalSeparator} />
 
                             {/* Footer Modal */}
                             <View style={styles.modalFooter}>
@@ -267,16 +271,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
         paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
     },
     modalTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-    modalBody: { flexDirection: 'row', marginBottom: 24 },
+    modalBody: { flexDirection: 'row', marginTop: 16, marginBottom: 16 },
     halfInput: { flex: 1 },
     spacer12: { width: 12 },
-    modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+    modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, paddingTop: 16 },
     btnModalCancel: {
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -285,12 +286,17 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         backgroundColor: colors.white,
     },
-    txtModalCancel: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },
+    txtModalCancel: { fontSize: 14, fontWeight: '400', color: colors.text },
     btnModalConfirm: {
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,
         backgroundColor: colors.primary,
     },
-    txtModalConfirm: { fontSize: 14, fontWeight: '600', color: colors.white },
+    txtModalConfirm: { fontSize: 14, fontWeight: '400', color: colors.white },
+    modalSeparator: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+    },
 });

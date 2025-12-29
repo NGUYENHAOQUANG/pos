@@ -18,7 +18,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface InventoryGeneralInfoProps {
-    date: string; // Định dạng hiển thị 'YYYY-MM-DD'
+    date: string; // Định dạng hiển thị 'dd/mm/yyyy'
     note: string;
     onDatePress: () => void;
     onNoteChange: (text: string) => void;

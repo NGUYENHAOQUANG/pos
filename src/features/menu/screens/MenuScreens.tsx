@@ -86,7 +86,7 @@ export const MenuScreens: React.FC = () => {
                 />
             </View>
 
-            <View style={[styles.safeArea, { paddingTop: insets.top }]}>
+            <View style={[styles.safeArea, { paddingTop: insets.top + 22 }]}>
                 <View style={styles.headerTitleContainer}>
                     <Text style={styles.headerTitle}>Menu</Text>
                 </View>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        height: 300, // Adjust based on SVG height aspect ratio
+        height: 300,
     },
     safeArea: {
         flex: 1,
