@@ -84,6 +84,8 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
                         titleStyle,
                     ]}
                     numberOfLines={1}
+                    adjustsFontSizeToFit={true} // Bật tính năng tự co giãn
+                    minimumFontScale={0.99}
                 >
                     {title}
                 </Text>
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: '700',
         color: colors.text,
     },
     titleCenter: {

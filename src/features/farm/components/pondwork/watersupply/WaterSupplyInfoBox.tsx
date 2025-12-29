@@ -5,13 +5,10 @@ import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
 interface WaterSupplyInfoBoxProps {
-    // Inputs
     targetLevel: string;
     onTargetLevelChange: (val: string) => void;
     supplyLevel: string;
     onSupplyLevelChange: (val: string) => void;
-
-    // Read-only calculated values (giả định được tính toán từ parent hoặc API)
     drainLevel?: string | number;
     volumeAfterDrain?: string | number;
     volumeSupply?: string | number;
@@ -28,7 +25,6 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
     volumeSupply = '-',
     volumeAfterSupply = '-',
 }) => {
-    // Build result items
     const resultItems: ResultItem[] = [
         { label: 'Mực nước xả xuống (cm)', value: drainLevel },
         { label: 'Thể tích sau xả (m³)', value: volumeAfterDrain },
@@ -38,9 +34,8 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
 
     return (
         <PondDataBox title="Mực nước và thể tích" resultItems={resultItems}>
-            {/* Input Row */}
             <View style={styles.rowInput}>
-                <View style={styles.colInput}>
+                <View style={styles.colInputLeft}>
                     <FarmInput
                         label="Mực nước mục tiêu (cm)"
                         value={targetLevel}
@@ -49,8 +44,10 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         required
                     />
                 </View>
+
                 <View style={styles.colGap} />
-                <View style={styles.colInput}>
+
+                <View style={styles.colInputRight}>
                     <FarmInput
                         label="Số cm cấp"
                         value={supplyLevel}
@@ -68,8 +65,11 @@ const styles = StyleSheet.create({
     rowInput: {
         flexDirection: 'row',
     },
-    colInput: {
-        flex: 1,
+    colInputLeft: {
+        flex: 2,
+    },
+    colInputRight: {
+        flex: 1.9,
     },
     colGap: {
         width: spacing.sm,
