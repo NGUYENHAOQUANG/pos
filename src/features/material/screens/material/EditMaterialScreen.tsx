@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        padding: spacing.md,
+        paddingVertical: spacing.md,
     },
     footer: {
         padding: spacing.md,
