@@ -9,6 +9,7 @@ import { IMaterial } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
+import { showValidationError } from '../../utils/validationToast';
 
 interface AddMaterialScreenProps {
     // onBack?: () => void;
@@ -87,6 +88,24 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         borderTopColor: colors.border,
                     }}
                     onPrimaryPress={() => {
+                        // Validation
+                        if (!name.trim()) {
+                            showValidationError('Vui lòng nhập tên vật tư');
+                            return;
+                        }
+                        if (!group) {
+                            showValidationError('Vui lòng chọn nhóm vật tư');
+                            return;
+                        }
+                        if (!type) {
+                            showValidationError('Vui lòng chọn loại vật tư');
+                            return;
+                        }
+                        if (!unit) {
+                            showValidationError('Vui lòng chọn đơn vị tính');
+                            return;
+                        }
+
                         onSave?.({
                             name,
                             group,

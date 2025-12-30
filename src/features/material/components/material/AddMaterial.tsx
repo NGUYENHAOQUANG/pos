@@ -232,7 +232,6 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 const styles = StyleSheet.create({
     sectionContainer: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
         marginBottom: spacing.md,
         zIndex: 10,
         ...Platform.select({

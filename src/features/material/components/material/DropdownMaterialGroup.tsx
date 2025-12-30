@@ -23,6 +23,7 @@ interface DropdownMaterialProps {
     placeholder?: string;
     dropdownStyle?: ViewStyle;
     showAllOption?: boolean;
+    inline?: boolean;
     isOpen: boolean;
     onToggle: () => void;
 }
@@ -45,6 +46,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     showAllOption = true,
     isOpen,
     onToggle,
+    inline = false,
 }) => {
     const displayOptions = showAllOption
         ? options
@@ -54,7 +56,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
-        if (isOpen && buttonRef.current) {
+        if (!inline && isOpen && buttonRef.current) {
             buttonRef.current.measure(
                 (fx: number, fy: number, width: number, height: number, px: number, py: number) => {
                     const statusBarHeight =
@@ -67,7 +69,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 }
             );
         }
-    }, [isOpen]);
+    }, [isOpen, inline]);
 
     const handleSelect = (option: string) => {
         onChange?.(option);
@@ -92,6 +94,26 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         width: dropdownCoords.width,
     };
 
+    const dropdownList = (
+        <View
+            style={[
+                styles.dropdown,
+                inline ? styles.dropdownInline : [dropdownStyle, dynamicDropdownStyle],
+            ]}
+        >
+            <FlatList
+                data={displayOptions}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={renderItem}
+                nestedScrollEnabled={true}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={true}
+                indicatorStyle="black"
+            />
+        </View>
+    );
+
     return (
         <View style={styles.container}>
             {label && (
@@ -110,32 +132,29 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 <Text style={[styles.text, !value && styles.placeholderText]}>
                     {value || placeholder}
                 </Text>
-                <Ionicons name="chevron-down" size={20} color={colors.textSecondary || '#999'} />
+                <Ionicons
+                    name={isOpen ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={colors.textSecondary || '#999'}
+                />
             </TouchableOpacity>
 
-            <Modal
-                visible={isOpen}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={onToggle}
-            >
-                <TouchableWithoutFeedback onPress={onToggle}>
-                    <View style={styles.modalOverlay}>
-                        <View style={[styles.dropdown, dropdownStyle, dynamicDropdownStyle]}>
-                            <FlatList
-                                data={displayOptions}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={renderItem}
-                                nestedScrollEnabled={true}
-                                keyboardShouldPersistTaps="handled"
-                                contentContainerStyle={styles.scrollContent}
-                                showsVerticalScrollIndicator={true}
-                                indicatorStyle="black"
-                            />
-                        </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+            {/* Inline Dropdown */}
+            {inline && isOpen && dropdownList}
+
+            {/* Modal Dropdown */}
+            {!inline && (
+                <Modal
+                    visible={isOpen}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={onToggle}
+                >
+                    <TouchableWithoutFeedback onPress={onToggle}>
+                        <View style={styles.modalOverlay}>{dropdownList}</View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            )}
         </View>
     );
 };
@@ -189,4 +208,11 @@ const styles = StyleSheet.create({
     itemSelected: { backgroundColor: '#F3F4F6' },
     itemText: { fontSize: 14, color: colors.text },
     itemTextSelected: { fontWeight: '500', color: colors.text },
+    dropdownInline: {
+        position: 'relative',
+        width: '100%',
+        marginTop: spacing.xs,
+        elevation: 0,
+        shadowOpacity: 0,
+    },
 });
