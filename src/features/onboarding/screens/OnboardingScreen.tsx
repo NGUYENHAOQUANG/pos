@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingTop: 24,
+        paddingTop: 34,
         width: SCREEN_WIDTH,
     },
     logoContainer: {
@@ -242,8 +242,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
         textAlign: 'center',
-        marginBottom: 12, // Khoảng cách giữa Tiêu đề và Mô tả
-        lineHeight: 32, // Tăng chiều cao dòng cho tiêu đề dễ đọc
+        marginBottom: 12,
+        lineHeight: 32,
     },
     slideDescription: {
         fontSize: 16,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
 
     // Layer spacer
     spacer: {
-        flex: SCREEN_HEIGHT < 800 ? 0.75 : 1, // Responsive adjustment
+        flex: SCREEN_HEIGHT < 800 ? 0.75 : 1.2, // Responsive adjustment
         backgroundColor: 'transparent',
     },
 
