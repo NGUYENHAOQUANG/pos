@@ -9,7 +9,7 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import CalenderIcon from '@/assets/Icon/Calender.svg';
 import { CollapseHead } from '../../components/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -18,10 +18,12 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface InventoryGeneralInfoProps {
-    date: string; // Định dạng hiển thị 'dd/mm/yyyy'
+    date: string; // Định dạng hiển thị 'dd/mm/yyyy' (Ngày kiểm kê)
     note: string;
     onDatePress: () => void;
     onNoteChange: (text: string) => void;
+    materialGroup?: string;
+    createdDate?: string;
 }
 
 export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
@@ -29,6 +31,8 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     note,
     onDatePress,
     onNoteChange,
+    materialGroup = '---',
+    createdDate = '',
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -50,10 +54,10 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
             {isExpanded && (
                 <View style={styles.body}>
                     {/* Read-only info rows */}
-                    <InfoRow label="Kho" value="{Tên trại nuôi}" />
-                    <InfoRow label="Ngày tạo phiếu:" value="11:00 28/11/2025" />
+                    <InfoRow label="Kho" value="Trại Kiên Giang" />
+                    <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
                     <InfoRow label="Người tạo phiếu:" value="Nguyễn Phương Duy" />
-                    <InfoRow label="Nhóm vật tư" value="Nuôi" isLast />
+                    <InfoRow label="Nhóm vật tư" value={materialGroup} isLast />
 
                     {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
                     <View style={styles.inputGroup}>
@@ -66,11 +70,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                             activeOpacity={0.7}
                         >
                             <Text style={styles.inputText}>{date}</Text>
-                            <Ionicons
-                                name="calendar-outline"
-                                size={20}
-                                color={colors.textTertiary}
-                            />
+                            <CalenderIcon width={20} height={20} />
                         </TouchableOpacity>
                     </View>
 
@@ -106,7 +106,6 @@ const InfoRow = ({ label, value, isLast }: { label: string; value: string; isLas
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
 
         ...Platform.select({
             ios: {
