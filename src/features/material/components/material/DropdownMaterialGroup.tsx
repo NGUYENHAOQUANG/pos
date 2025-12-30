@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -7,6 +7,9 @@ import {
     Platform,
     ViewStyle,
     FlatList,
+    Modal,
+    TouchableWithoutFeedback,
+    StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -47,6 +50,25 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         ? options
         : options.filter(option => option !== 'Tất cả nhóm vật tư');
 
+    const buttonRef = useRef<View>(null);
+    const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0, width: 0 });
+
+    useEffect(() => {
+        if (isOpen && buttonRef.current) {
+            buttonRef.current.measure(
+                (fx: number, fy: number, width: number, height: number, px: number, py: number) => {
+                    const statusBarHeight =
+                        Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
+                    setDropdownCoords({
+                        top: py + height - statusBarHeight + 2,
+                        left: px,
+                        width: width,
+                    });
+                }
+            );
+        }
+    }, [isOpen]);
+
     const handleSelect = (option: string) => {
         onChange?.(option);
         onToggle();
@@ -64,8 +86,14 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         );
     };
 
+    const dynamicDropdownStyle: ViewStyle = {
+        top: dropdownCoords.top,
+        left: dropdownCoords.left,
+        width: dropdownCoords.width,
+    };
+
     return (
-        <View style={[styles.container, isOpen && styles.containerZ1000]}>
+        <View style={styles.container}>
             {label && (
                 <View style={styles.labelContainer}>
                     {required && <Text style={styles.required}>* </Text>}
@@ -73,32 +101,47 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 </View>
             )}
 
-            <TouchableOpacity style={styles.button} onPress={onToggle} activeOpacity={0.7}>
+            <TouchableOpacity
+                ref={buttonRef}
+                style={styles.button}
+                onPress={onToggle}
+                activeOpacity={0.7}
+            >
                 <Text style={[styles.text, !value && styles.placeholderText]}>
                     {value || placeholder}
                 </Text>
                 <Ionicons name="chevron-down" size={20} color={colors.textSecondary || '#999'} />
             </TouchableOpacity>
 
-            {isOpen && (
-                <View style={[styles.dropdown, dropdownStyle]}>
-                    <FlatList
-                        data={displayOptions}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={renderItem}
-                        nestedScrollEnabled={true}
-                        keyboardShouldPersistTaps="handled"
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={true}
-                    />
-                </View>
-            )}
+            <Modal
+                visible={isOpen}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={onToggle}
+            >
+                <TouchableWithoutFeedback onPress={onToggle}>
+                    <View style={styles.modalOverlay}>
+                        <View style={[styles.dropdown, dropdownStyle, dynamicDropdownStyle]}>
+                            <FlatList
+                                data={displayOptions}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={renderItem}
+                                nestedScrollEnabled={true}
+                                keyboardShouldPersistTaps="handled"
+                                contentContainerStyle={styles.scrollContent}
+                                showsVerticalScrollIndicator={true}
+                                indicatorStyle="black"
+                            />
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, zIndex: 10, position: 'relative' },
+    container: { flex: 1, zIndex: 10 },
     labelContainer: { flexDirection: 'row', marginBottom: spacing.xs },
     label: { fontSize: 14, color: colors.text, fontWeight: '400' },
     required: { fontSize: 14, color: colors.error || '#FF4D4F' },
@@ -115,18 +158,17 @@ const styles = StyleSheet.create({
     },
     text: { flex: 1, fontSize: 15, color: colors.text },
     placeholderText: { color: colors.textSecondary || '#999' },
+    modalOverlay: {
+        flex: 1,
+    },
     dropdown: {
         position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
-        marginTop: 4,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: '#E5E7EB',
         maxHeight: 250,
-        zIndex: 1000,
+        // zIndex: 1000, // removed as it is inside Modal
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -147,5 +189,4 @@ const styles = StyleSheet.create({
     itemSelected: { backgroundColor: '#F3F4F6' },
     itemText: { fontSize: 14, color: colors.text },
     itemTextSelected: { fontWeight: '500', color: colors.text },
-    containerZ1000: { zIndex: 1000 },
 });
