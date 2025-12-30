@@ -37,14 +37,30 @@ export default function ModalAddTurn({
 
             <TouchableOpacity onPress={() => setPickerVisible(true)} activeOpacity={0.7}>
                 <View style={styles.inputContainer}>
-                    <AutoScrollText
-                        text={value ? formatTime(value) : placeholder}
-                        containerStyle={{ flex: 1 }}
-                        style={{
-                            color: value ? colors.text : colors.gray[400],
-                            fontSize: 14,
-                        }}
-                    />
+                    {value ? (
+                        <Text
+                            style={[
+                                styles.input,
+                                {
+                                    color: colors.text,
+                                    fontSize: 14,
+                                    textAlignVertical: 'center',
+                                },
+                            ]}
+                            numberOfLines={1}
+                        >
+                            {formatTime(value)}
+                        </Text>
+                    ) : (
+                        <AutoScrollText
+                            text={placeholder}
+                            containerStyle={{ flex: 1 }}
+                            style={{
+                                color: colors.gray[400],
+                                fontSize: 14,
+                            }}
+                        />
+                    )}
                     <Icon name="clock" size={16} color={colors.gray[400]} style={styles.icon} />
                 </View>
             </TouchableOpacity>
