@@ -33,6 +33,7 @@ export const CycleDetailScreen: React.FC = () => {
         <View style={styles.container}>
             <HeaderFarm
                 type="cycle-detail"
+                titleAlign="left"
                 leftComponent={
                     <View style={styles.leftHeaderContainer}>
                         <TouchableOpacity
@@ -41,7 +42,6 @@ export const CycleDetailScreen: React.FC = () => {
                         >
                             <Ionicons name="arrow-back" size={24} color={colors.text} />
                         </TouchableOpacity>
-                        <View style={styles.headerSpacer} />
                     </View>
                 }
                 title={
@@ -149,9 +149,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E5E7EB', // Match border colors
     },
-    headerSpacer: {
-        width: 70, // 110 (Badge) - 40 (Back) = 70
-    },
+
     statusBadge: {
         backgroundColor: '#FFFBEB',
         paddingHorizontal: spacing.sm,
@@ -186,7 +184,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#F3F4F6',
     },
     cardTitle: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '700',
         color: '#111827',
     },
@@ -231,16 +229,16 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.regular,
     },
     leftTitleContainer: {
-        flex: 1,
-        alignItems: 'center',
+        alignItems: 'flex-start',
+        marginLeft: 8, // Ensures ~16px total spacing from back button (8px from header + 8px here)
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
     },
     headerSubtitle: {
-        fontSize: 12,
+        fontSize: 14,
         color: colors.textSecondary,
         fontWeight: typography.fontWeight.regular,
     },

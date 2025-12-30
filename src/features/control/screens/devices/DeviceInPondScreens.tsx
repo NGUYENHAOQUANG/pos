@@ -32,7 +32,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
     const { pondName = 'Ao 1' } = route.params || {};
 
-    const { ponds, toggleDevice } = useControl();
+    const { ponds, toggleDevice, updateDeviceMode } = useControl();
     const currentPond = ponds.find(p => p.name === pondName);
     const allDevices = currentPond?.devices || [];
 
@@ -57,6 +57,23 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const handleToggleDevice = (id: string, isOn: boolean) => {
         if (currentPond) {
             toggleDevice(currentPond.id, id, isOn);
+        }
+    };
+
+    const handleSwitchAll = (devicesList: DeviceData[], mode: EControlMode) => {
+        if (!currentPond) return;
+        devicesList.forEach(d => {
+            updateDeviceMode(currentPond.id, d.id, mode);
+        });
+    };
+
+    const handleModeToggle = (id: string) => {
+        if (!currentPond) return;
+        const device = allDevices.find(d => d.id === id);
+        if (device) {
+            const newMode =
+                device.mode === EControlMode.SCHEDULE ? EControlMode.MANUAL : EControlMode.SCHEDULE;
+            updateDeviceMode(currentPond.id, id, newMode);
         }
     };
 
@@ -122,8 +139,9 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     devices={feeders}
                     layout="grid"
                     onSettingsPress={handleSettingsPress}
-                    onSwitchToSchedule={() => {}}
-                    onSwitchToManual={() => {}}
+                    onSwitchToSchedule={() => handleSwitchAll(feeders, EControlMode.SCHEDULE)}
+                    onSwitchToManual={() => handleSwitchAll(feeders, EControlMode.MANUAL)}
+                    onModePress={handleModeToggle}
                     onToggle={handleToggleDevice}
                     style={styles.extendedCard}
                 />
@@ -134,8 +152,9 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     devices={otherDevices}
                     layout="grid"
                     onSettingsPress={handleSettingsPress}
-                    onSwitchToSchedule={() => {}}
-                    onSwitchToManual={() => {}}
+                    onSwitchToSchedule={() => handleSwitchAll(otherDevices, EControlMode.SCHEDULE)}
+                    onSwitchToManual={() => handleSwitchAll(otherDevices, EControlMode.MANUAL)}
+                    onModePress={handleModeToggle}
                     onToggle={handleToggleDevice}
                     style={styles.extendedCard}
                 />
