@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
+        fontWeight: '400',
         color: colors.text,
         marginBottom: spacing.xs,
     },

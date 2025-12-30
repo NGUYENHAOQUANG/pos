@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    BackHandler,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
@@ -49,12 +50,13 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
     // Dirty state tracking
     const [isDirty, setIsDirty] = useState(false);
+    const isDirtyRef = useRef(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [pendingAction, setPendingAction] = useState<any>(null);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', e => {
-            if (!isDirty) {
+            if (!isDirtyRef.current) {
                 // If we don't have unsaved changes, then we don't need to do anything
                 return;
             }
@@ -70,12 +72,27 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         });
 
         return unsubscribe;
-    }, [navigation, isDirty]);
+    }, [navigation]); // Removed isDirty dependency as we use ref
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Handle Android hardware back button
+    useEffect(() => {
+        const onBackPress = () => {
+            if (isDirtyRef.current) {
+                setShowConfirmModal(true);
+                return true; // Prevent default behavior (exit/back)
+            }
+            return false; // Let default behavior happen
+        };
+
+        const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+        return () => subscription.remove();
+    }, []);
 
     const handleSave = () => {
         console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
@@ -93,6 +110,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
         onSave?.(mode);
         setIsDirty(false); // Reset dirty state on save
+        isDirtyRef.current = false;
         if (onBack) {
             onBack();
         } else {
@@ -124,9 +142,10 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 visible={showConfirmModal}
                 onConfirm={() => {
                     setShowConfirmModal(false);
-                    setIsDirty(false);
                     // Use setTimeout to ensure state updates allow navigation to proceed
                     setTimeout(() => {
+                        setIsDirty(false);
+                        isDirtyRef.current = false;
                         if (pendingAction) {
                             navigation.dispatch(pendingAction);
                             setPendingAction(null);
@@ -158,6 +177,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 onPress={() => {
                                     setMode('manual');
                                     setIsDirty(true);
+                                    isDirtyRef.current = true;
                                 }}
                                 activeOpacity={0.8}
                             >
@@ -177,6 +197,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 onPress={() => {
                                     setMode('schedule');
                                     setIsDirty(true);
+                                    isDirtyRef.current = true;
                                 }}
                                 activeOpacity={0.8}
                             >
@@ -208,6 +229,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                     onChangeText={text => {
                                         setRunDuration(text);
                                         setIsDirty(true);
+                                        isDirtyRef.current = true;
                                     }}
                                 />
                             </View>
@@ -223,6 +245,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                     onChangeText={text => {
                                         setStopDuration(text);
                                         setIsDirty(true);
+                                        isDirtyRef.current = true;
                                     }}
                                 />
                             </View>
@@ -230,7 +253,14 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     </View>
 
                     {/* 3. LỊCH HOẠT ĐỘNG */}
-                    <ActivitySchedule schedules={schedules} onUpdateSchedules={setSchedules} />
+                    <ActivitySchedule
+                        schedules={schedules}
+                        onUpdateSchedules={newSchedules => {
+                            setSchedules(newSchedules);
+                            setIsDirty(true);
+                            isDirtyRef.current = true;
+                        }}
+                    />
                 </ScrollView>
             </KeyboardAvoidingView>
 
