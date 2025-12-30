@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         marginTop: spacing.md,
+        paddingHorizontal: spacing.md,
     },
     fullWidthButton: {
         width: '100%',
