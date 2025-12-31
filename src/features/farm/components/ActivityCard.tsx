@@ -22,7 +22,7 @@ interface ActivityCardProps {
 
 export const ActivityCard: React.FC<ActivityCardProps> = ({ title, data, onEdit, note }) => {
     const [expanded, setExpanded] = useState(false);
-    const MAX_VISIBLE_ITEMS = 4;
+    const MAX_VISIBLE_ITEMS = 5;
     const shouldCollapse = data.length > MAX_VISIBLE_ITEMS;
 
     // Lọc data hiển thị
