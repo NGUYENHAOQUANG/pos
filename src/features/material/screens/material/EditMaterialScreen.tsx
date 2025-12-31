@@ -72,7 +72,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         name={name}
                         onNameChange={setName}
                         group={group}
-                        onGroupChange={setGroup}
+                        onGroupChange={val => {
+                            setGroup(val);
+                            setType('');
+                        }}
                         type={type}
                         onTypeChange={setType}
                         unit={unit}
@@ -101,6 +104,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                             }
                             if (!group) {
                                 showValidationError('Nhóm vật tư là bắt buộc');
+                                return;
+                            }
+                            if (!type) {
+                                showValidationError('Loại vật tư là bắt buộc');
                                 return;
                             }
                             if (!unit) {
