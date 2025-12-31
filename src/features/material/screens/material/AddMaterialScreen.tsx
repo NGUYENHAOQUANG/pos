@@ -62,7 +62,10 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         name={name}
                         onNameChange={setName}
                         group={group}
-                        onGroupChange={setGroup}
+                        onGroupChange={val => {
+                            setGroup(val);
+                            setType('');
+                        }}
                         type={type}
                         onTypeChange={setType}
                         unit={unit}
