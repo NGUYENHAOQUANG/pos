@@ -58,6 +58,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 label: `Lần ${nextIndex}`,
                 time: timeString,
                 date: dateString,
+                pondId: pondId,
                 note: note || undefined,
                 waterTreatmentType: activityType,
                 materials: selectedMaterials,

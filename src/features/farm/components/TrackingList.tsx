@@ -30,6 +30,7 @@ export interface TrackingGroup {
 interface TrackingDayCardProps {
     group: TrackingGroup;
     style?: any;
+    noteOnTop?: boolean;
 }
 
 const isToday = (date: Date): boolean => {
@@ -49,7 +50,7 @@ const formatSectionTitle = (dateKey: string): string => {
     return dateKey;
 };
 
-export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }) => {
+export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style, noteOnTop }) => {
     const [expanded, setExpanded] = useState(true);
 
     const toggleExpand = () => {
@@ -79,6 +80,7 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style }
                             title={activity.title}
                             data={activity.data}
                             note={activity.note}
+                            noteOnTop={noteOnTop}
                             onEdit={activity.onEdit}
                         />
                     ))}

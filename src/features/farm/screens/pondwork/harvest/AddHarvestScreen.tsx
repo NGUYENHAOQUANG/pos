@@ -251,6 +251,7 @@ export const AddHarvestScreen: React.FC = () => {
                 id: Date.now().toString(),
                 ...baseData,
                 label: `Lần ${nextIndex}`,
+                pondId: pondId,
             };
 
             updatePondJob(pondId, 'HARVEST', [...currentItems, newItem]);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import {
     CycleData,
@@ -12,6 +12,17 @@ import { formatDate, parseDate, compareTime } from '@/features/farm/utils/dateUt
 import { DUMMY_POND_DATA } from '@/features/farm/data/pondData';
 import { DUMMY_SEASON_DATA } from '@/features/farm/data/seasonData';
 import { DUMMY_CYCLE_DATA } from '@/features/farm/data/cycleData';
+import {
+    mockFeedJobExecutions,
+    mockShrimpInspectionJobExecutions,
+    mockMeasureSizeJobExecutions,
+    mockSiphonJobExecutions,
+    mockHandleProblemJobExecutions,
+    mockWaterSupplyJobExecutions,
+    mockWaterTreatmentJobExecutions,
+    mockTransferJobExecutions,
+    mockHarvestJobExecutions,
+} from '@/features/farm/data/jobData';
 
 interface FarmContextType {
     // Job Management
@@ -106,6 +117,54 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         value: season.id,
     }));
 
+    // Load job executions from mock API data (only once on mount)
+    useEffect(() => {
+        // Simulate API call to load job executions
+        const loadJobExecutions = () => {
+            // Map mock data arrays to JobType
+            const jobExecutionsByType: Record<JobType, JobExecution[]> = {
+                FEED: mockFeedJobExecutions,
+                SHRIMP_INSPECTION: mockShrimpInspectionJobExecutions,
+                MEASURE_SIZE: mockMeasureSizeJobExecutions,
+                ENVIRONMENT: [], // No mock data for environment yet
+                WATER_TREATMENT: mockWaterTreatmentJobExecutions,
+                WATER_CHANGE: mockWaterSupplyJobExecutions, // WATER_CHANGE uses WATER_SUPPLY data
+                SIPHON: mockSiphonJobExecutions,
+                TROUBLESHOOTING: mockHandleProblemJobExecutions, // TROUBLESHOOTING uses HANDLE_PROBLEM data
+                TRANSFER_POND: mockTransferJobExecutions,
+                CLEAN_POND: [], // No mock data for clean pond yet
+                SUN_DRY_POND: [], // No mock data for sun dry pond yet
+                HARVEST: mockHarvestJobExecutions,
+            };
+
+            // Group jobs by pondId
+            const groupedByPond: Record<string, Record<JobType, JobExecution[]>> = {};
+
+            Object.entries(jobExecutionsByType).forEach(([jobType, executions]) => {
+                executions.forEach(execution => {
+                    if (execution.pondId) {
+                        if (!groupedByPond[execution.pondId]) {
+                            groupedByPond[execution.pondId] = {} as Record<JobType, JobExecution[]>;
+                        }
+                        if (!groupedByPond[execution.pondId][jobType as JobType]) {
+                            groupedByPond[execution.pondId][jobType as JobType] = [];
+                        }
+                        groupedByPond[execution.pondId][jobType as JobType].push(execution);
+                    }
+                });
+            });
+
+            // Only set if pondJobs is empty (initial load)
+            // This preserves any user-created data
+            setPondJobs(prev => {
+                const isEmpty = Object.keys(prev).length === 0;
+                return isEmpty ? groupedByPond : prev;
+            });
+        };
+
+        loadJobExecutions();
+    }, []);
+
     const updatePondJob = (pondId: string, jobType: JobType, items: JobExecution[]) => {
         if (!pondId) return;
         setPondJobs(prev => ({
@@ -118,7 +177,8 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const getPondJobItems = (pondId: string, jobType: JobType) => {
-        return pondJobs[pondId]?.[jobType] || [];
+        const items = pondJobs[pondId]?.[jobType] || [];
+        return items.filter(item => !item.pondId || item.pondId === pondId);
     };
 
     const saveActiveCycle = (pondId: string, data: CycleData) => {

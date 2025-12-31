@@ -116,6 +116,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                     id: Date.now().toString(),
                     ...itemData,
                     label: `Lần ${nextIndex}`,
+                    pondId: pond.id,
                 };
                 updatePondJob(pond.id, 'SHRIMP_INSPECTION', [...currentItems, newItem]);
                 showAddJobSuccessToast('SHRIMP_INSPECTION');

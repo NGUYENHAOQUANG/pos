@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../navigation/MaterialNavigator';
@@ -17,6 +17,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { InventoryCard } from '../components/inventory/InventoryCard';
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
 import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
+import { showSuccessToast } from '../utils/validationToast';
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -56,12 +57,14 @@ export const MeterialScreen = () => {
 
     const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
         setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
+        showSuccessToast('Tạo vật tư thành công');
     };
 
     const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
         setMaterials(prev =>
             prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
         );
+        showSuccessToast('Cập nhật thông tin vật tư thành công');
     };
 
     const handleSaveWarehouse = (data: any) => {
@@ -72,6 +75,7 @@ export const MeterialScreen = () => {
             ...data,
         };
         setWarehouseList(prev => [newReceipt, ...prev]);
+        showSuccessToast('Tạo phiếu nhập kho thành công');
     };
 
     const handleSaveInventory = (newTicket: IInventoryTicket) => {
@@ -88,6 +92,7 @@ export const MeterialScreen = () => {
                 return mat;
             })
         );
+        showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
     };
 
     const handleCreateImport = () => {
@@ -181,62 +186,60 @@ export const MeterialScreen = () => {
     });
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                <HeaderMeterial
-                    showBackButton={false}
-                    rightComponent={
-                        <ButtonMetaerial
-                            onPressCreateImport={handleCreateImport}
-                            onPressCreateAdjustment={handleCreateInventory}
-                            onPressCreateMaterial={handleCreateMaterial}
-                        />
-                    }
-                />
-                <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
-                <SearchBarMeterial
-                    onSearch={handleSearch}
-                    onFilterPress={handleFilterPress}
-                    onGroupChange={handleFilterGroup}
-                    selectedTab={selectedTab}
-                />
+        <View style={styles.container}>
+            <HeaderMeterial
+                showBackButton={false}
+                rightComponent={
+                    <ButtonMetaerial
+                        onPressCreateImport={handleCreateImport}
+                        onPressCreateAdjustment={handleCreateInventory}
+                        onPressCreateMaterial={handleCreateMaterial}
+                    />
+                }
+            />
+            <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
+            <SearchBarMeterial
+                onSearch={handleSearch}
+                onFilterPress={handleFilterPress}
+                onGroupChange={handleFilterGroup}
+                selectedTab={selectedTab}
+            />
 
-                <View style={styles.content}>
-                    {selectedTab === 'list' && (
-                        <MaterialListScreen
-                            materials={filteredMaterials}
-                            onEdit={handleEditMaterial}
-                            onAdd={handleAddMaterial}
-                            onHistoryPress={handleHistoryPress}
-                            onAdjustmentPress={adjustmentItem =>
-                                navigation.navigate('AddInventory', {
-                                    onSave: handleSaveInventory,
-                                    initialMaterialName: adjustmentItem.name,
-                                } as any)
-                            }
+            <View style={styles.content}>
+                {selectedTab === 'list' && (
+                    <MaterialListScreen
+                        materials={filteredMaterials}
+                        onEdit={handleEditMaterial}
+                        onAdd={handleAddMaterial}
+                        onHistoryPress={handleHistoryPress}
+                        onAdjustmentPress={adjustmentItem =>
+                            navigation.navigate('AddInventory', {
+                                onSave: handleSaveInventory,
+                                initialMaterialName: adjustmentItem.name,
+                            } as any)
+                        }
+                    />
+                )}
+                {selectedTab === 'history' &&
+                    (filteredWarehouseList.length > 0 ? (
+                        <WarehouseListScreen receipts={filteredWarehouseList} />
+                    ) : (
+                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                    ))}
+                {selectedTab === 'inventory' &&
+                    (inventoryList.length > 0 ? (
+                        <FlatList
+                            data={inventoryList}
+                            keyExtractor={item => item.id}
+                            renderItem={({ item }) => <InventoryCard data={item} />}
+                            contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
+                            showsVerticalScrollIndicator={false}
                         />
-                    )}
-                    {selectedTab === 'history' &&
-                        (filteredWarehouseList.length > 0 ? (
-                            <WarehouseListScreen receipts={filteredWarehouseList} />
-                        ) : (
-                            <MaterialEmptyState tab="history" onPress={handleCreateImport} />
-                        ))}
-                    {selectedTab === 'inventory' &&
-                        (inventoryList.length > 0 ? (
-                            <FlatList
-                                data={inventoryList}
-                                keyExtractor={item => item.id}
-                                renderItem={({ item }) => <InventoryCard data={item} />}
-                                contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
-                                showsVerticalScrollIndicator={false}
-                            />
-                        ) : (
-                            <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
-                        ))}
-                </View>
+                    ) : (
+                        <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
+                    ))}
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

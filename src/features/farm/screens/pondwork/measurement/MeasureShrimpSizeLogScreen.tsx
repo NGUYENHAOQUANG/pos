@@ -4,7 +4,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm } from '@/features/farm/context/FarmContext';
-import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { TrackingGroup } from '@/features/farm/components/TrackingList';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { MeasureSizeMeta, JobExecution } from '@/features/farm/types/farm.types';
@@ -99,13 +98,6 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
             emptyMessage="Chưa có dữ liệu đo kích thước tôm"
             emptyButtonTitle="Bắt đầu đo kích thước tôm"
             onEmptyButtonPress={handleNavigateToCreate}
-            customEmptyState={
-                <EmptyStateCard
-                    message="Chưa có dữ liệu đo kích thước tôm"
-                    buttonTitle="Bắt đầu đo kích thước tôm"
-                    onPress={handleNavigateToCreate}
-                />
-            }
         />
     );
 };

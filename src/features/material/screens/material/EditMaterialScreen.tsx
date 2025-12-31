@@ -9,6 +9,7 @@ import { IMaterial } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
+import { showValidationError } from '../../utils/validationToast';
 
 interface EditMaterialScreenProps {}
 
@@ -71,7 +72,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         name={name}
                         onNameChange={setName}
                         group={group}
-                        onGroupChange={setGroup}
+                        onGroupChange={val => {
+                            setGroup(val);
+                            setType('');
+                        }}
                         type={type}
                         onTypeChange={setType}
                         unit={unit}
@@ -95,15 +99,19 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         secondaryTitle="Huỷ"
                         onPrimaryPress={() => {
                             if (!name.trim()) {
-                                console.warn('Tên vật tư là bắt buộc');
+                                showValidationError('Tên vật tư là bắt buộc');
                                 return;
                             }
                             if (!group) {
-                                console.warn('Nhóm vật tư là bắt buộc');
+                                showValidationError('Nhóm vật tư là bắt buộc');
+                                return;
+                            }
+                            if (!type) {
+                                showValidationError('Loại vật tư là bắt buộc');
                                 return;
                             }
                             if (!unit) {
-                                console.warn('Đơn vị tính là bắt buộc');
+                                showValidationError('Đơn vị tính là bắt buộc');
                                 return;
                             }
 

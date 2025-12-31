@@ -41,7 +41,10 @@ export type FarmStackParamList = {
     MeasureShrimpSizeScreen: { pond: PondData; itemToEdit?: JobExecution };
     PondworkLogScreen: { pond: PondData };
     AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
-    SettingEnvironment: undefined;
+    SettingEnvironment: {
+        data?: { advancedParameters?: Array<{ id: string; name: string }> };
+        onSave?: (data: { advancedParameters: Array<{ id: string; name: string }> }) => void;
+    };
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: { pondId: string; initialData?: CycleData | null };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };

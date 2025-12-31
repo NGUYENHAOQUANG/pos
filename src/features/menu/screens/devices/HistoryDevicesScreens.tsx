@@ -233,7 +233,12 @@ export const HistoryDevicesScreens = () => {
             <ScrollView contentContainerStyle={styles.content}>
                 {displayData.length > 0 ? (
                     displayData.map(group => (
-                        <TrackingDayCard key={group.id} group={group} style={styles.trackingCard} />
+                        <TrackingDayCard
+                            key={group.id}
+                            group={group}
+                            style={styles.trackingCard}
+                            noteOnTop={true}
+                        />
                     ))
                 ) : (
                     <View style={styles.emptyContainer}>
