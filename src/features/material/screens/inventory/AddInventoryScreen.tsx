@@ -11,6 +11,8 @@ import { IInventoryTicket } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
+import { mockMaterialList } from '../../data/materialData';
+import { showValidationError } from '../../utils/validationToast';
 
 interface AddInventoryScreenProps {
     // onBack: () => void;
@@ -22,6 +24,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
     const params = route.params;
     const onSave = params?.onSave;
+    const initialMaterialName = params?.initialMaterialName;
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -30,7 +33,15 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
+    // Handle initial material selection
+    useEffect(() => {
+        if (initialMaterialName) {
+            handleMaterialSelect(initialMaterialName);
+        }
+    }, [initialMaterialName]);
+
     // --- States ---
+    const scrollViewRef = React.useRef<ScrollView>(null);
     const [date, setDate] = useState(new Date());
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [note, setNote] = useState('');
@@ -39,8 +50,17 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [materialName, setMaterialName] = useState('');
     const [oldStock, setOldStock] = useState(0);
     const [newStock, setNewStock] = useState('');
+    const [materialGroup, setMaterialGroup] = useState('');
+
+    // Derive options from mock data
+    const materialOptions = mockMaterialList.map(m => m.name);
 
     // --- Handlers ---
+    const handleDropdownOpen = () => {
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 200);
+    };
 
     const handleDateConfirm = (selectedDate: Date) => {
         setDate(selectedDate);
@@ -49,34 +69,19 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     const handleMaterialSelect = (val: string) => {
         setMaterialName(val);
-        // Giả lập logic lấy tồn kho cũ
-        if (val === 'CP 09 – Thức ăn tôm giai đoạn 2') setOldStock(4);
-        else if (val === 'Vật tư B') setOldStock(10);
-        else setOldStock(0);
+
+        // Find material in mock list
+        const selectedMaterial = mockMaterialList.find(m => m.name === val);
+
+        if (selectedMaterial) {
+            setOldStock(selectedMaterial.remaining || 0);
+            setMaterialGroup(selectedMaterial.group);
+        } else {
+            setOldStock(0);
+            setMaterialGroup('');
+        }
 
         setNewStock('');
-    };
-
-    const handleSave = () => {
-        const newTicket: IInventoryTicket = {
-            id: Date.now().toString(),
-            checkerName: 'Nguyễn Phương Duy',
-            date: formatDateTime(date),
-            note: note || 'Phiếu mới',
-            totalDifference: Number(newStock) - oldStock,
-            items: [
-                {
-                    id: '1',
-                    materialName: materialName,
-                    beforeQuantity: oldStock,
-                    afterQuantity: Number(newStock),
-                },
-            ],
-        };
-        if (onSave) {
-            onSave(newTicket);
-        }
-        navigation.goBack();
     };
 
     const formatDate = (d: Date) => {
@@ -95,6 +100,43 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         return `${hours}:${minutes} ${day}/${month}/${year}`;
     };
 
+    const handleSave = () => {
+        // Validation
+        if (!note.trim()) {
+            showValidationError('Vui lòng nhập ghi chú lý do điều chỉnh');
+            return;
+        }
+        if (!materialName) {
+            showValidationError('Vui lòng chọn vật tư');
+            return;
+        }
+        if (!newStock.trim()) {
+            showValidationError('Vui lòng nhập tồn kho mới');
+            return;
+        }
+
+        const newTicket: IInventoryTicket = {
+            id: Date.now().toString(),
+            checkerName: 'Nguyễn Phương Duy',
+            date: formatDateTime(date),
+            note: note || 'Phiếu mới',
+            totalDifference: Number(newStock) - oldStock,
+            items: [
+                {
+                    id: '1',
+                    materialName: materialName,
+                    beforeQuantity: oldStock,
+                    afterQuantity: Number(newStock),
+                },
+            ],
+        };
+        if (onSave) {
+            onSave(newTicket);
+        }
+        // Return to Inventory tab
+        navigation.navigate('MaterialList', { selectedTab: 'inventory' });
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
@@ -104,6 +146,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 />
 
                 <ScrollView
+                    ref={scrollViewRef}
                     style={styles.scrollView}
                     contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
@@ -112,6 +155,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                     {/* Thông tin chung */}
                     <InventoryGeneralInfo
                         date={formatDate(date)}
+                        createdDate={formatDateTime(date)}
+                        materialGroup={materialGroup}
                         note={note}
                         onDatePress={() => setDatePickerVisible(true)}
                         onNoteChange={setNote}
@@ -125,6 +170,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                             newStock={newStock}
                             onMaterialSelect={handleMaterialSelect}
                             onNewStockChange={setNewStock}
+                            materialOptions={materialOptions}
+                            onDropdownOpen={handleDropdownOpen}
                         />
                     </View>
                 </ScrollView>
@@ -134,11 +181,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                     mode="single"
                     primaryTitle="Gửi Phiếu"
                     onPrimaryPress={handleSave}
-                    primaryButtonDisabled={!materialName || newStock === ''}
                     containerStyle={{
                         borderTopWidth: 1,
                         borderTopColor: colors.gray[200],
-                        // Add shadow via generic View styles if needed, but ButtonBar usually simpler
                     }}
                 />
 
@@ -167,7 +212,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        padding: spacing.md,
+        paddingVertical: spacing.md,
         paddingBottom: spacing.xl,
     },
     dropdownSection: {

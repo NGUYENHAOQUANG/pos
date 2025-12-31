@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingBottom: 12,
+        paddingTop: 12,
         paddingHorizontal: 16, // using standard 16 instead of spacing.md to ensure consistency if spacing.md changes
         backgroundColor: colors.white,
         borderBottomWidth: 1,

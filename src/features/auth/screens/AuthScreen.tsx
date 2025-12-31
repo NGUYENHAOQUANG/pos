@@ -87,7 +87,7 @@ export default function AuthScreen() {
                         <View style={styles.formCard}>
                             <View style={styles.logoSection}>
                                 <ErrorBoundary>
-                                    <Logo size="medium" />
+                                    <Logo size="square" />
                                 </ErrorBoundary>
                             </View>
 

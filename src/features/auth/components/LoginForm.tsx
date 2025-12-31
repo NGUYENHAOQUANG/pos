@@ -69,7 +69,7 @@ export default function LoginForm() {
                 >
                     {/* Logo Section - Canh giữa */}
                     <View style={styles.logoSection}>
-                        <Logo size="medium" />
+                        <Logo size="square" />
                     </View>
 
                     {/* Title Section */}
