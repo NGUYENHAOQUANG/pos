@@ -1,6 +1,6 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../navigation/MaterialNavigator';
 
@@ -16,23 +16,37 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { InventoryCard } from '../components/inventory/InventoryCard';
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
-import { mockMaterialList } from '../mockData/materialData';
+import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
+import { showSuccessToast } from '../utils/validationToast';
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const route = useRoute<RouteProp<MaterialStackParamList, 'MaterialList'>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
+
+    // Handle tab navigation from other screens
+    React.useEffect(() => {
+        if (route.params?.selectedTab) {
+            setSelectedTab(route.params.selectedTab);
+            // Optional: reset params so it doesn't stick?
+            // Better to keep it simple first
+            navigation.setParams({ selectedTab: undefined });
+        }
+    }, [route.params?.selectedTab, navigation]);
     const [materials, setMaterials] = useState<IMaterial[]>(mockMaterialList);
     const [searchText, setSearchText] = useState('');
     const [filterGroup, setFilterGroup] = useState('');
-    const [inventoryList, setInventoryList] = useState<IInventoryTicket[]>([]);
-    const [warehouseList, setWarehouseList] = useState<IWarehouseReceipt[]>([]);
+    const [inventoryList, setInventoryList] = useState<IInventoryTicket[]>(mockInventoryList);
+    const [warehouseList, setWarehouseList] = useState<IWarehouseReceipt[]>(mockWarehouseList);
     const [filterMaterialName, setFilterMaterialName] = useState<string | null>(null);
 
     // Force update materials on mount to handle Fast Refresh state preservation
     React.useEffect(() => {
         setMaterials(mockMaterialList);
+        setInventoryList(mockInventoryList);
+        setWarehouseList(mockWarehouseList);
     }, []);
 
     useLayoutEffect(() => {
@@ -43,12 +57,14 @@ export const MeterialScreen = () => {
 
     const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
         setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
+        showSuccessToast('Tạo vật tư thành công');
     };
 
     const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
         setMaterials(prev =>
             prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
         );
+        showSuccessToast('Cập nhật thông tin vật tư thành công');
     };
 
     const handleSaveWarehouse = (data: any) => {
@@ -59,11 +75,24 @@ export const MeterialScreen = () => {
             ...data,
         };
         setWarehouseList(prev => [newReceipt, ...prev]);
+        showSuccessToast('Tạo phiếu nhập kho thành công');
     };
 
     const handleSaveInventory = (newTicket: IInventoryTicket) => {
         console.log('Dữ liệu lưu:', newTicket);
         setInventoryList(prev => [newTicket, ...prev]);
+
+        // Update actual stock in material list
+        setMaterials(prevMaterials =>
+            prevMaterials.map(mat => {
+                const ticketItem = newTicket.items.find(item => item.materialName === mat.name);
+                if (ticketItem) {
+                    return { ...mat, remaining: ticketItem.afterQuantity };
+                }
+                return mat;
+            })
+        );
+        showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
     };
 
     const handleCreateImport = () => {
@@ -185,7 +214,10 @@ export const MeterialScreen = () => {
                             onAdd={handleAddMaterial}
                             onHistoryPress={handleHistoryPress}
                             onAdjustmentPress={adjustmentItem =>
-                                console.log('Adjustment', adjustmentItem)
+                                navigation.navigate('AddInventory', {
+                                    onSave: handleSaveInventory,
+                                    initialMaterialName: adjustmentItem.name,
+                                } as any)
                             }
                         />
                     )}

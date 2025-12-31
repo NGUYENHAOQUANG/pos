@@ -7,8 +7,6 @@ import {
     Modal,
     TouchableWithoutFeedback,
     Dimensions,
-    Platform,
-    StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -63,16 +61,12 @@ export const HeaderFarm = ({
 
     const openMenu = () => {
         if (buttonRef.current) {
-            buttonRef.current.measure((fx, fy, width, height, px, py) => {
+            buttonRef.current.measureInWindow((x, y, width, height) => {
                 const windowWidth = Dimensions.get('window').width;
-                const rightSpace = windowWidth - (px + width);
+                const rightSpace = windowWidth - (x + width);
 
                 setDropdownRight(rightSpace >= 0 ? rightSpace : 24);
-
-                const statusbarHeight =
-                    Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
-                const top = py ? py + height - statusbarHeight + 4 : fy + height + 100;
-                setDropdownTop(top || 200);
+                setDropdownTop(y + height + 4);
 
                 setMenuVisible(true);
             });
@@ -90,7 +84,17 @@ export const HeaderFarm = ({
      * Render Cycle Detail Mode & Simple Mode (Back, Custom Title with Subtitle, Right Action)
      */
     if (type === 'cycle-detail' || type === 'simple') {
-        const centerNode = typeof title === 'object' ? title : undefined;
+        const centerNode =
+            typeof title === 'object' ? (
+                <View
+                    style={{
+                        width: '100%',
+                        alignItems: titleAlign === 'left' ? 'flex-start' : 'center',
+                    }}
+                >
+                    {title}
+                </View>
+            ) : undefined;
         // For string title, HeaderSection handles it via 'title' prop.
         // If title is object (ReactNode), pass as centerComponent.
 

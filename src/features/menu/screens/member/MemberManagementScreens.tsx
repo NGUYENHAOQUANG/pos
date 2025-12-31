@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingTop: spacing.md,
+        paddingTop: 8,
         paddingBottom: spacing.sm,
         backgroundColor: colors.backgroundPrimary,
     },
