@@ -208,6 +208,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                     id: Date.now().toString(),
                     ...itemData,
                     label: `Lần ${nextIndex}`,
+                    pondId: pond.id,
                 };
                 updatePondJob(pond.id, 'ENVIRONMENT', [...currentItems, newItem]);
                 showAddJobSuccessToast('ENVIRONMENT');

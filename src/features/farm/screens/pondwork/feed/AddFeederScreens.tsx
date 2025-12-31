@@ -65,6 +65,7 @@ export const AddFeederScreens = () => {
                 label: `Lần ${nextIndex}`,
                 time: timeString,
                 date: dateString,
+                pondId: pondId,
                 note: note || undefined,
                 materials: selectedMaterials,
             };

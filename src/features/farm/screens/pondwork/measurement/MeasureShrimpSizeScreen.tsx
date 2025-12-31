@@ -115,6 +115,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 id: Date.now().toString(),
                 label: `Lần ${nextIndex}`,
                 ...itemData,
+                pondId: currentPond.id,
             };
             updatePondJob(currentPond.id, 'MEASURE_SIZE', [...currentItems, newItem]);
             Toast.show({ type: 'success', text1: 'Đã đo kích thước tôm thành công' });

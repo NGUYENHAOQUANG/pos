@@ -143,6 +143,7 @@ export interface JobExecution {
     time: string;
     date?: string;
     note?: string;
+    pondId?: string;
     materials?: {
         material: any;
         quantity: number;
