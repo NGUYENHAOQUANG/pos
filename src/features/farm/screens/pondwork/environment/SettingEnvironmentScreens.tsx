@@ -206,7 +206,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
             </ScrollView>
 
             {/* Footer Buttons */}
-            <View style={[styles.footerContainer, { paddingBottom: insets.bottom }]}>
+            <View style={styles.footerContainer}>
                 <ButtonBarFarm
                     primaryTitle="Lưu thông tin"
                     secondaryTitle="Thiết lập lại"
@@ -328,7 +328,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.borderLight,
-        paddingTop: 12 - 4,
     },
     modalOverlay: {
         flex: 1,

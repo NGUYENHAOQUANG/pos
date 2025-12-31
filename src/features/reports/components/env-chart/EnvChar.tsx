@@ -123,6 +123,8 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
 
     // Gestures
     const pan = Gesture.Pan()
+        .activeOffsetX([-10, 10])
+        .failOffsetY([-10, 10])
         .onChange(e => {
             const nextTranslate = savedTranslateX.value + e.translationX;
             if (nextTranslate > maxTranslateX) {

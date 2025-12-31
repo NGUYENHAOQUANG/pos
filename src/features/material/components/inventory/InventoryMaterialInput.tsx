@@ -9,6 +9,8 @@ interface InventoryMaterialInputProps {
     newStock: string;
     onMaterialSelect: (val: string) => void;
     onNewStockChange: (val: string) => void;
+    materialOptions?: string[];
+    onDropdownOpen?: () => void;
 }
 
 export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
@@ -17,31 +19,33 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
     newStock,
     onMaterialSelect,
     onNewStockChange,
+    materialOptions = [],
+    onDropdownOpen,
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const diff = newStock ? Number(newStock) - oldStock : 0;
     const hasSelectedMaterial = !!materialName;
-    const DROPDOWN_HEIGHT = 200;
-
     return (
-        <View
-            style={[
-                styles.container,
-                isDropdownOpen && { marginBottom: spacing['2xl'] + DROPDOWN_HEIGHT },
-            ]}
-        >
+        <View style={styles.container}>
             <Text style={styles.title}>Vật tư điều chỉnh</Text>
             <View style={styles.divider} />
             <View style={hasSelectedMaterial ? styles.dropdownWithMargin : styles.dropdownNoMargin}>
                 <DropdownMaterial
                     value={materialName}
                     placeholder="Chọn vật tư"
-                    options={['CP 09 – Thức ăn tôm giai đoạn 2', 'Vật tư B', 'Vật tư C']}
+                    options={materialOptions}
                     onChange={onMaterialSelect}
                     showAllOption={false}
                     isOpen={isDropdownOpen}
-                    onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onToggle={() => {
+                        const nextState = !isDropdownOpen;
+                        setIsDropdownOpen(nextState);
+                        if (nextState) {
+                            onDropdownOpen?.();
+                        }
+                    }}
+                    inline={true}
                 />
             </View>
 
@@ -92,7 +96,6 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
-        borderRadius: borderRadius.md,
         ...Platform.select({
             ios: {
                 shadowColor: colors.shadow,

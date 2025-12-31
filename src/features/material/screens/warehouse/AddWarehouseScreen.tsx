@@ -14,6 +14,7 @@ import { IMaterial, IWarehouseReceipt } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
+import { showValidationError } from '../../utils/validationToast';
 
 interface AddWarehouseScreenProps {
     // onBack?: () => void;
@@ -136,6 +137,28 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                         borderTopColor: colors.border,
                     }}
                     onPrimaryPress={() => {
+                        // Validation
+                        if (!supplier) {
+                            showValidationError('Vui lòng chọn nhà cung cấp');
+                            return;
+                        }
+                        if (materials.length === 0) {
+                            showValidationError('Vui lòng thêm ít nhất một vật tư');
+                            return;
+                        }
+                        // Check detailed items
+                        const invalidItemIndex = materials.findIndex(
+                            m => !m.materialName || !m.quantity || !m.price
+                        );
+                        if (invalidItemIndex !== -1) {
+                            showValidationError(
+                                `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
+                                    invalidItemIndex + 1
+                                })`
+                            );
+                            return;
+                        }
+
                         setIsConfirmModalVisible(true);
                     }}
                 />
