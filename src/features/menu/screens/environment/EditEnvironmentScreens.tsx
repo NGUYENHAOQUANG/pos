@@ -3,8 +3,9 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 // import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EditEnvironmentCard } from '@/features/menu/components/environment/EditEnvironmentCard';
@@ -39,10 +40,7 @@ export const EditEnvironmentScreens: React.FC = () => {
             route.params.onSave(updatedParameter);
         }
 
-        Toast.show({
-            type: 'success',
-            text1: 'Đã cập nhật thông số',
-        });
+        Toast.show(ToastMessages.Environment.UPDATE_SUCCESS);
         navigation.goBack();
     };
 
@@ -101,7 +99,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        padding: spacing.md,
+        paddingTop: 8,
+        paddingHorizontal: 0,
+        paddingBottom: 16,
     },
     footer: {
         backgroundColor: colors.white,

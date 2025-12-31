@@ -8,6 +8,7 @@ import { DatePickerModal } from '@/features/home/components/DatePickerModal';
 import { IconCalender } from '@/assets/icons';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
 interface GeneralInformationProps {
     onDataChange?: (data: GeneralInformationData) => void;
@@ -69,28 +70,16 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     useEffect(() => {
         if (triggerValidation) {
             if (!deviceName.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập tên thiết bị',
-                });
+                Toast.show(ToastMessages.Device.NAME_REQUIRED);
             }
             if (deviceType.id === '0') {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng chọn loại thiết bị',
-                });
+                Toast.show(ToastMessages.Device.TYPE_REQUIRED);
             }
             if (!quantity.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập số lượng',
-                });
+                Toast.show(ToastMessages.Device.QUANTITY_REQUIRED);
             }
             if (!importDate) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng chọn ngày nhập kho',
-                });
+                Toast.show(ToastMessages.Device.IMPORT_DATE_REQUIRED);
             }
         }
     }, [triggerValidation, deviceName, deviceType, quantity, importDate]);

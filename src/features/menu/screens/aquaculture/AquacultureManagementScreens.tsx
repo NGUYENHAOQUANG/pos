@@ -38,8 +38,20 @@ export const AquacultureManagementScreens: React.FC = () => {
         { id: '2', label: 'Trại Cà Mau' },
     ];
 
-    // Filter logic (optional, for now show all)
-    const filteredList = aquacultures; // Can implement tab filtering if needed
+    const activeData = React.useMemo(() => {
+        if (selectedTab === 'active') return aquacultures.filter(i => i.status === 'active');
+        if (selectedTab === 'ended') return aquacultures.filter(i => i.status === 'ended');
+        return aquacultures;
+    }, [aquacultures, selectedTab]);
+
+    const counts = React.useMemo(
+        () => ({
+            all: aquacultures.length,
+            active: aquacultures.filter(i => i.status === 'active').length,
+            ended: aquacultures.filter(i => i.status === 'ended').length,
+        }),
+        [aquacultures]
+    );
 
     return (
         <View style={styles.container}>
@@ -58,11 +70,7 @@ export const AquacultureManagementScreens: React.FC = () => {
             />
 
             {/* Tabs */}
-            <HeadingMenu
-                selectedTab={selectedTab}
-                onTabSelect={setSelectedTab}
-                counts={{ all: aquacultures.length, active: 0, ended: 0 }} // Simple count for now
-            />
+            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} counts={counts} />
 
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>
@@ -87,7 +95,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                     </View>
                 ) : (
                     <FlatList
-                        data={filteredList}
+                        data={activeData}
                         keyExtractor={item => item.id}
                         renderItem={({ item }) => (
                             <AquacultureItem
@@ -114,18 +122,20 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        padding: spacing.md,
+        // padding: spacing.md, // Removed to allow full width cards
         backgroundColor: colors.backgroundPrimary,
     },
     filterSection: {
         backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.md, // Restored padding
         zIndex: 100,
     },
     cardContainer: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
+        margin: spacing.md,
     },
     addButton: {
         width: 40,

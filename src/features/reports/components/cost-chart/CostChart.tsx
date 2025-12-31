@@ -84,8 +84,19 @@ const CostChart = ({ size = 300, data, totalDisplay = '0' }: CostChartProps) => 
 
             {/* Center Info */}
             <View style={styles.centerContainer}>
-                <Text style={styles.totalLabel}>TỔNG CỘNG</Text>
-                <Text style={styles.totalValue}>{totalDisplay}</Text>
+                <View
+                    style={{
+                        width: innerRadius * 2,
+                        height: innerRadius * 2,
+                        borderRadius: innerRadius,
+                        backgroundColor: colors.white,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Text style={styles.totalLabel}>TỔNG CỘNG</Text>
+                    <Text style={styles.totalValue}>{totalDisplay}</Text>
+                </View>
             </View>
         </View>
     );
@@ -101,7 +112,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: -1,
+        zIndex: 1,
     },
     totalLabel: {
         fontSize: typography.fontSize.sm,

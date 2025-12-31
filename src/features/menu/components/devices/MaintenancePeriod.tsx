@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
 interface MaintenancePeriodProps {
     onDataChange?: (data: MaintenancePeriodData) => void;
@@ -39,16 +40,10 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
     useEffect(() => {
         if (triggerValidation) {
             if (!operatingTime.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập thời gian hoạt động',
-                });
+                Toast.show(ToastMessages.Device.OPERATING_TIME_REQUIRED);
             }
             if (!usageTime.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập thời gian sử dụng từ ngày lắp',
-                });
+                Toast.show(ToastMessages.Device.USAGE_TIME_REQUIRED);
             }
         }
     }, [triggerValidation, operatingTime, usageTime]);

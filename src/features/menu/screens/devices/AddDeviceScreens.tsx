@@ -13,6 +13,7 @@ import {
     MaintenancePeriodData,
 } from '../../components/devices/MaintenancePeriod';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useMenuContext } from '@/features/menu/context/MenuContext';
 import { DeviceData } from '@/features/menu/types/menu.types';
 
@@ -68,10 +69,7 @@ export const AddDeviceScreens = () => {
 
             addDevice(newDevice);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Thêm thiết bị thành công',
-            });
+            Toast.show(ToastMessages.Device.ADD_SUCCESS);
             navigation.goBack();
         }
     };

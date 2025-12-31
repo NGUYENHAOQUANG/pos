@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 0, // Wrapper handles margin
         paddingTop: 0,
-        paddingBottom: 20,
+        paddingBottom: 100,
     },
     fixedContent: {
         paddingHorizontal: 16,

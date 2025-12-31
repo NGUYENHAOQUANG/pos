@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-nati
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -16,18 +17,10 @@ import { WorkUnit } from '@/features/menu/components/member/WorkUnit';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';
+import { unitsData } from '@/features/menu/data/memberData';
 
-const FARM_DATA = [
-    { id: '1', name: 'Trại A' },
-    { id: '2', name: 'Trại B' },
-    { id: '3', name: 'Trại C' },
-];
-
-const POND_DATA = [
-    { id: '101', name: 'Ao 1' },
-    { id: '102', name: 'Ao 2' },
-    { id: '103', name: 'Ao 3' },
-];
+const FARM_DATA = unitsData.filter(u => u.type === 'Trại');
+const POND_DATA = unitsData.filter(u => u.type === 'Ao');
 
 export const EditMemberScreens: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MenuStackParamList>>();
@@ -115,7 +108,7 @@ export const EditMemberScreens: React.FC = () => {
     const handleUpdateMember = () => {
         // Validation
         if (!name.trim()) {
-            Toast.show({ type: 'error', text1: 'Vui lòng nhập tên thành viên' });
+            Toast.show(ToastMessages.Member.NAME_REQUIRED);
             return;
         }
 
@@ -142,7 +135,7 @@ export const EditMemberScreens: React.FC = () => {
                 email: member.email, // Preserve email
                 status: member.status, // Preserve status
             });
-            Toast.show({ type: 'success', text1: 'Đã cập nhật thành viên' });
+            Toast.show(ToastMessages.Member.UPDATE_SUCCESS);
         }
 
         navigation.navigate('MemberManagement');
@@ -167,7 +160,7 @@ export const EditMemberScreens: React.FC = () => {
     const handleConfirmResend = () => {
         console.log('Resend Invite');
         setResendModalVisible(false);
-        Toast.show({ type: 'success', text1: 'Đã gửi lại lời mời' });
+        Toast.show(ToastMessages.Member.RESEND_INVITE_SUCCESS);
     };
 
     const handleSuspend = () => {
@@ -195,7 +188,7 @@ export const EditMemberScreens: React.FC = () => {
     const handleConfirmActivate = () => {
         if (member?.id) {
             updateMember(member.id, { status: 'active' });
-            Toast.show({ type: 'success', text1: 'Đã kích hoạt lại tài khoản' });
+            Toast.show(ToastMessages.Member.ACTIVATE_SUCCESS);
         }
         setActivateModalVisible(false);
         navigation.navigate('MemberManagement');
@@ -235,6 +228,7 @@ export const EditMemberScreens: React.FC = () => {
                     onUnitsChange={setSelectedUnitIds}
                     onAddUnitPress={() => setModalVisible(true)}
                     disabled={isPaused}
+                    availableUnits={managementLevel === 'farm' ? FARM_DATA : POND_DATA}
                 />
 
                 {!isPaused && (

@@ -10,8 +10,8 @@ import {
     Dimensions,
     LayoutChangeEvent,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
+import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { Loading } from '@/shared/components/ui/Loading';
 import Svg, { Path, Line, Text as SvgText, Circle } from 'react-native-svg';
 import { line, curveMonotoneX } from 'd3-shape';
@@ -260,186 +260,217 @@ export const GrowthChart = () => {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <View style={styles.container}>
                 {/* HEADER */}
-                <TouchableOpacity style={styles.header} onPress={toggleExpand} activeOpacity={0.8}>
-                    <Text style={styles.headerText}>BIỂU ĐỒ TĂNG TRƯỞNG</Text>
-                    <Ionicons
-                        name={expanded ? 'chevron-up' : 'chevron-down'}
-                        size={20}
-                        color={colors.text}
-                    />
-                </TouchableOpacity>
+                <BasicDropDownButton
+                    label="BIỂU ĐỒ TĂNG TRƯỞNG"
+                    isExpanded={expanded}
+                    onPress={toggleExpand}
+                    style={styles.header}
+                />
 
                 {expanded && (
-                    <View style={[styles.contentContainer, isLoading ? styles.loadingContainer : undefined]}>
+                    <View
+                        style={[
+                            styles.contentContainer,
+                            isLoading ? styles.loadingContainer : undefined,
+                        ]}
+                    >
                         {isLoading ? (
                             <Loading />
                         ) : (
                             <>
-                        {/* TABS */}
-                        <View style={styles.tabContainer}>
-                            {TABS.map(tab => (
-                                <TouchableOpacity
-                                    key={tab}
-                                    style={[styles.tab, selectedTab === tab && styles.selectedTab]}
-                                    onPress={() => setSelectedTab(tab)}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.tabText,
-                                            selectedTab === tab && styles.selectedTabText,
-                                        ]}
-                                    >
-                                        {tab}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        {/* CHART */}
-                        <View style={styles.chartWrapper} onLayout={onLayout}>
-                            <GestureDetector gesture={gesture}>
-                                <View style={{ flex: 1 }}>
-                                    <Svg width={chartWidth} height={CHART_HEIGHT}>
-                                        {/* Grids & Y-Axis Labels */}
-                                        {yLabels.map((label, i) => {
-                                            const y =
-                                                top +
-                                                ((CHART_HEIGHT - top - bottom) /
-                                                    (yLabels.length - 1)) *
-                                                    i;
-                                            return (
-                                                <React.Fragment key={`grid-group-${i}`}>
-                                                    <Line
-                                                        x1={left}
-                                                        x2={chartWidth - right}
-                                                        y1={y}
-                                                        y2={y}
-                                                        stroke={colors.gray[100]}
-                                                        strokeWidth={1}
-                                                    />
-                                                    <SvgText
-                                                        x={left}
-                                                        y={y - 5}
-                                                        fill={colors.gray[500]}
-                                                        fontSize="10"
-                                                    >
-                                                        {label}
-                                                    </SvgText>
-                                                </React.Fragment>
-                                            );
-                                        })}
-
-                                        {/* Paths */}
-                                        <Path
-                                            d={paths?.expectedPath || ''}
-                                            fill="none"
-                                            stroke="#FFAB76"
-                                            strokeWidth={2}
-                                        />
-                                        {paths?.actualPath && (
-                                            <Path
-                                                d={paths.actualPath}
-                                                fill="none"
-                                                stroke="#0057FF"
-                                                strokeWidth={2}
-                                            />
-                                        )}
-
-                                        {/* X Axis Labels */}
-                                        {activeData.map((d: GrowthDataPoint, i: number) => {
-                                            if (i % 7 !== 0 && i !== activeData.length - 1)
-                                                return null;
-                                            return (
-                                                <SvgText
-                                                    key={i}
-                                                    x={scales.x(i)}
-                                                    y={CHART_HEIGHT - bottom + 25}
-                                                    fill={colors.gray[500]}
-                                                    fontSize="10"
-                                                    textAnchor="middle"
-                                                >
-                                                    {formatDate(d.date)}
-                                                </SvgText>
-                                            );
-                                        })}
-
-                                        {/* INTERACTION ELEMENTS */}
-                                        <AnimatedLine
-                                            animatedProps={cursorProps}
-                                            y1={top}
-                                            y2={CHART_HEIGHT - bottom}
-                                            stroke={colors.gray[400]}
-                                            strokeDasharray="4 4"
-                                            strokeWidth={1}
-                                        />
-                                        <AnimatedCircle
-                                            animatedProps={dotProps}
-                                            r={7}
-                                            fill="#0057FF"
-                                            stroke="#FFFFFF"
-                                            strokeWidth={2}
-                                        />
-                                    </Svg>
-
-                                    {/* OVERLAY TOOLTIP & DATE BOX */}
-                                    <AnimatedView style={[styles.activeDateBox, dateBoxStyle]}>
-                                        <Text style={styles.activeDateText}>
-                                            {activeGrowthDataPoint
-                                                ? formatDate(activeGrowthDataPoint.date)
-                                                : '--/--/----'}
-                                        </Text>
-                                    </AnimatedView>
-
-                                    <AnimatedView style={[styles.tooltip, tooltipStyle]}>
-                                        <Text style={styles.tooltipTitle}>
-                                            {activeGrowthDataPoint
-                                                ? `Ngày tuổi ${activeGrowthDataPoint.dayAge}`
-                                                : '...'}
-                                        </Text>
-                                        <View style={styles.tooltipRow}>
-                                            <Text style={styles.tooltipLabel}>Kỳ vọng: </Text>
-                                            <Text style={styles.tooltipValueOrange}>
-                                                {activeGrowthDataPoint
-                                                    ? `${activeGrowthDataPoint.expected.toLocaleString(
-                                                          'vi-VN'
-                                                      )} (${
-                                                          selectedTab === 'Sản lượng' ? 'con' : 'kg'
-                                                      })`
-                                                    : '...'}
+                                {/* TABS */}
+                                <View style={styles.tabContainer}>
+                                    {TABS.map(tab => (
+                                        <TouchableOpacity
+                                            key={tab}
+                                            style={[
+                                                styles.tab,
+                                                selectedTab === tab && styles.selectedTab,
+                                            ]}
+                                            onPress={() => setSelectedTab(tab)}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.tabText,
+                                                    selectedTab === tab && styles.selectedTabText,
+                                                ]}
+                                            >
+                                                {tab}
                                             </Text>
-                                        </View>
-                                        <View style={styles.tooltipRow}>
-                                            <Text style={styles.tooltipLabel}>Thực tế: </Text>
-                                            <Text style={styles.tooltipValueBlue}>
-                                                {activeGrowthDataPoint
-                                                    ? `${(
-                                                          activeGrowthDataPoint.actual ?? 0
-                                                      ).toLocaleString('vi-VN')} (${
-                                                          selectedTab === 'Sản lượng' ? 'con' : 'kg'
-                                                      })`
-                                                    : '...'}
-                                            </Text>
-                                        </View>
-                                    </AnimatedView>
+                                        </TouchableOpacity>
+                                    ))}
                                 </View>
-                            </GestureDetector>
-                        </View>
 
-                        {/* LEGEND */}
-                        <View style={styles.legendContainer}>
-                            <View style={styles.legendItem}>
-                                <View style={[styles.legendDot, { backgroundColor: '#FFAB76' }]} />
-                                <Text style={styles.legendText}>Kỳ vọng</Text>
-                            </View>
-                            <View style={styles.legendItem}>
-                                <View style={[styles.legendDot, { backgroundColor: '#0057FF' }]} />
-                                <Text style={styles.legendText}>Ước tính</Text>
-                            </View>
-                            <View style={styles.legendItem}>
-                                <View style={[styles.legendDot, { backgroundColor: '#D1D5DB' }]} />
-                                <Text style={styles.legendText}>Thực tế</Text>
-                            </View>
-                        </View>
+                                {/* CHART */}
+                                <View style={styles.chartWrapper} onLayout={onLayout}>
+                                    <GestureDetector gesture={gesture}>
+                                        <View style={{ flex: 1 }}>
+                                            <Svg width={chartWidth} height={CHART_HEIGHT}>
+                                                {/* Grids & Y-Axis Labels */}
+                                                {yLabels.map((label, i) => {
+                                                    const y =
+                                                        top +
+                                                        ((CHART_HEIGHT - top - bottom) /
+                                                            (yLabels.length - 1)) *
+                                                            i;
+                                                    return (
+                                                        <React.Fragment key={`grid-group-${i}`}>
+                                                            <Line
+                                                                x1={left}
+                                                                x2={chartWidth - right}
+                                                                y1={y}
+                                                                y2={y}
+                                                                stroke={colors.gray[100]}
+                                                                strokeWidth={1}
+                                                            />
+                                                            <SvgText
+                                                                x={left}
+                                                                y={y - 5}
+                                                                fill={colors.gray[500]}
+                                                                fontSize="10"
+                                                            >
+                                                                {label}
+                                                            </SvgText>
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+
+                                                {/* Paths */}
+                                                <Path
+                                                    d={paths?.expectedPath || ''}
+                                                    fill="none"
+                                                    stroke="#FFAB76"
+                                                    strokeWidth={2}
+                                                />
+                                                {paths?.actualPath && (
+                                                    <Path
+                                                        d={paths.actualPath}
+                                                        fill="none"
+                                                        stroke="#0057FF"
+                                                        strokeWidth={2}
+                                                    />
+                                                )}
+
+                                                {/* X Axis Labels */}
+                                                {activeData.map((d: GrowthDataPoint, i: number) => {
+                                                    if (i % 7 !== 0 && i !== activeData.length - 1)
+                                                        return null;
+                                                    return (
+                                                        <SvgText
+                                                            key={i}
+                                                            x={scales.x(i)}
+                                                            y={CHART_HEIGHT - bottom + 25}
+                                                            fill={colors.gray[500]}
+                                                            fontSize="10"
+                                                            textAnchor="middle"
+                                                        >
+                                                            {formatDate(d.date)}
+                                                        </SvgText>
+                                                    );
+                                                })}
+
+                                                {/* INTERACTION ELEMENTS */}
+                                                <AnimatedLine
+                                                    animatedProps={cursorProps}
+                                                    y1={top}
+                                                    y2={CHART_HEIGHT - bottom}
+                                                    stroke={colors.gray[400]}
+                                                    strokeDasharray="4 4"
+                                                    strokeWidth={1}
+                                                />
+                                                <AnimatedCircle
+                                                    animatedProps={dotProps}
+                                                    r={7}
+                                                    fill="#0057FF"
+                                                    stroke="#FFFFFF"
+                                                    strokeWidth={2}
+                                                />
+                                            </Svg>
+
+                                            {/* OVERLAY TOOLTIP & DATE BOX */}
+                                            <AnimatedView
+                                                style={[styles.activeDateBox, dateBoxStyle]}
+                                            >
+                                                <Text style={styles.activeDateText}>
+                                                    {activeGrowthDataPoint
+                                                        ? formatDate(activeGrowthDataPoint.date)
+                                                        : '--/--/----'}
+                                                </Text>
+                                            </AnimatedView>
+
+                                            <AnimatedView style={[styles.tooltip, tooltipStyle]}>
+                                                <Text style={styles.tooltipTitle}>
+                                                    {activeGrowthDataPoint
+                                                        ? `Ngày tuổi ${activeGrowthDataPoint.dayAge}`
+                                                        : '...'}
+                                                </Text>
+                                                <View style={styles.tooltipRow}>
+                                                    <Text style={styles.tooltipLabel}>
+                                                        Kỳ vọng:{' '}
+                                                    </Text>
+                                                    <Text style={styles.tooltipValueOrange}>
+                                                        {activeGrowthDataPoint
+                                                            ? `${activeGrowthDataPoint.expected.toLocaleString(
+                                                                  'vi-VN'
+                                                              )} (${
+                                                                  selectedTab === 'Sản lượng'
+                                                                      ? 'con'
+                                                                      : 'kg'
+                                                              })`
+                                                            : '...'}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.tooltipRow}>
+                                                    <Text style={styles.tooltipLabel}>
+                                                        Thực tế:{' '}
+                                                    </Text>
+                                                    <Text style={styles.tooltipValueBlue}>
+                                                        {activeGrowthDataPoint
+                                                            ? `${(
+                                                                  activeGrowthDataPoint.actual ?? 0
+                                                              ).toLocaleString('vi-VN')} (${
+                                                                  selectedTab === 'Sản lượng'
+                                                                      ? 'con'
+                                                                      : 'kg'
+                                                              })`
+                                                            : '...'}
+                                                    </Text>
+                                                </View>
+                                            </AnimatedView>
+                                        </View>
+                                    </GestureDetector>
+                                </View>
+
+                                {/* LEGEND */}
+                                <View style={styles.legendContainer}>
+                                    <View style={styles.legendItem}>
+                                        <View
+                                            style={[
+                                                styles.legendDot,
+                                                { backgroundColor: '#FFAB76' },
+                                            ]}
+                                        />
+                                        <Text style={styles.legendText}>Kỳ vọng</Text>
+                                    </View>
+                                    <View style={styles.legendItem}>
+                                        <View
+                                            style={[
+                                                styles.legendDot,
+                                                { backgroundColor: '#0057FF' },
+                                            ]}
+                                        />
+                                        <Text style={styles.legendText}>Ước tính</Text>
+                                    </View>
+                                    <View style={styles.legendItem}>
+                                        <View
+                                            style={[
+                                                styles.legendDot,
+                                                { backgroundColor: '#D1D5DB' },
+                                            ]}
+                                        />
+                                        <Text style={styles.legendText}>Thực tế</Text>
+                                    </View>
+                                </View>
                             </>
                         )}
                     </View>

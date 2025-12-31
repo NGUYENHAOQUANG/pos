@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     container: {
         padding: spacing.md,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
+        borderRadius: 0,
     },
     inputGroup: {
         marginBottom: spacing.md,

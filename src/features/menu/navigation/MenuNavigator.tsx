@@ -19,6 +19,7 @@ import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesS
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
+import { FarmNavigator } from '@/features/farm/navigation/FarmNavigator';
 
 export type MenuStackParamList = {
     MenuMain: undefined;
@@ -40,6 +41,7 @@ export type MenuStackParamList = {
     HistoryDevices: { deviceId?: string };
     EquipmentMaintenance: { deviceId?: string };
     EditEquimentMaintenance: { deviceId: string; maintenanceId: string; initialData: any };
+    FarmStack: undefined;
 };
 
 const Stack = createNativeStackNavigator<MenuStackParamList>();
@@ -75,6 +77,7 @@ export const MenuNavigator = () => {
                     name="EditEquimentMaintenance"
                     component={EditEquimentMaintenanceScreens}
                 />
+                <Stack.Screen name="FarmStack" component={FarmNavigator} />
             </Stack.Navigator>
         </MenuProvider>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { FarmProvider } from '@/features/farm/context/FarmContext';
+
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
@@ -77,49 +77,44 @@ import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water
 
 export const FarmNavigator = () => {
     return (
-        <FarmProvider>
-            <Stack.Navigator
-                initialRouteName="FarmList"
-                screenOptions={{
-                    headerShown: false,
-                }}
-            >
-                <Stack.Screen name="FarmList" component={ShrimpPondListScreens} />
-                <Stack.Screen name="PondDetail" component={ShrimpFarmScreens} />
-                <Stack.Screen name="FeedTheShrimp" component={AddFeederScreens} />
-                <Stack.Screen name="EditFeeder" component={EditFeederScreens} />
-                <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
-                <Stack.Screen name="PondInfo" component={PondInfoScreen} />
-                <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
-                <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
-                <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
-                <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
-                <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
-                <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
-                <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
-                <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
-                <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
-                <Stack.Screen name="AddWaterTreatmentScreen" component={AddWaterTreatmentScreens} />
-                <Stack.Screen
-                    name="EditWaterTreatmentScreens"
-                    component={EditWaterTreatmentScreens}
-                />
-                <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
-                <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
-                <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
-                <Stack.Screen
-                    name="MeasureShrimpSizeLogScreen"
-                    component={MeasureShrimpSizeLogScreen}
-                />
-                <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
-                <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
-                <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
-                <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
-                <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />
-                <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
-                <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
-                <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
-            </Stack.Navigator>
-        </FarmProvider>
+        <Stack.Navigator
+            initialRouteName="FarmList"
+            screenOptions={{
+                headerShown: false,
+            }}
+        >
+            <Stack.Screen name="FarmList" component={ShrimpPondListScreens} />
+            <Stack.Screen name="PondDetail" component={ShrimpFarmScreens} />
+            <Stack.Screen name="FeedTheShrimp" component={AddFeederScreens} />
+            <Stack.Screen name="EditFeeder" component={EditFeederScreens} />
+            <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
+            <Stack.Screen name="PondInfo" component={PondInfoScreen} />
+            <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
+            <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
+            <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
+            <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
+            <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />
+            <Stack.Screen name="EnvironmentLogScreen" component={EnvironmentLogScreen} />
+            <Stack.Screen name="CreateCycle" component={CreateCycleScreen} />
+            <Stack.Screen name="AddSiphonScreen" component={AddSiphonScreen} />
+            <Stack.Screen name="SiphonLog" component={SiphonLogScreen} />
+            <Stack.Screen name="AddWaterTreatmentScreen" component={AddWaterTreatmentScreens} />
+            <Stack.Screen name="EditWaterTreatmentScreens" component={EditWaterTreatmentScreens} />
+            <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
+            <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
+            <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
+            <Stack.Screen
+                name="MeasureShrimpSizeLogScreen"
+                component={MeasureShrimpSizeLogScreen}
+            />
+            <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
+            <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
+            <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
+            <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
+            <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />
+            <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
+            <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
+            <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
+        </Stack.Navigator>
     );
 };

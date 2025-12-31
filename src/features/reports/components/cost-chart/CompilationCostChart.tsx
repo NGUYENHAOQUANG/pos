@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import CostChart from './CostChart';
 import BottomCostChart from './BottomCostChart';
 import { COST_DATA } from './costChartData';
@@ -25,12 +25,11 @@ const CompilationCostChart = () => {
 
     return (
         <View style={styles.container}>
-            <CollapseHead
-                title="BIỂU ĐỒ CHI PHÍ"
+            <BasicDropDownButton
+                label="BIỂU ĐỒ CHI PHÍ"
                 isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
+                onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
-                titleStyle={styles.headerTitle}
             />
 
             {isExpanded && (
