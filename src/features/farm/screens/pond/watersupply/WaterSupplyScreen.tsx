@@ -202,6 +202,7 @@ export const WaterSupplyScreen = () => {
                 id: Date.now().toString(),
                 label: `Lần ${nextIndex}`,
                 ...itemData,
+                pondId: pond.id,
             };
             updatePondJob(pond.id, 'WATER_CHANGE', [...currentItems, newItem]);
         }

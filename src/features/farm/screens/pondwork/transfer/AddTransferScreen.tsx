@@ -237,6 +237,7 @@ export const AddTransferScreen: React.FC = () => {
                 id: Date.now().toString(),
                 ...baseData,
                 label: `Lần ${nextIndex}`,
+                pondId: pondId,
             };
 
             updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);

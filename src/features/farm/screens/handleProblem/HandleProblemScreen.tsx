@@ -112,6 +112,7 @@ export const HandleProblemScreen = () => {
                 label: `Lần ${nextIndex}`,
                 time: timeString,
                 date: dateString,
+                pondId: pond.id,
                 ...jobData,
             };
             updatePondJob(pond.id, currentJobType, [...currentItems, newItem]);

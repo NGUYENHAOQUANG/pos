@@ -180,6 +180,7 @@ export const AddSiphonScreen: React.FC = () => {
                 id: Date.now().toString(),
                 ...baseData,
                 label: `Lần ${nextIndex}`,
+                pondId: pondId,
             };
 
             updatePondJob(pondId, 'SIPHON', [...currentItems, newItem]);

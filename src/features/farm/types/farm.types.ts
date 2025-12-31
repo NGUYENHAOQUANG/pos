@@ -80,6 +80,10 @@ export interface EnvironmentMeta {
     salinity?: string;
     alkalinity?: string;
     transparency?: string;
+    kali?: string;
+    tan?: string;
+    magie?: string;
+    no3?: string;
 }
 
 export interface SiphonMeta {
@@ -139,6 +143,7 @@ export interface JobExecution {
     time: string;
     date?: string;
     note?: string;
+    pondId?: string;
     materials?: {
         material: any;
         quantity: number;

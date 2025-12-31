@@ -7,7 +7,6 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { convertShrimpInspectionMetaToActivityData } from '@/features/farm/utils/metaConverters';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { JobExecution } from '@/features/farm/types/farm.types';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -46,9 +45,6 @@ export const PondworkLogScreen: React.FC = () => {
             emptyMessage="Chưa có dữ liệu kiểm tra tôm"
             emptyButtonTitle="Bắt đầu kiểm tra tôm"
             onEmptyButtonPress={handleStartInspection}
-            customEmptyState={
-                <MaterialEmptyState tab="shrimp-inspection" onPress={handleStartInspection} />
-            }
         />
     );
 };

@@ -21,6 +21,15 @@ interface EnvironmentParametersBoxProps {
     onTransparencyChange: (value: string) => void;
     onSetupPress?: () => void;
     showError?: boolean;
+    advancedParameters?: Array<{ id: string; name: string }>;
+    kali?: string;
+    onKaliChange?: (value: string) => void;
+    tan?: string;
+    onTanChange?: (value: string) => void;
+    magie?: string;
+    onMagieChange?: (value: string) => void;
+    no3?: string;
+    onNo3Change?: (value: string) => void;
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -38,7 +47,32 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onTransparencyChange,
     onSetupPress,
     showError = false,
+    advancedParameters = [],
+    kali = '',
+    onKaliChange,
+    tan = '',
+    onTanChange,
+    magie = '',
+    onMagieChange,
+    no3 = '',
+    onNo3Change,
 }) => {
+    // Map advanced parameter IDs to render fields
+    const getAdvancedParameterValue = (id: string): string => {
+        if (id === '7') return kali;
+        if (id === '8') return tan;
+        if (id === '9') return magie;
+        if (id === '10') return no3;
+        return '';
+    };
+
+    const getAdvancedParameterOnChange = (id: string): ((value: string) => void) | undefined => {
+        if (id === '7') return onKaliChange;
+        if (id === '8') return onTanChange;
+        if (id === '9') return onMagieChange;
+        if (id === '10') return onNo3Change;
+        return undefined;
+    };
     return (
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
@@ -93,6 +127,24 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         />
                     </View>
                 </View>
+
+                {/* Advanced Parameters */}
+                {advancedParameters.length > 0 &&
+                    advancedParameters.map(param => {
+                        const paramValue = getAdvancedParameterValue(param.id);
+                        const paramOnChange = getAdvancedParameterOnChange(param.id);
+                        if (!paramOnChange) return null;
+
+                        return (
+                            <View key={param.id} style={styles.fullWidthRow}>
+                                <FarmInput
+                                    label={param.name}
+                                    value={paramValue}
+                                    onChangeText={paramOnChange}
+                                />
+                            </View>
+                        );
+                    })}
             </View>
 
             <View style={styles.divider} />
@@ -141,6 +193,9 @@ const styles = StyleSheet.create({
     },
     column: {
         flex: 1,
+    },
+    fullWidthRow: {
+        width: '100%',
     },
     divider: {
         height: 1,

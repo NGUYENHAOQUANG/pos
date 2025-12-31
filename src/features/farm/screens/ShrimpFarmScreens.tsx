@@ -285,6 +285,7 @@ export const ShrimpFarmScreens: React.FC = () => {
             id: Date.now().toString(),
             label: `Lần ${nextIndex}`,
             time: timeString,
+            pondId: pond.id,
         };
 
         updatePondJob(pond.id, type, [...currentItems, newItem]);
