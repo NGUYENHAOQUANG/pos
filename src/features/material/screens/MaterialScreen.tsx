@@ -17,6 +17,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { InventoryCard } from '../components/inventory/InventoryCard';
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
 import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
+import { showSuccessToast } from '../utils/validationToast';
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -56,12 +57,14 @@ export const MeterialScreen = () => {
 
     const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
         setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
+        showSuccessToast('Tạo vật tư thành công');
     };
 
     const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
         setMaterials(prev =>
             prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
         );
+        showSuccessToast('Cập nhật thông tin vật tư thành công');
     };
 
     const handleSaveWarehouse = (data: any) => {
@@ -72,6 +75,7 @@ export const MeterialScreen = () => {
             ...data,
         };
         setWarehouseList(prev => [newReceipt, ...prev]);
+        showSuccessToast('Tạo phiếu nhập kho thành công');
     };
 
     const handleSaveInventory = (newTicket: IInventoryTicket) => {
@@ -88,6 +92,7 @@ export const MeterialScreen = () => {
                 return mat;
             })
         );
+        showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
     };
 
     const handleCreateImport = () => {
