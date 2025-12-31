@@ -27,21 +27,12 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
 
     const openMenu = () => {
         if (buttonRef.current) {
-            buttonRef.current.measure((fx, fy, width, height, px, py) => {
+            buttonRef.current.measureInWindow((x, y, width, height) => {
                 const windowWidth = Dimensions.get('window').width;
-                // px is X position on screen. px + width is right edge.
-                // Space from right screen edge = windowWidth - (px + width)
-                const rightSpace = windowWidth - (px + width);
+                const rightSpace = windowWidth - (x + width);
 
-                // Set right position to align with button
-                // Ensure non-negative and handle fallback
                 setDropdownRight(rightSpace >= 0 ? rightSpace : 24);
-
-                // Top position: py + height + 4 (margin)
-                // Removed statusbarHeight subtraction as it acts inconsistently on real devices vs emulators
-                // When using transparent Modal, coordinates are usually screen-relative already.
-                const top = py ? py + height + 4 : fy + height + 100;
-                setDropdownTop(top || 200);
+                setDropdownTop(y + height + 4);
 
                 setVisible(true);
             });

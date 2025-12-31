@@ -228,13 +228,14 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingTop: 34,
+        paddingTop: SCREEN_HEIGHT < 800 ? 20 : 34,
         width: SCREEN_WIDTH,
+        paddingBottom: 20, // Add bottom padding for safety
     },
     logoContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 12,
+        marginBottom: 8,
         height: 60,
     },
     slideTitle: {
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
         textAlign: 'center',
-        marginBottom: 12,
+        marginBottom: 8,
         lineHeight: 32,
     },
     slideDescription: {
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
 
     // Layer spacer
     spacer: {
-        flex: SCREEN_HEIGHT < 800 ? 0.75 : 1.2, // Responsive adjustment
+        flex: SCREEN_HEIGHT < 800 ? 0.6 : 1.0, // Balanced spacing
         backgroundColor: 'transparent',
     },
 
