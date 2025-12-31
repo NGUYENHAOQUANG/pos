@@ -80,6 +80,10 @@ export interface EnvironmentMeta {
     salinity?: string;
     alkalinity?: string;
     transparency?: string;
+    kali?: string;
+    tan?: string;
+    magie?: string;
+    no3?: string;
 }
 
 export interface SiphonMeta {

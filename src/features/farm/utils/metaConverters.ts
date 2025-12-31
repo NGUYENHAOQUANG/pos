@@ -35,6 +35,18 @@ export const convertEnvironmentMetaToActivityData = (meta: EnvironmentMeta): Act
     if (meta.transparency) {
         data.push({ label: 'Độ trong (cm)', value: meta.transparency });
     }
+    if (meta.kali) {
+        data.push({ label: 'Kali (mg/L)', value: meta.kali });
+    }
+    if (meta.tan) {
+        data.push({ label: 'TAN (mg/L)', value: meta.tan });
+    }
+    if (meta.magie) {
+        data.push({ label: 'Magie (mg/L)', value: meta.magie });
+    }
+    if (meta.no3) {
+        data.push({ label: 'NO3 (mg/L)', value: meta.no3 });
+    }
 
     return data;
 };

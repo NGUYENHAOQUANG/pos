@@ -52,6 +52,15 @@ export const AddEnvironmentScreen: React.FC = () => {
     const [showParameterError, setShowParameterError] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
+    // Advanced parameters state
+    const [advancedParameters, setAdvancedParameters] = useState<
+        Array<{ id: string; name: string }>
+    >([]);
+    const [kali, setKali] = useState(meta.kali || '');
+    const [tan, setTan] = useState(meta.tan || '');
+    const [magie, setMagie] = useState(meta.magie || '');
+    const [no3, setNo3] = useState(meta.no3 || '');
+
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
@@ -64,6 +73,10 @@ export const AddEnvironmentScreen: React.FC = () => {
             alkalinity: meta.alkalinity || '',
             transparency: meta.transparency || '',
             notes: itemToEdit?.note || '',
+            kali: meta.kali || '',
+            tan: meta.tan || '',
+            magie: meta.magie || '',
+            no3: meta.no3 || '',
         };
     }, [itemToEdit, meta]);
 
@@ -72,10 +85,54 @@ export const AddEnvironmentScreen: React.FC = () => {
         setTabBarVisible(false);
     }, [setTabBarVisible]);
 
+    // Initialize advanced parameters from meta when editing
+    useEffect(() => {
+        if (itemToEdit && meta) {
+            const advancedParams: Array<{ id: string; name: string }> = [];
+            if (meta.kali) {
+                advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
+            }
+            if (meta.tan) {
+                advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
+            }
+            if (meta.magie) {
+                advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
+            }
+            if (meta.no3) {
+                advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
+            }
+            setAdvancedParameters(advancedParams);
+        }
+    }, [itemToEdit, meta]);
+
     const handleBack = () => {
         if (navigation.canGoBack()) {
             navigation.goBack();
         }
+    };
+
+    const handleSaveAdvancedParams = (data: {
+        advancedParameters: Array<{ id: string; name: string }>;
+    }) => {
+        const newParamIds = new Set(data.advancedParameters.map(p => p.id));
+        const oldParamIds = new Set(advancedParameters.map(p => p.id));
+
+        // Find parameters that were unchecked
+        const uncheckedIds = Array.from(oldParamIds).filter(id => !newParamIds.has(id));
+
+        // Clear values for unchecked parameters
+        // In create mode: clear to prevent saving
+        // In edit mode: clear to allow updating (removing the field is an update)
+        if (uncheckedIds.length > 0) {
+            uncheckedIds.forEach(id => {
+                if (id === '7') setKali('');
+                if (id === '8') setTan('');
+                if (id === '9') setMagie('');
+                if (id === '10') setNo3('');
+            });
+        }
+
+        setAdvancedParameters(data.advancedParameters);
     };
 
     const handleSave = () => {
@@ -107,6 +164,23 @@ export const AddEnvironmentScreen: React.FC = () => {
                     salinity: salinity.trim() || undefined,
                     alkalinity: alkalinity.trim() || undefined,
                     transparency: transparency.trim() || undefined,
+                    // Only save advanced parameters if they are checked
+                    kali:
+                        advancedParameters.some(p => p.id === '7') && kali.trim()
+                            ? kali.trim()
+                            : undefined,
+                    tan:
+                        advancedParameters.some(p => p.id === '8') && tan.trim()
+                            ? tan.trim()
+                            : undefined,
+                    magie:
+                        advancedParameters.some(p => p.id === '9') && magie.trim()
+                            ? magie.trim()
+                            : undefined,
+                    no3:
+                        advancedParameters.some(p => p.id === '10') && no3.trim()
+                            ? no3.trim()
+                            : undefined,
                 },
             };
 
@@ -173,9 +247,24 @@ export const AddEnvironmentScreen: React.FC = () => {
             temperature.trim().length > 0 ||
             salinity.trim().length > 0 ||
             alkalinity.trim().length > 0 ||
-            transparency.trim().length > 0
+            transparency.trim().length > 0 ||
+            kali.trim().length > 0 ||
+            tan.trim().length > 0 ||
+            magie.trim().length > 0 ||
+            no3.trim().length > 0
         );
-    }, [pH, dissolvedOxygen, temperature, salinity, alkalinity, transparency]);
+    }, [
+        pH,
+        dissolvedOxygen,
+        temperature,
+        salinity,
+        alkalinity,
+        transparency,
+        kali,
+        tan,
+        magie,
+        no3,
+    ]);
 
     // Check if data has changed from initial (when editing)
     const hasChanges = useMemo(() => {
@@ -194,6 +283,10 @@ export const AddEnvironmentScreen: React.FC = () => {
         if (alkalinity !== initialData.alkalinity) return true;
         if (transparency !== initialData.transparency) return true;
         if (notes !== initialData.notes) return true;
+        if (kali !== initialData.kali) return true;
+        if (tan !== initialData.tan) return true;
+        if (magie !== initialData.magie) return true;
+        if (no3 !== initialData.no3) return true;
 
         return false;
     }, [
@@ -207,6 +300,10 @@ export const AddEnvironmentScreen: React.FC = () => {
         alkalinity,
         transparency,
         notes,
+        kali,
+        tan,
+        magie,
+        no3,
     ]);
 
     const isFormComplete = hasAtLeastOneParameter;
@@ -270,8 +367,20 @@ export const AddEnvironmentScreen: React.FC = () => {
                         setShowParameterError(false);
                     }}
                     onSetupPress={() => {
-                        navigation.navigate('SettingEnvironment');
+                        navigation.navigate('SettingEnvironment', {
+                            data: { advancedParameters },
+                            onSave: handleSaveAdvancedParams,
+                        });
                     }}
+                    advancedParameters={advancedParameters}
+                    kali={kali}
+                    onKaliChange={setKali}
+                    tan={tan}
+                    onTanChange={setTan}
+                    magie={magie}
+                    onMagieChange={setMagie}
+                    no3={no3}
+                    onNo3Change={setNo3}
                     showError={showParameterError}
                 />
 
