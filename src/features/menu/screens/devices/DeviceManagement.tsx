@@ -52,21 +52,22 @@ export const DeviceManagement = () => {
 
     const handleMorePress = (event: GestureResponderEvent, deviceId: string) => {
         const target = event.currentTarget as any;
-        target.measure(
-            (x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
-                const windowHeight = Dimensions.get('window').height;
-                const verticalPos = getMenuPosition(pageY, height, windowHeight, 220);
+        // Use measureInWindow to get absolute coordinates relative to the screen
+        target.measureInWindow((x: number, y: number, width: number, height: number) => {
+            const windowHeight = Dimensions.get('window').height;
+            // pageY is essentially y in measureInWindow
+            const verticalPos = getMenuPosition(y, height, windowHeight, 220);
 
-                const newPosition: { top?: number; bottom?: number; right: number } = {
-                    right: windowWidth - (pageX + width),
-                    ...verticalPos,
-                };
+            const newPosition: { top?: number; bottom?: number; right: number } = {
+                // Calculate right offset from window edge
+                right: windowWidth - (x + width),
+                ...verticalPos,
+            };
 
-                setMenuPosition(newPosition as any);
-                setSelectedDeviceId(deviceId);
-                setMenuVisible(true);
-            }
-        );
+            setMenuPosition(newPosition as any);
+            setSelectedDeviceId(deviceId);
+            setMenuVisible(true);
+        });
     };
 
     const handleCloseMenu = () => {

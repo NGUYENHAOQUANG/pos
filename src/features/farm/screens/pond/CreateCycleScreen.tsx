@@ -12,7 +12,6 @@ import Toast from 'react-native-toast-message';
 import { useFarm } from '../../context/FarmContext';
 import { CycleData } from '../../types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -37,7 +36,7 @@ export const CreateCycleScreen: React.FC = () => {
                 cycleName: '',
                 breedSource: undefined,
                 season: undefined,
-                stockingDate: formatDate(new Date()),
+                stockingDate: new Date().toISOString(),
             };
         }
         return {
@@ -124,7 +123,12 @@ export const CreateCycleScreen: React.FC = () => {
             />
 
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                <CreateCycleForm formData={cycleData} setFormData={setCycleData} pondId={pondId} />
+                <CreateCycleForm
+                    formData={cycleData}
+                    setFormData={setCycleData}
+                    pondId={pondId}
+                    isEdit={isEdit}
+                />
             </ScrollView>
 
             <ButtonBarFarm
@@ -144,7 +148,7 @@ export const CreateCycleScreen: React.FC = () => {
                 onConfirm={onConfirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
                 title="Xác nhận xóa chu kỳ nuôi"
-                message="Bạn sẽ không thể truy cập lại chu kỳ đã xóa. Các vật tư đã xuất kho cho chu kỳ này sẽ có thể bị ảnh hưởng. Bạn có chắc chắn mốn xóa chu kỳ này không?"
+                message="Bạn sẽ không thể truy cập lại chu kỳ đã xóa. Các vật tư đã xuất kho cho chu kỳ này sẽ có thể bị ảnh hưởng. Bạn có chắc chắn muốn xóa chu kỳ này không?"
                 confirmText="Xóa chu kỳ"
                 cancelText="Không"
             />

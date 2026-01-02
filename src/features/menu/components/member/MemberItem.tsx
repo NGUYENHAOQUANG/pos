@@ -82,18 +82,19 @@ export const MemberItem: React.FC<MemberItemProps> = ({
     } as any);
 
     const handlePressOption = () => {
-        buttonRef.current?.measure((x, y, width, height, pageX, pageY) => {
+        buttonRef.current?.measureInWindow((x, y, width, height) => {
             const windowHeight = require('react-native').Dimensions.get('window').height;
             const windowWidth = require('react-native').Dimensions.get('window').width;
 
             // Calculate estimated height: ~50px per item + ~16px padding
             const estimatedHeight = menuItems.length * 50 + 16;
 
-            const verticalPos = getMenuPosition(pageY, height, windowHeight, estimatedHeight);
+            // pageY is y in measureInWindow
+            const verticalPos = getMenuPosition(y, height, windowHeight, estimatedHeight);
 
             setMenuPosition({
                 ...verticalPos,
-                right: windowWidth - (pageX + width),
+                right: windowWidth - (x + width),
             });
             setMenuVisible(true);
         });

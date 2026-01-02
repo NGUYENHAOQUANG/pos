@@ -14,6 +14,7 @@ import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/Dr
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
 import { IconPond } from '@/assets/icons'; // Import new SVG
 import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 interface HeaderFarmProps {
@@ -34,6 +35,7 @@ interface HeaderFarmProps {
     title?: string | React.ReactNode; // e.g. Pond Name or custom ReactNode
     subtitle?: string; // e.g. Area
     tagType?: PondType;
+    status?: TagStatus; // Added status prop
     onBack?: () => void;
     leftComponent?: React.ReactNode;
     rightAction?: React.ReactNode;
@@ -50,6 +52,7 @@ export const HeaderFarm = ({
     title,
     subtitle,
     tagType,
+    status,
     onBack,
     leftComponent,
     rightAction,
@@ -130,6 +133,7 @@ export const HeaderFarm = ({
 
         const rightNode = (
             <View style={styles.detailRight}>
+                {status && <Tag status={status} style={styles.tag} />}
                 {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
                 <View ref={buttonRef} collapsable={false}>
                     <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />

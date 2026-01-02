@@ -52,6 +52,14 @@ const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
+const PREPARATION_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+    { type: JOB_TYPES.WATER_CHANGE, items: [] },
+    { type: JOB_TYPES.CLEAN_POND, items: [] },
+    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+];
+
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
 
@@ -117,7 +125,9 @@ export const ShrimpFarmScreens: React.FC = () => {
     const jobs = useMemo(() => {
         let jobTemplate: { type: JobType; items: never[] }[];
 
-        if (!pond?.type) {
+        if (!currentCycle) {
+            jobTemplate = PREPARATION_JOBS_TEMPLATE;
+        } else if (!pond?.type) {
             jobTemplate = COMMON_JOBS_TEMPLATE;
         } else {
             switch (pond.type) {
@@ -136,7 +146,7 @@ export const ShrimpFarmScreens: React.FC = () => {
             ...template,
             items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
         }));
-    }, [pond?.type, pond?.id, getPondJobItems]);
+    }, [pond?.type, pond?.id, getPondJobItems, currentCycle]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -412,6 +422,9 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
     };
 
+    // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo"
+    const headerDisplayType = pond?.type === 'Ao sẵn sàng' && currentCycle ? 'Ao vèo' : undefined;
+
     return (
         <View style={styles.container}>
             <HeadingFarm
@@ -420,6 +433,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                 tabType="pond-detail"
                 fullWidth
                 pond={pond}
+                displayPondType={headerDisplayType as any}
                 onBack={() => navigation.goBack()}
                 menuOptions={[
                     {

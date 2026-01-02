@@ -17,9 +17,10 @@ interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
     pondId?: string;
+    isEdit?: boolean;
 }
 
-const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId }) => {
+const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdit = false }) => {
     // Lấy danh mục từ FarmContext
     const { breedOptions, seasonOptions, getPondById } = useFarm();
 
@@ -189,6 +190,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId }) => 
                             : null
                     }
                     onDateChange={date => updateField('stockingDate', formatDate(date))}
+                    disabled={!isEdit}
                 />
 
                 <View style={styles.row}>

@@ -11,6 +11,7 @@ import { useFarm } from '@/features/farm/context/FarmContext';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showAddJobSuccessToast } from '@/features/farm/utils/toastMessages';
+import Toast from 'react-native-toast-message';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
@@ -31,6 +32,16 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     };
 
     const handleSave = () => {
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (pondId) {
             // Save with key 'WATER_TREATMENT'
             // Check key in context if needed

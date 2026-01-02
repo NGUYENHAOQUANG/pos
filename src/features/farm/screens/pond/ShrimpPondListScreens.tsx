@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,7 +18,7 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
 export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {
     const navigation = useNavigation<NavigationProp>();
-    const { ponds } = useFarm();
+    const { ponds, getLatestPondActivity, activeCycles, getCyclesByPondId } = useFarm();
     const [selectedTab, setSelectedTab] = useState('all');
     const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
         id: '1',
@@ -51,27 +51,75 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         navigation.navigate('FarmInfo', { farm: farmData });
     };
 
-    // Tính counts dựa trên status của các pond
+    const checkHasActivity = useCallback(
+        (pondId: string) => {
+            const activity = getLatestPondActivity(pondId);
+            return !!activity?.lastActivity && activity.lastActivity !== '-';
+        },
+        [getLatestPondActivity]
+    );
+
+    const checkHasCycle = useCallback(
+        (pondId: string) => {
+            const currentCycle = activeCycles[pondId];
+            if (currentCycle) return true;
+            // Check receiving ponds (if this pond is part of a transfer)
+            const cycles = getCyclesByPondId(pondId);
+            return cycles.some(c => c.receivingPonds?.includes(pondId));
+        },
+        [activeCycles, getCyclesByPondId]
+    );
+
+    // Generic status checker for consistency with ShrimpPondList's getStatus
+    const getComputedStatus = useCallback(
+        (pond: any) => {
+            const hasActivity = checkHasActivity(pond.id);
+            const hasCycle = checkHasCycle(pond.id);
+
+            if (!hasActivity && !hasCycle) return undefined;
+
+            // FIX: "Ao sẵn sàng" only shows status (and effectively changes type visual)
+            // when a cycle is active. If just doing work without cycle, keep clean.
+            if (pond.type === 'Ao sẵn sàng' && !hasCycle) {
+                return undefined;
+            }
+
+            if (['Ao sẵn sàng', 'Ao vèo', 'Ao lắng'].includes(pond.type)) {
+                return 'preparing';
+            }
+
+            if (pond.type === 'Ao nuôi') {
+                return 'active';
+            }
+
+            if (pond.status === 'Đang hoạt động') return 'active';
+            if (pond.status === 'Chuẩn bị') return 'preparing';
+
+            return undefined;
+        },
+        [checkHasActivity, checkHasCycle]
+    );
+
+    // Calculate counts based on COMPUTED status (requires activity + generic rules)
     const counts = useMemo(() => {
         const all = ponds.length;
-        const active = ponds.filter(pond => pond.status === 'Đang hoạt động').length;
-        const preparing = ponds.filter(pond => pond.status === 'Chuẩn bị').length;
+        const active = ponds.filter(pond => getComputedStatus(pond) === 'active').length;
+        const preparing = ponds.filter(pond => getComputedStatus(pond) === 'preparing').length;
         return { all, active, preparing };
-    }, [ponds]);
+    }, [ponds, getComputedStatus]);
 
-    // Filter data dựa trên selectedTab
     const filteredData = useMemo(() => {
         if (selectedTab === 'all') {
             return ponds;
         }
         if (selectedTab === 'active') {
-            return ponds.filter(pond => pond.status === 'Đang hoạt động');
+            return ponds.filter(pond => getComputedStatus(pond) === 'active');
         }
         if (selectedTab === 'preparing') {
-            return ponds.filter(pond => pond.status === 'Chuẩn bị');
+            return ponds.filter(pond => getComputedStatus(pond) === 'preparing');
         }
         return ponds;
-    }, [selectedTab, ponds]);
+    }, [selectedTab, ponds, getComputedStatus]);
 
     return (
         <View style={styles.container}>

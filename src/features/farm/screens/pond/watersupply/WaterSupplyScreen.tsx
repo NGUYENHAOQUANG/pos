@@ -8,6 +8,7 @@ import {
     Platform,
     TextInput,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -149,6 +150,26 @@ export const WaterSupplyScreen = () => {
     // };
 
     const handleSave = () => {
+        if (!targetLevel || !supplyLevel) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập đầy đủ thông tin mực nước',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) return;
 
         const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');

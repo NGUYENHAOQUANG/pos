@@ -22,6 +22,7 @@ import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import Toast from 'react-native-toast-message';
 
 // Mock Data
 const MOCK_MATERIALS: IMaterial[] = [
@@ -73,6 +74,16 @@ export const HandleProblemScreen = () => {
     }, [item]);
 
     const handleSave = () => {
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) return;
 
         const currentItems = getPondJobItems(pond.id, currentJobType);
