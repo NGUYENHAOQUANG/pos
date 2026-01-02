@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -34,11 +35,11 @@ export const PersonalInformationScreens: React.FC = () => {
     };
 
     const connectedFarms = [
-        { id: 1, name: '{Tên trại}', count: '{số lượng}' },
-        { id: 2, name: '{Tên trại}', count: '{số lượng}' },
+        { id: 1, name: 'Trại Kiên Giang', count: '10' },
+        { id: 2, name: 'Trại Cà Mau', count: '8' },
     ];
 
-    const totalFarms = '{số lượng}';
+    const totalFarms = '2';
 
     const handleChangePhoto = async () => {
         const result = await launchImageLibrary({
@@ -49,6 +50,14 @@ export const PersonalInformationScreens: React.FC = () => {
         if (result.assets && result.assets.length > 0) {
             setAvatarUri(result.assets[0].uri || null);
         }
+    };
+
+    const handleSave = () => {
+        Toast.show({
+            type: 'success',
+            text1: 'Cập nhật thông tin thành công',
+            position: 'top',
+        });
     };
 
     return (
@@ -67,7 +76,8 @@ export const PersonalInformationScreens: React.FC = () => {
                 <FarmConnecter
                     totalFarms={totalFarms}
                     farms={connectedFarms}
-                    onFarmPress={farm => console.log('Farm Pressed', farm.id)}
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    onFarmPress={() => (navigation.navigate as any)('FarmStack')}
                 />
 
                 {/* Bottom Spacer */}
@@ -77,9 +87,7 @@ export const PersonalInformationScreens: React.FC = () => {
             <ButtonBarMenu
                 primaryTitle="Lưu thông tin"
                 secondaryTitle="Huỷ"
-                onPrimaryPress={() => {
-                    console.log('Save Pressed');
-                }}
+                onPrimaryPress={handleSave}
                 onSecondaryPress={() => {
                     navigation.goBack();
                 }}

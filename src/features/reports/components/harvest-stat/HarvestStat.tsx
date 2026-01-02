@@ -59,29 +59,32 @@ export const HarvestStat = () => {
                 label="THỐNG KÊ THU HOẠCH"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
+                isExpanded={isSectionOpen}
             />
 
             {isSectionOpen && (
-                <View style={[styles.listContainer, isLoading ? styles.loadingContainer : undefined]}>
+                <View
+                    style={[styles.listContainer, isLoading ? styles.loadingContainer : undefined]}
+                >
                     {isLoading ? (
                         <Loading />
                     ) : (
                         <>
-                    {displayedData.map(item => (
-                        <HarvestItemCard key={item.id} item={item} />
-                    ))}
+                            {displayedData.map(item => (
+                                <HarvestItemCard key={item.id} item={item} />
+                            ))}
 
-                    {harvestData.length > INITIAL_SHOW_COUNT && (
-                        <TouchableOpacity
-                            style={styles.seeAllButton}
-                            onPress={toggleShowAll}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.seeAllText}>
-                                {showAll ? 'Thu gọn' : 'Xem tất cả'}
-                            </Text>
-                        </TouchableOpacity>
-                    )}
+                            {harvestData.length > INITIAL_SHOW_COUNT && (
+                                <TouchableOpacity
+                                    style={styles.seeAllButton}
+                                    onPress={toggleShowAll}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.seeAllText}>
+                                        {showAll ? 'Thu gọn' : 'Xem tất cả'}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </>
                     )}
                 </View>

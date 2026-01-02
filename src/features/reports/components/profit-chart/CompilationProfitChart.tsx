@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
 import { Legend, getProfitChartLegendItems } from '@/features/reports/components/Legend';
 import { MetricsRow } from '@/features/reports/components/profit-chart/MetricsRow';
@@ -45,10 +45,10 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}
         <View style={styles.container}>
             {/* Collapsible Chart Section */}
             <View style={styles.chartSection}>
-                <CollapseHead
-                    title="BIỂU ĐỒ LỢI NHUẬN"
+                <BasicDropDownButton
+                    label="BIỂU ĐỒ LỢI NHUẬN"
                     isExpanded={isExpanded}
-                    onToggle={() => setIsExpanded(!isExpanded)}
+                    onPress={() => setIsExpanded(!isExpanded)}
                     style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
                 />
 

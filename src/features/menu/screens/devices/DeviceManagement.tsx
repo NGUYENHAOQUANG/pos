@@ -6,8 +6,6 @@ import {
     Dimensions,
     GestureResponderEvent,
     ScrollView,
-    Platform,
-    StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +19,7 @@ import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/Dr
 import { DevicesCard } from '@/features/menu/components/devices/DevicesCard';
 import { DeviceData } from '@/features/menu/types/menu.types';
 import { WarningDevices } from '@/features/menu/components/devices/WarningDevices';
-import { DeviceActionMenu } from '@/features/menu/components/devices/DeviceActionMenu';
+import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
 import { useMenuContext } from '@/features/menu/context/MenuContext';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
@@ -57,22 +55,12 @@ export const DeviceManagement = () => {
         target.measure(
             (x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
                 const windowHeight = Dimensions.get('window').height;
-                const MENU_HEIGHT = 200;
-                const statusbarHeight =
-                    Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
+                const verticalPos = getMenuPosition(pageY, height, windowHeight, 220);
 
                 const newPosition: { top?: number; bottom?: number; right: number } = {
                     right: windowWidth - (pageX + width),
+                    ...verticalPos,
                 };
-
-                // Check if menu would go off screen
-                if (pageY + height + MENU_HEIGHT > windowHeight) {
-                    // Position above the button
-                    newPosition.bottom = windowHeight - pageY + 4 - statusbarHeight;
-                } else {
-                    // Position below
-                    newPosition.top = pageY + height + 4 + statusbarHeight;
-                }
 
                 setMenuPosition(newPosition as any);
                 setSelectedDeviceId(deviceId);
@@ -207,40 +195,55 @@ export const DeviceManagement = () => {
                         ))}
                 </ScrollView>
 
-                <DeviceActionMenu
+                <ActionMenu
                     visible={menuVisible}
                     onClose={handleCloseMenu}
-                    onEdit={() => {
-                        handleCloseMenu();
-                        if (selectedDeviceId) {
-                            (navigation.navigate as any)('EditDevice', {
-                                deviceId: selectedDeviceId,
-                            });
-                        }
-                    }}
-                    onMaintain={() => {
-                        handleCloseMenu();
-                        console.log('Maintain device:', selectedDeviceId);
-                        if (selectedDeviceId) {
-                            (navigation.navigate as any)('EquipmentMaintenance', {
-                                deviceId: selectedDeviceId,
-                            });
-                        }
-                    }}
-                    onViewHistory={() => {
-                        handleCloseMenu();
-                        if (selectedDeviceId) {
-                            (navigation.navigate as any)('HistoryDevices', {
-                                deviceId: selectedDeviceId,
-                            });
-                        }
-                    }}
-                    onDelete={() => {
-                        // Don't call handleCloseMenu here to preserve selectedDeviceId for the modal
-                        setMenuVisible(false);
-                        setDeleteModalVisible(true);
-                    }}
                     position={menuPosition}
+                    items={[
+                        {
+                            label: 'Chỉnh sửa thông tin',
+                            onPress: () => {
+                                handleCloseMenu();
+                                if (selectedDeviceId) {
+                                    (navigation.navigate as any)('EditDevice', {
+                                        deviceId: selectedDeviceId,
+                                    });
+                                }
+                            },
+                        },
+                        {
+                            label: 'Bảo trì thiết bị',
+                            onPress: () => {
+                                handleCloseMenu();
+                                console.log('Maintain device:', selectedDeviceId);
+                                if (selectedDeviceId) {
+                                    (navigation.navigate as any)('EquipmentMaintenance', {
+                                        deviceId: selectedDeviceId,
+                                    });
+                                }
+                            },
+                        },
+                        {
+                            label: 'Xem lịch sử thiết bị',
+                            onPress: () => {
+                                handleCloseMenu();
+                                if (selectedDeviceId) {
+                                    (navigation.navigate as any)('HistoryDevices', {
+                                        deviceId: selectedDeviceId,
+                                    });
+                                }
+                            },
+                        },
+                        {
+                            label: 'Xoá thiết bị',
+                            onPress: () => {
+                                // Don't call handleCloseMenu here to preserve selectedDeviceId for the modal
+                                setMenuVisible(false);
+                                setDeleteModalVisible(true);
+                            },
+                            danger: true,
+                        },
+                    ]}
                 />
 
                 <ConfirmationDeleteModal

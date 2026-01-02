@@ -14,6 +14,7 @@ import {
     MaintenancePeriodData,
 } from '../../components/devices/MaintenancePeriod';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useMenuContext } from '@/features/menu/context/MenuContext';
 import { DeviceData } from '@/features/menu/types/menu.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
@@ -46,10 +47,7 @@ export const EditDevicesScreens = () => {
         if (foundDevice) {
             setDevice(foundDevice);
         } else {
-            Toast.show({
-                type: 'error',
-                text1: 'Không tìm thấy thiết bị',
-            });
+            Toast.show(ToastMessages.Device.NOT_FOUND);
             navigation.goBack();
         }
     }, [deviceId, devices, navigation]);
@@ -95,10 +93,7 @@ export const EditDevicesScreens = () => {
 
             updateDevice(device.id, updatedDevice);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật thiết bị thành công',
-            });
+            Toast.show(ToastMessages.Device.UPDATE_SUCCESS);
             navigation.goBack();
         }
     };

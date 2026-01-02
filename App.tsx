@@ -58,7 +58,7 @@ function App(): React.JSX.Element {
         <SafeAreaProvider>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
             <AppProviders />
-            <Toast config={toastConfig} />
+            <Toast config={toastConfig} topOffset={0} />
         </SafeAreaProvider>
     );
 }

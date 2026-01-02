@@ -7,7 +7,12 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { colors, spacing } from '@/styles';
 import SensorStatisticsScreen from '../SensorStatisticsScreen/SensorStatisticsScreen';
 import { Loading } from '@/shared/components/ui/Loading';
-import { DEVICES_LIST, ACTIVITY_HISTORY, MODE_HISTORY, PONDS_LIST } from '@/features/control/data/devicesData';
+import {
+    DEVICES_LIST,
+    ACTIVITY_HISTORY,
+    MODE_HISTORY,
+    PONDS_LIST,
+} from '@/features/control/data/devicesData';
 
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
@@ -17,9 +22,7 @@ interface HistoryActivitieScreensProps {
     onBack?: () => void;
 }
 
-export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({
-    onBack,
-}) => {
+export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = ({ onBack }) => {
     const route = useRoute<RouteProp<ControlStackParamList, 'History'>>();
     // Get pondName from route params, default to 'Ao 1' if missing (though it should be there)
     const { pondName = 'Ao 1' } = route.params || {};
@@ -58,7 +61,7 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
     const historyDevices = React.useMemo(() => {
         // 1. Get Pond ID
         const pondId = currentPond.id;
-        
+
         // 2. Get Devices for this Pond
         const devices = DEVICES_LIST.filter(d => d.pondId === pondId);
 
@@ -71,25 +74,27 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
             const index = ++typeCounters[d.type];
 
             // Get Activity History
-            const activities = ACTIVITY_HISTORY
-                .filter(h => h.deviceId === d.id && h.date === '25/12/2025') // Mock date
+            const activities = ACTIVITY_HISTORY.filter(
+                h => h.deviceId === d.id && h.date === '25/12/2025'
+            ) // Mock date
                 .map(h => ({
                     startTime: h.startTime,
                     endTime: h.endTime,
                 }));
 
             // Get Mode History
-            const modeHistory = MODE_HISTORY
-                .filter(h => h.deviceId === d.id && h.date === '25/12/2025') // Mock date
+            const modeHistory = MODE_HISTORY.filter(
+                h => h.deviceId === d.id && h.date === '25/12/2025'
+            ) // Mock date
                 .map(h => ({
                     startTime: h.startTime,
                     endTime: h.endTime,
                     mode: h.mode,
                 }));
-            
+
             // Default mode history if missing (fallback)
             if (modeHistory.length === 0) {
-                 modeHistory.push({ startTime: '00:00', endTime: '24:00', mode: 'remote' });
+                modeHistory.push({ startTime: '00:00', endTime: '24:00', mode: 'remote' });
             }
 
             return {
@@ -120,9 +125,8 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
                         </View>
                         <HistoryActivitie devices={historyDevices} />
                     </>
-
                 ) : (
-                    <SensorStatisticsScreen />
+                    <SensorStatisticsScreen pondId={currentPond.id} />
                 )}
             </View>
         </View>

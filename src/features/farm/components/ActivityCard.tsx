@@ -18,15 +18,35 @@ interface ActivityCardProps {
     data: ActivityData[];
     onEdit?: () => void;
     note?: string;
+    /** Whether to show note area at the top (default: false, shows at bottom) */
+    noteOnTop?: boolean;
 }
 
-export const ActivityCard: React.FC<ActivityCardProps> = ({ title, data, onEdit, note }) => {
+export const ActivityCard: React.FC<ActivityCardProps> = ({
+    title,
+    data,
+    onEdit,
+    note,
+    noteOnTop = false,
+}) => {
     const [expanded, setExpanded] = useState(false);
-    const MAX_VISIBLE_ITEMS = 4;
+    const MAX_VISIBLE_ITEMS = 5;
     const shouldCollapse = data.length > MAX_VISIBLE_ITEMS;
 
     // Lọc data hiển thị
     const visibleData = expanded || !shouldCollapse ? data : data.slice(0, MAX_VISIBLE_ITEMS);
+
+    // Note component
+    const noteComponent = note && (
+        <View style={styles.noteBox}>
+            <Text style={styles.noteLabel}>
+                {note.includes('|') ? note.split('|')[0] : 'Ghi chú'}
+            </Text>
+            <Text style={styles.noteContent}>
+                {note.includes('|') ? note.split('|').slice(1).join('|') : note}
+            </Text>
+        </View>
+    );
 
     return (
         <View style={styles.card}>
@@ -34,19 +54,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ title, data, onEdit,
             <CardHeader title={title} onEdit={onEdit} />
 
             {/* 2. Body Content */}
-            {/* 2. Body Content */}
             <View style={styles.body}>
-                {/* Note Area - Moved to top as per requirement */}
-                {note && (
-                    <View style={styles.noteBox}>
-                        <Text style={styles.noteLabel}>
-                            {note.includes('|') ? note.split('|')[0] : 'Ghi chú'}
-                        </Text>
-                        <Text style={styles.noteContent}>
-                            {note.includes('|') ? note.split('|').slice(1).join('|') : note}
-                        </Text>
-                    </View>
-                )}
+                {/* Note Area - Top or Bottom based on noteOnTop flag */}
+                {noteOnTop && noteComponent}
 
                 {visibleData.map((item, index) => (
                     <DataRow
@@ -58,6 +68,9 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ title, data, onEdit,
                     />
                 ))}
 
+                {/* Note Area - Bottom (default) */}
+                {data.length > MAX_VISIBLE_ITEMS && expanded && !noteOnTop && noteComponent}
+                {data.length < MAX_VISIBLE_ITEMS && !noteOnTop && noteComponent}
                 {/* 3. Footer Toggle (Xem thêm/Thu gọn) */}
                 {shouldCollapse && (
                     <TouchableOpacity

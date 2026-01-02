@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
@@ -36,12 +37,7 @@ export const HistoryDevicesScreens = () => {
     useEffect(() => {
         if ((route.params as any)?.success) {
             setSelectedTab('maintenance');
-            Toast.show({
-                type: 'success',
-                text1: 'Đã thêm thông tin bảo trì',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_ADD_SUCCESS);
 
             // Update device status to 'active' (Đã lắp đặt)
             if (updateDevice && deviceId) {
@@ -63,7 +59,7 @@ export const HistoryDevicesScreens = () => {
                             time: `${String(maintenanceDate.getHours()).padStart(2, '0')}:${String(
                                 maintenanceDate.getMinutes()
                             ).padStart(2, '0')}`,
-                            title: '[Tên ao]', 
+                            title: '[Tên ao]',
                             note: `Mô tả công việc|${description}`,
                             data: [
                                 {
@@ -106,26 +102,28 @@ export const HistoryDevicesScreens = () => {
         const isInstalled = device.status !== 'warehouse';
 
         if (isInstalled) {
-             // Find specific installation history using correct lookup
+            // Find specific installation history using correct lookup
             const installHistory = INSTALLATION_HISTORY.find(h => h.deviceId === device.id);
-            
+
             // Helper to get date string
             const getDisplayDate = () => {
                 if (installHistory) return installHistory.date;
                 if (device.importDate) return device.importDate;
                 return 'N/A';
             };
-            
+
             const displayDate = getDisplayDate();
 
             displayData.push({
                 id: 'install_event',
-                date: displayDate, 
+                date: displayDate,
                 activities: [
                     {
                         id: `install_${device.id}`,
                         time: '08:00',
-                        title: installHistory ? `Lắp đặt tại ${installHistory.location}` : device.name,
+                        title: installHistory
+                            ? `Lắp đặt tại ${installHistory.location}`
+                            : device.name,
                         data: [
                             {
                                 label: 'Ngày lắp',
@@ -135,13 +133,17 @@ export const HistoryDevicesScreens = () => {
                                 label: 'Kỹ thuật viên',
                                 value: installHistory ? installHistory.technician : '---',
                             },
-                            { 
-                                label: 'Giới hạn ngày SD', 
-                                value: installHistory ? `${installHistory.limitUsageDays} ngày` : '---' 
+                            {
+                                label: 'Giới hạn ngày SD',
+                                value: device.maintenance?.usageTime?.limit
+                                    ? `${device.maintenance.usageTime.limit} ngày`
+                                    : '---',
                             },
-                             { 
-                                label: 'Giới hạn giờ hoạt động', 
-                                value: installHistory ? `${installHistory.limitOperatingHours} giờ` : '---' 
+                            {
+                                label: 'Giới hạn giờ hoạt động',
+                                value: device.maintenance?.operatingTime?.limit
+                                    ? `${device.maintenance.operatingTime.limit} giờ`
+                                    : '---',
                             },
                         ],
                     },
@@ -152,9 +154,9 @@ export const HistoryDevicesScreens = () => {
 
     if (selectedTab === 'maintenance') {
         const mockMaintenance = MAINTENANCE_HISTORY.filter(h => h.deviceId === device?.id);
-        
+
         if (mockMaintenance.length > 0) {
-             mockMaintenance.forEach((record, index) => {
+            mockMaintenance.forEach((record, index) => {
                 displayData.push({
                     id: `maintenance_mock_${index}`,
                     date: record.startDate,
@@ -168,17 +170,20 @@ export const HistoryDevicesScreens = () => {
                                 { label: 'Ngày bắt đầu', value: record.startDate },
                                 { label: 'Ngày hoàn thành', value: record.endDate },
                                 { label: 'Chi phí', value: record.estimatedCost },
-                                { label: 'TGHĐ lúc lỗi', value: `${record.operatingHoursAtFault} giờ` },
+                                {
+                                    label: 'TGHĐ lúc lỗi',
+                                    value: `${record.operatingHoursAtFault} giờ`,
+                                },
                                 { label: 'TGSD lúc lỗi', value: `${record.usageDaysAtFault} ngày` },
-                            ]
-                        }
-                    ]
+                            ],
+                        },
+                    ],
                 });
-             });
+            });
         }
 
         if (device?.maintenanceHistory) {
-             displayData.push(...device.maintenanceHistory);
+            displayData.push(...device.maintenanceHistory);
         }
     }
 
@@ -193,7 +198,13 @@ export const HistoryDevicesScreens = () => {
                     ? 1
                     : 0,
         },
-        { key: 'maintenance', label: 'Bảo trì', count: (MAINTENANCE_HISTORY.filter(h => h.deviceId === device?.id).length || 0) + (device?.maintenanceHistory?.length || 0) },
+        {
+            key: 'maintenance',
+            label: 'Bảo trì',
+            count:
+                (MAINTENANCE_HISTORY.filter(h => h.deviceId === device?.id).length || 0) +
+                (device?.maintenanceHistory?.length || 0),
+        },
     ];
 
     const handleEmptyStatePress = () => {
@@ -222,7 +233,12 @@ export const HistoryDevicesScreens = () => {
             <ScrollView contentContainerStyle={styles.content}>
                 {displayData.length > 0 ? (
                     displayData.map(group => (
-                        <TrackingDayCard key={group.id} group={group} style={styles.trackingCard} />
+                        <TrackingDayCard
+                            key={group.id}
+                            group={group}
+                            style={styles.trackingCard}
+                            noteOnTop={true}
+                        />
                     ))
                 ) : (
                     <View style={styles.emptyContainer}>

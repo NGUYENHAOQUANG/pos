@@ -13,7 +13,7 @@ import {
     TrackingGroup,
     TimelineActivity,
 } from '@/features/farm/components/TrackingList';
-import { parseDate, formatDate } from '@/features/farm/utils/dateUtils';
+import { parseDate, formatDate, compareTime } from '@/features/farm/utils/dateUtils';
 import { TouchableOpacity } from 'react-native';
 import {
     convertEnvironmentMetaToActivityData,
@@ -123,8 +123,8 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             if (dateA.getTime() !== dateB.getTime()) {
                 return dateB.getTime() - dateA.getTime();
             }
-            // Compare time HH:mm
-            return (b.item.time || '').localeCompare(a.item.time || '');
+            // Compare time HH:mm (descending)
+            return compareTime(b.item.time || '00:00', a.item.time || '00:00');
         });
 
         // 5. Group by date
@@ -146,6 +146,18 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 note: item.note,
                 onEdit: () => onEditJobItem?.(type, item),
             });
+        });
+
+        // Sort activities within each group by time descending
+        Object.keys(groups).forEach(dateKey => {
+            groups[dateKey].sort((a, b) => compareTime(b.time || '00:00', a.time || '00:00'));
+        });
+
+        // Sort groups by date descending
+        groupOrder.sort((a, b) => {
+            const dateA = parseDate(a);
+            const dateB = parseDate(b);
+            return dateB.getTime() - dateA.getTime();
         });
 
         return groupOrder.map(date => ({

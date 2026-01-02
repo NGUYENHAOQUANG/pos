@@ -8,7 +8,7 @@ import {
     FlatList,
     ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -50,12 +50,16 @@ const ENVIRONMENT_PARAMETERS: EnvironmentParameter[] = [
 const ADVANCED_PARAMETERS: EnvironmentParameter[] = [
     { id: '7', name: 'Kali (mg/L)', limit: '250 - 400', isChecked: false },
     { id: '8', name: 'TAN (mg/L)', limit: '0 - 3', isChecked: false },
-    { id: '9', name: 'Magie (mg/L)', limit: '750 - 1400', isChecked: true },
+    { id: '9', name: 'Magie (mg/L)', limit: '750 - 1400', isChecked: false },
     { id: '10', name: 'NO3 (mg/L)', limit: '0 - 10', isChecked: false },
 ];
 
+type SettingEnvironmentRouteProp = RouteProp<FarmStackParamList, 'SettingEnvironment'>;
+
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<SettingEnvironmentRouteProp>();
+    const { data, onSave } = route.params || {};
     const insets = useSafeAreaInsets();
     // const { setTabBarVisible } = useTabBarVisibility();
 
@@ -64,8 +68,15 @@ export const SettingEnvironmentScreens: React.FC = () => {
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownButtonRef = useRef<View>(null);
     const [parameters, setParameters] = useState<EnvironmentParameter[]>(ENVIRONMENT_PARAMETERS);
-    const [advancedParameters, setAdvancedParameters] =
-        useState<EnvironmentParameter[]>(ADVANCED_PARAMETERS);
+    const [advancedParameters, setAdvancedParameters] = useState<EnvironmentParameter[]>(
+        data?.advancedParameters
+            ? ADVANCED_PARAMETERS.map(p =>
+                  data.advancedParameters!.some(ap => ap.id === p.id)
+                      ? { ...p, isChecked: true }
+                      : p
+              )
+            : ADVANCED_PARAMETERS
+    );
 
     // No local tab bar visibility logic needed anymore
 
@@ -111,16 +122,26 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleEdit = (parameter: EnvironmentParameter) => {
-        navigation.navigate('EditEnvironment', {
+        (navigation as any).navigate('EditEnvironment', {
             parameter,
             onSave: handleUpdateParameter,
         });
     };
 
     const handleSave = () => {
+        // Get checked advanced parameters
+        const checkedAdvancedParams = advancedParameters
+            .filter(p => p.isChecked)
+            .map(p => ({ id: p.id, name: p.name }));
+
+        // Call onSave callback if provided
+        if (onSave) {
+            onSave({ advancedParameters: checkedAdvancedParams });
+        }
+
         Toast.show({
             type: 'success',
-            text1: 'Đã thêm chỉ số',
+            text1: 'Đã lưu thông số',
             position: 'top',
             visibilityTime: 3000,
         });

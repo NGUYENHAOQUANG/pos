@@ -13,6 +13,7 @@ interface FeaturePermissionsProps {
     onUnitsChange: (ids: string[]) => void;
     onAddUnitPress: () => void;
     disabled?: boolean;
+    availableUnits: { id: string; name: string }[];
 }
 
 const PERMISSIONS = [
@@ -20,18 +21,6 @@ const PERMISSIONS = [
     { id: 'task_execution', label: 'Thực hiện tác vụ/công việc' },
     { id: 'iot_control', label: 'Điều khiển thiết bị IoT' },
     { id: 'material_management', label: 'Quản Lý Vật Tư' },
-];
-
-const FARM_DATA = [
-    { id: '1', name: 'Trại A' },
-    { id: '2', name: 'Trại B' },
-    { id: '3', name: 'Trại C' },
-];
-
-const POND_DATA = [
-    { id: '101', name: 'Ao 1' },
-    { id: '102', name: 'Ao 2' },
-    { id: '103', name: 'Ao 3' },
 ];
 
 export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
@@ -43,6 +32,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
     onUnitsChange,
     onAddUnitPress,
     disabled = false,
+    availableUnits,
 }) => {
     const isAllSelected = selectedPermissions.length === PERMISSIONS.length;
 
@@ -69,8 +59,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
         onUnitsChange(selectedUnitIds.filter(id => id !== idToRemove));
     };
 
-    const currentData = managementLevel === 'farm' ? FARM_DATA : POND_DATA;
-    const selectedUnits = currentData.filter(item => selectedUnitIds.includes(item.id));
+    const selectedUnits = availableUnits.filter(item => selectedUnitIds.includes(item.id));
 
     return (
         <View style={styles.container}>
@@ -202,6 +191,8 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                         ))}
                     </View>
                 </View>
+
+                <View style={styles.separator} />
 
                 {/* Permissions Section */}
                 <View style={[styles.section, { marginBottom: 0 }]}>
@@ -414,5 +405,10 @@ const styles = StyleSheet.create({
     },
     disabledElement: {
         // opacity: 0.5, // Removed to keep text dark
+    },
+    separator: {
+        height: 1,
+        backgroundColor: colors.gray[200],
+        marginBottom: spacing.lg,
     },
 });
