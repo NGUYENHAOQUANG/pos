@@ -4,7 +4,7 @@ import { colors, spacing, typography, borderRadius, sizes } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { IconCalender } from '@/assets/icons';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import Toast from 'react-native-toast-message';

@@ -161,6 +161,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleBack}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
 
             <ConfirmationDeleteModal

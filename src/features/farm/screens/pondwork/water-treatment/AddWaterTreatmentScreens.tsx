@@ -113,6 +113,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleBack}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
         </SafeAreaView>
     );

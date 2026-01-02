@@ -1,22 +1,14 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    Platform,
-    ImageSourcePropType,
-    ViewStyle,
-} from 'react-native';
+import { View, Text, StyleSheet, Platform, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius } from '@/styles';
+import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface EmptyStateCardProps {
     message?: string;
     description?: string;
     buttonTitle?: string;
     onPress?: () => void;
-    imageSource?: ImageSourcePropType;
     style?: ViewStyle;
 }
 
@@ -25,12 +17,11 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     description,
     buttonTitle,
     onPress,
-    imageSource = require('@/assets/images/EmptyState.png'),
     style,
 }) => {
     return (
         <View style={[styles.container, style]}>
-            <Image source={imageSource} style={styles.image} resizeMode="contain" />
+            <EmptyStateIcon width={100} height={61} style={styles.image} />
             {message && <Text style={styles.message}>{message}</Text>}
             {description && <Text style={styles.description}>{description}</Text>}
             {buttonTitle && onPress && (
@@ -68,10 +59,7 @@ const styles = StyleSheet.create({
         }),
         gap: spacing.md,
     },
-    image: {
-        width: 100,
-        height: 61,
-    },
+    image: {},
     message: {
         fontSize: 16,
         fontWeight: '400',

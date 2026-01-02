@@ -138,6 +138,7 @@ export const AddFeederScreens = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSaveInfo}
                 onSecondaryPress={() => navigation.goBack()}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
         </View>
     );

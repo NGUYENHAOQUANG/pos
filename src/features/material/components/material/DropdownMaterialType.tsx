@@ -9,7 +9,6 @@ import {
     ViewStyle,
     Modal,
     TouchableWithoutFeedback,
-    StatusBar,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -84,10 +83,8 @@ export const DropdownMaterialType: React.FC<DropdownMaterialTypeProps> = ({
             // Measure button position to place dropdown correctly
             buttonRef.current.measure(
                 (fx: number, fy: number, width: number, height: number, px: number, py: number) => {
-                    const statusBarHeight =
-                        Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0;
                     setDropdownCoords({
-                        top: py + height - statusBarHeight + 2,
+                        top: py + height + 4,
                         left: px,
                         width: width,
                     });
