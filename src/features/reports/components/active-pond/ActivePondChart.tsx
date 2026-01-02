@@ -1,14 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    LayoutChangeEvent,
-    TouchableOpacity,
-    StyleProp,
-    ViewStyle,
-    ScrollView,
-} from 'react-native';
+import { View, Text, StyleSheet, LayoutChangeEvent, ScrollView } from 'react-native';
 import Svg, {
     Path,
     Line,
@@ -21,7 +12,6 @@ import Svg, {
 } from 'react-native-svg';
 import { area, curveStepAfter } from 'd3-shape';
 import { scaleLinear, scaleTime } from 'd3-scale';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles/colors';
 
 // --- IMPORT MOCK DATA ---
@@ -44,44 +34,6 @@ const parseDate = (dateStr: string): Date => {
     return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
 };
 
-// --- COMPONENT BUTTON ---
-interface BasicDropDownButtonProps {
-    label?: string;
-    placeholder?: string;
-    onPress?: () => void;
-    style?: StyleProp<ViewStyle>;
-}
-
-const BasicDropDownButton: React.FC<BasicDropDownButtonProps> = ({
-    label,
-    placeholder = 'Chọn mục',
-    onPress,
-    style,
-}) => (
-    <TouchableOpacity style={[btnStyles.container, style]} onPress={onPress} activeOpacity={0.7}>
-        <Text style={[btnStyles.text, !label && btnStyles.placeholder]}>
-            {label || placeholder}
-        </Text>
-        <Ionicons name="chevron-down" size={20} color={colors.text} />
-    </TouchableOpacity>
-);
-
-const btnStyles = StyleSheet.create({
-    container: {
-        height: 46,
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderColor: colors.border,
-    },
-    text: { fontSize: 14, fontWeight: '700', color: colors.text, flex: 1, marginRight: 4 },
-    placeholder: { fontWeight: '400', color: colors.textSecondary },
-});
-
 // --- COLORS ---
 const CHART_COLORS = {
     activeFill: colors.green[300],
@@ -98,6 +50,7 @@ const CHART_COLORS = {
 };
 
 import { Loading } from '@/shared/components/ui/Loading';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 
 export const ActivePondChart = () => {
     const [expanded, setExpanded] = useState(false);
@@ -233,6 +186,7 @@ export const ActivePondChart = () => {
                 label={`TỔNG SỐ AO HOẠT ĐỘNG (${currentActiveTotal})`}
                 onPress={handleToggle}
                 style={styles.headerButton}
+                isExpanded={expanded}
             />
 
             {expanded && (
@@ -245,7 +199,12 @@ export const ActivePondChart = () => {
                         containerWidth > 0 &&
                         xScale &&
                         yScale && (
-                            <View style={[styles.contentContainer, isLoading ? styles.loadingContainer : undefined]}>
+                            <View
+                                style={[
+                                    styles.contentContainer,
+                                    isLoading ? styles.loadingContainer : undefined,
+                                ]}
+                            >
                                 <View style={styles.mainWrapper}>
                                     {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
                                     <View
@@ -285,7 +244,12 @@ export const ActivePondChart = () => {
                                     {/* --- CỘT PHẢI: HEADER CỐ ĐỊNH + BIỂU ĐỒ CUỘN --- */}
                                     <View style={{ flex: 1 }}>
                                         {/* 1. TOP LABELS (CỐ ĐỊNH) */}
-                                        <View style={[styles.fixedHeaderLabels, { height: HEADER_HEIGHT }]}>
+                                        <View
+                                            style={[
+                                                styles.fixedHeaderLabels,
+                                                { height: HEADER_HEIGHT },
+                                            ]}
+                                        >
                                             <View style={styles.labelGroupLeft}>
                                                 <Text style={styles.labelTitle}>Ao vèo</Text>
                                                 <View style={styles.labelRow}>
@@ -386,7 +350,8 @@ export const ActivePondChart = () => {
                                                     <Circle
                                                         cx={currentX}
                                                         cy={yScale(
-                                                            targetDataPoint.active + targetDataPoint.prep
+                                                            targetDataPoint.active +
+                                                                targetDataPoint.prep
                                                         )}
                                                         r={4}
                                                         fill={CHART_COLORS.prep}
@@ -443,9 +408,15 @@ export const ActivePondChart = () => {
                                 <View style={styles.spacer} />
 
                                 <View style={styles.legendWrapper}>
-                                    <LegendItem color={CHART_COLORS.activeFill} label="Đang hoạt động" />
+                                    <LegendItem
+                                        color={CHART_COLORS.activeFill}
+                                        label="Đang hoạt động"
+                                    />
                                     <LegendItem color={CHART_COLORS.prep} label="Đang chuẩn bị" />
-                                    <LegendItem color={CHART_COLORS.functional} label="Ao chức năng" />
+                                    <LegendItem
+                                        color={CHART_COLORS.functional}
+                                        label="Ao chức năng"
+                                    />
                                 </View>
                             </View>
                         )
@@ -537,5 +508,3 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
 });
-
-

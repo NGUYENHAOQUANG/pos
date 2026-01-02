@@ -9,6 +9,7 @@ import {
 } from '@/features/menu/components/aquaculture/DropDownButton';
 import { Aquaculture } from '@/features/menu/types/menu.types';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
 interface AquacultureFormProps {
     initialValues?: Partial<Aquaculture>;
@@ -52,35 +53,19 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
             submit: () => {
                 // Validation
                 if (!farm) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Vui lòng chọn trại nuôi',
-                        position: 'top',
-                    });
+                    Toast.show(ToastMessages.Aquaculture.FARM_REQUIRED);
                     return null;
                 }
                 if (!cycleName.trim()) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Vui lòng nhập tên vụ nuôi',
-                        position: 'top',
-                    });
+                    Toast.show(ToastMessages.Aquaculture.CYCLE_NAME_REQUIRED);
                     return null;
                 }
                 if (!cycleCode.trim()) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Vui lòng nhập mã vụ nuôi',
-                        position: 'top',
-                    });
+                    Toast.show(ToastMessages.Aquaculture.CYCLE_CODE_REQUIRED);
                     return null;
                 }
                 if (!startDate) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Vui lòng chọn ngày bắt đầu',
-                        position: 'top',
-                    });
+                    Toast.show(ToastMessages.Aquaculture.START_DATE_REQUIRED);
                     return null;
                 }
 

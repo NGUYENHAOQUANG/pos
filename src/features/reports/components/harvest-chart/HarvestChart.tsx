@@ -48,6 +48,7 @@ export const HarvestChart: React.FC = () => {
                 label="BIỂU ĐỒ THU HOẠCH"
                 onPress={() => setIsCollapsed(!isCollapsed)}
                 style={styles.headerButton}
+                isExpanded={!isCollapsed}
             />
 
             {!isCollapsed && (
@@ -56,46 +57,55 @@ export const HarvestChart: React.FC = () => {
                         <Loading />
                     ) : (
                         <>
-                    <View style={styles.summaryContainer}>
-                        <Text style={styles.summaryLabel}>Sản lượng đã thu hoạch</Text>
-                        <Text style={styles.summaryValue}>{totalYield} tấn</Text>
-                    </View>
+                            <View style={styles.summaryContainer}>
+                                <Text style={styles.summaryLabel}>Sản lượng đã thu hoạch</Text>
+                                <Text style={styles.summaryValue}>{totalYield} tấn</Text>
+                            </View>
 
-                    <View style={styles.chartAreaWrapper}>
-                        <View style={styles.yAxisLabels}>
-                            {yAxisConfig.labels.map(val => (
-                                <View key={val} style={styles.yLabelWrapper}>
-                                    <Text style={styles.yLabelText}>{val.toLocaleString()}</Text>
+                            <View style={styles.chartAreaWrapper}>
+                                <View style={styles.yAxisLabels}>
+                                    {yAxisConfig.labels.map(val => (
+                                        <View key={val} style={styles.yLabelWrapper}>
+                                            <Text style={styles.yLabelText}>
+                                                {val.toLocaleString()}
+                                            </Text>
+                                        </View>
+                                    ))}
                                 </View>
-                            ))}
-                        </View>
 
-                        {/* Chart-Section */}
-                        <View style={styles.chartContent}>
-                            <View style={styles.gridContainer} pointerEvents="none">
-                                {[0, 1, 2, 3, 4].map(i => (
-                                    <View
-                                        key={i}
-                                        style={[styles.gridLine, { top: i * (BAR_MAX_HEIGHT / 4) }]}
-                                    />
-                                ))}
-                            </View>
-                            <View style={styles.barsWrapper}>
-                                {mockHarvestChartData.map(item => (
-                                    <View key={item.pond} style={styles.barColumn}>
-                                        <Text style={styles.topValueText}>{item.yield.toFixed(2)}</Text>
-                                        <View
-                                            style={[
-                                                styles.bar,
-                                                { height: getBarHeight(item.yield) },
-                                            ]}
-                                        />
-                                        <Text style={styles.bottomLabelText}>{item.pond}</Text>
+                                {/* Chart-Section */}
+                                <View style={styles.chartContent}>
+                                    <View style={styles.gridContainer} pointerEvents="none">
+                                        {[0, 1, 2, 3, 4].map(i => (
+                                            <View
+                                                key={i}
+                                                style={[
+                                                    styles.gridLine,
+                                                    { top: i * (BAR_MAX_HEIGHT / 4) },
+                                                ]}
+                                            />
+                                        ))}
                                     </View>
-                                ))}
+                                    <View style={styles.barsWrapper}>
+                                        {mockHarvestChartData.map(item => (
+                                            <View key={item.pond} style={styles.barColumn}>
+                                                <Text style={styles.topValueText}>
+                                                    {item.yield.toFixed(2)}
+                                                </Text>
+                                                <View
+                                                    style={[
+                                                        styles.bar,
+                                                        { height: getBarHeight(item.yield) },
+                                                    ]}
+                                                />
+                                                <Text style={styles.bottomLabelText}>
+                                                    {item.pond}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </View>
+                                </View>
                             </View>
-                        </View>
-                    </View>
                         </>
                     )}
                 </View>

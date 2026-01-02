@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -39,10 +40,7 @@ export const MemberManagementScreens: React.FC = () => {
 
     React.useEffect(() => {
         if (route.params?.showSuccess) {
-            Toast.show({
-                type: 'success',
-                text1: 'Đã thêm thành viên thành công',
-            });
+            Toast.show(ToastMessages.Member.ADD_SUCCESS);
             // Reset param to avoid showing toast again on re-render if needed
             navigation.setParams({ showSuccess: undefined });
         }
@@ -218,7 +216,7 @@ export const MemberManagementScreens: React.FC = () => {
                 onClose={() => setResendModalVisible(false)}
                 onConfirm={() => {
                     setResendModalVisible(false);
-                    Toast.show({ type: 'success', text1: 'Đã gửi lại lời mời' });
+                    Toast.show(ToastMessages.Member.RESEND_INVITE_SUCCESS);
                 }}
             />
 
@@ -229,7 +227,7 @@ export const MemberManagementScreens: React.FC = () => {
                     if (selectedMemberId) {
                         updateMember(selectedMemberId, { status: 'active' });
                         setActivateModalVisible(false);
-                        Toast.show({ type: 'success', text1: 'Đã kích hoạt lại tài khoản' });
+                        Toast.show(ToastMessages.Member.ACTIVATE_SUCCESS);
                     }
                 }}
                 title="Kích hoạt lại"

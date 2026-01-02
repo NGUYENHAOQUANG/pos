@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
@@ -59,34 +60,22 @@ export const AddMemberScreens: React.FC = () => {
     const handleAddMember = () => {
         // Validation
         if (!name.trim()) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng nhập tên thành viên',
-            });
+            Toast.show(ToastMessages.Member.NAME_REQUIRED);
             return;
         }
 
         if (!contact.trim()) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng nhập thông tin liên hệ',
-            });
+            Toast.show(ToastMessages.Member.CONTACT_REQUIRED);
             return;
         }
 
         if (selectedUnitIds.length === 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng chọn ít nhất một đơn vị công tác',
-            });
+            Toast.show(ToastMessages.Member.UNIT_REQUIRED);
             return;
         }
 
         if (selectedPermissions.length === 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng chọn ít nhất một quyền thao tác',
-            });
+            Toast.show(ToastMessages.Member.PERMISSION_REQUIRED);
             return;
         }
 
@@ -125,6 +114,7 @@ export const AddMemberScreens: React.FC = () => {
                     selectedUnitIds={selectedUnitIds}
                     onUnitsChange={setSelectedUnitIds}
                     onAddUnitPress={() => setModalVisible(true)}
+                    availableUnits={managementLevel === 'farm' ? FARM_DATA : POND_DATA}
                 />
             </ScrollView>
 

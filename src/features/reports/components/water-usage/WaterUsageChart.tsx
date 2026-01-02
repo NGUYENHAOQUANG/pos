@@ -4,7 +4,7 @@ import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { Loading } from '@/shared/components/ui/Loading';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_HEIGHT = 400;
@@ -56,7 +56,7 @@ const scaleLinear = (value: number, domain: [number, number], range: [number, nu
 };
 
 const WaterUsageChart = () => {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -68,12 +68,11 @@ const WaterUsageChart = () => {
     const barWidth = DRAW_WIDTH / DATA_POINTS.length;
     return (
         <View style={styles.container}>
-            <CollapseHead
-                title="LƯỢNG NƯỚC SỬ DỤNG THEO NGÀY"
+            <BasicDropDownButton
+                label="LƯỢNG NƯỚC SỬ DỤNG THEO NGÀY"
                 isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
+                onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
-                titleStyle={styles.headerTitle}
             />
 
             {isExpanded && (

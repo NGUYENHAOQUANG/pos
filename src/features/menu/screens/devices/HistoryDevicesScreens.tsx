@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
@@ -36,12 +37,7 @@ export const HistoryDevicesScreens = () => {
     useEffect(() => {
         if ((route.params as any)?.success) {
             setSelectedTab('maintenance');
-            Toast.show({
-                type: 'success',
-                text1: 'Đã thêm thông tin bảo trì',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_ADD_SUCCESS);
 
             // Update device status to 'active' (Đã lắp đặt)
             if (updateDevice && deviceId) {
@@ -139,14 +135,14 @@ export const HistoryDevicesScreens = () => {
                             },
                             {
                                 label: 'Giới hạn ngày SD',
-                                value: installHistory
-                                    ? `${installHistory.limitUsageDays} ngày`
+                                value: device.maintenance?.usageTime?.limit
+                                    ? `${device.maintenance.usageTime.limit} ngày`
                                     : '---',
                             },
                             {
                                 label: 'Giới hạn giờ hoạt động',
-                                value: installHistory
-                                    ? `${installHistory.limitOperatingHours} giờ`
+                                value: device.maintenance?.operatingTime?.limit
+                                    ? `${device.maintenance.operatingTime.limit} giờ`
                                     : '---',
                             },
                         ],

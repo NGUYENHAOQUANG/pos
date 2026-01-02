@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors } from '@/styles';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
 import { Legend, getFeedProdLegendItems } from '@/features/reports/components/Legend';
 import { Chart } from '@/features/reports/components/feed-prod/Chart';
@@ -62,10 +62,10 @@ export const CompilationFeedProd = () => {
         <View style={styles.container}>
             {/* Collapsible Chart Section */}
             <View style={styles.chartSection}>
-                <CollapseHead
-                    title="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
+                <BasicDropDownButton
+                    label="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
                     isExpanded={isExpanded}
-                    onToggle={() => setIsExpanded(!isExpanded)}
+                    onPress={() => setIsExpanded(!isExpanded)}
                     style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
                 />
 

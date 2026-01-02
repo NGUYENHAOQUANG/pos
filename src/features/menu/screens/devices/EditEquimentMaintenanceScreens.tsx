@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -55,12 +56,7 @@ export const EditEquimentMaintenanceScreens = () => {
 
     const handleSave = () => {
         if (!description.trim()) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng nhập mô tả công việc',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_DESC_REQUIRED);
             return;
         }
 
@@ -98,12 +94,7 @@ export const EditEquimentMaintenanceScreens = () => {
 
             updateDevice(deviceId, { maintenanceHistory: updatedHistory });
 
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật thông tin thành công',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_UPDATE_SUCCESS);
         }
 
         navigation.goBack();
@@ -119,12 +110,7 @@ export const EditEquimentMaintenanceScreens = () => {
             const updatedHistory = currentHistory.filter(r => r.id !== maintenanceId);
             updateDevice(deviceId, { maintenanceHistory: updatedHistory });
 
-            Toast.show({
-                type: 'success',
-                text1: 'Đã xoá thông tin bảo trì',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_DELETE_SUCCESS);
         }
         setDeleteModalVisible(false);
         navigation.goBack();

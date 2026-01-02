@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import { HeadingEnvChart } from './HeadingEnvChart';
 import { PondIndex } from './PondIndex';
 import EnvChar from './EnvChar';
@@ -66,12 +67,11 @@ const CompilationEnvChart = () => {
 
     return (
         <View style={styles.container}>
-            <CollapseHead
-                title="BIỂU ĐỒ THÔNG SỐ MÔI TRƯỜNG"
+            <BasicDropDownButton
+                label="BIỂU ĐỒ THÔNG SỐ MÔI TRƯỜNG"
                 isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
+                onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
-                titleStyle={styles.headerTitle}
             />
 
             {isExpanded && (
@@ -132,5 +132,3 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
 });
-
-

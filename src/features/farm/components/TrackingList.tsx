@@ -81,11 +81,7 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style, 
                             data={activity.data}
                             note={activity.note}
                             noteOnTop={noteOnTop}
-                            onEdit={
-                                activity.onEdit
-                                    ? activity.onEdit
-                                    : () => console.log('Edit activity', activity.id)
-                            }
+                            onEdit={activity.onEdit}
                         />
                     ))}
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
@@ -21,12 +22,7 @@ export const EquipmentMaintenanceScreens = () => {
 
     const handleSave = () => {
         if (!description.trim()) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vui lòng nhập mô tả công việc',
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            Toast.show(ToastMessages.Device.MAINTENANCE_DESC_REQUIRED);
             return;
         }
 

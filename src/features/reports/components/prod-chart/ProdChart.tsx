@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { spacing } from '@/styles/spacing';
-import { CollapseHead } from '@/features/farm/components/CollapseHead';
+import { BasicDropDownButton } from '../BasicDropDownButton';
 import { prodChartData, prodChartSummary, ProdDataPoint } from './prodData';
 import { Loading } from '@/shared/components/ui/Loading';
 
@@ -300,12 +300,11 @@ export const ProdChart = () => {
 
     return (
         <View style={styles.container}>
-            <CollapseHead
-                title="BIỂU ĐỒ SẢN LƯỢNG"
+            <BasicDropDownButton
+                label="BIỂU ĐỒ SẢN LƯỢNG"
                 isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
+                onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
-                titleStyle={styles.headerTitle}
             />
 
             {isExpanded && (
@@ -316,53 +315,59 @@ export const ProdChart = () => {
                         </View>
                     ) : (
                         <>
-                    <View style={styles.tabContainer}>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === 'Ngày tuổi' && styles.activeTab]}
-                            onPress={() => setActiveTab('Ngày tuổi')}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === 'Ngày tuổi' && styles.activeTabText,
-                                ]}
-                            >
-                                Ngày tuổi
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.tab, activeTab === 'Khu vực' && styles.activeTab]}
-                            onPress={() => setActiveTab('Khu vực')}
-                        >
-                            <Text
-                                style={[
-                                    styles.tabText,
-                                    activeTab === 'Khu vực' && styles.activeTabText,
-                                ]}
-                            >
-                                Khu vực
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.summaryContainer}>
-                        {prodChartSummary.map((item, index) => (
-                            <View key={index} style={styles.summaryItem}>
-                                <Text style={styles.summaryLabel}>{item.label}</Text>
-                                <Text style={styles.summaryValue}>{item.value}</Text>
+                            <View style={styles.tabContainer}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.tab,
+                                        activeTab === 'Ngày tuổi' && styles.activeTab,
+                                    ]}
+                                    onPress={() => setActiveTab('Ngày tuổi')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === 'Ngày tuổi' && styles.activeTabText,
+                                        ]}
+                                    >
+                                        Ngày tuổi
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.tab,
+                                        activeTab === 'Khu vực' && styles.activeTab,
+                                    ]}
+                                    onPress={() => setActiveTab('Khu vực')}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === 'Khu vực' && styles.activeTabText,
+                                        ]}
+                                    >
+                                        Khu vực
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-                        ))}
-                    </View>
 
-                    <VisualChart
-                        data={activeData}
-                        yLabels={yLabels}
-                        maxValue={yMax}
-                        height={chartHeight}
-                        barWidth={activeTab === 'Khu vực' ? 20 : 30}
-                    />
+                            <View style={styles.summaryContainer}>
+                                {prodChartSummary.map((item, index) => (
+                                    <View key={index} style={styles.summaryItem}>
+                                        <Text style={styles.summaryLabel}>{item.label}</Text>
+                                        <Text style={styles.summaryValue}>{item.value}</Text>
+                                    </View>
+                                ))}
+                            </View>
 
-                    <Legend />
+                            <VisualChart
+                                data={activeData}
+                                yLabels={yLabels}
+                                maxValue={yMax}
+                                height={chartHeight}
+                                barWidth={activeTab === 'Khu vực' ? 20 : 30}
+                            />
+
+                            <Legend />
                         </>
                     )}
                 </View>
@@ -387,7 +392,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: spacing.md,
         backgroundColor: colors.white,
     },
     headerTitle: {
