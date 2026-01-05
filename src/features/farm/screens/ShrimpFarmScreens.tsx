@@ -12,7 +12,6 @@ import { JobExecution, CycleData } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import Toast from 'react-native-toast-message';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
@@ -52,6 +51,14 @@ const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.HARVEST, items: [] },
 ];
 
+const PREPARATION_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+    { type: JOB_TYPES.WATER_CHANGE, items: [] },
+    { type: JOB_TYPES.CLEAN_POND, items: [] },
+    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+];
+
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
 
@@ -88,36 +95,13 @@ export const ShrimpFarmScreens: React.FC = () => {
         return currentCycleData || foundCycle;
     }, [pond?.id, activeCycles, foundCycle]);
 
-    const [hasCycleBefore, setHasCycleBefore] = useState(!!currentCycle);
-
-    useEffect(() => {
-        // TRƯỜNG HỢP 1: Tạo mới thành công (Từ không có -> Có)
-        if (!hasCycleBefore && currentCycle) {
-            Toast.show({
-                type: 'success',
-                text1: 'Đã tạo chu kỳ nuôi thành công',
-                position: 'top',
-                topOffset: 60,
-            });
-            setHasCycleBefore(true);
-        }
-        // TRƯỜNG HỢP 2: Xóa thành công (Từ đang có -> Mất tiêu)
-        else if (hasCycleBefore && !currentCycle) {
-            Toast.show({
-                type: 'success',
-                text1: 'Đã xóa chu kỳ nuôi thành công',
-                position: 'top',
-                topOffset: 60,
-            });
-            setHasCycleBefore(false);
-        }
-    }, [currentCycle, hasCycleBefore]);
-
     // Chọn template dựa vào loại ao và tạo jobs
     const jobs = useMemo(() => {
         let jobTemplate: { type: JobType; items: never[] }[];
 
-        if (!pond?.type) {
+        if (!currentCycle) {
+            jobTemplate = PREPARATION_JOBS_TEMPLATE;
+        } else if (!pond?.type) {
             jobTemplate = COMMON_JOBS_TEMPLATE;
         } else {
             switch (pond.type) {
@@ -136,7 +120,7 @@ export const ShrimpFarmScreens: React.FC = () => {
             ...template,
             items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
         }));
-    }, [pond?.type, pond?.id, getPondJobItems]);
+    }, [pond?.type, pond?.id, getPondJobItems, currentCycle]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -412,6 +396,9 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
     };
 
+    // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo"
+    const headerDisplayType = pond?.type === 'Ao sẵn sàng' && currentCycle ? 'Ao vèo' : undefined;
+
     return (
         <View style={styles.container}>
             <HeadingFarm
@@ -420,6 +407,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                 tabType="pond-detail"
                 fullWidth
                 pond={pond}
+                displayPondType={headerDisplayType as any}
                 onBack={() => navigation.goBack()}
                 menuOptions={[
                     {

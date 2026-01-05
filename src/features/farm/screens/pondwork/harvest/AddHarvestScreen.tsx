@@ -195,6 +195,27 @@ export const AddHarvestScreen: React.FC = () => {
     };
 
     const handleSave = () => {
+        if (harvestType !== 'Đóng chu kỳ') {
+            if (!yieldAmount.trim()) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Vui lòng nhập sản lượng thu hoạch',
+                    position: 'top',
+                    visibilityTime: 3000,
+                });
+                return;
+            }
+            if (!shrimpSize.trim()) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Vui lòng nhập cỡ tôm thu hoạch',
+                    position: 'top',
+                    visibilityTime: 3000,
+                });
+                return;
+            }
+        }
+
         if (!pond?.id) {
             navigation.goBack();
             return;

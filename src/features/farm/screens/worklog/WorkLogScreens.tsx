@@ -269,5 +269,6 @@ const styles = StyleSheet.create({
     emptyStateContainer: {
         flex: 1,
         justifyContent: 'flex-start',
+        paddingHorizontal: spacing.md,
     },
 });

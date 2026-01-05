@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
+import Toast from 'react-native-toast-message';
 import { useControl } from '../../context/ControlContext';
 import { EControlMode } from '../../types/control.types';
 
@@ -107,6 +108,11 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         if (route.params?.pondId && route.params?.deviceId) {
             updateDeviceMode(route.params.pondId, route.params.deviceId, controlMode);
         }
+
+        Toast.show({
+            type: 'success',
+            text1: 'Cập nhật cấu hình thành công',
+        });
 
         onSave?.(mode);
         setIsDirty(false); // Reset dirty state on save

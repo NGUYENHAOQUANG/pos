@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -139,6 +140,12 @@ export const AddEnvironmentScreen: React.FC = () => {
         // Validate: at least one parameter must be filled
         if (!hasAtLeastOneParameter) {
             setShowParameterError(true);
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập ít nhất một chỉ số',
+                position: 'top',
+                visibilityTime: 3000,
+            });
             return;
         }
 

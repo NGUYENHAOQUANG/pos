@@ -156,6 +156,7 @@ export const EditFeederScreens = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSaveInfo}
                 onSecondaryPress={() => navigation.goBack()}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
 
             {/* Modals */}

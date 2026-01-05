@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
     View,
     Text,
@@ -67,16 +67,44 @@ export const SettingEnvironmentScreens: React.FC = () => {
     const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(DEFAULT_LOCATIONS[0]);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownButtonRef = useRef<View>(null);
-    const [parameters, setParameters] = useState<EnvironmentParameter[]>(ENVIRONMENT_PARAMETERS);
-    const [advancedParameters, setAdvancedParameters] = useState<EnvironmentParameter[]>(
-        data?.advancedParameters
-            ? ADVANCED_PARAMETERS.map(p =>
-                  data.advancedParameters!.some(ap => ap.id === p.id)
-                      ? { ...p, isChecked: true }
-                      : p
-              )
-            : ADVANCED_PARAMETERS
+
+    // Memoize initial state for comparison
+    const initialParameters = useMemo(() => ENVIRONMENT_PARAMETERS, []);
+    const initialAdvancedParameters = useMemo(
+        () =>
+            data?.advancedParameters
+                ? ADVANCED_PARAMETERS.map(p =>
+                      data.advancedParameters!.some(ap => ap.id === p.id)
+                          ? { ...p, isChecked: true }
+                          : p
+                  )
+                : ADVANCED_PARAMETERS,
+        [data]
     );
+
+    // Initial state setup...
+    const [parameters, setParameters] = useState<EnvironmentParameter[]>(initialParameters);
+    const [advancedParameters, setAdvancedParameters] =
+        useState<EnvironmentParameter[]>(initialAdvancedParameters);
+
+    // Helper to compare parameter arrays
+    const areParametersEqual = (arr1: EnvironmentParameter[], arr2: EnvironmentParameter[]) => {
+        if (arr1.length !== arr2.length) return false;
+        return arr1.every((p1, index) => {
+            const p2 = arr2[index];
+            return p1.id === p2.id && p1.isChecked === p2.isChecked && p1.limit === p2.limit;
+        });
+    };
+
+    // Calculate dirty state
+    const isDirty = useMemo(() => {
+        const parametersChanged = !areParametersEqual(parameters, initialParameters);
+        const advancedParametersChanged = !areParametersEqual(
+            advancedParameters,
+            initialAdvancedParameters
+        );
+        return parametersChanged || advancedParametersChanged;
+    }, [parameters, advancedParameters, initialParameters, initialAdvancedParameters]);
 
     // No local tab bar visibility logic needed anymore
 
@@ -149,8 +177,8 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleReset = () => {
-        setParameters([...ENVIRONMENT_PARAMETERS]);
-        setAdvancedParameters([...ADVANCED_PARAMETERS]);
+        setParameters([...initialParameters]);
+        setAdvancedParameters([...initialAdvancedParameters]);
     };
 
     const renderDropdownItem = ({ item }: { item: FarmLocation }) => {
@@ -233,7 +261,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
                     secondaryTitle="Thiết lập lại"
                     onPrimaryPress={handleSave}
                     onSecondaryPress={handleReset}
-                    primaryDisabled={false}
+                    primaryDisabled={!isDirty}
                     secondaryType="primary"
                 />
             </View>

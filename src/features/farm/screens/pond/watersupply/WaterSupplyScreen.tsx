@@ -8,11 +8,17 @@ import {
     Platform,
     TextInput,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
+import {
+    showAddJobSuccessToast,
+    showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
@@ -36,7 +42,6 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 export const WaterSupplyScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const insets = useSafeAreaInsets();
 
     const { pond, item } = route.params || {};
     const { updatePondJob, getPondJobItems } = useFarm();
@@ -149,6 +154,26 @@ export const WaterSupplyScreen = () => {
     // };
 
     const handleSave = () => {
+        if (!targetLevel || !supplyLevel) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập đầy đủ thông tin mực nước',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) return;
 
         const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
@@ -186,6 +211,7 @@ export const WaterSupplyScreen = () => {
                 i.id === item.id ? { ...i, ...itemData } : i
             );
             updatePondJob(pond.id, 'WATER_CHANGE', updatedItems);
+            showEditJobSuccessToast('WATER_CHANGE');
         } else {
             // CREATE
             let maxIndex = 0;
@@ -205,6 +231,7 @@ export const WaterSupplyScreen = () => {
                 pondId: pond.id,
             };
             updatePondJob(pond.id, 'WATER_CHANGE', [...currentItems, newItem]);
+            showAddJobSuccessToast('WATER_CHANGE');
         }
 
         navigation.goBack();
@@ -294,16 +321,13 @@ export const WaterSupplyScreen = () => {
             </View>
 
             {/* Footer */}
-            <View style={[styles.footer, { paddingBottom: insets.bottom || 16 }]}>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-                    <Text style={styles.cancelButtonText}>Huỷ</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                    <Text style={styles.saveButtonText}>
-                        {item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    </Text>
-                </TouchableOpacity>
-            </View>
+            <ButtonBarFarm
+                primaryTitle={item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleSave}
+                onSecondaryPress={() => navigation.goBack()}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+            />
 
             <ConfirmationDeleteModal
                 visible={showDeleteModal}
@@ -365,42 +389,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text,
     },
-    footer: {
-        flexDirection: 'row',
-        padding: spacing.md,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-    },
-    cancelButton: {
-        paddingVertical: 12,
-        paddingHorizontal: spacing.lg,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.gray[300],
-        marginRight: spacing.md,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    cancelButtonText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    saveButton: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: borderRadius.md,
-        backgroundColor: colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    saveButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.white,
-    },
+
     headerDeleteButton: {
         width: 40,
         height: 40,

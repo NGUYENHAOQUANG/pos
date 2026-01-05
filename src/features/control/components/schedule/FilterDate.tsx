@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { DatePickerModal } from '../../../home/components/DatePickerModal';
+import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 // removed LayoutChangeEvent
 import { colors } from '@/styles';
 import CalenderIcon from '@/assets/Icon/IconDevices/Calender.svg';

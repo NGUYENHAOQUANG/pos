@@ -37,6 +37,16 @@ export const AddFeederScreens = () => {
     const [executionDate, setExecutionDate] = useState(new Date());
 
     const handleSaveInfo = () => {
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (pondId) {
             const currentItems = getPondJobItems(pondId, 'FEED');
 
@@ -128,6 +138,7 @@ export const AddFeederScreens = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSaveInfo}
                 onSecondaryPress={() => navigation.goBack()}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
         </View>
     );

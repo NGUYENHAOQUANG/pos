@@ -19,6 +19,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useControl } from '../../context/ControlContext';
+import Toast from 'react-native-toast-message';
 
 // Removed Mocks
 
@@ -44,6 +45,15 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     // Show Custom Feeding Machine Screen
     const handleSettingsPress = (id: string) => {
         const selectedDevice = allDevices.find(d => d.id === id);
+
+        if (selectedDevice?.mode === EControlMode.LOCAL) {
+            Toast.show({
+                type: 'error',
+                text1: 'Không thể cấu hình khi thiết bị này',
+            });
+            return;
+        }
+
         const initialMode = selectedDevice?.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual';
 
         navigation.navigate('CustomFeedingMachine', {
@@ -63,7 +73,16 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const handleSwitchAll = (devicesList: DeviceData[], mode: EControlMode) => {
         if (!currentPond) return;
         devicesList.forEach(d => {
+            if (d.mode === EControlMode.LOCAL) return;
             updateDeviceMode(currentPond.id, d.id, mode);
+        });
+
+        Toast.show({
+            type: 'success',
+            text1:
+                mode === EControlMode.SCHEDULE
+                    ? 'Đã chuyển tất cả sang Lịch trình'
+                    : 'Đã chuyển tất cả sang Thủ công',
         });
     };
 
@@ -71,6 +90,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         if (!currentPond) return;
         const device = allDevices.find(d => d.id === id);
         if (device) {
+            if (device.mode === EControlMode.LOCAL) return;
             const newMode =
                 device.mode === EControlMode.SCHEDULE ? EControlMode.MANUAL : EControlMode.SCHEDULE;
             updateDeviceMode(currentPond.id, id, newMode);

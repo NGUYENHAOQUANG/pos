@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -130,6 +131,26 @@ export const AddSiphonScreen: React.FC = () => {
     const isButtonDisabled = itemToEdit && !hasChanges;
 
     const handleSave = () => {
+        if (!lossAmount.trim()) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập số tôm hao',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) {
             navigation.goBack();
             return;

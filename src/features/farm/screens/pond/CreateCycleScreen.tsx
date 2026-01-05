@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors } from '@/styles';
+import { colors, borderRadius } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/components/pond/CreateCycleForm';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import TrashOutlined from '@/assets/Icon/IconDevices/TrashOutlined.svg';
+import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import Toast from 'react-native-toast-message';
 import { useFarm } from '../../context/FarmContext';
 import { CycleData } from '../../types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -22,7 +21,7 @@ export const CreateCycleScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
 
     // Lấy các hàm từ FarmContext
-    const { saveActiveCycle, deleteActiveCycle } = useFarm();
+    const { saveActiveCycle, deleteActiveCycle, deleteCycle } = useFarm();
 
     const { pondId, initialData } = route.params;
     const isEdit = !!initialData;
@@ -37,7 +36,7 @@ export const CreateCycleScreen: React.FC = () => {
                 cycleName: '',
                 breedSource: undefined,
                 season: undefined,
-                stockingDate: formatDate(new Date()),
+                stockingDate: new Date().toISOString(),
             };
         }
         return {
@@ -67,7 +66,6 @@ export const CreateCycleScreen: React.FC = () => {
                 type: 'error',
                 text1: 'Vui lòng nhập đầy đủ các thông tin',
                 position: 'top',
-                topOffset: 60,
             });
         }
 
@@ -92,16 +90,25 @@ export const CreateCycleScreen: React.FC = () => {
 
         // Lưu vào FarmContext
         saveActiveCycle(pondId, fullCycleData);
+
+        Toast.show({
+            type: 'success',
+            text1: isEdit ? 'Đã cập nhật chu kỳ thành công' : 'Đã tạo chu kỳ nuôi thành công',
+            topOffset: 0,
+        });
         navigation.goBack();
     };
 
     const onConfirmDelete = () => {
         if (pondId) {
-            deleteActiveCycle(pondId); // Xóa trong FarmContext
+            deleteActiveCycle(pondId); // Xóa trong ActiveCycle
+            if (initialData?.id) {
+                deleteCycle(initialData.id); // Xóa trong danh sách Cycles
+            }
             setShowDeleteModal(false); // Đóng modal
-
             // Navigate về màn hình ao nuôi để hiện Toast thành công
-            navigation.goBack();
+            // Sử dụng navigate thay vì goBack để đảm bảo không quay lại màn hình detail cũ
+            navigation.navigate('PondDetail', { pondId } as any);
         }
     };
 
@@ -117,14 +124,19 @@ export const CreateCycleScreen: React.FC = () => {
                             style={styles.iconBtn}
                             onPress={() => setShowDeleteModal(true)}
                         >
-                            <TrashOutlined width={24} height={24} fill={colors.red[600]} />
+                            <DeleteIcon width={20} height={20} color={colors.red[900]} />
                         </TouchableOpacity>
                     ) : null
                 }
             />
 
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                <CreateCycleForm formData={cycleData} setFormData={setCycleData} pondId={pondId} />
+                <CreateCycleForm
+                    formData={cycleData}
+                    setFormData={setCycleData}
+                    pondId={pondId}
+                    isEdit={isEdit}
+                />
             </ScrollView>
 
             <ButtonBarFarm
@@ -144,7 +156,7 @@ export const CreateCycleScreen: React.FC = () => {
                 onConfirm={onConfirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
                 title="Xác nhận xóa chu kỳ nuôi"
-                message="Bạn sẽ không thể truy cập lại chu kỳ đã xóa. Các vật tư đã xuất kho cho chu kỳ này sẽ có thể bị ảnh hưởng. Bạn có chắc chắn mốn xóa chu kỳ này không?"
+                message="Bạn sẽ không thể truy cập lại chu kỳ đã xóa. Các vật tư đã xuất kho cho chu kỳ này sẽ có thể bị ảnh hưởng. Bạn có chắc chắn muốn xóa chu kỳ này không?"
                 confirmText="Xóa chu kỳ"
                 cancelText="Không"
             />
@@ -162,10 +174,10 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 4,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.sm,
         borderWidth: 1,
-        borderColor: '#FF4D4F',
+        borderColor: colors.red[900],
     },
 });
 

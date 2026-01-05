@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { IconCalender } from '@/assets/icons';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { formatDateTime, FormatDateTimeOptions } from '@/features/farm/utils/dateUtils';
 
 /**

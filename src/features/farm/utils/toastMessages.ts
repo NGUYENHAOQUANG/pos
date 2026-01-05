@@ -22,8 +22,8 @@ const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>
         edit: 'Đã cập nhật xử lý nước thành công',
     },
     WATER_CHANGE: {
-        add: 'Đã thêm cấp nước thành công',
-        edit: 'Đã cập nhật cấp nước thành công',
+        add: 'Đã thay/cấp nước thành công',
+        edit: 'Đã cập nhật thay/cấp nước thành công',
     },
     SIPHON: {
         add: 'Đã xi-phông thành công',

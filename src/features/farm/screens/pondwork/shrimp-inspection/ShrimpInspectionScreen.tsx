@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -79,6 +80,16 @@ export const ShrimpInspectionScreen: React.FC = () => {
     };
 
     const handleSave = () => {
+        if (!itemToEdit && foodAmount.trim().length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập lượng thức ăn giảm',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (pond?.id) {
             const currentItems = getPondJobItems(pond.id, 'SHRIMP_INSPECTION');
             const timeString = selectedDate.toLocaleTimeString('en-GB', {

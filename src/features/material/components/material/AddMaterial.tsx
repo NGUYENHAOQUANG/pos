@@ -41,6 +41,7 @@ interface AddMaterialProps {
     onDosageChange?: (text: string) => void;
     manufacturer?: string;
     onManufacturerChange?: (text: string) => void;
+    onUnitDropdownOpen?: () => void;
 }
 
 export const AddMaterial: React.FC<AddMaterialProps> = ({
@@ -62,6 +63,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     onDosageChange,
     manufacturer,
     onManufacturerChange,
+    onUnitDropdownOpen,
 }) => {
     const [isBasicExpanded, setIsBasicExpanded] = useState(true);
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
@@ -73,6 +75,9 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
             setActiveDropdown(null);
         } else {
             setActiveDropdown(key);
+            if (key === 'unitOfUse') {
+                onUnitDropdownOpen?.();
+            }
         }
     };
 
