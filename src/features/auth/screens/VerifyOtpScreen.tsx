@@ -81,7 +81,7 @@ export default function VerifyOTPScreen() {
         }
 
         if (otpString === '0000') {
-            setErrorMessage('Mã không chính xác, vui lòng kiểm tra lại.');
+            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             return;
         }
 
@@ -144,7 +144,9 @@ export default function VerifyOTPScreen() {
                         </View>
 
                         {isError ? (
-                            <Text style={styles.errorText}>{errorMessage}</Text>
+                            <Text style={styles.errorText} numberOfLines={1} adjustsFontSizeToFit>
+                                {errorMessage}
+                            </Text>
                         ) : (
                             <View style={styles.errorPlaceholder} />
                         )}
