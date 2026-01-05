@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, borderRadius, sizes } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
-import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
-import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
-import { IconCalender } from '@/assets/icons';
-import { formatDate } from '@/features/farm/utils/dateUtils';
+import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
@@ -46,7 +44,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
     const [quantity, setQuantity] = useState(initialData?.quantity || '');
     const [importDate, setImportDate] = useState<Date | null>(initialData?.importDate || null);
     const [condition, setCondition] = useState<'new' | 'used'>(initialData?.condition || 'new');
-    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
 
     // Notify parent of data changes
     useEffect(() => {
@@ -88,12 +85,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
         setDeviceType(item);
     };
 
-    const getFormattedDateText = () => {
-        if (!importDate) return 'dd/mm/yyyy';
-        // Format as dd/mm/yyyy
-        return formatDate(importDate);
-    };
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Thông tin chung</Text>
@@ -118,8 +109,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                         value={deviceType}
                         onSelect={handleDeviceTypeSelect}
                         showIcon={false}
-                        height={sizes.input.md}
-                        borderRadius={borderRadius.md}
+                        borderRadius={borderRadius.sm}
                         style={styles.dropdown}
                     />
                 </View>
@@ -138,19 +128,15 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                         />
                     </View>
                     <View style={[styles.col, { paddingLeft: spacing.sm }]}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>
-                                <Text style={styles.required}>* </Text>Ngày nhập kho
-                            </Text>
-                            <TouchableOpacity
-                                style={styles.dateInput}
-                                onPress={() => setIsDatePickerVisible(true)}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={styles.dateText}>{getFormattedDateText()}</Text>
-                                <IconCalender width={15} height={15} />
-                            </TouchableOpacity>
-                        </View>
+                        <DateInputButton
+                            label="Ngày nhập kho"
+                            required
+                            date={importDate}
+                            onDateChange={setImportDate}
+                            dateOnly
+                            dateText={importDate ? undefined : 'dd/mm/yyyy'}
+                            height={40}
+                        />
                     </View>
                 </View>
 
@@ -194,16 +180,6 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     </View>
                 </View>
             </View>
-
-            <DatePickerModal
-                visible={isDatePickerVisible}
-                onClose={() => setIsDatePickerVisible(false)}
-                date={importDate || new Date()}
-                onSelectDate={date => {
-                    setImportDate(date);
-                    setIsDatePickerVisible(false);
-                }}
-            />
         </View>
     );
 };
@@ -239,7 +215,8 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.sm,
         fontWeight: '400',
         color: colors.text,
-        marginBottom: spacing.xs,
+        marginBottom: spacing.sm,
+        lineHeight: 22,
     },
     required: {
         color: colors.error,
@@ -289,21 +266,5 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         marginBottom: 0,
-    },
-    dateInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        height: sizes.input.md,
-    },
-    dateText: {
-        fontSize: 14,
-        color: colors.text,
-        flex: 1,
-    },
+    }, // Removed unused date styles
 });

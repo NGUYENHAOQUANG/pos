@@ -7,7 +7,7 @@
  *
  * @see https://rn.mobile.ant.design/components/input-item
  */
-import { borderRadius, colors, sizes, spacing, typography } from '@/styles';
+import { colors, sizes, spacing, typography } from '@/styles';
 import React, { useState } from 'react';
 import {
     StyleSheet,
@@ -97,7 +97,7 @@ export function Input({
     // Get border color based on state
     const getBorderColor = (): string => {
         if (error) return colors.error;
-        if (isFocused) return colors.primary;
+        // Focus state uses default border color as requested
         return colors.border;
     };
 
@@ -198,10 +198,11 @@ const styles = StyleSheet.create({
         marginBottom: spacing.lg,
     },
     label: {
-        fontSize: typography.fontSize.sm,
+        fontSize: 14,
         fontWeight: '400',
         color: colors.text,
-        marginBottom: spacing.xs,
+        lineHeight: 22,
+        marginBottom: spacing.sm,
     },
     required: {
         color: colors.error,
@@ -211,14 +212,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.md,
+        borderRadius: 8,
         backgroundColor: colors.white,
-        minHeight: sizes.input.md,
+        height: 40,
         paddingHorizontal: spacing.md,
     },
     inputContainerFocused: {
-        borderColor: colors.primary,
-        borderWidth: 1.5,
+        // Focus styles removed to match default border design
     },
     inputContainerError: {
         borderColor: colors.error,
@@ -232,11 +232,12 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: typography.fontSize.base,
+        fontSize: 16,
         color: colors.text,
+        lineHeight: 24,
+        letterSpacing: 0,
         paddingVertical: 0,
-        minHeight: sizes.input.md - 2,
-        fontFamily: typography.fontFamily.regular,
+        height: '100%', // Match container height
     },
     inputMultiline: {
         minHeight: sizes.input.md * 2,

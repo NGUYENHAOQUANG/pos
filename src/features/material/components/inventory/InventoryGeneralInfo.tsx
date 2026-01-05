@@ -140,7 +140,6 @@ const styles = StyleSheet.create({
     },
     infoValue: {
         fontSize: 14,
-        color: colors.textSecondary,
         textAlign: 'right',
     },
     inputGroup: {

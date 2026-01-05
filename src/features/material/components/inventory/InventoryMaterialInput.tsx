@@ -57,6 +57,8 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
                             <Text style={styles.oldStockValue}>{oldStock} Kg</Text>
                         </View>
 
+                        <View style={styles.dividerVertical} />
+
                         <View style={styles.col}>
                             <Text style={styles.label}>
                                 <Text style={styles.required}>* </Text>Tồn kho mới
@@ -127,6 +129,11 @@ const styles = StyleSheet.create({
     },
     col: {
         flex: 1,
+    },
+    dividerVertical: {
+        width: 1,
+        height: '100%',
+        backgroundColor: colors.gray[100],
     },
     label: {
         fontSize: 14,

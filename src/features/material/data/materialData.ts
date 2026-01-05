@@ -1292,7 +1292,7 @@ export const mockWarehouseList: IWarehouseReceipt[] = IMPORT_RECEIPTS_DATA.map(r
 const INVENTORY_RAW_DATA = [
     {
         id: 'KK-20251208-02',
-        date: '2025-12-16',
+        date: '7:00 2025/12/16',
         checker: 'Nguyễn Văn Duy',
         location: 'Kho tổng',
         note: '',
@@ -1303,7 +1303,7 @@ const INVENTORY_RAW_DATA = [
     },
     {
         id: 'KK-20251208-04',
-        date: '2025-12-16',
+        date: '7:00 2025/12/16',
         checker: 'Nguyễn Văn Duy',
         location: 'Kho tổng',
         note: '',
@@ -1314,7 +1314,7 @@ const INVENTORY_RAW_DATA = [
     },
     {
         id: 'KK-20251208-05',
-        date: '2025-12-16',
+        date: '7:00 2025/12/16',
         checker: 'Nguyễn Văn Duy',
         location: 'Kho tổng',
         note: '',
@@ -1325,7 +1325,7 @@ const INVENTORY_RAW_DATA = [
     },
     {
         id: 'KK-20251216-07',
-        date: '2025-12-16',
+        date: '7:00 2025/12/16',
         checker: 'Nguyễn Văn Duy',
         location: 'Kho nuôi',
         note: '',
@@ -1336,7 +1336,7 @@ const INVENTORY_RAW_DATA = [
     },
     {
         id: 'KK-20251216-07',
-        date: '2025-12-16',
+        date: '7:00 2025/12/16',
         checker: 'Nguyễn Văn Duy',
         location: 'Kho nuôi',
         note: '',
