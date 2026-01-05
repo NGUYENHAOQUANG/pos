@@ -177,6 +177,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
+                        <View style={styles.fullWidthDivider} />
                         <View style={styles.radioGroup}>
                             <TouchableOpacity
                                 style={styles.radioItem}
@@ -223,6 +224,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     {/* 2. CẤU HÌNH MÁY */}
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Cấu hình máy</Text>
+                        <View style={styles.fullWidthDivider} />
                         <View style={styles.rowInputs}>
                             <View style={styles.inputWrapper}>
                                 <Text style={styles.inputLabel}>Chạy (giây)</Text>
@@ -295,18 +297,16 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: colors.white,
-        borderRadius: 12, // Keep rounded corners
         padding: 16,
-        marginBottom: 16, // Spacing between cards
-        marginHorizontal: 0, // Fill to edges
-        // Remove shadow for flat look or keep it subtle
+        marginBottom: 16,
+        marginHorizontal: 0,
         width: '100%',
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '700',
         color: colors.text,
-        marginBottom: 16,
+        marginBottom: 12,
     },
     radioGroup: {
         flexDirection: 'row',
@@ -352,12 +352,18 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     textInput: {
-        height: 48, // Taller inputs
+        height: 40,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 8,
         paddingHorizontal: 12,
         fontSize: 14,
         color: colors.text,
+    },
+    fullWidthDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+        marginBottom: 16,
     },
 });

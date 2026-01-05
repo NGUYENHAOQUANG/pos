@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { DeviceCard } from './Devices';
 import { EControlMode, DeviceData } from '../../types/control.types';
 import { ButtonControlSwitch } from './ButtonControlSwitch';
-import { spacing } from '@/styles';
+import { spacing, colors } from '@/styles';
 
 // Mock Data Removed
 
@@ -96,7 +96,6 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
-        borderRadius: 16, // Consistent with design typically
         padding: 16,
         marginBottom: spacing.md, // Spacing between cards
         // Shadow for the whole card
@@ -115,8 +114,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
-        paddingBottom: 12, // Visual separation
+        borderBottomColor: colors.border,
+        paddingBottom: 12,
+        marginHorizontal: -16,
+        paddingHorizontal: 16,
     },
     title: {
         fontSize: 18,

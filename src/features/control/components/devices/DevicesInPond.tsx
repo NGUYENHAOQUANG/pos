@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: '#1F2937',
     },
     cardWrapper: {

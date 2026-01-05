@@ -26,13 +26,25 @@ export const EditEnvironmentScreens: React.FC = () => {
     // No explicit tab bar handling needed
 
     const handleSave = () => {
+        // Validate limits
+        if (lowerLimit && upperLimit) {
+            const lower = parseFloat(lowerLimit);
+            const upper = parseFloat(upperLimit);
+
+            if (!isNaN(lower) && !isNaN(upper) && lower > upper) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Giới hạn dưới không được lớn hơn giới hạn trên',
+                });
+                return;
+            }
+        }
+
         // Construct updated parameter object
         const updatedParameter = {
             ...parameter,
             name,
             limit: `${lowerLimit} - ${upperLimit}`,
-            // We might want to save alert state too if supported by EnvironmentParameter type
-            // For now, assuming EnvironmentParameter interface has these fields or extending functionality later
         };
 
         // Call the callback to update state in parent screen

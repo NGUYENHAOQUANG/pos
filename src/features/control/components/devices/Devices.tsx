@@ -37,6 +37,10 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
         // Error State
         containerStyle = { ...styles.cardContainer, ...styles.cardError };
         switchTrackColor = colors.primary;
+    } else if (data.mode === EControlMode.LOCAL) {
+        // Local Mode (Active but locked)
+        containerStyle = { ...styles.cardContainer, ...styles.cardActive };
+        switchTrackColor = colors.primaryLight; // Lighter blue to indicate read-only/local
     } else if (!data.isOn) {
         // Inactive State
         containerStyle = { ...styles.cardContainer, ...styles.cardInactive };

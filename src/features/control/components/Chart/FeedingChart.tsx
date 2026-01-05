@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Animated,
     Easing,
+    ScrollView,
 } from 'react-native';
 import Svg, { Line, Path, Circle, Rect, G, Text as SvgText } from 'react-native-svg';
 import { FeedingTooltip } from './FeedingTooltip';
@@ -19,11 +20,10 @@ const AnimatedView = Animated.createAnimatedComponent(View);
 const CHART_HEIGHT = 260;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const AXIS_MARGIN_TOP = 10;
-const PADDING_LEFT = 35;
-const PADDING_RIGHT = 20;
+const Y_AXIS_WIDTH = 35;
 const PADDING_TOP = 20;
 const PADDING_BOTTOM = 50;
-const CHART_WIDTH = SCREEN_WIDTH - 32 - PADDING_LEFT - PADDING_RIGHT;
+const PADDING_RIGHT = 20;
 
 // Helper to convert HH:mm to float hours
 const parseTimeToHours = (timeStr: string) => {
@@ -57,20 +57,14 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
         }));
     }, [data]);
 
+    const scrollViewRef = useRef<ScrollView>(null);
+    const [hasScrolled, setHasScrolled] = useState(false);
+
     // 2. Determine Axis Ranges
     const { minTime, maxTime, maxY, xLabels } = useMemo(() => {
-        if (processedData.length === 0) {
-            return { minTime: 0, maxTime: 24, maxY: 10, xLabels: ['00:00', '12:00', '24:00'] };
-        }
-
-        const hours = processedData.map(d => d.hourValue);
-        const minH = Math.min(...hours);
-        const maxH = Math.max(...hours);
-
-        // Padding for X axis (start slightly before min, end slightly after max)
-        // For integer alignment, floor min, ceil max
-        const startHour = Math.floor(minH);
-        const endHour = Math.ceil(maxH) + 1; // Add 1 hour buffer
+        // Fixed range 0 -> 24
+        const startHour = 0;
+        const endHour = 24;
 
         const values: number[] = [];
         processedData.forEach(d => {
@@ -79,12 +73,11 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
         });
         const maxVal = Math.max(...values, 0);
         // Round up max val to nice number
-        const maxYVal = Math.ceil(maxVal / 5) * 5 || 10; // Steps of 5, fallback 10
+        const maxYVal = Math.ceil(maxVal / 5) * 5 || 10;
 
-        // Generate Labels (every 2 hours roughly, or adaptive)
+        // Generate Labels (every 1 hour)
         const labels = [];
-        for (let h = startHour; h <= endHour; h += 2) {
-            // Every 2 hours
+        for (let h = startHour; h <= endHour; h += 1) {
             labels.push(`${h.toString().padStart(2, '0')}:00`);
         }
 
@@ -94,28 +87,57 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
     const yLabels = [];
     const yStep = maxY / 4 || 1;
     for (let i = 0; i <= maxY; i += yStep) {
-        yLabels.push(i); // Keep decimals if step is small
+        yLabels.push(i);
     }
 
     // 3. Scaling Functions
-    // Time -> X
-    const getX = (hour: number) => {
-        if (maxTime === minTime) return PADDING_LEFT;
-        return ((hour - minTime) / (maxTime - minTime)) * CHART_WIDTH + PADDING_LEFT;
-    };
+
+    const totalHours = maxTime - minTime; // Always 24
+    const PIXELS_PER_HOUR = 60;
+    const contentWidthRaw = totalHours * PIXELS_PER_HOUR;
+    const minContentWidth = SCREEN_WIDTH - 32 - Y_AXIS_WIDTH;
+    const contentWidth = Math.max(contentWidthRaw + PADDING_RIGHT, minContentWidth);
+
+    // Time -> X (Relative to Content SVG)
+    const getX = React.useCallback(
+        (hour: number) => {
+            // minTime is 0
+            const availableWidth = contentWidth - PADDING_RIGHT - 20;
+            return (hour / 24) * availableWidth + 20;
+        },
+        [contentWidth]
+    );
 
     // Value -> Y
-    const getY = (val: number) => {
-        return (
-            CHART_HEIGHT -
-            PADDING_TOP -
-            PADDING_BOTTOM -
-            (val / maxY) * (CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM) +
-            PADDING_TOP
-        );
-    };
+    const getY = React.useCallback(
+        (val: number) => {
+            return (
+                CHART_HEIGHT -
+                PADDING_TOP -
+                PADDING_BOTTOM -
+                (val / maxY) * (CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM) +
+                PADDING_TOP
+            );
+        },
+        [maxY]
+    );
 
     const chartAreaHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
+
+    // Auto Scroll to first data point
+    useEffect(() => {
+        if (processedData.length > 0 && !hasScrolled && scrollViewRef.current && contentWidth > 0) {
+            const firstHour = processedData[0].hourValue;
+            // Scroll to start slightly before the first point (e.g. -1 hour)
+            const targetX = getX(Math.max(0, firstHour - 1));
+
+            // Use setTimeout to allow layout to finish
+            setTimeout(() => {
+                scrollViewRef.current?.scrollTo({ x: targetX, animated: true });
+                setHasScrolled(true);
+            }, 500);
+        }
+    }, [processedData, hasScrolled, contentWidth, getX]);
 
     useEffect(() => {
         if (selectedPoint) {
@@ -144,7 +166,6 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
     const createStepPath = () => {
         if (processedData.length === 0) return '';
 
-        // Start
         let path = `M ${getX(processedData[0].hourValue)} ${getY(processedData[0].feedAmount)}`;
 
         for (let i = 0; i < processedData.length - 1; i++) {
@@ -155,8 +176,6 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
             const y1 = getY(current.feedAmount);
             const y2 = getY(next.feedAmount);
 
-            // Step Line: Horizontal then Vertical
-            // L x2 y1 L x2 y2
             path += ` L ${x2} ${y1} L ${x2} ${y2}`;
         }
         return path;
@@ -215,22 +234,14 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
             <Text style={styles.title}>Khối Lượng Thức Ăn Thả Thực Tế</Text>
             <Text style={styles.subtitle}>Đo bằng cảm biến cân nặng (Loadcell)</Text>
 
-            <View style={styles.chartWrapper}>
-                <TouchableOpacity activeOpacity={1} onPress={handleTouch} style={styles.touchArea}>
-                    <Svg width={SCREEN_WIDTH - 32} height={CHART_HEIGHT}>
-                        {/* Horizontal Grid & Labels */}
+            <View style={styles.chartWrapperRow}>
+                {/* Fixed Y-Axis */}
+                <View style={{ width: Y_AXIS_WIDTH, height: CHART_HEIGHT }}>
+                    <Svg width={Y_AXIS_WIDTH} height={CHART_HEIGHT}>
                         {yLabels.map(val => (
-                            <G key={`grid-y-${val}`}>
-                                <Line
-                                    x1={PADDING_LEFT}
-                                    y1={getY(val)}
-                                    x2={CHART_WIDTH + PADDING_LEFT}
-                                    y2={getY(val)}
-                                    stroke={colors.gray[100]}
-                                    strokeWidth={1}
-                                />
+                            <G key={`grid-y-label-${val}`}>
                                 <SvgText
-                                    x={PADDING_LEFT - 8}
+                                    x={Y_AXIS_WIDTH - 5}
                                     y={getY(val) + 3}
                                     fill={colors.text}
                                     fontSize="10"
@@ -240,148 +251,181 @@ export default function FeedingChart({ data = [] }: FeedingChartProps) {
                                 </SvgText>
                             </G>
                         ))}
-
-                        {/* Bottom Axis Line */}
+                        {/* Bottom Axis Line Extension */}
                         <Line
-                            x1={PADDING_LEFT}
+                            x1={0}
                             y1={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
-                            x2={CHART_WIDTH + PADDING_LEFT}
+                            x2={Y_AXIS_WIDTH}
                             y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
                             stroke={colors.gray[300]}
                             strokeWidth={1}
                         />
+                    </Svg>
+                </View>
 
-                        {/* X-Axis Grid & Labels */}
-                        {xLabels.map((label, index) => {
-                            const hourVal = parseTimeToHours(label); // Assuming label is HH:mm
-                            const xPos = getX(hourVal);
-
-                            const chartBottom = CHART_HEIGHT - PADDING_BOTTOM;
-                            const axisY = chartBottom + AXIS_MARGIN_TOP;
-                            const tickHalf = 4;
-                            const textMargin = 12;
-
-                            // Only render if within bounds
-                            if (xPos < PADDING_LEFT || xPos > CHART_WIDTH + PADDING_LEFT)
-                                return null;
-
-                            return (
-                                <G key={`grid-x-${index}`}>
-                                    <Line
-                                        x1={xPos}
-                                        y1={PADDING_TOP}
-                                        y2={chartBottom}
-                                        stroke={colors.gray[100]}
-                                        strokeDasharray="4 4"
-                                    />
-                                    <Line
-                                        x1={xPos}
-                                        y1={axisY - tickHalf}
-                                        x2={xPos}
-                                        y2={axisY + tickHalf}
-                                        stroke={colors.gray[400]}
-                                        strokeWidth={1.5}
-                                    />
-                                    <SvgText
-                                        x={xPos}
-                                        y={axisY + tickHalf + textMargin}
-                                        fill={colors.textSecondary}
-                                        fontSize="10"
-                                        textAnchor="middle"
-                                    >
-                                        {label}
-                                    </SvgText>
-                                </G>
-                            );
-                        })}
-
-                        {/* Planned Data (Bars) */}
-                        {processedData.map((d, i) => {
-                            const x = getX(d.hourValue);
-                            const y = getY(d.plannedFeedAmount);
-                            const barWidth = 8;
-                            const barHeight = chartAreaHeight - (y - PADDING_TOP);
-                            return (
-                                <Rect
-                                    key={`plan-${i}`}
-                                    x={x - barWidth / 2}
-                                    y={y}
-                                    width={barWidth}
-                                    height={Math.max(barHeight, 0)}
-                                    fill={colors.primary}
-                                    rx={2}
+                {/* Scrollable Content */}
+                <ScrollView ref={scrollViewRef} horizontal showsHorizontalScrollIndicator={false}>
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={handleTouch}
+                        style={styles.touchArea}
+                    >
+                        <Svg width={contentWidth} height={CHART_HEIGHT}>
+                            {/* Horizontal Grid Lines */}
+                            {yLabels.map(val => (
+                                <Line
+                                    key={`grid-y-${val}`}
+                                    x1={0}
+                                    y1={getY(val)}
+                                    x2={contentWidth}
+                                    y2={getY(val)}
+                                    // Make stroke dashed or lighter
+                                    stroke={colors.gray[100]}
+                                    strokeWidth={1}
                                 />
-                            );
-                        })}
+                            ))}
 
-                        {/* Actual Data (Step Line) */}
-                        <Path
-                            d={createStepPath()}
-                            fill="none"
-                            stroke={colors.orange[600]}
-                            strokeWidth="2"
-                        />
-
-                        {/* Points on Step Line */}
-                        {processedData.map((point, i) => (
-                            <Circle
-                                key={`point-${i}`}
-                                cx={getX(point.hourValue)}
-                                cy={getY(point.feedAmount)}
-                                r={3}
-                                fill={colors.orange[600]}
-                                stroke={colors.white}
-                                strokeWidth={1}
-                            />
-                        ))}
-
-                        {/* Cursor / Tooltip Lines */}
-                        <AnimatedG style={verticalLineStyle}>
+                            {/* Bottom Axis Line */}
                             <Line
                                 x1={0}
-                                y1={PADDING_TOP}
-                                x2={0}
+                                y1={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
+                                x2={contentWidth}
                                 y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
-                                stroke={colors.gray[600]}
+                                stroke={colors.gray[300]}
                                 strokeWidth={1}
                             />
-                        </AnimatedG>
 
-                        <AnimatedG style={horizontalLineStyle}>
-                            <Line
-                                x1={PADDING_LEFT}
-                                y1={0}
-                                x2={CHART_WIDTH + PADDING_LEFT}
-                                y2={0}
-                                stroke={colors.gray[600]}
-                                strokeWidth={1}
-                            />
-                        </AnimatedG>
+                            {/* X-Axis Grid & Labels */}
+                            {xLabels.map((label, index) => {
+                                const hourVal = parseTimeToHours(label);
+                                const xPos = getX(hourVal);
 
-                        <AnimatedG style={cursorPointStyle}>
-                            <Circle
-                                cx={0}
-                                cy={0}
-                                r={4}
-                                fill={colors.orange[600]}
-                                stroke={colors.white}
-                                strokeWidth={2}
-                            />
-                        </AnimatedG>
-                    </Svg>
+                                const chartBottom = CHART_HEIGHT - PADDING_BOTTOM;
+                                const axisY = chartBottom + AXIS_MARGIN_TOP;
+                                const tickHalf = 4;
+                                const textMargin = 12;
 
-                    {selectedPoint && (
-                        <AnimatedView style={tooltipAnimatedStyle}>
-                            <FeedingTooltip
-                                visible={true}
-                                x={0}
-                                y={0}
-                                time={selectedPoint.time}
-                                weight={selectedPoint.value}
+                                if (xPos < 0 || xPos > contentWidth) return null;
+
+                                return (
+                                    <G key={`grid-x-${index}`}>
+                                        <Line
+                                            x1={xPos}
+                                            y1={PADDING_TOP}
+                                            y2={chartBottom}
+                                            stroke={colors.gray[100]}
+                                            strokeDasharray="4 4"
+                                        />
+                                        <Line
+                                            x1={xPos}
+                                            y1={axisY - tickHalf}
+                                            x2={xPos}
+                                            y2={axisY + tickHalf}
+                                            stroke={colors.gray[400]}
+                                            strokeWidth={1.5}
+                                        />
+                                        <SvgText
+                                            x={xPos}
+                                            y={axisY + tickHalf + textMargin}
+                                            fill={colors.textSecondary}
+                                            fontSize="10"
+                                            textAnchor="middle"
+                                        >
+                                            {label}
+                                        </SvgText>
+                                    </G>
+                                );
+                            })}
+
+                            {/* Planned Data (Bars) */}
+                            {processedData.map((d, i) => {
+                                const x = getX(d.hourValue);
+                                const y = getY(d.plannedFeedAmount);
+                                const barWidth = 8;
+                                const barHeight = chartAreaHeight - (y - PADDING_TOP);
+                                return (
+                                    <Rect
+                                        key={`plan-${i}`}
+                                        x={x - barWidth / 2}
+                                        y={y}
+                                        width={barWidth}
+                                        height={Math.max(barHeight, 0)}
+                                        fill={colors.primary}
+                                        rx={2}
+                                    />
+                                );
+                            })}
+
+                            {/* Actual Data (Step Line) */}
+                            <Path
+                                d={createStepPath()}
+                                fill="none"
+                                stroke={colors.orange[600]}
+                                strokeWidth="2"
                             />
-                        </AnimatedView>
-                    )}
-                </TouchableOpacity>
+
+                            {/* Points on Step Line */}
+                            {processedData.map((point, i) => (
+                                <Circle
+                                    key={`point-${i}`}
+                                    cx={getX(point.hourValue)}
+                                    cy={getY(point.feedAmount)}
+                                    r={3}
+                                    fill={colors.orange[600]}
+                                    stroke={colors.white}
+                                    strokeWidth={1}
+                                />
+                            ))}
+
+                            {/* Cursor */}
+                            <AnimatedG style={verticalLineStyle}>
+                                <Line
+                                    x1={0}
+                                    y1={PADDING_TOP}
+                                    x2={0}
+                                    y2={CHART_HEIGHT - PADDING_BOTTOM + AXIS_MARGIN_TOP}
+                                    stroke={colors.gray[600]}
+                                    strokeWidth={1}
+                                />
+                            </AnimatedG>
+
+                            <AnimatedG style={horizontalLineStyle}>
+                                <Line
+                                    x1={0}
+                                    y1={0}
+                                    x2={contentWidth}
+                                    y2={0}
+                                    stroke={colors.gray[600]}
+                                    strokeWidth={1}
+                                />
+                            </AnimatedG>
+
+                            <AnimatedG style={cursorPointStyle}>
+                                <Circle
+                                    cx={0}
+                                    cy={0}
+                                    r={4}
+                                    fill={colors.orange[600]}
+                                    stroke={colors.white}
+                                    strokeWidth={2}
+                                />
+                            </AnimatedG>
+                        </Svg>
+
+                        {/* Tooltip */}
+                        {selectedPoint && (
+                            <AnimatedView style={tooltipAnimatedStyle}>
+                                <FeedingTooltip
+                                    visible={true}
+                                    x={0}
+                                    y={0}
+                                    time={selectedPoint.time}
+                                    weight={selectedPoint.value}
+                                />
+                            </AnimatedView>
+                        )}
+                    </TouchableOpacity>
+                </ScrollView>
             </View>
 
             <View style={styles.legendContainer}>
@@ -421,8 +465,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 16,
     },
-    chartWrapper: {
-        alignItems: 'center',
+    chartWrapperRow: {
+        flexDirection: 'row',
     },
     touchArea: {
         position: 'relative',
