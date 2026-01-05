@@ -58,15 +58,18 @@ export const convertShrimpInspectionMetaToActivityData = (
     meta: ShrimpInspectionMeta
 ): ActivityData[] => {
     const data: ActivityData[] = [
-        { label: 'Lượng thức ăn cho vào nhá:', value: meta.foodAmount || '--' },
+        {
+            label: 'Lượng thức ăn cho vào nhá:',
+            value: meta.foodAmount ? `${meta.foodAmount}g` : '--',
+        },
         { label: 'Thức ăn thừa:', value: meta.leftoverFood || '--' },
-        { label: 'Đường ruột:', value: meta.intestine || '--' },
-        { label: 'Màu đường ruột:', value: meta.intestineColor || '--' },
-        { label: 'Màu phân:', value: meta.stoolColor || '--' },
+        { label: 'Đường ruột', value: meta.intestine || '--' },
+        { label: 'Màu đường ruột', value: meta.intestineColor || '--' },
+        { label: 'Màu phân', value: meta.stoolColor || '--' },
     ];
 
     if (meta.liver) {
-        data.push({ label: 'Gan:', value: meta.liver });
+        data.push({ label: 'Gan', value: meta.liver });
     }
     if (meta.images && meta.images.length > 0) {
         data.push({ label: 'Hình ảnh:', value: `${meta.images.length} ảnh` });
@@ -288,13 +291,13 @@ export const convertMeasureSizeMetaToActivityData = (
     if (meta.totalShrimpCount !== null && meta.totalShrimpCount !== undefined) {
         data.push({
             label: 'Tổng số tôm hiện tại (con)',
-            value: meta.totalShrimpCount.toLocaleString(),
+            value: meta.totalShrimpCount,
         });
     }
     if (meta.survivalRate !== null && meta.survivalRate !== undefined) {
         data.push({
             label: 'Tỉ lệ sống dự kiến (%)',
-            value: `${meta.survivalRate.toFixed(2)}`,
+            value: formatNumber(Math.round(meta.survivalRate)),
         });
     }
 

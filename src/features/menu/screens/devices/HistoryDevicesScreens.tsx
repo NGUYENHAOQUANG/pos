@@ -216,7 +216,10 @@ export const HistoryDevicesScreens = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderMenu title="Lịch sử thiết bị" onBack={() => navigation.goBack()} />
+            <HeaderMenu
+                title="Lịch sử thiết bị"
+                onBack={() => (navigation.navigate as any)('DeviceManagement')}
+            />
 
             <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
 

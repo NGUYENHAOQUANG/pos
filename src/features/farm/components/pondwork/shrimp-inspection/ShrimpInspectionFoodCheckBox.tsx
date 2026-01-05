@@ -37,13 +37,31 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     leftoverFood,
     onLeftoverFoodChange,
 }) => {
+    const handleFoodAmountChange = (text: string) => {
+        // 1. Remove any character that is not 0-9 or .
+        let cleaned = text.replace(/[^0-9.]/g, '');
+
+        // 2. Prevent . at the beginning
+        if (cleaned.startsWith('.')) {
+            cleaned = cleaned.substring(1);
+        }
+
+        // 3. Ensure only one . exists
+        const parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+        }
+
+        onFoodAmountChange(cleaned);
+    };
+
     return (
         <SelectionInfoBox title="Kiểm tra thức ăn">
             {/* Lượng thức ăn cho vào nhá */}
             <FarmInput
                 label="Lượng thức ăn cho vào nhá (g)"
                 value={foodAmount}
-                onChangeText={onFoodAmountChange}
+                onChangeText={handleFoodAmountChange}
                 keyboardType="numeric"
                 required
             />

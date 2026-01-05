@@ -18,6 +18,7 @@ export const AquacultureManagementScreens: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const { aquacultures } = useMenuContext();
     const [selectedTab, setSelectedTab] = useState('all');
+    const [selectedFarm, setSelectedFarm] = useState<string>('all');
 
     useFocusEffect(
         React.useCallback(() => {
@@ -34,15 +35,28 @@ export const AquacultureManagementScreens: React.FC = () => {
 
     // Mock data for dropdown
     const farmOptions = [
+        { id: 'all', label: 'Tất cả trại' },
         { id: '1', label: 'Trại Kiên Giang' },
         { id: '2', label: 'Trại Cà Mau' },
     ];
 
     const activeData = React.useMemo(() => {
-        if (selectedTab === 'active') return aquacultures.filter(i => i.status === 'active');
-        if (selectedTab === 'ended') return aquacultures.filter(i => i.status === 'ended');
-        return aquacultures;
-    }, [aquacultures, selectedTab]);
+        let filtered = aquacultures;
+
+        // Filter by farm
+        if (selectedFarm !== 'all') {
+            filtered = filtered.filter(i => i.farmId === selectedFarm);
+        }
+
+        // Filter by status tab
+        if (selectedTab === 'active') {
+            filtered = filtered.filter(i => i.status === 'active');
+        } else if (selectedTab === 'ended') {
+            filtered = filtered.filter(i => i.status === 'ended');
+        }
+
+        return filtered;
+    }, [aquacultures, selectedTab, selectedFarm]);
 
     const counts = React.useMemo(
         () => ({
@@ -76,8 +90,8 @@ export const AquacultureManagementScreens: React.FC = () => {
             <View style={styles.filterSection}>
                 <DropDownButton
                     data={farmOptions}
-                    value={farmOptions[0]}
-                    onSelect={item => console.log('Selected:', item)}
+                    value={farmOptions.find(f => f.id === selectedFarm) || farmOptions[0]}
+                    onSelect={item => setSelectedFarm(item.id.toString())}
                     height={40}
                     borderRadius={6}
                 />

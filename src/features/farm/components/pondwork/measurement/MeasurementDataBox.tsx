@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { spacing } from '@/styles';
 
 interface MeasurementDataBoxProps {
@@ -31,9 +32,10 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
             const currentTotal = size * weight;
             setTotalShrimp(currentTotal);
 
-            // Tỉ lệ sống (%) = (Số con thu / Số con thả ban đầu) × 100
-            if (stockingQuantity && stockingQuantity > 0) {
-                const rate = (currentTotal / stockingQuantity) * 100;
+            // Tỉ lệ sống (%) = (Tổng số con hiện tại / Số lượng giống thả ban đầu) × 100
+            if (stockingQuantity && Number(stockingQuantity) > 0) {
+                const initialStock = Number(stockingQuantity);
+                const rate = (currentTotal / initialStock) * 100;
                 setSurvivalRate(rate);
             } else {
                 setSurvivalRate(null);
@@ -51,7 +53,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         if (totalShrimp !== null) {
             items.push({
                 label: 'Tổng số tôm hiện tại (con)',
-                value: Math.round(totalShrimp),
+                value: Math.round(totalShrimp).toString(),
             });
         } else {
             items.push({
@@ -63,7 +65,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         if (survivalRate !== null) {
             items.push({
                 label: 'Tỉ lệ sống dự kiến (%)',
-                value: survivalRate.toFixed(2),
+                value: formatNumber(Math.round(survivalRate)),
             });
         } else {
             items.push({
