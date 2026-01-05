@@ -147,19 +147,18 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        marginBottom: spacing.xs,
     },
     col: {
-        flex: 1,
-        gap: spacing.xs,
+        paddingBottom: 0,
     },
     alignRight: {
         alignItems: 'flex-end',
     },
     label: {
         fontSize: 14,
-        fontWeight: '700',
         color: colors.text,
+        fontWeight: '600',
     },
     value: {
         fontSize: 14,
@@ -199,16 +198,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: spacing.md,
-        paddingVertical: spacing.xs,
+        paddingTop: spacing.sm,
+        gap: 4,
     },
     toggleText: {
         fontSize: 14,
         color: colors.primary,
-        marginRight: 4,
+        fontWeight: '500',
     },
     expandedContainer: {
-        marginTop: spacing.md,
+        marginTop: spacing.sm,
         borderTopWidth: 1,
         borderTopColor: colors.borderLight,
         paddingTop: spacing.md,
@@ -224,13 +223,14 @@ const styles = StyleSheet.create({
         color: colors.text,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
-        padding: spacing.sm,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.sm,
         marginBottom: spacing.sm,
     },
     detailRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.sm,
+        paddingHorizontal: spacing.md,
         marginBottom: spacing.sm,
     },
     detailLabel: {

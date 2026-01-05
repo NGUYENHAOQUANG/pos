@@ -60,11 +60,10 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                 </Text>
             </View>
 
-            <View style={styles.separatorCenter} />
-
             {/* Expanded Content */}
             {isExpanded && (
-                <View style={styles.expandedContent}>
+                <View>
+                    <View style={styles.separatorCenter} />
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Loại vật tư: </Text>
                         <Text style={styles.detailValue}>{item.type || '---'}</Text>
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: spacing.xs,
+        marginBottom: spacing.md,
     },
     name: {
         fontSize: 18,
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs,
+        marginVertical: spacing.sm,
     },
     infoText: {
         fontSize: 14,
@@ -173,14 +172,11 @@ const styles = StyleSheet.create({
     label: {
         fontWeight: '600',
     },
-    expandedContent: {
-        marginTop: spacing.xs,
-        marginBottom: spacing.sm,
-    },
     detailRow: {
         flexDirection: 'row',
         marginBottom: spacing.xs,
         flexWrap: 'wrap',
+        marginTop: spacing.sm,
     },
     detailLabel: {
         fontSize: 14,
@@ -199,8 +195,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.xs,
-        marginBottom: spacing.sm,
+        marginVertical: spacing.sm,
     },
     expandText: {
         fontSize: 14,
@@ -210,7 +205,7 @@ const styles = StyleSheet.create({
     },
     actionRow: {
         flexDirection: 'row',
-        paddingTop: spacing.xs,
+        marginTop: spacing.md,
     },
     actionButton: {
         flex: 1,
@@ -221,12 +216,10 @@ const styles = StyleSheet.create({
     separator: {
         height: 1,
         backgroundColor: colors.borderLight,
-        marginVertical: spacing.xs,
         marginHorizontal: -spacing.md,
     },
     separatorCenter: {
         height: 1,
         backgroundColor: colors.borderLight,
-        marginVertical: spacing.xs,
     },
 });
