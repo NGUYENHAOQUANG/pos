@@ -9,7 +9,6 @@ import {
     UIManager,
 } from 'react-native';
 import { DropdownMaterial } from './DropdownMaterialGroup';
-import { DropdownMaterialType } from './DropdownMaterialType';
 import { CollapseHead } from '../CollapseHead';
 import { UnitOfMeasure } from './UnitOfMeasure';
 import { UnitOfUse } from './UnitOfUse';
@@ -18,6 +17,36 @@ import { colors, spacing, borderRadius } from '@/styles';
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const MATERIAL_TYPES_MAP: Record<string, string[]> = {
+    Nuôi: ['Con giống khác', 'Thức ăn sống'],
+    'Vật tư nội bộ': [
+        'Chất cải thiện nước',
+        'Chất xử lý nước',
+        'Chế phẩm sinh học',
+        'Dinh dưỡng bổ sung',
+        'Hoá chất',
+        'Khoáng chất',
+        'Khác',
+        'Nauplii',
+        'Thuốc trộn',
+        'Thức ăn cho tôm',
+        'Trị bệnh',
+        'Tôm bố mẹ',
+        'Tôm giống',
+    ],
+    CCDC: ['Công cụ dụng cụ', 'Kit kiểm tra chất lượng nước', 'Nhiên liệu', 'Phụ tùng'],
+    'Thiết bị điện': ['Thiết bị điện'],
+    'Chi phí khác': [
+        'Chi phí bán hàng',
+        'Chi phí khác',
+        'Chi phí khấu hao',
+        'Chi phí lương',
+        'Chi phí điện',
+        'Chi phí điện nước',
+        'Chi phí quản lý doanh nghiệp',
+    ],
+};
 
 interface AddMaterialProps {
     // Basic Info
@@ -81,6 +110,9 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
         }
     };
 
+    // Calculate options for Material Type based on selected Group
+    const typeOptions = group && MATERIAL_TYPES_MAP[group] ? MATERIAL_TYPES_MAP[group] : [];
+
     const toggleBasicExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsBasicExpanded(!isBasicExpanded);
@@ -138,12 +170,13 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 />
                             </View>
                             <View style={styles.halfWidth}>
-                                <DropdownMaterialType
+                                <DropdownMaterial
                                     label="Loại vật tư"
                                     required
-                                    value={type}
                                     onChange={onTypeChange}
-                                    group={group}
+                                    value={type}
+                                    // Pass derived options based on group
+                                    options={typeOptions}
                                     placeholder="Chọn loại"
                                     dropdownStyle={styles.dropdownNegativeMargin}
                                     isOpen={activeDropdown === 'type'}

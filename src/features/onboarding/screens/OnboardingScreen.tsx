@@ -184,7 +184,7 @@ export default function OnboardingScreen() {
             <View style={styles.backgroundWrapper}>{slidesData[currentIndex]?.background}</View>
 
             {/* Layer 2: Spacer Layer*/}
-            <View style={styles.spacer} pointerEvents="none" />
+            {/* Layer 2: Spacer Layer - Removed as requested */}
 
             {/* Layer 3: Content Layer */}
             <Animated.View style={[styles.sliderContainer, sliderContainerAnimatedStyle]}>
@@ -221,16 +221,20 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
     rootContainer: {
         flex: 1,
-        // backgroundColor: colors.secondary,
-        // overflow: 'hidden',
+        justifyContent: 'flex-end',
+        /**
+         * Logic: Auto fit height
+         * Container chính sẽ đẩy nội dung xuống đáy (bottom sheet style)
+         * thay vì dùng Spacer để đẩy.
+         */
     },
     slideContentContainer: {
-        flex: 1,
+        // flex: 1, // Removed for auto fit
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingTop: SCREEN_HEIGHT < 800 ? 20 : 34,
         width: SCREEN_WIDTH,
-        paddingBottom: 20, // Add bottom padding for safety
+        marginBottom: 48,
     },
     logoContainer: {
         alignItems: 'center',
@@ -240,7 +244,7 @@ const styles = StyleSheet.create({
     },
     slideTitle: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontWeight: '700',
         color: '#333',
         textAlign: 'center',
         marginBottom: 8,
@@ -265,20 +269,18 @@ const styles = StyleSheet.create({
     },
 
     // Layer spacer
-    spacer: {
-        flex: SCREEN_HEIGHT < 800 ? 0.6 : 1.0, // Balanced spacing
-        backgroundColor: 'transparent',
-    },
+    // Spacer style removed
 
     // Layer Content
     sliderContainer: {
-        flex: 1,
+        // Removed flex: 1 to enable auto-fit height
+        width: '100%',
         backgroundColor: colors.white,
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
     },
     sliderWrapper: {
-        flex: 1,
+        // flex: 1,
         flexDirection: 'row',
     },
     slideItem: {
@@ -347,6 +349,6 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     gestureHandler: {
-        flex: 1,
+        // flex: 1,
     },
 });

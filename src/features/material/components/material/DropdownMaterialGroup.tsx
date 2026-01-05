@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
 
 interface DropdownMaterialProps {
     value?: string;
@@ -56,15 +57,13 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 
     useEffect(() => {
         if (!inline && isOpen && buttonRef.current) {
-            buttonRef.current.measure(
-                (fx: number, fy: number, width: number, height: number, px: number, py: number) => {
-                    setDropdownCoords({
-                        top: py + height + 4,
-                        left: px,
-                        width: width,
-                    });
-                }
-            );
+            buttonRef.current.measureInWindow((x, y, width, height) => {
+                setDropdownCoords({
+                    top: y + height + 4,
+                    left: x,
+                    width: width,
+                });
+            });
         }
     }, [isOpen, inline]);
 
@@ -88,7 +87,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     const dynamicDropdownStyle: ViewStyle = {
         top: dropdownCoords.top,
         left: dropdownCoords.left,
-        width: dropdownCoords.width,
+        minWidth: dropdownCoords.width,
     };
 
     const dropdownList = (
@@ -126,9 +125,27 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 onPress={onToggle}
                 activeOpacity={0.7}
             >
-                <Text style={[styles.text, !value && styles.placeholderText]}>
-                    {value || placeholder}
-                </Text>
+                <View style={{ flex: 1, marginRight: spacing.xs, justifyContent: 'center' }}>
+                    {value ? (
+                        <AutoScrollText
+                            text={value}
+                            style={{
+                                ...StyleSheet.flatten(styles.text),
+                                flex: undefined,
+                            }}
+                            containerStyle={{ width: '100%' }}
+                        />
+                    ) : (
+                        <AutoScrollText
+                            text={placeholder}
+                            style={{
+                                ...StyleSheet.flatten([styles.text, styles.placeholderText]),
+                                flex: undefined,
+                            }}
+                            containerStyle={{ width: '100%' }}
+                        />
+                    )}
+                </View>
                 <Ionicons
                     name={isOpen ? 'chevron-up' : 'chevron-down'}
                     size={20}
