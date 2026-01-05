@@ -45,6 +45,10 @@ export type FarmStackParamList = {
         data?: { advancedParameters?: Array<{ id: string; name: string }> };
         onSave?: (data: { advancedParameters: Array<{ id: string; name: string }> }) => void;
     };
+    EditEnvironment: {
+        parameter: { id: string; name: string; limit: string; isChecked: boolean };
+        onSave?: (data: any) => void;
+    };
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: { pondId: string; initialData?: CycleData | null };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
@@ -77,6 +81,7 @@ import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/Feeding
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
+import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 
 export const FarmNavigator = () => {
     return (
@@ -118,6 +123,7 @@ export const FarmNavigator = () => {
             <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
+            <Stack.Screen name="EditEnvironment" component={EditEnvironmentScreens} />
         </Stack.Navigator>
     );
 };
