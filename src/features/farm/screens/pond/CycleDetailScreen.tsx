@@ -34,16 +34,7 @@ export const CycleDetailScreen: React.FC = () => {
             <HeaderFarm
                 type="cycle-detail"
                 titleAlign="left"
-                leftComponent={
-                    <View style={styles.leftHeaderContainer}>
-                        <TouchableOpacity
-                            style={styles.customBackButton}
-                            onPress={() => navigation.goBack()}
-                        >
-                            <Ionicons name="arrow-back" size={24} color={colors.text} />
-                        </TouchableOpacity>
-                    </View>
-                }
+                onBack={() => navigation.goBack()}
                 title={
                     <View style={styles.leftTitleContainer}>
                         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -136,20 +127,6 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     // ... statusBadge style kept ...
-    leftHeaderContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    customBackButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: '#E5E7EB', // Match border colors
-    },
-
     statusBadge: {
         backgroundColor: '#FFFBEB',
         paddingHorizontal: spacing.sm,

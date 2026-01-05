@@ -34,7 +34,7 @@ export const DevicesInPond = () => {
         },
         {
             id: 'o2',
-            name: 'Quạt nước 2',
+            name: 'Quạt nước 2 (Tại chỗ)',
             icon: FanIcon,
             mode: EControlMode.LOCAL,
             isOn: true,
@@ -74,8 +74,24 @@ export const DevicesInPond = () => {
                 <View style={styles.headerRow}>
                     <Text style={styles.sectionTitle}>Máy cho ăn</Text>
                     <ButtonControlSwitch
-                        onSwitchToManual={() => console.log('Feeder to Manual')}
-                        onSwitchToSchedule={() => console.log('Feeder to Schedule')}
+                        onSwitchToManual={() =>
+                            setFeeders(prev =>
+                                prev.map(d =>
+                                    d.mode === EControlMode.LOCAL
+                                        ? d
+                                        : { ...d, mode: EControlMode.MANUAL }
+                                )
+                            )
+                        }
+                        onSwitchToSchedule={() =>
+                            setFeeders(prev =>
+                                prev.map(d =>
+                                    d.mode === EControlMode.LOCAL
+                                        ? d
+                                        : { ...d, mode: EControlMode.SCHEDULE }
+                                )
+                            )
+                        }
                     />
                 </View>
                 <View style={styles.cardWrapper}>
@@ -90,8 +106,24 @@ export const DevicesInPond = () => {
                 <View style={styles.headerRow}>
                     <Text style={styles.sectionTitle}>Thiết bị khác</Text>
                     <ButtonControlSwitch
-                        onSwitchToManual={() => console.log('Others to Manual')}
-                        onSwitchToSchedule={() => console.log('Others to Schedule')}
+                        onSwitchToManual={() =>
+                            setOtherDevices(prev =>
+                                prev.map(d =>
+                                    d.mode === EControlMode.LOCAL
+                                        ? d
+                                        : { ...d, mode: EControlMode.MANUAL }
+                                )
+                            )
+                        }
+                        onSwitchToSchedule={() =>
+                            setOtherDevices(prev =>
+                                prev.map(d =>
+                                    d.mode === EControlMode.LOCAL
+                                        ? d
+                                        : { ...d, mode: EControlMode.SCHEDULE }
+                                )
+                            )
+                        }
                     />
                 </View>
                 <View style={styles.gridContainer}>

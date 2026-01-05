@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
-import EmptyState from '@/assets/Icon/EmptyState.svg';
+import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 interface DropDownSelectMaterialProps {
     data: IMaterial[];
@@ -158,7 +158,7 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
                         />
                     ) : (
                         <View style={styles.emptyContainer}>
-                            <EmptyState width={60} height={60} />
+                            <EmptyStateIcon width={60} height={60} />
                             <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
                             <TouchableOpacity style={styles.createButton} onPress={handleCreateNew}>
                                 <Ionicons name="add" size={16} color={colors.primary} />
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         position: 'absolute',
-        top: 54, // height 48 + 6px margin
+        top: 44, // height 40 + 4px margin
         left: 0,
         right: 0,
         backgroundColor: colors.white,

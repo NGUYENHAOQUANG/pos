@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
@@ -23,6 +23,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const onSave = params?.onSave;
 
     const { setTabBarVisible } = useTabBarVisibility();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -52,6 +53,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                 />
 
                 <ScrollView
+                    ref={scrollViewRef}
                     style={styles.content}
                     contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
@@ -79,6 +81,11 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         onDosageChange={setDosage}
                         manufacturer={manufacturer}
                         onManufacturerChange={setManufacturer}
+                        onUnitDropdownOpen={() => {
+                            setTimeout(() => {
+                                scrollViewRef.current?.scrollToEnd({ animated: true });
+                            }, 100);
+                        }}
                     />
                 </ScrollView>
 

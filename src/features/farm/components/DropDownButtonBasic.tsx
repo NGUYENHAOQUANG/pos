@@ -29,6 +29,7 @@ interface DropDownButtonBasicProps {
     height?: number;
     borderRadius?: number;
     disabled?: boolean;
+    placeholder?: string;
 }
 
 const DEFAULT_DATA: DropDownItem[] = [
@@ -46,16 +47,15 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     height = 40,
     borderRadius: customBorderRadius = spacing.sm,
     disabled = false,
+    placeholder = 'Chọn',
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const [currentItem, setCurrentItem] = useState<DropDownItem>(value || data[0]);
+    const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value);
     const dropdownButtonRef = useRef<View>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
     React.useEffect(() => {
-        if (value) {
-            setCurrentItem(value);
-        }
+        setCurrentItem(value);
     }, [value]);
 
     const handleDropdownPress = () => {
@@ -79,7 +79,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
     };
 
     const renderItem = ({ item }: { item: DropDownItem }) => {
-        const isSelected = item.id === currentItem.id;
+        const isSelected = currentItem ? item.id === currentItem.id : false;
         return (
             <TouchableOpacity
                 style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
@@ -113,10 +113,14 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                         <IconEnvironment width={18} height={18} style={styles.locationIcon} />
                     )}
                     <Text
-                        style={[styles.locationText, disabled && styles.disabledText]}
+                        style={[
+                            styles.locationText,
+                            !currentItem && styles.placeholderText,
+                            disabled && styles.disabledText,
+                        ]}
                         numberOfLines={1}
                     >
-                        {currentItem.label}
+                        {currentItem?.label || placeholder}
                     </Text>
                     {!disabled && (
                         <Ionicons
@@ -224,6 +228,9 @@ const styles = StyleSheet.create({
         borderColor: colors.gray[200],
     },
     disabledText: {
+        color: colors.textSecondary,
+    },
+    placeholderText: {
         color: colors.textSecondary,
     },
 });

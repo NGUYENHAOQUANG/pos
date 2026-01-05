@@ -12,9 +12,9 @@ import {
     View,
     Text,
     Animated,
-    LayoutAnimation,
     Platform,
     UIManager,
+    Easing,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -122,52 +122,81 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
     // Animation value: 0 = visible, 1 = hidden
     const slideAnim = useRef(new Animated.Value(shouldShow ? 0 : 1)).current;
 
+    // Animation/translation values for each of the 5 icons
+    const iconAnims = useRef(navigationItems.map(() => new Animated.Value(0))).current;
+
     useEffect(() => {
-        // 1. Animate Layout (Spacer resizing)
-        LayoutAnimation.configureNext({
-            duration: 250,
-            update: { type: LayoutAnimation.Types.easeInEaseOut },
-            create: {
-                type: LayoutAnimation.Types.easeInEaseOut,
-                property: LayoutAnimation.Properties.opacity,
-            },
-            delete: {
-                type: LayoutAnimation.Types.easeInEaseOut,
-                property: LayoutAnimation.Properties.opacity,
-            },
-        });
+        // Animate Visual (TabBar sliding)
+        // Use SPRING for showing (Bounce effect)
+        // Use TIMING for hiding (Prevents layout jitter/oscillation at the end)
+        if (shouldShow) {
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                friction: 6,
+                tension: 60,
+                useNativeDriver: false,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: 1,
+                duration: 250,
+                useNativeDriver: false,
+                easing: Easing.out(Easing.ease),
+            }).start();
+        }
 
-        // 2. Animate Visual (TabBar sliding with spring)
-        Animated.spring(slideAnim, {
-            toValue: shouldShow ? 0 : 1,
-            useNativeDriver: true, // Native driver for smooth transform
-            friction: 6,
-            tension: 50,
-        }).start();
-    }, [shouldShow, slideAnim]);
+        // Animate Icons only when showing up
+        if (shouldShow) {
+            // Helper for bounce animation
+            const bounce = (anim: Animated.Value, delay: number) => {
+                anim.setValue(20); // Start from below
+                return Animated.sequence([
+                    Animated.delay(delay),
+                    Animated.spring(anim, {
+                        toValue: 0, // Spring up to final position
+                        friction: 6,
+                        tension: 80,
+                        useNativeDriver: true,
+                    }),
+                ]);
+            };
 
-    const translateY = slideAnim.interpolate({
+            // Stagger delays: Center (Farm) -> Sides (Devices/Material) -> Outer (Reports/Menu)
+            // Indices: Reports(0), Devices(1), Farm(2), Material(3), Menu(4)
+            const BASE_DELAY = 50; // Wait slightly for bar to start moving
+            const STAGGER = 60; // Delay between waves
+
+            Animated.parallel([
+                bounce(iconAnims[2], BASE_DELAY), // Farm
+                bounce(iconAnims[1], BASE_DELAY + STAGGER), // Devices
+                bounce(iconAnims[3], BASE_DELAY + STAGGER), // Material
+                bounce(iconAnims[0], BASE_DELAY + STAGGER * 2), // Reports
+                bounce(iconAnims[4], BASE_DELAY + STAGGER * 2), // Menu
+            ]).start();
+        } else {
+            // Reset instantly when hiding so they are ready for next show
+            iconAnims.forEach(anim => anim.setValue(0));
+        }
+    }, [shouldShow, slideAnim, iconAnims]);
+
+    const animatedHeight = slideAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, totalHeight],
+        outputRange: [totalHeight, 0],
+        extrapolate: 'clamp', // Prevent negative height during spring bounce
     });
 
     return (
         <>
-            {/* Spacer to push content up/down - Controlled by LayoutAnimation state */}
-            <View
-                style={{ height: shouldShow ? totalHeight : 0, backgroundColor: 'transparent' }}
-            />
-
-            {/* Visual Tab Bar (Absolute Positioned for smooth slide) */}
+            {/* Visual Tab Bar (Layout Affecting) */}
             <Animated.View
                 style={[
                     styles.bottomContainer,
                     {
-                        transform: [{ translateY }],
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
+                        height: animatedHeight,
+                        // transform: [{ translateY }], // Removed to avoid creating a gap between content and bar
+                        // Removed absolute position to ensure it takes up space in layout
+                        backgroundColor: 'white',
+                        overflow: 'hidden', // Ensure content doesn't spill out when height < total
                     },
                 ]}
             >
@@ -179,10 +208,14 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                         paddingBottom: safeBottom,
                     }}
                 >
-                    {state.routes.map(route => {
+                    {state.routes.map((route, index) => {
                         const item = navigationItems.find(i => i.key === route.name);
                         // Use activeTabName for visual focus instead of standard state.index
                         const isFocused = route.name === activeTabName;
+
+                        // Get animation value by index (assuming route order matches navigationItems)
+                        // Safety: use index % length or fallback to 0 if something is weird
+                        const iconAnim = iconAnims[index] || new Animated.Value(0);
 
                         const onPress = () => {
                             const event = navigation.emit({
@@ -208,13 +241,30 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                                 onPress={onPress}
                                 activeOpacity={0.7}
                             >
-                                {isFocused && <View style={styles.activeIndicator} />}
-                                <View style={styles.iconContainer}>
-                                    <IconComponent width={24} height={24} />
-                                </View>
-                                <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>
-                                    {item.label}
-                                </Text>
+                                <Animated.View
+                                    style={[
+                                        {
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: '100%',
+                                            height: '100%',
+                                            transform: [{ translateY: iconAnim }],
+                                        },
+                                    ]}
+                                >
+                                    {isFocused && <View style={styles.activeIndicator} />}
+                                    <View style={styles.iconContainer}>
+                                        <IconComponent width={24} height={24} />
+                                    </View>
+                                    <Text
+                                        style={[
+                                            styles.tabLabel,
+                                            isFocused && styles.tabLabelActive,
+                                        ]}
+                                    >
+                                        {item.label}
+                                    </Text>
+                                </Animated.View>
                             </TouchableOpacity>
                         );
                     })}
@@ -306,6 +356,7 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: 'transparent',
     },
     bottomContainer: {
         backgroundColor: 'white',

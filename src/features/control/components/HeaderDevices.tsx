@@ -53,25 +53,35 @@ export const HeaderDevices: React.FC<HeaderDevicesProps> = ({
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.tabsContent}
+                        contentContainerStyle={styles.scrollContentContainer}
                     >
-                        {tabs.map(tab => {
-                            const isSelected = selectedTab === tab.key;
-                            return (
-                                <TouchableOpacity
-                                    key={tab.key}
-                                    style={[styles.tab, isSelected && styles.activeTab]}
-                                    onPress={() => onTabSelect && onTabSelect(tab.key)}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text
-                                        style={[styles.tabText, isSelected && styles.activeTabText]}
+                        <View style={styles.tabsContent}>
+                            {tabs.map((tab, index) => {
+                                const isSelected = selectedTab === tab.key;
+                                const isLast = index === tabs.length - 1;
+                                return (
+                                    <TouchableOpacity
+                                        key={tab.key}
+                                        style={[
+                                            styles.tab,
+                                            isSelected && styles.activeTab,
+                                            isLast && { marginRight: 0 },
+                                        ]}
+                                        onPress={() => onTabSelect && onTabSelect(tab.key)}
+                                        activeOpacity={0.7}
                                     >
-                                        {tab.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            );
-                        })}
+                                        <Text
+                                            style={[
+                                                styles.tabText,
+                                                isSelected && styles.activeTabText,
+                                            ]}
+                                        >
+                                            {tab.label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
                     </ScrollView>
                 </View>
             );
@@ -109,15 +119,22 @@ const styles = StyleSheet.create({
     // Tab styles
     tabsContainer: {
         flexDirection: 'row',
+        width: '100%',
     },
-    tabsContent: {
+    scrollContentContainer: {
         flexGrow: 1,
         justifyContent: 'center',
+    },
+    tabsContent: {
+        flexDirection: 'row',
         alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
     },
     tab: {
-        paddingVertical: spacing.xs,
-        marginHorizontal: spacing.sm,
+        paddingVertical: spacing.xs + 4,
+        marginRight: 16, // Exact 16px gap
+        marginLeft: 0,
         borderBottomWidth: 2,
         borderBottomColor: 'transparent',
     },
@@ -125,12 +142,12 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.primary,
     },
     tabText: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.textSecondary,
         fontWeight: '400',
     },
     activeTabText: {
         color: colors.primary,
-        fontWeight: '600',
+        fontWeight: '700',
     },
 });

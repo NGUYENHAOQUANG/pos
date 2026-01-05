@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
-import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { colors, spacing } from '@/styles';
 import { IMaterial } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -17,6 +17,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute<RouteProp<MaterialStackParamList, 'EditMaterial'>>();
     const { setTabBarVisible } = useTabBarVisibility();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -64,6 +65,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                 />
 
                 <ScrollView
+                    ref={scrollViewRef}
                     style={styles.content}
                     contentContainerStyle={styles.contentContainer}
                     showsVerticalScrollIndicator={false}
@@ -89,50 +91,53 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         onDosageChange={setDosage}
                         manufacturer={manufacturer}
                         onManufacturerChange={setManufacturer}
+                        onUnitDropdownOpen={() => {
+                            setTimeout(() => {
+                                scrollViewRef.current?.scrollToEnd({ animated: true });
+                            }, 100);
+                        }}
                     />
                 </ScrollView>
 
-                <View style={styles.footer}>
-                    <ButtonBarMaterial
-                        mode="double"
-                        primaryTitle="Lưu thông tin"
-                        secondaryTitle="Huỷ"
-                        onPrimaryPress={() => {
-                            if (!name.trim()) {
-                                showValidationError('Tên vật tư là bắt buộc');
-                                return;
-                            }
-                            if (!group) {
-                                showValidationError('Nhóm vật tư là bắt buộc');
-                                return;
-                            }
-                            if (!type) {
-                                showValidationError('Loại vật tư là bắt buộc');
-                                return;
-                            }
-                            if (!unit) {
-                                showValidationError('Đơn vị tính là bắt buộc');
-                                return;
-                            }
+                <ButtonBar
+                    mode="double"
+                    primaryTitle="Lưu thông tin"
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={() => {
+                        if (!name.trim()) {
+                            showValidationError('Tên vật tư là bắt buộc');
+                            return;
+                        }
+                        if (!group) {
+                            showValidationError('Nhóm vật tư là bắt buộc');
+                            return;
+                        }
+                        if (!type) {
+                            showValidationError('Loại vật tư là bắt buộc');
+                            return;
+                        }
+                        if (!unit) {
+                            showValidationError('Đơn vị tính là bắt buộc');
+                            return;
+                        }
 
-                            if (!initialData) return;
+                        if (!initialData) return;
 
-                            onSave?.({
-                                ...initialData,
-                                name,
-                                group,
-                                type,
-                                unit,
-                                usage,
-                                unitOfUse,
-                                dosage,
-                                manufacturer,
-                            });
-                            navigation.goBack();
-                        }}
-                        onSecondaryPress={() => navigation.goBack()}
-                    />
-                </View>
+                        onSave?.({
+                            ...initialData,
+                            name,
+                            group,
+                            type,
+                            unit,
+                            usage,
+                            unitOfUse,
+                            dosage,
+                            manufacturer,
+                        });
+                        navigation.goBack();
+                    }}
+                    onSecondaryPress={() => navigation.goBack()}
+                />
             </View>
         </SafeAreaView>
     );
@@ -152,12 +157,5 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
-    },
-    footer: {
-        padding: spacing.md,
-        backgroundColor: colors.white,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.md,
     },
 });

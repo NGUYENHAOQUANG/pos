@@ -12,7 +12,7 @@ import {
 import CalenderIcon from '@/assets/Icon/Calender.svg';
 import { CollapseHead } from '../CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DatePickerModal } from '@/features/home/components/DatePickerModal';
+import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);

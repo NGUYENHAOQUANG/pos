@@ -23,6 +23,7 @@ import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import Toast from 'react-native-toast-message';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -187,6 +188,27 @@ export const AddTransferScreen: React.FC = () => {
     };
 
     const handleSave = () => {
+        if (!shrimpSize) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập cỡ tôm hiện tại',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
+        const validReceivingPonds = receivingPonds.filter(p => p.quantity.trim() !== '');
+        if (validReceivingPonds.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập số lượng cho ít nhất một ao nhận',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) {
             navigation.goBack();
             return;
