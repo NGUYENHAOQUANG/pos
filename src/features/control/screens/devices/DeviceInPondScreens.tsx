@@ -49,7 +49,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         if (selectedDevice?.mode === EControlMode.LOCAL) {
             Toast.show({
                 type: 'error',
-                text1: 'Không thể cấu hình khi thiết bị này',
+                text1: 'Không thể cấu hình thiết bị này',
             });
             return;
         }

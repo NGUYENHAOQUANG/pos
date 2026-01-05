@@ -44,10 +44,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             </View>
 
                             {/* Body */}
+                            <View style={styles.fullWidthDivider} />
                             <View style={styles.body}>
                                 <Text style={styles.message}>{message}</Text>
                             </View>
-
+                            <View style={styles.fullWidthDivider} />
                             {/* Footer */}
                             <View style={styles.footer}>
                                 <TouchableOpacity
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     },
     message: {
         fontSize: 14,
-        color: colors.textSecondary,
+        color: colors.text,
         lineHeight: 20,
     },
     footer: {
@@ -153,5 +154,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
         color: colors.white,
+    },
+    fullWidthDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
     },
 });

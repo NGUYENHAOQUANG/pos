@@ -43,7 +43,7 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = ({
             activeOpacity={0.8}
             onPress={() => onValueChange(!value)}
             disabled={disabled}
-            style={[style, { opacity: disabled ? 0.5 : 1 }]} // Allow style override (e.g. for scaling)
+            style={[style]} // Removed opacity: disabled ? 0.5 : 1 to fix visual artifact
         >
             <Animated.View style={[styles.track, { backgroundColor }]}>
                 <Animated.View
