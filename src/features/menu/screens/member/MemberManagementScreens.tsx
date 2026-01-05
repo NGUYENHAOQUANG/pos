@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -140,7 +140,7 @@ export const MemberManagementScreens: React.FC = () => {
             </View>
 
             {/* Content */}
-            <View style={styles.content}>
+            <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
                 {filteredMembers.length > 0 ? (
                     <View style={styles.listContainer}>
                         {filteredMembers.map(member => (
@@ -179,7 +179,7 @@ export const MemberManagementScreens: React.FC = () => {
                         />
                     </View>
                 )}
-            </View>
+            </ScrollView>
 
             <ConfirmationDeleteModal
                 visible={deleteModalVisible}
@@ -293,9 +293,11 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingTop: 8,
-        paddingBottom: spacing.sm,
         backgroundColor: colors.backgroundPrimary,
+    },
+    contentContainer: {
+        paddingTop: 8,
+        paddingBottom: 43,
     },
     listContainer: {
         gap: spacing.sm,

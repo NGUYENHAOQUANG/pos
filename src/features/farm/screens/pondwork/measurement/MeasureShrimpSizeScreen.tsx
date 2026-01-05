@@ -44,15 +44,22 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             cyclesForPond.find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
             cyclesForPond[0];
 
-        return cycle?.stockingQuantity;
+        return cycle?.stockingQuantity ? Number(cycle.stockingQuantity) : undefined;
     }, [currentPond?.id, activeCycles, getCyclesByPondId]);
 
     // --- State ---
-    const [time, setTime] = useState(itemToEdit?.date ? new Date(itemToEdit.date) : new Date());
-    const [imageUris, setImageUris] = useState<string[]>(itemToEdit?.images || []);
     const meta = itemToEdit?.meta as
-        | { shrimpSize?: string; remainingWeight?: string; notes?: string; images?: string[] }
+        | {
+              shrimpSize?: string;
+              remainingWeight?: string;
+              notes?: string;
+              images?: string[];
+              date?: string;
+          }
         | undefined;
+
+    const [time, setTime] = useState(meta?.date ? new Date(meta.date) : new Date());
+    const [imageUris, setImageUris] = useState<string[]>(meta?.images || []);
     const [shrimpSize, setShrimpSize] = useState(meta?.shrimpSize || '');
     const [remainingWeight, setRemainingWeight] = useState(meta?.remainingWeight || '');
     const [notes, setNotes] = useState(meta?.notes || '');
@@ -110,7 +117,17 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             updatePondJob(currentPond.id, 'MEASURE_SIZE', updatedItems);
             Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
         } else {
-            const nextIndex = currentItems.length + 1;
+            // Find the max index from existing "Lần X" labels
+            const maxIndex = currentItems.reduce((max, item) => {
+                const match = item.label.match(/Lần\s+(\d+)/);
+                if (match && match[1]) {
+                    const num = parseInt(match[1], 10);
+                    return num > max ? num : max;
+                }
+                return max;
+            }, 0);
+
+            const nextIndex = maxIndex + 1;
             const newItem = {
                 id: Date.now().toString(),
                 label: `Lần ${nextIndex}`,
@@ -131,13 +148,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         const currentItems = getPondJobItems(currentPond.id, 'MEASURE_SIZE');
         const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
 
-        // Re-label items after deletion to maintain sequence (e.g., Lần 1, Lần 2)
-        const relabeledItems = updatedItems.map((item, index) => ({
-            ...item,
-            label: `Lần ${index + 1}`,
-        }));
-
-        updatePondJob(currentPond.id, 'MEASURE_SIZE', relabeledItems);
+        updatePondJob(currentPond.id, 'MEASURE_SIZE', updatedItems);
 
         setIsDeleteModalVisible(false);
         Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });

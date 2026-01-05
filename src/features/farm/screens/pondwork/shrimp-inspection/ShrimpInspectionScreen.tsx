@@ -39,9 +39,15 @@ export const ShrimpInspectionScreen: React.FC = () => {
         () => (itemToEdit?.meta as ShrimpInspectionMeta) || ({} as ShrimpInspectionMeta),
         [itemToEdit?.meta]
     );
-    const [selectedDate, setSelectedDate] = useState(
-        itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
-    );
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (!itemToEdit?.date) return new Date();
+        const dateObj = parseDate(itemToEdit.date);
+        if (itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            dateObj.setHours(hours, minutes);
+        }
+        return dateObj;
+    });
     const [foodAmount, setFoodAmount] = useState(meta.foodAmount || '');
     const [leftoverFood, setLeftoverFood] = useState(meta.leftoverFood || 'Hết');
     const [intestine, setIntestine] = useState(meta.intestine || 'Đầy');
@@ -55,8 +61,13 @@ export const ShrimpInspectionScreen: React.FC = () => {
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
+        const dateObj = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
+        if (itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            dateObj.setHours(hours, minutes);
+        }
         return {
-            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+            date: dateObj,
             foodAmount: meta.foodAmount || '',
             leftoverFood: meta.leftoverFood || 'Hết',
             intestine: meta.intestine || 'Đầy',
