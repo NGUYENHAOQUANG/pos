@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { colors } from '@/styles';
 import { spacing } from '@/styles/spacing';
 import {
@@ -16,6 +17,7 @@ import {
     IconCleaningThePond,
     IconDryingThePond,
     IconHarvest,
+    IconWarningOutlined,
 } from '@/assets/icons';
 
 export type JobType =
@@ -101,11 +103,7 @@ export const JOB_CONFIG: Record<JobType, JobConfig> = {
     },
 };
 
-export interface JobExecution {
-    id: string;
-    label: string;
-    time: string;
-}
+// ... (keep JOB_CONFIG and JobType)
 
 interface JobCardProps {
     type: JobType;
@@ -130,6 +128,19 @@ export const JobCard: React.FC<JobCardProps> = ({
     const displayTitle = title || config.defaultTitle;
     const hasItems = items && items.length > 0;
 
+    const hasWarning = (item: JobExecution) => {
+        if (type !== 'ENVIRONMENT' || !item.meta) return false;
+        const meta = item.meta as EnvironmentMeta;
+        return (
+            meta.pHWarning ||
+            meta.doWarning ||
+            meta.temperatureWarning ||
+            meta.salinityWarning ||
+            meta.alkalinityWarning ||
+            meta.transparencyWarning
+        );
+    };
+
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.header} onPress={onPress}>
@@ -152,9 +163,20 @@ export const JobCard: React.FC<JobCardProps> = ({
                         {items.map((item, index) => (
                             <React.Fragment key={item.id || index}>
                                 <View style={styles.itemRow}>
-                                    <Text style={styles.itemText}>
-                                        {item.label} - {item.time}
-                                    </Text>
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                        }}
+                                    >
+                                        <Text style={styles.itemText}>
+                                            {item.label} - {item.time}
+                                        </Text>
+                                        {hasWarning(item) && (
+                                            <IconWarningOutlined width={16} height={16} />
+                                        )}
+                                    </View>
                                     <TouchableOpacity onPress={() => onEditItem?.(item)}>
                                         <AntDesign name="edit" size={18} color={colors.text} />
                                     </TouchableOpacity>

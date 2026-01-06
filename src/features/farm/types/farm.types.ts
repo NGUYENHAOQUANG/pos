@@ -76,10 +76,15 @@ export interface EnvironmentMeta {
     pH?: string;
     pHWarning?: boolean;
     do?: string;
+    doWarning?: boolean;
     temperature?: string;
+    temperatureWarning?: boolean;
     salinity?: string;
+    salinityWarning?: boolean;
     alkalinity?: string;
+    alkalinityWarning?: boolean;
     transparency?: string;
+    transparencyWarning?: boolean;
     kali?: string;
     tan?: string;
     magie?: string;

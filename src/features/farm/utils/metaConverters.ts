@@ -21,19 +21,35 @@ export const convertEnvironmentMetaToActivityData = (meta: EnvironmentMeta): Act
         data.push({ label: 'pH:', value: meta.pH, isWarning: meta.pHWarning ?? false });
     }
     if (meta.do) {
-        data.push({ label: 'DO (mg/L)', value: meta.do });
+        data.push({ label: 'DO (mg/L)', value: meta.do, isWarning: meta.doWarning ?? false });
     }
     if (meta.temperature) {
-        data.push({ label: 'Nhiệt độ (°C)', value: meta.temperature });
+        data.push({
+            label: 'Nhiệt độ (°C)',
+            value: meta.temperature,
+            isWarning: meta.temperatureWarning ?? false,
+        });
     }
     if (meta.salinity) {
-        data.push({ label: 'Độ mặn (ppt)', value: meta.salinity });
+        data.push({
+            label: 'Độ mặn (ppt)',
+            value: meta.salinity,
+            isWarning: meta.salinityWarning ?? false,
+        });
     }
     if (meta.alkalinity) {
-        data.push({ label: 'Độ kiềm (mg/L)', value: meta.alkalinity });
+        data.push({
+            label: 'Độ kiềm (mg/L)',
+            value: meta.alkalinity,
+            isWarning: meta.alkalinityWarning ?? false,
+        });
     }
     if (meta.transparency) {
-        data.push({ label: 'Độ trong (cm)', value: meta.transparency });
+        data.push({
+            label: 'Độ trong (cm)',
+            value: meta.transparency,
+            isWarning: meta.transparencyWarning ?? false,
+        });
     }
     if (meta.kali) {
         data.push({ label: 'Kali (mg/L)', value: meta.kali });
