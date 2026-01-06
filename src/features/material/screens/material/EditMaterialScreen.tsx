@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
+import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
@@ -55,7 +55,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     }, [initialData]);
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
             <View style={styles.container}>
                 <HeaderMeterial
@@ -139,15 +139,11 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                     onSecondaryPress={() => navigation.goBack()}
                 />
             </View>
-        </SafeAreaView>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
