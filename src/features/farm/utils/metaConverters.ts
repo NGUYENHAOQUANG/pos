@@ -307,14 +307,25 @@ export const convertMeasureSizeMetaToActivityData = (
     if (meta.totalShrimpCount !== null && meta.totalShrimpCount !== undefined) {
         data.push({
             label: 'Tổng số tôm hiện tại (con)',
-            value: meta.totalShrimpCount,
+            value: Math.round(meta.totalShrimpCount).toString(),
         });
     }
     if (meta.survivalRate !== null && meta.survivalRate !== undefined) {
         data.push({
             label: 'Tỉ lệ sống dự kiến (%)',
-            value: formatNumber(Math.round(meta.survivalRate)),
+            value: `${Math.round(meta.survivalRate)}`,
         });
+    }
+
+    if (meta.shrimpSize) {
+        const size = parseFloat(meta.shrimpSize);
+        if (!isNaN(size) && size > 0) {
+            const weight = Math.round(1000 / size);
+            data.push({
+                label: 'Trọng lượng tôm (g/con)',
+                value: `${weight}`,
+            });
+        }
     }
 
     return data;
