@@ -7,6 +7,8 @@ import {
     JobExecution,
     PondData,
     SeasonData,
+    TransferInfo,
+    PondType,
 } from '@/features/farm/types/farm.types';
 import { formatDate, parseDate, compareTime } from '@/features/farm/utils/dateUtils';
 import { DUMMY_POND_DATA } from '@/features/farm/data/pondData';
@@ -75,6 +77,7 @@ interface FarmContextType {
     // Pond Data Management
     ponds: PondData[];
     getPondById: (pondId: string) => PondData | undefined;
+    updatePondType: (pondId: string, newType: PondType) => void;
 
     // Season Data Management
     seasons: SeasonData[];
@@ -90,7 +93,9 @@ interface FarmContextType {
     handleTransferPond: (
         sourcePondId: string,
         receivingPonds: Array<{ receivingPond?: string; quantity: string }>,
-        transferDate: string
+        transferDate: string,
+        shrimpSize: string,
+        totalEstimatedShrimp: number
     ) => void;
     calculateDOC: (stockingDate: string | null | undefined) => number;
     calculateTotalEstimatedShrimp: (
@@ -119,7 +124,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [activeCycles, setActiveCycles] = useState<Record<string, CycleData>>({});
 
     // Initialize data from mock data
-    const [ponds] = useState<PondData[]>(DUMMY_POND_DATA);
+    const [ponds, setPonds] = useState<PondData[]>(DUMMY_POND_DATA);
     const [seasons, setSeasons] = useState<SeasonData[]>(DUMMY_SEASON_DATA);
     const [cycles, setCycles] = useState<CycleData[]>(DUMMY_CYCLE_DATA);
 
@@ -241,6 +246,13 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return ponds.find(pond => pond.id === pondId);
     };
 
+    // Update pond type (e.g., "Ao vèo" -> "Ao sẵn sàng")
+    const updatePondType = (pondId: string, newType: PondType) => {
+        setPonds(prev =>
+            prev.map(pond => (pond.id === pondId ? { ...pond, type: newType } : pond))
+        );
+    };
+
     const updateSeason = (seasonId: string, data: Partial<SeasonData>) => {
         setSeasons(prev =>
             prev.map(season => (season.id === seasonId ? { ...season, ...data } : season))
@@ -341,31 +353,50 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Handle transfer pond: create cycles for receiving ponds and close source cycle
     const handleTransferPond = (
         sourcePondId: string,
-        receivingPonds: Array<{ receivingPond?: string; quantity: string }>,
-        transferDate: string
+        receivingPondsData: Array<{ receivingPond?: string; quantity: string }>,
+        transferDate: string,
+        shrimpSize: string,
+        totalEstimatedShrimp: number
     ) => {
+        console.log('=== handleTransferPond called ===');
+        console.log('sourcePondId:', sourcePondId);
+        console.log('receivingPondsData:', receivingPondsData);
+
         // Get source pond info
         const sourcePond = getPondById(sourcePondId);
-        if (!sourcePond) return;
+        console.log('sourcePond:', sourcePond);
+        if (!sourcePond) {
+            console.log('Source pond not found, returning');
+            return;
+        }
 
-        // Only process if source pond is "Ao vèo" (nursery pond)
-        if (sourcePond.type !== 'Ao vèo') return;
+        console.log('sourcePond.type:', sourcePond.type);
 
         // Get current cycle of source pond
         const sourceCycle = activeCycles[sourcePondId];
         const cyclesForSourcePond = getCyclesByPondId(sourcePondId);
+        console.log('sourceCycle from activeCycles:', sourceCycle);
+        console.log('cyclesForSourcePond:', cyclesForSourcePond);
+
         const cycleToClose =
             sourceCycle ||
             cyclesForSourcePond.find(cycle => cycle.sourcePonds?.includes(sourcePondId)) ||
             cyclesForSourcePond[0];
 
-        if (!cycleToClose) return;
+        console.log('cycleToClose:', cycleToClose);
+        if (!cycleToClose) {
+            console.log('No cycle to close, returning');
+            return;
+        }
+
+        // Calculate DOC at source pond
+        const sourceDOC = calculateDOC(cycleToClose.stockingDate);
 
         // Get breed option for calculating estimated cost
         const breedOption = breedOptions.find(b => b.value === cycleToClose.breedSource);
 
-        // Create new cycles for receiving ponds
-        receivingPonds.forEach(({ receivingPond, quantity }, index) => {
+        // Process each receiving pond
+        receivingPondsData.forEach(({ receivingPond, quantity }) => {
             if (!receivingPond) return;
 
             const quantityNum = parseFloat(quantity.replace(/\D/g, '')) || 0;
@@ -374,36 +405,102 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const receivingPondData = getPondById(receivingPond);
             if (!receivingPondData) return;
 
-            // Calculate density for receiving pond (con/m² = quantity / area)
-            const areaMatch = receivingPondData.area.match(/(\d+(\.\d+)?)\s*m²/);
-            const area = areaMatch ? parseFloat(areaMatch[1]) : undefined;
-            const density = area && area > 0 ? quantityNum / area : 0;
-
-            // Calculate estimated cost: price per 1000 PLs * quantity (in thousands)
-            const estimatedCost = breedOption?.price ? breedOption.price * (quantityNum / 1000) : 0;
-
-            // Create new cycle for receiving pond
-            const newCycle: CycleData = {
-                id: `${receivingPond}-${Date.now()}-${index}`,
-                cycleName: cycleToClose.cycleName || `Chu kỳ ${receivingPond}`,
-                breedSource: cycleToClose.breedSource,
-                season: cycleToClose.season,
-                stockingDate: transferDate,
-                stockingQuantity: quantityNum,
-                age: cycleToClose.age || 0,
-                density,
-                estimatedCost,
-                sourcePonds: [sourcePondId],
-                receivingPonds: [],
-                status: 'Chưa hoàn thành',
-                notes: `Chuyển từ ${sourcePond.name}`,
+            // Create transferInfo to store original cycle data from nursery pond
+            const transferInfo: TransferInfo = {
+                transferDate,
+                shrimpSize,
+                totalEstimatedShrimp,
+                sourcePondId,
+                sourcePondName: sourcePond.name,
+                quantity: quantityNum,
+                originalCycle: {
+                    cycleName: cycleToClose.cycleName,
+                    season: cycleToClose.season,
+                    breedSource: cycleToClose.breedSource,
+                    stockingDate: cycleToClose.stockingDate,
+                    stockingQuantity: cycleToClose.stockingQuantity,
+                    doc: sourceDOC,
+                },
             };
 
-            // Save as active cycle for receiving pond
-            saveActiveCycle(receivingPond, newCycle);
-            // Also add to cycles array
-            createCycle(newCycle);
+            // Check if receiving pond already has a cycle
+            const existingCycle =
+                activeCycles[receivingPond] || getCurrentCycleForPond(receivingPond);
+
+            if (existingCycle) {
+                // If receiving pond already has a cycle, just add transferInfo to it
+                const updatedCycle: CycleData = {
+                    ...existingCycle,
+                    transferInfo, // Add transfer info from nursery pond
+                };
+
+                // Update the existing cycle with transferInfo
+                saveActiveCycle(receivingPond, updatedCycle);
+                updateCycle(existingCycle.id, { transferInfo });
+            } else {
+                // If receiving pond has no cycle, create a new one
+                // Calculate density for receiving pond (con/m² = quantity / area)
+                const areaMatch = receivingPondData.area.match(/(\d+(\.\d+)?)\s*m²/);
+                const area = areaMatch ? parseFloat(areaMatch[1]) : undefined;
+                const density = area && area > 0 ? quantityNum / area : 0;
+
+                // Calculate estimated cost: price per 1000 PLs * quantity (in thousands)
+                const estimatedCost = breedOption?.price
+                    ? breedOption.price * (quantityNum / 1000)
+                    : 0;
+
+                // Create new cycle for receiving pond with transferInfo
+                const newCycle: CycleData = {
+                    id: `${receivingPond}-${Date.now()}`,
+                    cycleName: cycleToClose.cycleName || `Chu kỳ ${receivingPond}`,
+                    breedSource: cycleToClose.breedSource,
+                    season: cycleToClose.season,
+                    stockingDate: transferDate,
+                    stockingQuantity: quantityNum,
+                    age: cycleToClose.age || 0,
+                    density,
+                    estimatedCost,
+                    sourcePonds: [sourcePondId],
+                    receivingPonds: [],
+                    status: 'Chưa hoàn thành',
+                    notes: `Chuyển từ ${sourcePond.name}`,
+                    transferInfo, // Store transfer info from nursery pond
+                };
+
+                // Save as active cycle for receiving pond
+                saveActiveCycle(receivingPond, newCycle);
+                // Also add to cycles array
+                createCycle(newCycle);
+            }
         });
+
+        // Change source pond type from "Ao vèo" to "Ao sẵn sàng" (ready/preparation state)
+        console.log('=== Changing source pond status ===');
+        console.log('Before updatePondType - sourcePondId:', sourcePondId);
+        updatePondType(sourcePondId, 'Ao sẵn sàng');
+        console.log('After updatePondType');
+
+        // Remove source pond from ALL cycles that reference it
+        // This ensures the source pond no longer has any cycle association
+        console.log('Removing sourcePondId from all related cycles...');
+        setCycles(prevCycles =>
+            prevCycles.map(cycle => {
+                // Remove from sourcePonds array if exists
+                if (cycle.sourcePonds?.includes(sourcePondId)) {
+                    const newSourcePonds = cycle.sourcePonds.filter(id => id !== sourcePondId);
+                    console.log(`Removed ${sourcePondId} from cycle ${cycle.id} sourcePonds`);
+                    return { ...cycle, sourcePonds: newSourcePonds };
+                }
+                return cycle;
+            })
+        );
+
+        // Delete from activeCycles
+        console.log('Deleting from activeCycles...');
+        deleteActiveCycle(sourcePondId);
+        console.log('Deleted from activeCycles');
+
+        console.log('=== handleTransferPond completed ===');
     };
 
     const getPondJobItemsByDateRange = (
@@ -551,6 +648,7 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // Pond Data Management
                 ponds,
                 getPondById,
+                updatePondType,
                 // Season Data Management
                 seasons,
                 updateSeason,

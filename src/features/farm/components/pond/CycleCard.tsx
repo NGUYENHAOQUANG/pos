@@ -6,20 +6,27 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 interface CycleCardProps {
     cycleName: string;
     startDate: string;
+    endDate?: string; // Optional end date for completed cycles
     doc: number;
     stockingQuantity: number;
     breed: string;
+    status?: 'Chưa hoàn thành' | 'Hoàn thành'; // Cycle status
     onPress?: () => void;
 }
 
 export const CycleCard: React.FC<CycleCardProps> = ({
     cycleName,
     startDate,
+    endDate,
     doc,
     stockingQuantity,
     breed,
+    status = 'Chưa hoàn thành',
     onPress,
 }) => {
+    const isCompleted = status === 'Hoàn thành';
+    const dateDisplay = endDate ? `${startDate} - ${endDate}` : `${startDate} - nay`;
+
     return (
         <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
             {/* Header chia làm 2 cột */}
@@ -27,13 +34,17 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                 {/* Cột trái: Tên và Ngày thả */}
                 <View style={styles.leftColumn}>
                     <Text style={styles.cycleName}>{cycleName}</Text>
-                    <Text style={styles.dateText}>{startDate} - nay</Text>
+                    <Text style={styles.dateText}>{dateDisplay}</Text>
                 </View>
 
                 {/* Cột phải: Badge trạng thái & Mũi tên (Căn phải + Giữa dọc) */}
                 <View style={styles.rightColumn}>
-                    <View style={styles.statusBadge}>
-                        <Text style={styles.statusText}>Chưa hoàn thành</Text>
+                    <View style={[styles.statusBadge, isCompleted && styles.statusBadgeCompleted]}>
+                        <Text
+                            style={[styles.statusText, isCompleted && styles.statusTextCompleted]}
+                        >
+                            {status}
+                        </Text>
                     </View>
                     <Ionicons
                         name="chevron-forward"
@@ -110,10 +121,17 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#FFE58F',
     },
+    statusBadgeCompleted: {
+        backgroundColor: colors.neutral, // #F7FAFD
+        borderColor: colors.defaultBorder, // #DEE4ED
+    },
     statusText: {
         fontSize: typography.fontSize.sm,
         color: '#D48806',
         fontWeight: typography.fontWeight.regular,
+    },
+    statusTextCompleted: {
+        color: colors.text, // Dark text for completed
     },
     arrowIcon: {
         marginLeft: 8, // Khoảng cách giữa badge và mũi tên

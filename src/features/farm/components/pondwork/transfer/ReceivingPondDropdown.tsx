@@ -9,12 +9,14 @@ interface ReceivingPondDropdownProps {
     pond: ReceivingPondItem;
     onSelect: (pondId: string, selectedPondId: string) => void;
     pondOptions: DropDownItem[];
+    onDropdownOpen?: () => void; // Callback when dropdown opens
 }
 
 export const ReceivingPondDropdown: React.FC<ReceivingPondDropdownProps> = ({
     pond,
     onSelect,
     pondOptions,
+    onDropdownOpen,
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const dropdownRef = useRef<View>(null);
@@ -24,16 +26,22 @@ export const ReceivingPondDropdown: React.FC<ReceivingPondDropdownProps> = ({
     const displayText = selectedPond?.label || 'Chọn';
 
     const handleDropdownPress = () => {
-        if (dropdownRef.current) {
-            dropdownRef.current.measureInWindow((x, y, width, height) => {
-                setDropdownPosition({
-                    top: y + height + 4,
-                    left: x,
-                    width: width,
+        // First scroll the page up
+        onDropdownOpen?.();
+
+        // Wait for scroll animation to complete, then measure and show dropdown
+        setTimeout(() => {
+            if (dropdownRef.current) {
+                dropdownRef.current.measureInWindow((x, y, width, height) => {
+                    setDropdownPosition({
+                        top: y + height + 4,
+                        left: x,
+                        width: width,
+                    });
+                    setIsDropdownVisible(true);
                 });
-                setIsDropdownVisible(true);
-            });
-        }
+            }
+        }, 350); // Wait for scroll animation
     };
 
     const handleSelect = (item: DropDownItem) => {
@@ -105,7 +113,7 @@ export const ReceivingPondDropdown: React.FC<ReceivingPondDropdownProps> = ({
                             data={pondOptions}
                             keyExtractor={item => item.id.toString()}
                             renderItem={renderItem}
-                            scrollEnabled={false}
+                            scrollEnabled={true}
                             contentContainerStyle={styles.dropdownScrollContent}
                         />
                     </View>
@@ -147,6 +155,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.gray[200],
+        maxHeight: 5 * 44, // Show max 5 items (44px per item) and allow scroll
         ...shadows.md,
     },
     dropdownScrollContent: {
