@@ -59,7 +59,14 @@ export const HandleProblemScreen = () => {
     useEffect(() => {
         if (item) {
             if (item.date) {
-                setSelectedDate(parseDate(item.date));
+                const date = parseDate(item.date);
+                if (item.time) {
+                    const [hours, minutes] = item.time.split(':').map(Number);
+                    if (!isNaN(hours) && !isNaN(minutes)) {
+                        date.setHours(hours, minutes);
+                    }
+                }
+                setSelectedDate(date);
             }
             setNote(item.note || '');
             if (item.materials) {

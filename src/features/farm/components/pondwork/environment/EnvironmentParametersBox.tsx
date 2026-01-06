@@ -73,6 +73,24 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         if (id === '10') return onNo3Change;
         return undefined;
     };
+
+    const handleNumericInput = (text: string, callback: (val: string) => void) => {
+        // 1. Remove any character that is not 0-9 or .
+        let cleaned = text.replace(/[^0-9.]/g, '');
+
+        // 2. Prevent . at the beginning
+        if (cleaned.startsWith('.')) {
+            cleaned = cleaned.substring(1);
+        }
+
+        // 3. Ensure only one . exists
+        const parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+        }
+
+        callback(cleaned);
+    };
     return (
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
@@ -85,10 +103,18 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 {/* Row 1 */}
                 <View style={styles.row}>
                     <View style={styles.column}>
-                        <FarmInput label="pH (1-14)" value={pH} onChangeText={onPHChange} />
+                        <FarmInput
+                            label="pH (1-14)"
+                            value={pH}
+                            onChangeText={text => handleNumericInput(text, onPHChange)}
+                        />
                     </View>
                     <View style={styles.column}>
-                        <FarmInput label="DO (mg/L)" value={doValue} onChangeText={onDOChange} />
+                        <FarmInput
+                            label="DO (mg/L)"
+                            value={doValue}
+                            onChangeText={text => handleNumericInput(text, onDOChange)}
+                        />
                     </View>
                 </View>
 
@@ -98,14 +124,14 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Nhiệt độ (°C)"
                             value={temperature}
-                            onChangeText={onTemperatureChange}
+                            onChangeText={text => handleNumericInput(text, onTemperatureChange)}
                         />
                     </View>
                     <View style={styles.column}>
                         <FarmInput
                             label="Độ mặn (ppt)"
                             value={salinity}
-                            onChangeText={onSalinityChange}
+                            onChangeText={text => handleNumericInput(text, onSalinityChange)}
                         />
                     </View>
                 </View>
@@ -116,14 +142,14 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Độ kiềm (mg/L)"
                             value={alkalinity}
-                            onChangeText={onAlkalinityChange}
+                            onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                         />
                     </View>
                     <View style={styles.column}>
                         <FarmInput
                             label="Độ trong (cm)"
                             value={transparency}
-                            onChangeText={onTransparencyChange}
+                            onChangeText={text => handleNumericInput(text, onTransparencyChange)}
                         />
                     </View>
                 </View>
@@ -140,7 +166,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                 <FarmInput
                                     label={param.name}
                                     value={paramValue}
-                                    onChangeText={paramOnChange}
+                                    onChangeText={text => handleNumericInput(text, paramOnChange)}
                                 />
                             </View>
                         );

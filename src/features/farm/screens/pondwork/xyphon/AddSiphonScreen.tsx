@@ -41,9 +41,19 @@ export const AddSiphonScreen: React.FC = () => {
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as SiphonMeta) || {}, [itemToEdit?.meta]);
-    const [selectedDate, setSelectedDate] = useState<Date>(
-        itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
-    );
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        if (itemToEdit?.date) {
+            const date = parseDate(itemToEdit.date);
+            if (itemToEdit.time) {
+                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    date.setHours(hours, minutes);
+                }
+            }
+            return date;
+        }
+        return new Date();
+    });
     const [lossAmount, setLossAmount] = useState<string>(meta.lossAmount || '');
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
@@ -56,7 +66,16 @@ export const AddSiphonScreen: React.FC = () => {
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
         return {
-            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+            date: (() => {
+                const date = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
+                if (itemToEdit.date && itemToEdit.time) {
+                    const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                    if (!isNaN(hours) && !isNaN(minutes)) {
+                        date.setHours(hours, minutes);
+                    }
+                }
+                return date;
+            })(),
             lossAmount: meta.lossAmount || '',
             notes: itemToEdit?.note || '',
             images: meta.images || [],

@@ -16,10 +16,16 @@
 default_platform(:ios)
 
 platform :ios do
+  # App-Specific Password for App Store Connect
+  ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = "ekfb-xshp-evsc-zxic"
+
   desc "Push a new beta build to TestFlight"
   lane :beta do
     increment_build_number(xcodeproj: "MebiOne.xcodeproj")
     build_app(workspace: "MebiOne.xcworkspace", scheme: "MebiOne")
-    upload_to_testflight
+    upload_to_testflight(
+        apple_id: "6757392489",
+        skip_waiting_for_build_processing: true
+    )
   end
 end
