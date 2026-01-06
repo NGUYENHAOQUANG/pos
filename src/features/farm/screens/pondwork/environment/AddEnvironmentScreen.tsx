@@ -57,9 +57,19 @@ export const AddEnvironmentScreen: React.FC = () => {
         () => (itemToEdit?.meta as EnvironmentMeta) || ({} as EnvironmentMeta),
         [itemToEdit?.meta]
     );
-    const [selectedDate, setSelectedDate] = useState(
-        itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
-    );
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (itemToEdit?.date) {
+            const date = parseDate(itemToEdit.date);
+            if (itemToEdit.time) {
+                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    date.setHours(hours, minutes);
+                }
+            }
+            return date;
+        }
+        return new Date();
+    });
 
     // Environment parameters state
     const [pH, setPH] = useState(meta.pH || '');
@@ -84,8 +94,17 @@ export const AddEnvironmentScreen: React.FC = () => {
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
+
+        let date = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
+        if (itemToEdit.date && itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                date.setHours(hours, minutes);
+            }
+        }
+
         return {
-            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+            date: date,
             pH: meta.pH || '',
             do: meta.do || '',
             temperature: meta.temperature || '',
@@ -348,7 +367,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Đo chỉ số môi trường</Text>
+                <Text style={styles.headerTitle}>Đo thông số môi trường</Text>
                 {itemToEdit ? (
                     <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
                         <IconTrashOutlined width={18} height={18} />
