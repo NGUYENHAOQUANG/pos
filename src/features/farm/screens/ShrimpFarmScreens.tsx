@@ -15,6 +15,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -65,13 +66,30 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
 export const ShrimpFarmScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const { pond } = route.params || {};
+    const { pond: pondFromParams } = route.params || {};
 
     const [selectedTab, setSelectedTab] = useState<string>('work');
+    const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
     const { setTabBarVisible } = useTabBarVisibility();
 
-    const { getPondJobItems, updatePondJob, activeCycles, breedOptions, getCyclesByPondId } =
-        useFarm();
+    const {
+        getPondJobItems,
+        updatePondJob,
+        activeCycles,
+        breedOptions,
+        getCyclesByPondId,
+        getPondById,
+        ponds,
+        cycles,
+    } = useFarm();
+
+    // Get fresh pond data from context instead of stale params
+    // This ensures UI updates when pond type changes after transfer
+    const pond = useMemo(() => {
+        if (!pondFromParams?.id) return pondFromParams;
+        return getPondById(pondFromParams.id) || pondFromParams;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pondFromParams, getPondById, ponds]); // Added ponds to trigger re-render
 
     // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {
@@ -87,7 +105,8 @@ export const ShrimpFarmScreens: React.FC = () => {
 
         // Nếu không có, lấy chu kỳ đầu tiên (ao nguồn)
         return cyclesForPond[0] || null;
-    }, [pond?.id, getCyclesByPondId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pond?.id, getCyclesByPondId, cycles]); // Added cycles to trigger re-render when cycle is deleted
 
     // Ưu tiên chu kỳ từ activeCycles, nếu không có thì dùng từ cycles
     const currentCycle: CycleData | null = useMemo(() => {
@@ -189,33 +208,38 @@ export const ShrimpFarmScreens: React.FC = () => {
         if (type === JOB_TYPES.TRANSFER_POND) {
             // Get latest shrimp size from MEASURE_SIZE jobs
             const measureSizeItems = getPondJobItems(pond.id, 'MEASURE_SIZE');
+
+            // Check if there is no measure size data, show warning modal
+            if (measureSizeItems.length === 0) {
+                setIsMeasureSizeModalVisible(true);
+                return;
+            }
+
             let latestShrimpSize: string | undefined = undefined;
 
-            if (measureSizeItems.length > 0) {
-                // Sort by date (newest first), then by time (newest first)
-                const sorted = [...measureSizeItems].sort((a, b) => {
-                    const dateA = a.date ? parseDate(a.date) : new Date(0);
-                    const dateB = b.date ? parseDate(b.date) : new Date(0);
+            // Sort by date (newest first), then by time (newest first)
+            const sorted = [...measureSizeItems].sort((a, b) => {
+                const dateA = a.date ? parseDate(a.date) : new Date(0);
+                const dateB = b.date ? parseDate(b.date) : new Date(0);
 
-                    if (dateA.getTime() !== dateB.getTime()) {
-                        return dateB.getTime() - dateA.getTime(); // Newest first
-                    }
+                if (dateA.getTime() !== dateB.getTime()) {
+                    return dateB.getTime() - dateA.getTime(); // Newest first
+                }
 
-                    // If same date, sort by time (newest first)
-                    const timeA = a.time || '00:00';
-                    const timeB = b.time || '00:00';
-                    const [hoursA, minutesA] = timeA.split(':').map(Number);
-                    const [hoursB, minutesB] = timeB.split(':').map(Number);
-                    const totalMinutesA = hoursA * 60 + minutesA;
-                    const totalMinutesB = hoursB * 60 + minutesB;
+                // If same date, sort by time (newest first)
+                const timeA = a.time || '00:00';
+                const timeB = b.time || '00:00';
+                const [hoursA, minutesA] = timeA.split(':').map(Number);
+                const [hoursB, minutesB] = timeB.split(':').map(Number);
+                const totalMinutesA = hoursA * 60 + minutesA;
+                const totalMinutesB = hoursB * 60 + minutesB;
 
-                    return totalMinutesB - totalMinutesA; // Newest first
-                });
+                return totalMinutesB - totalMinutesA; // Newest first
+            });
 
-                const latestItem = sorted[0];
-                const latestMeta = latestItem?.meta as { shrimpSize?: string } | undefined;
-                latestShrimpSize = latestMeta?.shrimpSize;
-            }
+            const latestItem = sorted[0];
+            const latestMeta = latestItem?.meta as { shrimpSize?: string } | undefined;
+            latestShrimpSize = latestMeta?.shrimpSize;
 
             // Get cycle data for current pond
             const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
@@ -427,6 +451,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                             {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
                             {currentCycle ? (
                                 <View style={styles.cycleCardWrapper}>
+                                    {/* Main cycle card */}
                                     <CycleCard
                                         cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
                                         startDate={currentCycle?.stockingDate ?? ''}
@@ -445,6 +470,40 @@ export const ShrimpFarmScreens: React.FC = () => {
                                             })
                                         }
                                     />
+
+                                    {/* Transferred cycle card - show if pond received shrimp from nursery */}
+                                    {currentCycle.transferInfo && (
+                                        <CycleCard
+                                            cycleName={
+                                                currentCycle.transferInfo.originalCycle.cycleName ||
+                                                'Chu kỳ ao vèo'
+                                            }
+                                            startDate={
+                                                currentCycle.transferInfo.originalCycle.stockingDate
+                                            }
+                                            endDate={currentCycle.transferInfo.transferDate}
+                                            doc={currentCycle.transferInfo.originalCycle.doc || 0}
+                                            stockingQuantity={
+                                                currentCycle.transferInfo.originalCycle
+                                                    .stockingQuantity || 0
+                                            }
+                                            breed={
+                                                breedOptions.find(
+                                                    b =>
+                                                        b.value ===
+                                                        currentCycle.transferInfo?.originalCycle
+                                                            .breedSource
+                                                )?.label || 'N/A'
+                                            }
+                                            status="Hoàn thành"
+                                            onPress={() =>
+                                                navigation.navigate('CycleDetail', {
+                                                    pondId: pond.id,
+                                                    cycleData: currentCycle,
+                                                })
+                                            }
+                                        />
+                                    )}
                                 </View>
                             ) : (
                                 <PondCycleEmptyState />
@@ -491,6 +550,17 @@ export const ShrimpFarmScreens: React.FC = () => {
                     </TouchableOpacity>
                 </View>
             )}
+
+            {/* Modal cảnh báo cần đo kích thước tôm trước khi sang ao */}
+            <ConfirmationModal
+                visible={isMeasureSizeModalVisible}
+                type="measure_size_required"
+                onCancel={() => setIsMeasureSizeModalVisible(false)}
+                onConfirm={() => {
+                    setIsMeasureSizeModalVisible(false);
+                    navigation.navigate('MeasureShrimpSizeScreen', { pond });
+                }}
+            />
         </View>
     );
 };
@@ -546,5 +616,6 @@ const styles = StyleSheet.create({
     cycleCardWrapper: {
         marginTop: spacing.sm,
         marginBottom: spacing.sm, // Khoảng hở nhỏ so với danh sách công việc bên dưới
+        gap: 8, // 8px spacing between cycle cards
     },
 });

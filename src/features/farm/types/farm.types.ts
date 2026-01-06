@@ -32,6 +32,27 @@ export interface CycleData {
     receivingPonds?: string[]; // Ao nhận - ví dụ: ["N01", "N02"]
     status?: 'Hoàn thành' | 'Chưa hoàn thành'; // Trạng thái
     doc?: number; // DOC (ngày) - ví dụ: 21
+    // Thông tin sang ao (chỉ có khi chu kỳ này được tạo từ việc sang ao)
+    transferInfo?: TransferInfo;
+}
+
+// Thông tin sang ao - lưu dữ liệu từ ao vèo khi chuyển sang ao nuôi
+export interface TransferInfo {
+    transferDate: string; // Ngày sang ao
+    shrimpSize: string; // Cỡ tôm (con/kg)
+    totalEstimatedShrimp: number; // Tổng số tôm dự kiến (con)
+    sourcePondId: string; // Ao nguồn (ao vèo)
+    sourcePondName: string; // Tên ao nguồn
+    quantity: number; // Số lượng tôm nhận được
+    // Thông tin chu kỳ gốc từ ao vèo
+    originalCycle: {
+        cycleName: string;
+        season: string;
+        breedSource: string;
+        stockingDate: string;
+        stockingQuantity: number;
+        doc: number; // Số ngày nuôi (DOC) tại ao vèo
+    };
 }
 
 export interface FarmData {
