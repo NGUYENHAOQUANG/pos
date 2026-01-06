@@ -43,10 +43,6 @@ export const AddTransferScreen: React.FC = () => {
         breedOptions,
         handleTransferPond,
         calculateTotalEstimatedShrimp,
-        activeCycles,
-        getCyclesByPondId,
-        deleteCycle,
-        deleteActiveCycle,
     } = useFarm();
 
     // ========== ROUTE PARAMS ==========
@@ -78,6 +74,12 @@ export const AddTransferScreen: React.FC = () => {
     });
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
     const hasInitialized = useRef(false);
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    // Callback to scroll up when dropdown opens
+    const handleDropdownOpen = () => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+    };
 
     // Pond options for receiving ponds dropdown (exclude current pond)
     const pondOptions = useMemo(() => {
@@ -209,6 +211,18 @@ export const AddTransferScreen: React.FC = () => {
             return;
         }
 
+        // Check if all receiving ponds with quantity have selected a pond
+        const pondsWithoutSelection = validReceivingPonds.filter(p => !p.receivingPond);
+        if (pondsWithoutSelection.length > 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn ao nhận cho tất cả các dòng có số lượng',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
         if (!pond?.id) {
             navigation.goBack();
             return;
@@ -272,32 +286,12 @@ export const AddTransferScreen: React.FC = () => {
                     receivingPond: p.receivingPond,
                     quantity: p.quantity,
                 })),
-                formatDate(selectedDate)
+                formatDate(selectedDate),
+                shrimpSize,
+                totalEstimatedShrimp
             );
 
-            // Close source cycle (delete from cycles and activeCycles) - same logic as harvest
-            const currentCycle = activeCycles[pondId];
-            const cyclesForPond = getCyclesByPondId(pondId);
-
-            // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
-            const cycleToDelete =
-                currentCycle ||
-                cyclesForPond.find(cycle => cycle.sourcePonds?.includes(pondId)) ||
-                cyclesForPond[0];
-
-            if (cycleToDelete && cycleToDelete.id) {
-                // Xóa cycle khỏi cycles array
-                console.log('Xóa cycle khỏi cycles array:', cycleToDelete.id);
-                deleteCycle(cycleToDelete.id);
-
-                // Tìm tất cả các ponds có cycle này trong activeCycles và xóa chúng
-                Object.keys(activeCycles).forEach(pondIdKey => {
-                    const cycleInActive = activeCycles[pondIdKey];
-                    if (cycleInActive && cycleInActive.id === cycleToDelete.id) {
-                        deleteActiveCycle(pondIdKey);
-                    }
-                });
-            }
+            // Note: Source cycle deletion is handled in handleTransferPond
         }
 
         navigation.goBack();
@@ -315,7 +309,11 @@ export const AddTransferScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+            >
                 <GeneralInfoBox
                     type="default"
                     date={selectedDate}
@@ -343,6 +341,7 @@ export const AddTransferScreen: React.FC = () => {
                     }}
                     totalEstimatedShrimp={totalEstimatedShrimp}
                     pondOptions={pondOptions}
+                    onDropdownOpen={handleDropdownOpen}
                 />
 
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
@@ -410,6 +409,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 150,
     },
     footer: {
         backgroundColor: colors.white,

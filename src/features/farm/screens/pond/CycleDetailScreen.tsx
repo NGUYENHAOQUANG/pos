@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-nati
 import { colors, spacing, typography } from '@/styles';
 import { useFarm } from '../../context/FarmContext';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { CycleData } from '../../types/farm.types';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -19,15 +20,20 @@ export const CycleDetailScreen: React.FC = () => {
 
     // Lấy dữ liệu từ params truyền sang
     const { cycleData, pondId } = route.params || {};
+    const typedCycleData = cycleData as CycleData | undefined;
     const { breedOptions, seasonOptions, calculateDOC } = useFarm();
 
-    const breedLabel = breedOptions.find(b => b.value === cycleData?.breedSource)?.label || 'N/A';
-    const seasonLabel = seasonOptions.find(s => s.value === cycleData?.season)?.label || 'N/A';
+    const breedLabel =
+        breedOptions.find(b => b.value === typedCycleData?.breedSource)?.label || 'N/A';
+    const seasonLabel = seasonOptions.find(s => s.value === typedCycleData?.season)?.label || 'N/A';
 
     // Calculate DOC (Days of Culture)
     const doc = useMemo(() => {
-        return calculateDOC(cycleData?.stockingDate);
-    }, [cycleData?.stockingDate, calculateDOC]);
+        return calculateDOC(typedCycleData?.stockingDate);
+    }, [typedCycleData?.stockingDate, calculateDOC]);
+
+    // Get transfer info if exists
+    const transferInfo = typedCycleData?.transferInfo;
 
     return (
         <View style={styles.container}>
@@ -38,10 +44,10 @@ export const CycleDetailScreen: React.FC = () => {
                 title={
                     <View style={styles.leftTitleContainer}>
                         <Text style={styles.headerTitle} numberOfLines={1}>
-                            {cycleData?.cycleName}
+                            {typedCycleData?.cycleName}
                         </Text>
                         <Text style={styles.headerSubtitle} numberOfLines={1}>
-                            {cycleData?.stockingDate ?? '---'} - nay
+                            {typedCycleData?.stockingDate ?? '---'} - nay
                         </Text>
                     </View>
                 }
@@ -57,6 +63,7 @@ export const CycleDetailScreen: React.FC = () => {
             />
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+                {/* Thông tin thả giống - Chu kỳ gốc của ao nhận */}
                 <View style={styles.card}>
                     <View style={styles.cardHeaderWithBorder}>
                         <Text style={styles.cardTitle}>Thông tin thả giống</Text>
@@ -66,7 +73,7 @@ export const CycleDetailScreen: React.FC = () => {
                                 onPress={() =>
                                     navigation.navigate('CreateCycle', {
                                         pondId,
-                                        initialData: cycleData,
+                                        initialData: typedCycleData,
                                     })
                                 }
                             >
@@ -84,7 +91,7 @@ export const CycleDetailScreen: React.FC = () => {
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Tên chu kỳ:</Text>
-                            <Text style={styles.value}>{cycleData?.cycleName || '---'}</Text>
+                            <Text style={styles.value}>{typedCycleData?.cycleName || '---'}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Tôm giống:</Text>
@@ -95,7 +102,9 @@ export const CycleDetailScreen: React.FC = () => {
 
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Ngày thả:</Text>
-                            <Text style={styles.value}>{cycleData?.stockingDate ?? '---'}</Text>
+                            <Text style={styles.value}>
+                                {typedCycleData?.stockingDate ?? '---'}
+                            </Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
@@ -104,11 +113,59 @@ export const CycleDetailScreen: React.FC = () => {
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Số lượng thả (Pls):</Text>
                             <Text style={styles.value}>
-                                {cycleData?.stockingQuantity?.toLocaleString() || 0}
+                                {typedCycleData?.stockingQuantity?.toLocaleString() || 0}
                             </Text>
                         </View>
                     </View>
                 </View>
+
+                {/* Thông tin sang ao - Hiển thị nếu có transferInfo */}
+                {transferInfo && (
+                    <View style={[styles.card, styles.transferCard]}>
+                        <View style={styles.cardHeaderWithBorder}>
+                            <Text style={styles.cardTitle}>Thông tin sang ao</Text>
+                            <Ionicons name="chevron-up" size={20} color="#374151" />
+                        </View>
+
+                        <View style={styles.infoContainer}>
+                            <View style={styles.infoRow}>
+                                <Text style={styles.label}>Ngày sang ao:</Text>
+                                <Text style={styles.value}>{transferInfo.transferDate}</Text>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
+                                <Text style={styles.value}>{transferInfo.shrimpSize}</Text>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <Text style={styles.label}>Tổng số tôm dự kiến (con):</Text>
+                                <Text style={styles.value}>
+                                    {transferInfo.totalEstimatedShrimp?.toLocaleString() || 0}
+                                </Text>
+                            </View>
+
+                            <View style={[styles.line]} />
+
+                            {/* Ao nhận header - outside of card */}
+                            <View style={styles.infoRow}>
+                                <Text style={styles.label}>Ao nhận</Text>
+                                <Text style={styles.value}>1</Text>
+                            </View>
+
+                            {/* Card for receiving ponds list */}
+                            <View style={styles.receivingPondCard}>
+                                {/* Hiển thị ao nguồn và số lượng */}
+                                <View style={styles.subRow}>
+                                    <Text style={styles.subLabel}>
+                                        {transferInfo.sourcePondName}
+                                    </Text>
+                                    <Text style={styles.subValue}>
+                                        {transferInfo.quantity?.toLocaleString() || 0}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                )}
             </ScrollView>
         </View>
     );
@@ -218,5 +275,36 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.textSecondary,
         fontWeight: typography.fontWeight.regular,
+    },
+    // Transfer Card Styles
+    transferCard: {
+        marginTop: spacing.sm,
+    },
+    receivingPondCard: {
+        backgroundColor: colors.backgroundPrimary,
+        borderRadius: 8,
+        padding: spacing.sm,
+        gap: 8,
+    },
+    subRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingLeft: spacing.md,
+    },
+    subLabel: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        fontWeight: typography.fontWeight.regular,
+    },
+    subValue: {
+        fontSize: typography.fontSize.sm,
+        color: colors.text,
+        fontWeight: typography.fontWeight.regular,
+    },
+    sectionTitle: {
+        fontSize: typography.fontSize.sm,
+        color: colors.primary,
+        fontWeight: typography.fontWeight.bold,
+        marginTop: spacing.xs,
     },
 });

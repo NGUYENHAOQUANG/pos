@@ -288,6 +288,75 @@ cd ..
 npm run android
 ```
 
+## 🚀 Fastlane - Build & Deploy Android
+
+### Yêu cầu
+
+1. **Ruby**: Cần cài đặt Ruby (macOS có sẵn)
+2. **Fastlane**: Cài đặt với `gem install fastlane`
+3. **Google Play Console API Key**: File JSON service account
+
+### Cấu trúc thư mục
+
+```
+android/
+├── fastlane/
+│   ├── Appfile          # Cấu hình package name và API key
+│   └── Fastfile         # Định nghĩa các lanes
+└── mebieco-*.json       # Service account key file
+```
+
+### Cấu hình
+
+**Appfile** (`android/fastlane/Appfile`):
+
+```ruby
+json_key_file("./mebieco-74cae262755f.json")
+package_name("com.mebisoft.mebieco")
+```
+
+**Fastfile** (`android/fastlane/Fastfile`):
+
+```ruby
+platform :android do
+  desc "Build và đẩy App lên Internal Testing"
+  lane :upload_internal do
+    gradle(task: "bundle", build_type: "Release")
+
+    upload_to_play_store(
+      track: 'internal',
+      release_status: 'draft',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true
+    )
+  end
+end
+```
+
+### Sử dụng
+
+```bash
+# Di chuyển vào thư mục android
+cd android
+
+# Upload lên Internal Testing
+fastlane android upload_internal
+
+# Hoặc với bundle exec (khuyến nghị)
+bundle exec fastlane android upload_internal
+```
+
+### Lưu ý quan trọng
+
+1. **Version Code**: Mỗi lần upload phải tăng `versionCode` trong `android/app/build.gradle`
+2. **Node Version**: Cần Node.js 20+ (kiểm tra với `node -v`)
+3. **Clean Build**: Nếu gặp lỗi cache, xóa thư mục `android/build`:
+    ```bash
+    rm -rf android/build
+    ```
+
 ### Node Modules Issues
 
 ```bash

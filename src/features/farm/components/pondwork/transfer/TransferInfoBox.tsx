@@ -24,6 +24,7 @@ interface TransferInfoBoxProps {
     totalEstimatedShrimp?: number;
     pondOptions: DropDownItem[];
     containerStyle?: ViewStyle;
+    onDropdownOpen?: () => void; // Callback when dropdown opens
 }
 
 export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
@@ -35,6 +36,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     totalEstimatedShrimp,
     pondOptions,
     containerStyle,
+    onDropdownOpen,
 }) => {
     // Calculate total quantity from all rows
     const totalQuantity = useMemo(() => {
@@ -132,16 +134,16 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
         onReceivingPondPress?.(pondId);
     };
 
+    // List of selected pond IDs for filtering dropdown options
+    const selectedPondIds = useMemo(() => {
+        return receivingPonds.map(p => p.receivingPond).filter((id): id is string => !!id);
+    }, [receivingPonds]);
+
     return (
         <SelectionInfoBox title="Thông tin chuyển đi" style={containerStyle}>
-            {/* Transfer Method */}
             <View style={styles.transferMethodContainer}>
                 <Text style={styles.label}>Hình thức chuyển</Text>
-                <TouchableOpacity
-                    style={styles.pillButton}
-                    onPress={onTransferMethodPress}
-                    activeOpacity={0.7}
-                >
+                <TouchableOpacity style={styles.pillButton} onPress={onTransferMethodPress}>
                     <Text style={styles.pillButtonText}>{transferMethod}</Text>
                 </TouchableOpacity>
             </View>
@@ -152,7 +154,14 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                     <IconError width={16} height={16} />
                     <Text style={styles.errorText}>
                         Tổng số lượng tôm chuyển đi phải bằng tổng tôm dự kiến trong ao (
-                        {formatNumber(totalEstimatedShrimp.toString())})
+                        {formatNumber(totalEstimatedShrimp.toString())}).{' '}
+                        {totalQuantity > totalEstimatedShrimp
+                            ? `Dư ${formatNumber(
+                                  (totalQuantity - totalEstimatedShrimp).toString()
+                              )} con.`
+                            : `Thiếu ${formatNumber(
+                                  (totalEstimatedShrimp - totalQuantity).toString()
+                              )} con.`}
                     </Text>
                 </View>
             )}
@@ -161,6 +170,17 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                 {/* Receiving Pond Rows */}
                 {receivingPonds.map((pond, index) => {
                     const isFirstRow = index === 0;
+
+                    // Filter options: Keep current selection + options not selected elsewhere
+                    const availableOptions = pondOptions.filter(option => {
+                        const isSelectedInOtherRow = selectedPondIds.some(
+                            selectedId =>
+                                selectedId === option.id.toString() &&
+                                selectedId !== pond.receivingPond
+                        );
+                        return !isSelectedInOtherRow;
+                    });
+
                     return (
                         <View key={pond.id} style={styles.rowContainer}>
                             {/* Receiving Pond */}
@@ -174,7 +194,8 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                 <ReceivingPondDropdown
                                     pond={pond}
                                     onSelect={handleReceivingPondSelect}
-                                    pondOptions={pondOptions}
+                                    pondOptions={availableOptions}
+                                    onDropdownOpen={onDropdownOpen}
                                 />
                             </View>
 
