@@ -1,2 +1,2 @@
-json_key_file("/Users/hotienky/datas/App/mobile/android/mebieco-74cae262755f.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
-package_name("com.mebisoft.mebieco") # e.g. com.krausefx.app
+json_key_file("./mebieco-74cae262755f.json")
+package_name("com.mebisoft.mebieco")
