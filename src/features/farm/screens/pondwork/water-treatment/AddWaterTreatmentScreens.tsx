@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { colors } from '@/styles';
@@ -83,7 +83,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <>
             {/* Header */}
             <HeaderFarm type="simple" title="Xử lý nước" onBack={handleBack} />
 
@@ -115,7 +115,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 onSecondaryPress={handleBack}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
-        </SafeAreaView>
+        </>
     );
 };
 

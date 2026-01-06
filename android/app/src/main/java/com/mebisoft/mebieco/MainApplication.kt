@@ -1,4 +1,4 @@
-package com.mebisoft
+package com.mebisoft.mebieco
 
 import android.app.Application
 import com.facebook.react.PackageList

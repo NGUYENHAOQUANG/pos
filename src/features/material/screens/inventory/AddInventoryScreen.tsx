@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
@@ -138,72 +138,66 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.container}>
-                <HeaderMeterial
-                    title="Tạo Phiếu Điều Chỉnh Tồn Kho"
-                    onBackPress={() => navigation.goBack()}
+        <View style={styles.container}>
+            <HeaderMeterial
+                title="Tạo Phiếu Điều Chỉnh Tồn Kho"
+                onBackPress={() => navigation.goBack()}
+            />
+
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Thông tin chung */}
+                <InventoryGeneralInfo
+                    date={formatDate(date)}
+                    createdDate={formatDateTime(date)}
+                    materialGroup={materialGroup}
+                    note={note}
+                    onDatePress={() => setDatePickerVisible(true)}
+                    onNoteChange={setNote}
                 />
 
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.contentContainer}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* Thông tin chung */}
-                    <InventoryGeneralInfo
-                        date={formatDate(date)}
-                        createdDate={formatDateTime(date)}
-                        materialGroup={materialGroup}
-                        note={note}
-                        onDatePress={() => setDatePickerVisible(true)}
-                        onNoteChange={setNote}
+                {/* Nhập liệu vật tư */}
+                <View style={styles.dropdownSection}>
+                    <InventoryMaterialInput
+                        materialName={materialName}
+                        oldStock={oldStock}
+                        newStock={newStock}
+                        onMaterialSelect={handleMaterialSelect}
+                        onNewStockChange={setNewStock}
+                        materialOptions={materialOptions}
+                        onDropdownOpen={handleDropdownOpen}
                     />
+                </View>
+            </ScrollView>
 
-                    {/* Nhập liệu vật tư */}
-                    <View style={styles.dropdownSection}>
-                        <InventoryMaterialInput
-                            materialName={materialName}
-                            oldStock={oldStock}
-                            newStock={newStock}
-                            onMaterialSelect={handleMaterialSelect}
-                            onNewStockChange={setNewStock}
-                            materialOptions={materialOptions}
-                            onDropdownOpen={handleDropdownOpen}
-                        />
-                    </View>
-                </ScrollView>
+            {/* Nút Gửi Phiếu */}
+            <ButtonBarMaterial
+                mode="single"
+                primaryTitle="Gửi Phiếu"
+                onPrimaryPress={handleSave}
+                containerStyle={{
+                    borderTopWidth: 1,
+                    borderTopColor: colors.gray[200],
+                }}
+            />
 
-                {/* Nút Gửi Phiếu */}
-                <ButtonBarMaterial
-                    mode="single"
-                    primaryTitle="Gửi Phiếu"
-                    onPrimaryPress={handleSave}
-                    containerStyle={{
-                        borderTopWidth: 1,
-                        borderTopColor: colors.gray[200],
-                    }}
-                />
-
-                {/* Modal Chọn Ngày */}
-                <DatePickerModal
-                    visible={isDatePickerVisible}
-                    onClose={() => setDatePickerVisible(false)}
-                    date={date}
-                    onSelectDate={handleDateConfirm}
-                />
-            </View>
-        </SafeAreaView>
+            {/* Modal Chọn Ngày */}
+            <DatePickerModal
+                visible={isDatePickerVisible}
+                onClose={() => setDatePickerVisible(false)}
+                date={date}
+                onSelectDate={handleDateConfirm}
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,

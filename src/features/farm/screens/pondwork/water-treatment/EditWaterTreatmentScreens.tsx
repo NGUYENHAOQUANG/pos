@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     ScrollView,
-    SafeAreaView,
     KeyboardAvoidingView,
     Platform,
     TouchableOpacity,
@@ -127,7 +126,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <>
             {/* Header */}
             <HeaderFarm
                 type="simple"
@@ -169,15 +168,11 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
             />
-        </SafeAreaView>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.backgroundPrimary,
-    },
     flex1: {
         flex: 1,
     },

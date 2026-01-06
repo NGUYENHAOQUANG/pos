@@ -32,15 +32,44 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob } = useFarm();
+    const { getPondJobItems, updatePondJob, environmentSettings } = useFarm();
+
+    const checkLimit = (value: string, paramId: string): boolean => {
+        if (!value || !value.trim()) return false;
+
+        // Find parameter in default settings
+        const param = environmentSettings.defaultParameters.find(p => p.id === paramId);
+        if (!param || !param.limit) return false;
+
+        const parts = param.limit.split('-');
+        if (parts.length !== 2) return false;
+
+        const min = parseFloat(parts[0].trim());
+        const max = parseFloat(parts[1].trim());
+        const val = parseFloat(value.trim());
+
+        if (isNaN(min) || isNaN(max) || isNaN(val)) return false;
+
+        return val < min || val > max;
+    };
 
     const meta = useMemo(
         () => (itemToEdit?.meta as EnvironmentMeta) || ({} as EnvironmentMeta),
         [itemToEdit?.meta]
     );
-    const [selectedDate, setSelectedDate] = useState(
-        itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
-    );
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (itemToEdit?.date) {
+            const date = parseDate(itemToEdit.date);
+            if (itemToEdit.time) {
+                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    date.setHours(hours, minutes);
+                }
+            }
+            return date;
+        }
+        return new Date();
+    });
 
     // Environment parameters state
     const [pH, setPH] = useState(meta.pH || '');
@@ -65,8 +94,17 @@ export const AddEnvironmentScreen: React.FC = () => {
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
+
+        let date = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
+        if (itemToEdit.date && itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                date.setHours(hours, minutes);
+            }
+        }
+
         return {
-            date: itemToEdit.date ? parseDate(itemToEdit.date) : new Date(),
+            date: date,
             pH: meta.pH || '',
             do: meta.do || '',
             temperature: meta.temperature || '',
@@ -165,12 +203,17 @@ export const AddEnvironmentScreen: React.FC = () => {
                 note: notes.trim() || undefined,
                 meta: {
                     pH: pH.trim() || undefined,
-                    pHWarning: true,
+                    pHWarning: checkLimit(pH, '1'),
                     do: dissolvedOxygen.trim() || undefined,
+                    doWarning: checkLimit(dissolvedOxygen, '2'),
                     temperature: temperature.trim() || undefined,
+                    temperatureWarning: checkLimit(temperature, '3'),
                     salinity: salinity.trim() || undefined,
+                    salinityWarning: checkLimit(salinity, '5'),
                     alkalinity: alkalinity.trim() || undefined,
+                    alkalinityWarning: checkLimit(alkalinity, '6'),
                     transparency: transparency.trim() || undefined,
+                    transparencyWarning: checkLimit(transparency, '4'),
                     // Only save advanced parameters if they are checked
                     kali:
                         advancedParameters.some(p => p.id === '7') && kali.trim()
@@ -324,7 +367,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Đo chỉ số môi trường</Text>
+                <Text style={styles.headerTitle}>Đo thông số môi trường</Text>
                 {itemToEdit ? (
                     <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
                         <IconTrashOutlined width={18} height={18} />
