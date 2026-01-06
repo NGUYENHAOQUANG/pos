@@ -134,71 +134,74 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                 />
 
                 {isBasicExpanded && (
-                    <View style={styles.content}>
-                        <View style={styles.inputGroup}>
-                            <View style={styles.labelContainer}>
-                                <Text style={styles.required}>* </Text>
-                                <Text style={styles.label}>Tên vật tư</Text>
+                    <>
+                        <View style={styles.divider} />
+                        <View style={styles.content}>
+                            <View style={styles.inputGroup}>
+                                <View style={styles.labelContainer}>
+                                    <Text style={styles.required}>* </Text>
+                                    <Text style={styles.label}>Tên vật tư</Text>
+                                </View>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Nhập tên vật tư"
+                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    value={name}
+                                    onChangeText={onNameChange}
+                                />
                             </View>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Nhập tên vật tư"
-                                placeholderTextColor={colors.textSecondary || '#999'}
-                                value={name}
-                                onChangeText={onNameChange}
-                            />
-                        </View>
 
-                        <View style={[styles.row, styles.rowZ30]}>
-                            <View style={styles.halfWidth}>
-                                <DropdownMaterial
-                                    label="Nhóm vật tư"
-                                    required
-                                    value={group}
-                                    options={
-                                        groupOptions && groupOptions.length > 0
-                                            ? groupOptions
-                                            : undefined
-                                    }
-                                    onChange={onGroupChange}
-                                    placeholder="Chọn nhóm vật tư"
-                                    dropdownStyle={styles.dropdownNegativeMargin}
-                                    showAllOption={false}
-                                    // --- TRUYỀN PROPS ---
-                                    isOpen={activeDropdown === 'group'}
-                                    onToggle={() => handleToggleDropdown('group')}
-                                />
+                            <View style={[styles.row, styles.rowZ30]}>
+                                <View style={styles.halfWidth}>
+                                    <DropdownMaterial
+                                        label="Nhóm vật tư"
+                                        required
+                                        value={group}
+                                        options={
+                                            groupOptions && groupOptions.length > 0
+                                                ? groupOptions
+                                                : undefined
+                                        }
+                                        onChange={onGroupChange}
+                                        placeholder="Chọn nhóm vật tư"
+                                        dropdownStyle={styles.dropdownNegativeMargin}
+                                        showAllOption={false}
+                                        // --- TRUYỀN PROPS ---
+                                        isOpen={activeDropdown === 'group'}
+                                        onToggle={() => handleToggleDropdown('group')}
+                                    />
+                                </View>
+                                <View style={styles.halfWidth}>
+                                    <DropdownMaterial
+                                        label="Loại vật tư"
+                                        required
+                                        onChange={onTypeChange}
+                                        value={type}
+                                        // Pass derived options based on group
+                                        options={typeOptions}
+                                        placeholder="Chọn loại"
+                                        dropdownStyle={styles.dropdownNegativeMargin}
+                                        isOpen={activeDropdown === 'type'}
+                                        onToggle={() => handleToggleDropdown('type')}
+                                    />
+                                </View>
                             </View>
-                            <View style={styles.halfWidth}>
-                                <DropdownMaterial
-                                    label="Loại vật tư"
-                                    required
-                                    onChange={onTypeChange}
-                                    value={type}
-                                    // Pass derived options based on group
-                                    options={typeOptions}
-                                    placeholder="Chọn loại"
-                                    dropdownStyle={styles.dropdownNegativeMargin}
-                                    isOpen={activeDropdown === 'type'}
-                                    onToggle={() => handleToggleDropdown('type')}
-                                />
-                            </View>
-                        </View>
 
-                        <View style={[styles.row, styles.rowMarginTop, styles.rowZ20]}>
-                            <View style={styles.halfWidth}>
-                                <UnitOfMeasure
-                                    label="Đơn vị tính"
-                                    required
-                                    value={unit}
-                                    options={unitOptions}
-                                    onChange={onUnitChange}
-                                    isOpen={activeDropdown === 'unit'}
-                                    onToggle={() => handleToggleDropdown('unit')}
-                                />
+                            <View style={[styles.row, styles.rowMarginTop, styles.rowZ20]}>
+                                <View style={styles.halfWidth}>
+                                    <UnitOfMeasure
+                                        label="Đơn vị tính"
+                                        required
+                                        value={unit}
+                                        options={unitOptions}
+                                        onChange={onUnitChange}
+                                        isOpen={activeDropdown === 'unit'}
+                                        onToggle={() => handleToggleDropdown('unit')}
+                                    />
+                                </View>
                             </View>
                         </View>
-                    </View>
+                    </>
                 )}
             </View>
 
@@ -211,56 +214,59 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                 />
 
                 {isAdvancedExpanded && (
-                    <View style={styles.content}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Công dụng</Text>
-                            <TextInput
-                                style={[styles.input, styles.textArea]}
-                                placeholder="Nhập công dụng"
-                                placeholderTextColor={colors.textSecondary || '#999'}
-                                value={usage}
-                                onChangeText={onUsageChange}
-                                multiline
-                                textAlignVertical="top"
-                            />
-                        </View>
-
-                        <View style={styles.row}>
-                            <View style={styles.halfWidth}>
-                                <UnitOfUse
-                                    label="Đơn vị sử dụng"
-                                    value={unitOfUse}
-                                    options={unitOptions}
-                                    onChange={onUnitOfUseChange}
-                                    isOpen={activeDropdown === 'unitOfUse'}
-                                    onToggle={() => handleToggleDropdown('unitOfUse')}
+                    <>
+                        <View style={styles.divider} />
+                        <View style={styles.content}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Công dụng</Text>
+                                <TextInput
+                                    style={[styles.input, styles.textArea]}
+                                    placeholder="Nhập công dụng"
+                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    value={usage}
+                                    onChangeText={onUsageChange}
+                                    multiline
+                                    textAlignVertical="top"
                                 />
                             </View>
-                            <View style={styles.halfWidth}>
-                                <View style={styles.inputGroup}>
-                                    <Text style={styles.label}>Liều dùng</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Nhập liều dùng"
-                                        placeholderTextColor={colors.textSecondary || '#999'}
-                                        value={dosage}
-                                        onChangeText={onDosageChange}
+
+                            <View style={styles.row}>
+                                <View style={styles.halfWidth}>
+                                    <UnitOfUse
+                                        label="Đơn vị sử dụng"
+                                        value={unitOfUse}
+                                        options={unitOptions}
+                                        onChange={onUnitOfUseChange}
+                                        isOpen={activeDropdown === 'unitOfUse'}
+                                        onToggle={() => handleToggleDropdown('unitOfUse')}
                                     />
                                 </View>
+                                <View style={styles.halfWidth}>
+                                    <View style={styles.inputGroup}>
+                                        <Text style={styles.label}>Liều dùng</Text>
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder="Nhập liều dùng"
+                                            placeholderTextColor={colors.textSecondary || '#999'}
+                                            value={dosage}
+                                            onChangeText={onDosageChange}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Nhà sản xuất</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Nhập nhà sản xuất"
+                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    value={manufacturer}
+                                    onChangeText={onManufacturerChange}
+                                />
                             </View>
                         </View>
-
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nhà sản xuất</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Nhập nhà sản xuất"
-                                placeholderTextColor={colors.textSecondary || '#999'}
-                                value={manufacturer}
-                                onChangeText={onManufacturerChange}
-                            />
-                        </View>
-                    </View>
+                    </>
                 )}
             </View>
         </View>
@@ -300,6 +306,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontWeight: '400',
         marginBottom: spacing.xs,
+        lineHeight: 20,
     },
     required: {
         fontSize: 14,
@@ -345,5 +352,10 @@ const styles = StyleSheet.create({
     },
     rowMarginTop: {
         marginTop: spacing.md,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginBottom: spacing.md,
     },
 });

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
 import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { colors, spacing, borderRadius } from '@/styles';
-
+import { numericStringSchema } from '@/shared/utils/validation';
 interface InventoryMaterialInputProps {
     materialName: string;
     oldStock: number;
@@ -68,7 +68,12 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
                                     style={styles.stockInput}
                                     keyboardType="numeric"
                                     value={newStock}
-                                    onChangeText={onNewStockChange}
+                                    onChangeText={text => {
+                                        const normalizedText = text.replace(/,/g, '.');
+                                        if (numericStringSchema.safeParse(normalizedText).success) {
+                                            onNewStockChange(normalizedText);
+                                        }
+                                    }}
                                 />
                                 <Text style={styles.unit}>Kg</Text>
                             </View>

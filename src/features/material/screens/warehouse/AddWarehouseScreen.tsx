@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
+import { View, StyleSheet, StatusBar, ScrollView, Text } from 'react-native';
+import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { WarehouseInformation } from '../../components/warehouse/WarehouseInformation';
@@ -90,7 +91,12 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     };
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('vi-VN') + 'đ';
+        return (
+            <>
+                {formatCurrencyValue(value)}{' '}
+                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+            </>
+        );
     };
 
     const totalAmount = calculateTotal();

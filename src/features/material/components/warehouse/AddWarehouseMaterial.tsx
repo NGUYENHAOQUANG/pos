@@ -12,7 +12,9 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { CollapseHead } from '../CollapseHead';
+import { numericStringSchema } from '@/shared/utils/validation';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -47,7 +49,12 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     };
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('vi-VN') + ' đ';
+        return (
+            <>
+                {formatCurrencyValue(value)}{' '}
+                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+            </>
+        );
     };
 
     const materialNames = materialOptions.map(opt => opt.label);
@@ -150,17 +157,42 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             <View style={styles.halfWidth}>
                                                 <View style={styles.labelContainer}>
                                                     <Text style={styles.required}>* </Text>
-                                                    <Text style={styles.label}>Đơn giá (đ)</Text>
+                                                    <Text style={styles.label}>
+                                                        Đơn giá (
+                                                        <Text
+                                                            style={{
+                                                                textDecorationLine: 'underline',
+                                                            }}
+                                                        >
+                                                            đ
+                                                        </Text>
+                                                        )
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.inputContainer}>
                                                     <TextInput
                                                         style={styles.innerInput}
                                                         placeholder="Nhập đơn giá"
                                                         placeholderTextColor={colors.textSecondary}
-                                                        value={item.price}
-                                                        onChangeText={val =>
-                                                            onUpdateMaterial(item.id, 'price', val)
-                                                        }
+                                                        value={item.price.replace(
+                                                            /\B(?=(\d{3})+(?!\d))/g,
+                                                            ','
+                                                        )}
+                                                        onChangeText={val => {
+                                                            // Remove commas for storage/validation
+                                                            const cleanVal = val.replace(/,/g, '');
+                                                            if (
+                                                                numericStringSchema.safeParse(
+                                                                    cleanVal
+                                                                ).success
+                                                            ) {
+                                                                onUpdateMaterial(
+                                                                    item.id,
+                                                                    'price',
+                                                                    cleanVal
+                                                                );
+                                                            }
+                                                        }}
                                                         keyboardType="numeric"
                                                     />
                                                 </View>
