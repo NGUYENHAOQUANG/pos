@@ -6,9 +6,9 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    SafeAreaView,
     Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -74,6 +74,13 @@ export const Filter: React.FC<FilterProps> = ({
     const isAllSelected =
         optionsToRender.length > 0 && selectedTypes.length === optionsToRender.length;
 
+    const insets = useSafeAreaInsets();
+    const headerStyle = {
+        ...styles.header,
+        paddingTop:
+            Platform.OS === 'android' ? spacing.md : Math.max(insets.top, spacing.md) + spacing.sm,
+    };
+
     if (optionsToRender.length === 0) {
         return (
             <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -85,7 +92,7 @@ export const Filter: React.FC<FilterProps> = ({
                     />
                     <View style={styles.container}>
                         {/* Header */}
-                        <View style={styles.header}>
+                        <View style={headerStyle}>
                             <Text style={styles.headerTitle}>Bộ lọc</Text>
                             <TouchableOpacity onPress={onClose}>
                                 <Ionicons name="close" size={24} color={colors.text} />
@@ -102,7 +109,6 @@ export const Filter: React.FC<FilterProps> = ({
                                 Không có lựa chọn nào để lọc
                             </Text>
                         </View>
-                        <SafeAreaView />
                     </View>
                 </View>
             </Modal>
@@ -121,7 +127,7 @@ export const Filter: React.FC<FilterProps> = ({
 
                 <View style={styles.container}>
                     {/* Header */}
-                    <View style={styles.header}>
+                    <View style={headerStyle}>
                         <Text style={styles.headerTitle}>Bộ lọc</Text>
                         <TouchableOpacity onPress={handleReset}>
                             <Text style={styles.resetText}>Thiết lập lại</Text>
@@ -221,11 +227,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
+        paddingBottom: spacing.md,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderDark,
-        paddingTop: Platform.OS === 'android' ? spacing.xl : spacing.md, // Add padding for status bar on Android if needed, though Modal usually covers it.
-        // Or better, stick to safe area conventions. Let's just do simple full height first as requested.
     },
     headerTitle: {
         fontSize: typography.fontSize.lg,

@@ -137,10 +137,6 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F0F5FF',
-    },
     container: {
         flex: 1,
         backgroundColor: '#F0F5FF',
