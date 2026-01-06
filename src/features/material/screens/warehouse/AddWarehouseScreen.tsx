@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, ScrollView } from 'react-native';
+import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { WarehouseInformation } from '../../components/warehouse/WarehouseInformation';
@@ -96,7 +96,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     const totalAmount = calculateTotal();
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
             <View style={styles.container}>
                 <HeaderMeterial
@@ -178,15 +178,11 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                     }}
                 />
             </View>
-        </SafeAreaView>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#F0F5FF',
-    },
     container: {
         flex: 1,
         backgroundColor: '#F0F5FF',
