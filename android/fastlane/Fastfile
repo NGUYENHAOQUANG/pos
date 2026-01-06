@@ -1,0 +1,15 @@
+platform :android do
+  desc "Build và đẩy App lên Internal Testing"
+  lane :upload_internal do
+    gradle(task: "bundle", build_type: "Release")
+
+    upload_to_play_store(
+      track: 'internal',
+      release_status: 'draft',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true
+    )
+  end
+end

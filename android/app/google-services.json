@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "341400017610",
-    "project_id": "mebione-mobile",
-    "storage_bucket": "mebione-mobile.firebasestorage.app"
+    "project_number": "804205577840",
+    "project_id": "mebieco-6d46d",
+    "storage_bucket": "mebieco-6d46d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:341400017610:android:1a517d05362348b4ae3233",
+        "mobilesdk_app_id": "1:804205577840:android:8746dd8262f805114ed6b5",
         "android_client_info": {
-          "package_name": "com.mebisoft"
+          "package_name": "com.mebisoft.mebieco"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAFt7xjjWqflLiTEcmw8Mkt9at1wP_HB-w"
+          "current_key": "AIzaSyDhTfd1rYsxnHtb3NyBg_Rbr7KnDjKDJK0"
         }
       ],
       "services": {

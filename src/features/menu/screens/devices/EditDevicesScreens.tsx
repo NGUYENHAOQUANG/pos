@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -165,15 +164,13 @@ export const EditDevicesScreens = () => {
                 />
             </ScrollView>
 
-            <SafeAreaView edges={['bottom']} style={styles.footer}>
-                <ButtonBarMenu
-                    primaryTitle="Cập nhật thông tin"
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleUpdate}
-                    onSecondaryPress={handleBack}
-                    secondaryType="default"
-                />
-            </SafeAreaView>
+            <ButtonBarMenu
+                primaryTitle="Cập nhật thông tin"
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleUpdate}
+                onSecondaryPress={handleBack}
+                secondaryType="default"
+            />
 
             <ConfirmationDeleteModal
                 visible={deleteModalVisible}

@@ -83,7 +83,9 @@ export const FoodChart: React.FC = () => {
                         date={selectedDate}
                         onDateChange={setSelectedDate}
                         height={32}
-                        dateText={selectedDate.toISOString().split('T')[0]}
+                        dateText={`${selectedDate.getFullYear()}-${String(
+                            selectedDate.getMonth() + 1
+                        ).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
                     />
                 </View>
             </View>
