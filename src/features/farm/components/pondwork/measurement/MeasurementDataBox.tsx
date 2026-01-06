@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { spacing } from '@/styles';
 
 interface MeasurementDataBoxProps {
@@ -22,6 +21,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 }) => {
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
+    const [shrimpWeight, setShrimpWeight] = useState<number | null>(null);
 
     useEffect(() => {
         const size = parseFloat(shrimpSize);
@@ -29,13 +29,13 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         if (!isNaN(size) && !isNaN(weight) && size > 0 && weight > 0) {
             // Số con thu = Cỡ tôm (con/kg) × Sản lượng còn lại (kg)
-            const currentTotal = size * weight;
+            const currentTotal = Math.round(size * weight);
             setTotalShrimp(currentTotal);
 
             // Tỉ lệ sống (%) = (Tổng số con hiện tại / Số lượng giống thả ban đầu) × 100
             if (stockingQuantity && Number(stockingQuantity) > 0) {
                 const initialStock = Number(stockingQuantity);
-                const rate = (currentTotal / initialStock) * 100;
+                const rate = Math.round((currentTotal / initialStock) * 100);
                 setSurvivalRate(rate);
             } else {
                 setSurvivalRate(null);
@@ -44,38 +44,38 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
             setTotalShrimp(null);
             setSurvivalRate(null);
         }
+
+        if (!isNaN(size) && size > 0) {
+            // Trọng lượng trung bình = 1000 / Cỡ tôm
+            const weightPerShrimp = 1000 / size;
+            // Round to integer for display
+            setShrimpWeight(Math.round(weightPerShrimp));
+        } else {
+            setShrimpWeight(null);
+        }
     }, [shrimpSize, remainingWeight, stockingQuantity]);
 
     // Build result items
     const resultItems: ResultItem[] = useMemo(() => {
         const items: ResultItem[] = [];
 
-        if (totalShrimp !== null) {
-            items.push({
-                label: 'Tổng số tôm hiện tại (con)',
-                value: Math.round(totalShrimp).toString(),
-            });
-        } else {
-            items.push({
-                label: 'Tổng số tôm hiện tại (con)',
-                value: '-',
-            });
-        }
+        items.push({
+            label: 'Tổng số tôm hiện tại (con)',
+            value: totalShrimp !== null ? totalShrimp.toString() : '-',
+        });
 
-        if (survivalRate !== null) {
-            items.push({
-                label: 'Tỉ lệ sống dự kiến (%)',
-                value: formatNumber(Math.round(survivalRate)),
-            });
-        } else {
-            items.push({
-                label: 'Tỉ lệ sống dự kiến (%)',
-                value: '-',
-            });
-        }
+        items.push({
+            label: 'Tỉ lệ sống dự kiến (%)',
+            value: survivalRate !== null ? `${survivalRate}` : '-',
+        });
+
+        items.push({
+            label: 'Trọng lượng tôm (g/con)',
+            value: shrimpWeight !== null ? `${shrimpWeight}` : '-',
+        });
 
         return items;
-    }, [totalShrimp, survivalRate]);
+    }, [totalShrimp, survivalRate, shrimpWeight]);
 
     const handleNumericInput = (text: string, callback: (val: string) => void) => {
         // 1. Remove any character that is not 0-9 or .
