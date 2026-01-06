@@ -44,7 +44,9 @@ export const ShrimpInspectionScreen: React.FC = () => {
         const dateObj = parseDate(itemToEdit.date);
         if (itemToEdit.time) {
             const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-            dateObj.setHours(hours, minutes);
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                dateObj.setHours(hours, minutes);
+            }
         }
         return dateObj;
     });
@@ -61,11 +63,16 @@ export const ShrimpInspectionScreen: React.FC = () => {
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
         if (!itemToEdit) return null;
-        const dateObj = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
-        if (itemToEdit.time) {
-            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-            dateObj.setHours(hours, minutes);
-        }
+        const dateObj = (() => {
+            const d = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
+            if (itemToEdit.date && itemToEdit.time) {
+                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                if (!isNaN(hours) && !isNaN(minutes)) {
+                    d.setHours(hours, minutes);
+                }
+            }
+            return d;
+        })();
         return {
             date: dateObj,
             foodAmount: meta.foodAmount || '',
