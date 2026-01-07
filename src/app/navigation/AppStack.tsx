@@ -49,7 +49,6 @@ import { AddWarehouseScreen } from '@/features/material/screens/warehouse/AddWar
 import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
 
 // Control screens
-import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens';
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
 import CustomFeedingMachine from '@/features/control/screens/CustomFeedingMachine/CustomFeedingMachineScreen';
 import { ScheduleActivitieScreens } from '@/features/control/screens/schedule/ScheduleActivitieScreens';
@@ -118,7 +117,7 @@ const EquipmentMaintenanceWithProvider = withMenuProvider(EquipmentMaintenanceSc
 const EditEquimentMaintenanceWithProvider = withMenuProvider(EditEquimentMaintenanceScreens);
 
 // Wrapped Control screens
-const ControlDetailWithProvider = withControlProvider(DevicesInPondScreens);
+// ControlDetailWithProvider moved to MainNavigator
 const ConnectDeviceWithProvider = withControlProvider(ConnectDeviceScreens);
 const CustomFeedingMachineWithProvider = withControlProvider(CustomFeedingMachine);
 const ScheduleWithProvider = withControlProvider(ScheduleActivitieScreens);
@@ -264,7 +263,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 
             {/* ============== Control Screens ============== */}
-            <Stack.Screen name="ControlDetail" component={ControlDetailWithProvider} />
+            {/* ControlDetail moved to MainNavigator to show Tab Bar */}
             <Stack.Screen name="ConnectDevice" component={ConnectDeviceWithProvider} />
             <Stack.Screen
                 name="CustomFeedingMachine"

@@ -19,6 +19,7 @@ import { SvgProps } from 'react-native-svg';
 // Main screens only (no nested stacks)
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
+import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 
@@ -26,17 +27,25 @@ import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 import { MenuProvider } from '@/features/menu/context/MenuContext';
 import { ControlProvider } from '@/features/control/context/ControlContext';
 
-// Wrapper components with providers
+// Native Stack for Control Tab
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const ControlStack = createNativeStackNavigator();
+
+// Wrapper components with providers including Stack for Control
+const ControlStackScreen = () => (
+    <ControlProvider>
+        <ControlStack.Navigator screenOptions={{ headerShown: false }}>
+            <ControlStack.Screen name="ControlList" component={DeviceControlScreens} />
+            <ControlStack.Screen name="ControlDetail" component={DevicesInPondScreens} />
+        </ControlStack.Navigator>
+    </ControlProvider>
+);
+
 const MenuScreenWithProvider = () => (
     <MenuProvider>
         <MenuScreens />
     </MenuProvider>
-);
-
-const DevicesScreenWithProvider = () => (
-    <ControlProvider>
-        <DeviceControlScreens />
-    </ControlProvider>
 );
 
 // Import Icons
@@ -77,7 +86,7 @@ const navigationItems: NavigationItem[] = [
         label: 'Điều khiển',
         Icon: IconDevices,
         IconActive: IconDevicesActive,
-        component: DevicesScreenWithProvider,
+        component: ControlStackScreen, // Use Stack instead of single screen
     },
     {
         key: 'Farm',
@@ -312,7 +321,7 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: colors.backgroundPrimary, // Change from white to backgroundPrimary to show rounded corners
     },
     bottomContainer: {
         flexDirection: 'row',
@@ -325,6 +334,8 @@ const styles = StyleSheet.create({
         elevation: 10,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+        // Ensure content is clipped to rounded corners if needed, though usually not for tab bar
+        overflow: 'hidden',
     },
     tabItem: {
         flex: 1,
