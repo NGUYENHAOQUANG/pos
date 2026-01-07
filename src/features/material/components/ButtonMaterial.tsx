@@ -6,8 +6,9 @@ import {
     StyleSheet,
     Animated,
     Platform,
-    LayoutChangeEvent,
     TouchableHighlight,
+    Modal,
+    Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -18,19 +19,27 @@ interface ButtonMetaerialProps {
     onPressCreateMaterial?: () => void;
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({
     onPressCreateImport,
     onPressCreateAdjustment,
     onPressCreateMaterial,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [buttonLayout, setButtonLayout] = useState<{ width: number; height: number } | null>(
-        null
-    );
+    const [buttonPosition, setButtonPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+    const buttonRef = useRef<View>(null);
 
     const animation = useRef(new Animated.Value(0)).current;
 
     const toggleMenu = () => {
+        if (!isOpen) {
+            // Measure button position before opening
+            buttonRef.current?.measureInWindow((x, y, width, height) => {
+                setButtonPosition({ x, y, width, height });
+            });
+        }
+
         const toValue = isOpen ? 0 : 1;
 
         Animated.spring(animation, {
@@ -49,11 +58,6 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({
         { label: 'Tạo Vật Tư', onPress: onPressCreateMaterial },
     ];
 
-    const onButtonLayout = (event: LayoutChangeEvent) => {
-        const { width, height } = event.nativeEvent.layout;
-        setButtonLayout({ width, height });
-    };
-
     const opacity = animation.interpolate({
         inputRange: [0, 1],
         outputRange: [0, 1],
@@ -69,61 +73,58 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({
         outputRange: [-10, 0],
     });
 
+    // Calculate menu position - align right edge with button right edge
+    const menuRight = SCREEN_WIDTH - buttonPosition.x - buttonPosition.width;
+    const menuTop = buttonPosition.y + buttonPosition.height + spacing.xs;
+
     return (
-        <View style={styles.container}>
-            {/* Menu Overlay */}
-            {isOpen && (
-                <TouchableOpacity
-                    style={{
-                        position: 'absolute',
-                        top: -1000,
-                        bottom: -1000,
-                        left: -1000,
-                        right: -1000,
-                        backgroundColor: 'transparent',
-                        zIndex: 98,
-                    }}
-                    onPress={toggleMenu}
-                    activeOpacity={1}
-                />
-            )}
-
-            {/* Menu Dropdown */}
-            <Animated.View
-                style={[
-                    styles.menuContainer,
-                    {
-                        opacity,
-                        transform: [{ scale }, { translateY }],
-                        top: (buttonLayout?.height || 44) + spacing.xs,
-                    },
-                ]}
-                pointerEvents={isOpen ? 'auto' : 'none'}
-            >
-                {menuItems.map((item, index) => (
-                    <TouchableHighlight
-                        key={index}
-                        style={styles.menuItem}
-                        underlayColor="#F5F5F5"
-                        onPress={() => {
-                            toggleMenu();
-                            item.onPress?.();
-                        }}
-                    >
-                        <Text style={styles.menuItemText}>{item.label}</Text>
-                    </TouchableHighlight>
-                ))}
-            </Animated.View>
-
+        <View style={styles.container} ref={buttonRef}>
             {/* Main Button */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={toggleMenu}
-                activeOpacity={0.8}
-                onLayout={onButtonLayout}
-            >
+            <TouchableOpacity style={styles.button} onPress={toggleMenu} activeOpacity={0.8}>
                 <Ionicons name="add" size={24} color={colors.text} />
             </TouchableOpacity>
+
+            {/* Menu Modal */}
+            <Modal
+                visible={isOpen}
+                transparent={true}
+                animationType="none"
+                onRequestClose={toggleMenu}
+            >
+                {/* Overlay */}
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    onPress={toggleMenu}
+                    activeOpacity={1}
+                >
+                    {/* Menu Dropdown */}
+                    <Animated.View
+                        style={[
+                            styles.menuContainer,
+                            {
+                                opacity,
+                                transform: [{ scale }, { translateY }],
+                                top: menuTop,
+                                right: menuRight,
+                            },
+                        ]}
+                    >
+                        {menuItems.map((item, index) => (
+                            <TouchableHighlight
+                                key={index}
+                                style={styles.menuItem}
+                                underlayColor="#F5F5F5"
+                                onPress={() => {
+                                    toggleMenu();
+                                    item.onPress?.();
+                                }}
+                            >
+                                <Text style={styles.menuItemText}>{item.label}</Text>
+                            </TouchableHighlight>
+                        ))}
+                    </Animated.View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 };
@@ -131,7 +132,6 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({
 const styles = StyleSheet.create({
     container: {
         alignItems: 'flex-end',
-        zIndex: 100,
     },
     button: {
         width: 40,
@@ -143,13 +143,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.borderDark,
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
     menuContainer: {
         position: 'absolute',
-        right: 0,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         paddingVertical: spacing.xs,
-        minWidth: 280, // Wider menu
+        minWidth: 280,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -161,8 +164,6 @@ const styles = StyleSheet.create({
                 elevation: 8,
             },
         }),
-        zIndex: 99,
-        // Removed border to match the clean card look
     },
     menuItem: {
         paddingVertical: spacing.md,
@@ -170,11 +171,8 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         marginHorizontal: spacing.xs,
     },
-    menuItemBorder: {
-        // Removed border separator
-    },
     menuItemText: {
-        fontSize: 16, // Larger font
+        fontSize: 16,
         color: colors.text,
         fontWeight: '400',
     },

@@ -83,6 +83,34 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
+    // Real-time validation
+    useEffect(() => {
+        if (!stockingQuantity || !shrimpSize || !remainingWeight) return;
+
+        const size = parseFloat(shrimpSize);
+        const weight = parseFloat(remainingWeight);
+
+        if (isNaN(size) || isNaN(weight)) return;
+
+        const totalShrimp = Math.round(size * weight);
+
+        if (totalShrimp > stockingQuantity) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vượt quá số lượng thả ban đầu',
+            });
+            return;
+        }
+
+        const calculatedSurvivalRate = Math.round((totalShrimp / stockingQuantity) * 100);
+        if (calculatedSurvivalRate > 100) {
+            Toast.show({
+                type: 'error',
+                text1: 'Tỉ lệ sống vượt quá 100%',
+            });
+        }
+    }, [shrimpSize, remainingWeight, stockingQuantity]);
+
     const handleSave = () => {
         if (!shrimpSize || !remainingWeight) {
             Toast.show({ type: 'error', text1: 'Vui lòng nhập đủ thông tin bắt buộc' });
@@ -95,12 +123,30 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
         const size = parseFloat(shrimpSize);
         const weight = parseFloat(remainingWeight);
-        const totalShrimp = !isNaN(size) && !isNaN(weight) ? size * weight : null;
+        const totalShrimp = !isNaN(size) && !isNaN(weight) ? Math.round(size * weight) : null;
 
         // Calculate survival rate: (Số con thu / Số con thả ban đầu) × 100
         let survivalRate: number | null = null;
         if (totalShrimp !== null && stockingQuantity && stockingQuantity > 0) {
-            survivalRate = (totalShrimp / stockingQuantity) * 100;
+            survivalRate = Math.round((totalShrimp / stockingQuantity) * 100);
+        }
+
+        // Validation: Tổng số tôm hiện tại không được lớn hơn số lượng thả ban đầu
+        if (totalShrimp !== null && stockingQuantity && totalShrimp > stockingQuantity) {
+            Toast.show({
+                type: 'error',
+                text1: 'Không thể lưu vui lòng kiểm tra lại',
+            });
+            return;
+        }
+
+        // Validation: Tỉ lệ sống không được vượt quá 100%
+        if (survivalRate !== null && survivalRate > 100) {
+            Toast.show({
+                type: 'error',
+                text1: 'Không thể lưu vui lòng kiểm tra lại',
+            });
+            return;
         }
 
         const timeString = time.toLocaleTimeString('en-GB', {

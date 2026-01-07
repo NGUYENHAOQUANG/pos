@@ -78,7 +78,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             updatePondJob(pondId, 'WATER_TREATMENT', [...currentItems, newItem]);
             showAddJobSuccessToast('WATER_TREATMENT');
         }
-
+        25;
         navigation.goBack();
     };
 
@@ -88,7 +88,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             <HeaderFarm type="simple" title="Xử lý nước" onBack={handleBack} />
 
             <KeyboardAvoidingView
-                style={styles.flex1}
+                style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <ScrollView style={styles.flex1}>

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ViewStyle } from '
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { IconTrashOutlined } from '@/assets/icons';
+import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
 import { IconError } from '@/assets/icons';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ReceivingPondDropdown } from './ReceivingPondDropdown';
@@ -222,7 +222,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                             onPress={() => handleDeleteRow(pond.id)}
                                             activeOpacity={0.7}
                                         >
-                                            <IconTrashOutlined width={18} height={18} />
+                                            <DeleteBlack width={18} height={18} />
                                         </TouchableOpacity>
                                     )}
                                 </View>

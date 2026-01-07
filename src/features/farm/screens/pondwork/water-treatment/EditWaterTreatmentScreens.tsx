@@ -175,6 +175,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 const styles = StyleSheet.create({
     flex1: {
         flex: 1,
+        backgroundColor: colors.backgroundPrimary,
     },
     headerDeleteButton: {
         width: 40,

@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         padding: spacing.md,
         paddingBottom: spacing.xs,
         backgroundColor: '#F0F5FF',
-        zIndex: 100, // Ensure dropdowns can float above content below
+        zIndex: 1, // Lower than header so popup can show above
     },
     topRow: {
         flexDirection: 'row',
