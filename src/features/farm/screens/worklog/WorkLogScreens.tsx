@@ -116,16 +116,27 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             allJobs = allJobs.filter(({ type }) => selectedFilters.includes(type));
         }
 
-        // 4. Sort by date desc, then time desc
-        allJobs.sort((a, b) => {
+        // 4. Sort by date desc, then time desc, then by original index desc (newest first when same time)
+        // Add original index to preserve insertion order
+        const indexedJobs = allJobs.map((job, idx) => ({ ...job, originalIndex: idx }));
+
+        indexedJobs.sort((a, b) => {
             const dateA = a.item.date ? parseDate(a.item.date) : new Date(0);
             const dateB = b.item.date ? parseDate(b.item.date) : new Date(0);
             if (dateA.getTime() !== dateB.getTime()) {
                 return dateB.getTime() - dateA.getTime();
             }
             // Compare time HH:mm (descending)
-            return compareTime(b.item.time || '00:00', a.item.time || '00:00');
+            const timeCompare = compareTime(b.item.time || '00:00', a.item.time || '00:00');
+            if (timeCompare !== 0) {
+                return timeCompare;
+            }
+            // When time is equal, item added later (higher originalIndex) should come first
+            return b.originalIndex - a.originalIndex;
         });
+
+        // Use indexedJobs for the rest of the logic
+        allJobs = indexedJobs;
 
         // 5. Group by date
         const groups: Record<string, TimelineActivity[]> = {};
@@ -148,10 +159,8 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             });
         });
 
-        // Sort activities within each group by time descending
-        Object.keys(groups).forEach(dateKey => {
-            groups[dateKey].sort((a, b) => compareTime(b.time || '00:00', a.time || '00:00'));
-        });
+        // Activities are already sorted correctly from the allJobs sort above
+        // No need to re-sort here as it would lose the originalIndex ordering
 
         // Sort groups by date descending
         groupOrder.sort((a, b) => {
