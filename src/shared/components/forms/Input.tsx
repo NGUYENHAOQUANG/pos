@@ -22,7 +22,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
     /** Label text displayed above the input */
-    label: string | React.ReactNode;
+    label?: string | React.ReactNode;
     /** Placeholder text */
     placeholder?: string;
     /** Input value */
@@ -112,10 +112,12 @@ export function Input({
     return (
         <View style={[styles.container, containerStyle]}>
             {/* Label */}
-            <Text style={styles.label}>
-                {required && <Text style={styles.required}>* </Text>}
-                {label}
-            </Text>
+            {label && (
+                <Text style={styles.label}>
+                    {required && <Text style={styles.required}>* </Text>}
+                    {label}
+                </Text>
+            )}
 
             {/* Input Container */}
             <View
@@ -234,9 +236,9 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: colors.text,
-        lineHeight: 24,
         letterSpacing: 0,
         paddingVertical: 0,
+        textAlignVertical: 'center',
         height: '100%', // Match container height
     },
     inputMultiline: {

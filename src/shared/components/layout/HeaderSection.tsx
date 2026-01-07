@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
         zIndex: 1000,
+        overflow: 'visible',
     },
     leftContainer: {
         minWidth: 40,
@@ -152,6 +153,8 @@ const styles = StyleSheet.create({
         minWidth: 40,
         alignItems: 'flex-end',
         justifyContent: 'center',
+        overflow: 'visible',
+        zIndex: 1000,
     },
     iconButton: {
         width: 40,

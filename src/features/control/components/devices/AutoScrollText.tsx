@@ -8,12 +8,13 @@ import {
     ViewStyle,
     TextStyle,
     ScrollView,
+    StyleProp,
 } from 'react-native';
 
 interface AutoScrollTextProps {
     text: string;
-    style?: TextStyle;
-    containerStyle?: ViewStyle;
+    style?: StyleProp<TextStyle>;
+    containerStyle?: StyleProp<ViewStyle>;
     speed?: number; // pixels per second
     spacing?: number; // gap between duplicated texts
 }

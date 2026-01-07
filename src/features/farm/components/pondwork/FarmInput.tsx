@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         fontSize: 16,
         color: colors.text,
-        lineHeight: 24,
         letterSpacing: 0,
+        textAlignVertical: 'center',
     },
 });

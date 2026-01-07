@@ -1,27 +1,26 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
 
-interface TabBarVisibilityContextType {
-  isTabBarVisible: boolean;
-  setTabBarVisible: (visible: boolean) => void;
-}
-
-export const TabBarVisibilityContext = createContext<TabBarVisibilityContextType>({
-  isTabBarVisible: true,
-  setTabBarVisible: () => { },
+/**
+ * @deprecated This context is no longer needed with the Partner Pattern.
+ * Tab bar visibility is now handled automatically by the navigation structure (AppStack vs MainNavigator).
+ */
+export const TabBarVisibilityContext = createContext({
+    isTabBarVisible: true,
+    setTabBarVisible: (_visible: boolean) => {},
 });
 
+/**
+ * @deprecated No-op hook. Tab bar visibility is managed automatically.
+ */
 export const useTabBarVisibility = () => useContext(TabBarVisibilityContext);
 
-interface TabBarVisibilityProviderProps {
-  children: ReactNode;
-}
-
-export const TabBarVisibilityProvider: React.FC<TabBarVisibilityProviderProps> = ({ children }) => {
-  const [isTabBarVisible, setTabBarVisible] = useState(true);
-
-  return (
-    <TabBarVisibilityContext.Provider value={{ isTabBarVisible, setTabBarVisible }}>
-      {children}
-    </TabBarVisibilityContext.Provider>
-  );
+/**
+ * @deprecated No-op provider.
+ */
+export const TabBarVisibilityProvider = ({ children }: { children: React.ReactNode }) => {
+    return <>{children}</>;
 };
+
+// Deprecated constants/hooks if still used implicitly
+export const TAB_BAR_HEIGHT = 70;
+export const useTabBarHeight = () => TAB_BAR_HEIGHT;
