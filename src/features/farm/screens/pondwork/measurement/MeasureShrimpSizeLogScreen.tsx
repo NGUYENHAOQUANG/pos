@@ -34,7 +34,7 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
             dateItems.sort((a: JobExecution, b: JobExecution) => {
                 const aNum = parseInt(a.label.replace('Lần ', ''), 10) || 0;
                 const bNum = parseInt(b.label.replace('Lần ', ''), 10) || 0;
-                return aNum - bNum;
+                return aNum + bNum;
             });
 
             const activities = dateItems.map((item: JobExecution) => {

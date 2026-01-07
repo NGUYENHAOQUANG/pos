@@ -77,6 +77,24 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         return items;
     }, [totalShrimp, survivalRate]);
 
+    const handleNumericInput = (text: string, callback: (val: string) => void) => {
+        // 1. Remove any character that is not 0-9 or .
+        let cleaned = text.replace(/[^0-9.]/g, '');
+
+        // 2. Prevent . at the beginning
+        if (cleaned.startsWith('.')) {
+            cleaned = cleaned.substring(1);
+        }
+
+        // 3. Ensure only one . exists
+        const parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+        }
+
+        callback(cleaned);
+    };
+
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>
             <View style={styles.inputRow}>
@@ -84,7 +102,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     <FarmInput
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
-                        onChangeText={onShrimpSizeChange}
+                        onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
                         keyboardType="numeric"
                         required
                     />
@@ -93,7 +111,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     <FarmInput
                         label="Sản lượng còn lại (kg)"
                         value={remainingWeight}
-                        onChangeText={onRemainingWeightChange}
+                        onChangeText={text => handleNumericInput(text, onRemainingWeightChange)}
                         keyboardType="numeric"
                         required
                     />

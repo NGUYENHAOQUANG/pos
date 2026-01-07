@@ -33,6 +33,26 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
         return null;
     }, [yieldAmount, referencePrice]);
 
+    const handleNumericInput = (text: string, callback?: (val: string) => void) => {
+        if (!callback) return;
+
+        // 1. Remove any character that is not 0-9 or .
+        let cleaned = text.replace(/[^0-9.]/g, '');
+
+        // 2. Prevent . at the beginning
+        if (cleaned.startsWith('.')) {
+            cleaned = cleaned.substring(1);
+        }
+
+        // 3. Ensure only one . exists
+        const parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+        }
+
+        callback(cleaned);
+    };
+
     // Build result items
     const resultItems: ResultItem[] = [
         { label: 'Doanh thu (VNĐ)', value: revenue !== null ? revenue : '-' },
@@ -51,7 +71,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                     <FarmInput
                         label="Sản lượng (kg)"
                         value={yieldAmount}
-                        onChangeText={onYieldAmountChange}
+                        onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
                         keyboardType="numeric"
                         required
                     />
@@ -62,7 +82,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                     <FarmInput
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
-                        onChangeText={onShrimpSizeChange}
+                        onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
                         keyboardType="numeric"
                         required
                     />
@@ -73,7 +93,7 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             <FarmInput
                 label="Giá tôm tham khảo (VNĐ/kg)"
                 value={referencePrice}
-                onChangeText={onReferencePriceChange}
+                onChangeText={text => handleNumericInput(text, onReferencePriceChange)}
                 keyboardType="numeric"
                 required
             />
