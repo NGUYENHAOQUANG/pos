@@ -26,6 +26,7 @@ interface DropdownMaterialProps {
     inline?: boolean;
     isOpen: boolean;
     onToggle: () => void;
+    disabled?: boolean;
 }
 
 export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
@@ -47,6 +48,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     isOpen,
     onToggle,
     inline = false,
+    disabled = false,
 }) => {
     const displayOptions = showAllOption
         ? options
@@ -121,14 +123,16 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 
             <TouchableOpacity
                 ref={buttonRef}
-                style={styles.button}
+                style={[styles.button, disabled && { opacity: 0.6 }]}
                 onPress={onToggle}
                 activeOpacity={0.7}
+                disabled={disabled}
             >
                 <View style={{ flex: 1, marginRight: spacing.xs, justifyContent: 'center' }}>
                     {value ? (
                         <AutoScrollText
                             text={value}
+                            key={value}
                             style={{
                                 ...StyleSheet.flatten(styles.text),
                                 flex: undefined,

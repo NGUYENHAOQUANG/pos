@@ -183,6 +183,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
+                                        disabled={!group}
                                     />
                                 </View>
                             </View>
