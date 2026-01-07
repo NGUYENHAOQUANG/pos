@@ -60,6 +60,14 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         const items: ResultItem[] = [];
 
         items.push({
+            label: 'Số lượng thả (Pls)',
+            value:
+                stockingQuantity && Number(stockingQuantity) > 0
+                    ? Number(stockingQuantity).toLocaleString('en-US')
+                    : '-',
+        });
+
+        items.push({
             label: 'Tổng số tôm hiện tại (con)',
             value: totalShrimp !== null ? totalShrimp.toString() : '-',
         });
@@ -75,7 +83,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         });
 
         return items;
-    }, [totalShrimp, survivalRate, shrimpWeight]);
+    }, [totalShrimp, survivalRate, shrimpWeight, stockingQuantity]);
 
     const handleNumericInput = (text: string, callback: (val: string) => void) => {
         // 1. Remove any character that is not 0-9 or .

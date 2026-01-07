@@ -8,6 +8,7 @@ import { TrackingGroup } from '@/features/farm/components/TrackingList';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { MeasureSizeMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { convertMeasureSizeMetaToActivityData } from '@/features/farm/utils/metaConverters';
+import { compareTime, parseDate } from '@/features/farm/utils/dateUtils';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeLogScreen'>;
@@ -22,7 +23,7 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
     const [endDate, setEndDate] = useState(new Date());
 
     const itemsByDate = useMemo(() => {
-        if (!pond?.id) return new Map();
+        if (!pond?.id) return new Map<string, JobExecution[]>();
         return getPondJobItemsGroupedByDate(pond.id, 'MEASURE_SIZE', startDate, endDate);
     }, [getPondJobItemsGroupedByDate, pond?.id, startDate, endDate]);
 
@@ -30,12 +31,8 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
         const groups = Array.from(itemsByDate.entries());
 
         const mappedGroups = groups.map(([dateKey, dateItems]) => {
-            // Sort activities within the group by "Lần" number (ascending)
-            dateItems.sort((a: JobExecution, b: JobExecution) => {
-                const aNum = parseInt(a.label.replace('Lần ', ''), 10) || 0;
-                const bNum = parseInt(b.label.replace('Lần ', ''), 10) || 0;
-                return aNum + bNum;
-            });
+            // Sort activities within the group by time (descending)
+            dateItems.sort((a: JobExecution, b: JobExecution) => compareTime(b.time, a.time));
 
             const activities = dateItems.map((item: JobExecution) => {
                 const meta = (item.meta as MeasureSizeMeta) || ({} as MeasureSizeMeta);
@@ -58,26 +55,18 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
                 };
             });
 
-            // Format the date title for the group header
-            const dateStr = dateKey.replace('Hôm nay, ', '');
-            const isToday = dateKey === new Date().toLocaleDateString('en-GB');
-            const displayDate = isToday ? `Hôm nay, ${dateStr}` : dateStr;
-
             return {
                 id: dateKey,
-                date: displayDate,
+                date: dateKey,
                 activities: activities,
             };
         });
 
         // Sort the groups by date, descending (newest first)
         return mappedGroups.sort((a, b) => {
-            const parseDate = (dStr: string) => {
-                const clean = dStr.replace('Hôm nay, ', '');
-                const [day, month, year] = clean.split('/').map(Number);
-                return new Date(year, month - 1, day).getTime();
-            };
-            return parseDate(b.date) - parseDate(a.date);
+            const dateA = parseDate(a.date);
+            const dateB = parseDate(b.date);
+            return dateB.getTime() - dateA.getTime();
         });
     }, [itemsByDate, pond, navigation]);
 
