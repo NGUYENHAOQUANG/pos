@@ -108,6 +108,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                             }}
                             isOpen={isGroupDropdownOpen}
                             onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
+                            useAutoScroll={selectedTab === 'history'}
                         />
                     </View>
                 </View>

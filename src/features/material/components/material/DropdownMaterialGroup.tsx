@@ -26,6 +26,7 @@ interface DropdownMaterialProps {
     inline?: boolean;
     isOpen: boolean;
     onToggle: () => void;
+    useAutoScroll?: boolean; // true = dùng AutoScrollText, false = dùng Text thường
 }
 
 export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
@@ -47,6 +48,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     isOpen,
     onToggle,
     inline = false,
+    useAutoScroll = false, // Mặc định dùng Text thường
 }) => {
     const displayOptions = showAllOption
         ? options
@@ -126,24 +128,36 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 activeOpacity={0.7}
             >
                 <View style={{ flex: 1, marginRight: spacing.xs, justifyContent: 'center' }}>
-                    {value ? (
-                        <AutoScrollText
-                            text={value}
-                            style={{
-                                ...StyleSheet.flatten(styles.text),
-                                flex: undefined,
-                            }}
-                            containerStyle={{ width: '100%' }}
-                        />
+                    {useAutoScroll ? (
+                        // Dùng AutoScrollText cho tab lịch sử nhập kho
+                        value ? (
+                            <AutoScrollText
+                                text={value}
+                                style={{
+                                    ...StyleSheet.flatten(styles.text),
+                                    flex: undefined,
+                                }}
+                                containerStyle={{ width: '100%' }}
+                            />
+                        ) : (
+                            <AutoScrollText
+                                text={placeholder}
+                                style={{
+                                    ...StyleSheet.flatten([styles.text, styles.placeholderText]),
+                                    flex: undefined,
+                                }}
+                                containerStyle={{ width: '100%' }}
+                            />
+                        )
                     ) : (
-                        <AutoScrollText
-                            text={placeholder}
-                            style={{
-                                ...StyleSheet.flatten([styles.text, styles.placeholderText]),
-                                flex: undefined,
-                            }}
-                            containerStyle={{ width: '100%' }}
-                        />
+                        // Dùng Text thường cho tab danh sách vật tư và kiểm kê
+                        <Text
+                            style={[styles.text, !value && styles.placeholderText]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {value || placeholder}
+                        </Text>
                     )}
                 </View>
                 <Ionicons
@@ -189,7 +203,13 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: borderRadius.sm,
     },
-    text: { flex: 1, fontSize: 15, color: colors.text },
+    text: {
+        flex: 1,
+        fontSize: 15,
+        color: colors.text,
+        lineHeight: 44,
+        textAlignVertical: 'center',
+    },
     placeholderText: { color: colors.textSecondary || '#999' },
     modalOverlay: {
         flex: 1,
