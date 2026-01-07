@@ -106,6 +106,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="pH (1-14)"
                             value={pH}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onPHChange)}
                         />
                     </View>
@@ -113,6 +114,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="DO (mg/L)"
                             value={doValue}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onDOChange)}
                         />
                     </View>
@@ -124,6 +126,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Nhiệt độ (°C)"
                             value={temperature}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onTemperatureChange)}
                         />
                     </View>
@@ -131,6 +134,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Độ mặn (ppt)"
                             value={salinity}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onSalinityChange)}
                         />
                     </View>
@@ -142,6 +146,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Độ kiềm (mg/L)"
                             value={alkalinity}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                         />
                     </View>
@@ -149,6 +154,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         <FarmInput
                             label="Độ trong (cm)"
                             value={transparency}
+                            keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onTransparencyChange)}
                         />
                     </View>
@@ -166,6 +172,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                 <FarmInput
                                     label={param.name}
                                     value={paramValue}
+                                    keyboardType="default"
                                     onChangeText={text => handleNumericInput(text, paramOnChange)}
                                 />
                             </View>
