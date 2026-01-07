@@ -1,32 +1,44 @@
 /**
  * @file MainNavigator.tsx
- * @description Main Navigator - Shrimp farm management app navigation
+ * @description Main Tab Navigator - Only contains main screens for each tab
+ * Tab Bar is always visible here. Detail screens are in AppStack (outside tabs).
+ * Following Partner pattern.
  * @author Kindy
  * @created 2025-11-16
- * @updated 2025-12-05
+ * @updated 2025-01-07
  */
-import React, { useEffect, useRef } from 'react';
-import {
-    StyleSheet,
-    TouchableOpacity,
-    View,
-    Text,
-    Animated,
-    Platform,
-    UIManager,
-    Easing,
-} from 'react-native';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { StyleSheet, TouchableOpacity, View, Text, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { getFocusedRouteNameFromRoute, Route } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
-import { useTabBarVisibility } from './TabBarVisibilityContext';
-import { MaterialNavigator } from '@/features/material/navigation/MaterialNavigator';
-import { ControlNavigator } from '@/features/control/navigation/ControlNavigator';
-import { FarmNavigator } from '@/features/farm/navigation/FarmNavigator';
 import { colors } from '@/styles';
-import { MenuNavigator } from '@/features/menu/navigation/MenuNavigator';
 import { SvgProps } from 'react-native-svg';
+
+// Main screens only (no nested stacks)
+import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
+import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
+import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
+import { MenuScreens } from '@/features/menu/screens/MenuScreens';
+
+// Providers
+import { MenuProvider } from '@/features/menu/context/MenuContext';
+import { ControlProvider } from '@/features/control/context/ControlContext';
+
+// Wrapper components with providers
+const MenuScreenWithProvider = () => (
+    <MenuProvider>
+        <MenuScreens />
+    </MenuProvider>
+);
+
+const DevicesScreenWithProvider = () => (
+    <ControlProvider>
+        <DeviceControlScreens />
+    </ControlProvider>
+);
+
 // Import Icons
 import {
     IconReport,
@@ -42,6 +54,7 @@ import {
 } from '@/assets/icons';
 
 const TAB_HEIGHT = 70;
+const PADDING_BOTTOM = 12;
 
 interface NavigationItem {
     key: string;
@@ -52,7 +65,6 @@ interface NavigationItem {
 }
 
 const navigationItems: NavigationItem[] = [
-    // ... items
     {
         key: 'Reports',
         label: 'Báo cáo',
@@ -65,256 +77,219 @@ const navigationItems: NavigationItem[] = [
         label: 'Điều khiển',
         Icon: IconDevices,
         IconActive: IconDevicesActive,
-        component: ControlNavigator,
+        component: DevicesScreenWithProvider,
     },
     {
         key: 'Farm',
         label: 'Trại nuôi',
         Icon: IconFarm,
         IconActive: IconFarmActive,
-        component: FarmNavigator,
+        component: ShrimpPondListScreens,
     },
     {
         key: 'Material',
         label: 'Vật tư',
         Icon: IconMaterial,
         IconActive: IconMaterialActive,
-        component: MaterialNavigator,
+        component: MeterialScreen,
     },
     {
         key: 'Menu',
         label: 'Menu',
         Icon: IconSetting,
         IconActive: IconSettingActive,
-        component: MenuNavigator,
+        component: MenuScreenWithProvider,
     },
 ];
 
 const Tab = createBottomTabNavigator();
 
-const PADDING_BOTTOM = 12;
+// Animation constants
+const BASE_DELAY = 10;
+const STAGGER_DELAY = 30;
 
-// Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
+/**
+ * Animated Tab Item Component
+ * Spring animation from bottom, sequential from right to left
+ */
+interface AnimatedTabItemProps {
+    route: { key: string; name: string };
+    item: NavigationItem;
+    isFocused: boolean;
+    onPress: () => void;
+    index: number;
+    totalItems: number;
+    animationKey: number; // Key to trigger re-animation
 }
 
-const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
-    const { isTabBarVisible } = useTabBarVisibility();
+const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
+    route,
+    item,
+    isFocused,
+    onPress,
+    index,
+    totalItems,
+    animationKey,
+}) => {
+    const translateY = useRef(new Animated.Value(30)).current;
+    const opacity = useRef(new Animated.Value(0)).current;
+    const indicatorScale = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        // Calculate delay: from center (Farm at index 2) outward to both sides
+        // Index order: 0-Reports, 1-Devices, 2-Farm, 3-Material, 4-Menu
+        const centerIndex = 2; // Farm is at center
+        const distanceFromCenter = Math.abs(index - centerIndex);
+        const delay = BASE_DELAY + distanceFromCenter * STAGGER_DELAY;
+
+        // Reset values IMMEDIATELY to prevent flash of old state
+        translateY.setValue(30);
+        opacity.setValue(0);
+        indicatorScale.setValue(0);
+
+        // Spring animation for icon and text
+        Animated.parallel([
+            Animated.sequence([
+                Animated.delay(delay),
+                Animated.spring(translateY, {
+                    toValue: 0,
+                    friction: 5,
+                    tension: 100,
+                    useNativeDriver: true,
+                }),
+            ]),
+            Animated.sequence([
+                Animated.delay(delay),
+                Animated.timing(opacity, {
+                    toValue: 1,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+            ]),
+        ]).start();
+    }, [animationKey, translateY, opacity, indicatorScale, index, totalItems]);
+
+    // Animate active indicator when tab becomes focused or when animation key changes
+    useEffect(() => {
+        if (isFocused) {
+            indicatorScale.setValue(0);
+            Animated.spring(indicatorScale, {
+                toValue: 1,
+                friction: 5,
+                tension: 100,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isFocused, indicatorScale, animationKey]);
+
+    const IconComponent = isFocused ? item.IconActive : item.Icon;
+
+    return (
+        <TouchableOpacity
+            key={route.key}
+            style={styles.tabItem}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <Animated.View
+                style={[
+                    styles.tabItemContent,
+                    {
+                        opacity,
+                        transform: [{ translateY }],
+                    },
+                ]}
+            >
+                {/* Active indicator with scale animation */}
+                {isFocused && (
+                    <Animated.View
+                        style={[
+                            styles.activeIndicator,
+                            {
+                                transform: [{ scaleX: indicatorScale }],
+                            },
+                        ]}
+                    />
+                )}
+                <View style={styles.iconContainer}>
+                    <IconComponent width={24} height={24} />
+                </View>
+                <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>
+                    {item.label}
+                </Text>
+            </Animated.View>
+        </TouchableOpacity>
+    );
+};
+
+/**
+ * Custom Tab Bar with spring animations
+ * Animation triggers when navigating back from detail screens
+ */
+const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
     const safeBottom = Math.max(insets.bottom, PADDING_BOTTOM);
     const totalHeight = TAB_HEIGHT + safeBottom;
 
+    // Animation key to trigger re-animation when tab bar becomes visible
+    const [animationKey, setAnimationKey] = useState(0);
+
+    // Trigger animation when MainNavigator gains focus (coming back from detail screens)
+    useFocusEffect(
+        useCallback(() => {
+            // Increment key to trigger re-animation
+            setAnimationKey(prev => prev + 1);
+        }, [])
+    );
+
     const currentRoute = state.routes[state.index];
-    const focusedRouteName = getFocusedRouteNameFromRoute(currentRoute);
-
-    // Determine which tab should be visually active
-    let activeTabName = currentRoute.name;
-    if (currentRoute.name === 'Menu' && focusedRouteName === 'FarmStack') {
-        activeTabName = 'Farm';
-    }
-
-    const focusedOptions = descriptors[currentRoute.key].options;
-
-    // Determine visibility logic
-    const shouldShow = isTabBarVisible && (focusedOptions.tabBarStyle as any)?.display !== 'none';
-
-    // Animation value: 0 = visible, 1 = hidden
-    const slideAnim = useRef(new Animated.Value(shouldShow ? 0 : 1)).current;
-
-    // Animation/translation values for each of the 5 icons
-    const iconAnims = useRef(navigationItems.map(() => new Animated.Value(0))).current;
-
-    useEffect(() => {
-        // Animate Visual (TabBar sliding)
-        // Use SPRING for showing (Bounce effect)
-        // Use TIMING for hiding (Prevents layout jitter/oscillation at the end)
-        if (shouldShow) {
-            Animated.spring(slideAnim, {
-                toValue: 0,
-                friction: 6,
-                tension: 60,
-                useNativeDriver: false,
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: 1,
-                duration: 250,
-                useNativeDriver: false,
-                easing: Easing.out(Easing.ease),
-            }).start();
-        }
-
-        // Animate Icons only when showing up
-        if (shouldShow) {
-            // Helper for bounce animation
-            const bounce = (anim: Animated.Value, delay: number) => {
-                anim.setValue(20); // Start from below
-                return Animated.sequence([
-                    Animated.delay(delay),
-                    Animated.spring(anim, {
-                        toValue: 0, // Spring up to final position
-                        friction: 6,
-                        tension: 80,
-                        useNativeDriver: true,
-                    }),
-                ]);
-            };
-
-            // Stagger delays: Center (Farm) -> Sides (Devices/Material) -> Outer (Reports/Menu)
-            // Indices: Reports(0), Devices(1), Farm(2), Material(3), Menu(4)
-            const BASE_DELAY = 50; // Wait slightly for bar to start moving
-            const STAGGER = 60; // Delay between waves
-
-            Animated.parallel([
-                bounce(iconAnims[2], BASE_DELAY), // Farm
-                bounce(iconAnims[1], BASE_DELAY + STAGGER), // Devices
-                bounce(iconAnims[3], BASE_DELAY + STAGGER), // Material
-                bounce(iconAnims[0], BASE_DELAY + STAGGER * 2), // Reports
-                bounce(iconAnims[4], BASE_DELAY + STAGGER * 2), // Menu
-            ]).start();
-        } else {
-            // Reset instantly when hiding so they are ready for next show
-            iconAnims.forEach(anim => anim.setValue(0));
-        }
-    }, [shouldShow, slideAnim, iconAnims]);
-
-    const animatedHeight = slideAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [totalHeight, 0],
-        extrapolate: 'clamp', // Prevent negative height during spring bounce
-    });
 
     return (
-        <>
-            {/* Visual Tab Bar (Layout Affecting) */}
-            <Animated.View
-                style={[
-                    styles.bottomContainer,
-                    {
-                        height: animatedHeight,
-                        // transform: [{ translateY }], // Removed to avoid creating a gap between content and bar
-                        // Removed absolute position to ensure it takes up space in layout
-                        backgroundColor: 'white',
-                        overflow: 'hidden', // Ensure content doesn't spill out when height < total
-                    },
-                ]}
-            >
-                <View
-                    style={{
-                        height: totalHeight,
-                        flexDirection: 'row',
-                        width: '100%',
-                        paddingBottom: safeBottom,
-                    }}
-                >
-                    {state.routes.map((route, index) => {
-                        const item = navigationItems.find(i => i.key === route.name);
-                        // Use activeTabName for visual focus instead of standard state.index
-                        const isFocused = route.name === activeTabName;
+        <View
+            style={[
+                styles.bottomContainer,
+                {
+                    height: totalHeight,
+                    paddingBottom: safeBottom,
+                },
+            ]}
+        >
+            {state.routes.map((route, index) => {
+                const item = navigationItems.find(i => i.key === route.name);
+                const isFocused = route.name === currentRoute.name;
 
-                        // Get animation value by index (assuming route order matches navigationItems)
-                        // Safety: use index % length or fallback to 0 if something is weird
-                        const iconAnim = iconAnims[index] || new Animated.Value(0);
+                const onPress = () => {
+                    const event = navigation.emit({
+                        type: 'tabPress',
+                        target: route.key,
+                        canPreventDefault: true,
+                    });
 
-                        const onPress = () => {
-                            const event = navigation.emit({
-                                type: 'tabPress',
-                                target: route.key,
-                                canPreventDefault: true,
-                            });
+                    if (!event.defaultPrevented) {
+                        navigation.navigate(route.name);
+                    }
+                };
 
-                            // Allow navigation even if focused (supports pop-to-top behavior)
-                            if (!event.defaultPrevented) {
-                                navigation.navigate(route.name);
-                            }
-                        };
+                if (!item) return null;
 
-                        if (!item) return null;
-
-                        const IconComponent = isFocused ? item.IconActive : item.Icon;
-
-                        return (
-                            <TouchableOpacity
-                                key={route.key}
-                                style={styles.tabItem}
-                                onPress={onPress}
-                                activeOpacity={0.7}
-                            >
-                                <Animated.View
-                                    style={[
-                                        {
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: '100%',
-                                            height: '100%',
-                                            transform: [{ translateY: iconAnim }],
-                                        },
-                                    ]}
-                                >
-                                    {isFocused && <View style={styles.activeIndicator} />}
-                                    <View style={styles.iconContainer}>
-                                        <IconComponent width={24} height={24} />
-                                    </View>
-                                    <Text
-                                        style={[
-                                            styles.tabLabel,
-                                            isFocused && styles.tabLabelActive,
-                                        ]}
-                                    >
-                                        {item.label}
-                                    </Text>
-                                </Animated.View>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </View>
-            </Animated.View>
-        </>
+                return (
+                    <AnimatedTabItem
+                        key={`${route.key}-${animationKey}`} // Force remount to ensure clean animation start
+                        route={route}
+                        item={item}
+                        isFocused={isFocused}
+                        onPress={onPress}
+                        index={index}
+                        totalItems={state.routes.length}
+                        animationKey={animationKey}
+                    />
+                );
+            })}
+        </View>
     );
 };
 
 const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
-
-// Helper to determine visibility for the Menu tab
-const getMenuTabBarVisibility = (route: Partial<Route<string>>) => {
-    const routeName = getFocusedRouteNameFromRoute(route) ?? 'MenuMain';
-    // Allow tab bar only on the main menu screen and FarmStack
-    if (routeName === 'MenuMain' || routeName === 'FarmStack') {
-        return undefined; // Default style (visible)
-    }
-    return { display: 'none' } as const;
-};
-
-// Helper to determine visibility for the Material tab
-const getMaterialTabBarVisibility = (route: Partial<Route<string>>) => {
-    const routeName = getFocusedRouteNameFromRoute(route) ?? 'MaterialList';
-    // Allow tab bar only on the main material list screen
-    if (routeName === 'MaterialList') {
-        return undefined; // Default style (visible)
-    }
-    return { display: 'none' } as const;
-};
-
-// Helper to determine visibility for the Control tab
-const getControlTabBarVisibility = (route: Partial<Route<string>>) => {
-    const routeName = getFocusedRouteNameFromRoute(route) ?? 'ControlList';
-    // Allow tab bar on ControlList AND ControlDetail
-    if (routeName === 'ControlList' || routeName === 'ControlDetail') {
-        return undefined; // Default style (visible)
-    }
-    return { display: 'none' } as const;
-};
-
-// Helper to determine visibility for the Farm tab
-const getFarmTabBarVisibility = (route: Partial<Route<string>>) => {
-    const routeName = getFocusedRouteNameFromRoute(route) ?? 'FarmList';
-    // Allow tab bar on FarmList and PondDetail
-    if (routeName === 'FarmList' || routeName === 'PondDetail') {
-        return undefined; // Default style (visible)
-    }
-    return { display: 'none' } as const;
-};
 
 export function MainNavigator() {
     return (
@@ -327,26 +302,7 @@ export function MainNavigator() {
                 tabBar={renderTabBar}
             >
                 {navigationItems.map(item => (
-                    <Tab.Screen
-                        key={item.key}
-                        name={item.key}
-                        component={item.component}
-                        options={({ route }) => {
-                            if (item.key === 'Menu') {
-                                return { tabBarStyle: getMenuTabBarVisibility(route) };
-                            }
-                            if (item.key === 'Material') {
-                                return { tabBarStyle: getMaterialTabBarVisibility(route) };
-                            }
-                            if (item.key === 'Devices') {
-                                return { tabBarStyle: getControlTabBarVisibility(route) };
-                            }
-                            if (item.key === 'Farm') {
-                                return { tabBarStyle: getFarmTabBarVisibility(route) };
-                            }
-                            return {};
-                        }}
-                    />
+                    <Tab.Screen key={item.key} name={item.key} component={item.component} />
                 ))}
             </Tab.Navigator>
         </View>
@@ -356,9 +312,10 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
     },
     bottomContainer: {
+        flexDirection: 'row',
         backgroundColor: 'white',
         borderTopWidth: 0,
         shadowColor: colors.black,
@@ -368,7 +325,6 @@ const styles = StyleSheet.create({
         elevation: 10,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        // Removed flexDirection: 'row' here because it's on the inner View
     },
     tabItem: {
         flex: 1,
@@ -376,6 +332,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         height: '100%',
         position: 'relative',
+    },
+    tabItemContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100%',
     },
     activeIndicator: {
         position: 'absolute',
@@ -389,16 +351,6 @@ const styles = StyleSheet.create({
     iconContainer: {
         marginBottom: 4,
         marginTop: 8,
-    },
-    icon: {
-        width: 24,
-        height: 24,
-    },
-    iconActive: {
-        tintColor: colors.primary,
-    },
-    iconInactive: {
-        tintColor: colors.text,
     },
     tabLabel: {
         fontSize: 12,
