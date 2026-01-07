@@ -13,7 +13,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { WarehouseReceiptItems } from './WarehouseReceiptItems';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { IWarehouseReceipt } from '../../types/material.types';
+import { IWarehouseReceipt } from '@/features/material/types/material.types';
+import { formatCurrencyValue } from '@/shared/utils/formatters';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -38,7 +39,21 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
     };
 
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('vi-VN') + ' đ';
+        if (value >= 1000000) {
+            const millions = parseFloat((value / 1000000).toFixed(6));
+            return (
+                <>
+                    {formatCurrencyValue(millions)} Triệu{' '}
+                    <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                </>
+            );
+        }
+        return (
+            <>
+                {formatCurrencyValue(value)}{' '}
+                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+            </>
+        );
     };
 
     const formatDate = (dateString: string | Date) => {

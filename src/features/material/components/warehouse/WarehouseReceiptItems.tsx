@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
+import { formatCurrencyValue } from '@/shared/utils/formatters';
 
 export interface MaterialItem {
     id: string;
@@ -15,7 +16,12 @@ interface WarehouseReceiptItemsProps {
 
 export const WarehouseReceiptItems: React.FC<WarehouseReceiptItemsProps> = ({ materials }) => {
     const formatCurrency = (value: number) => {
-        return value.toLocaleString('vi-VN') + ' đ';
+        return (
+            <>
+                {formatCurrencyValue(value)}{' '}
+                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+            </>
+        );
     };
 
     return (
@@ -61,7 +67,9 @@ export const WarehouseReceiptItems: React.FC<WarehouseReceiptItemsProps> = ({ ma
                             {/* Total Amount */}
                             <View style={styles.footer}>
                                 <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                <Text style={styles.footerValue}>{formatCurrency(itemTotal)}</Text>
+                                <Text style={styles.footerValue}>
+                                    {formatCurrencyValue(itemTotal)}
+                                </Text>
                             </View>
                         </View>
                     </View>

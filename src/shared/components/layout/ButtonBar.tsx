@@ -13,7 +13,7 @@ export interface ButtonBarProps {
     onPrimaryPress?: () => void;
     onSecondaryPress?: () => void;
     totalLabel?: string;
-    totalValue?: string | number;
+    totalValue?: string | number | React.ReactNode;
     primaryButtonDisabled?: boolean;
     primaryButtonStyle?: ViewStyle;
     primaryButtonTextStyle?: TextStyle;

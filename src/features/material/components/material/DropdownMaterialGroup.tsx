@@ -27,6 +27,7 @@ interface DropdownMaterialProps {
     isOpen: boolean;
     onToggle: () => void;
     useAutoScroll?: boolean; // true = dùng AutoScrollText, false = dùng Text thường
+    disabled?: boolean;
 }
 
 export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
@@ -49,6 +50,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     onToggle,
     inline = false,
     useAutoScroll = false, // Mặc định dùng Text thường
+    disabled = false,
 }) => {
     const displayOptions = showAllOption
         ? options
@@ -112,6 +114,45 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         </View>
     );
 
+    // Render content dựa trên useAutoScroll
+    const renderButtonContent = () => {
+        if (useAutoScroll) {
+            // Dùng AutoScrollText cho tab lịch sử nhập kho
+            return value ? (
+                <AutoScrollText
+                    text={value}
+                    key={value}
+                    style={{
+                        ...StyleSheet.flatten(styles.text),
+                        flex: undefined,
+                    }}
+                    containerStyle={{ width: '100%' }}
+                />
+            ) : (
+                <AutoScrollText
+                    text={placeholder}
+                    key={placeholder}
+                    style={{
+                        ...StyleSheet.flatten([styles.text, styles.placeholderText]),
+                        flex: undefined,
+                    }}
+                    containerStyle={{ width: '100%' }}
+                />
+            );
+        } else {
+            // Dùng Text thường cho tab danh sách vật tư và kiểm kê
+            return (
+                <Text
+                    style={[styles.text, !value && styles.placeholderText]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                >
+                    {value || placeholder}
+                </Text>
+            );
+        }
+    };
+
     return (
         <View style={styles.container}>
             {label && (
@@ -123,42 +164,13 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 
             <TouchableOpacity
                 ref={buttonRef}
-                style={styles.button}
+                style={[styles.button, disabled && { opacity: 0.6 }]}
                 onPress={onToggle}
                 activeOpacity={0.7}
+                disabled={disabled}
             >
                 <View style={{ flex: 1, marginRight: spacing.xs, justifyContent: 'center' }}>
-                    {useAutoScroll ? (
-                        // Dùng AutoScrollText cho tab lịch sử nhập kho
-                        value ? (
-                            <AutoScrollText
-                                text={value}
-                                style={{
-                                    ...StyleSheet.flatten(styles.text),
-                                    flex: undefined,
-                                }}
-                                containerStyle={{ width: '100%' }}
-                            />
-                        ) : (
-                            <AutoScrollText
-                                text={placeholder}
-                                style={{
-                                    ...StyleSheet.flatten([styles.text, styles.placeholderText]),
-                                    flex: undefined,
-                                }}
-                                containerStyle={{ width: '100%' }}
-                            />
-                        )
-                    ) : (
-                        // Dùng Text thường cho tab danh sách vật tư và kiểm kê
-                        <Text
-                            style={[styles.text, !value && styles.placeholderText]}
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                        >
-                            {value || placeholder}
-                        </Text>
-                    )}
+                    {renderButtonContent()}
                 </View>
                 <Ionicons
                     name={isOpen ? 'chevron-up' : 'chevron-down'}
@@ -221,7 +233,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E5E7EB',
         maxHeight: 250,
-        // zIndex: 1000, // removed as it is inside Modal
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
