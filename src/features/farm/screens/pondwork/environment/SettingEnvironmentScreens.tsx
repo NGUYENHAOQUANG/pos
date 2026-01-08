@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,7 +8,7 @@ import {
     FlatList,
     ScrollView,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +31,7 @@ type NavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<FarmStackParamList>,
     NativeStackNavigationProp<MenuStackParamList>
 >;
+type SettingEnvironmentRouteProp = RouteProp<FarmStackParamList, 'SettingEnvironment'>;
 
 const DEFAULT_LOCATIONS: FarmLocation[] = [
     { id: '1', name: 'Trại Kiên Giang' },
@@ -41,12 +42,12 @@ const DEFAULT_LOCATIONS: FarmLocation[] = [
 
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<SettingEnvironmentRouteProp>();
+    const { data, onSave } = route.params || {};
     const insets = useSafeAreaInsets();
 
     // Use FarmContext
     const { environmentSettings, updateEnvironmentSettings } = useFarm();
-
-    // Removed debug useEffect to clear warnings
 
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(DEFAULT_LOCATIONS[0]);
@@ -57,20 +58,48 @@ export const SettingEnvironmentScreens: React.FC = () => {
     const [parameters, setParameters] = useState<EnvironmentParameter[]>(
         environmentSettings.defaultParameters
     );
-    const [advancedParameters, setAdvancedParameters] = useState<EnvironmentParameter[]>(
-        environmentSettings.advancedParameters
-    );
+
+    // Initialize advanced parameters: if route has data, mark those as checked, otherwise use context
+    const initialAdvancedParameters = useMemo(() => {
+        if (data?.advancedParameters) {
+            // Mark advanced parameters as checked if they're in the route data
+            return environmentSettings.advancedParameters.map(p =>
+                data.advancedParameters!.some(ap => ap.id === p.id) ? { ...p, isChecked: true } : p
+            );
+        }
+        return environmentSettings.advancedParameters;
+    }, [data, environmentSettings.advancedParameters]);
+
+    const [advancedParameters, setAdvancedParameters] =
+        useState<EnvironmentParameter[]>(initialAdvancedParameters);
+
+    // Update advanced parameters when route data changes
+    useEffect(() => {
+        if (data?.advancedParameters) {
+            setAdvancedParameters(
+                environmentSettings.advancedParameters.map(p =>
+                    data.advancedParameters!.some(ap => ap.id === p.id)
+                        ? { ...p, isChecked: true }
+                        : p
+                )
+            );
+        }
+    }, [data, environmentSettings.advancedParameters]);
 
     // Calculate dirty state
     const isDirty = useMemo(() => {
-        // Compare current state with context state
+        // Compare current state with initial state
         const paramsChanged =
             JSON.stringify(parameters) !== JSON.stringify(environmentSettings.defaultParameters);
         const advancedParamsChanged =
-            JSON.stringify(advancedParameters) !==
-            JSON.stringify(environmentSettings.advancedParameters);
+            JSON.stringify(advancedParameters) !== JSON.stringify(initialAdvancedParameters);
         return paramsChanged || advancedParamsChanged;
-    }, [parameters, advancedParameters, environmentSettings]);
+    }, [
+        parameters,
+        advancedParameters,
+        environmentSettings.defaultParameters,
+        initialAdvancedParameters,
+    ]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -137,7 +166,15 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleSave = () => {
-        // Update context
+        // If onSave callback is provided (from AddEnvironmentScreen), call it with checked advanced parameters
+        if (onSave) {
+            const checkedAdvancedParams = advancedParameters
+                .filter(p => p.isChecked)
+                .map(p => ({ id: p.id, name: p.name }));
+            onSave({ advancedParameters: checkedAdvancedParams });
+        }
+
+        // Always update context with the settings
         updateEnvironmentSettings({
             defaultParameters: parameters,
             advancedParameters: advancedParameters,
@@ -153,9 +190,9 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleReset = () => {
-        // Reset to context values (the last saved state)
+        // Reset to initial values
         setParameters(environmentSettings.defaultParameters);
-        setAdvancedParameters(environmentSettings.advancedParameters);
+        setAdvancedParameters(initialAdvancedParameters);
     };
 
     const renderDropdownItem = ({ item }: { item: FarmLocation }) => {

@@ -82,7 +82,20 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
-                        unitOptions={['Kg', 'Lít', 'ml', 'g', 'mg']}
+                        unitOptions={[
+                            'Kg',
+                            'ml',
+                            'Lít',
+                            'Gram',
+                            'mét',
+                            'Cuộn',
+                            'Cái',
+                            'Con',
+                            'Tấm',
+                            'Chai',
+                            'Miếng',
+                            'm3',
+                        ]}
                         usage={usage}
                         onUsageChange={setUsage}
                         unitOfUse={unitOfUse}

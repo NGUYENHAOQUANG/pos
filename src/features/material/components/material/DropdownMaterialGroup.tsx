@@ -83,7 +83,13 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 style={[styles.item, isSelected && styles.itemSelected]}
                 onPress={() => handleSelect(item)}
             >
-                <Text style={[styles.itemText, isSelected && styles.itemTextSelected]}>{item}</Text>
+                <AutoScrollText
+                    text={item}
+                    style={[styles.itemText, isSelected && styles.itemTextSelected]}
+                    containerStyle={styles.autoScrollContainer}
+                    speed={30}
+                    spacing={40}
+                />
             </TouchableOpacity>
         );
     };
@@ -91,7 +97,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     const dynamicDropdownStyle: ViewStyle = {
         top: dropdownCoords.top,
         left: dropdownCoords.left,
-        minWidth: dropdownCoords.width,
+        width: dropdownCoords.width,
     };
 
     const dropdownList = (
@@ -253,6 +259,10 @@ const styles = StyleSheet.create({
     itemSelected: { backgroundColor: '#F3F4F6' },
     itemText: { fontSize: 14, color: colors.text },
     itemTextSelected: { fontWeight: '500', color: colors.text },
+    autoScrollContainer: {
+        width: '100%',
+        minHeight: 20,
+    },
     dropdownInline: {
         position: 'relative',
         width: '100%',

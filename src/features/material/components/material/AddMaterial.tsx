@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { DropdownMaterial } from './DropdownMaterialGroup';
 import { CollapseHead } from '../CollapseHead';
-import { UnitOfMeasure } from './UnitOfMeasure';
 import { UnitOfUse } from './UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -190,7 +189,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
                             <View style={[styles.row, styles.rowMarginTop, styles.rowZ20]}>
                                 <View style={styles.halfWidth}>
-                                    <UnitOfMeasure
+                                    <DropdownMaterial
                                         label="Đơn vị tính"
                                         required
                                         value={unit}

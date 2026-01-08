@@ -83,9 +83,34 @@ export const AddEnvironmentScreen: React.FC = () => {
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     // Advanced parameters state
-    const [advancedParameters, setAdvancedParameters] = useState<
-        Array<{ id: string; name: string }>
-    >([]);
+    // Initialize from environmentSettings if creating new, or from meta if editing
+    const initialAdvancedParams = useMemo(() => {
+        if (itemToEdit && meta) {
+            // When editing: get from meta
+            const advancedParams: Array<{ id: string; name: string }> = [];
+            if (meta.kali) {
+                advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
+            }
+            if (meta.tan) {
+                advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
+            }
+            if (meta.magie) {
+                advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
+            }
+            if (meta.no3) {
+                advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
+            }
+            return advancedParams;
+        } else {
+            // When creating new: get from environmentSettings (checked ones)
+            return environmentSettings.advancedParameters
+                .filter(p => p.isChecked)
+                .map(p => ({ id: p.id, name: p.name }));
+        }
+    }, [itemToEdit, meta, environmentSettings.advancedParameters]);
+
+    const [advancedParameters, setAdvancedParameters] =
+        useState<Array<{ id: string; name: string }>>(initialAdvancedParams);
     const [kali, setKali] = useState(meta.kali || '');
     const [tan, setTan] = useState(meta.tan || '');
     const [magie, setMagie] = useState(meta.magie || '');
@@ -124,9 +149,11 @@ export const AddEnvironmentScreen: React.FC = () => {
         setTabBarVisible(false);
     }, [setTabBarVisible]);
 
-    // Initialize advanced parameters from meta when editing
+    // Update advanced parameters when environmentSettings changes (for create mode)
+    // or when meta changes (for edit mode)
     useEffect(() => {
         if (itemToEdit && meta) {
+            // When editing: get from meta
             const advancedParams: Array<{ id: string; name: string }> = [];
             if (meta.kali) {
                 advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
@@ -141,8 +168,14 @@ export const AddEnvironmentScreen: React.FC = () => {
                 advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
             }
             setAdvancedParameters(advancedParams);
+        } else {
+            // When creating new: get from environmentSettings (checked ones)
+            const checkedParams = environmentSettings.advancedParameters
+                .filter(p => p.isChecked)
+                .map(p => ({ id: p.id, name: p.name }));
+            setAdvancedParameters(checkedParams);
         }
-    }, [itemToEdit, meta]);
+    }, [itemToEdit, meta, environmentSettings.advancedParameters]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {

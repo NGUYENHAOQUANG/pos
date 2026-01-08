@@ -11,7 +11,6 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from './material/DropdownMaterialGroup';
-import { DropdownVoteStatus } from './inventory/DropdownVoteStatus';
 import { TabType } from './HeadingMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -34,7 +33,9 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const [searchText, setSearchText] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Dropdown states
     const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
     const [materialGroup, setMaterialGroup] = useState('');
     const [voteStatus, setVoteStatus] = useState('');
@@ -96,7 +97,16 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                 <View style={styles.expandedContent}>
                     {selectedTab === 'history' && (
                         <View style={styles.dropdownWrapper}>
-                            <DropdownVoteStatus value={voteStatus} onChange={setVoteStatus} />
+                            <DropdownMaterial
+                                value={voteStatus}
+                                onChange={setVoteStatus}
+                                options={['Hoàn thành', 'Lưu nháp']}
+                                placeholder="Trạng thái"
+                                isOpen={isStatusDropdownOpen}
+                                onToggle={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                                useAutoScroll={true}
+                                showAllOption={false}
+                            />
                         </View>
                     )}
                     <View style={styles.dropdownWrapper}>
