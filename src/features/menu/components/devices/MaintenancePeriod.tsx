@@ -4,6 +4,7 @@ import { colors, spacing, typography } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
+import { handleIntegerInput } from '@/shared/utils/validation';
 
 interface MaintenancePeriodProps {
     onDataChange?: (data: MaintenancePeriodData) => void;
@@ -57,7 +58,7 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
                 label="Thời gian hoạt động (giờ)"
                 placeholder="vd: 24 giờ"
                 value={operatingTime}
-                onChangeText={setOperatingTime}
+                onChangeText={text => setOperatingTime(handleIntegerInput(text))}
                 required
                 keyboardType="numeric"
             />
@@ -67,7 +68,7 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
                 label="Thời gian sử dụng từ ngày lắp (ngày)"
                 placeholder="vd: 30 ngày"
                 value={usageTime}
-                onChangeText={setUsageTime}
+                onChangeText={text => setUsageTime(handleIntegerInput(text))}
                 required
                 keyboardType="numeric"
                 containerStyle={{ marginBottom: 0 }} // Last item

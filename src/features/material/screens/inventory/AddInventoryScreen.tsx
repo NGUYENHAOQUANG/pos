@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -11,20 +11,18 @@ import { IInventoryTicket } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { mockMaterialList } from '../../data/materialData';
 import { showValidationError } from '../../utils/validationToast';
+import { useMaterialStore } from '../../store/materialStore';
 
-interface AddInventoryScreenProps {
-    // onBack: () => void;
-    // onSave: (data: IInventoryTicket) => void;
-}
+interface AddInventoryScreenProps {}
 
 export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
     const params = route.params;
-    const onSave = params?.onSave;
     const initialMaterialName = params?.initialMaterialName;
+    const materials = useMaterialStore(state => state.materials);
+    const addInventoryTicket = useMaterialStore(state => state.addInventoryTicket);
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -32,13 +30,6 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
-
-    // Handle initial material selection
-    useEffect(() => {
-        if (initialMaterialName) {
-            handleMaterialSelect(initialMaterialName);
-        }
-    }, [initialMaterialName]);
 
     // --- States ---
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -52,8 +43,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [newStock, setNewStock] = useState('');
     const [materialGroup, setMaterialGroup] = useState('');
 
-    // Derive options from mock data
-    const materialOptions = mockMaterialList.map(m => m.name);
+    // Derive options from store
+    const materialOptions = materials.map(m => m.name);
 
     // --- Handlers ---
     const handleDropdownOpen = () => {
@@ -67,22 +58,32 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         setDatePickerVisible(false);
     };
 
-    const handleMaterialSelect = (val: string) => {
-        setMaterialName(val);
+    const handleMaterialSelect = useCallback(
+        (val: string) => {
+            setMaterialName(val);
 
-        // Find material in mock list
-        const selectedMaterial = mockMaterialList.find(m => m.name === val);
+            // Find material in store
+            const selectedMaterial = materials.find(m => m.name === val);
 
-        if (selectedMaterial) {
-            setOldStock(selectedMaterial.remaining || 0);
-            setMaterialGroup(selectedMaterial.group);
-        } else {
-            setOldStock(0);
-            setMaterialGroup('');
+            if (selectedMaterial) {
+                setOldStock(selectedMaterial.remaining || 0);
+                setMaterialGroup(selectedMaterial.group);
+            } else {
+                setOldStock(0);
+                setMaterialGroup('');
+            }
+
+            setNewStock('');
+        },
+        [materials]
+    );
+
+    // Handle initial material selection
+    useEffect(() => {
+        if (initialMaterialName) {
+            handleMaterialSelect(initialMaterialName);
         }
-
-        setNewStock('');
-    };
+    }, [initialMaterialName, handleMaterialSelect]);
 
     const formatDate = (d: Date) => {
         const day = String(d.getDate()).padStart(2, '0');
@@ -130,11 +131,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 },
             ],
         };
-        if (onSave) {
-            onSave(newTicket);
-        }
+        addInventoryTicket(newTicket);
         // Return to Inventory tab
-        navigation.navigate('MaterialList', { selectedTab: 'inventory' });
+        navigation.navigate('MaterialList', { selectedTab: 'inventory' } as any);
     };
 
     return (
