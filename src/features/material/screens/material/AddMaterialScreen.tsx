@@ -5,22 +5,17 @@ import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
-import { IMaterial } from '../../types/material.types';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
+import { useMaterialStore } from '../../store/materialStore';
 
-interface AddMaterialScreenProps {
-    // onBack?: () => void;
-    // onSave?: (data: Omit<IMaterial, 'id'>) => void;
-}
+interface AddMaterialScreenProps {}
 
 export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const route = useRoute<RouteProp<MaterialStackParamList, 'AddMaterial'>>();
-    const params = route.params as { onSave?: (data: Omit<IMaterial, 'id'>) => void } | undefined;
-    const onSave = params?.onSave;
+    const addMaterial = useMaterialStore(state => state.addMaterial);
 
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
@@ -116,7 +111,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                             return;
                         }
 
-                        onSave?.({
+                        addMaterial({
                             name,
                             group,
                             type,
@@ -125,7 +120,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                             unitOfUse,
                             dosage,
                             manufacturer,
-                            remaining: 0, // Default value for new material
+                            remaining: 0,
                         });
                         navigation.goBack();
                     }}

@@ -7,6 +7,7 @@ import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/Dr
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
+import { handleIntegerInput } from '@/shared/utils/validation';
 
 interface GeneralInformationProps {
     onDataChange?: (data: GeneralInformationData) => void;
@@ -121,7 +122,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                             label="Số lượng (cái)"
                             placeholder="Input"
                             value={quantity}
-                            onChangeText={setQuantity}
+                            onChangeText={text => setQuantity(handleIntegerInput(text))}
                             required
                             keyboardType="numeric"
                             containerStyle={{ marginBottom: 0 }}

@@ -11,35 +11,33 @@ import {
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '../../components/warehouse/ConfirmSubmiss';
-import { IMaterial, IWarehouseReceipt } from '../../types/material.types';
+import { IMaterial } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
+import { useMaterialStore } from '../../store/materialStore';
 
-interface AddWarehouseScreenProps {
-    // onBack?: () => void;
-    // onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
-    // availableMaterials?: IMaterial[];
-}
+interface AddWarehouseScreenProps {}
 
 export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddWarehouse'>>();
     const { setTabBarVisible } = useTabBarVisibility();
+    const materials = useMaterialStore(state => state.materials);
+    const addWarehouseReceipt = useMaterialStore(state => state.addWarehouseReceipt);
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
     const params = route.params as
         | {
-              onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
               availableMaterials?: IMaterial[];
           }
         | undefined;
-    const onSave = params?.onSave;
-    const availableMaterials = params?.availableMaterials || [];
+    const availableMaterials = params?.availableMaterials || materials;
     // Combine mock materials with passed available materials
     const materialOptions = availableMaterials.map((m: IMaterial) => ({
         label: m.name,
@@ -49,21 +47,21 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
 
     const [date, setDate] = useState(new Date());
     const [supplier, setSupplier] = useState('');
-    const [materials, setMaterials] = useState<MaterialItem[]>([
+    const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
         { id: '1', materialName: '', quantity: '', price: '' },
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
     const handleAddMaterial = () => {
-        setMaterials([
-            ...materials,
+        setWarehouseItems([
+            ...warehouseItems,
             { id: Date.now().toString(), materialName: '', quantity: '', price: '' },
         ]);
     };
 
     const handleUpdateMaterial = (id: string, field: keyof MaterialItem, value: string) => {
-        setMaterials(
-            materials.map(item => {
+        setWarehouseItems(
+            warehouseItems.map(item => {
                 if (item.id === id) {
                     const updatedItem = { ...item, [field]: value };
 
@@ -83,7 +81,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     };
 
     const calculateTotal = () => {
-        return materials.reduce((sum, item) => {
+        return warehouseItems.reduce((sum, item) => {
             const qty = parseFloat(item.quantity) || 0;
             const price = parseFloat(item.price) || 0;
             return sum + qty * price;
@@ -126,7 +124,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                     />
 
                     <AddWarehouseMaterial
-                        materials={materials}
+                        materials={warehouseItems}
                         onUpdateMaterial={handleUpdateMaterial}
                         onAddMaterial={handleAddMaterial}
                         materialOptions={materialOptions}
@@ -148,12 +146,12 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                             showValidationError('Vui lòng chọn nhà cung cấp');
                             return;
                         }
-                        if (materials.length === 0) {
+                        if (warehouseItems.length === 0) {
                             showValidationError('Vui lòng thêm ít nhất một vật tư');
                             return;
                         }
                         // Check detailed items
-                        const invalidItemIndex = materials.findIndex(
+                        const invalidItemIndex = warehouseItems.findIndex(
                             m => !m.materialName || !m.quantity || !m.price
                         );
                         if (invalidItemIndex !== -1) {
@@ -174,10 +172,16 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                     onClose={() => setIsConfirmModalVisible(false)}
                     onConfirm={() => {
                         setIsConfirmModalVisible(false);
-                        onSave?.({
+                        addWarehouseReceipt({
                             date,
                             supplier,
-                            materials,
+                            materials: warehouseItems.map(m => ({
+                                id: m.id,
+                                materialName: m.materialName,
+                                quantity: m.quantity,
+                                price: m.price,
+                                total: parseFloat(m.quantity) * parseFloat(m.price),
+                            })),
                             totalAmount,
                         });
                         navigation.goBack();

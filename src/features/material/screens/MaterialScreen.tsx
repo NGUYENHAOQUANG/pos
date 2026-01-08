@@ -1,11 +1,11 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../navigation/MaterialNavigator';
 
 import { HeaderMeterial } from '../components/HeaderMaterial';
-import { ButtonMetaerial } from '../components/ButtonMaterial';
+import { ButtonMetaerial, MaterialMenuOverlay } from '../components/ButtonMaterial';
 import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
 import { SearchBarMeterial } from '../components/SearchBarMaterial';
 import { MaterialEmptyState } from '../components/EmptyStateCard';
@@ -15,39 +15,56 @@ import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { InventoryCard } from '../components/inventory/InventoryCard';
-import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
-import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
-import { showSuccessToast } from '../utils/validationToast';
+import { IMaterial } from '../types/material.types';
+import { useMaterialStore } from '../store/materialStore';
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const route = useRoute<RouteProp<MaterialStackParamList, 'MaterialList'>>();
+    const route = useRoute();
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
 
-    // Handle tab navigation from other screens
-    React.useEffect(() => {
-        if (route.params?.selectedTab) {
-            setSelectedTab(route.params.selectedTab);
-            // Optional: reset params so it doesn't stick?
-            // Better to keep it simple first
-            navigation.setParams({ selectedTab: undefined });
-        }
-    }, [route.params?.selectedTab, navigation]);
-    const [materials, setMaterials] = useState<IMaterial[]>(mockMaterialList);
-    const [searchText, setSearchText] = useState('');
-    const [filterGroup, setFilterGroup] = useState('');
-    const [inventoryList, setInventoryList] = useState<IInventoryTicket[]>(mockInventoryList);
-    const [warehouseList, setWarehouseList] = useState<IWarehouseReceipt[]>(mockWarehouseList);
-    const [filterMaterialName, setFilterMaterialName] = useState<string | null>(null);
+    // Use Zustand store
+    const {
+        materials,
+        warehouseList,
+        inventoryList,
+        searchText,
+        filterGroup,
+        filterMaterialName,
+        setSearchText,
+        setFilterGroup,
+        setFilterMaterialName,
+        initializeData,
+    } = useMaterialStore();
 
-    // Force update materials on mount to handle Fast Refresh state preservation
-    React.useEffect(() => {
-        setMaterials(mockMaterialList);
-        setInventoryList(mockInventoryList);
-        setWarehouseList(mockWarehouseList);
-    }, []);
+    // Menu state management
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
+    const handleShowMenu = (position: { x: number; y: number; width: number; height: number }) => {
+        setMenuPosition(position);
+        setMenuOpen(true);
+    };
+
+    const handleCloseMenu = () => {
+        setMenuOpen(false);
+    };
+
+    // Handle tab navigation from other screens
+    useEffect(() => {
+        const params = route.params as { selectedTab?: TabType } | undefined;
+        if (params?.selectedTab) {
+            setSelectedTab(params.selectedTab);
+            navigation.setParams({ selectedTab: undefined } as any);
+        }
+    }, [route.params, navigation]);
+
+    // Initialize data on mount (for Fast Refresh support)
+    useEffect(() => {
+        initializeData();
+    }, [initializeData]);
 
     useLayoutEffect(() => {
         // Always show tab bar on list screen
@@ -55,70 +72,23 @@ export const MeterialScreen = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const handleSaveMaterial = (newMaterial: Omit<IMaterial, 'id'>) => {
-        setMaterials(prev => [...prev, { ...newMaterial, id: Date.now().toString() }]);
-        showSuccessToast('Tạo vật tư thành công');
-    };
-
-    const handleUpdateMaterial = (updatedMaterial: IMaterial) => {
-        setMaterials(prev =>
-            prev.map(item => (item.id === updatedMaterial.id ? updatedMaterial : item))
-        );
-        showSuccessToast('Cập nhật thông tin vật tư thành công');
-    };
-
-    const handleSaveWarehouse = (data: any) => {
-        console.log('Save Warehouse Import', data);
-        const newReceipt = {
-            // Type this properly if possible
-            id: Date.now().toString(),
-            ...data,
-        };
-        setWarehouseList(prev => [newReceipt, ...prev]);
-        showSuccessToast('Tạo phiếu nhập kho thành công');
-    };
-
-    const handleSaveInventory = (newTicket: IInventoryTicket) => {
-        console.log('Dữ liệu lưu:', newTicket);
-        setInventoryList(prev => [newTicket, ...prev]);
-
-        // Update actual stock in material list
-        setMaterials(prevMaterials =>
-            prevMaterials.map(mat => {
-                const ticketItem = newTicket.items.find(item => item.materialName === mat.name);
-                if (ticketItem) {
-                    return { ...mat, remaining: ticketItem.afterQuantity };
-                }
-                return mat;
-            })
-        );
-        showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
-    };
-
     const handleCreateImport = () => {
         navigation.navigate('AddWarehouse', {
             availableMaterials: materials,
-            onSave: handleSaveWarehouse, // Pass callback (requires updating Navigator param list type)
         } as any);
     };
 
     const handleCreateInventory = () => {
-        console.log('Tạo phiếu điều chỉnh tồn kho');
-        navigation.navigate('AddInventory', {
-            onSave: handleSaveInventory,
-        } as any);
+        navigation.navigate('AddInventory', {} as any);
     };
 
     const handleCreateMaterial = () => {
-        navigation.navigate('AddMaterial', {
-            onSave: handleSaveMaterial,
-        } as any);
+        navigation.navigate('AddMaterial', {} as any);
     };
 
     const handleEditMaterial = (item: IMaterial) => {
         navigation.navigate('EditMaterial', {
             material: item,
-            onSave: handleUpdateMaterial,
         } as any);
     };
 
@@ -187,16 +157,12 @@ export const MeterialScreen = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderMeterial
-                showBackButton={false}
-                rightComponent={
-                    <ButtonMetaerial
-                        onPressCreateImport={handleCreateImport}
-                        onPressCreateAdjustment={handleCreateInventory}
-                        onPressCreateMaterial={handleCreateMaterial}
-                    />
-                }
-            />
+            <View style={{ zIndex: 1000, elevation: 10 }}>
+                <HeaderMeterial
+                    showBackButton={false}
+                    rightComponent={<ButtonMetaerial onShowMenu={handleShowMenu} />}
+                />
+            </View>
             <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
             <SearchBarMeterial
                 onSearch={handleSearch}
@@ -214,7 +180,6 @@ export const MeterialScreen = () => {
                         onHistoryPress={handleHistoryPress}
                         onAdjustmentPress={adjustmentItem =>
                             navigation.navigate('AddInventory', {
-                                onSave: handleSaveInventory,
                                 initialMaterialName: adjustmentItem.name,
                             } as any)
                         }
@@ -239,6 +204,15 @@ export const MeterialScreen = () => {
                         <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
                     ))}
             </View>
+
+            <MaterialMenuOverlay
+                isOpen={menuOpen}
+                buttonPosition={menuPosition}
+                onClose={handleCloseMenu}
+                onPressCreateImport={handleCreateImport}
+                onPressCreateAdjustment={handleCreateInventory}
+                onPressCreateMaterial={handleCreateMaterial}
+            />
         </View>
     );
 };

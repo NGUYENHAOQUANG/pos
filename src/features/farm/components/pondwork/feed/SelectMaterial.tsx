@@ -139,7 +139,7 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                             label="Số lượng"
                                             value={quantity}
                                             onChangeText={text =>
-                                                setQuantity(text.replace(/[^0-9.]/g, ''))
+                                                setQuantity(text.replace(/[^0-9]/g, ''))
                                             }
                                             keyboardType="numeric"
                                             required
