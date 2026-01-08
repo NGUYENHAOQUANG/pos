@@ -10,6 +10,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
+import { useMaterialStore } from '../../store/materialStore';
 
 interface EditMaterialScreenProps {}
 
@@ -18,17 +19,15 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const route = useRoute<RouteProp<MaterialStackParamList, 'EditMaterial'>>();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
+    const updateMaterial = useMaterialStore(state => state.updateMaterial);
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const params = route.params as
-        | { material: IMaterial; onSave?: (data: IMaterial) => void }
-        | undefined;
+    const params = route.params as { material: IMaterial } | undefined;
     const initialData = params?.material;
-    const onSave = params?.onSave;
     // Basic Info State
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
@@ -136,7 +135,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
 
                         if (!initialData) return;
 
-                        onSave?.({
+                        updateMaterial({
                             ...initialData,
                             name,
                             group,
