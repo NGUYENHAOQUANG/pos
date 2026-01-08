@@ -58,20 +58,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
           }
         | undefined;
 
-    const [time, setTime] = useState(() => {
-        if (meta?.date) {
-            const date = new Date(meta.date);
-            // If itemToEdit has time, override the hours/minutes of the date
-            if (itemToEdit?.time) {
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                if (!isNaN(hours) && !isNaN(minutes)) {
-                    date.setHours(hours, minutes);
-                }
-            }
-            return date;
-        }
-        return new Date();
-    });
+    const [time, setTime] = useState(new Date());
     const [imageUris, setImageUris] = useState<string[]>(meta?.images || []);
     const [shrimpSize, setShrimpSize] = useState(meta?.shrimpSize || '');
     const [remainingWeight, setRemainingWeight] = useState(meta?.remainingWeight || '');

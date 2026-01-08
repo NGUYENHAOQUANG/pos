@@ -58,9 +58,7 @@ export const AddTransferScreen: React.FC = () => {
     const meta = useMemo(() => (itemToEdit?.meta as TransferMeta) || {}, [itemToEdit?.meta]);
 
     // ========== STATE ==========
-    const [selectedDate, setSelectedDate] = useState<Date>(
-        itemToEdit?.date ? parseDate(itemToEdit.date) : new Date()
-    );
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
     const [shrimpSize, setShrimpSize] = useState<string>(
         meta.shrimpSize?.toString() || latestShrimpSizeFromParams || '60'

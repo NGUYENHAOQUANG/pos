@@ -41,19 +41,7 @@ export const AddHarvestScreen: React.FC = () => {
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
-    const [selectedDate, setSelectedDate] = useState<Date>(() => {
-        if (itemToEdit?.date) {
-            const date = parseDate(itemToEdit.date);
-            if (itemToEdit.time) {
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                if (!isNaN(hours) && !isNaN(minutes)) {
-                    date.setHours(hours, minutes);
-                }
-            }
-            return date;
-        }
-        return new Date();
-    });
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
     const [harvestType, setHarvestType] = useState<string>(meta.harvestType || 'Thu hết');
     const [yieldAmount, setYieldAmount] = useState<string>(meta.yieldAmount || '');

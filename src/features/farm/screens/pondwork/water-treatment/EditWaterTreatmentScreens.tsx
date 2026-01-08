@@ -16,7 +16,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -49,23 +49,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 if (itemToEdit.waterTreatmentType) {
                     setActivityType(itemToEdit.waterTreatmentType);
                 }
-
-                // Parse date and time from itemToEdit
-                if (itemToEdit.date) {
-                    const dateObj = parseDate(itemToEdit.date);
-                    // Set time if available
-                    if (itemToEdit.time) {
-                        const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                        dateObj.setHours(hours, minutes);
-                    }
-                    setExecutionDate(dateObj);
-                } else if (itemToEdit.time) {
-                    // Fallback: if no date, just set time to current date
-                    const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                    const date = new Date();
-                    date.setHours(hours, minutes);
-                    setExecutionDate(date);
-                }
+                // Do not override date/time with itemToEdit.date/time
+                // executionDate is already initialized to new Date() (current time) by useState
             }
         }
     }, [pondId, jobId, getPondJobItems]);
@@ -144,6 +129,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     <WaterTreatment
                         executionDate={executionDate}
                         onExecutionDateChange={setExecutionDate}
+                        disabledDate={true}
                         activityType={activityType}
                         onActivityTypeChange={setActivityType}
                         selectedMaterials={selectedMaterials}

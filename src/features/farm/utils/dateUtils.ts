@@ -11,11 +11,34 @@ export const formatDate = (date: Date): string => {
 };
 
 /**
- * Parse date string from dd/mm/yyyy format to Date object
- * @param dateStr - Date string in dd/mm/yyyy format
+ * Format date as dd/mm/yyyy HH:mm string
+ * @param date - Date object to format
+ * @returns Formatted date string (dd/mm/yyyy HH:mm)
+ */
+export const formatDateWithTime = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
+/**
+ * Parse date string from dd/mm/yyyy or dd/mm/yyyy HH:mm format to Date object
+ * @param dateStr - Date string
  * @returns Date object
  */
 export const parseDate = (dateStr: string): Date => {
+    // Handle dd/mm/yyyy HH:mm
+    if (dateStr.includes(':')) {
+        const [datePart, timePart] = dateStr.split(' ');
+        const [day, month, year] = datePart.split('/').map(Number);
+        const [hours, minutes] = timePart.split(':').map(Number);
+        return new Date(year, month - 1, day, hours, minutes);
+    }
+
+    // Handle dd/mm/yyyy
     const [day, month, year] = dateStr.split('/').map(Number);
     return new Date(year, month - 1, day);
 };

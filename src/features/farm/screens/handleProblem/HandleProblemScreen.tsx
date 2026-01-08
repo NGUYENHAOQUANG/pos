@@ -17,7 +17,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
-import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -58,16 +58,8 @@ export const HandleProblemScreen = () => {
     // Load Data for Edit
     useEffect(() => {
         if (item) {
-            if (item.date) {
-                const date = parseDate(item.date);
-                if (item.time) {
-                    const [hours, minutes] = item.time.split(':').map(Number);
-                    if (!isNaN(hours) && !isNaN(minutes)) {
-                        date.setHours(hours, minutes);
-                    }
-                }
-                setSelectedDate(date);
-            }
+            // Do not override selectedDate with item.date/time, keep it as new Date() (current time)
+
             setNote(item.note || '');
             if (item.materials) {
                 setSelectedMaterials(item.materials);

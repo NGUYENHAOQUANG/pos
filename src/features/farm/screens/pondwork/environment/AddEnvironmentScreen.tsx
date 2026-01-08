@@ -57,19 +57,7 @@ export const AddEnvironmentScreen: React.FC = () => {
         () => (itemToEdit?.meta as EnvironmentMeta) || ({} as EnvironmentMeta),
         [itemToEdit?.meta]
     );
-    const [selectedDate, setSelectedDate] = useState(() => {
-        if (itemToEdit?.date) {
-            const date = parseDate(itemToEdit.date);
-            if (itemToEdit.time) {
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                if (!isNaN(hours) && !isNaN(minutes)) {
-                    date.setHours(hours, minutes);
-                }
-            }
-            return date;
-        }
-        return new Date();
-    });
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Environment parameters state
     const [pH, setPH] = useState(meta.pH || '');
