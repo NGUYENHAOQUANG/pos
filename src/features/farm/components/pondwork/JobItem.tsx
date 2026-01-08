@@ -143,10 +143,19 @@ export const JobCard: React.FC<JobCardProps> = ({
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.header} onPress={onPress}>
+            <TouchableOpacity
+                style={styles.header}
+                onPress={onPress}
+                disabled={type === 'TRANSFER_POND'}
+            >
                 <View style={styles.leftContent}>
                     <config.icon width={40} height={40} style={{ marginRight: 12 }} />
-                    <Text style={styles.title}>{displayTitle}</Text>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.title}>{displayTitle}</Text>
+                        {hasItems && (
+                            <Text style={styles.headerCountText}>{items.length} lượt</Text>
+                        )}
+                    </View>
                 </View>
                 <View style={styles.actions}>
                     <TouchableOpacity style={styles.addButton} onPress={onPressAdd}>
@@ -159,8 +168,10 @@ export const JobCard: React.FC<JobCardProps> = ({
             <View style={styles.body}>
                 {hasItems ? (
                     <View style={styles.listContent}>
+                        {/* Always show total count */}
                         <Text style={styles.countText}>{items.length} lượt</Text>
-                        {items.map((item, index) => (
+                        {/* Show only the last 3 items */}
+                        {items.slice(-3).map((item, index, arr) => (
                             <React.Fragment key={item.id || index}>
                                 <View style={styles.itemRow}>
                                     <View
@@ -181,7 +192,7 @@ export const JobCard: React.FC<JobCardProps> = ({
                                         <AntDesign name="edit" size={18} color={colors.text} />
                                     </TouchableOpacity>
                                 </View>
-                                {items.length > 1 && index < items.length - 1 && (
+                                {arr.length > 1 && index < arr.length - 1 && (
                                     <View style={styles.itemDivider} />
                                 )}
                             </React.Fragment>
@@ -284,5 +295,10 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: colors.borderLight,
         marginVertical: spacing.xs,
+    },
+    headerCountText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        marginTop: 4,
     },
 });

@@ -10,14 +10,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthNavigator } from './AuthNavigator';
 import { AppStack } from './AppStack';
 import { useAuthStore } from '@/features/auth/store/authStore';
-import { CreateBreedingAreaScreen, MapEditorScreen } from '@/features/management';
 
 // Root level param list (Auth + Main sections)
 type RootParamList = {
     Auth: undefined;
     Main: undefined;
-    CreateFarm: { updatedLocation?: { latitude: number; longitude: number } } | undefined;
-    MapEditor: { latitude?: number; longitude?: number };
 };
 
 const Stack = createNativeStackNavigator<RootParamList>();
@@ -33,24 +30,7 @@ export function AppNavigator() {
             }}
         >
             {isAuthenticated ? (
-                <>
-                    <Stack.Screen name="Main" component={AppStack} />
-                    <Stack.Screen
-                        name="CreateFarm"
-                        component={CreateBreedingAreaScreen}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name="MapEditor"
-                        component={MapEditorScreen}
-                        options={{
-                            headerShown: false,
-                            presentation: 'fullScreenModal',
-                        }}
-                    />
-                </>
+                <Stack.Screen name="Main" component={AppStack} />
             ) : (
                 <Stack.Screen name="Auth" component={AuthNavigator} />
             )}

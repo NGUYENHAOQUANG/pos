@@ -8,7 +8,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';

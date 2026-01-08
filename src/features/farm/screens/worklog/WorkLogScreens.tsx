@@ -6,7 +6,7 @@ import { IconFilter, IconFilterActive } from '@/assets/icons';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData, JobExecution } from '@/features/farm/types/farm.types';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
 import {
     TrackingDayCard,
@@ -46,7 +46,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const { getPondJobItems } = useFarm();
+    const { pondJobs } = useFarm();
 
     // Helper to get data for a specific job
     const getJobData = (type: JobType, item: JobExecution) => {
@@ -94,7 +94,10 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
 
         // 1. Collect jobs for available types
         availableJobTypes.forEach(type => {
-            const items = getPondJobItems(pond.id, type);
+            // Access pondJobs directly to ensure dependency is valid and triggers updates
+            const rawItems = pondJobs[pond.id]?.[type] || [];
+            const items = rawItems.filter(item => !item.pondId || item.pondId === pond.id);
+
             items.forEach(item => {
                 allJobs.push({ type, item });
             });
@@ -102,8 +105,8 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
 
         // 2. Filter by date
         const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
         const end = new Date(endDate);
+        start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
 
         allJobs = allJobs.filter(({ item }) => {
@@ -116,8 +119,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             allJobs = allJobs.filter(({ type }) => selectedFilters.includes(type));
         }
 
-        // 4. Sort by date desc, then time desc, then by original index desc (newest first when same time)
-        // Add original index to preserve insertion order
+        // 4. Sort by date desc, then time desc, then by original index desc
         const indexedJobs = allJobs.map((job, idx) => ({ ...job, originalIndex: idx }));
 
         indexedJobs.sort((a, b) => {
@@ -126,16 +128,13 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             if (dateA.getTime() !== dateB.getTime()) {
                 return dateB.getTime() - dateA.getTime();
             }
-            // Compare time HH:mm (descending)
             const timeCompare = compareTime(b.item.time || '00:00', a.item.time || '00:00');
             if (timeCompare !== 0) {
                 return timeCompare;
             }
-            // When time is equal, item added later (higher originalIndex) should come first
             return b.originalIndex - a.originalIndex;
         });
 
-        // Use indexedJobs for the rest of the logic
         allJobs = indexedJobs;
 
         // 5. Group by date
@@ -159,9 +158,6 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             });
         });
 
-        // Activities are already sorted correctly from the allJobs sort above
-        // No need to re-sort here as it would lose the originalIndex ordering
-
         // Sort groups by date descending
         groupOrder.sort((a, b) => {
             const dateA = parseDate(a);
@@ -176,7 +172,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
         }));
     }, [
         pond?.id,
-        getPondJobItems,
+        pondJobs, // Used directly now
         startDate,
         endDate,
         selectedFilters,

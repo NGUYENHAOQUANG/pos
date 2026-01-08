@@ -15,7 +15,7 @@ import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/Harv
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';

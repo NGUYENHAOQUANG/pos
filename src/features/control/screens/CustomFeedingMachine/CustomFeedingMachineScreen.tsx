@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
-import { useControl } from '../../context/ControlContext';
+import { useControl } from '../../store/controlStore';
 import { EControlMode } from '../../types/control.types';
 
 import ActivitySchedule, {
@@ -42,12 +42,63 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     const initialMode = route.params?.initialMode || props.initialMode || 'manual';
     const { onBack, onSave } = props;
     const { setTabBarVisible } = useTabBarVisibility();
-    const { updateDeviceMode } = useControl();
+    const { ponds, updateDeviceMode, updateDeviceSettings } = useControl();
 
-    const [mode, setMode] = useState<'manual' | 'schedule'>(initialMode);
+    // Get IDs from params
+    const pondId = route.params?.pondId;
+    const deviceId = route.params?.deviceId;
+
+    // Find current device data from store
+    const currentPond = ponds.find(p => p.id === pondId);
+    const currentDevice = currentPond?.devices.find(d => d.id === deviceId);
+
+    const [mode, setMode] = useState<'manual' | 'schedule'>('manual');
     const [runDuration, setRunDuration] = useState('');
     const [stopDuration, setStopDuration] = useState('');
     const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+
+    // Helper to format Date to HH:mm string
+    const formatTime = (date: Date | null): string => {
+        if (!date) return '00:00';
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
+    // Helper to parse HH:mm string to Date
+    const parseTime = (timeStr: string): Date => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+        return date;
+    };
+
+    // Initialize state from store
+    useEffect(() => {
+        if (currentDevice) {
+            // Set Mode
+            setMode(currentDevice.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual');
+
+            // Set Config
+            if (currentDevice.feedingConfig) {
+                setRunDuration(currentDevice.feedingConfig.runTime.toString());
+                setStopDuration(currentDevice.feedingConfig.stopTime.toString());
+            }
+
+            // Set Schedules (Convert Store -> UI)
+            if (currentDevice.schedules) {
+                const mappedSchedules: ScheduleItem[] = currentDevice.schedules.map(s => ({
+                    id: s.id,
+                    startTime: parseTime(s.startTime),
+                    endTime: parseTime(s.endTime),
+                }));
+                setSchedules(mappedSchedules);
+            }
+        } else {
+            // Fallback or initial defaults
+            if (initialMode) setMode(initialMode);
+        }
+    }, [currentDevice, initialMode]);
 
     // Dirty state tracking
     const [isDirty, setIsDirty] = useState(false);
@@ -98,15 +149,28 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     const handleSave = () => {
         console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
 
-        // Convert 'manual' | 'schedule' string to EControlMode enum if needed,
-        // or ensure types match. EControlMode is 'MANUAL' | 'SCHEDULE' (uppercase).
-        // The component uses lowercase 'manual' | 'schedule'.
-        // Let's import EControlMode and map it.
-
         const controlMode = mode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
 
-        if (route.params?.pondId && route.params?.deviceId) {
-            updateDeviceMode(route.params.pondId, route.params.deviceId, controlMode);
+        if (pondId && deviceId) {
+            // Convert UI Schedules -> Store Schedules
+            const deviceSchedules = schedules.map(s => ({
+                id: s.id,
+                startTime: formatTime(s.startTime),
+                endTime: formatTime(s.endTime),
+                isEnabled: true, // Default enabled
+            }));
+
+            // Update Mode
+            updateDeviceMode(pondId, deviceId, controlMode);
+
+            // Update Settings (Config & Schedules)
+            updateDeviceSettings(pondId, deviceId, {
+                feedingConfig: {
+                    runTime: parseInt(runDuration) || 0,
+                    stopTime: parseInt(stopDuration) || 0,
+                },
+                schedules: deviceSchedules,
+            });
         }
 
         Toast.show({
@@ -235,7 +299,8 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                     keyboardType="numeric"
                                     value={runDuration}
                                     onChangeText={text => {
-                                        setRunDuration(text);
+                                        const numericText = text.replace(/[^0-9]/g, '');
+                                        setRunDuration(numericText);
                                         setIsDirty(true);
                                         isDirtyRef.current = true;
                                     }}
@@ -251,7 +316,8 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                     keyboardType="numeric"
                                     value={stopDuration}
                                     onChangeText={text => {
-                                        setStopDuration(text);
+                                        const numericText = text.replace(/[^0-9]/g, '');
+                                        setStopDuration(numericText);
                                         setIsDirty(true);
                                         isDirtyRef.current = true;
                                     }}

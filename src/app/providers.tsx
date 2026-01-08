@@ -15,7 +15,6 @@ import { AppNavigator } from './navigation/AppNavigator';
 import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
-import { FarmProvider } from '@/features/farm/context/FarmContext';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -44,11 +43,9 @@ export function AppProviders() {
                 <AntdProvider theme={antdTheme}>
                     <QueryClientProvider client={queryClient}>
                         <TabBarVisibilityProvider>
-                            <FarmProvider>
-                                <NavigationContainer>
-                                    <AppNavigator />
-                                </NavigationContainer>
-                            </FarmProvider>
+                            <NavigationContainer>
+                                <AppNavigator />
+                            </NavigationContainer>
                         </TabBarVisibilityProvider>
                     </QueryClientProvider>
                 </AntdProvider>

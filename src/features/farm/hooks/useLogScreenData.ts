@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { JobExecution, JobMeta } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
@@ -73,7 +73,7 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
     config: LogScreenConfig<T>
 ): UseLogScreenDataResult => {
     const navigation = useNavigation<NavigationProp>();
-    const { getPondJobItemsGroupedByDate } = useFarm();
+    const { getPondJobItemsGroupedByDate, pondJobs: _pondJobs } = useFarm();
 
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
@@ -160,7 +160,8 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
             const dateB = parseDate(b.date);
             return dateA.getTime() - dateB.getTime();
         });
-    }, [pondId, config, getPondJobItemsGroupedByDate, startDate, endDate, navigation]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pondId, config, getPondJobItemsGroupedByDate, startDate, endDate, navigation, _pondJobs]);
 
     return {
         startDate,

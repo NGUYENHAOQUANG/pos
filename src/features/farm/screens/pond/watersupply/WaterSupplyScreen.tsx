@@ -23,7 +23,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';

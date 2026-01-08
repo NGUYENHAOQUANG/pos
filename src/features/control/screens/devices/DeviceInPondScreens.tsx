@@ -18,7 +18,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useControl } from '../../context/ControlContext';
+import { useControl } from '../../store/controlStore';
 import Toast from 'react-native-toast-message';
 
 // Removed Mocks

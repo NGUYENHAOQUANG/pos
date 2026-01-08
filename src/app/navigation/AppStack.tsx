@@ -52,6 +52,7 @@ import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInv
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
 import CustomFeedingMachine from '@/features/control/screens/CustomFeedingMachine/CustomFeedingMachineScreen';
 import { ScheduleActivitieScreens } from '@/features/control/screens/schedule/ScheduleActivitieScreens';
+import { UserManualScreens } from '@/features/control/screens/usermanual/UserManualScreens';
 import { HistoryActivitieScreens } from '@/features/control/screens/schedule/HistoryActivitieScreens';
 
 // Menu screens
@@ -80,10 +81,12 @@ import { Aquaculture, Member } from '@/features/menu/types/menu.types';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 
 // Providers for wrapping screens
-import { MenuProvider } from '@/features/menu/context/MenuContext';
-import { ControlProvider } from '@/features/control/context/ControlContext';
+// Providers for wrapping screens
+// Note: MenuProvider removed - now using Zustand store (useMenuStore)
+// Note: ControlProvider removed - now using Zustand store (useControlStore)
 
-// Wrapper factory for Menu screens
+// Wrapper factory for Menu screens - Removed as we use Zustand
+/*
 const withMenuProvider = <P extends object>(Component: React.ComponentType<P>) => {
     return (props: P) => (
         <MenuProvider>
@@ -91,37 +94,24 @@ const withMenuProvider = <P extends object>(Component: React.ComponentType<P>) =
         </MenuProvider>
     );
 };
+*/
 
-// Wrapper factory for Control screens
-const withControlProvider = <P extends object>(Component: React.ComponentType<P>) => {
-    return (props: P) => (
-        <ControlProvider>
-            <Component {...props} />
-        </ControlProvider>
-    );
-};
+// Wrapped Menu screens - Now using components directly
+const PersonalInformationWithProvider = PersonalInformationScreens;
+const AquacultureManagementWithProvider = AquacultureManagementScreens;
+const MemberManagementWithProvider = MemberManagementScreens;
+const AddAquacultureWithProvider = AddAquacultureScreens;
+const EditAquacultureWithProvider = EditAquacultureScreens;
+const AddMemberWithProvider = AddMemberScreens;
+const EditMemberWithProvider = EditMemberScreens;
+const DeviceManagementWithProvider = DeviceManagement;
+const AddDeviceWithProvider = AddDeviceScreens;
+const EditDeviceWithProvider = EditDevicesScreens;
+const HistoryDevicesWithProvider = HistoryDevicesScreens;
+const EquipmentMaintenanceWithProvider = EquipmentMaintenanceScreens;
+const EditEquimentMaintenanceWithProvider = EditEquimentMaintenanceScreens;
 
-// Wrapped Menu screens
-const PersonalInformationWithProvider = withMenuProvider(PersonalInformationScreens);
-const AquacultureManagementWithProvider = withMenuProvider(AquacultureManagementScreens);
-const MemberManagementWithProvider = withMenuProvider(MemberManagementScreens);
-const AddAquacultureWithProvider = withMenuProvider(AddAquacultureScreens);
-const EditAquacultureWithProvider = withMenuProvider(EditAquacultureScreens);
-const AddMemberWithProvider = withMenuProvider(AddMemberScreens);
-const EditMemberWithProvider = withMenuProvider(EditMemberScreens);
-const DeviceManagementWithProvider = withMenuProvider(DeviceManagement);
-const AddDeviceWithProvider = withMenuProvider(AddDeviceScreens);
-const EditDeviceWithProvider = withMenuProvider(EditDevicesScreens);
-const HistoryDevicesWithProvider = withMenuProvider(HistoryDevicesScreens);
-const EquipmentMaintenanceWithProvider = withMenuProvider(EquipmentMaintenanceScreens);
-const EditEquimentMaintenanceWithProvider = withMenuProvider(EditEquimentMaintenanceScreens);
-
-// Wrapped Control screens
-// ControlDetailWithProvider moved to MainNavigator
-const ConnectDeviceWithProvider = withControlProvider(ConnectDeviceScreens);
-const CustomFeedingMachineWithProvider = withControlProvider(CustomFeedingMachine);
-const ScheduleWithProvider = withControlProvider(ScheduleActivitieScreens);
-const HistoryWithProvider = withControlProvider(HistoryActivitieScreens);
+// Note: Control screens no longer need provider wrappers - using Zustand store directly
 
 // Root Stack Param List - All screens in the app
 export type AppStackParamList = {
@@ -191,6 +181,7 @@ export type AppStackParamList = {
     };
     Schedule: { pondName: string };
     History: { pondName: string };
+    UserManual: undefined;
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
@@ -205,7 +196,15 @@ export type AppStackParamList = {
     EditDevice: { deviceId: string };
     HistoryDevices: { deviceId?: string };
     EquipmentMaintenance: { deviceId?: string };
-    EditEquimentMaintenance: { deviceId: string; maintenanceId: string; initialData: unknown };
+    EditEquimentMaintenance: {
+        deviceId: string;
+        maintenanceId: string;
+        initialData: {
+            date?: string | Date;
+            description?: string;
+            resetTime?: boolean;
+        };
+    };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -264,13 +263,12 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Control Screens ============== */}
             {/* ControlDetail moved to MainNavigator to show Tab Bar */}
-            <Stack.Screen name="ConnectDevice" component={ConnectDeviceWithProvider} />
-            <Stack.Screen
-                name="CustomFeedingMachine"
-                component={CustomFeedingMachineWithProvider}
-            />
-            <Stack.Screen name="Schedule" component={ScheduleWithProvider} />
-            <Stack.Screen name="History" component={HistoryWithProvider} />
+            {/* Control screens use Zustand store directly - no provider needed */}
+            <Stack.Screen name="ConnectDevice" component={ConnectDeviceScreens} />
+            <Stack.Screen name="CustomFeedingMachine" component={CustomFeedingMachine} />
+            <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
+            <Stack.Screen name="History" component={HistoryActivitieScreens} />
+            <Stack.Screen name="UserManual" component={UserManualScreens} />
 
             {/* ============== Menu Screens ============== */}
             <Stack.Screen name="PersonalInformation" component={PersonalInformationWithProvider} />

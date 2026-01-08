@@ -13,7 +13,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
 

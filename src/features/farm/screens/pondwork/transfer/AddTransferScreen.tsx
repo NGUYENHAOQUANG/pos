@@ -17,7 +17,7 @@ import {
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { TransferMeta } from '@/features/farm/types/farm.types';
 import {
     showAddJobSuccessToast,
@@ -292,7 +292,16 @@ export const AddTransferScreen: React.FC = () => {
             // Note: Source cycle deletion is handled in handleTransferPond
         }
 
-        navigation.goBack();
+        // Reset navigation stack: MainTabs -> PondDetail
+        // This way: user stays on PondDetail, but back button goes to MainTabs (farm list)
+        if (pond) {
+            navigation.reset({
+                index: 1,
+                routes: [{ name: 'MainTabs' }, { name: 'PondDetail', params: { pond } }],
+            });
+        } else {
+            navigation.goBack();
+        }
     };
 
     return (

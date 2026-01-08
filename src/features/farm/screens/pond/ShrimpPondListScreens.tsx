@@ -10,7 +10,7 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData } from '@/features/farm/types/farm.types';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 
 interface ShrimpPondListScreensProps {}
 
