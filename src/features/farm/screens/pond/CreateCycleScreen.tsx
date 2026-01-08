@@ -12,6 +12,7 @@ import Toast from 'react-native-toast-message';
 import { useFarm } from '../../context/FarmContext';
 import { CycleData } from '../../types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { formatDateWithTime } from '../../utils/dateUtils';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -36,11 +37,13 @@ export const CreateCycleScreen: React.FC = () => {
                 cycleName: '',
                 breedSource: undefined,
                 season: undefined,
-                stockingDate: new Date().toISOString(),
+                stockingDate: formatDateWithTime(new Date()),
             };
         }
         return {
             ...data,
+            // Override stockingDate with current time in edit mode
+            stockingDate: formatDateWithTime(new Date()),
         };
     };
 

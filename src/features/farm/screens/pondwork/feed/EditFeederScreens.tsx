@@ -50,14 +50,7 @@ export const EditFeederScreens = () => {
                 if (itemToEdit.materials) {
                     setSelectedMaterials(itemToEdit.materials);
                 }
-                // Optional: Parse time string back to Date if needed,
-                // but currently we just default to 'now' if time parsing is complex or just keep it simple.
-                // If we want to show the saved time:
-                // itemToEdit.time is "HH:mm". We might want to construct a date object.
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                const date = new Date();
-                date.setHours(hours, minutes);
-                setExecutionDate(date);
+                // Do not override executionDate with saved time, keep it as current time (new Date())
             }
         }
     }, [pondId, jobId, getPondJobItems]);
