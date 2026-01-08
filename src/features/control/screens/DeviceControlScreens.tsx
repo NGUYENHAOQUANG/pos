@@ -2,14 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { HeaderDevices } from '../components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
-import { ButtonHelp } from '../components/ButtonHelp';
 import { DevicesStatus } from '../components/DevicesStatus';
 import { PondCard } from '../components/devices/PondCard';
 import { colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
-import { useControl } from '../context/ControlContext';
+import { useControl } from '../store/controlStore';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
@@ -58,11 +57,11 @@ export const DeviceControlScreens = () => {
                 <HeaderCamLocation
                     selectedLocation={selectedFarm}
                     onLocationSelect={setSelectedFarm}
+                    onHelpPress={() => navigation.navigate('UserManual')}
                 />
             )}
             <HeaderDevices
                 title="Điều Khiển Thiết Bị"
-                rightComponent={<ButtonHelp />}
                 showBackButton={false}
                 includeSafeArea={!showDashboard}
             />

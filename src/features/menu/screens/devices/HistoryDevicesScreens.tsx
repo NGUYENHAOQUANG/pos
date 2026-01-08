@@ -14,7 +14,7 @@ type HistoryDevicesScreenRouteProp = RouteProp<MenuStackParamList, 'HistoryDevic
 
 import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
 
-import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { useMenuContext } from '@/features/menu/store/menuStore';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 
 import { INSTALLATION_HISTORY, MAINTENANCE_HISTORY } from '@/features/control/data/devicesData';

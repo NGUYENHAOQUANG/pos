@@ -89,7 +89,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         if (!pondFromParams?.id) return pondFromParams;
         return getPondById(pondFromParams.id) || pondFromParams;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pondFromParams, getPondById, ponds]); // Added ponds to trigger re-render
+    }, [pondFromParams, getPondById, ponds]);
 
     // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {

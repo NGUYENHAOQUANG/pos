@@ -8,7 +8,7 @@ import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EquipmentMaintenance } from '@/features/menu/components/devices/EquipmentMaintenance';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
-import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { useMenuContext } from '@/features/menu/store/menuStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
 import { TouchableOpacity } from 'react-native';

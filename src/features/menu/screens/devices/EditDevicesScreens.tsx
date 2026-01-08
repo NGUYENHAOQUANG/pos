@@ -14,7 +14,7 @@ import {
 } from '../../components/devices/MaintenancePeriod';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
-import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { useMenuContext } from '@/features/menu/store/menuStore';
 import { DeviceData } from '@/features/menu/types/menu.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';

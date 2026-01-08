@@ -15,7 +15,7 @@ import {
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
-import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { useMenuContext } from '@/features/menu/store/menuStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';

@@ -21,32 +21,26 @@ import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondLi
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
 import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
+// Note: MenuProvider removed - now using Zustand store (useMenuStore)
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 
 // Providers
-import { MenuProvider } from '@/features/menu/context/MenuContext';
-import { ControlProvider } from '@/features/control/context/ControlContext';
+// Note: ControlProvider removed - now using Zustand store (useControlStore)
 
 // Native Stack for Control Tab
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const ControlStack = createNativeStackNavigator();
 
-// Wrapper components with providers including Stack for Control
+// Control Stack Screen - no provider needed, using Zustand directly
 const ControlStackScreen = () => (
-    <ControlProvider>
-        <ControlStack.Navigator screenOptions={{ headerShown: false }}>
-            <ControlStack.Screen name="ControlList" component={DeviceControlScreens} />
-            <ControlStack.Screen name="ControlDetail" component={DevicesInPondScreens} />
-        </ControlStack.Navigator>
-    </ControlProvider>
+    <ControlStack.Navigator screenOptions={{ headerShown: false }}>
+        <ControlStack.Screen name="ControlList" component={DeviceControlScreens} />
+        <ControlStack.Screen name="ControlDetail" component={DevicesInPondScreens} />
+    </ControlStack.Navigator>
 );
 
-const MenuScreenWithProvider = () => (
-    <MenuProvider>
-        <MenuScreens />
-    </MenuProvider>
-);
+const MenuScreenWithProvider = MenuScreens;
 
 // Import Icons
 import {

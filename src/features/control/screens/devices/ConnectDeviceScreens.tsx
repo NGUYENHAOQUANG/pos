@@ -13,7 +13,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { ConnectDevice } from '@/features/control/components/devices/ConnectDevice';
 import { colors } from '@/styles';
-import { useControl } from '@/features/control/context/ControlContext';
+import { useControl } from '@/features/control/store/controlStore';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 
 // Define MainTabParams since it's not exported globally yet

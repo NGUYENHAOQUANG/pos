@@ -7,7 +7,7 @@ import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
-import { useMenuContext } from '@/features/menu/context/MenuContext';
+import { useMenuContext } from '@/features/menu/store/menuStore';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { GeneralInformation } from '@/features/menu/components/member/GeneralInformation';
 import { FeaturePermissions } from '@/features/menu/components/member/FeaturePermissions';
