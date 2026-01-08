@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../navigation/MaterialNavigator';
 
 import { HeaderMeterial } from '../components/HeaderMaterial';
-import { ButtonMetaerial } from '../components/ButtonMaterial';
+import { ButtonMetaerial, MaterialMenuOverlay } from '../components/ButtonMaterial';
 import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
 import { SearchBarMeterial } from '../components/SearchBarMaterial';
 import { MaterialEmptyState } from '../components/EmptyStateCard';
@@ -39,6 +39,19 @@ export const MeterialScreen = () => {
         initializeData,
     } = useMaterialStore();
 
+    // Menu state management
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
+    const handleShowMenu = (position: { x: number; y: number; width: number; height: number }) => {
+        setMenuPosition(position);
+        setMenuOpen(true);
+    };
+
+    const handleCloseMenu = () => {
+        setMenuOpen(false);
+    };
+
     // Handle tab navigation from other screens
     useEffect(() => {
         const params = route.params as { selectedTab?: TabType } | undefined;
@@ -58,9 +71,6 @@ export const MeterialScreen = () => {
         setTabBarVisible(true);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
-
-    // Get store actions
-    const {} = useMaterialStore();
 
     const handleCreateImport = () => {
         navigation.navigate('AddWarehouse', {
@@ -147,16 +157,12 @@ export const MeterialScreen = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderMeterial
-                showBackButton={false}
-                rightComponent={
-                    <ButtonMetaerial
-                        onPressCreateImport={handleCreateImport}
-                        onPressCreateAdjustment={handleCreateInventory}
-                        onPressCreateMaterial={handleCreateMaterial}
-                    />
-                }
-            />
+            <View style={{ zIndex: 1000, elevation: 10 }}>
+                <HeaderMeterial
+                    showBackButton={false}
+                    rightComponent={<ButtonMetaerial onShowMenu={handleShowMenu} />}
+                />
+            </View>
             <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
             <SearchBarMeterial
                 onSearch={handleSearch}
@@ -198,6 +204,15 @@ export const MeterialScreen = () => {
                         <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
                     ))}
             </View>
+
+            <MaterialMenuOverlay
+                isOpen={menuOpen}
+                buttonPosition={menuPosition}
+                onClose={handleCloseMenu}
+                onPressCreateImport={handleCreateImport}
+                onPressCreateAdjustment={handleCreateInventory}
+                onPressCreateMaterial={handleCreateMaterial}
+            />
         </View>
     );
 };
