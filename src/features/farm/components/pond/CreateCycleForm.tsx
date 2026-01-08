@@ -11,7 +11,7 @@ import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 import { useFarm } from '@/features/farm/context/FarmContext';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
-import { parseDate, formatDate } from '@/features/farm/utils/dateUtils';
+import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
 
 interface Props {
     formData: Partial<CycleData>;
@@ -189,8 +189,11 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                                 : new Date(formData.stockingDate)
                             : null
                     }
-                    onDateChange={date => updateField('stockingDate', formatDate(date))}
-                    disabled={!isEdit}
+                    onDateChange={date => updateField('stockingDate', formatDateWithTime(date))}
+                    disabled={isEdit}
+                    formatOptions={{
+                        showCurrentLabel: 'auto',
+                    }}
                 />
 
                 <View style={styles.row}>

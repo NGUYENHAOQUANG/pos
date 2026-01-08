@@ -65,21 +65,7 @@ export const WaterSupplyScreen = () => {
     // --- Load Data khi Edit ---
     useEffect(() => {
         if (item) {
-            if (item.date) {
-                const parts = item.date.split('/');
-                if (parts.length === 3) {
-                    const d = new Date(
-                        parseInt(parts[2], 10),
-                        parseInt(parts[1], 10) - 1,
-                        parseInt(parts[0], 10)
-                    );
-                    if (item.time) {
-                        const [h, m] = item.time.split(':').map(Number);
-                        d.setHours(h, m);
-                    }
-                    setSelectedDate(d);
-                }
-            }
+            // Do not setSelectedDate from item.date/time, keep as current time (new Date())
 
             const meta = (item.meta as WaterSupplyMeta) || ({} as WaterSupplyMeta);
             setTargetLevel(meta?.targetLevel?.toString() || '');

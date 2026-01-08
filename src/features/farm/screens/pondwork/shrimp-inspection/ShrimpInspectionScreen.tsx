@@ -39,17 +39,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         () => (itemToEdit?.meta as ShrimpInspectionMeta) || ({} as ShrimpInspectionMeta),
         [itemToEdit?.meta]
     );
-    const [selectedDate, setSelectedDate] = useState(() => {
-        if (!itemToEdit?.date) return new Date();
-        const dateObj = parseDate(itemToEdit.date);
-        if (itemToEdit.time) {
-            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-            if (!isNaN(hours) && !isNaN(minutes)) {
-                dateObj.setHours(hours, minutes);
-            }
-        }
-        return dateObj;
-    });
+    const [selectedDate, setSelectedDate] = useState(new Date());
     const [foodAmount, setFoodAmount] = useState(meta.foodAmount || '');
     const [leftoverFood, setLeftoverFood] = useState(meta.leftoverFood || 'Hết');
     const [intestine, setIntestine] = useState(meta.intestine || 'Đầy');

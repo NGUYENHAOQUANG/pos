@@ -565,9 +565,16 @@ export const FarmProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 ? parseDate(stockingDate)
                 : new Date(stockingDate);
 
+        // Normalize start date to midnight (00:00:00)
+        start.setHours(0, 0, 0, 0);
+
         const now = new Date();
+        // Normalize current date to midnight (00:00:00)
+        now.setHours(0, 0, 0, 0);
+
         const diffTime = Math.abs(now.getTime() - start.getTime());
-        return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+        // Add 1 to include the stocking day as day 1
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     };
 
     const getLatestPondActivity = (pondId: string) => {
