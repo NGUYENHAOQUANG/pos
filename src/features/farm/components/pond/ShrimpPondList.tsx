@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
 
 import { spacing } from '@/styles';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { ShrimpPond } from '@/features/farm/components/pond/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';

@@ -7,7 +7,7 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { JobExecution, CycleData } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -81,6 +81,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         getPondById,
         ponds,
         cycles,
+        pondJobs: _pondJobs,
     } = useFarm();
 
     // Get fresh pond data from context instead of stale params
@@ -139,7 +140,8 @@ export const ShrimpFarmScreens: React.FC = () => {
             ...template,
             items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
         }));
-    }, [pond?.type, pond?.id, getPondJobItems, currentCycle]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pond?.type, pond?.id, getPondJobItems, currentCycle, _pondJobs]);
 
     useEffect(() => {
         setTabBarVisible(false);

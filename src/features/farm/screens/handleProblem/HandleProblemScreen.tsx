@@ -12,7 +12,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
-import { useFarm } from '@/features/farm/context/FarmContext';
+import { useFarm } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';

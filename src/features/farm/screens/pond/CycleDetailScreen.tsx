@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
-import { useFarm } from '../../context/FarmContext';
+import { useFarm } from '../../store/farmStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { CycleData } from '../../types/farm.types';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
