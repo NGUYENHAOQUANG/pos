@@ -2,6 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
     DropDownButton,
@@ -42,7 +43,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
         const [endDate, setEndDate] = useState<Date | null>(
             initialValues?.endDate ? new Date(initialValues.endDate) : null
         );
-        const [status, setStatus] = useState<'active' | 'ended'>(
+        const [status /*, setStatus*/] = useState<'active' | 'ended'>(
             initialValues?.status === 'active' || initialValues?.status === 'ended'
                 ? initialValues.status
                 : 'active'
@@ -157,7 +158,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Status */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>Chọn trạng thái</Text>
-                    <View style={styles.radioGroup}>
+                    {/* <View style={styles.radioGroup}>
                         <TouchableOpacity
                             style={styles.radioItem}
                             onPress={() => setStatus('active')}
@@ -189,7 +190,17 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                             </View>
                             <Text style={styles.radioLabel}>Đã kết thúc</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
+                    <TouchableOpacity
+                        style={styles.checkboxContainer}
+                        onPress={() => {}} // Disabled toggle as per request
+                        activeOpacity={1}
+                    >
+                        <View style={[styles.checkbox, styles.checkboxChecked]}>
+                            <Ionicons name="checkmark" size={16} color={colors.white} />
+                        </View>
+                        <Text style={styles.checkboxLabel}>Đang nuôi</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Note */}
@@ -320,5 +331,29 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         color: colors.text,
         textAlignVertical: 'top',
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
+    },
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+    },
+    checkboxChecked: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    checkboxLabel: {
+        fontSize: 14,
+        color: colors.text,
+        lineHeight: 22,
     },
 });
