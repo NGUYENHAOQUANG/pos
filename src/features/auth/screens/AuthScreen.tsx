@@ -35,10 +35,18 @@ export default function AuthScreen() {
         }
 
         const rawPhone = phoneNumber.replace(/\s/g, '');
-        if (rawPhone.length < 10) {
+        // Regex kiểm tra số điện thoại Việt Nam:
+        // Bắt đầu bằng số 0.
+        // Ký tự tiếp theo là: 3, 5, 7, 8, 9 (các đầu số di động hợp lệ).
+        // Theo sau là 8 chữ số.
+        // Tổng độ dài là 10 số.
+        const phoneRegex = /^(0)(3|5|7|8|9)([0-9]{8})$/;
+
+        if (!phoneRegex.test(rawPhone)) {
             setError('Số điện thoại không hợp lệ, vui lòng kiểm tra lại.');
             return;
         }
+
         if (rawPhone === '0908456789') {
             setError('Số điện thoại không tồn tại, vui lòng kiểm tra và thử lại.');
             return;
