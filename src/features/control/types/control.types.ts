@@ -35,7 +35,7 @@ export interface DeviceSchedule {
 export interface DeviceData {
     id: string;
     name: string;
-    icon: React.FC<import('react-native-svg').SvgProps>; // Using strict type
+    // icon removed for persistence, use getDeviceIcon(type) instead
     mode: EControlMode;
     isOn: boolean;
     errorMessage?: string;

@@ -25,19 +25,17 @@ export const MeterialScreen = () => {
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
 
-    // Use Zustand store
-    const {
-        materials,
-        warehouseList,
-        inventoryList,
-        searchText,
-        filterGroup,
-        filterMaterialName,
-        setSearchText,
-        setFilterGroup,
-        setFilterMaterialName,
-        initializeData,
-    } = useMaterialStore();
+    // Use Zustand store with simplified selectors
+    const materials = useMaterialStore(state => state.materials);
+    const warehouseList = useMaterialStore(state => state.warehouseList);
+    const inventoryList = useMaterialStore(state => state.inventoryList);
+    const searchText = useMaterialStore(state => state.searchText);
+    const filterGroup = useMaterialStore(state => state.filterGroup);
+    const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
+    const setSearchText = useMaterialStore(state => state.setSearchText);
+    const setFilterGroup = useMaterialStore(state => state.setFilterGroup);
+    const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
+    const initializeData = useMaterialStore(state => state.initializeData);
 
     // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
