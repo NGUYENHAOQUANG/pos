@@ -160,7 +160,9 @@ export const MeterialScreen = () => {
             <View style={{ zIndex: 1000, elevation: 10 }}>
                 <HeaderMeterial
                     showBackButton={false}
-                    rightComponent={<ButtonMetaerial onShowMenu={handleShowMenu} />}
+                    rightComponent={
+                        <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                    }
                 />
             </View>
             <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />

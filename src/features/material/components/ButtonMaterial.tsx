@@ -23,11 +23,24 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ButtonMetaerialProps {
     onShowMenu: (position: { x: number; y: number; width: number; height: number }) => void;
+    isOpen: boolean;
 }
 
-export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({ onShowMenu }) => {
+export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({ onShowMenu, isOpen }) => {
     const buttonRef = useRef<View>(null);
     const isMeasuring = useRef(false);
+    const rotation = useSharedValue(0);
+
+    React.useEffect(() => {
+        rotation.value = withTiming(isOpen ? 1 : 0, { duration: 200 });
+    }, [isOpen, rotation]);
+
+    const animatedIconStyle = useAnimatedStyle(() => {
+        const rotate = interpolate(rotation.value, [0, 1], [0, 45]);
+        return {
+            transform: [{ rotate: `${rotate}deg` }],
+        };
+    });
 
     const handlePress = () => {
         if (isMeasuring.current) return;
@@ -46,7 +59,9 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({ onShowMenu }) 
             onPress={handlePress}
             activeOpacity={0.7}
         >
-            <Ionicons name="add" size={24} color={colors.text} />
+            <Animated.View style={animatedIconStyle}>
+                <Ionicons name="add" size={24} color={colors.text} />
+            </Animated.View>
         </TouchableOpacity>
     );
 };
