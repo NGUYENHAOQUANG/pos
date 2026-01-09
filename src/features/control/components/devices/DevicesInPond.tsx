@@ -4,18 +4,13 @@ import { DeviceCard } from './Devices';
 import { ButtonControlSwitch } from './ButtonControlSwitch'; // Assuming it's in the same folder or adjusted path
 import { EControlMode, DeviceData } from '../../types/control.types';
 
-import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
-
 export const DevicesInPond = () => {
     // Mock Data for Feeder Section
     const [feeders, setFeeders] = useState<DeviceData[]>([
         {
             id: 'f1',
             name: 'Máy cho ăn',
-            icon: FeederIcon,
+
             mode: EControlMode.MANUAL,
             isOn: true,
             type: 'feeder',
@@ -27,7 +22,6 @@ export const DevicesInPond = () => {
         {
             id: 'o1',
             name: 'Quạt nước 1',
-            icon: FanIcon,
             mode: EControlMode.SCHEDULE,
             isOn: true,
             type: 'fan',
@@ -35,7 +29,6 @@ export const DevicesInPond = () => {
         {
             id: 'o2',
             name: 'Quạt nước 2 (Tại chỗ)',
-            icon: FanIcon,
             mode: EControlMode.LOCAL,
             isOn: true,
             type: 'fan',
@@ -43,7 +36,6 @@ export const DevicesInPond = () => {
         {
             id: 'o3',
             name: 'Máy thổi khí',
-            icon: OxyIcon,
             mode: EControlMode.SCHEDULE,
             isOn: true,
             errorMessage: 'Bị mất khí!',
@@ -52,7 +44,6 @@ export const DevicesInPond = () => {
         {
             id: 'o4',
             name: 'Syphon',
-            icon: SyphonIcon,
             mode: EControlMode.SCHEDULE,
             isOn: false,
             type: 'syphon',

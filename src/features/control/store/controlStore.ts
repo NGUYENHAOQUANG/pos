@@ -1,10 +1,8 @@
 import { create } from 'zustand';
-import { SvgProps } from 'react-native-svg';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pond, EControlMode, DeviceData, PondDeviceStats } from '../types/control.types';
-import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
 import { PONDS_LIST, DEVICES_LIST } from '../data/devicesData';
 
 // Helper to calculate stats
@@ -36,7 +34,6 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
 const createDeviceFromCode = (
     code: string,
     name: string,
-    icon: React.FC<SvgProps>,
     type: 'feeder' | 'fan' | 'oxy' | 'syphon'
 ): DeviceData => {
     return {
@@ -45,7 +42,6 @@ const createDeviceFromCode = (
         isOn: true,
         errorMessage: undefined,
         name,
-        icon,
         type,
     };
 };
@@ -60,26 +56,9 @@ const createInitialPonds = (): Pond[] => {
             const isActive = d.status === 'active';
             const isMaintenance = d.status === 'maintenance';
 
-            let icon: React.FC<SvgProps> = FanIcon;
-            switch (d.type) {
-                case 'feeder':
-                    icon = FeederIcon;
-                    break;
-                case 'fan':
-                    icon = FanIcon;
-                    break;
-                case 'oxy':
-                    icon = OxyIcon;
-                    break;
-                case 'syphon':
-                    icon = SyphonIcon;
-                    break;
-            }
-
             return {
                 id: d.id,
                 name: d.name,
-                icon: icon,
                 mode: d.mode,
                 isOn: isActive,
                 errorMessage: isMaintenance ? 'Đang bảo trì' : undefined,
@@ -108,118 +87,110 @@ interface ControlStore {
 }
 
 // Zustand Store
-export const useControlStore = create<ControlStore>(set => ({
-    ponds: createInitialPonds(),
+export const useControlStore = create<ControlStore>()(
+    persist(
+        immer(set => ({
+            ponds: createInitialPonds(),
 
-    addPond: () => {
-        // Disabled - placeholder for future implementation
-    },
+            addPond: () => {
+                // Disabled - placeholder for future implementation
+            },
 
-    connectDeviceToPond: (pondName: string, code?: string) => {
-        if (!code) return;
+            connectDeviceToPond: (pondName: string, code?: string) => {
+                if (!code) return;
 
-        set(state => ({
-            ponds: state.ponds.map(p => {
-                if (p.name !== pondName) return p;
+                set(state => {
+                    const pond = state.ponds.find(p => p.name === pondName);
+                    if (!pond) return;
 
-                // Device Map for Codes 1-6
-                const typeMap: Record<
-                    string,
-                    {
-                        type: 'feeder' | 'fan' | 'oxy' | 'syphon';
-                        defaultName: string;
-                        icon: React.FC<SvgProps>;
+                    // Device Map for Codes 1-6
+                    const typeMap: Record<
+                        string,
+                        {
+                            type: 'feeder' | 'fan' | 'oxy' | 'syphon';
+                            defaultName: string;
+                        }
+                    > = {
+                        '1': { type: 'feeder', defaultName: 'Máy cho ăn tự động A1' },
+                        '2': { type: 'syphon', defaultName: 'Hệ thống Xiphong X1' },
+                        '3': { type: 'fan', defaultName: 'Quạt nước Q1' },
+                        '4': { type: 'fan', defaultName: 'Quạt nước Q2' },
+                        '5': { type: 'oxy', defaultName: 'Máy thổi khí Oxy 1' },
+                        '6': { type: 'syphon', defaultName: 'Hệ thống Xiphong X2' },
+                    };
+
+                    const config = typeMap[code];
+                    if (!config) return;
+
+                    // Naming Logic - append number if name exists
+                    let finalName = config.defaultName;
+                    const nameExists = pond.devices.some(d => d.name === config.defaultName);
+
+                    if (nameExists) {
+                        let counter = 1;
+                        while (
+                            pond.devices.some(d => d.name === `${config.defaultName} ${counter}`)
+                        ) {
+                            counter++;
+                        }
+                        finalName = `${config.defaultName} ${counter}`;
                     }
-                > = {
-                    '1': { type: 'feeder', defaultName: 'Máy cho ăn tự động A1', icon: FeederIcon },
-                    '2': { type: 'syphon', defaultName: 'Hệ thống Xiphong X1', icon: SyphonIcon },
-                    '3': { type: 'fan', defaultName: 'Quạt nước Q1', icon: FanIcon },
-                    '4': { type: 'fan', defaultName: 'Quạt nước Q2', icon: FanIcon },
-                    '5': { type: 'oxy', defaultName: 'Máy thổi khí Oxy 1', icon: OxyIcon },
-                    '6': { type: 'syphon', defaultName: 'Hệ thống Xiphong X2', icon: SyphonIcon },
-                };
 
-                const config = typeMap[code];
-                if (!config) return p;
+                    const newDevice = createDeviceFromCode(code, finalName, config.type);
+                    pond.devices.push(newDevice);
+                    pond.hasDevices = true;
+                    pond.deviceStats = calculatePondStats(pond.devices);
+                });
+            },
 
-                // Naming Logic - append number if name exists
-                let finalName = config.defaultName;
-                const nameExists = p.devices.some(d => d.name === config.defaultName);
+            toggleDevice: (pondId: string, deviceId: string, isOn: boolean) => {
+                set(state => {
+                    const pond = state.ponds.find(p => p.id === pondId);
+                    if (!pond) return;
 
-                if (nameExists) {
-                    let counter = 1;
-                    while (p.devices.some(d => d.name === `${config.defaultName} ${counter}`)) {
-                        counter++;
+                    const device = pond.devices.find(d => d.id === deviceId);
+                    if (device) {
+                        device.isOn = isOn;
+                        pond.deviceStats = calculatePondStats(pond.devices);
                     }
-                    finalName = `${config.defaultName} ${counter}`;
-                }
+                });
+            },
 
-                const newDevice = createDeviceFromCode(code, finalName, config.icon, config.type);
-                const updatedDevices = [...p.devices, newDevice];
+            updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => {
+                set(state => {
+                    const pond = state.ponds.find(p => p.id === pondId);
+                    if (!pond) return;
 
-                return {
-                    ...p,
-                    devices: updatedDevices,
-                    hasDevices: true,
-                    deviceStats: calculatePondStats(updatedDevices),
-                };
-            }),
-        }));
-    },
+                    const device = pond.devices.find(d => d.id === deviceId);
+                    if (device) {
+                        device.mode = mode;
+                        pond.deviceStats = calculatePondStats(pond.devices);
+                    }
+                });
+            },
 
-    toggleDevice: (pondId: string, deviceId: string, isOn: boolean) => {
-        set(state => ({
-            ponds: state.ponds.map(pond => {
-                if (pond.id !== pondId) return pond;
+            updateDeviceSettings: (
+                pondId: string,
+                deviceId: string,
+                settings: Partial<DeviceData>
+            ) => {
+                set(state => {
+                    const pond = state.ponds.find(p => p.id === pondId);
+                    if (!pond) return;
 
-                const updatedDevices = pond.devices.map(device =>
-                    device.id === deviceId ? { ...device, isOn } : device
-                );
-
-                return {
-                    ...pond,
-                    devices: updatedDevices,
-                    deviceStats: calculatePondStats(updatedDevices),
-                };
-            }),
-        }));
-    },
-
-    updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => {
-        set(state => ({
-            ponds: state.ponds.map(pond => {
-                if (pond.id !== pondId) return pond;
-
-                const updatedDevices = pond.devices.map(device =>
-                    device.id === deviceId ? { ...device, mode } : device
-                );
-
-                return {
-                    ...pond,
-                    devices: updatedDevices,
-                    deviceStats: calculatePondStats(updatedDevices),
-                };
-            }),
-        }));
-    },
-
-    updateDeviceSettings: (pondId: string, deviceId: string, settings: Partial<DeviceData>) => {
-        set(state => ({
-            ponds: state.ponds.map(pond => {
-                if (pond.id !== pondId) return pond;
-
-                const updatedDevices = pond.devices.map(device =>
-                    device.id === deviceId ? { ...device, ...settings } : device
-                );
-
-                return {
-                    ...pond,
-                    devices: updatedDevices,
-                };
-            }),
-        }));
-    },
-}));
+                    const device = pond.devices.find(d => d.id === deviceId);
+                    if (device) {
+                        Object.assign(device, settings);
+                    }
+                });
+            },
+        })),
+        {
+            name: 'control-storage',
+            storage: createJSONStorage(() => AsyncStorage),
+        }
+    )
+);
 
 // Backward compatibility hook - can be used as drop-in replacement for useControl
 export const useControl = () => {

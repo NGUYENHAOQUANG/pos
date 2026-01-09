@@ -5,7 +5,8 @@
  */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Storage } from '@/core/services/storage.service';
+import { immer } from 'zustand/middleware/immer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
 import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
 import { showSuccessToast } from '../utils/validationToast';
@@ -47,7 +48,7 @@ interface MaterialState {
 
 export const useMaterialStore = create<MaterialState>()(
     persist(
-        (set, get) => ({
+        immer((set, get) => ({
             // Initial state
             materials: mockMaterialList,
             warehouseList: mockWarehouseList,
@@ -58,10 +59,10 @@ export const useMaterialStore = create<MaterialState>()(
 
             // Initialize data (for Fast Refresh support)
             initializeData: () => {
-                set({
-                    materials: mockMaterialList,
-                    warehouseList: mockWarehouseList,
-                    inventoryList: mockInventoryList,
+                set(state => {
+                    state.materials = mockMaterialList;
+                    state.warehouseList = mockWarehouseList;
+                    state.inventoryList = mockInventoryList;
                 });
             },
 
@@ -71,18 +72,19 @@ export const useMaterialStore = create<MaterialState>()(
                     ...material,
                     id: Date.now().toString(),
                 };
-                set(state => ({
-                    materials: [...state.materials, newMaterial],
-                }));
+                set(state => {
+                    state.materials.unshift(newMaterial);
+                });
                 showSuccessToast('Tạo vật tư thành công');
             },
 
             updateMaterial: (material: IMaterial) => {
-                set(state => ({
-                    materials: state.materials.map(item =>
-                        item.id === material.id ? material : item
-                    ),
-                }));
+                set(state => {
+                    const index = state.materials.findIndex(item => item.id === material.id);
+                    if (index !== -1) {
+                        state.materials[index] = material;
+                    }
+                });
                 showSuccessToast('Cập nhật thông tin vật tư thành công');
             },
 
@@ -100,9 +102,9 @@ export const useMaterialStore = create<MaterialState>()(
                     ...receipt,
                     id: Date.now().toString(),
                 };
-                set(state => ({
-                    warehouseList: [newReceipt, ...state.warehouseList],
-                }));
+                set(state => {
+                    state.warehouseList.unshift(newReceipt);
+                });
                 showSuccessToast('Tạo phiếu nhập kho thành công');
             },
 
@@ -113,26 +115,17 @@ export const useMaterialStore = create<MaterialState>()(
             // Inventory actions
             addInventoryTicket: (ticket: IInventoryTicket) => {
                 set(state => {
-                    const newInventoryList = [ticket, ...state.inventoryList];
+                    state.inventoryList.unshift(ticket);
 
                     // Update actual stock in material list
-                    const updatedMaterials = state.materials.map(mat => {
-                        const ticketItem = ticket.items.find(
-                            item => item.materialName === mat.name
+                    ticket.items.forEach(ticketItem => {
+                        const material = state.materials.find(
+                            mat => mat.name === ticketItem.materialName
                         );
-                        if (ticketItem) {
-                            return {
-                                ...mat,
-                                remaining: ticketItem.afterQuantity,
-                            };
+                        if (material) {
+                            material.remaining = ticketItem.afterQuantity;
                         }
-                        return mat;
                     });
-
-                    return {
-                        inventoryList: newInventoryList,
-                        materials: updatedMaterials,
-                    };
                 });
                 showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
             },
@@ -143,28 +136,34 @@ export const useMaterialStore = create<MaterialState>()(
 
             // Filter actions
             setSearchText: (text: string) => {
-                set({ searchText: text });
+                set(state => {
+                    state.searchText = text;
+                });
             },
 
             setFilterGroup: (group: string) => {
-                set({ filterGroup: group });
+                set(state => {
+                    state.filterGroup = group;
+                });
             },
 
             setFilterMaterialName: (name: string | null) => {
-                set({ filterMaterialName: name });
+                set(state => {
+                    state.filterMaterialName = name;
+                });
             },
 
             resetFilters: () => {
-                set({
-                    searchText: '',
-                    filterGroup: '',
-                    filterMaterialName: null,
+                set(state => {
+                    state.searchText = '';
+                    state.filterGroup = '';
+                    state.filterMaterialName = null;
                 });
             },
-        }),
+        })),
         {
             name: 'material-storage',
-            storage: createJSONStorage(() => Storage),
+            storage: createJSONStorage(() => AsyncStorage),
             // Only persist data, not UI state
             partialize: state => ({
                 materials: state.materials,
