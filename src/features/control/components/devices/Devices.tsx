@@ -6,6 +6,7 @@ import { DevicesStatusColor } from './DevicesStatusColor';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
 import { AutoScrollText } from './AutoScrollText';
+import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
 
 // Responsive Scaling Helper
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -50,7 +51,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
         containerStyle = { ...styles.cardContainer, ...styles.cardActive };
     }
 
-    const Icon = data.icon;
+    const Icon = getDeviceIcon(data.type);
 
     if (!Icon) return null;
 

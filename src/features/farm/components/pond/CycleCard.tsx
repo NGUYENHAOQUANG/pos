@@ -6,11 +6,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 interface CycleCardProps {
     cycleName: string;
     startDate: string;
-    endDate?: string; // Optional end date for completed cycles
+    endDate?: string;
     doc: number;
     stockingQuantity: number;
     breed: string;
-    status?: 'Chưa hoàn thành' | 'Hoàn thành'; // Cycle status
+    status?: 'Chưa hoàn thành' | 'Hoàn thành';
     onPress?: () => void;
 }
 
@@ -37,7 +37,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                     <Text style={styles.dateText}>{dateDisplay}</Text>
                 </View>
 
-                {/* Cột phải: Badge trạng thái & Mũi tên (Căn phải + Giữa dọc) */}
+                {/* Cột phải: Badge trạng thái & Mũi tên */}
                 <View style={styles.rightColumn}>
                     <View style={[styles.statusBadge, isCompleted && styles.statusBadgeCompleted]}>
                         <Text
@@ -49,7 +49,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                     <Ionicons
                         name="chevron-forward"
                         size={18}
-                        color="#9CA3AF"
+                        color={colors.gray[400]}
                         style={styles.arrowIcon}
                     />
                 </View>
@@ -61,7 +61,7 @@ export const CycleCard: React.FC<CycleCardProps> = ({
             {/* Body: Thông tin chi tiết */}
             <View style={styles.body}>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
+                    <Text style={styles.label}>Ngày nuôi (DOC):</Text>
                     <Text style={styles.value}>{doc}</Text>
                 </View>
 
@@ -81,20 +81,20 @@ export const CycleCard: React.FC<CycleCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#FFFFFF', // Nền trắng
+        backgroundColor: colors.white,
         width: '100%',
         borderWidth: 1,
-        borderColor: '#F3F4F6',
-        borderRadius: 0, // Không bo góc
+        borderColor: colors.borderLight,
+        borderRadius: 0,
     },
     header: {
-        flexDirection: 'row', // Chia cột ngang
+        flexDirection: 'row',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
-        alignItems: 'center', // Căn giữa các cột theo chiều dọc
+        alignItems: 'center',
     },
     leftColumn: {
-        flex: 1, // Chiếm không gian bên trái
+        flex: 1,
     },
     cycleName: {
         fontSize: typography.fontSize.sm,
@@ -114,31 +114,31 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     statusBadge: {
-        backgroundColor: '#FFFBE6',
+        backgroundColor: colors.yellow[50],
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#FFE58F',
+        borderColor: colors.yellow[300],
     },
     statusBadgeCompleted: {
-        backgroundColor: colors.neutral, // #F7FAFD
-        borderColor: colors.defaultBorder, // #DEE4ED
+        backgroundColor: colors.neutral,
+        borderColor: colors.defaultBorder,
     },
     statusText: {
         fontSize: typography.fontSize.sm,
-        color: '#D48806',
+        color: colors.orange[500],
         fontWeight: typography.fontWeight.regular,
     },
     statusTextCompleted: {
-        color: colors.text, // Dark text for completed
+        color: colors.text,
     },
     arrowIcon: {
-        marginLeft: 8, // Khoảng cách giữa badge và mũi tên
+        marginLeft: 8,
     },
     divider: {
         height: 1,
-        backgroundColor: '#F3F4F6', // Borderline ngăn cách
+        backgroundColor: colors.borderLight,
     },
     body: {
         paddingHorizontal: spacing.md,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs, // Khoảng cách giữa các dòng thông tin
+        marginBottom: spacing.xs,
     },
     label: {
         fontSize: typography.fontSize.sm,

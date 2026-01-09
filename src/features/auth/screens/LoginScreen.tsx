@@ -22,27 +22,36 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, spacing, typography } from '@/styles';
 
 export default function LoginScreen() {
+    // --- 1. Hooks & Store ---
     const navigation = useNavigation<AuthStackNavigationProp>();
+    const insets = useSafeAreaInsets();
+
+    const login = useAuthStore(state => state.login);
+
+    // --- 2. Local States ---
     const [selectedTab, setSelectedTab] = useState(0);
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [countryCode, setCountryCode] = useState('+84');
     const [password, setPassword] = useState('');
-    const insets = useSafeAreaInsets();
 
+    // --- 3. Handlers ---
     const handleLogin = async () => {
-        console.log('Login pressed', {
-            tab: selectedTab === 0 ? 'Email' : 'Phone',
-            value: selectedTab === 0 ? email : phone,
-            password,
-        });
-
-        // Mock login - update auth store to trigger navigation
-        const { login } = useAuthStore.getState();
-        await login({
+        const loginData = {
             phone: selectedTab === 0 ? email : phone,
             password,
+        };
+
+        console.log('Login pressed', {
+            tab: selectedTab === 0 ? 'Email' : 'Phone',
+            ...loginData,
         });
+
+        try {
+            await login(loginData);
+        } catch (error) {
+            console.error('Login failed:', error);
+        }
     };
 
     const handleForgotPassWord = () => {
@@ -51,7 +60,6 @@ export default function LoginScreen() {
     };
 
     const handleCreateAccount = () => {
-        console.log('Create account pressed');
         navigation.navigate('Register');
     };
 
@@ -61,6 +69,7 @@ export default function LoginScreen() {
             edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
         >
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+
             {Platform.OS === 'android' && (
                 <View style={[styles.androidStatusBar, { height: insets.top }]} />
             )}
@@ -76,7 +85,7 @@ export default function LoginScreen() {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Header */}
+                    {/* Header Section */}
                     <View style={styles.headerContainer}>
                         <View style={styles.headerContent}>
                             <View style={styles.leftButton}>
@@ -141,6 +150,7 @@ export default function LoginScreen() {
                         />
                     </View>
 
+                    {/* Footer */}
                     <TouchableOpacity onPress={handleCreateAccount} activeOpacity={0.7}>
                         <Text style={styles.footerText}>
                             Bạn chưa có tài khoản?
@@ -171,20 +181,18 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         marginBottom: spacing['3xl'],
-        marginHorizontal: -spacing.lg, // Extend to full width ignoring parent padding
+        marginHorizontal: -spacing.lg,
     },
     headerContent: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16, // Top 16, Bottom 16 (relative to content)
-        // Wait, user said padding top 16, padding with divider is 16.
-        // So 16 top, 16 bottom.
+        paddingVertical: 16,
         position: 'relative',
     },
     leftButton: {
         position: 'absolute',
-        left: spacing.lg, // Align with content padding
+        left: spacing.lg,
         zIndex: 1,
     },
     divider: {
@@ -192,28 +200,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.border,
         width: '100%',
     },
-    logoContainer: {
-        // Removed
-    },
     content: {
         flex: 1,
         marginBottom: spacing['2xl'],
-    },
-    title: {
-        fontSize: typography.fontSize['3xl'] - 2,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        marginBottom: spacing.xs,
-    },
-    subtitle: {
-        fontSize: typography.fontSize.base,
-        color: colors.textSecondary,
-        marginBottom: spacing.xl,
-        lineHeight: spacing.lg,
-    },
-    buttonContainer: {
-        marginTop: spacing.xs,
-        marginBottom: spacing.lg,
     },
     footerText: {
         fontSize: typography.fontSize.sm,
