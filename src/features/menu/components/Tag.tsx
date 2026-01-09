@@ -28,7 +28,8 @@ export const Tag: React.FC<TagProps> = ({ status, style }) => {
                 };
             case 'active':
                 return {
-                    label: 'Hoạt động',
+                    // label: 'Hoạt động',
+                    label: 'Đang nuôi',
                     color: colors.green[600],
                     backgroundColor: colors.green[50],
                     borderColor: colors.green[300],
