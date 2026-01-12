@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,6 +29,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const { itemToEdit, pond: routePond } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const currentPond = routePond;
 
@@ -223,9 +224,11 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             </View>
 
             <ScrollView
+                ref={scrollViewRef}
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
             >
                 <GeneralInfoBox
                     type="withImage"
@@ -242,7 +245,11 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onRemainingWeightChange={setRemainingWeight}
                     stockingQuantity={stockingQuantity}
                 />
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             <View style={styles.footer}>

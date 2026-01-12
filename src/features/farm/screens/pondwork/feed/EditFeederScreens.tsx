@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Toast from 'react-native-toast-message';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -39,6 +39,7 @@ export const EditFeederScreens = () => {
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     // Load existing data
     useEffect(() => {
@@ -120,8 +121,10 @@ export const EditFeederScreens = () => {
 
             <View style={styles.contentContainer}>
                 <ScrollView
+                    ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
                     {/* General Info Section */}
                     <GeneralInfoBox
@@ -138,7 +141,11 @@ export const EditFeederScreens = () => {
                     />
 
                     {/* Note Section */}
-                    <SelectionNotesBox notes={note} onNotesChange={setNote} />
+                    <SelectionNotesBox
+                        notes={note}
+                        onNotesChange={setNote}
+                        scrollViewRef={scrollViewRef}
+                    />
                     <View style={styles.spacer} />
                 </ScrollView>
             </View>

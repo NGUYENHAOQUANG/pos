@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,6 +30,7 @@ export const AddHarvestScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
+    const scrollViewRef = useRef<ScrollView>(null);
     const {
         getPondJobItems,
         updatePondJob,
@@ -312,7 +313,12 @@ export const AddHarvestScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
                 <GeneralInfoBox
                     type="harvest"
                     date={selectedDate}
@@ -336,7 +342,11 @@ export const AddHarvestScreen: React.FC = () => {
                     />
                 )}
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             {/* Footer Buttons */}
