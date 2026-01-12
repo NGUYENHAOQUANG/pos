@@ -17,6 +17,22 @@ export const authApi = {
     return data;
   },
 
+  requestOtp: async (phoneNumber: string): Promise<any> => {
+    const {data} = await apiClient.post(
+      API_ENDPOINTS.AUTH.REQUEST_OTP,
+      { phoneNumber }
+    );
+    return data;
+  },
+
+  verifyOtp: async (phoneNumber: string, otpCode: string): Promise<AuthResponse> => {
+    const {data} = await apiClient.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.VERIFY_OTP,
+      { phoneNumber, otpCode }
+    );
+    return data;
+  },
+
   register: async (registerData: RegisterData): Promise<AuthResponse> => {
     const {data} = await apiClient.post<AuthResponse>(
       API_ENDPOINTS.AUTH.REGISTER,

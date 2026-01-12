@@ -26,7 +26,7 @@ export default function LoginScreen() {
     const navigation = useNavigation<AuthStackNavigationProp>();
     const insets = useSafeAreaInsets();
 
-    const login = useAuthStore(state => state.login);
+    // const login = useAuthStore(state => state.login); // Removed unused hook assignment
 
     // --- 2. Local States ---
     const [selectedTab, setSelectedTab] = useState(0);
@@ -37,21 +37,18 @@ export default function LoginScreen() {
 
     // --- 3. Handlers ---
     const handleLogin = async () => {
-        const loginData = {
-            phone: selectedTab === 0 ? email : phone,
-            password,
-        };
-
         console.log('Login pressed', {
             tab: selectedTab === 0 ? 'Email' : 'Phone',
-            ...loginData,
+            value: selectedTab === 0 ? email : phone,
+            password,
         });
 
-        try {
-            await login(loginData);
-        } catch (error) {
-            console.error('Login failed:', error);
-        }
+        // Mock login - update auth store to trigger navigation
+        const { login } = useAuthStore.getState();
+        await login({
+            username: selectedTab === 0 ? email : phone,
+            password,
+        });
     };
 
     const handleForgotPassWord = () => {
