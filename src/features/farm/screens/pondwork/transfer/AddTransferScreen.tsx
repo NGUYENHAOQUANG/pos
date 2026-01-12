@@ -320,6 +320,7 @@ export const AddTransferScreen: React.FC = () => {
                 ref={scrollViewRef}
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
             >
                 <GeneralInfoBox
                     type="default"
@@ -351,7 +352,11 @@ export const AddTransferScreen: React.FC = () => {
                     onDropdownOpen={handleDropdownOpen}
                 />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             {/* Footer Buttons */}

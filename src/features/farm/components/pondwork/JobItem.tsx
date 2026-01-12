@@ -137,7 +137,11 @@ export const JobCard: React.FC<JobCardProps> = ({
             meta.temperatureWarning ||
             meta.salinityWarning ||
             meta.alkalinityWarning ||
-            meta.transparencyWarning
+            meta.transparencyWarning ||
+            meta.kaliWarning ||
+            meta.tanWarning ||
+            meta.magieWarning ||
+            meta.no3Warning
         );
     };
 

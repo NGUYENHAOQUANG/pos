@@ -31,7 +31,7 @@ export const MemberManagementScreens: React.FC = () => {
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [suspendModalVisible, setSuspendModalVisible] = useState(false);
-    const [resendModalVisible, setResendModalVisible] = useState(false);
+    // const [resendModalVisible, setResendModalVisible] = useState(false);
     const [activateModalVisible, setActivateModalVisible] = useState(false);
     const [selectedRole, setSelectedRole] = useState<string>('all');
     const [selectedLevel, setSelectedLevel] = useState<string>('all');
@@ -163,10 +163,10 @@ export const MemberManagementScreens: React.FC = () => {
                                     setSelectedMemberId(member.id);
                                     setActivateModalVisible(true);
                                 }}
-                                onResendInvite={() => {
-                                    setSelectedMemberId(member.id);
-                                    setResendModalVisible(true);
-                                }}
+                                // onResendInvite={() => {
+                                //     setSelectedMemberId(member.id);
+                                //     setResendModalVisible(true);
+                                // }}
                             />
                         ))}
                     </View>
@@ -211,14 +211,14 @@ export const MemberManagementScreens: React.FC = () => {
                 successMessage="Đã tạm ngưng tài khoản"
             />
 
-            <ResendComfirmCard
+            {/* <ResendComfirmCard
                 visible={resendModalVisible}
                 onClose={() => setResendModalVisible(false)}
                 onConfirm={() => {
                     setResendModalVisible(false);
                     Toast.show(ToastMessages.Member.RESEND_INVITE_SUCCESS);
                 }}
-            />
+            /> */}
 
             <ResendComfirmCard
                 visible={activateModalVisible}

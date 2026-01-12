@@ -56,7 +56,7 @@ export const EditMemberScreens: React.FC = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [suspendModalVisible, setSuspendModalVisible] = useState(false);
-    const [resendModalVisible, setResendModalVisible] = useState(false);
+    // const [resendModalVisible, setResendModalVisible] = useState(false);
     const [activateModalVisible, setActivateModalVisible] = useState(false); // Reuse reuse modal or add new state? Add new state for clarity
 
     // Load member data
@@ -153,7 +153,7 @@ export const EditMemberScreens: React.FC = () => {
         navigation.navigate('MemberManagement');
     };
 
-    const handleResendInvite = () => {
+    /* const handleResendInvite = () => {
         setResendModalVisible(true);
     };
 
@@ -161,7 +161,7 @@ export const EditMemberScreens: React.FC = () => {
         console.log('Resend Invite');
         setResendModalVisible(false);
         Toast.show(ToastMessages.Member.RESEND_INVITE_SUCCESS);
-    };
+    }; */
 
     const handleSuspend = () => {
         setSuspendModalVisible(true);
@@ -233,14 +233,12 @@ export const EditMemberScreens: React.FC = () => {
 
                 {!isPaused && (
                     <View style={styles.actionContainer}>
-                        {isPending ? (
-                            <TouchableOpacity
+                        {isPending ? null /* <TouchableOpacity
                                 style={styles.resendButton}
                                 onPress={handleResendInvite}
                             >
                                 <Text style={styles.resendText}>Gửi lại lời mời</Text>
-                            </TouchableOpacity>
-                        ) : (
+                            </TouchableOpacity> */ : (
                             <TouchableOpacity style={styles.suspendButton} onPress={handleSuspend}>
                                 <Text style={styles.suspendText}>Tạm ngưng tài khoản</Text>
                             </TouchableOpacity>
@@ -286,11 +284,11 @@ export const EditMemberScreens: React.FC = () => {
                 successMessage="Đã tạm ngưng tài khoản"
             />
 
-            <ResendComfirmCard
+            {/* <ResendComfirmCard
                 visible={resendModalVisible}
                 onClose={() => setResendModalVisible(false)}
                 onConfirm={handleConfirmResend}
-            />
+            /> */}
 
             <ResendComfirmCard
                 visible={activateModalVisible}

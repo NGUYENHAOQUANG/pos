@@ -16,6 +16,7 @@ interface WaterTreatmentProps {
     note: string;
     onNoteChange: (note: string) => void;
     disabledDate?: boolean;
+    scrollViewRef?: React.RefObject<any>;
 }
 
 export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
@@ -28,6 +29,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
     note,
     onNoteChange,
     disabledDate = false,
+    scrollViewRef,
 }) => {
     const activityOptions = ['Đánh khoáng', 'Đánh vi sinh', 'Kiểm khuẩn'];
 
@@ -59,7 +61,11 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
             />
 
             {/* Notes */}
-            <SelectionNotesBox notes={note} onNotesChange={onNoteChange} />
+            <SelectionNotesBox
+                notes={note}
+                onNotesChange={onNoteChange}
+                scrollViewRef={scrollViewRef}
+            />
         </View>
     );
 };

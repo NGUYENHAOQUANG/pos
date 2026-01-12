@@ -21,6 +21,7 @@ interface UnitOfUseProps {
     tooltipText?: string;
     isOpen: boolean;
     onToggle: () => void;
+    disabled?: boolean;
 }
 
 export const UnitOfUse: React.FC<UnitOfUseProps> = ({
@@ -32,6 +33,7 @@ export const UnitOfUse: React.FC<UnitOfUseProps> = ({
     tooltipText = 'Đơn vị sử dụng được dùng khi xuất kho sản phẩm (Ví dụ cho ăn ở ao, xuất kho hoá chất).',
     isOpen,
     onToggle,
+    disabled = false,
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
@@ -72,17 +74,32 @@ export const UnitOfUse: React.FC<UnitOfUseProps> = ({
                 </View>
             )}
 
-            <TouchableOpacity style={styles.trigger} onPress={onToggle} activeOpacity={0.7}>
+            <TouchableOpacity
+                style={[styles.trigger, disabled && styles.triggerDisabled]}
+                onPress={() => !disabled && onToggle()}
+                activeOpacity={0.7}
+                disabled={disabled}
+            >
                 <AutoScrollText
                     key={value || placeholder}
                     text={value || placeholder}
-                    style={[styles.valueText, !value && styles.placeholderText]}
+                    style={[
+                        styles.valueText,
+                        !value && styles.placeholderText,
+                        disabled && styles.textDisabled,
+                    ]}
                     containerStyle={{ flex: 1, marginRight: 8 }}
                 />
-                <Ionicons name="chevron-down" size={20} color={colors.textSecondary || '#999'} />
+                <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={
+                        disabled ? colors.textSecondary || '#999' : colors.textSecondary || '#999'
+                    }
+                />
             </TouchableOpacity>
 
-            {isOpen && (
+            {isOpen && !disabled && (
                 <View style={styles.dropdown}>
                     <ScrollView
                         nestedScrollEnabled
@@ -131,8 +148,12 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: borderRadius.sm,
     },
+    triggerDisabled: {
+        borderColor: colors.borderDisabled,
+    },
     valueText: { flex: 1, fontSize: 15, color: colors.text },
     placeholderText: { color: colors.textSecondary || '#999' },
+    textDisabled: { color: colors.textSecondary || '#999', opacity: 0.6 },
     dropdown: {
         position: 'absolute',
         top: '100%',

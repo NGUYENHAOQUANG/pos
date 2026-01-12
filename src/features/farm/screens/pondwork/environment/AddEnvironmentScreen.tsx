@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,12 +33,19 @@ export const AddEnvironmentScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const { getPondJobItems, updatePondJob, environmentSettings } = useFarm();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const checkLimit = (value: string, paramId: string): boolean => {
         if (!value || !value.trim()) return false;
 
         // Find parameter in default settings
-        const param = environmentSettings.defaultParameters.find(p => p.id === paramId);
+        let param = environmentSettings.defaultParameters.find(p => p.id === paramId);
+
+        // If not found in default, look in advanced settings
+        if (!param) {
+            param = environmentSettings.advancedParameters.find(p => p.id === paramId);
+        }
+
         if (!param || !param.limit) return false;
 
         const parts = param.limit.split('-');
@@ -76,16 +83,16 @@ export const AddEnvironmentScreen: React.FC = () => {
         if (itemToEdit && meta) {
             // When editing: get from meta
             const advancedParams: Array<{ id: string; name: string }> = [];
-            if (meta.kali) {
+            if (meta.kali !== undefined) {
                 advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
             }
-            if (meta.tan) {
+            if (meta.tan !== undefined) {
                 advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
             }
-            if (meta.magie) {
+            if (meta.magie !== undefined) {
                 advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
             }
-            if (meta.no3) {
+            if (meta.no3 !== undefined) {
                 advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
             }
             return advancedParams;
@@ -143,16 +150,16 @@ export const AddEnvironmentScreen: React.FC = () => {
         if (itemToEdit && meta) {
             // When editing: get from meta
             const advancedParams: Array<{ id: string; name: string }> = [];
-            if (meta.kali) {
+            if (meta.kali !== undefined) {
                 advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
             }
-            if (meta.tan) {
+            if (meta.tan !== undefined) {
                 advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
             }
-            if (meta.magie) {
+            if (meta.magie !== undefined) {
                 advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
             }
-            if (meta.no3) {
+            if (meta.no3 !== undefined) {
                 advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
             }
             setAdvancedParameters(advancedParams);
@@ -163,7 +170,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 .map(p => ({ id: p.id, name: p.name }));
             setAdvancedParameters(checkedParams);
         }
-    }, [itemToEdit, meta, environmentSettings.advancedParameters]);
+    }, [itemToEdit, meta, environmentSettings.advancedParameters]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -236,21 +243,25 @@ export const AddEnvironmentScreen: React.FC = () => {
                     transparency: transparency.trim() || undefined,
                     transparencyWarning: checkLimit(transparency, '4'),
                     // Only save advanced parameters if they are checked
-                    kali:
+                    kali: advancedParameters.some(p => p.id === '7') ? kali.trim() : undefined,
+                    kaliWarning:
                         advancedParameters.some(p => p.id === '7') && kali.trim()
-                            ? kali.trim()
+                            ? checkLimit(kali, '7')
                             : undefined,
-                    tan:
+                    tan: advancedParameters.some(p => p.id === '8') ? tan.trim() : undefined,
+                    tanWarning:
                         advancedParameters.some(p => p.id === '8') && tan.trim()
-                            ? tan.trim()
+                            ? checkLimit(tan, '8')
                             : undefined,
-                    magie:
+                    magie: advancedParameters.some(p => p.id === '9') ? magie.trim() : undefined,
+                    magieWarning:
                         advancedParameters.some(p => p.id === '9') && magie.trim()
-                            ? magie.trim()
+                            ? checkLimit(magie, '9')
                             : undefined,
-                    no3:
+                    no3: advancedParameters.some(p => p.id === '10') ? no3.trim() : undefined,
+                    no3Warning:
                         advancedParameters.some(p => p.id === '10') && no3.trim()
-                            ? no3.trim()
+                            ? checkLimit(no3, '10')
                             : undefined,
                 },
             };
@@ -399,7 +410,12 @@ export const AddEnvironmentScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
                 <GeneralInfoBox
                     type="default"
                     date={selectedDate}
@@ -456,7 +472,11 @@ export const AddEnvironmentScreen: React.FC = () => {
                     showError={showParameterError}
                 />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             {/* Footer Buttons */}

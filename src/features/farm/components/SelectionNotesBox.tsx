@@ -1,23 +1,43 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
 import { colors, spacing } from '@/styles';
 
 interface SelectionNotesBoxProps {
     notes: string;
     onNotesChange: (value: string) => void;
+    scrollViewRef?: React.RefObject<any>;
 }
 
-export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onNotesChange }) => {
+export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({
+    notes,
+    onNotesChange,
+    scrollViewRef,
+}) => {
+    const containerRef = useRef<View>(null);
+    const inputRef = useRef<TextInput>(null);
+
+    const handleFocus = () => {
+        if (Platform.OS === 'ios' && scrollViewRef?.current) {
+            // Delay để đảm bảo keyboard đã mở
+            setTimeout(() => {
+                // Scroll to end để đảm bảo input được hiển thị
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }, 300);
+        }
+    };
+
     return (
-        <View style={styles.container}>
+        <View ref={containerRef} style={styles.container}>
             <Text style={styles.title}>Ghi chú</Text>
             <View style={styles.inputGroup}>
                 <TextInput
+                    ref={inputRef}
                     style={styles.textArea}
                     placeholder="Nhập ghi chú"
                     placeholderTextColor={colors.borderSubtle}
                     value={notes}
                     onChangeText={onNotesChange}
+                    onFocus={handleFocus}
                     multiline
                     textAlignVertical="top"
                 />

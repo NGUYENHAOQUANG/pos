@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Toast from 'react-native-toast-message';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -35,6 +35,7 @@ export const AddFeederScreens = () => {
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const handleSaveInfo = () => {
         if (selectedMaterials.length === 0) {
@@ -108,8 +109,10 @@ export const AddFeederScreens = () => {
 
             <View style={styles.contentContainer}>
                 <ScrollView
+                    ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
                     {/* General Info Section */}
                     <GeneralInfoBox
@@ -126,7 +129,11 @@ export const AddFeederScreens = () => {
                     />
 
                     {/* Note Section */}
-                    <SelectionNotesBox notes={note} onNotesChange={setNote} />
+                    <SelectionNotesBox
+                        notes={note}
+                        onNotesChange={setNote}
+                        scrollViewRef={scrollViewRef}
+                    />
                     {/* Add extra padding at bottom to ensure content isn't hidden behind footer if keybaord is open or just for scroll space */}
                     <View style={styles.spacer} />
                 </ScrollView>

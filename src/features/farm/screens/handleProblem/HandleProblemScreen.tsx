@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -69,6 +69,7 @@ export const HandleProblemScreen = () => {
     const [note, setNote] = useState('');
     const [imageUris, setImageUris] = useState<string[]>([]);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     // Load Data for Edit
     useEffect(() => {
@@ -173,8 +174,10 @@ export const HandleProblemScreen = () => {
             />
 
             <ScrollView
+                ref={scrollViewRef}
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
             >
                 {/* 1. Thông tin chung */}
                 <GeneralInfoBox
@@ -193,7 +196,11 @@ export const HandleProblemScreen = () => {
                 />
 
                 {/* 3. Ghi chú (Mô tả sự cố) */}
-                <SelectionNotesBox notes={note} onNotesChange={setNote} />
+                <SelectionNotesBox
+                    notes={note}
+                    onNotesChange={setNote}
+                    scrollViewRef={scrollViewRef}
+                />
 
                 <View style={styles.spacer} />
             </ScrollView>

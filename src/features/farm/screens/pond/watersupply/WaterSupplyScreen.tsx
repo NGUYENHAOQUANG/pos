@@ -1,13 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-    View,
-    StyleSheet,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    Platform,
-    TextInput,
-} from 'react-native';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
@@ -23,6 +15,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
@@ -61,6 +54,7 @@ export const WaterSupplyScreen = () => {
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     // --- Load Data khi Edit ---
     useEffect(() => {
@@ -255,8 +249,10 @@ export const WaterSupplyScreen = () => {
 
             <View style={styles.contentContainer}>
                 <ScrollView
+                    ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
                     {/* 1. Thông tin chung */}
                     <GeneralInfoBox
@@ -289,18 +285,11 @@ export const WaterSupplyScreen = () => {
                     />
 
                     {/* 4. Ghi chú */}
-                    <View style={styles.section}>
-                        <Text style={styles.label}>Ghi chú</Text>
-                        <TextInput
-                            style={styles.noteInput}
-                            placeholder="Nhập ghi chú"
-                            placeholderTextColor={colors.gray[300]}
-                            multiline
-                            textAlignVertical="top"
-                            value={note}
-                            onChangeText={setNote}
-                        />
-                    </View>
+                    <SelectionNotesBox
+                        notes={note}
+                        onNotesChange={setNote}
+                        scrollViewRef={scrollViewRef}
+                    />
 
                     <View style={styles.spacer} />
                 </ScrollView>

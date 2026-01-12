@@ -130,6 +130,7 @@ export const colors = {
     borderMedium: '#E2E8F0', // Medium border color
     borderLight: '#F3F4F6',
     borderDark: '#D1D5DB',
+    borderDisabled: '#E0E0E0', // Disabled border color
     borderSubtle: '#00000040', // Subtle black border (40% opacity)
 
     // Utilities

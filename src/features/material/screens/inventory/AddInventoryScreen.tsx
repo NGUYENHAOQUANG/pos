@@ -16,8 +16,20 @@ import { useMaterialStore } from '../../store/materialStore';
 
 interface AddInventoryScreenProps {}
 
+// Define strict types for navigation targets locally since we cannot edit AppStack
+type MainTabParams = {
+    screen: 'Material';
+    params: { selectedTab: 'inventory' };
+};
+
+type LocalNavigationProp = NativeStackNavigationProp<
+    Omit<MaterialStackParamList, 'MainTabs'> & {
+        MainTabs: MainTabParams;
+    }
+>;
+
 export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const navigation = useNavigation<LocalNavigationProp>();
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
     const params = route.params;
     const initialMaterialName = params?.initialMaterialName;
@@ -133,7 +145,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         };
         addInventoryTicket(newTicket);
         // Return to Inventory tab
-        navigation.navigate('MaterialList', { selectedTab: 'inventory' } as any);
+        navigation.navigate('MainTabs', {
+            screen: 'Material',
+            params: { selectedTab: 'inventory' },
+        });
     };
 
     return (

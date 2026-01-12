@@ -37,12 +37,12 @@ export default function AuthScreen() {
         }
 
         const rawPhone = phoneNumber.replace(/\s/g, '');
-        
+
         // Validate VN Phone Number Format
         const vnPhoneRegex = /^(0)(3|5|7|8|9)([0-9]{8})$/;
 
         if (!vnPhoneRegex.test(rawPhone)) {
-             Toast.show({
+            Toast.show({
                 type: 'error',
                 text1: 'Số điện thoại không hợp lệ',
                 text2: 'Vui lòng thử lại',
@@ -60,7 +60,7 @@ export default function AuthScreen() {
 
         try {
             const response = await authApi.requestOtp(rawPhone);
-            
+
             // In Dev environment, OTP is in response.data.testOtp
             const devOtp = response?.data?.testOtp;
             console.log('AuthScreen OTP Response:', JSON.stringify(response));

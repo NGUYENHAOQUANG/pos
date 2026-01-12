@@ -52,16 +52,20 @@ export const convertEnvironmentMetaToActivityData = (meta: EnvironmentMeta): Act
         });
     }
     if (meta.kali) {
-        data.push({ label: 'Kali (mg/L)', value: meta.kali });
+        data.push({ label: 'Kali (mg/L)', value: meta.kali, isWarning: meta.kaliWarning ?? false });
     }
     if (meta.tan) {
-        data.push({ label: 'TAN (mg/L)', value: meta.tan });
+        data.push({ label: 'TAN (mg/L)', value: meta.tan, isWarning: meta.tanWarning ?? false });
     }
     if (meta.magie) {
-        data.push({ label: 'Magie (mg/L)', value: meta.magie });
+        data.push({
+            label: 'Magie (mg/L)',
+            value: meta.magie,
+            isWarning: meta.magieWarning ?? false,
+        });
     }
     if (meta.no3) {
-        data.push({ label: 'NO3 (mg/L)', value: meta.no3 });
+        data.push({ label: 'NO3 (mg/L)', value: meta.no3, isWarning: meta.no3Warning ?? false });
     }
 
     return data;

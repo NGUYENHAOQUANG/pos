@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     StyleSheet,
     ScrollView,
@@ -35,6 +35,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     // Load existing data
     useEffect(() => {
@@ -124,7 +125,12 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 style={styles.flex1}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                <ScrollView style={styles.flex1} showsVerticalScrollIndicator={false}>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.flex1}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
                     {/* Main Content Component */}
                     <WaterTreatment
                         executionDate={executionDate}
@@ -136,6 +142,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                         onSelectedMaterialsChange={setSelectedMaterials}
                         note={note}
                         onNoteChange={setNote}
+                        scrollViewRef={scrollViewRef}
                     />
                 </ScrollView>
             </KeyboardAvoidingView>
