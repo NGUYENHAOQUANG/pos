@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, StyleSheet, InteractionManager } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -11,12 +11,12 @@ import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useFarm } from '@/features/farm/store/farmStore';
+import { Loading } from '@/shared/components/ui/Loading';
 
 interface ShrimpPondListScreensProps {}
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
-// Sort order map
 // Sort order map
 const POND_TYPE_ORDER: Record<string, number> = {
     [POND_TYPES.NURSERY]: 1,
@@ -37,6 +37,15 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         label: 'Trại Kiên Giang',
         value: '1',
     });
+    const [isReady, setIsReady] = useState(false);
+
+    useEffect(() => {
+        const task = InteractionManager.runAfterInteractions(() => {
+            setIsReady(true);
+        });
+
+        return () => task.cancel();
+    }, []);
 
     const farmOptions: DropDownItem[] = [
         { id: '1', label: 'Trại Kiên Giang', value: '1' },
@@ -90,13 +99,15 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
     // Calculate counts based on COMPUTED status (requires activity + generic rules)
     const counts = useMemo(() => {
+        if (!isReady) return { all: 0, active: 0, preparing: 0 };
         const all = ponds.length;
         const active = ponds.filter(pond => getComputedStatus(pond) === 'active').length;
         const preparing = ponds.filter(pond => getComputedStatus(pond) === 'preparing').length;
         return { all, active, preparing };
-    }, [ponds, getComputedStatus]);
+    }, [ponds, getComputedStatus, isReady]);
 
     const filteredData = useMemo(() => {
+        if (!isReady) return [];
         let data = ponds;
         if (selectedTab === 'active') {
             data = ponds.filter(pond => getComputedStatus(pond) === 'active');
@@ -109,29 +120,31 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
             const orderB = POND_TYPE_ORDER[b.type] || 99;
             return orderA - orderB;
         });
-    }, [selectedTab, ponds, getComputedStatus]);
+    }, [selectedTab, ponds, getComputedStatus, isReady]);
 
     return (
-        <View style={styles.container}>
-            <HeaderFarm
-                type="list"
-                data={farmOptions}
-                value={selectedFarm}
-                onSelect={setSelectedFarm}
-                onMenuPress={handleFarmInfoPress}
-            />
-            <HeadingFarm
-                selectedTab={selectedTab}
-                onTabSelect={setSelectedTab}
-                tabType="dashboard"
-                counts={counts}
-            />
-            <ShrimpPondList
-                data={filteredData}
-                onPondPress={handlePondPress}
-                onInfoPress={handlePondInfoPress}
-            />
-        </View>
+        <Loading isLoading={!isReady}>
+            <View style={styles.container}>
+                <HeaderFarm
+                    type="list"
+                    data={farmOptions}
+                    value={selectedFarm}
+                    onSelect={setSelectedFarm}
+                    onMenuPress={handleFarmInfoPress}
+                />
+                <HeadingFarm
+                    selectedTab={selectedTab}
+                    onTabSelect={setSelectedTab}
+                    tabType="dashboard"
+                    counts={counts}
+                />
+                <ShrimpPondList
+                    data={filteredData}
+                    onPondPress={handlePondPress}
+                    onInfoPress={handlePondInfoPress}
+                />
+            </View>
+        </Loading>
     );
 };
 
