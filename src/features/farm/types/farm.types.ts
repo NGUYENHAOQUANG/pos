@@ -107,9 +107,13 @@ export interface EnvironmentMeta {
     transparency?: string;
     transparencyWarning?: boolean;
     kali?: string;
+    kaliWarning?: boolean;
     tan?: string;
+    tanWarning?: boolean;
     magie?: string;
+    magieWarning?: boolean;
     no3?: string;
+    no3Warning?: boolean;
 }
 
 export interface SiphonMeta {
