@@ -8,7 +8,7 @@ import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarm } from '@/features/farm/store/farmStore';
-import { JobExecution, CycleData } from '@/features/farm/types/farm.types';
+import { JobExecution, CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -172,25 +172,25 @@ export const ShrimpFarmScreens: React.FC = () => {
 
         if (pond?.type) {
             switch (pond.type) {
-                case 'Ao lắng':
+                case POND_TYPES.SETTLING:
                     jobTemplate = SETTLING_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao xử lý':
+                case POND_TYPES.TREATMENT:
                     jobTemplate = TREATMENT_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao chứa nước':
+                case POND_TYPES.WATER_STORAGE:
                     jobTemplate = WATER_STORAGE_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao nuôi':
+                case POND_TYPES.CULTIVATION:
                     jobTemplate = CULTIVATION_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao vèo':
+                case POND_TYPES.NURSERY:
                     jobTemplate = NURSERY_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao sẵn sàng':
+                case POND_TYPES.READY:
                     jobTemplate = READY_POND_JOBS_TEMPLATE;
                     break;
-                case 'Ao thải':
+                case POND_TYPES.WASTE:
                     jobTemplate = WASTE_POND_JOBS_TEMPLATE;
                     break;
                 default:
@@ -624,7 +624,7 @@ export const ShrimpFarmScreens: React.FC = () => {
             {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ.
                 User yêu cầu "Ao sẵn sàng" KHÔNG có bắt đầu chu kỳ nuôi.
             */}
-            {selectedTab === 'work' && !currentCycle && pond?.type !== 'Ao sẵn sàng' && (
+            {selectedTab === 'work' && !currentCycle && pond?.type !== POND_TYPES.READY && (
                 <View style={styles.footer}>
                     <TouchableOpacity
                         style={styles.startButton}

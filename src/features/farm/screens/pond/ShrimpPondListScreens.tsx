@@ -9,7 +9,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { FarmData } from '@/features/farm/types/farm.types';
+import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useFarm } from '@/features/farm/store/farmStore';
 
 interface ShrimpPondListScreensProps {}
@@ -17,14 +17,15 @@ interface ShrimpPondListScreensProps {}
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
 // Sort order map
+// Sort order map
 const POND_TYPE_ORDER: Record<string, number> = {
-    'Ao vèo': 1,
-    'Ao nuôi': 2,
-    'Ao sẵn sàng': 3,
-    'Ao chứa nước': 4,
-    'Ao xử lý': 5,
-    'Ao thải': 6,
-    'Ao lắng': 7,
+    [POND_TYPES.NURSERY]: 1,
+    [POND_TYPES.CULTIVATION]: 2,
+    [POND_TYPES.READY]: 3,
+    [POND_TYPES.WATER_STORAGE]: 4,
+    [POND_TYPES.TREATMENT]: 5,
+    [POND_TYPES.WASTE]: 6,
+    [POND_TYPES.SETTLING]: 7,
 };
 
 export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {

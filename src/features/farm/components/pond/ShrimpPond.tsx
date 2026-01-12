@@ -11,7 +11,8 @@ import {
 
 import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
 import { IconPond } from '@/assets/icons'; // Import new SVG
-import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
+import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
 import { useFarm } from '@/features/farm/store/farmStore';
@@ -51,12 +52,13 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     // Logic hasData: Now includes almost all functional ponds
     // Exclude 'Ao lắng' (Settling) as it has no tasks, unless specific logic arises later.
     const hasData =
-        type === 'Ao nuôi' ||
-        type === 'Ao vèo' ||
-        type === 'Ao sẵn sàng' ||
-        type === 'Ao xử lý' ||
-        type === 'Ao chứa nước' ||
-        type === 'Ao thải';
+        type === POND_TYPES.CULTIVATION ||
+        type === POND_TYPES.NURSERY ||
+        type === POND_TYPES.READY ||
+        type === POND_TYPES.TREATMENT ||
+        type === POND_TYPES.WATER_STORAGE ||
+        type === POND_TYPES.WASTE ||
+        type === POND_TYPES.SETTLING;
 
     const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
 

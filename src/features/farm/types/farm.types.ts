@@ -1,11 +1,14 @@
-export type PondType =
-    | 'Ao nuôi'
-    | 'Ao vèo'
-    | 'Ao sẵn sàng'
-    | 'Ao lắng'
-    | 'Ao thải'
-    | 'Ao xử lý'
-    | 'Ao chứa nước';
+export const POND_TYPES = {
+    CULTIVATION: 'Ao nuôi',
+    NURSERY: 'Ao vèo',
+    READY: 'Ao sẵn sàng',
+    SETTLING: 'Ao lắng',
+    WASTE: 'Ao thải',
+    TREATMENT: 'Ao xử lý',
+    WATER_STORAGE: 'Ao chứa nước',
+} as const;
+
+export type PondType = (typeof POND_TYPES)[keyof typeof POND_TYPES];
 
 export interface PondData {
     id: string;
