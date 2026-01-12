@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
@@ -26,6 +26,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const handleBack = () => {
         navigation.goBack();
@@ -91,7 +92,11 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                <ScrollView style={styles.flex1}>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.flex1}
+                    keyboardShouldPersistTaps="handled"
+                >
                     {/* Main Content Component */}
                     <WaterTreatment
                         executionDate={executionDate}
@@ -103,6 +108,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                         note={note}
                         onNoteChange={setNote}
                         disabledDate={true}
+                        scrollViewRef={scrollViewRef}
                     />
                 </ScrollView>
             </KeyboardAvoidingView>

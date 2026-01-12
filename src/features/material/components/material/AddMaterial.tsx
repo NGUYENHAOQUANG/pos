@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -45,6 +45,22 @@ const MATERIAL_TYPES_MAP: Record<string, string[]> = {
         'Chi phí điện nước',
         'Chi phí quản lý doanh nghiệp',
     ],
+};
+
+// Mapping từ đơn vị tính chính sang các đơn vị sử dụng tương ứng
+const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
+    // Khối lượng
+    Kg: ['Kg', 'g', 'mg'],
+    g: ['g', 'mg', 'kg'],
+    Gram: ['g', 'mg', 'kg'],
+    mg: ['mg', 'g'],
+    // Thể tích
+    Lít: ['Lít', 'ml'],
+    ml: ['ml', 'Lít'],
+    // Chiều dài
+    mét: ['m', 'cm', 'mm'],
+    // Thể tích khối
+    m3: ['m3', 'Lít', 'ml'],
 };
 
 interface AddMaterialProps {
@@ -111,6 +127,22 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
     // Calculate options for Material Type based on selected Group
     const typeOptions = group && MATERIAL_TYPES_MAP[group] ? MATERIAL_TYPES_MAP[group] : [];
+
+    // Calculate options for Unit of Use based on selected Unit
+    const unitOfUseOptions = useMemo(() => {
+        return unit && UNIT_TO_USAGE_UNITS_MAP[unit] ? UNIT_TO_USAGE_UNITS_MAP[unit] : [];
+    }, [unit]);
+
+    // Reset unitOfUse if current value is not in the new options
+    useEffect(() => {
+        if (unit && unitOfUse && unitOfUseOptions.length > 0) {
+            if (!unitOfUseOptions.includes(unitOfUse)) {
+                onUnitOfUseChange?.('');
+            }
+        } else if (!unit) {
+            onUnitOfUseChange?.('');
+        }
+    }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
 
     const toggleBasicExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -235,10 +267,14 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                     <UnitOfUse
                                         label="Đơn vị sử dụng"
                                         value={unitOfUse}
-                                        options={unitOptions}
+                                        options={unitOfUseOptions}
                                         onChange={onUnitOfUseChange}
                                         isOpen={activeDropdown === 'unitOfUse'}
                                         onToggle={() => handleToggleDropdown('unitOfUse')}
+                                        placeholder={
+                                            unit ? 'Chọn đơn vị sử dụng' : 'Chọn đơn vị tính trước'
+                                        }
+                                        disabled={!unit}
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>

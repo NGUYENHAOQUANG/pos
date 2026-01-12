@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,6 +33,7 @@ export const AddEnvironmentScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const { getPondJobItems, updatePondJob, environmentSettings } = useFarm();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const checkLimit = (value: string, paramId: string): boolean => {
         if (!value || !value.trim()) return false;
@@ -409,7 +410,12 @@ export const AddEnvironmentScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
                 <GeneralInfoBox
                     type="default"
                     date={selectedDate}
@@ -466,7 +472,11 @@ export const AddEnvironmentScreen: React.FC = () => {
                     showError={showParameterError}
                 />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             {/* Footer Buttons */}

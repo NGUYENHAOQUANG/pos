@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -38,6 +38,7 @@ export const AddSiphonScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const { getPondJobItems, updatePondJob } = useFarm();
+    const scrollViewRef = useRef<ScrollView>(null);
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as SiphonMeta) || {}, [itemToEdit?.meta]);
@@ -236,7 +237,12 @@ export const AddSiphonScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
                 <GeneralInfoBox
                     type="withImage"
                     date={selectedDate}
@@ -254,7 +260,11 @@ export const AddSiphonScreen: React.FC = () => {
                     materials={MOCK_MATERIALS}
                 />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                <SelectionNotesBox
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    scrollViewRef={scrollViewRef}
+                />
             </ScrollView>
 
             {/* Footer Buttons */}
