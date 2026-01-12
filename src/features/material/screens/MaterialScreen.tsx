@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,14 +41,17 @@ export const MeterialScreen = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-    const handleShowMenu = (position: { x: number; y: number; width: number; height: number }) => {
-        setMenuPosition(position);
-        setMenuOpen(true);
-    };
+    const handleShowMenu = useCallback(
+        (position: { x: number; y: number; width: number; height: number }) => {
+            setMenuPosition(position);
+            setMenuOpen(true);
+        },
+        []
+    );
 
-    const handleCloseMenu = () => {
+    const handleCloseMenu = useCallback(() => {
         setMenuOpen(false);
-    };
+    }, []);
 
     // Handle tab navigation from other screens
     useEffect(() => {
@@ -70,95 +73,116 @@ export const MeterialScreen = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const handleCreateImport = () => {
+    const handleCreateImport = useCallback(() => {
         navigation.navigate('AddWarehouse', {
             availableMaterials: materials,
         } as any);
-    };
+    }, [navigation, materials]);
 
-    const handleCreateInventory = () => {
+    const handleCreateInventory = useCallback(() => {
         navigation.navigate('AddInventory', {} as any);
-    };
+    }, [navigation]);
 
-    const handleCreateMaterial = () => {
+    const handleCreateMaterial = useCallback(() => {
         navigation.navigate('AddMaterial', {} as any);
-    };
+    }, [navigation]);
 
-    const handleEditMaterial = (item: IMaterial) => {
-        navigation.navigate('EditMaterial', {
-            material: item,
-        } as any);
-    };
+    const handleEditMaterial = useCallback(
+        (item: IMaterial) => {
+            navigation.navigate('EditMaterial', {
+                material: item,
+            } as any);
+        },
+        [navigation]
+    );
 
-    const handleAddMaterial = () => {
+    const handleAddMaterial = useCallback(() => {
         handleCreateMaterial();
-    };
+    }, [handleCreateMaterial]);
 
-    const handleSearch = (text: string) => {
-        setSearchText(text);
-    };
+    const handleSearch = useCallback(
+        (text: string) => {
+            setSearchText(text);
+        },
+        [setSearchText]
+    );
 
-    const handleFilterGroup = (group: string) => {
-        setFilterGroup(group);
-    };
+    const handleFilterGroup = useCallback(
+        (group: string) => {
+            setFilterGroup(group);
+        },
+        [setFilterGroup]
+    );
 
-    const handleFilterPress = () => {
+    const handleFilterPress = useCallback(() => {
         console.log('Filter pressed');
-    };
+    }, []);
 
-    const handleTabSelect = (tab: TabType) => {
-        setSelectedTab(tab);
-        if (tab !== 'history') {
-            setFilterMaterialName(null);
-        } else if (filterMaterialName) {
-            setFilterMaterialName(null);
-        }
-    };
-
-    const handleHistoryPress = (item: IMaterial) => {
-        setFilterMaterialName(item.name);
-        setSelectedTab('history');
-    };
-
-    const filteredMaterials = materials.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase());
-        const matchesGroup =
-            filterGroup === '' ||
-            filterGroup === 'Tất cả nhóm vật tư' ||
-            item.group === filterGroup;
-        return matchesSearch && matchesGroup;
-    });
-
-    const filteredWarehouseList = warehouseList.filter(receipt => {
-        if (filterMaterialName) {
-            if (!receipt.materials.some(m => m.materialName === filterMaterialName)) {
-                return false;
+    const handleTabSelect = useCallback(
+        (tab: TabType) => {
+            setSelectedTab(tab);
+            if (tab !== 'history') {
+                setFilterMaterialName(null);
+            } else if (filterMaterialName) {
+                setFilterMaterialName(null);
             }
-        }
-        if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
-            const hasGroup = receipt.materials.some(receiptItem => {
-                const materialDef = materials.find(m => m.name === receiptItem.materialName);
-                return materialDef?.group === filterGroup;
-            });
-            if (!hasGroup) return false;
-        }
-        if (searchText) {
-            const lowerSearch = searchText.toLowerCase();
-            const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
-            const matchesMaterial = receipt.materials.some(m =>
-                m.materialName.toLowerCase().includes(lowerSearch)
-            );
-            if (!matchesSupplier && !matchesMaterial) return false;
-        }
-        return true;
-    });
+        },
+        [filterMaterialName, setFilterMaterialName]
+    );
+
+    const handleHistoryPress = useCallback(
+        (item: IMaterial) => {
+            setFilterMaterialName(item.name);
+            setSelectedTab('history');
+        },
+        [setFilterMaterialName]
+    );
+
+    const filteredMaterials = useMemo(() => {
+        return materials.filter(item => {
+            const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase());
+            const matchesGroup =
+                filterGroup === '' ||
+                filterGroup === 'Tất cả nhóm vật tư' ||
+                item.group === filterGroup;
+            return matchesSearch && matchesGroup;
+        });
+    }, [materials, searchText, filterGroup]);
+
+    const filteredWarehouseList = useMemo(() => {
+        return warehouseList.filter(receipt => {
+            if (filterMaterialName) {
+                if (!receipt.materials.some(m => m.materialName === filterMaterialName)) {
+                    return false;
+                }
+            }
+            if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
+                const hasGroup = receipt.materials.some(receiptItem => {
+                    const materialDef = materials.find(m => m.name === receiptItem.materialName);
+                    return materialDef?.group === filterGroup;
+                });
+                if (!hasGroup) return false;
+            }
+            if (searchText) {
+                const lowerSearch = searchText.toLowerCase();
+                const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
+                const matchesMaterial = receipt.materials.some(m =>
+                    m.materialName.toLowerCase().includes(lowerSearch)
+                );
+                if (!matchesSupplier && !matchesMaterial) return false;
+            }
+            return true;
+        });
+    }, [warehouseList, filterMaterialName, filterGroup, materials, searchText]);
 
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
                 <HeaderMeterial
                     showBackButton={false}
-                    rightComponent={<ButtonMetaerial onShowMenu={handleShowMenu} />}
+                    rightComponent={
+                        <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
+                    }
                 />
             </View>
             <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
@@ -169,39 +193,58 @@ export const MeterialScreen = () => {
                 selectedTab={selectedTab}
             />
 
-            <View style={styles.content}>
-                {selectedTab === 'list' && (
-                    <MaterialListScreen
-                        materials={filteredMaterials}
-                        onEdit={handleEditMaterial}
-                        onAdd={handleAddMaterial}
-                        onHistoryPress={handleHistoryPress}
-                        onAdjustmentPress={adjustmentItem =>
-                            navigation.navigate('AddInventory', {
-                                initialMaterialName: adjustmentItem.name,
-                            } as any)
-                        }
-                    />
-                )}
-                {selectedTab === 'history' &&
-                    (filteredWarehouseList.length > 0 ? (
-                        <WarehouseListScreen receipts={filteredWarehouseList} />
-                    ) : (
-                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
-                    ))}
-                {selectedTab === 'inventory' &&
-                    (inventoryList.length > 0 ? (
-                        <FlatList
-                            data={inventoryList}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => <InventoryCard data={item} />}
-                            contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    ) : (
-                        <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
-                    ))}
-            </View>
+            {useMemo(
+                () => (
+                    <View style={styles.content}>
+                        {selectedTab === 'list' && (
+                            <MaterialListScreen
+                                materials={filteredMaterials}
+                                onEdit={handleEditMaterial}
+                                onAdd={handleAddMaterial}
+                                onHistoryPress={handleHistoryPress}
+                                onAdjustmentPress={adjustmentItem =>
+                                    navigation.navigate('AddInventory', {
+                                        initialMaterialName: adjustmentItem.name,
+                                    } as any)
+                                }
+                            />
+                        )}
+                        {selectedTab === 'history' &&
+                            (filteredWarehouseList.length > 0 ? (
+                                <WarehouseListScreen receipts={filteredWarehouseList} />
+                            ) : (
+                                <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                            ))}
+                        {selectedTab === 'inventory' &&
+                            (inventoryList.length > 0 ? (
+                                <FlatList
+                                    data={inventoryList}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({ item }) => <InventoryCard data={item} />}
+                                    contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
+                                    showsVerticalScrollIndicator={false}
+                                />
+                            ) : (
+                                <MaterialEmptyState
+                                    tab="inventory"
+                                    onPress={handleCreateInventory}
+                                />
+                            ))}
+                    </View>
+                ),
+                [
+                    selectedTab,
+                    filteredMaterials,
+                    handleEditMaterial,
+                    handleAddMaterial,
+                    handleHistoryPress,
+                    navigation,
+                    filteredWarehouseList,
+                    handleCreateImport,
+                    inventoryList,
+                    handleCreateInventory,
+                ]
+            )}
 
             <MaterialMenuOverlay
                 isOpen={menuOpen}
