@@ -16,12 +16,14 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { colors, spacing, typography, commonStyles } from '@/styles';
+import { authApi } from '../api/authApi';
 
 export default function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -32,19 +34,34 @@ export default function SignUpScreen() {
   const [countryCode, setCountryCode] = useState("+84");
   const insets = useSafeAreaInsets();
 
-  const handleGetOTP = () => {
+  const handleGetOTP = async () => {
     const method = selectedTab === 0 ? 'email' : 'phone';
     const contact = selectedTab === 0 ? email : phone;
 
-    console.log('Get OTP pressed', {
-      tab: selectedTab === 0 ? 'Email' : 'Phone',
-      fullName,
-      email: selectedTab === 0 ? email : undefined,
-      phone: selectedTab === 1 ? phone : undefined,
-      countryCode: selectedTab === 1 ? countryCode : undefined,
-    });
+    try {
+        const response = await authApi.requestOtp(contact);
+        console.log('OTP Response:', response);
+        
+        // In Dev environment, OTP is in response.data.testOtp
+        const devOtp = response?.data?.testOtp;
+        console.log('Full Response:', JSON.stringify(response));
+        
+        if (devOtp) {
+             console.log('Dev OTP:', devOtp);
+             // Optional: Keep a discreet toast or remove entirely based on user preference
+             // For now removing explicit debug alert
+        }
 
-    navigation.navigate('Verify-otp', { method, contact });
+        navigation.navigate('Verify-otp', { 
+            method, 
+            contact,
+            otpCode: devOtp ? String(devOtp) : undefined 
+        });
+        
+    } catch (error) {
+        console.error('Failed to request OTP:', error);
+        Alert.alert('Lỗi', 'Không thể lấy mã OTP. Vui lòng kiểm tra lại kết nối.');
+    }
   };
 
   const handleChangeTab = (index: number) => {

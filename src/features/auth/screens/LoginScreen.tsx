@@ -40,7 +40,7 @@ export default function LoginScreen() {
         // Mock login - update auth store to trigger navigation
         const { login } = useAuthStore.getState();
         await login({
-            phone: selectedTab === 0 ? email : phone,
+            username: selectedTab === 0 ? email : phone,
             password,
         });
     };

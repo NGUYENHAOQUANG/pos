@@ -34,7 +34,7 @@ export type AuthStackParamList = {
   Login: undefined;
   // Auth: undefined; // Removed to avoid conflict
   Register: undefined; // Deprecated - use Auth instead
-  'Verify-otp': { method: string; contact: string };
+  'Verify-otp': { method: string; contact: string; otpCode?: string };
   'Create-password': undefined;
   'Register-Success': undefined;
   ForgotPassword: undefined;

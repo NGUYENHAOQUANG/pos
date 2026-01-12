@@ -3,13 +3,14 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/config/toastConfig';
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from './src/app/providers';
 import { LogBox } from 'react-native';
+import notifee from '@notifee/react-native';
 // import {
 //   requestNotificationPermission,
 //   getFCMToken,
@@ -21,6 +22,14 @@ LogBox.ignoreAllLogs();
 
 function App(): React.JSX.Element {
     const isDarkMode = useColorScheme() === 'dark';
+
+    useEffect(() => {
+        const checkPermission = async () => {
+            await notifee.requestPermission();
+        };
+
+        checkPermission();
+    }, []);
 
     //   useEffect(() => {
     //     const setupNotifications = async () => {

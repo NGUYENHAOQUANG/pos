@@ -35,15 +35,33 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
 
     // Handle Input
     const handleCodeChange = (text: string, index: number) => {
-      const newCode = [...code];
-      // Only take the last character to prevent paste errors
-      const val = text.slice(-1).replace(/[^0-9]/g, '');
+      const cleanText = text.replace(/[^0-9]/g, '');
 
-      newCode[index] = val;
+      // Case 1: Pasting/Autofill full code (or part of it)
+      if (cleanText.length > 1) {
+        const newCode = [...code];
+        // Distribute characters starting from current index
+        for (let i = 0; i < cleanText.length; i++) {
+            if (index + i < length) {
+                newCode[index + i] = cleanText[i];
+            }
+        }
+        onCodeChanged(newCode);
+        
+        // Focus the last filled box or the next empty one
+        const nextIndex = Math.min(index + cleanText.length, length - 1);
+        inputRefs.current[nextIndex]?.focus();
+        return;
+      }
+
+      // Case 2: Standard single character input
+      const newVal = cleanText.slice(-1); // Take last char
+      const newCode = [...code];
+      newCode[index] = newVal;
       onCodeChanged(newCode);
 
       // Auto focus next input if value exists
-      if (val && index < length - 1) {
+      if (newVal && index < length - 1) {
         inputRefs.current[index + 1]?.focus();
       }
     };
@@ -82,6 +100,9 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
               onKeyPress={e => handleKeyPress(e, index)}
               keyboardType="number-pad"
               maxLength={1}
+              textContentType="oneTimeCode"
+              autoComplete="sms-otp"
+              importantForAutofill="yes"
               selectTextOnFocus={true} // Auto select old value on focus
               textAlign="center"
               cursorColor="#3B82F6"

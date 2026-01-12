@@ -7,7 +7,7 @@ import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
 
 // Custom Toast Component to handle dynamic safe area positioning
 // This ensures the toast is always centered vertically relative to the HeaderSection content
-const CustomToast = ({ text1, type }: { text1?: string; type: 'success' | 'error' }) => {
+const CustomToast = ({ text1, text2, type }: { text1?: string; text2?: string; type: 'success' | 'error' }) => {
     // HeaderSection uses padding: insets.top + 12
     // We want the toast top to align effectively with the header content top.
 
@@ -28,16 +28,23 @@ const CustomToast = ({ text1, type }: { text1?: string; type: 'success' | 'error
                     <Text style={styles.errorTextIcon}>!</Text>
                 )}
             </View>
-            <Text style={styles.text} numberOfLines={1}>
-                {text1}
-            </Text>
+            <View style={styles.contentContainer}>
+                <Text style={styles.text} numberOfLines={1}>
+                    {text1}
+                </Text>
+                {text2 ? (
+                    <Text style={styles.subText} numberOfLines={1}>
+                        {text2}
+                    </Text>
+                ) : null}
+            </View>
         </View>
     );
 };
 
 export const toastConfig: ToastConfig = {
-    success: ({ text1 }) => <CustomToast text1={text1} type="success" />,
-    error: ({ text1 }) => <CustomToast text1={text1} type="error" />,
+    success: ({ text1, text2 }) => <CustomToast text1={text1} text2={text2} type="success" />,
+    error: ({ text1, text2 }) => <CustomToast text1={text1} text2={text2} type="error" />,
 };
 
 const styles = StyleSheet.create({
@@ -46,7 +53,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: 'auto',
         maxWidth: '80%',
-        height: 40,
+        height: 'auto', // Changed from fixed 40 for flexibility
+        minHeight: 40,
         backgroundColor: 'white',
         borderRadius: borderRadius.sm,
         paddingVertical: 8,
@@ -66,10 +74,19 @@ const styles = StyleSheet.create({
     iconWrapper: {
         marginRight: 8,
     },
+    contentContainer: { // New container for texts
+        flexShrink: 1,
+    },
     text: {
         fontSize: 14,
         color: colors.text,
+        fontWeight: '500', // Slightly bolder for title
+    },
+    subText: { // New style for text2
+        fontSize: 13,
+        color: colors.textSecondary,
         fontWeight: '400',
+        marginTop: 2,
     },
     errorTextIcon: {
         color: colors.red[900],

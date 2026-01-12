@@ -37,18 +37,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   const formatAndSetPhone = (text: string) => {
     // Chỉ giữ lại số
     const cleaned = text.replace(/\D/g, '');
-
-    // Logic format (4 số - 3 số - 3 số) hoặc tùy chỉnh
-    let formatted = cleaned;
-    if (cleaned.length > 4) {
-      formatted = `${cleaned.slice(0, 4)} ${cleaned.slice(4)}`;
-    }
-    if (cleaned.length > 7) {
-      formatted = `${formatted.slice(0, 8)} ${formatted.slice(8)}`;
-    }
-
-    // Giới hạn độ dài (ví dụ 10 số -> format xong dài khoảng 12-13 ký tự)
-    if (formatted.length > 13) {
+    if (cleaned.length > 10) {
       return;
     }
 

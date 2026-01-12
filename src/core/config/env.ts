@@ -7,7 +7,7 @@
 import {API_URL, NODE_ENV, API_TIMEOUT} from '@env';
 
 export const ENV = {
-  API_URL: API_URL || 'https://api.example.com',
+  API_URL: API_URL || 'https://mebi-mebione-d-backend-api-as-1.azurewebsites.net/api/v1',
   ENVIRONMENT: NODE_ENV || 'development',
   API_TIMEOUT: API_TIMEOUT ? parseInt(API_TIMEOUT, 10) : 10000,
 } as const;

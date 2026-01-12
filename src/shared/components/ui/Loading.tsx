@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.white,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         zIndex: 9999,
     },
     dot: {

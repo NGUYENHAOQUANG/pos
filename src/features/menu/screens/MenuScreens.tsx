@@ -10,6 +10,7 @@ import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
 const { width } = Dimensions.get('window');
 
@@ -62,13 +63,12 @@ export const MenuScreens: React.FC = () => {
         setIsLogoutModalVisible(true);
     };
 
-    const onConfirmLogout = () => {
+    const logout = useAuthStore(state => state.logout);
+
+    const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
-        // Navigate deeply to Auth stack, specifically Login screen
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Auth', state: { routes: [{ name: 'Login' }] } }],
-        });
+        // Call store logout - this triggers AppNavigator state change
+        await logout();
     };
 
     const handleProfilePress = () => {
