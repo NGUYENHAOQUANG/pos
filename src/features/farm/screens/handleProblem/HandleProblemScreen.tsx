@@ -43,7 +43,22 @@ export const HandleProblemScreen = () => {
 
     // Determine job type and title
     const currentJobType: JobType = jobType as JobType;
-    const screenTitle = item ? 'Chỉnh sửa Xử lý sự cố' : 'Xử lý sự cố';
+
+    const getTitle = () => {
+        switch (currentJobType) {
+            case 'CLEAN_POND':
+                return 'Rửa ao';
+            case 'SUN_DRY_POND':
+                return 'Phơi ao';
+            case 'TROUBLESHOOTING':
+                return 'Xử lý sự cố';
+            default:
+                return 'Xử lý sự cố';
+        }
+    };
+
+    const baseTitle = getTitle();
+    const screenTitle = item ? `Chỉnh sửa ${baseTitle}` : baseTitle;
 
     // State
     const [selectedDate, setSelectedDate] = useState(new Date());

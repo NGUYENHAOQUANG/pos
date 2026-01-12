@@ -11,6 +11,7 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 // Components Tracking
 import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblemLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -24,13 +25,27 @@ export const HandleProblemLogScreen = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
 
-    const currentJobType: 'CLEAN_POND' | 'SUN_DRY_POND' = jobType as 'CLEAN_POND' | 'SUN_DRY_POND';
-    const screenTitle = 'Nhật ký xử lý sự cố';
+    const currentJobType: JobType = jobType as JobType;
+
+    const getTitle = () => {
+        switch (currentJobType) {
+            case 'CLEAN_POND':
+                return 'Nhật ký Rửa ao';
+            case 'SUN_DRY_POND':
+                return 'Nhật ký Phơi ao';
+            case 'TROUBLESHOOTING':
+                return 'Nhật ký Xử lý sự cố';
+            default:
+                return 'Nhật ký Xử lý sự cố';
+        }
+    };
+
+    const screenTitle = getTitle();
     const emptyMessage = 'Chưa có dữ liệu xử lý sự cố';
     const buttonTitle = 'Bắt đầu ghi lại sự cố';
 
     const handleCreateNew = () => {
-        if (pond) navigation.navigate('HandleProblem', { pond, jobType: currentJobType });
+        if (pond) navigation.navigate('HandleProblem', { pond, jobType: currentJobType as any });
     };
 
     // Logic Grouping Data
@@ -73,7 +88,7 @@ export const HandleProblemLogScreen = () => {
                             navigation.navigate('HandleProblem', {
                                 pond,
                                 item: job,
-                                jobType: currentJobType,
+                                jobType: currentJobType as any,
                             });
                         }
                     },

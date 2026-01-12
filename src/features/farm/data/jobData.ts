@@ -7,15 +7,6 @@ import {
     TransferMeta,
     HarvestMeta,
 } from '@/features/farm/types/farm.types';
-import { formatDate } from '@/features/farm/utils/dateUtils';
-
-const today = new Date();
-const yesterday = new Date(today);
-yesterday.setDate(yesterday.getDate() - 1);
-
-// Helper to get formatted date string
-const getTodayStr = () => formatDate(today);
-const getYesterdayStr = () => formatDate(yesterday);
 
 /**
  * Mock data for JobExecution (FEED jobs)
@@ -27,7 +18,7 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-01',
         label: 'Lần 1',
         time: '08:00',
-        date: getTodayStr(),
+        date: '08/01/2026',
         pondId: 'N01',
         note: 'Lần 1 sáng, tôm ăn đều',
         materials: [{ material: { name: 'Grobest – 9122' }, quantity: 20, unit: 'kg' }],
@@ -37,27 +28,27 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-N02',
         label: 'Lần 1',
         time: '08:00',
-        date: getTodayStr(),
+        date: '05/01/2026',
         pondId: 'N02',
         note: 'Tôm ăn tốt',
         materials: [{ material: { name: 'CP10' }, quantity: 25, unit: 'kg' }],
     },
-    // N03
+    // N03 - Date: 29/12/2025
     {
-        id: 'FE-TODAY-N03',
+        id: 'FE-YESTERDAY-N03',
         label: 'Lần 1',
         time: '08:15',
-        date: getTodayStr(),
+        date: '29/12/2025',
         pondId: 'N03',
         note: 'Tôm mới thả, ăn ít',
         materials: [{ material: { name: 'UP Starter 0.8mm' }, quantity: 5, unit: 'kg' }],
     },
-    // N04
+    // N04 - Date: 06/01/2026
     {
-        id: 'FE-TODAY-N04',
+        id: 'FE-YESTERDAY-N04',
         label: 'Lần 1',
         time: '08:20',
-        date: getTodayStr(),
+        date: '06/01/2026',
         pondId: 'N04',
         note: 'Tăng trọng',
         materials: [{ material: { name: 'CP10' }, quantity: 15, unit: 'kg' }],
@@ -67,7 +58,7 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-N05',
         label: 'Lần 1',
         time: '08:00',
-        date: getTodayStr(),
+        date: '07/01/2026',
         pondId: 'N05',
         note: 'Ăn mạnh',
         materials: [{ material: { name: 'CP10' }, quantity: 40, unit: 'kg' }],
@@ -77,17 +68,17 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-N06',
         label: 'Lần 1',
         time: '08:30',
-        date: getTodayStr(),
+        date: '09/01/2026',
         pondId: 'N06',
         note: 'Ăn bình thường',
         materials: [{ material: { name: 'CP10' }, quantity: 30, unit: 'kg' }],
     },
-    // N07
+    // N07 - Date: 07/01/2026
     {
-        id: 'FE-TODAY-N07',
+        id: 'FE-PAST-N07',
         label: 'Lần 1',
         time: '08:00',
-        date: getTodayStr(),
+        date: '07/01/2026',
         pondId: 'N07',
         note: 'Giảm ăn do mưa',
         materials: [{ material: { name: 'CP09' }, quantity: 20, unit: 'kg' }],
@@ -97,17 +88,17 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-N08',
         label: 'Lần 1',
         time: '08:10',
-        date: getTodayStr(),
+        date: '09/01/2026',
         pondId: 'N08',
         note: 'Chuẩn bị thu',
         materials: [{ material: { name: 'CP10' }, quantity: 35, unit: 'kg' }],
     },
-    // V01
+    // V01 - Date: 29/12/2025
     {
-        id: 'FE-TODAY-V01',
+        id: 'FE-PAST-V01',
         label: 'Lần 1',
         time: '07:30',
-        date: getTodayStr(),
+        date: '29/12/2025',
         pondId: 'V01',
         note: 'Ươm giống',
         materials: [{ material: { name: 'UP Starter 0.8mm' }, quantity: 1, unit: 'kg' }],
@@ -117,7 +108,7 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-V02',
         label: 'Lần 1',
         time: '07:30',
-        date: getTodayStr(),
+        date: '09/01/2026',
         pondId: 'V02',
         note: 'Ươm giống',
         materials: [{ material: { name: 'UP Starter 0.8mm' }, quantity: 1.2, unit: 'kg' }],
@@ -127,7 +118,7 @@ export const mockFeedJobExecutions: JobExecution[] = [
         id: 'FE-TODAY-V03',
         label: 'Lần 1',
         time: '07:45',
-        date: getTodayStr(),
+        date: '06/01/2026',
         pondId: 'V03',
         note: 'Ươm ngày 3',
         materials: [{ material: { name: 'UP Starter 0.8mm' }, quantity: 0.5, unit: 'kg' }],
@@ -138,12 +129,12 @@ export const mockFeedJobExecutions: JobExecution[] = [
  * Mock data for JobExecution (SHRIMP_INSPECTION jobs)
  */
 export const mockShrimpInspectionJobExecutions: JobExecution[] = [
-    // N01
+    // N01 - Today
     {
         id: 'KT-TODAY-N01',
         label: 'Kiểm tra sáng',
         time: '09:00',
-        date: getTodayStr(),
+        date: '08/01/2026',
         pondId: 'N01',
         note: 'Tôm khỏe',
         meta: {
@@ -155,22 +146,22 @@ export const mockShrimpInspectionJobExecutions: JobExecution[] = [
             intestineColor: 'Nâu',
         } as ShrimpInspectionMeta,
     },
-    // N03
+    // N03 - Yesterday
     {
-        id: 'KT-TODAY-N03',
+        id: 'KT-YESTERDAY-N03',
         label: 'Kiểm tra vó',
         time: '09:30',
-        date: getTodayStr(),
+        date: '05/01/2026',
         pondId: 'N03',
         note: 'Gan đẹp',
         meta: { foodAmount: '5', leftoverFood: 'Hết', liver: 'Tốt' } as ShrimpInspectionMeta,
     },
-    // N05
+    // N05 - Date: 06/01/2026
     {
-        id: 'KT-TODAY-N05',
+        id: 'KT-PAST-N05',
         label: 'Kiểm tra trưa',
         time: '11:00',
-        date: getTodayStr(),
+        date: '06/01/2026',
         pondId: 'N05',
         note: 'Đường ruột to',
         meta: { foodAmount: '40', leftoverFood: 'Còn ít' } as ShrimpInspectionMeta,
@@ -180,7 +171,7 @@ export const mockShrimpInspectionJobExecutions: JobExecution[] = [
         id: 'KT-TODAY-V01',
         label: 'Soi kính',
         time: '10:00',
-        date: getTodayStr(),
+        date: '29/12/2025',
         pondId: 'V01',
         note: 'Không ký sinh trùng',
         meta: { foodAmount: '1', liver: 'Vàng nhạt' } as ShrimpInspectionMeta,
@@ -196,17 +187,17 @@ export const mockMeasureSizeJobExecutions: JobExecution[] = [
         id: 'SK-TODAY-N01',
         label: 'Cân mẫu',
         time: '14:00',
-        date: getTodayStr(),
+        date: '31/12/2025',
         pondId: 'N01',
         note: 'Size 85 về',
         meta: { shrimpSize: '85', remainingWeight: '2200' } as MeasureSizeMeta,
     },
-    // N04 - Yesterday
+    // N04 - Date: 05/01/2026
     {
-        id: 'SK-YESTERDAY-N04',
+        id: 'SK-PAST-N04',
         label: 'Cân mẫu',
         time: '14:00',
-        date: getYesterdayStr(),
+        date: '05/01/2026',
         pondId: 'N04',
         note: 'Tôm lớn nhanh',
         meta: { shrimpSize: '120', remainingWeight: '1000' } as MeasureSizeMeta,
@@ -218,19 +209,19 @@ export const mockMeasureSizeJobExecutions: JobExecution[] = [
  */
 export const mockSiphonJobExecutions: JobExecution[] = [
     {
-        id: 'XP-TODAY-N01',
+        id: 'XP-today-N01',
         label: 'Xi phông',
         time: '07:00',
-        date: getTodayStr(),
+        date: '09/01/2026',
         pondId: 'N01',
         note: 'Sạch đáy',
         meta: { lossAmount: '2', images: [] } as SiphonMeta,
     },
     {
-        id: 'XP-TODAY-N06',
+        id: 'XP-YESTERDAY-N06',
         label: 'Xi phông',
         time: '07:15',
-        date: getTodayStr(),
+        date: '05/01/2026',
         pondId: 'N06',
         note: 'Nhiều vỏ',
         meta: { lossAmount: '5', images: [] } as SiphonMeta,
@@ -245,7 +236,7 @@ export const mockHandleProblemJobExecutions: JobExecution[] = [
         id: 'SC-TODAY-N02',
         label: 'Rớt cục thịt',
         time: '06:00',
-        date: getTodayStr(),
+        date: '06/01/2026',
         pondId: 'N02',
         note: 'Vớt xác, kiểm tra khí độc',
         images: [],
@@ -260,7 +251,7 @@ export const mockWaterSupplyJobExecutions: JobExecution[] = [
         id: 'WC-TODAY-SS01',
         label: 'Cấp nước',
         time: '08:00',
-        date: getTodayStr(),
+        date: '09/01/2026',
         pondId: 'SS01',
         note: 'Cấp đầy ao',
         meta: { targetLevel: '140', supplyLevel: '20' } as WaterSupplyMeta,
@@ -275,17 +266,18 @@ export const mockWaterTreatmentJobExecutions: JobExecution[] = [
         id: 'XL-TODAY-N01',
         label: 'Đánh khoáng',
         time: '20:00',
-        date: getTodayStr(),
+        date: '05/01/2026',
         pondId: 'N01',
         note: 'Định kỳ',
         waterTreatmentType: 'Đánh khoáng',
         materials: [{ material: { name: 'MineralMix' }, quantity: 10, unit: 'kg' }],
     },
+    // Specific date request: 05/01/2026
     {
-        id: 'XL-TODAY-N08',
+        id: 'XL-PAST-N08',
         label: 'Diệt khuẩn',
         time: '09:00',
-        date: getTodayStr(),
+        date: '05/01/2026',
         pondId: 'N08',
         note: 'Trước khi thu tôm',
         waterTreatmentType: 'Diệt khuẩn',
@@ -298,7 +290,7 @@ export const mockTransferJobExecutions: JobExecution[] = [
         id: 'SA-TODAY-V01',
         label: 'Sang tôm',
         time: '07:00',
-        date: getTodayStr(),
+        date: '29/12/2025',
         pondId: 'V01',
         note: 'Sang qua N01',
         meta: { transferMethod: 'Sang hết' } as TransferMeta,
@@ -307,10 +299,10 @@ export const mockTransferJobExecutions: JobExecution[] = [
 
 export const mockHarvestJobExecutions: JobExecution[] = [
     {
-        id: 'TH-TODAY-N07',
+        id: 'TH-PAST-N07',
         label: 'Thu tỉa',
         time: '05:00',
-        date: getTodayStr(),
+        date: '07/01/2026',
         pondId: 'N07',
         note: 'Thu bớt',
         meta: { harvestType: 'Thu tỉa', shrimpSize: '60', revenue: 100000000 } as HarvestMeta,

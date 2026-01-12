@@ -24,41 +24,28 @@ export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
         const currentCycle = activeCycles[pondId];
         if (currentCycle) return true;
         const cycles = getCyclesByPondId(pondId);
-        return cycles.some(c => c.receivingPonds?.includes(pondId));
+        // If there are any cycles associated, consider it valid (Active)
+        // This matches ShrimpPond.tsx logic which falls back to cycles[0]
+        return cycles.length > 0;
     };
 
-    const getStatus = (item: PondData, activityName?: string): TagStatus | undefined => {
-        if (!activityName || activityName === '-') return undefined;
+    const getStatus = (item: PondData): TagStatus | undefined => {
+        const hasCycle = checkHasCycle(item.id);
 
-        // Ao sẵn sàng: Only 'preparing' if it has a cycle
-        if (item.type === 'Ao sẵn sàng') {
-            return checkHasCycle(item.id) ? 'preparing' : undefined;
-        }
-
-        // Ao vèo, Ao lắng -> Always 'preparing' tag if they have activity
-        if (['Ao vèo', 'Ao lắng'].includes(item.type)) {
-            return 'preparing';
-        }
-
-        // Ao nuôi -> Always 'active' tag if they have activity
-        if (item.type === 'Ao nuôi') {
+        if (hasCycle) {
             return 'active';
         }
 
-        if (item.status === 'Đang hoạt động') return 'active';
-        if (item.status === 'Chuẩn bị') return 'preparing';
-
-        return undefined; // Default fallback
+        // Everything else is 'preparing' (Chuẩn bị) as per request
+        return 'preparing';
     };
 
     const renderItem: ListRenderItem<PondData> = ({ item }) => {
         const latestActivity = getLatestPondActivity(item.id);
         const displayActivity = latestActivity?.lastActivity || item.lastActivity;
-        const computedStatus = getStatus(item, displayActivity);
+        const computedStatus = getStatus(item);
 
-        const hasCycle = checkHasCycle(item.id);
-        // Force type to 'Ao vèo' if it is 'Ao sẵn sàng' AND has active cycle
-        const displayType = (item.type === 'Ao sẵn sàng' && hasCycle ? 'Ao vèo' : item.type) as any;
+        const displayType = item.type;
 
         return (
             <ShrimpPond

@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors, borderRadius } from '@/styles';
-
-export type PondType = 'Ao nuôi' | 'Ao vèo' | 'Ao sẵn sàng' | 'Ao lắng' | 'Ao thải';
+import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 
 interface PondTypeTagProps {
     type: PondType;
@@ -12,33 +11,41 @@ interface PondTypeTagProps {
 export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
     const getStyle = () => {
         switch (type) {
-            case 'Ao nuôi':
+            case POND_TYPES.CULTIVATION:
                 return styles.blue;
-            case 'Ao vèo':
+            case POND_TYPES.NURSERY:
                 return styles.orange;
-            case 'Ao sẵn sàng':
+            case POND_TYPES.READY:
                 return styles.green;
-            case 'Ao lắng':
+            case POND_TYPES.SETTLING:
                 return styles.purple;
-            case 'Ao thải':
+            case POND_TYPES.WASTE:
                 return styles.pink;
+            case POND_TYPES.TREATMENT:
+                return styles.yellow;
+            case POND_TYPES.WATER_STORAGE:
+                return styles.cyan;
             default:
-                return styles.blue; // Fallback
+                return styles.blue;
         }
     };
 
     const getTextStyle = () => {
         switch (type) {
-            case 'Ao nuôi':
+            case POND_TYPES.CULTIVATION:
                 return styles.textBlue;
-            case 'Ao vèo':
+            case POND_TYPES.NURSERY:
                 return styles.textOrange;
-            case 'Ao sẵn sàng':
+            case POND_TYPES.READY:
                 return styles.textGreen;
-            case 'Ao lắng':
+            case POND_TYPES.SETTLING:
                 return styles.textPurple;
-            case 'Ao thải':
+            case POND_TYPES.WASTE:
                 return styles.textPink;
+            case POND_TYPES.TREATMENT:
+                return styles.textYellow;
+            case POND_TYPES.WATER_STORAGE:
+                return styles.textCyan;
             default:
                 return styles.textBlue;
         }
@@ -104,5 +111,21 @@ const styles = StyleSheet.create({
     },
     textPink: {
         color: colors.pink[600],
+    },
+    // Yellow - Ao xử lý
+    yellow: {
+        backgroundColor: colors.yellow[50],
+        borderColor: colors.yellow[600],
+    },
+    textYellow: {
+        color: colors.yellow[700],
+    },
+    // Cyan - Ao chứa nước
+    cyan: {
+        backgroundColor: colors.cyan[50],
+        borderColor: colors.cyan[600],
+    },
+    textCyan: {
+        color: colors.cyan[800],
     },
 });
