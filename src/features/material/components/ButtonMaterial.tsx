@@ -26,45 +26,62 @@ interface ButtonMetaerialProps {
     isOpen: boolean;
 }
 
-export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = ({ onShowMenu, isOpen }) => {
-    const buttonRef = useRef<View>(null);
-    const isMeasuring = useRef(false);
-    const rotation = useSharedValue(0);
+export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = React.memo(
+    ({ onShowMenu, isOpen }) => {
+        const buttonRef = useRef<View>(null);
+        const isMeasuring = useRef(false);
+        const lastPosition = useRef<{ x: number; y: number; width: number; height: number } | null>(
+            null
+        );
+        const rotation = useSharedValue(0);
 
-    React.useEffect(() => {
-        rotation.value = withTiming(isOpen ? 1 : 0, { duration: 200 });
-    }, [isOpen, rotation]);
+        React.useEffect(() => {
+            rotation.value = withTiming(isOpen ? 1 : 0, { duration: 250 });
+        }, [isOpen, rotation]);
 
-    const animatedIconStyle = useAnimatedStyle(() => {
-        const rotate = interpolate(rotation.value, [0, 1], [0, 45]);
-        return {
-            transform: [{ rotate: `${rotate}deg` }],
-        };
-    });
-
-    const handlePress = () => {
-        if (isMeasuring.current) return;
-        isMeasuring.current = true;
-
-        buttonRef.current?.measure((x, y, width, height, pageX, pageY) => {
-            isMeasuring.current = false;
-            onShowMenu({ x: pageX || 0, y: pageY || 0, width: width || 0, height: height || 0 });
+        const animatedIconStyle = useAnimatedStyle(() => {
+            const rotate = interpolate(rotation.value, [0, 1], [0, 45]);
+            return {
+                transform: [{ rotate: `${rotate}deg` }],
+            };
         });
-    };
 
-    return (
-        <TouchableOpacity
-            ref={buttonRef}
-            style={styles.button}
-            onPress={handlePress}
-            activeOpacity={0.7}
-        >
-            <Animated.View style={animatedIconStyle}>
-                <Ionicons name="add" size={24} color={colors.text} />
-            </Animated.View>
-        </TouchableOpacity>
-    );
-};
+        const handlePress = () => {
+            if (isMeasuring.current) return;
+
+            if (lastPosition.current && isOpen) {
+                onShowMenu(lastPosition.current);
+                return;
+            }
+
+            isMeasuring.current = true;
+            buttonRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                isMeasuring.current = false;
+                const position = {
+                    x: pageX || 0,
+                    y: pageY || 0,
+                    width: width || 0,
+                    height: height || 0,
+                };
+                lastPosition.current = position;
+                onShowMenu(position);
+            });
+        };
+
+        return (
+            <TouchableOpacity
+                ref={buttonRef}
+                style={styles.button}
+                onPress={handlePress}
+                activeOpacity={0.7}
+            >
+                <Animated.View style={animatedIconStyle}>
+                    <Ionicons name="add" size={24} color={colors.text} />
+                </Animated.View>
+            </TouchableOpacity>
+        );
+    }
+);
 
 interface MaterialMenuOverlayProps {
     isOpen: boolean;
@@ -75,7 +92,7 @@ interface MaterialMenuOverlayProps {
     onPressCreateMaterial?: () => void;
 }
 
-export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => {
+export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.memo(props => {
     const {
         isOpen,
         buttonPosition,
@@ -91,9 +108,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => 
     React.useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
-            // Immediately reset to 0 for a fresh animation on every open
-            animation.value = 0;
-            animation.value = withTiming(1, { duration: 200 });
+            animation.value = withTiming(1, { duration: 250 });
         } else {
             animation.value = withTiming(0, { duration: 200 }, finished => {
                 if (finished) {
@@ -101,12 +116,11 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => 
                 }
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen]);
+    }, [isOpen, animation]);
 
     const animatedMenuStyle = useAnimatedStyle(() => {
         const opacity = interpolate(animation.value, [0, 1], [0, 1], Extrapolation.CLAMP);
-        const scale = interpolate(animation.value, [0, 1], [0.9, 1], Extrapolation.CLAMP);
+        const scale = interpolate(animation.value, [0, 1], [0.95, 1], Extrapolation.CLAMP);
         const translateY = interpolate(animation.value, [0, 1], [-10, 0], Extrapolation.CLAMP);
 
         return {
@@ -123,13 +137,11 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => 
         { label: 'Tạo Vật Tư', onPress: onPressCreateMaterial },
     ];
 
-    // Calculate menu position - align right edge with button right edge
     const menuRight = SCREEN_WIDTH - (buttonPosition?.x || 0) - (buttonPosition?.width || 0);
-    const menuTop = (buttonPosition?.y || 0) + (buttonPosition?.height || 0) + 4;
+    const menuTop = (buttonPosition?.y || 0) + (buttonPosition?.height || 0) + 8;
 
     return (
         <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
-            {/* Main Button */}
             <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
 
             <Animated.View
@@ -146,10 +158,12 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => 
                     <TouchableHighlight
                         key={index}
                         style={styles.menuItem}
-                        underlayColor="#F5F5F5"
+                        underlayColor="#F5F5F7"
                         onPress={() => {
                             onClose();
-                            item.onPress?.();
+                            setTimeout(() => {
+                                item.onPress?.();
+                            }, 50);
                         }}
                     >
                         <Text style={styles.menuItemText}>{item.label}</Text>
@@ -158,7 +172,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = props => 
             </Animated.View>
         </View>
     );
-};
+});
 
 const styles = StyleSheet.create({
     container: {
