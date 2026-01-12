@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
     },
     triggerDisabled: {
-        borderColor: '#E0E0E0',
+        borderColor: colors.borderDisabled,
     },
     valueText: { flex: 1, fontSize: 15, color: colors.text },
     placeholderText: { color: colors.textSecondary || '#999' },
