@@ -157,8 +157,15 @@ export type AppStackParamList = {
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
     CycleDetail: { pondId: string; cycleData: CycleData };
-    HandleProblem: { pond: PondData; item?: JobExecution; jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' };
-    HandleProblemLog: { pond: PondData; jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' };
+    HandleProblem: {
+        pond: PondData;
+        item?: JobExecution;
+        jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
+    };
+    HandleProblemLog: {
+        pond: PondData;
+        jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
+    };
     SunDryPondLog: { pond: PondData };
 
     // ============== Material Screens (Tab Bar hidden) ==============

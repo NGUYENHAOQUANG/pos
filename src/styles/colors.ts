@@ -43,6 +43,8 @@ export const colors = {
     },
     cyan: {
         50: '#E6FFFB',
+        600: '#87E8DE',
+        800: '#08979C',
     },
     blue: {
         50: '#E6F4FF',

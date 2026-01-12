@@ -2,7 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 
-export type PondType = 'Ao nuôi' | 'Ao vèo' | 'Ao sẵn sàng' | 'Ao lắng' | 'Ao thải';
+export type PondType =
+    | 'Ao nuôi'
+    | 'Ao vèo'
+    | 'Ao sẵn sàng'
+    | 'Ao lắng'
+    | 'Ao thải'
+    | 'Ao xử lý'
+    | 'Ao chứa nước';
 
 interface PondTypeTagProps {
     type: PondType;
@@ -22,8 +29,12 @@ export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
                 return styles.purple;
             case 'Ao thải':
                 return styles.pink;
+            case 'Ao xử lý':
+                return styles.yellow;
+            case 'Ao chứa nước':
+                return styles.cyan;
             default:
-                return styles.blue; // Fallback
+                return styles.blue;
         }
     };
 
@@ -39,6 +50,10 @@ export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
                 return styles.textPurple;
             case 'Ao thải':
                 return styles.textPink;
+            case 'Ao xử lý':
+                return styles.textYellow;
+            case 'Ao chứa nước':
+                return styles.textCyan;
             default:
                 return styles.textBlue;
         }
@@ -104,5 +119,21 @@ const styles = StyleSheet.create({
     },
     textPink: {
         color: colors.pink[600],
+    },
+    // Yellow - Ao xử lý
+    yellow: {
+        backgroundColor: colors.yellow[50],
+        borderColor: colors.yellow[600],
+    },
+    textYellow: {
+        color: colors.yellow[700],
+    },
+    // Cyan - Ao chứa nước
+    cyan: {
+        backgroundColor: colors.cyan[50],
+        borderColor: colors.cyan[600],
+    },
+    textCyan: {
+        color: colors.cyan[800],
     },
 });

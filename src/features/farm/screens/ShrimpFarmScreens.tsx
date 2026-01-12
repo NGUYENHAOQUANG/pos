@@ -29,10 +29,26 @@ const JOB_TYPES = {
     CLEAN_POND: 'CLEAN_POND' as const,
     SUN_DRY_POND: 'SUN_DRY_POND' as const,
     HARVEST: 'HARVEST' as const,
+    TROUBLESHOOTING: 'TROUBLESHOOTING' as const,
 };
 
-// Common jobs - dùng cho cả ao vèo và ao nuôi
-const COMMON_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+// 1. Ao Lắng: KHÔNG có tác vụ
+const SETTLING_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [];
+
+// 2. Ao Xử Lý: Đo thông số môi trường, Xử lý nước
+const TREATMENT_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+];
+
+// 3. Ao Chứa Nước: Đo thông số môi trường
+const WATER_STORAGE_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+];
+
+// 4. Ao Nuôi: Full tasks
+// 4. Ao Nuôi: Full tasks
+const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.FEED, items: [] },
     { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
     { type: JOB_TYPES.MEASURE_SIZE, items: [] },
@@ -40,24 +56,48 @@ const COMMON_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.WATER_TREATMENT, items: [] },
     { type: JOB_TYPES.WATER_CHANGE, items: [] },
     { type: JOB_TYPES.SIPHON, items: [] },
+    { type: JOB_TYPES.TROUBLESHOOTING, items: [] }, // Xử lý sự cố
+    { type: JOB_TYPES.TRANSFER_POND, items: [] },
+    { type: JOB_TYPES.HARVEST, items: [] },
     { type: JOB_TYPES.CLEAN_POND, items: [] },
     { type: JOB_TYPES.SUN_DRY_POND, items: [] },
 ];
 
+// 5. Ao Vèo: Full tasks minus Harvest
 const NURSERY_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.TRANSFER_POND, items: [] },
-];
-
-const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.HARVEST, items: [] },
-];
-
-const PREPARATION_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.FEED, items: [] },
+    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
+    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
     { type: JOB_TYPES.ENVIRONMENT, items: [] },
     { type: JOB_TYPES.WATER_TREATMENT, items: [] },
     { type: JOB_TYPES.WATER_CHANGE, items: [] },
+    { type: JOB_TYPES.SIPHON, items: [] },
+    { type: JOB_TYPES.TROUBLESHOOTING, items: [] },
+    { type: JOB_TYPES.TRANSFER_POND, items: [] },
     { type: JOB_TYPES.CLEAN_POND, items: [] },
     { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+];
+
+// 6. Ao Sẵn Sàng (Backup/Ready): Full tasks
+const READY_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.FEED, items: [] },
+    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
+    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
+    { type: JOB_TYPES.WATER_CHANGE, items: [] },
+    { type: JOB_TYPES.SIPHON, items: [] },
+    { type: JOB_TYPES.TROUBLESHOOTING, items: [] },
+    { type: JOB_TYPES.TRANSFER_POND, items: [] },
+    { type: JOB_TYPES.HARVEST, items: [] },
+    { type: JOB_TYPES.CLEAN_POND, items: [] },
+    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
+];
+
+// 7. Ao Thải: Đo thông số môi trường, Xử lý nước
+const WASTE_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
+    { type: JOB_TYPES.ENVIRONMENT, items: [] },
+    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
 ];
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -81,11 +121,22 @@ export const ShrimpFarmScreens: React.FC = () => {
         getPondById,
         ponds,
         cycles,
-        pondJobs: _pondJobs,
+        // Destructure all job maps to trigger re-renders
+        feedJobs,
+        shrimpInspectionJobs,
+        measureSizeJobs,
+        environmentJobs,
+        waterTreatmentJobs,
+        waterChangeJobs,
+        siphonJobs,
+        troubleshootingJobs,
+        transferPondJobs,
+        cleanPondJobs,
+        sunDryJobs,
+        harvestJobs,
     } = useFarm();
 
     // Get fresh pond data from context instead of stale params
-    // This ensures UI updates when pond type changes after transfer
     const pond = useMemo(() => {
         if (!pondFromParams?.id) return pondFromParams;
         return getPondById(pondFromParams.id) || pondFromParams;
@@ -107,7 +158,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         // Nếu không có, lấy chu kỳ đầu tiên (ao nguồn)
         return cyclesForPond[0] || null;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pond?.id, getCyclesByPondId, cycles]); // Added cycles to trigger re-render when cycle is deleted
+    }, [pond?.id, getCyclesByPondId, cycles]);
 
     // Ưu tiên chu kỳ từ activeCycles, nếu không có thì dùng từ cycles
     const currentCycle: CycleData | null = useMemo(() => {
@@ -115,24 +166,35 @@ export const ShrimpFarmScreens: React.FC = () => {
         return currentCycleData || foundCycle;
     }, [pond?.id, activeCycles, foundCycle]);
 
-    // Chọn template dựa vào loại ao và tạo jobs
+    // Chọn template dựa vào loại ao
     const jobs = useMemo(() => {
-        let jobTemplate: { type: JobType; items: never[] }[];
+        let jobTemplate: { type: JobType; items: never[] }[] = [];
 
-        if (!currentCycle) {
-            jobTemplate = PREPARATION_JOBS_TEMPLATE;
-        } else if (!pond?.type) {
-            jobTemplate = COMMON_JOBS_TEMPLATE;
-        } else {
+        if (pond?.type) {
             switch (pond.type) {
-                case 'Ao vèo':
-                    jobTemplate = [...COMMON_JOBS_TEMPLATE, ...NURSERY_POND_JOBS_TEMPLATE];
+                case 'Ao lắng':
+                    jobTemplate = SETTLING_POND_JOBS_TEMPLATE;
+                    break;
+                case 'Ao xử lý':
+                    jobTemplate = TREATMENT_POND_JOBS_TEMPLATE;
+                    break;
+                case 'Ao chứa nước':
+                    jobTemplate = WATER_STORAGE_POND_JOBS_TEMPLATE;
                     break;
                 case 'Ao nuôi':
-                    jobTemplate = [...COMMON_JOBS_TEMPLATE, ...CULTIVATION_POND_JOBS_TEMPLATE];
+                    jobTemplate = CULTIVATION_POND_JOBS_TEMPLATE;
+                    break;
+                case 'Ao vèo':
+                    jobTemplate = NURSERY_POND_JOBS_TEMPLATE;
+                    break;
+                case 'Ao sẵn sàng':
+                    jobTemplate = READY_POND_JOBS_TEMPLATE;
+                    break;
+                case 'Ao thải':
+                    jobTemplate = WASTE_POND_JOBS_TEMPLATE;
                     break;
                 default:
-                    jobTemplate = COMMON_JOBS_TEMPLATE;
+                    jobTemplate = [];
             }
         }
 
@@ -141,7 +203,25 @@ export const ShrimpFarmScreens: React.FC = () => {
             items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
         }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pond?.type, pond?.id, getPondJobItems, currentCycle, _pondJobs]);
+    }, [
+        pond?.type,
+        pond?.id,
+        getPondJobItems,
+        currentCycle,
+        // Add all job maps as dependencies
+        feedJobs,
+        shrimpInspectionJobs,
+        measureSizeJobs,
+        environmentJobs,
+        waterTreatmentJobs,
+        waterChangeJobs,
+        siphonJobs,
+        troubleshootingJobs,
+        transferPondJobs,
+        cleanPondJobs,
+        sunDryJobs,
+        harvestJobs,
+    ]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -152,8 +232,6 @@ export const ShrimpFarmScreens: React.FC = () => {
 
     const calculateDOC = (startDateString: string | null | undefined) => {
         if (!startDateString) return 0;
-        // Parse date: if string contains "/", it's dd/mm/yyyy format, use parseDate
-        // Otherwise, it's ISO string, use new Date()
         const start =
             typeof startDateString === 'string' && startDateString.includes('/')
                 ? parseDate(startDateString)
@@ -275,6 +353,11 @@ export const ShrimpFarmScreens: React.FC = () => {
             return;
         }
 
+        if (type === JOB_TYPES.TROUBLESHOOTING) {
+            navigation.navigate('HandleProblem', { pond, jobType: 'TROUBLESHOOTING' as any });
+            return;
+        }
+
         const currentItems = getPondJobItems(pond.id, type);
 
         // Calculate next index based on max existing label
@@ -359,9 +442,12 @@ export const ShrimpFarmScreens: React.FC = () => {
             return;
         }
 
-        const itemToEdit = item; // Alias for compatibility with below code if needed
+        if (type === JOB_TYPES.TROUBLESHOOTING) {
+            navigation.navigate('HandleProblem', { pond, item, jobType: 'TROUBLESHOOTING' as any });
+            return;
+        }
 
-        // For other job types, keep the delete behavior (or implement edit later)
+        const itemToEdit = item;
         const currentItems = getPondJobItems(pond.id, type);
         const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
         updatePondJob(pond.id, type, newItems);
@@ -378,10 +464,6 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
         if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
             navigation.navigate('PondworkLogScreen', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.MEASURE_SIZE && pond) {
-            navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
             return;
         }
         if (type === JOB_TYPES.MEASURE_SIZE && pond) {
@@ -420,10 +502,15 @@ export const ShrimpFarmScreens: React.FC = () => {
             navigation.navigate('SunDryPondLog', { pond });
             return;
         }
+
+        if (type === JOB_TYPES.TROUBLESHOOTING && pond) {
+            navigation.navigate('HandleProblemLog', { pond, jobType: 'TROUBLESHOOTING' as any });
+            return;
+        }
     };
 
-    // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo"
-    const headerDisplayType = pond?.type === 'Ao sẵn sàng' && currentCycle ? 'Ao vèo' : undefined;
+    // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo" -> REMOVED
+    const headerDisplayType = undefined;
 
     return (
         <View style={styles.container}>
@@ -534,8 +621,10 @@ export const ShrimpFarmScreens: React.FC = () => {
                 </ScrollView>
             </View>
 
-            {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ */}
-            {selectedTab === 'work' && !currentCycle && (
+            {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ.
+                User yêu cầu "Ao sẵn sàng" KHÔNG có bắt đầu chu kỳ nuôi.
+            */}
+            {selectedTab === 'work' && !currentCycle && pond?.type !== 'Ao sẵn sàng' && (
                 <View style={styles.footer}>
                     <TouchableOpacity
                         style={styles.startButton}

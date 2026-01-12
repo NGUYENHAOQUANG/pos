@@ -73,12 +73,77 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
     config: LogScreenConfig<T>
 ): UseLogScreenDataResult => {
     const navigation = useNavigation<NavigationProp>();
-    const { getPondJobItemsGroupedByDate, pondJobs: _pondJobs } = useFarm();
 
-    const [startDate, setStartDate] = useState(new Date());
+    // Destructure all slices to ensure reactivity
+    const {
+        getPondJobItemsGroupedByDate,
+        feedJobs,
+        shrimpInspectionJobs,
+        measureSizeJobs,
+        environmentJobs,
+        waterTreatmentJobs,
+        waterChangeJobs,
+        siphonJobs,
+        troubleshootingJobs,
+        transferPondJobs,
+        cleanPondJobs,
+        sunDryJobs,
+        harvestJobs,
+    } = useFarm();
+
+    const [startDate, setStartDate] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
     const [endDate, setEndDate] = useState(new Date());
 
     const pondId = config.pond?.id || config.pondId;
+
+    // Determine which data slice to listen to based on jobType
+    const jobsSourceToCheck = useMemo(() => {
+        switch (config.jobType) {
+            case 'FEED':
+                return feedJobs;
+            case 'SHRIMP_INSPECTION':
+                return shrimpInspectionJobs;
+            case 'MEASURE_SIZE':
+                return measureSizeJobs;
+            case 'ENVIRONMENT':
+                return environmentJobs;
+            case 'WATER_TREATMENT':
+                return waterTreatmentJobs;
+            case 'WATER_CHANGE':
+                return waterChangeJobs;
+            case 'SIPHON':
+                return siphonJobs;
+            case 'TROUBLESHOOTING':
+                return troubleshootingJobs;
+            case 'TRANSFER_POND':
+                return transferPondJobs;
+            case 'CLEAN_POND':
+                return cleanPondJobs;
+            case 'SUN_DRY_POND':
+                return sunDryJobs;
+            case 'HARVEST':
+                return harvestJobs;
+            default:
+                return {};
+        }
+    }, [
+        config.jobType,
+        feedJobs,
+        shrimpInspectionJobs,
+        measureSizeJobs,
+        environmentJobs,
+        waterTreatmentJobs,
+        waterChangeJobs,
+        siphonJobs,
+        troubleshootingJobs,
+        transferPondJobs,
+        cleanPondJobs,
+        sunDryJobs,
+        harvestJobs,
+    ]);
 
     const groupedData: TrackingGroup[] = useMemo(() => {
         if (!pondId) return [];
@@ -154,14 +219,23 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
             });
         });
 
-        // Sort groups by date (oldest first)
+        // Sort groups by date (newest first)
         return groups.sort((a, b) => {
             const dateA = parseDate(a.date);
             const dateB = parseDate(b.date);
-            return dateA.getTime() - dateB.getTime();
+            return dateB.getTime() - dateA.getTime();
         });
+        // Depend on jobsSourceToCheck to trigger updates when data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pondId, config, getPondJobItemsGroupedByDate, startDate, endDate, navigation, _pondJobs]);
+    }, [
+        pondId,
+        config,
+        getPondJobItemsGroupedByDate,
+        startDate,
+        endDate,
+        navigation,
+        jobsSourceToCheck,
+    ]);
 
     return {
         startDate,

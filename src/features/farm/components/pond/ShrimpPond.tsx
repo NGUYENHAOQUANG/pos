@@ -48,8 +48,15 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     status,
     pondId,
 }) => {
-    // If no update/activity provided, consider it empty/no-data mode
-    const hasData = type === 'Ao nuôi' || type === 'Ao vèo' || type === 'Ao sẵn sàng';
+    // Logic hasData: Now includes almost all functional ponds
+    // Exclude 'Ao lắng' (Settling) as it has no tasks, unless specific logic arises later.
+    const hasData =
+        type === 'Ao nuôi' ||
+        type === 'Ao vèo' ||
+        type === 'Ao sẵn sàng' ||
+        type === 'Ao xử lý' ||
+        type === 'Ao chứa nước' ||
+        type === 'Ao thải';
 
     const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
 
@@ -77,9 +84,8 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
         : undefined;
 
-    // Display Logic Override:
-    // If "Ao sẵn sàng" has an active cycle, show as "Ao vèo"
-    const displayType = type === 'Ao sẵn sàng' && cycleData ? 'Ao vèo' : type;
+    // Display Logic Override: REMOVED as per request.
+    const displayType = type;
 
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState<ActionMenuPosition>({});
@@ -109,13 +115,17 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                 setMenuVisible(false);
             },
         },
-        {
-            label: 'Các chu kì nuôi',
-            onPress: () => {
-                onCyclePress?.();
-                setMenuVisible(false);
-            },
-        },
+        ...(cycleData
+            ? [
+                  {
+                      label: 'Các chu kì nuôi',
+                      onPress: () => {
+                          onCyclePress?.();
+                          setMenuVisible(false);
+                      },
+                  },
+              ]
+            : []),
     ];
 
     return (

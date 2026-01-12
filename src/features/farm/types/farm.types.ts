@@ -1,4 +1,11 @@
-export type PondType = 'Ao nuôi' | 'Ao vèo' | 'Ao sẵn sàng' | 'Ao lắng' | 'Ao thải';
+export type PondType =
+    | 'Ao nuôi'
+    | 'Ao vèo'
+    | 'Ao sẵn sàng'
+    | 'Ao lắng'
+    | 'Ao thải'
+    | 'Ao xử lý'
+    | 'Ao chứa nước';
 
 export interface PondData {
     id: string;

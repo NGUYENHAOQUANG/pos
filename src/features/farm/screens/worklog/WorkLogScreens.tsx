@@ -39,14 +39,61 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     availableJobTypes = [],
 }) => {
     // State for DateRangeFilter
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
     const [endDate, setEndDate] = useState(new Date());
 
     // State for Filter modal
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const { pondJobs } = useFarm();
+    const {
+        feedJobs,
+        shrimpInspectionJobs,
+        measureSizeJobs,
+        environmentJobs,
+        waterTreatmentJobs,
+        waterChangeJobs,
+        siphonJobs,
+        troubleshootingJobs,
+        transferPondJobs,
+        cleanPondJobs,
+        sunDryJobs,
+        harvestJobs,
+    } = useFarm();
+
+    const jobDataMap = useMemo(
+        () => ({
+            FEED: feedJobs,
+            SHRIMP_INSPECTION: shrimpInspectionJobs,
+            MEASURE_SIZE: measureSizeJobs,
+            ENVIRONMENT: environmentJobs,
+            WATER_TREATMENT: waterTreatmentJobs,
+            WATER_CHANGE: waterChangeJobs,
+            SIPHON: siphonJobs,
+            TROUBLESHOOTING: troubleshootingJobs,
+            TRANSFER_POND: transferPondJobs,
+            CLEAN_POND: cleanPondJobs,
+            SUN_DRY_POND: sunDryJobs,
+            HARVEST: harvestJobs,
+        }),
+        [
+            feedJobs,
+            shrimpInspectionJobs,
+            measureSizeJobs,
+            environmentJobs,
+            waterTreatmentJobs,
+            waterChangeJobs,
+            siphonJobs,
+            troubleshootingJobs,
+            transferPondJobs,
+            cleanPondJobs,
+            sunDryJobs,
+            harvestJobs,
+        ]
+    );
 
     // Helper to get data for a specific job
     const getJobData = (type: JobType, item: JobExecution) => {
@@ -94,8 +141,8 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
 
         // 1. Collect jobs for available types
         availableJobTypes.forEach(type => {
-            // Access pondJobs directly to ensure dependency is valid and triggers updates
-            const rawItems = pondJobs[pond.id]?.[type] || [];
+            // Use jobDataMap instead of removed pondJobs
+            const rawItems = jobDataMap[type]?.[pond.id] || [];
             const items = rawItems.filter(item => !item.pondId || item.pondId === pond.id);
 
             items.forEach(item => {
@@ -172,7 +219,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
         }));
     }, [
         pond?.id,
-        pondJobs, // Used directly now
+        jobDataMap,
         startDate,
         endDate,
         selectedFilters,
