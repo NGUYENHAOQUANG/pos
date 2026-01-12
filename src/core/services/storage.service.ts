@@ -1,43 +1,40 @@
 /**
  * @file storage.service.ts
- * @description Storage Service - MMKV wrapper. Adapter for Zustand persist middleware
+ * @description Storage Service - AsyncStorage wrapper. Adapter for Zustand persist middleware
  * @author Kindy
  * @created 2025-11-16
+ * @updated 2026-01-12
  */
-import { MMKV } from 'react-native-mmkv';
-
-export const storage = new MMKV({
-    id: 'app-storage',
-});
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Storage adapter for Zustand persist
 export const Storage = {
-    setItem: (key: string, value: string): void => {
+    setItem: async (key: string, value: string): Promise<void> => {
         try {
-            storage.set(key, value);
+            await AsyncStorage.setItem(key, value);
         } catch (error) {
             console.warn('[Storage] Failed to set item:', key, error);
         }
     },
-    getItem: (key: string): string | null => {
+    getItem: async (key: string): Promise<string | null> => {
         try {
-            const value = storage.getString(key);
+            const value = await AsyncStorage.getItem(key);
             return value ?? null;
         } catch (error) {
             console.warn('[Storage] Failed to get item:', key, error);
             return null;
         }
     },
-    removeItem: (key: string): void => {
+    removeItem: async (key: string): Promise<void> => {
         try {
-            storage.delete(key);
+            await AsyncStorage.removeItem(key);
         } catch (error) {
             console.warn('[Storage] Failed to remove item:', key, error);
         }
     },
-    clear: (): void => {
+    clear: async (): Promise<void> => {
         try {
-            storage.clearAll();
+            await AsyncStorage.clear();
         } catch (error) {
             console.warn('[Storage] Failed to clear:', error);
         }

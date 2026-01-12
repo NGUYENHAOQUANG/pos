@@ -49,12 +49,6 @@ export default function LoginScreen() {
             username: selectedTab === 0 ? email : phone,
             password,
         });
-
-        try {
-            await login(loginData);
-        } catch (error) {
-            console.error('Login failed:', error);
-        }
     };
 
     const handleForgotPassWord = () => {
