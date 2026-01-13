@@ -1,9 +1,3 @@
-/**
- * @file materialGroupApi.ts
- * @description Material Group API
- * @author Kindy
- * @created 2025-01-13
- */
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {

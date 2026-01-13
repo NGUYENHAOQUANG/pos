@@ -44,4 +44,12 @@ export const API_ENDPOINTS = {
     UNITS: {
         LIST: '/units',
     },
+    // Materials
+    MATERIAL: {
+        LIST: '/materials',
+        DETAIL: (id: number) => `/materials/${id}`,
+        CREATE: '/materials',
+        UPDATE: (id: number) => `/materials/${id}`,
+        DELETE: (id: number) => `/materials/${id}`,
+    },
 } as const;

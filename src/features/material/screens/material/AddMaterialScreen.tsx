@@ -9,23 +9,26 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterialStore } from '@/features/material/store/materialStore';
+import { useMaterialStore } from '@/features/material/store';
+import { IMaterialType } from '@/features/material/types/material.types';
 
 interface AddMaterialScreenProps {}
 
 export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const addMaterial = useMaterialStore(state => state.addMaterial);
+    const createMaterial = useMaterialStore(state => state.createMaterial);
 
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Get material groups and units from store
+    // Get material groups, types, and units from store
     const {
         fetchMaterialGroups,
         getMaterialGroupOptions,
         isLoadingMaterialGroups,
         materialGroups,
+        materialTypes,
+        fetchMaterialTypes,
         fetchUnits,
         getUnitOptions,
     } = useMaterialStore();
@@ -35,11 +38,12 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Fetch material groups and units on mount
+    // Fetch material groups, types, and units on mount
     useEffect(() => {
         fetchMaterialGroups();
+        fetchMaterialTypes();
         fetchUnits();
-    }, [fetchMaterialGroups, fetchUnits]);
+    }, [fetchMaterialGroups, fetchMaterialTypes, fetchUnits]);
 
     // Get dropdown options from store
     const materialGroupOptions = getMaterialGroupOptions();
@@ -56,6 +60,57 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const [unitOfUse, setUnitOfUse] = useState('');
     const [dosage, setDosage] = useState('');
     const [manufacturer, setManufacturer] = useState('');
+
+    const handleSave = async () => {
+        // Validation
+        if (!name.trim()) {
+            showValidationError('Vui lòng nhập tên vật tư');
+            return;
+        }
+        if (!group) {
+            showValidationError('Vui lòng chọn nhóm vật tư');
+            return;
+        }
+        if (!type) {
+            showValidationError('Vui lòng chọn loại vật tư');
+            return;
+        }
+        if (!unit) {
+            showValidationError('Vui lòng chọn đơn vị tính');
+            return;
+        }
+
+        try {
+            // Map type name to materialTypeId
+            const selectedType = materialTypes.find((t: IMaterialType) => t.name === type);
+            if (!selectedType) {
+                showValidationError('Loại vật tư không hợp lệ');
+                return;
+            }
+
+            // Map unit to unitId (unit is already the id from dropdown)
+            const unitId = typeof unit === 'number' ? unit : Number(unit);
+            if (isNaN(unitId)) {
+                showValidationError('Đơn vị tính không hợp lệ');
+                return;
+            }
+
+            // Create material via API
+            await createMaterial({
+                name: name.trim(),
+                materialTypeId: selectedType.id,
+                description: usage || '', // Map usage to description
+                unitId: unitId,
+                manufacturer: manufacturer?.trim() || null,
+                isActive: true,
+            });
+
+            navigation.goBack();
+        } catch (error) {
+            // Error is already handled in createMaterial with toast
+            console.error('[AddMaterialScreen] Failed to create material:', error);
+        }
+    };
 
     return (
         <>
@@ -115,38 +170,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         borderTopWidth: 1,
                         borderTopColor: colors.border,
                     }}
-                    onPrimaryPress={() => {
-                        // Validation
-                        if (!name.trim()) {
-                            showValidationError('Vui lòng nhập tên vật tư');
-                            return;
-                        }
-                        if (!group) {
-                            showValidationError('Vui lòng chọn nhóm vật tư');
-                            return;
-                        }
-                        if (!type) {
-                            showValidationError('Vui lòng chọn loại vật tư');
-                            return;
-                        }
-                        if (!unit) {
-                            showValidationError('Vui lòng chọn đơn vị tính');
-                            return;
-                        }
-
-                        addMaterial({
-                            name,
-                            group,
-                            type,
-                            unit,
-                            usage,
-                            unitOfUse,
-                            dosage,
-                            manufacturer,
-                            remaining: 0,
-                        });
-                        navigation.goBack();
-                    }}
+                    onPrimaryPress={handleSave}
                     onSecondaryPress={() => navigation.goBack()}
                 />
             </View>

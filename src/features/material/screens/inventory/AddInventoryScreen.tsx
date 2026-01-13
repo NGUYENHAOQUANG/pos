@@ -7,12 +7,12 @@ import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
-import { IInventoryTicket } from '../../types/material.types';
+import { IInventoryTicket, IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store';
 
 interface AddInventoryScreenProps {}
 
@@ -56,7 +56,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [materialGroup, setMaterialGroup] = useState('');
 
     // Derive options from store
-    const materialOptions = materials.map(m => m.name);
+    const materialOptions = materials.map((m: IMaterial) => m.name);
 
     // --- Handlers ---
     const handleDropdownOpen = () => {
@@ -75,7 +75,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             setMaterialName(val);
 
             // Find material in store
-            const selectedMaterial = materials.find(m => m.name === val);
+            const selectedMaterial = materials.find((m: IMaterial) => m.name === val);
 
             if (selectedMaterial) {
                 setOldStock(selectedMaterial.remaining || 0);
