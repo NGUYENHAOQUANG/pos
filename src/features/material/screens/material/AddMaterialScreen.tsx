@@ -10,6 +10,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
 import { useMaterialStore } from '../../store/materialStore';
+import { unitApi } from '../../api/unitApi';
 
 interface AddMaterialScreenProps {}
 
@@ -30,6 +31,21 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
     const [unit, setUnit] = useState('');
+    const [unitOptions, setUnitOptions] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchUnits = async () => {
+            try {
+                const data = await unitApi.getUnits();
+                if (data && data.length > 0) {
+                    setUnitOptions(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch units:', error);
+            }
+        };
+        fetchUnits();
+    }, []);
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -67,7 +83,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
-                        unitOptions={['Kg', 'Lít', 'ml', 'g', 'mg']}
+                        unitOptions={unitOptions}
                         usage={usage}
                         onUsageChange={setUsage}
                         unitOfUse={unitOfUse}

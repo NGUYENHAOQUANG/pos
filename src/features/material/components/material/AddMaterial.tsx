@@ -229,6 +229,8 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         onChange={onUnitChange}
                                         isOpen={activeDropdown === 'unit'}
                                         onToggle={() => handleToggleDropdown('unit')}
+                                        placeholder="Chọn đơn vị tính"
+                                        showAllOption={false}
                                     />
                                 </View>
                             </View>
