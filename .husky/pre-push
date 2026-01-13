@@ -1,3 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Ensure nvm / node is available
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
 echo "🔍 Đang kiểm tra ESLint cho toàn bộ project..."
 
 # Chạy ESLint với --max-warnings=0 để fail nếu có warnings
@@ -15,4 +22,3 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 echo "✅ Tất cả file đã pass ESLint check!"
-
