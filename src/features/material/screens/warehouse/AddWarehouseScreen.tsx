@@ -2,22 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, ScrollView, Text } from 'react-native';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeaderMeterial } from '../../components/HeaderMaterial';
-import { WarehouseInformation } from '../../components/warehouse/WarehouseInformation';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { WarehouseInformation } from '@/features/material/components/warehouse/WarehouseInformation';
 import {
     AddWarehouseMaterial,
     MaterialItem,
-} from '../../components/warehouse/AddWarehouseMaterial';
-import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+} from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
-import { ConfirmSubmiss } from '../../components/warehouse/ConfirmSubmiss';
-import { IMaterial } from '../../types/material.types';
+import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
+import { IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store';
 
 interface AddWarehouseScreenProps {}
 
