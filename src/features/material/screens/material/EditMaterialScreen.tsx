@@ -11,6 +11,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
 import { useMaterialStore } from '../../store/materialStore';
+import { unitApi } from '../../api/unitApi';
 
 interface EditMaterialScreenProps {}
 
@@ -33,6 +34,21 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
     const [unit, setUnit] = useState('');
+    const [unitOptions, setUnitOptions] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchUnits = async () => {
+            try {
+                const data = await unitApi.getUnits();
+                if (data && data.length > 0) {
+                    setUnitOptions(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch units:', error);
+            }
+        };
+        fetchUnits();
+    }, []);
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -81,20 +97,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
-                        unitOptions={[
-                            'Kg',
-                            'ml',
-                            'Lít',
-                            'Gram',
-                            'mét',
-                            'Cuộn',
-                            'Cái',
-                            'Con',
-                            'Tấm',
-                            'Chai',
-                            'Miếng',
-                            'm3',
-                        ]}
+                        unitOptions={unitOptions}
                         usage={usage}
                         onUsageChange={setUsage}
                         unitOfUse={unitOfUse}
