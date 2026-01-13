@@ -14,8 +14,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
-import PhoneInput from '../components/PhoneInput';
-import { authApi } from '../api/authApi';
+import PhoneInput from '@/features/auth/components/PhoneInput';
+import { authApi } from '@/features/auth/api/authApi';
 import Toast from 'react-native-toast-message';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { colors, spacing } from '@/styles';
