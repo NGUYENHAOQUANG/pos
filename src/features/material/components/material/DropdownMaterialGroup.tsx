@@ -14,10 +14,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
 
+export interface DropdownOption {
+    label: string;
+    value: string | number;
+}
+
 interface DropdownMaterialProps {
-    value?: string;
-    onChange?: (value: string) => void;
-    options?: string[];
+    value?: string | number;
+    onChange?: (value: any) => void;
+    options?: (string | DropdownOption)[];
     label?: string;
     required?: boolean;
     placeholder?: string;
@@ -26,7 +31,7 @@ interface DropdownMaterialProps {
     inline?: boolean;
     isOpen: boolean;
     onToggle: () => void;
-    useAutoScroll?: boolean; // true = dùng AutoScrollText, false = dùng Text thường
+    useAutoScroll?: boolean;
     disabled?: boolean;
 }
 
@@ -49,12 +54,23 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     isOpen,
     onToggle,
     inline = false,
-    useAutoScroll = false, // Mặc định dùng Text thường
+    useAutoScroll = false,
     disabled = false,
 }) => {
+    // Helper to get normalized options
+    const getNormalizedOptions = (): DropdownOption[] => {
+        return options.map(opt => {
+            if (typeof opt === 'string') {
+                return { label: opt, value: opt };
+            }
+            return opt;
+        });
+    };
+
+    const allOptions = getNormalizedOptions();
     const displayOptions = showAllOption
-        ? options
-        : options.filter(option => option !== 'Tất cả nhóm vật tư');
+        ? allOptions
+        : allOptions.filter(opt => opt.label !== 'Tất cả nhóm vật tư');
 
     const buttonRef = useRef<View>(null);
     const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0, width: 0 });
@@ -71,20 +87,20 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         }
     }, [isOpen, inline]);
 
-    const handleSelect = (option: string) => {
-        onChange?.(option);
+    const handleSelect = (option: DropdownOption) => {
+        onChange?.(option.value);
         onToggle();
     };
 
-    const renderItem = ({ item }: { item: string }) => {
-        const isSelected = item === value;
+    const renderItem = ({ item }: { item: DropdownOption }) => {
+        const isSelected = item.value === value;
         return (
             <TouchableOpacity
                 style={[styles.item, isSelected && styles.itemSelected]}
                 onPress={() => handleSelect(item)}
             >
                 <AutoScrollText
-                    text={item}
+                    text={item.label}
                     style={[styles.itemText, isSelected && styles.itemTextSelected]}
                     containerStyle={styles.autoScrollContainer}
                     speed={30}
@@ -109,7 +125,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         >
             <FlatList
                 data={displayOptions}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item, index) => String(item.value) + index}
                 renderItem={renderItem}
                 nestedScrollEnabled={true}
                 keyboardShouldPersistTaps="handled"
@@ -120,14 +136,15 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         </View>
     );
 
-    // Render content dựa trên useAutoScroll
+    // Get display label for current value
+    const currentLabel = allOptions.find(opt => opt.value === value)?.label || value?.toString();
+
     const renderButtonContent = () => {
         if (useAutoScroll) {
-            // Dùng AutoScrollText cho tab lịch sử nhập kho
             return value ? (
                 <AutoScrollText
-                    text={value}
-                    key={value}
+                    text={currentLabel || ''}
+                    key={String(value)}
                     style={{
                         ...StyleSheet.flatten(styles.text),
                         flex: undefined,
@@ -146,14 +163,13 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 />
             );
         } else {
-            // Dùng Text thường cho tab danh sách vật tư và kiểm kê
             return (
                 <Text
                     style={[styles.text, !value && styles.placeholderText]}
                     numberOfLines={1}
                     ellipsizeMode="tail"
                 >
-                    {value || placeholder}
+                    {currentLabel || placeholder}
                 </Text>
             );
         }

@@ -11,7 +11,7 @@ export interface IMaterial {
     name: string;
     group: MaterialGroupType;
     type?: string;
-    unit: string;
+    unit: string | number;
     usage?: string;
     unitOfUse?: string;
     dosage?: string;
@@ -20,6 +20,13 @@ export interface IMaterial {
     price?: number; // Sometimes used in warehouse context
     quantity?: string | number; // Sometimes used in warehouse context
 }
+
+export interface IUnit {
+    id: number;
+    name: string;
+}
+
+export type GetUnitsResponse = IAppResponse<IPaginate<IUnit>>;
 
 export interface IWarehouseMaterialItem {
     id: string;
