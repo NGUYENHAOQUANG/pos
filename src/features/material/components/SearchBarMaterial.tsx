@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from './material/DropdownMaterialGroup';
 import { TabType } from './HeadingMaterial';
+import { useMaterialStore } from '../store/materialStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -39,6 +40,24 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     const [materialGroup, setMaterialGroup] = useState('');
     const [voteStatus, setVoteStatus] = useState('');
+
+    // Get material groups from store
+    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
+        useMaterialStore();
+
+    // Fetch material groups on mount
+    useEffect(() => {
+        fetchMaterialGroups();
+    }, [fetchMaterialGroups]);
+
+    // Get dropdown options from store
+    const materialGroupOptions = getMaterialGroupOptions();
+
+    // Debug log
+    useEffect(() => {
+        console.log('[SearchBarMaterial] Material group options:', materialGroupOptions);
+        console.log('[SearchBarMaterial] isLoading:', isLoadingMaterialGroups);
+    }, [materialGroupOptions, isLoadingMaterialGroups]);
 
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -116,9 +135,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                                 setMaterialGroup(value);
                                 onGroupChange?.(value);
                             }}
+                            options={materialGroupOptions}
                             isOpen={isGroupDropdownOpen}
                             onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
                             useAutoScroll={selectedTab === 'history'}
+                            disabled={isLoadingMaterialGroups}
                         />
                     </View>
                 </View>

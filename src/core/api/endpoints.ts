@@ -47,4 +47,16 @@ export const API_ENDPOINTS = {
         DELETE: (id: number | string) => `/zones/${id}`,
         PONDS: (id: number | string) => `/zones/${id}/ponds`,
     },
+    // Material Group
+    MATERIAL_GROUP: {
+        LIST: '/material-groups',
+        DETAIL: (id: number) => `/material-groups/${id}`,
+        CREATE: '/material-groups',
+        UPDATE: (id: number) => `/material-groups/${id}`,
+        DELETE: (id: number) => `/material-groups/${id}`,
+    },
+    // Units
+    UNITS: {
+        LIST: '/units',
+    },
 } as const;

@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeaderMeterial } from '../../components/HeaderMaterial';
-import { AddMaterial } from '../../components/material/AddMaterial';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { AddMaterial } from '@/features/material/components/material/AddMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { colors, spacing } from '@/styles';
-import { IMaterial } from '../../types/material.types';
+import { IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store/materialStore';
 
 interface EditMaterialScreenProps {}
 
@@ -20,11 +20,30 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
     const updateMaterial = useMaterialStore(state => state.updateMaterial);
+    const { fetchUnits, getUnitOptions } = useMaterialStore();
+
+    // Get material groups from store
+    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
+        useMaterialStore();
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Fetch material groups on mount
+    useEffect(() => {
+        fetchMaterialGroups();
+    }, [fetchMaterialGroups]);
+
+    // Get dropdown options from store
+    const materialGroupOptions = getMaterialGroupOptions();
+    const unitOptions = getUnitOptions();
+
+    // Fetch units on mount
+    useEffect(() => {
+        fetchUnits();
+    }, [fetchUnits]);
 
     const params = route.params as { material: IMaterial } | undefined;
     const initialData = params?.material;
@@ -32,7 +51,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState('');
+    const [unit, setUnit] = useState<string | number>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -81,20 +100,9 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
-                        unitOptions={[
-                            'Kg',
-                            'ml',
-                            'Lít',
-                            'Gram',
-                            'mét',
-                            'Cuộn',
-                            'Cái',
-                            'Con',
-                            'Tấm',
-                            'Chai',
-                            'Miếng',
-                            'm3',
-                        ]}
+                        unitOptions={unitOptions}
+                        groupOptions={materialGroupOptions}
+                        groupDisabled={isLoadingMaterialGroups}
                         usage={usage}
                         onUsageChange={setUsage}
                         unitOfUse={unitOfUse}
