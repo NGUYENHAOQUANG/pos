@@ -75,6 +75,7 @@ interface AddMaterialProps {
     onUnitChange?: (value: string) => void;
     groupOptions?: string[];
     unitOptions?: string[];
+    groupDisabled?: boolean;
 
     // Advanced Info
     usage?: string;
@@ -99,6 +100,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     onUnitChange,
     groupOptions = [],
     unitOptions = [],
+    groupDisabled = false,
     usage,
     onUsageChange,
     unitOfUse,
@@ -197,9 +199,9 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         placeholder="Chọn nhóm vật tư"
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         showAllOption={false}
-                                        // --- TRUYỀN PROPS ---
                                         isOpen={activeDropdown === 'group'}
                                         onToggle={() => handleToggleDropdown('group')}
+                                        disabled={groupDisabled}
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>
