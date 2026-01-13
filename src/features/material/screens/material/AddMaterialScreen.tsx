@@ -21,10 +21,22 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
+    // Get material groups from store
+    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
+        useMaterialStore();
+
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Fetch material groups on mount
+    useEffect(() => {
+        fetchMaterialGroups();
+    }, [fetchMaterialGroups]);
+
+    // Get dropdown options from store
+    const materialGroupOptions = getMaterialGroupOptions();
 
     // Basic Info State
     const [name, setName] = useState('');
@@ -83,6 +95,8 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
+                        groupOptions={materialGroupOptions}
+                        groupDisabled={isLoadingMaterialGroups}
                         unitOptions={unitOptions}
                         usage={usage}
                         onUsageChange={setUsage}

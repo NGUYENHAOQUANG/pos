@@ -24,6 +24,14 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/products/${id}`,
         DELETE: (id: string) => `/products/${id}`,
     },
+    // Material Group
+    MATERIAL_GROUP: {
+        LIST: '/material-groups',
+        DETAIL: (id: number) => `/material-groups/${id}`,
+        CREATE: '/material-groups',
+        UPDATE: (id: number) => `/material-groups/${id}`,
+        DELETE: (id: number) => `/material-groups/${id}`,
+    },
     // Units
     UNITS: {
         LIST: '/units',

@@ -7,15 +7,26 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
+import {
+    IMaterial,
+    IWarehouseReceipt,
+    IInventoryTicket,
+    IMaterialGroup,
+} from '../types/material.types';
 import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
 import { showSuccessToast } from '../utils/validationToast';
+import { materialGroupApi } from '../api/materialGroupApi';
 
 interface MaterialState {
     // Data
     materials: IMaterial[];
     warehouseList: IWarehouseReceipt[];
     inventoryList: IInventoryTicket[];
+    materialGroups: IMaterialGroup[];
+
+    // Loading states
+    isLoadingMaterialGroups: boolean;
+    materialGroupsError: string | null;
 
     // UI State (for MaterialScreen)
     searchText: string;
@@ -27,6 +38,10 @@ interface MaterialState {
     updateMaterial: (material: IMaterial) => void;
     getMaterialById: (id: string) => IMaterial | undefined;
     getMaterials: () => IMaterial[];
+
+    // Actions - Material Groups
+    fetchMaterialGroups: () => Promise<void>;
+    getMaterialGroupOptions: () => string[];
 
     // Actions - Warehouse
     addWarehouseReceipt: (receipt: Omit<IWarehouseReceipt, 'id'>) => void;
@@ -53,6 +68,9 @@ export const useMaterialStore = create<MaterialState>()(
             materials: mockMaterialList,
             warehouseList: mockWarehouseList,
             inventoryList: mockInventoryList,
+            materialGroups: [],
+            isLoadingMaterialGroups: false,
+            materialGroupsError: null,
             searchText: '',
             filterGroup: '',
             filterMaterialName: null,
@@ -64,6 +82,51 @@ export const useMaterialStore = create<MaterialState>()(
                     state.warehouseList = mockWarehouseList;
                     state.inventoryList = mockInventoryList;
                 });
+            },
+
+            // Fetch material groups from API
+            fetchMaterialGroups: async () => {
+                set(state => {
+                    state.isLoadingMaterialGroups = true;
+                    state.materialGroupsError = null;
+                });
+
+                try {
+                    console.log('[MaterialStore] Fetching material groups...');
+                    const response = await materialGroupApi.getAll({ Page: 1, PageSize: 100 });
+                    console.log('[MaterialStore] API Response:', JSON.stringify(response, null, 2));
+
+                    if (response.result && response.data?.items) {
+                        console.log('[MaterialStore] Material groups loaded:', response.data.items);
+                        set(state => {
+                            state.materialGroups = response.data.items || [];
+                            state.isLoadingMaterialGroups = false;
+                        });
+                    } else {
+                        console.log('[MaterialStore] API Error:', response.message);
+                        set(state => {
+                            state.materialGroupsError =
+                                response.message || 'Không thể tải nhóm vật tư';
+                            state.isLoadingMaterialGroups = false;
+                        });
+                    }
+                } catch (error) {
+                    console.log('[MaterialStore] Fetch error:', error);
+                    set(state => {
+                        state.materialGroupsError =
+                            error instanceof Error ? error.message : 'Đã xảy ra lỗi';
+                        state.isLoadingMaterialGroups = false;
+                    });
+                }
+            },
+
+            // Get material group options for dropdown
+            getMaterialGroupOptions: () => {
+                const groups = get().materialGroups;
+                const options = groups
+                    .filter(group => group.name)
+                    .map(group => group.name as string);
+                return ['Tất cả nhóm vật tư', ...options];
             },
 
             // Material actions
@@ -169,6 +232,7 @@ export const useMaterialStore = create<MaterialState>()(
                 materials: state.materials,
                 warehouseList: state.warehouseList,
                 inventoryList: state.inventoryList,
+                materialGroups: state.materialGroups,
             }),
         }
     )
