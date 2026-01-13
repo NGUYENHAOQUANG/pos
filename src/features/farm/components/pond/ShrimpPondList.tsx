@@ -11,12 +11,22 @@ interface ShrimpPondListProps {
     data: PondData[];
     onPondPress?: (pond: PondData) => void;
     onInfoPress?: (pond: PondData) => void;
+    onEndReached?: () => void;
+    onEndReachedThreshold?: number;
+    ListFooterComponent?: React.ComponentType | React.ReactElement | null;
+    refreshing?: boolean;
+    onRefresh?: () => void;
 }
 
 export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
     data,
     onPondPress,
     onInfoPress,
+    onEndReached,
+    onEndReachedThreshold = 0.5,
+    ListFooterComponent,
+    refreshing,
+    onRefresh,
 }) => {
     const { getLatestPondActivity, activeCycles, getCyclesByPondId } = useFarm();
 
@@ -50,13 +60,13 @@ export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
         return (
             <ShrimpPond
                 name={item.name}
-                area={item.area}
+                area={item.areaSqm ? `${Number(item.areaSqm).toFixed(2)} m²` : item.area || ''}
                 type={displayType}
                 lastUpdate={latestActivity?.lastUpdate || item.lastUpdate}
                 lastActivity={displayActivity}
                 status={computedStatus}
                 style={styles.item}
-                pondId={item.id}
+                pondId={item.id || ''}
                 onInfoPress={() => onInfoPress?.(item)}
                 onCyclePress={() => {}}
                 onDetailPress={() => onPondPress?.(item)}
@@ -71,6 +81,11 @@ export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={onEndReachedThreshold}
+            ListFooterComponent={ListFooterComponent}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
         />
     );
 };

@@ -8,9 +8,18 @@ interface PondTypeTagProps {
     style?: StyleProp<ViewStyle>;
 }
 
+// Helper to safely get the string value for comparison
+const getTypeValue = (type: PondType | string | undefined | null): string => {
+    if (!type) return '';
+    if (typeof type === 'string') return type;
+    return type.name || ''; // Use name for comparison against POND_TYPES values (which are names)
+};
+
 export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
+    const typeValue = getTypeValue(type);
+
     const getStyle = () => {
-        switch (type) {
+        switch (typeValue) {
             case POND_TYPES.CULTIVATION:
                 return styles.blue;
             case POND_TYPES.NURSERY:
@@ -31,7 +40,7 @@ export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
     };
 
     const getTextStyle = () => {
-        switch (type) {
+        switch (typeValue) {
             case POND_TYPES.CULTIVATION:
                 return styles.textBlue;
             case POND_TYPES.NURSERY:
@@ -53,7 +62,7 @@ export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
 
     return (
         <View style={[styles.container, getStyle(), style]}>
-            <Text style={[styles.text, getTextStyle()]}>{type}</Text>
+            <Text style={[styles.text, getTextStyle()]}>{typeValue}</Text>
         </View>
     );
 };
