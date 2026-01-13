@@ -21,7 +21,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Get material groups, types, and units from store
+    // Get material groups and units from store
     const {
         fetchMaterialGroups,
         getMaterialGroupOptions,
