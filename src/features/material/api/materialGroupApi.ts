@@ -12,7 +12,7 @@ import {
     GetMaterialGroupsResponse,
     GetMaterialGroupByIdResponse,
     IAppResponse,
-} from '../types/material.types';
+} from '@/features/material/types/material.types';
 
 export interface GetMaterialGroupsParams {
     Page?: number;

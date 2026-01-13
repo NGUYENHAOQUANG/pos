@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeaderMeterial } from '../../components/HeaderMaterial';
-import { AddMaterial } from '../../components/material/AddMaterial';
-import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { AddMaterial } from '@/features/material/components/material/AddMaterial';
+import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
-import { unitApi } from '../../api/unitApi';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store/materialStore';
+import { unitApi } from '@/features/material/api/unitApi';
 
 interface AddMaterialScreenProps {}
 

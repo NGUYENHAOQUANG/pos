@@ -12,10 +12,14 @@ import {
     IWarehouseReceipt,
     IInventoryTicket,
     IMaterialGroup,
-} from '../types/material.types';
-import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
-import { showSuccessToast } from '../utils/validationToast';
-import { materialGroupApi } from '../api/materialGroupApi';
+} from '@/features/material/types/material.types';
+import {
+    mockMaterialList,
+    mockWarehouseList,
+    mockInventoryList,
+} from '@/features/material/data/materialData';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { materialGroupApi } from '@/features/material/api/materialGroupApi';
 
 interface MaterialState {
     // Data

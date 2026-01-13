@@ -8,9 +8,9 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
-import { DropdownMaterial } from './DropdownMaterialGroup';
-import { CollapseHead } from '../CollapseHead';
-import { UnitOfUse } from './UnitOfUse';
+import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
+import { CollapseHead } from '@/features/material/components/CollapseHead';
+import { UnitOfUse } from '@/features/material/components/material/UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
