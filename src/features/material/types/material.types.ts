@@ -11,7 +11,8 @@ export interface IMaterial {
     name: string;
     group: MaterialGroupType;
     type?: string;
-    unit: string | number;
+    unit: string | number; // unitId for API calls
+    unitName?: string; // unitName for display
     usage?: string;
     unitOfUse?: string;
     dosage?: string;
@@ -145,3 +146,51 @@ export interface UpdateMaterialTypeRequest {
 
 export type GetMaterialTypesResponse = IAppResponse<IPaginate<IMaterialType>>;
 export type GetMaterialTypeByIdResponse = IAppResponse<IMaterialType>;
+
+// ============ Material API Types ============
+export interface MaterialResponse {
+    id: number;
+    creatorId?: number | null;
+    createdAt?: string | null;
+    lastModifierId?: number | null;
+    lastModifiedAt?: string | null;
+    isDeleted?: boolean;
+    deleterId?: number | null;
+    deletedAt?: string | null;
+    code?: string | null;
+    name?: string | null;
+    manufacturer?: string | null;
+    unitId: number;
+    unitName?: string | null;
+    materialGroupId?: number;
+    materialTypeId?: number;
+    description?: string | null; // Map to usage field
+}
+
+export interface CreateMaterialRequest {
+    name: string;
+    materialTypeId: number;
+    description: string;
+    unitId: number;
+    manufacturer?: string | null;
+    isActive?: boolean;
+}
+
+export interface UpdateMaterialRequest {
+    name?: string | null;
+    materialTypeId?: number | null;
+    description?: string | null;
+    unitId?: number | null;
+    manufacturer?: string | null;
+    isActive?: boolean | null;
+}
+
+export interface GetMaterialsParams {
+    Search?: string;
+    MaterialTypeId?: number;
+    Page?: number;
+    PageSize?: number;
+}
+
+export type GetMaterialsResponse = IAppResponse<IPaginate<MaterialResponse>>;
+export type GetMaterialByIdResponse = IAppResponse<MaterialResponse>;

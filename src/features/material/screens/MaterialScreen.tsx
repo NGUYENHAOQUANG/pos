@@ -2,21 +2,27 @@ import React, { useState, useLayoutEffect, useEffect, useCallback, useMemo } fro
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../navigation/MaterialNavigator';
-
-import { HeaderMeterial } from '../components/HeaderMaterial';
-import { ButtonMetaerial, MaterialMenuOverlay } from '../components/ButtonMaterial';
-import { HeadingMeterial, TabType } from '../components/HeadingMaterial';
-import { SearchBarMeterial } from '../components/SearchBarMaterial';
-import { MaterialEmptyState } from '../components/EmptyStateCard';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import {
+    ButtonMetaerial,
+    MaterialMenuOverlay,
+} from '@/features/material/components/ButtonMaterial';
+import { HeadingMeterial, TabType } from '@/features/material/components/HeadingMaterial';
+import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { WarehouseListScreen } from './warehouse/WarehouseListScreen';
 import { MaterialListScreen } from './material/MaterialListScreen';
+import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
+import {
+    IMaterial,
+    IWarehouseReceipt,
+    IWarehouseMaterialItem,
+} from '@/features/material/types/material.types';
+import { useMaterialStore } from '@/features/material/store';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-
-import { InventoryCard } from '../components/inventory/InventoryCard';
-import { IMaterial } from '../types/material.types';
-import { useMaterialStore } from '../store/materialStore';
+import { Loading } from '@/shared/components/ui/Loading';
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -31,11 +37,13 @@ export const MeterialScreen = () => {
     const inventoryList = useMaterialStore(state => state.inventoryList);
     const searchText = useMaterialStore(state => state.searchText);
     const filterGroup = useMaterialStore(state => state.filterGroup);
+    const filterType = useMaterialStore(state => state.filterType);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
+    const isLoadingMaterials = useMaterialStore(state => state.isLoadingMaterials);
     const setSearchText = useMaterialStore(state => state.setSearchText);
-    const setFilterGroup = useMaterialStore(state => state.setFilterGroup);
+    const setFilterType = useMaterialStore(state => state.setFilterType);
     const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
-    const initializeData = useMaterialStore(state => state.initializeData);
+    const fetchMaterials = useMaterialStore(state => state.fetchMaterials);
 
     // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
@@ -62,10 +70,20 @@ export const MeterialScreen = () => {
         }
     }, [route.params, navigation]);
 
-    // Initialize data on mount (for Fast Refresh support)
+    // Fetch materials from API on mount and when filters change
     useEffect(() => {
-        initializeData();
-    }, [initializeData]);
+        const loadMaterials = async () => {
+            try {
+                await fetchMaterials({
+                    Page: 1,
+                    PageSize: 100,
+                });
+            } catch (error) {
+                console.error('[MaterialScreen] Failed to fetch materials:', error);
+            }
+        };
+        loadMaterials();
+    }, [fetchMaterials, filterType, searchText]);
 
     useLayoutEffect(() => {
         // Always show tab bar on list screen
@@ -107,11 +125,16 @@ export const MeterialScreen = () => {
         [setSearchText]
     );
 
-    const handleFilterGroup = useCallback(
-        (group: string) => {
-            setFilterGroup(group);
+    const handleFilterType = useCallback(
+        (type: string) => {
+            setFilterType(type);
+            // Refetch materials when filter changes
+            fetchMaterials({
+                Page: 1,
+                PageSize: 100,
+            });
         },
-        [setFilterGroup]
+        [setFilterType, fetchMaterials]
     );
 
     const handleFilterPress = useCallback(() => {
@@ -139,26 +162,32 @@ export const MeterialScreen = () => {
     );
 
     const filteredMaterials = useMemo(() => {
-        return materials.filter(item => {
+        return materials.filter((item: IMaterial) => {
             const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase());
-            const matchesGroup =
-                filterGroup === '' ||
-                filterGroup === 'Tất cả nhóm vật tư' ||
-                item.group === filterGroup;
-            return matchesSearch && matchesGroup;
+            const matchesType =
+                filterType === '' ||
+                filterType === 'Tất cả loại vật tư' ||
+                item.type === filterType;
+            return matchesSearch && matchesType;
         });
-    }, [materials, searchText, filterGroup]);
+    }, [materials, searchText, filterType]);
 
     const filteredWarehouseList = useMemo(() => {
-        return warehouseList.filter(receipt => {
+        return warehouseList.filter((receipt: IWarehouseReceipt) => {
             if (filterMaterialName) {
-                if (!receipt.materials.some(m => m.materialName === filterMaterialName)) {
+                if (
+                    !receipt.materials.some(
+                        (m: IWarehouseMaterialItem) => m.materialName === filterMaterialName
+                    )
+                ) {
                     return false;
                 }
             }
             if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
-                const hasGroup = receipt.materials.some(receiptItem => {
-                    const materialDef = materials.find(m => m.name === receiptItem.materialName);
+                const hasGroup = receipt.materials.some((receiptItem: IWarehouseMaterialItem) => {
+                    const materialDef = materials.find(
+                        (m: IMaterial) => m.name === receiptItem.materialName
+                    );
                     return materialDef?.group === filterGroup;
                 });
                 if (!hasGroup) return false;
@@ -166,7 +195,7 @@ export const MeterialScreen = () => {
             if (searchText) {
                 const lowerSearch = searchText.toLowerCase();
                 const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
-                const matchesMaterial = receipt.materials.some(m =>
+                const matchesMaterial = receipt.materials.some((m: IWarehouseMaterialItem) =>
                     m.materialName.toLowerCase().includes(lowerSearch)
                 );
                 if (!matchesSupplier && !matchesMaterial) return false;
@@ -189,7 +218,7 @@ export const MeterialScreen = () => {
             <SearchBarMeterial
                 onSearch={handleSearch}
                 onFilterPress={handleFilterPress}
-                onGroupChange={handleFilterGroup}
+                onGroupChange={handleFilterType}
                 selectedTab={selectedTab}
             />
 
@@ -197,17 +226,19 @@ export const MeterialScreen = () => {
                 () => (
                     <View style={styles.content}>
                         {selectedTab === 'list' && (
-                            <MaterialListScreen
-                                materials={filteredMaterials}
-                                onEdit={handleEditMaterial}
-                                onAdd={handleAddMaterial}
-                                onHistoryPress={handleHistoryPress}
-                                onAdjustmentPress={adjustmentItem =>
-                                    navigation.navigate('AddInventory', {
-                                        initialMaterialName: adjustmentItem.name,
-                                    } as any)
-                                }
-                            />
+                            <Loading isLoading={isLoadingMaterials}>
+                                <MaterialListScreen
+                                    materials={filteredMaterials}
+                                    onEdit={handleEditMaterial}
+                                    onAdd={handleAddMaterial}
+                                    onHistoryPress={handleHistoryPress}
+                                    onAdjustmentPress={adjustmentItem =>
+                                        navigation.navigate('AddInventory', {
+                                            initialMaterialName: adjustmentItem.name,
+                                        } as any)
+                                    }
+                                />
+                            </Loading>
                         )}
                         {selectedTab === 'history' &&
                             (filteredWarehouseList.length > 0 ? (
@@ -235,6 +266,7 @@ export const MeterialScreen = () => {
                 [
                     selectedTab,
                     filteredMaterials,
+                    isLoadingMaterials,
                     handleEditMaterial,
                     handleAddMaterial,
                     handleHistoryPress,

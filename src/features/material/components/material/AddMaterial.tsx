@@ -13,9 +13,8 @@ import {
     DropdownOption,
 } from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/features/material/components/CollapseHead';
-import { UnitOfUse } from '@/features/material/components/material/UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
-import { materialTypeApi } from '@/features/material/api/materialTypeApi';
+import { useMaterialStore } from '@/features/material/store';
 import { IMaterialGroup } from '@/features/material/types/material.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,20 +22,20 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 // Mapping từ đơn vị tính chính sang các đơn vị sử dụng tương ứng
-const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
-    // Khối lượng
-    Kg: ['Kg', 'g', 'mg'],
-    g: ['g', 'mg', 'kg'],
-    Gram: ['g', 'mg', 'kg'],
-    mg: ['mg', 'g'],
-    // Thể tích
-    Lít: ['Lít', 'ml'],
-    ml: ['ml', 'Lít'],
-    // Chiều dài
-    mét: ['m', 'cm', 'mm'],
-    // Thể tích khối
-    m3: ['m3', 'Lít', 'ml'],
-};
+// const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
+//     // Khối lượng
+//     Kg: ['Kg', 'g', 'mg'],
+//     g: ['g', 'mg', 'kg'],
+//     Gram: ['g', 'mg', 'kg'],
+//     mg: ['mg', 'g'],
+//     // Thể tích
+//     Lít: ['Lít', 'ml'],
+//     ml: ['ml', 'Lít'],
+//     // Chiều dài
+//     mét: ['m', 'cm', 'mm'],
+//     // Thể tích khối
+//     m3: ['m3', 'Lít', 'ml'],
+// };
 
 interface AddMaterialProps {
     // Basic Info
@@ -79,10 +78,10 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     groupDisabled = false,
     usage,
     onUsageChange,
-    unitOfUse,
-    onUnitOfUseChange,
-    dosage,
-    onDosageChange,
+    unitOfUse: _unitOfUse,
+    onUnitOfUseChange: _onUnitOfUseChange,
+    dosage: _dosage,
+    onDosageChange: _onDosageChange,
     manufacturer,
     onManufacturerChange,
     onUnitDropdownOpen,
@@ -93,56 +92,23 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // State for API-fetched material types
-    const [typeOptions, setTypeOptions] = useState<string[]>([]);
-    const [isLoadingTypes, setIsLoadingTypes] = useState(false);
+    // Get material types from store
+    const fetchMaterialTypesByGroup = useMaterialStore(state => state.fetchMaterialTypesByGroup);
+    const getMaterialTypeOptions = useMaterialStore(state => state.getMaterialTypeOptions);
+    const isLoadingMaterialTypes = useMaterialStore(state => state.isLoadingMaterialTypes);
+
+    // Get type options for selected group
+    const typeOptions = useMemo(() => {
+        if (!group) return [];
+        return getMaterialTypeOptions(group);
+    }, [group, getMaterialTypeOptions]);
 
     // Fetch material types when group changes
     useEffect(() => {
-        const fetchMaterialTypes = async () => {
-            if (!group || materialGroupsData.length === 0) {
-                setTypeOptions([]);
-                return;
-            }
-
-            // Find the selected group's ID
-            const selectedGroup = materialGroupsData.find(g => g.name === group);
-            if (!selectedGroup) {
-                console.warn('[UI] Selected group not found in materialGroupsData');
-                setTypeOptions([]);
-                return;
-            }
-
-            setIsLoadingTypes(true);
-            try {
-                // API does not support MaterialGroupId filter, so we fetch all and filter client-side
-                const response = await materialTypeApi.getList({
-                    PageSize: 100,
-                });
-                if (response.result && response.data?.items) {
-                    // Filter types by materialGroupId client-side
-                    const filteredTypes = response.data.items
-                        .filter(item => item.materialGroupId === selectedGroup.id)
-                        .map(item => item.name || '')
-                        .filter(n => n);
-                    console.log(
-                        `[UI] Filtered ${filteredTypes.length} types for group ${selectedGroup.name} (ID: ${selectedGroup.id})`
-                    );
-                    setTypeOptions(filteredTypes);
-                } else {
-                    console.warn('[UI] API returned no items');
-                    setTypeOptions([]);
-                }
-            } catch (error) {
-                console.error('[UI] Failed to fetch material types:', error);
-                setTypeOptions([]);
-            } finally {
-                setIsLoadingTypes(false);
-            }
-        };
-
-        fetchMaterialTypes();
-    }, [group, materialGroupsData]);
+        if (group && materialGroupsData.length > 0) {
+            fetchMaterialTypesByGroup(group);
+        }
+    }, [group, materialGroupsData, fetchMaterialTypesByGroup]);
 
     const handleToggleDropdown = (key: string) => {
         if (activeDropdown === key) {
@@ -156,29 +122,31 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     };
 
     // Calculate options for Unit of Use based on selected Unit
-    const unitOfUseOptions = useMemo(() => {
-        if (!unit) return [];
-        // Find the label (name) corresponding to the unit value (id)
-        const selectedOption = unitOptions.find(opt =>
-            typeof opt === 'string' ? opt === unit : opt.value === unit
-        );
-        const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
+    // Commented out - UNIT_TO_USAGE_UNITS_MAP is no longer used
+    // const unitOfUseOptions = useMemo(() => {
+    //     if (!unit) return [];
+    //     // Find the label (name) corresponding to the unit value (id)
+    //     const selectedOption = unitOptions.find(opt =>
+    //         typeof opt === 'string' ? opt === unit : opt.value === unit
+    //     );
+    //     const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
 
-        return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
-            ? UNIT_TO_USAGE_UNITS_MAP[unitName]
-            : [];
-    }, [unit, unitOptions]);
+    //     return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
+    //         ? UNIT_TO_USAGE_UNITS_MAP[unitName]
+    //         : [];
+    // }, [unit, unitOptions]);
 
     // Reset unitOfUse if current value is not in the new options
-    useEffect(() => {
-        if (unit && unitOfUse && unitOfUseOptions.length > 0) {
-            if (!unitOfUseOptions.includes(unitOfUse)) {
-                onUnitOfUseChange?.('');
-            }
-        } else if (!unit) {
-            onUnitOfUseChange?.('');
-        }
-    }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
+    // Commented out - unitOfUseOptions is no longer used
+    // useEffect(() => {
+    //     if (unit && unitOfUse && unitOfUseOptions.length > 0) {
+    //         if (!unitOfUseOptions.includes(unitOfUse)) {
+    //             onUnitOfUseChange?.('');
+    //         }
+    //     } else if (!unit) {
+    //         onUnitOfUseChange?.('');
+    //     }
+    // }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
 
     const toggleBasicExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -250,7 +218,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
-                                        disabled={!group || isLoadingTypes}
+                                        disabled={!group || isLoadingMaterialTypes}
                                     />
                                 </View>
                             </View>
@@ -300,7 +268,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 />
                             </View>
 
-                            <View style={styles.row}>
+                            {/* <View style={styles.row}>
                                 <View style={styles.halfWidth}>
                                     <UnitOfUse
                                         label="Đơn vị sử dụng"
@@ -327,7 +295,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         />
                                     </View>
                                 </View>
-                            </View>
+                            </View> */}
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>Nhà sản xuất</Text>

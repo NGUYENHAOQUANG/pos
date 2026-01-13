@@ -52,7 +52,7 @@ export const MaterialList: React.FC<MaterialListProps> = ({
             <View style={styles.infoRow}>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Đơn vị tính: </Text>
-                    {item.unit}
+                    {item.unitName || item.unit}
                 </Text>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Còn: </Text>
@@ -77,14 +77,15 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                             <Text style={styles.detailLabel}>Công dụng:</Text> {item.usage || '---'}
                         </Text>
                     </View>
-                    <View style={styles.detailRow}>
+                    {/* Commented out - Đơn vị sử dụng và Liều dùng */}
+                    {/* <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
                         <Text style={styles.detailValue}>{item.unitOfUse || '---'}</Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Liều dùng: </Text>
                         <Text style={styles.detailValue}>{item.dosage || '---'}</Text>
-                    </View>
+                    </View> */}
 
                     {/* Edit Button */}
                     <ButtonMaterialList
