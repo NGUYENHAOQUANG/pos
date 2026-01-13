@@ -22,6 +22,7 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddEnvironmentScreen'>;
@@ -410,74 +411,76 @@ export const AddEnvironmentScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-            >
-                <GeneralInfoBox
-                    type="default"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    disabledDate={true}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <GeneralInfoBox
+                        type="default"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        disabledDate={true}
+                    />
 
-                <EnvironmentParametersBox
-                    pH={pH}
-                    onPHChange={value => {
-                        setPH(value);
-                        setShowParameterError(false);
-                    }}
-                    do={dissolvedOxygen}
-                    onDOChange={value => {
-                        setDissolvedOxygen(value);
-                        setShowParameterError(false);
-                    }}
-                    temperature={temperature}
-                    onTemperatureChange={value => {
-                        setTemperature(value);
-                        setShowParameterError(false);
-                    }}
-                    salinity={salinity}
-                    onSalinityChange={value => {
-                        setSalinity(value);
-                        setShowParameterError(false);
-                    }}
-                    alkalinity={alkalinity}
-                    onAlkalinityChange={value => {
-                        setAlkalinity(value);
-                        setShowParameterError(false);
-                    }}
-                    transparency={transparency}
-                    onTransparencyChange={value => {
-                        setTransparency(value);
-                        setShowParameterError(false);
-                    }}
-                    onSetupPress={() => {
-                        navigation.navigate('SettingEnvironment', {
-                            data: { advancedParameters },
-                            onSave: handleSaveAdvancedParams,
-                        });
-                    }}
-                    advancedParameters={advancedParameters}
-                    kali={kali}
-                    onKaliChange={setKali}
-                    tan={tan}
-                    onTanChange={setTan}
-                    magie={magie}
-                    onMagieChange={setMagie}
-                    no3={no3}
-                    onNo3Change={setNo3}
-                    showError={showParameterError}
-                />
+                    <EnvironmentParametersBox
+                        pH={pH}
+                        onPHChange={value => {
+                            setPH(value);
+                            setShowParameterError(false);
+                        }}
+                        do={dissolvedOxygen}
+                        onDOChange={value => {
+                            setDissolvedOxygen(value);
+                            setShowParameterError(false);
+                        }}
+                        temperature={temperature}
+                        onTemperatureChange={value => {
+                            setTemperature(value);
+                            setShowParameterError(false);
+                        }}
+                        salinity={salinity}
+                        onSalinityChange={value => {
+                            setSalinity(value);
+                            setShowParameterError(false);
+                        }}
+                        alkalinity={alkalinity}
+                        onAlkalinityChange={value => {
+                            setAlkalinity(value);
+                            setShowParameterError(false);
+                        }}
+                        transparency={transparency}
+                        onTransparencyChange={value => {
+                            setTransparency(value);
+                            setShowParameterError(false);
+                        }}
+                        onSetupPress={() => {
+                            navigation.navigate('SettingEnvironment', {
+                                data: { advancedParameters },
+                                onSave: handleSaveAdvancedParams,
+                            });
+                        }}
+                        advancedParameters={advancedParameters}
+                        kali={kali}
+                        onKaliChange={setKali}
+                        tan={tan}
+                        onTanChange={setTan}
+                        magie={magie}
+                        onMagieChange={setMagie}
+                        no3={no3}
+                        onNo3Change={setNo3}
+                        showError={showParameterError}
+                    />
 
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
@@ -550,6 +553,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 100,
     },
     footer: {
         backgroundColor: colors.white,

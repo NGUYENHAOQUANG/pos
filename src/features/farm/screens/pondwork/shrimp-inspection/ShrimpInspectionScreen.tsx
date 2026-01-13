@@ -23,6 +23,7 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -229,49 +230,51 @@ export const ShrimpInspectionScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={[styles.scrollContent]}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* Thông tin chung Box */}
-                <GeneralInfoBox
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    type="withImage"
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    disabledDate={true}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={[styles.scrollContent]}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* Thông tin chung Box */}
+                    <GeneralInfoBox
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        type="withImage"
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        disabledDate={true}
+                    />
 
-                {/* Kiểm tra thức ăn Box */}
-                <ShrimpInspectionFoodCheckBox
-                    foodAmount={foodAmount}
-                    onFoodAmountChange={setFoodAmount}
-                    leftoverFood={leftoverFood}
-                    onLeftoverFoodChange={setLeftoverFood}
-                />
+                    {/* Kiểm tra thức ăn Box */}
+                    <ShrimpInspectionFoodCheckBox
+                        foodAmount={foodAmount}
+                        onFoodAmountChange={setFoodAmount}
+                        leftoverFood={leftoverFood}
+                        onLeftoverFoodChange={setLeftoverFood}
+                    />
 
-                {/* Quan sát mẫu Box */}
-                <ShrimpInspectionObservationBox
-                    intestine={intestine}
-                    onIntestineChange={setIntestine}
-                    intestineColor={intestineColor}
-                    onIntestineColorChange={setIntestineColor}
-                    stoolColor={stoolColor}
-                    onStoolColorChange={setStoolColor}
-                    liver={liver}
-                    onLiverChange={setLiver}
-                />
+                    {/* Quan sát mẫu Box */}
+                    <ShrimpInspectionObservationBox
+                        intestine={intestine}
+                        onIntestineChange={setIntestine}
+                        intestineColor={intestineColor}
+                        onIntestineColorChange={setIntestineColor}
+                        stoolColor={stoolColor}
+                        onStoolColorChange={setStoolColor}
+                        liver={liver}
+                        onLiverChange={setLiver}
+                    />
 
-                {/* Ghi chú Box */}
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+                    {/* Ghi chú Box */}
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
@@ -344,6 +347,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 100,
     },
     footer: {
         backgroundColor: colors.white,

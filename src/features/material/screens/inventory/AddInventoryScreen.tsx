@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
@@ -158,36 +159,38 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 onBackPress={() => navigation.goBack()}
             />
 
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* Thông tin chung */}
-                <InventoryGeneralInfo
-                    date={formatDate(date)}
-                    createdDate={formatDateTime(date)}
-                    materialGroup={materialGroup}
-                    note={note}
-                    onDatePress={() => setDatePickerVisible(true)}
-                    onNoteChange={setNote}
-                />
-
-                {/* Nhập liệu vật tư */}
-                <View style={styles.dropdownSection}>
-                    <InventoryMaterialInput
-                        materialName={materialName}
-                        oldStock={oldStock}
-                        newStock={newStock}
-                        onMaterialSelect={handleMaterialSelect}
-                        onNewStockChange={setNewStock}
-                        materialOptions={materialOptions}
-                        onDropdownOpen={handleDropdownOpen}
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.contentContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* Thông tin chung */}
+                    <InventoryGeneralInfo
+                        date={formatDate(date)}
+                        createdDate={formatDateTime(date)}
+                        materialGroup={materialGroup}
+                        note={note}
+                        onDatePress={() => setDatePickerVisible(true)}
+                        onNoteChange={setNote}
                     />
-                </View>
-            </ScrollView>
+
+                    {/* Nhập liệu vật tư */}
+                    <View style={styles.dropdownSection}>
+                        <InventoryMaterialInput
+                            materialName={materialName}
+                            oldStock={oldStock}
+                            newStock={newStock}
+                            onMaterialSelect={handleMaterialSelect}
+                            onNewStockChange={setNewStock}
+                            materialOptions={materialOptions}
+                            onDropdownOpen={handleDropdownOpen}
+                        />
+                    </View>
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Nút Gửi Phiếu */}
             <ButtonBarMaterial
@@ -221,7 +224,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingBottom: 100,
     },
     dropdownSection: {
         zIndex: 100,

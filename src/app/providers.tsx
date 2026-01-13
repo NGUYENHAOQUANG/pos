@@ -5,13 +5,7 @@
  * @created 2025-11-16
  */
 import React, { useEffect, useState } from 'react';
-import {
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    Keyboard,
-    KeyboardAvoidingViewProps,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -34,11 +28,6 @@ const queryClient = new QueryClient({
 export function AppProviders() {
     const [showSplash, setShowSplash] = useState(true);
 
-    const defaultBehavior: KeyboardAvoidingViewProps['behavior'] =
-        Platform.OS === 'ios' ? 'padding' : 'height';
-    const [keyboardBehavior, setKeyboardBehavior] =
-        useState<KeyboardAvoidingViewProps['behavior']>(defaultBehavior);
-
     useEffect(() => {
         // Auto-hide splash screen after 2.5 seconds
         const timer = setTimeout(() => {
@@ -48,37 +37,18 @@ export function AppProviders() {
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
-        // Only apply keyboard fix on Android
-        if (Platform.OS !== 'android') return;
-
-        const showListener = Keyboard.addListener('keyboardDidShow', () => {
-            setKeyboardBehavior(defaultBehavior);
-        });
-        const hideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardBehavior(undefined);
-        });
-
-        return () => {
-            showListener.remove();
-            hideListener.remove();
-        };
-    }, [defaultBehavior]);
-
     return (
         <SafeAreaProvider>
             <GestureHandlerRootView style={styles.gestureHandler}>
-                <KeyboardAvoidingView behavior={keyboardBehavior} style={styles.keyboardView}>
-                    <AntdProvider theme={antdTheme}>
-                        <QueryClientProvider client={queryClient}>
-                            <TabBarVisibilityProvider>
-                                <NavigationContainer>
-                                    <AppNavigator />
-                                </NavigationContainer>
-                            </TabBarVisibilityProvider>
-                        </QueryClientProvider>
-                    </AntdProvider>
-                </KeyboardAvoidingView>
+                <AntdProvider theme={antdTheme}>
+                    <QueryClientProvider client={queryClient}>
+                        <TabBarVisibilityProvider>
+                            <NavigationContainer>
+                                <AppNavigator />
+                            </NavigationContainer>
+                        </TabBarVisibilityProvider>
+                    </QueryClientProvider>
+                </AntdProvider>
             </GestureHandlerRootView>
 
             {/* Splash Screen overlay - outside navigation stack, prevents back navigation */}
@@ -89,9 +59,6 @@ export function AppProviders() {
 
 const styles = StyleSheet.create({
     gestureHandler: {
-        flex: 1,
-    },
-    keyboardView: {
         flex: 1,
     },
 });

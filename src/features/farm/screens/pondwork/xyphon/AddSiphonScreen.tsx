@@ -27,6 +27,7 @@ import {
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddSiphonScreen'>;
@@ -237,35 +238,37 @@ export const AddSiphonScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-            >
-                <GeneralInfoBox
-                    type="withImage"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    disabledDate={true}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <GeneralInfoBox
+                        type="withImage"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        disabledDate={true}
+                    />
 
-                <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
+                    <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
 
-                <MaterialSelectionBox
-                    selectedMaterials={selectedMaterials}
-                    onMaterialsChange={setSelectedMaterials}
-                    materials={MOCK_MATERIALS}
-                />
+                    <MaterialSelectionBox
+                        selectedMaterials={selectedMaterials}
+                        onMaterialsChange={setSelectedMaterials}
+                        materials={MOCK_MATERIALS}
+                    />
 
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
@@ -338,6 +341,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 100,
     },
     footer: {
         backgroundColor: colors.white,

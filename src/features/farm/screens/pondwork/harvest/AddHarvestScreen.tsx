@@ -20,6 +20,7 @@ import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
@@ -313,41 +314,43 @@ export const AddHarvestScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-            >
-                <GeneralInfoBox
-                    type="harvest"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    activityLabel="Chọn loại thu hoạch"
-                    activityOptions={harvestTypeOptions}
-                    selectedActivity={harvestType}
-                    onSelectActivity={setHarvestType}
-                    disabledDate={true}
-                />
-
-                {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
-                {harvestType !== 'Đóng chu kỳ' && (
-                    <HarvestDataBox
-                        yieldAmount={yieldAmount}
-                        onYieldAmountChange={setYieldAmount}
-                        shrimpSize={shrimpSize}
-                        onShrimpSizeChange={setShrimpSize}
-                        referencePrice={referencePrice}
-                        onReferencePriceChange={setReferencePrice}
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <GeneralInfoBox
+                        type="harvest"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        activityLabel="Chọn loại thu hoạch"
+                        activityOptions={harvestTypeOptions}
+                        selectedActivity={harvestType}
+                        onSelectActivity={setHarvestType}
+                        disabledDate={true}
                     />
-                )}
 
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+                    {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
+                    {harvestType !== 'Đóng chu kỳ' && (
+                        <HarvestDataBox
+                            yieldAmount={yieldAmount}
+                            onYieldAmountChange={setYieldAmount}
+                            shrimpSize={shrimpSize}
+                            onShrimpSizeChange={setShrimpSize}
+                            referencePrice={referencePrice}
+                            onReferencePriceChange={setReferencePrice}
+                        />
+                    )}
+
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
@@ -430,6 +433,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 100,
     },
     footer: {
         backgroundColor: colors.white,

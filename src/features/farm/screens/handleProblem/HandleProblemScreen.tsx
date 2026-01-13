@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '../../components/pondwork/GeneralInfoBox';
@@ -11,6 +11,7 @@ import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/M
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 import { useFarm } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -173,37 +174,39 @@ export const HandleProblemScreen = () => {
                 }
             />
 
-            <ScrollView
-                ref={scrollViewRef}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* 1. Thông tin chung */}
-                <GeneralInfoBox
-                    type="withImage"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    disabledDate={true}
-                />
-                {/* 2. Chọn vật tư */}
-                <MaterialSelectionBox
-                    selectedMaterials={selectedMaterials}
-                    onMaterialsChange={setSelectedMaterials}
-                    materials={MOCK_MATERIALS}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* 1. Thông tin chung */}
+                    <GeneralInfoBox
+                        type="withImage"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        disabledDate={true}
+                    />
+                    {/* 2. Chọn vật tư */}
+                    <MaterialSelectionBox
+                        selectedMaterials={selectedMaterials}
+                        onMaterialsChange={setSelectedMaterials}
+                        materials={MOCK_MATERIALS}
+                    />
 
-                {/* 3. Ghi chú (Mô tả sự cố) */}
-                <SelectionNotesBox
-                    notes={note}
-                    onNotesChange={setNote}
-                    scrollViewRef={scrollViewRef}
-                />
+                    {/* 3. Ghi chú (Mô tả sự cố) */}
+                    <SelectionNotesBox
+                        notes={note}
+                        onNotesChange={setNote}
+                        scrollViewRef={scrollViewRef}
+                    />
 
-                <View style={styles.spacer} />
-            </ScrollView>
+                    <View style={styles.spacer} />
+                </ScrollView>
+            </SafeInputLayout>
 
             <ButtonBarFarm
                 primaryTitle={item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
@@ -236,7 +239,7 @@ export const HandleProblemScreen = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.backgroundPrimary },
-    scrollContent: { paddingBottom: spacing.md },
+    scrollContent: { paddingBottom: 100 },
 
     headerDeleteButton: {
         width: 40,

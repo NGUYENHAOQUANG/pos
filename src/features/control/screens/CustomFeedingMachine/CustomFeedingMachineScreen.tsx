@@ -6,8 +6,6 @@ import {
     TouchableOpacity,
     TextInput,
     ScrollView,
-    KeyboardAvoidingView,
-    Platform,
     BackHandler,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -24,6 +22,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
@@ -230,10 +229,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 }}
             />
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={styles.flex1}
-            >
+            <SafeInputLayout style={styles.flex1}>
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
@@ -336,7 +332,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         }}
                     />
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </SafeInputLayout>
 
             <ButtonBar
                 mode="double"
@@ -360,6 +356,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingVertical: 12, // Vertical spacing for scroll
         paddingHorizontal: 0, // Fill width
+        paddingBottom: 100,
     },
     card: {
         backgroundColor: colors.white,

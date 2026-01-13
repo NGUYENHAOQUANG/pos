@@ -9,6 +9,7 @@ import {
     MaterialItem,
 } from '../../components/warehouse/AddWarehouseMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '../../components/warehouse/ConfirmSubmiss';
 import { IMaterial } from '../../types/material.types';
@@ -109,27 +110,29 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                     rightComponent={null}
                 />
 
-                <ScrollView
-                    style={styles.content}
-                    contentContainerStyle={styles.contentContainer}
-                    showsVerticalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <WarehouseInformation
-                        date={date}
-                        onDateChange={setDate}
-                        supplier={supplier}
-                        onSupplierChange={setSupplier}
-                    />
+                <SafeInputLayout>
+                    <ScrollView
+                        style={styles.content}
+                        contentContainerStyle={styles.contentContainer}
+                        showsVerticalScrollIndicator={false}
+                        nestedScrollEnabled={true}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <WarehouseInformation
+                            date={date}
+                            onDateChange={setDate}
+                            supplier={supplier}
+                            onSupplierChange={setSupplier}
+                        />
 
-                    <AddWarehouseMaterial
-                        materials={warehouseItems}
-                        onUpdateMaterial={handleUpdateMaterial}
-                        onAddMaterial={handleAddMaterial}
-                        materialOptions={materialOptions}
-                    />
-                </ScrollView>
+                        <AddWarehouseMaterial
+                            materials={warehouseItems}
+                            onUpdateMaterial={handleUpdateMaterial}
+                            onAddMaterial={handleAddMaterial}
+                            materialOptions={materialOptions}
+                        />
+                    </ScrollView>
+                </SafeInputLayout>
 
                 <ButtonBarMaterial
                     mode="total"
@@ -202,6 +205,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingBottom: 100,
     },
 });

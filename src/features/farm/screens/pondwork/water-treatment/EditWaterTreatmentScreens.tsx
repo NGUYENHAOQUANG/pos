@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    StyleSheet,
-    ScrollView,
-    KeyboardAvoidingView,
-    Platform,
-    TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { colors, borderRadius } from '@/styles';
@@ -18,6 +12,7 @@ import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/M
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 
@@ -121,13 +116,11 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 rightAction={renderHeaderRight()}
             />
 
-            <KeyboardAvoidingView
-                style={styles.flex1}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
+            <SafeInputLayout style={styles.flex1}>
                 <ScrollView
                     ref={scrollViewRef}
                     style={styles.flex1}
+                    contentContainerStyle={{ paddingBottom: 100 }}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
@@ -145,7 +138,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                         scrollViewRef={scrollViewRef}
                     />
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <ButtonBarFarm
