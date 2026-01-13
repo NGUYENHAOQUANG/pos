@@ -55,8 +55,24 @@ export const API_ENDPOINTS = {
         UPDATE: (id: number) => `/material-groups/${id}`,
         DELETE: (id: number) => `/material-groups/${id}`,
     },
+    // Material Type
+    MATERIAL_TYPE: {
+        LIST: '/material-types',
+        DETAIL: (id: number) => `/material-types/${id}`,
+        CREATE: '/material-types',
+        UPDATE: (id: number) => `/material-types/${id}`,
+        DELETE: (id: number) => `/material-types/${id}`,
+    },
     // Units
     UNITS: {
         LIST: '/units',
+    },
+    // Materials
+    MATERIAL: {
+        LIST: '/materials',
+        DETAIL: (id: number) => `/materials/${id}`,
+        CREATE: '/materials',
+        UPDATE: (id: number) => `/materials/${id}`,
+        DELETE: (id: number) => `/materials/${id}`,
     },
 } as const;

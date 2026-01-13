@@ -3,16 +3,17 @@ import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
-import { IInventoryTicket } from '../../types/material.types';
+import { IInventoryTicket, IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store';
 
 interface AddInventoryScreenProps {}
 
@@ -56,7 +57,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [materialGroup, setMaterialGroup] = useState('');
 
     // Derive options from store
-    const materialOptions = materials.map(m => m.name);
+    const materialOptions = materials.map((m: IMaterial) => m.name);
 
     // --- Handlers ---
     const handleDropdownOpen = () => {
@@ -75,7 +76,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             setMaterialName(val);
 
             // Find material in store
-            const selectedMaterial = materials.find(m => m.name === val);
+            const selectedMaterial = materials.find((m: IMaterial) => m.name === val);
 
             if (selectedMaterial) {
                 setOldStock(selectedMaterial.remaining || 0);
@@ -158,36 +159,38 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 onBackPress={() => navigation.goBack()}
             />
 
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* Thông tin chung */}
-                <InventoryGeneralInfo
-                    date={formatDate(date)}
-                    createdDate={formatDateTime(date)}
-                    materialGroup={materialGroup}
-                    note={note}
-                    onDatePress={() => setDatePickerVisible(true)}
-                    onNoteChange={setNote}
-                />
-
-                {/* Nhập liệu vật tư */}
-                <View style={styles.dropdownSection}>
-                    <InventoryMaterialInput
-                        materialName={materialName}
-                        oldStock={oldStock}
-                        newStock={newStock}
-                        onMaterialSelect={handleMaterialSelect}
-                        onNewStockChange={setNewStock}
-                        materialOptions={materialOptions}
-                        onDropdownOpen={handleDropdownOpen}
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.contentContainer}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    {/* Thông tin chung */}
+                    <InventoryGeneralInfo
+                        date={formatDate(date)}
+                        createdDate={formatDateTime(date)}
+                        materialGroup={materialGroup}
+                        note={note}
+                        onDatePress={() => setDatePickerVisible(true)}
+                        onNoteChange={setNote}
                     />
-                </View>
-            </ScrollView>
+
+                    {/* Nhập liệu vật tư */}
+                    <View style={styles.dropdownSection}>
+                        <InventoryMaterialInput
+                            materialName={materialName}
+                            oldStock={oldStock}
+                            newStock={newStock}
+                            onMaterialSelect={handleMaterialSelect}
+                            onNewStockChange={setNewStock}
+                            materialOptions={materialOptions}
+                            onDropdownOpen={handleDropdownOpen}
+                        />
+                    </View>
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Nút Gửi Phiếu */}
             <ButtonBarMaterial
@@ -221,7 +224,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingBottom: 100,
     },
     dropdownSection: {
         zIndex: 100,

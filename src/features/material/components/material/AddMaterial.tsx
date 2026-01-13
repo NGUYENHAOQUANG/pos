@@ -13,58 +13,29 @@ import {
     DropdownOption,
 } from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/features/material/components/CollapseHead';
-import { UnitOfUse } from '@/features/material/components/material/UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
+import { useMaterialStore } from '@/features/material/store';
+import { IMaterialGroup } from '@/features/material/types/material.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const MATERIAL_TYPES_MAP: Record<string, string[]> = {
-    Nuôi: ['Con giống khác', 'Thức ăn sống'],
-    'Vật tư nội bộ': [
-        'Chất cải thiện nước',
-        'Chất xử lý nước',
-        'Chế phẩm sinh học',
-        'Dinh dưỡng bổ sung',
-        'Hoá chất',
-        'Khoáng chất',
-        'Khác',
-        'Nauplii',
-        'Thuốc trộn',
-        'Thức ăn cho tôm',
-        'Trị bệnh',
-        'Tôm bố mẹ',
-        'Tôm giống',
-    ],
-    CCDC: ['Công cụ dụng cụ', 'Kit kiểm tra chất lượng nước', 'Nhiên liệu', 'Phụ tùng'],
-    'Thiết bị điện': ['Thiết bị điện'],
-    'Chi phí khác': [
-        'Chi phí bán hàng',
-        'Chi phí khác',
-        'Chi phí khấu hao',
-        'Chi phí lương',
-        'Chi phí điện',
-        'Chi phí điện nước',
-        'Chi phí quản lý doanh nghiệp',
-    ],
-};
-
 // Mapping từ đơn vị tính chính sang các đơn vị sử dụng tương ứng
-const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
-    // Khối lượng
-    Kg: ['Kg', 'g', 'mg'],
-    g: ['g', 'mg', 'kg'],
-    Gram: ['g', 'mg', 'kg'],
-    mg: ['mg', 'g'],
-    // Thể tích
-    Lít: ['Lít', 'ml'],
-    ml: ['ml', 'Lít'],
-    // Chiều dài
-    mét: ['m', 'cm', 'mm'],
-    // Thể tích khối
-    m3: ['m3', 'Lít', 'ml'],
-};
+// const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
+//     // Khối lượng
+//     Kg: ['Kg', 'g', 'mg'],
+//     g: ['g', 'mg', 'kg'],
+//     Gram: ['g', 'mg', 'kg'],
+//     mg: ['mg', 'g'],
+//     // Thể tích
+//     Lít: ['Lít', 'ml'],
+//     ml: ['ml', 'Lít'],
+//     // Chiều dài
+//     mét: ['m', 'cm', 'mm'],
+//     // Thể tích khối
+//     m3: ['m3', 'Lít', 'ml'],
+// };
 
 interface AddMaterialProps {
     // Basic Info
@@ -79,6 +50,7 @@ interface AddMaterialProps {
     groupOptions?: string[];
     unitOptions?: (string | DropdownOption)[];
     groupDisabled?: boolean;
+    materialGroupsData?: IMaterialGroup[];
 
     // Advanced Info
     usage?: string;
@@ -106,18 +78,37 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     groupDisabled = false,
     usage,
     onUsageChange,
-    unitOfUse,
-    onUnitOfUseChange,
-    dosage,
-    onDosageChange,
+    unitOfUse: _unitOfUse,
+    onUnitOfUseChange: _onUnitOfUseChange,
+    dosage: _dosage,
+    onDosageChange: _onDosageChange,
     manufacturer,
     onManufacturerChange,
     onUnitDropdownOpen,
+    materialGroupsData = [],
 }) => {
     const [isBasicExpanded, setIsBasicExpanded] = useState(true);
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+    // Get material types from store
+    const fetchMaterialTypesByGroup = useMaterialStore(state => state.fetchMaterialTypesByGroup);
+    const getMaterialTypeOptions = useMaterialStore(state => state.getMaterialTypeOptions);
+    const isLoadingMaterialTypes = useMaterialStore(state => state.isLoadingMaterialTypes);
+
+    // Get type options for selected group
+    const typeOptions = useMemo(() => {
+        if (!group) return [];
+        return getMaterialTypeOptions(group);
+    }, [group, getMaterialTypeOptions]);
+
+    // Fetch material types when group changes
+    useEffect(() => {
+        if (group && materialGroupsData.length > 0) {
+            fetchMaterialTypesByGroup(group);
+        }
+    }, [group, materialGroupsData, fetchMaterialTypesByGroup]);
 
     const handleToggleDropdown = (key: string) => {
         if (activeDropdown === key) {
@@ -130,33 +121,32 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
         }
     };
 
-    // Calculate options for Material Type based on selected Group
-    const typeOptions = group && MATERIAL_TYPES_MAP[group] ? MATERIAL_TYPES_MAP[group] : [];
-
     // Calculate options for Unit of Use based on selected Unit
-    const unitOfUseOptions = useMemo(() => {
-        if (!unit) return [];
-        // Find the label (name) corresponding to the unit value (id)
-        const selectedOption = unitOptions.find(opt =>
-            typeof opt === 'string' ? opt === unit : opt.value === unit
-        );
-        const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
+    // Commented out - UNIT_TO_USAGE_UNITS_MAP is no longer used
+    // const unitOfUseOptions = useMemo(() => {
+    //     if (!unit) return [];
+    //     // Find the label (name) corresponding to the unit value (id)
+    //     const selectedOption = unitOptions.find(opt =>
+    //         typeof opt === 'string' ? opt === unit : opt.value === unit
+    //     );
+    //     const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
 
-        return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
-            ? UNIT_TO_USAGE_UNITS_MAP[unitName]
-            : [];
-    }, [unit, unitOptions]);
+    //     return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
+    //         ? UNIT_TO_USAGE_UNITS_MAP[unitName]
+    //         : [];
+    // }, [unit, unitOptions]);
 
     // Reset unitOfUse if current value is not in the new options
-    useEffect(() => {
-        if (unit && unitOfUse && unitOfUseOptions.length > 0) {
-            if (!unitOfUseOptions.includes(unitOfUse)) {
-                onUnitOfUseChange?.('');
-            }
-        } else if (!unit) {
-            onUnitOfUseChange?.('');
-        }
-    }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
+    // Commented out - unitOfUseOptions is no longer used
+    // useEffect(() => {
+    //     if (unit && unitOfUse && unitOfUseOptions.length > 0) {
+    //         if (!unitOfUseOptions.includes(unitOfUse)) {
+    //             onUnitOfUseChange?.('');
+    //         }
+    //     } else if (!unit) {
+    //         onUnitOfUseChange?.('');
+    //     }
+    // }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
 
     const toggleBasicExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -228,7 +218,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
-                                        disabled={!group}
+                                        disabled={!group || isLoadingMaterialTypes}
                                     />
                                 </View>
                             </View>
@@ -278,7 +268,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 />
                             </View>
 
-                            <View style={styles.row}>
+                            {/* <View style={styles.row}>
                                 <View style={styles.halfWidth}>
                                     <UnitOfUse
                                         label="Đơn vị sử dụng"
@@ -305,7 +295,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         />
                                     </View>
                                 </View>
-                            </View>
+                            </View> */}
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>Nhà sản xuất</Text>

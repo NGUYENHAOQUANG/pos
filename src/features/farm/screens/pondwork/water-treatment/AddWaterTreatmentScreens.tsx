@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { colors } from '@/styles';
@@ -12,6 +12,7 @@ import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/M
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showAddJobSuccessToast } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
@@ -88,13 +89,11 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             {/* Header */}
             <HeaderFarm type="simple" title="Xử lý nước" onBack={handleBack} />
 
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            >
+            <SafeInputLayout style={styles.container}>
                 <ScrollView
                     ref={scrollViewRef}
                     style={styles.flex1}
+                    contentContainerStyle={styles.scrollContent}
                     keyboardShouldPersistTaps="handled"
                 >
                     {/* Main Content Component */}
@@ -111,7 +110,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                         scrollViewRef={scrollViewRef}
                     />
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <ButtonBarFarm
@@ -134,6 +133,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: 24,
+        paddingBottom: 100,
     },
 });

@@ -25,6 +25,7 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddTransferScreen'>;
@@ -316,48 +317,50 @@ export const AddTransferScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-            >
-                <GeneralInfoBox
-                    type="default"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    disabledDate={true}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <GeneralInfoBox
+                        type="default"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        disabledDate={true}
+                    />
 
-                <CurrentPondInfoBox
-                    shrimpBreed={shrimpBreed}
-                    actualStockingQuantity={actualStockingQuantity}
-                    shrimpSize={shrimpSize}
-                    onShrimpSizeChange={setShrimpSize}
-                    totalEstimatedShrimp={totalEstimatedShrimp}
-                />
+                    <CurrentPondInfoBox
+                        shrimpBreed={shrimpBreed}
+                        actualStockingQuantity={actualStockingQuantity}
+                        shrimpSize={shrimpSize}
+                        onShrimpSizeChange={setShrimpSize}
+                        totalEstimatedShrimp={totalEstimatedShrimp}
+                    />
 
-                <TransferInfoBox
-                    transferMethod={transferMethod}
-                    onTransferMethodPress={() => {
-                        console.log('Select transfer method');
-                    }}
-                    receivingPonds={receivingPonds}
-                    onReceivingPondsChange={setReceivingPonds}
-                    onReceivingPondPress={id => {
-                        console.log('Select receiving pond for id:', id);
-                    }}
-                    totalEstimatedShrimp={totalEstimatedShrimp}
-                    pondOptions={pondOptions}
-                    onDropdownOpen={handleDropdownOpen}
-                />
+                    <TransferInfoBox
+                        transferMethod={transferMethod}
+                        onTransferMethodPress={() => {
+                            console.log('Select transfer method');
+                        }}
+                        receivingPonds={receivingPonds}
+                        onReceivingPondsChange={setReceivingPonds}
+                        onReceivingPondPress={id => {
+                            console.log('Select receiving pond for id:', id);
+                        }}
+                        totalEstimatedShrimp={totalEstimatedShrimp}
+                        pondOptions={pondOptions}
+                        onDropdownOpen={handleDropdownOpen}
+                    />
 
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>

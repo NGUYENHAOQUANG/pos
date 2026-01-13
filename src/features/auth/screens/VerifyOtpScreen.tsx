@@ -26,7 +26,7 @@ export default function VerifyOTPScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
     const route = useRoute<RouteProp<AuthStackParamList, 'Verify-otp'>>();
     const verifyOtp = useAuthStore(state => state.verifyOtp);
-    const { contact} = route.params;
+    const { contact } = route.params;
 
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
 
@@ -95,18 +95,17 @@ export default function VerifyOTPScreen() {
 
         try {
             console.log('Verify Success:', otpString);
-            
+
             // Call API verify OTP via Store (handles login)
             await verifyOtp(contact, otpString);
-            
+
             Toast.show({
                 type: 'success',
                 text1: 'Đăng nhập thành công',
                 visibilityTime: 2000,
             });
-            
+
             // Success! Store update (isAuthenticated=true) will trigger navigation to Main App
-            
         } catch (error) {
             setErrorMessage('Mã OTP không chính xác hoặc đã hết hạn.');
             console.error(error);
@@ -136,7 +135,7 @@ export default function VerifyOTPScreen() {
                 )}
 
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    behavior={Platform.OS === 'android' ? 'padding' : undefined}
                     style={styles.keyboardView}
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
                 >
@@ -166,7 +165,11 @@ export default function VerifyOTPScreen() {
                             </View>
 
                             {isError ? (
-                                <Text style={styles.errorText} numberOfLines={1} adjustsFontSizeToFit>
+                                <Text
+                                    style={styles.errorText}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                >
                                     {errorMessage}
                                 </Text>
                             ) : (
@@ -177,7 +180,8 @@ export default function VerifyOTPScreen() {
                                 <Text style={styles.resendLabel}>Không nhận được mã? </Text>
                                 {countdown > 0 ? (
                                     <Text style={styles.timerText}>
-                                        <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
+                                        <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau
+                                        0:
                                         {countdown.toString().padStart(2, '0')})
                                     </Text>
                                 ) : (
