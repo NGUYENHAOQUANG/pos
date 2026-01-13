@@ -12,10 +12,17 @@ import {
     IWarehouseReceipt,
     IInventoryTicket,
     IMaterialGroup,
-} from '../types/material.types';
-import { mockMaterialList, mockWarehouseList, mockInventoryList } from '../data/materialData';
-import { showSuccessToast } from '../utils/validationToast';
-import { materialGroupApi } from '../api/materialGroupApi';
+    IUnit,
+} from '@/features/material/types/material.types';
+import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
+import {
+    mockMaterialList,
+    mockWarehouseList,
+    mockInventoryList,
+} from '@/features/material/data/materialData';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { materialGroupApi } from '@/features/material/api/materialGroupApi';
+import { unitApi } from '@/features/material/api/unitApi';
 
 interface MaterialState {
     // Data
@@ -23,10 +30,13 @@ interface MaterialState {
     warehouseList: IWarehouseReceipt[];
     inventoryList: IInventoryTicket[];
     materialGroups: IMaterialGroup[];
+    units: IUnit[];
 
     // Loading states
     isLoadingMaterialGroups: boolean;
     materialGroupsError: string | null;
+    isLoadingUnits: boolean;
+    unitsError: string | null;
 
     // UI State (for MaterialScreen)
     searchText: string;
@@ -42,6 +52,10 @@ interface MaterialState {
     // Actions - Material Groups
     fetchMaterialGroups: () => Promise<void>;
     getMaterialGroupOptions: () => string[];
+
+    // Actions - Units
+    fetchUnits: () => Promise<void>;
+    getUnitOptions: () => DropdownOption[];
 
     // Actions - Warehouse
     addWarehouseReceipt: (receipt: Omit<IWarehouseReceipt, 'id'>) => void;
@@ -71,6 +85,9 @@ export const useMaterialStore = create<MaterialState>()(
             materialGroups: [],
             isLoadingMaterialGroups: false,
             materialGroupsError: null,
+            units: [],
+            isLoadingUnits: false,
+            unitsError: null,
             searchText: '',
             filterGroup: '',
             filterMaterialName: null,
@@ -118,6 +135,40 @@ export const useMaterialStore = create<MaterialState>()(
                         state.isLoadingMaterialGroups = false;
                     });
                 }
+            },
+
+            // Fetch units from API
+            fetchUnits: async () => {
+                set(state => {
+                    state.isLoadingUnits = true;
+                    state.unitsError = null;
+                });
+
+                try {
+                    const response = await unitApi.getUnits();
+                    let unitsData: IUnit[] = [];
+
+                    if (response.data && response.data.items) {
+                        unitsData = response.data.items;
+                    }
+
+                    set(state => {
+                        state.units = unitsData;
+                        state.isLoadingUnits = false;
+                    });
+                } catch (error) {
+                    console.log('[MaterialStore] Fetch units error:', error);
+                    set(state => {
+                        state.unitsError =
+                            error instanceof Error ? error.message : 'Lỗi tải đơn vị tính';
+                        state.isLoadingUnits = false;
+                    });
+                }
+            },
+
+            getUnitOptions: () => {
+                const units = get().units;
+                return units.map(u => ({ label: u.name, value: u.id }));
             },
 
             // Get material group options for dropdown
