@@ -8,7 +8,10 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
-import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
+import {
+    DropdownMaterial,
+    DropdownOption,
+} from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { UnitOfUse } from '@/features/material/components/material/UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -71,10 +74,10 @@ interface AddMaterialProps {
     onGroupChange?: (value: string) => void;
     type?: string;
     onTypeChange?: (value: string) => void;
-    unit?: string;
-    onUnitChange?: (value: string) => void;
+    unit?: string | number;
+    onUnitChange?: (value: any) => void;
     groupOptions?: string[];
-    unitOptions?: string[];
+    unitOptions?: (string | DropdownOption)[];
     groupDisabled?: boolean;
 
     // Advanced Info
@@ -132,8 +135,17 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
     // Calculate options for Unit of Use based on selected Unit
     const unitOfUseOptions = useMemo(() => {
-        return unit && UNIT_TO_USAGE_UNITS_MAP[unit] ? UNIT_TO_USAGE_UNITS_MAP[unit] : [];
-    }, [unit]);
+        if (!unit) return [];
+        // Find the label (name) corresponding to the unit value (id)
+        const selectedOption = unitOptions.find(opt =>
+            typeof opt === 'string' ? opt === unit : opt.value === unit
+        );
+        const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
+
+        return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
+            ? UNIT_TO_USAGE_UNITS_MAP[unitName]
+            : [];
+    }, [unit, unitOptions]);
 
     // Reset unitOfUse if current value is not in the new options
     useEffect(() => {

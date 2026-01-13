@@ -10,7 +10,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterialStore } from '@/features/material/store/materialStore';
-import { unitApi } from '@/features/material/api/unitApi';
 
 interface AddMaterialScreenProps {}
 
@@ -21,43 +20,35 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Get material groups from store
-    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
-        useMaterialStore();
+    // Get material groups and units from store
+    const {
+        fetchMaterialGroups,
+        getMaterialGroupOptions,
+        isLoadingMaterialGroups,
+        fetchUnits,
+        getUnitOptions,
+    } = useMaterialStore();
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Fetch material groups on mount
+    // Fetch material groups and units on mount
     useEffect(() => {
         fetchMaterialGroups();
-    }, [fetchMaterialGroups]);
+        fetchUnits();
+    }, [fetchMaterialGroups, fetchUnits]);
 
     // Get dropdown options from store
     const materialGroupOptions = getMaterialGroupOptions();
+    const unitOptions = getUnitOptions();
 
     // Basic Info State
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState('');
-    const [unitOptions, setUnitOptions] = useState<string[]>([]);
-
-    useEffect(() => {
-        const fetchUnits = async () => {
-            try {
-                const data = await unitApi.getUnits();
-                if (data && data.length > 0) {
-                    setUnitOptions(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch units:', error);
-            }
-        };
-        fetchUnits();
-    }, []);
+    const [unit, setUnit] = useState<string | number>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
