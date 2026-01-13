@@ -13,6 +13,7 @@ import { useFarm } from '../../store/farmStore';
 import { CycleData } from '../../types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDateWithTime } from '../../utils/dateUtils';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -133,14 +134,20 @@ export const CreateCycleScreen: React.FC = () => {
                 }
             />
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                <CreateCycleForm
-                    formData={cycleData}
-                    setFormData={setCycleData}
-                    pondId={pondId}
-                    isEdit={isEdit}
-                />
-            </ScrollView>
+            <SafeInputLayout>
+                <ScrollView
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                >
+                    <CreateCycleForm
+                        formData={cycleData}
+                        setFormData={setCycleData}
+                        pondId={pondId}
+                        isEdit={isEdit}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             <ButtonBarFarm
                 primaryTitle={isEdit ? 'Cập nhật thông tin' : 'Bắt đầu chu kỳ nuôi'}

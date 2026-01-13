@@ -4,6 +4,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
 import { IMaterial } from '../../types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -63,53 +64,56 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                     rightComponent={null} // Hide the right button
                 />
 
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.content}
-                    contentContainerStyle={styles.contentContainer}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <AddMaterial
-                        name={name}
-                        onNameChange={setName}
-                        group={group}
-                        onGroupChange={val => {
-                            setGroup(val);
-                            setType('');
-                        }}
-                        type={type}
-                        onTypeChange={setType}
-                        unit={unit}
-                        onUnitChange={setUnit}
-                        unitOptions={[
-                            'Kg',
-                            'ml',
-                            'Lít',
-                            'Gram',
-                            'mét',
-                            'Cuộn',
-                            'Cái',
-                            'Con',
-                            'Tấm',
-                            'Chai',
-                            'Miếng',
-                            'm3',
-                        ]}
-                        usage={usage}
-                        onUsageChange={setUsage}
-                        unitOfUse={unitOfUse}
-                        onUnitOfUseChange={setUnitOfUse}
-                        dosage={dosage}
-                        onDosageChange={setDosage}
-                        manufacturer={manufacturer}
-                        onManufacturerChange={setManufacturer}
-                        onUnitDropdownOpen={() => {
-                            setTimeout(() => {
-                                scrollViewRef.current?.scrollToEnd({ animated: true });
-                            }, 100);
-                        }}
-                    />
-                </ScrollView>
+                <SafeInputLayout>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.content}
+                        contentContainerStyle={styles.contentContainer}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <AddMaterial
+                            name={name}
+                            onNameChange={setName}
+                            group={group}
+                            onGroupChange={val => {
+                                setGroup(val);
+                                setType('');
+                            }}
+                            type={type}
+                            onTypeChange={setType}
+                            unit={unit}
+                            onUnitChange={setUnit}
+                            unitOptions={[
+                                'Kg',
+                                'ml',
+                                'Lít',
+                                'Gram',
+                                'mét',
+                                'Cuộn',
+                                'Cái',
+                                'Con',
+                                'Tấm',
+                                'Chai',
+                                'Miếng',
+                                'm3',
+                            ]}
+                            usage={usage}
+                            onUsageChange={setUsage}
+                            unitOfUse={unitOfUse}
+                            onUnitOfUseChange={setUnitOfUse}
+                            dosage={dosage}
+                            onDosageChange={setDosage}
+                            manufacturer={manufacturer}
+                            onManufacturerChange={setManufacturer}
+                            onUnitDropdownOpen={() => {
+                                setTimeout(() => {
+                                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                                }, 100);
+                            }}
+                        />
+                    </ScrollView>
+                </SafeInputLayout>
 
                 <ButtonBar
                     mode="double"
@@ -165,5 +169,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
+        paddingBottom: 100,
     },
 });

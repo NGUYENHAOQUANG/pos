@@ -5,17 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import React, { useState } from 'react';
-import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-    KeyboardAvoidingView,
-    StatusBar,
-} from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/styles';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 export default function LoginForm() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -57,10 +50,7 @@ export default function LoginForm() {
                 <View style={[styles.androidStatusBar, { height: insets.top }]} />
             )}
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboardView}
-            >
+            <SafeInputLayout style={styles.keyboardView}>
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
@@ -110,7 +100,7 @@ export default function LoginForm() {
                         </View>
                     </View>
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </SafeInputLayout>
         </SafeAreaView>
     );
 }
@@ -133,6 +123,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         paddingHorizontal: spacing.lg,
         paddingTop: spacing['2xl'],
+        paddingBottom: 100,
     },
     logoSection: {
         alignItems: 'center',

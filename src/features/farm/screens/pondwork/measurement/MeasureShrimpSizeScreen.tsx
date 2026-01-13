@@ -16,6 +16,7 @@ import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurem
 import { useFarm } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -223,34 +224,36 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 )}
             </View>
 
-            <ScrollView
-                ref={scrollViewRef}
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                <GeneralInfoBox
-                    type="withImage"
-                    date={time}
-                    onDateChange={setTime}
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    disabledDate={true}
-                />
-                <MeasurementDataBox
-                    shrimpSize={shrimpSize}
-                    onShrimpSizeChange={setShrimpSize}
-                    remainingWeight={remainingWeight}
-                    onRemainingWeightChange={setRemainingWeight}
-                    stockingQuantity={stockingQuantity}
-                />
-                <SelectionNotesBox
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    scrollViewRef={scrollViewRef}
-                />
-            </ScrollView>
+            <SafeInputLayout>
+                <ScrollView
+                    ref={scrollViewRef}
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <GeneralInfoBox
+                        type="withImage"
+                        date={time}
+                        onDateChange={setTime}
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        disabledDate={true}
+                    />
+                    <MeasurementDataBox
+                        shrimpSize={shrimpSize}
+                        onShrimpSizeChange={setShrimpSize}
+                        remainingWeight={remainingWeight}
+                        onRemainingWeightChange={setRemainingWeight}
+                        stockingQuantity={stockingQuantity}
+                    />
+                    <SelectionNotesBox
+                        notes={notes}
+                        onNotesChange={setNotes}
+                        scrollViewRef={scrollViewRef}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             <View style={styles.footer}>
                 <ButtonBarFarm
@@ -325,6 +328,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 0,
+        paddingBottom: 100,
     },
     footer: {
         backgroundColor: colors.white,

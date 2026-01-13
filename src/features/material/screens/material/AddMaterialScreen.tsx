@@ -4,6 +4,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '../../components/HeaderMaterial';
 import { AddMaterial } from '../../components/material/AddMaterial';
 import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -47,42 +48,44 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                     rightComponent={null} // Hide the right button
                 />
 
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.content}
-                    contentContainerStyle={styles.contentContainer}
-                    showsVerticalScrollIndicator={false}
-                    nestedScrollEnabled={true}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <AddMaterial
-                        name={name}
-                        onNameChange={setName}
-                        group={group}
-                        onGroupChange={val => {
-                            setGroup(val);
-                            setType('');
-                        }}
-                        type={type}
-                        onTypeChange={setType}
-                        unit={unit}
-                        onUnitChange={setUnit}
-                        unitOptions={['Kg', 'Lít', 'ml', 'g', 'mg']}
-                        usage={usage}
-                        onUsageChange={setUsage}
-                        unitOfUse={unitOfUse}
-                        onUnitOfUseChange={setUnitOfUse}
-                        dosage={dosage}
-                        onDosageChange={setDosage}
-                        manufacturer={manufacturer}
-                        onManufacturerChange={setManufacturer}
-                        onUnitDropdownOpen={() => {
-                            setTimeout(() => {
-                                scrollViewRef.current?.scrollToEnd({ animated: true });
-                            }, 100);
-                        }}
-                    />
-                </ScrollView>
+                <SafeInputLayout>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.content}
+                        contentContainerStyle={styles.contentContainer}
+                        showsVerticalScrollIndicator={false}
+                        nestedScrollEnabled={true}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <AddMaterial
+                            name={name}
+                            onNameChange={setName}
+                            group={group}
+                            onGroupChange={val => {
+                                setGroup(val);
+                                setType('');
+                            }}
+                            type={type}
+                            onTypeChange={setType}
+                            unit={unit}
+                            onUnitChange={setUnit}
+                            unitOptions={['Kg', 'Lít', 'ml', 'g', 'mg']}
+                            usage={usage}
+                            onUsageChange={setUsage}
+                            unitOfUse={unitOfUse}
+                            onUnitOfUseChange={setUnitOfUse}
+                            dosage={dosage}
+                            onDosageChange={setDosage}
+                            manufacturer={manufacturer}
+                            onManufacturerChange={setManufacturer}
+                            onUnitDropdownOpen={() => {
+                                setTimeout(() => {
+                                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                                }, 100);
+                            }}
+                        />
+                    </ScrollView>
+                </SafeInputLayout>
 
                 <ButtonBarMaterial
                     mode="double"
@@ -141,5 +144,6 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         paddingVertical: spacing.md,
+        paddingBottom: 100,
     },
 });
