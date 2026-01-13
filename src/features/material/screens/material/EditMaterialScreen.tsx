@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeaderMeterial } from '../../components/HeaderMaterial';
-import { AddMaterial } from '../../components/material/AddMaterial';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { AddMaterial } from '@/features/material/components/material/AddMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { colors, spacing } from '@/styles';
-import { IMaterial } from '../../types/material.types';
+import { IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store';
+import { IMaterialType } from '@/features/material/types/material.types';
 
 interface EditMaterialScreenProps {}
 
@@ -21,11 +22,37 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
     const updateMaterial = useMaterialStore(state => state.updateMaterial);
+    const { fetchUnits, getUnitOptions } = useMaterialStore();
+
+    // Get material groups, types from store
+    const {
+        fetchMaterialGroups,
+        getMaterialGroupOptions,
+        isLoadingMaterialGroups,
+        materialGroups,
+        materialTypes,
+        fetchMaterialTypes,
+    } = useMaterialStore();
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Fetch material groups, types, and units on mount
+    useEffect(() => {
+        fetchMaterialGroups();
+        fetchMaterialTypes();
+    }, [fetchMaterialGroups, fetchMaterialTypes]);
+
+    // Get dropdown options from store
+    const materialGroupOptions = getMaterialGroupOptions();
+    const unitOptions = getUnitOptions();
+
+    // Fetch units on mount
+    useEffect(() => {
+        fetchUnits();
+    }, [fetchUnits]);
 
     const params = route.params as { material: IMaterial } | undefined;
     const initialData = params?.material;
@@ -33,7 +60,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState('');
+    const [unit, setUnit] = useState<string | number>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -53,6 +80,69 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             setManufacturer(initialData.manufacturer || '');
         }
     }, [initialData]);
+
+    const handleSave = async () => {
+        // Validation
+        if (!name.trim()) {
+            showValidationError('Tên vật tư là bắt buộc');
+            return;
+        }
+        if (!group) {
+            showValidationError('Nhóm vật tư là bắt buộc');
+            return;
+        }
+        if (!type) {
+            showValidationError('Loại vật tư là bắt buộc');
+            return;
+        }
+        if (!unit) {
+            showValidationError('Đơn vị tính là bắt buộc');
+            return;
+        }
+
+        if (!initialData) {
+            showValidationError('Không tìm thấy thông tin vật tư');
+            return;
+        }
+
+        try {
+            // Map type name to materialTypeId
+            const selectedType = materialTypes.find((t: IMaterialType) => t.name === type);
+            if (!selectedType) {
+                showValidationError('Loại vật tư không hợp lệ');
+                return;
+            }
+
+            // Map unit to unitId (unit is already the id from dropdown)
+            const unitId = typeof unit === 'number' ? unit : Number(unit);
+            if (isNaN(unitId)) {
+                showValidationError('Đơn vị tính không hợp lệ');
+                return;
+            }
+
+            // Get material id (convert string to number)
+            const materialId = Number(initialData.id);
+            if (isNaN(materialId)) {
+                showValidationError('ID vật tư không hợp lệ');
+                return;
+            }
+
+            // Update material via API
+            await updateMaterial(materialId, {
+                name: name.trim(),
+                materialTypeId: selectedType.id,
+                description: usage || '', // Map usage to description
+                unitId: unitId,
+                manufacturer: manufacturer?.trim() || null,
+                isActive: true,
+            });
+
+            navigation.goBack();
+        } catch (error) {
+            // Error is already handled in updateMaterial with toast
+            console.error('[EditMaterialScreen] Failed to update material:', error);
+        }
+    };
 
     return (
         <>
@@ -84,20 +174,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                             onTypeChange={setType}
                             unit={unit}
                             onUnitChange={setUnit}
-                            unitOptions={[
-                                'Kg',
-                                'ml',
-                                'Lít',
-                                'Gram',
-                                'mét',
-                                'Cuộn',
-                                'Cái',
-                                'Con',
-                                'Tấm',
-                                'Chai',
-                                'Miếng',
-                                'm3',
-                            ]}
+                            unitOptions={unitOptions}
+                            groupOptions={materialGroupOptions}
+                            materialGroupsData={materialGroups}
+                            groupDisabled={isLoadingMaterialGroups}
                             usage={usage}
                             onUsageChange={setUsage}
                             unitOfUse={unitOfUse}
@@ -119,39 +199,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                     mode="double"
                     primaryTitle="Lưu thông tin"
                     secondaryTitle="Huỷ"
-                    onPrimaryPress={() => {
-                        if (!name.trim()) {
-                            showValidationError('Tên vật tư là bắt buộc');
-                            return;
-                        }
-                        if (!group) {
-                            showValidationError('Nhóm vật tư là bắt buộc');
-                            return;
-                        }
-                        if (!type) {
-                            showValidationError('Loại vật tư là bắt buộc');
-                            return;
-                        }
-                        if (!unit) {
-                            showValidationError('Đơn vị tính là bắt buộc');
-                            return;
-                        }
-
-                        if (!initialData) return;
-
-                        updateMaterial({
-                            ...initialData,
-                            name,
-                            group,
-                            type,
-                            unit,
-                            usage,
-                            unitOfUse,
-                            dosage,
-                            manufacturer,
-                        });
-                        navigation.goBack();
-                    }}
+                    onPrimaryPress={handleSave}
                     onSecondaryPress={() => navigation.goBack()}
                 />
             </View>

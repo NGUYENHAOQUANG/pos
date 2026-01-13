@@ -17,7 +17,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
 import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
+import { useMaterialStore } from '../../store';
 
 interface AddWarehouseScreenProps {}
 

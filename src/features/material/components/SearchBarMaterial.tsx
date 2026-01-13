@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from './material/DropdownMaterialGroup';
 import { TabType } from './HeadingMaterial';
+import { useMaterialStore } from '../store';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -39,6 +40,18 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     const [materialGroup, setMaterialGroup] = useState('');
     const [voteStatus, setVoteStatus] = useState('');
+
+    // Get material types from store
+    const { fetchMaterialTypes, getAllMaterialTypeOptions, isLoadingMaterialTypes } =
+        useMaterialStore();
+
+    // Fetch material types on mount
+    useEffect(() => {
+        fetchMaterialTypes();
+    }, [fetchMaterialTypes]);
+
+    // Get dropdown options from store
+    const materialTypeOptions = getAllMaterialTypeOptions();
 
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -116,9 +129,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                                 setMaterialGroup(value);
                                 onGroupChange?.(value);
                             }}
+                            options={materialTypeOptions}
                             isOpen={isGroupDropdownOpen}
                             onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
                             useAutoScroll={selectedTab === 'history'}
+                            disabled={isLoadingMaterialTypes}
                         />
                     </View>
                 </View>

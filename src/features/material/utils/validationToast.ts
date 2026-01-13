@@ -25,3 +25,16 @@ export const showSuccessToast = (message: string) => {
         visibilityTime: 3000,
     });
 };
+
+/**
+ * Show a standardized error toast.
+ * @param message The error message to display
+ */
+export const showErrorToast = (message: string) => {
+    Toast.show({
+        type: 'error',
+        text1: message,
+        position: 'top',
+        visibilityTime: 3000,
+    });
+};
