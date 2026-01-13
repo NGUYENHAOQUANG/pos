@@ -21,10 +21,22 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const scrollViewRef = useRef<ScrollView>(null);
     const updateMaterial = useMaterialStore(state => state.updateMaterial);
 
+    // Get material groups from store
+    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
+        useMaterialStore();
+
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Fetch material groups on mount
+    useEffect(() => {
+        fetchMaterialGroups();
+    }, [fetchMaterialGroups]);
+
+    // Get dropdown options from store
+    const materialGroupOptions = getMaterialGroupOptions();
 
     const params = route.params as { material: IMaterial } | undefined;
     const initialData = params?.material;
@@ -81,6 +93,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                         onTypeChange={setType}
                         unit={unit}
                         onUnitChange={setUnit}
+                        groupOptions={materialGroupOptions}
+                        groupDisabled={isLoadingMaterialGroups}
                         unitOptions={[
                             'Kg',
                             'ml',
