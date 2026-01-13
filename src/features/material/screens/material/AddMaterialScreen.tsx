@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, StatusBar, ScrollView } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { HeaderMeterial } from '../../components/HeaderMaterial';
-import { AddMaterial } from '../../components/material/AddMaterial';
-import { ButtonBarMaterial } from '../../components/ButtonBarMaterial';
+import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { AddMaterial } from '@/features/material/components/material/AddMaterial';
+import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { colors, spacing } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '../../navigation/MaterialNavigator';
-import { showValidationError } from '../../utils/validationToast';
-import { useMaterialStore } from '../../store/materialStore';
-import { unitApi } from '../../api/unitApi';
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { useMaterialStore } from '@/features/material/store/materialStore';
 
 interface AddMaterialScreenProps {}
 
@@ -21,43 +20,35 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Get material groups from store
-    const { fetchMaterialGroups, getMaterialGroupOptions, isLoadingMaterialGroups } =
-        useMaterialStore();
+    // Get material groups and units from store
+    const {
+        fetchMaterialGroups,
+        getMaterialGroupOptions,
+        isLoadingMaterialGroups,
+        fetchUnits,
+        getUnitOptions,
+    } = useMaterialStore();
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Fetch material groups on mount
+    // Fetch material groups and units on mount
     useEffect(() => {
         fetchMaterialGroups();
-    }, [fetchMaterialGroups]);
+        fetchUnits();
+    }, [fetchMaterialGroups, fetchUnits]);
 
     // Get dropdown options from store
     const materialGroupOptions = getMaterialGroupOptions();
+    const unitOptions = getUnitOptions();
 
     // Basic Info State
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState('');
-    const [unitOptions, setUnitOptions] = useState<string[]>([]);
-
-    useEffect(() => {
-        const fetchUnits = async () => {
-            try {
-                const data = await unitApi.getUnits();
-                if (data && data.length > 0) {
-                    setUnitOptions(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch units:', error);
-            }
-        };
-        fetchUnits();
-    }, []);
+    const [unit, setUnit] = useState<string | number>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
