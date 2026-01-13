@@ -111,3 +111,30 @@ export interface IAppResponse<T> {
 
 export type GetMaterialGroupsResponse = IAppResponse<IPaginate<IMaterialGroup>>;
 export type GetMaterialGroupByIdResponse = IAppResponse<IMaterialGroup>;
+
+// ============ Material Type Types ============
+export interface IMaterialType {
+    id: number;
+    creatorId?: number | null;
+    createdAt?: string | null;
+    lastModifierId?: number | null;
+    lastModifiedAt?: string | null;
+    name: string | null;
+    code?: string | null;
+    materialGroupId: number;
+}
+
+export interface CreateMaterialTypeRequest {
+    name: string;
+    code?: string | null;
+    materialGroupId: number;
+}
+
+export interface UpdateMaterialTypeRequest {
+    name?: string | null;
+    code?: string | null;
+    materialGroupId?: number | null;
+}
+
+export type GetMaterialTypesResponse = IAppResponse<IPaginate<IMaterialType>>;
+export type GetMaterialTypeByIdResponse = IAppResponse<IMaterialType>;

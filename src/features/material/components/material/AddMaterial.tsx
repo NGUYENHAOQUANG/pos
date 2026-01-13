@@ -12,40 +12,12 @@ import { DropdownMaterial } from './DropdownMaterialGroup';
 import { CollapseHead } from '../CollapseHead';
 import { UnitOfUse } from './UnitOfUse';
 import { colors, spacing, borderRadius } from '@/styles';
+import { materialTypeApi } from '@/features/material/api/materialTypeApi';
+import { IMaterialGroup } from '@/features/material/types/material.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const MATERIAL_TYPES_MAP: Record<string, string[]> = {
-    Nuôi: ['Con giống khác', 'Thức ăn sống'],
-    'Vật tư nội bộ': [
-        'Chất cải thiện nước',
-        'Chất xử lý nước',
-        'Chế phẩm sinh học',
-        'Dinh dưỡng bổ sung',
-        'Hoá chất',
-        'Khoáng chất',
-        'Khác',
-        'Nauplii',
-        'Thuốc trộn',
-        'Thức ăn cho tôm',
-        'Trị bệnh',
-        'Tôm bố mẹ',
-        'Tôm giống',
-    ],
-    CCDC: ['Công cụ dụng cụ', 'Kit kiểm tra chất lượng nước', 'Nhiên liệu', 'Phụ tùng'],
-    'Thiết bị điện': ['Thiết bị điện'],
-    'Chi phí khác': [
-        'Chi phí bán hàng',
-        'Chi phí khác',
-        'Chi phí khấu hao',
-        'Chi phí lương',
-        'Chi phí điện',
-        'Chi phí điện nước',
-        'Chi phí quản lý doanh nghiệp',
-    ],
-};
 
 // Mapping từ đơn vị tính chính sang các đơn vị sử dụng tương ứng
 const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
@@ -76,6 +48,7 @@ interface AddMaterialProps {
     groupOptions?: string[];
     unitOptions?: string[];
     groupDisabled?: boolean;
+    materialGroupsData?: IMaterialGroup[];
 
     // Advanced Info
     usage?: string;
@@ -110,11 +83,63 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     manufacturer,
     onManufacturerChange,
     onUnitDropdownOpen,
+    materialGroupsData = [],
 }) => {
     const [isBasicExpanded, setIsBasicExpanded] = useState(true);
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+    // State for API-fetched material types
+    const [typeOptions, setTypeOptions] = useState<string[]>([]);
+    const [isLoadingTypes, setIsLoadingTypes] = useState(false);
+
+    // Fetch material types when group changes
+    useEffect(() => {
+        const fetchMaterialTypes = async () => {
+            if (!group || materialGroupsData.length === 0) {
+                setTypeOptions([]);
+                return;
+            }
+
+            // Find the selected group's ID
+            const selectedGroup = materialGroupsData.find(g => g.name === group);
+            if (!selectedGroup) {
+                console.warn('[UI] Selected group not found in materialGroupsData');
+                setTypeOptions([]);
+                return;
+            }
+
+            setIsLoadingTypes(true);
+            try {
+                // API does not support MaterialGroupId filter, so we fetch all and filter client-side
+                const response = await materialTypeApi.getList({
+                    PageSize: 100,
+                });
+                if (response.result && response.data?.items) {
+                    // Filter types by materialGroupId client-side
+                    const filteredTypes = response.data.items
+                        .filter(item => item.materialGroupId === selectedGroup.id)
+                        .map(item => item.name || '')
+                        .filter(n => n);
+                    console.log(
+                        `[UI] Filtered ${filteredTypes.length} types for group ${selectedGroup.name} (ID: ${selectedGroup.id})`
+                    );
+                    setTypeOptions(filteredTypes);
+                } else {
+                    console.warn('[UI] API returned no items');
+                    setTypeOptions([]);
+                }
+            } catch (error) {
+                console.error('[UI] Failed to fetch material types:', error);
+                setTypeOptions([]);
+            } finally {
+                setIsLoadingTypes(false);
+            }
+        };
+
+        fetchMaterialTypes();
+    }, [group, materialGroupsData]);
 
     const handleToggleDropdown = (key: string) => {
         if (activeDropdown === key) {
@@ -126,9 +151,6 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
             }
         }
     };
-
-    // Calculate options for Material Type based on selected Group
-    const typeOptions = group && MATERIAL_TYPES_MAP[group] ? MATERIAL_TYPES_MAP[group] : [];
 
     // Calculate options for Unit of Use based on selected Unit
     const unitOfUseOptions = useMemo(() => {
@@ -216,7 +238,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
-                                        disabled={!group}
+                                        disabled={!group || isLoadingTypes}
                                     />
                                 </View>
                             </View>
