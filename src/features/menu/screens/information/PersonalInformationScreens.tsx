@@ -10,6 +10,8 @@ import { FarmConnecter } from '@/features/menu/components/information/FarmConnec
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { Zone } from '@/features/farm/types/farm.types';
 
 export const PersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
@@ -34,12 +36,31 @@ export const PersonalInformationScreens: React.FC = () => {
         level: 'Trưởng phòng',
     };
 
-    const connectedFarms = [
-        { id: 1, name: 'Trại Kiên Giang', count: '10' },
-        { id: 2, name: 'Trại Cà Mau', count: '8' },
-    ];
+    const { zones, ponds, fetchZones } = useFarmStore();
 
-    const totalFarms = '2';
+    React.useEffect(() => {
+        fetchZones();
+    }, [fetchZones]);
+
+    // Calculate connected farms from real data
+    const connectedFarms = React.useMemo(() => {
+        return zones.map((zone: Zone) => {
+            // Count ponds in this zone
+            // Match by zone.code or zone.name (depending on what pond.zone stores)
+            // pond.zone stores string like "KV-A", zone.code might be "KV-A"
+            const pondCount = ponds.filter(
+                p => (zone.code && p.zone === zone.code) || (zone.name && p.zone === zone.name)
+            ).length;
+
+            return {
+                id: zone.id,
+                name: zone.name,
+                count: pondCount.toString(),
+            };
+        });
+    }, [zones, ponds]);
+
+    const totalFarms = zones.length.toString();
 
     const handleChangePhoto = async () => {
         const result = await launchImageLibrary({

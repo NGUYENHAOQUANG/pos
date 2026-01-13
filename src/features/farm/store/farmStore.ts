@@ -11,6 +11,7 @@ import { createPondListStore, PondListStore } from './core/pondListStore';
 import { createSeasonStore, SeasonStore } from './core/seasonStore';
 import { createSettingStore, SettingStore } from './core/settingStore';
 import { createCycleStore, CycleStore } from './core/cycleStore';
+import { createZoneStore, ZoneStore } from './core/zoneStore';
 
 // Job Slices
 import { createFeedSlice, FeedSlice } from './pondwork/feedStore';
@@ -54,6 +55,7 @@ export type FarmState = PondListStore &
     SeasonStore &
     SettingStore &
     CycleStore &
+    ZoneStore &
     FeedSlice &
     ShrimpInspectionSlice &
     MeasureSizeSlice &
@@ -76,6 +78,7 @@ export const useFarmStore = create<FarmState>()(
             ...createSeasonStore(...a),
             ...createSettingStore(...a),
             ...createCycleStore(...a),
+            ...createZoneStore(...a),
 
             // Job Logic
             ...createFeedSlice(...a),
@@ -271,6 +274,8 @@ export const useFarmStore = create<FarmState>()(
                 seasons: state.seasons,
                 cycles: state.cycles,
                 environmentSettings: state.environmentSettings,
+                zones: state.zones,
+                selectedZoneId: state.selectedZoneId,
             }),
         }
     )

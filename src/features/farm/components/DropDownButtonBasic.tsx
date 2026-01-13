@@ -159,7 +159,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                             data={data}
                             keyExtractor={item => item.id.toString()}
                             renderItem={renderItem}
-                            scrollEnabled={false}
+                            // scrollEnabled={false}
                             contentContainerStyle={styles.dropdownScrollContent}
                         />
                     </View>
@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[200],
         ...shadows.md,
+        maxHeight: 220, // Limit height to show approx 5 items
     },
     dropdownScrollContent: {
         paddingVertical: spacing.xs,

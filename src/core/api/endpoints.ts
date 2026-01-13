@@ -24,6 +24,29 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/products/${id}`,
         DELETE: (id: string) => `/products/${id}`,
     },
+    // Ponds
+    PONDS: {
+        LIST: '/ponds',
+        DETAIL: (id: string) => `/ponds/${id}`,
+        CREATE: '/ponds',
+        UPDATE: (id: string) => `/ponds/${id}`,
+        DELETE: (id: string) => `/ponds/${id}`,
+    },
+    POND_TYPES: {
+        LIST: '/pond-types',
+    },
+    POND_TYPE_OPERATIONS: {
+        LIST: '/pond-type-operations',
+    },
+    // Zones / Farms
+    ZONES: {
+        LIST: '/zones',
+        DETAIL: (id: number | string) => `/zones/${id}`,
+        CREATE: '/zones',
+        UPDATE: (id: number | string) => `/zones/${id}`,
+        DELETE: (id: number | string) => `/zones/${id}`,
+        PONDS: (id: number | string) => `/zones/${id}/ponds`,
+    },
     // Material Group
     MATERIAL_GROUP: {
         LIST: '/material-groups',

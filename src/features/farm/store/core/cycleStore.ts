@@ -254,8 +254,14 @@ export const createCycleStore: StateCreator<
                 saveActiveCycle(receivingPond, updatedCycle);
                 updateCycle(existingCycle.id, { transferInfo });
             } else {
-                const areaMatch = receivingPondData.area.match(/(\d+(\.\d+)?)\s*m²/);
-                const area = areaMatch ? parseFloat(areaMatch[1]) : undefined;
+                let area: number | undefined;
+                if (receivingPondData.areaSqm) {
+                    area = receivingPondData.areaSqm;
+                } else if (receivingPondData.area) {
+                    const areaMatch = receivingPondData.area.match(/(\d+(\.\d+)?)\s*m²/);
+                    area = areaMatch ? parseFloat(areaMatch[1]) : undefined;
+                }
+
                 const density = area && area > 0 ? quantityNum / area : 0;
 
                 const estimatedCost = breedOption?.price
@@ -284,7 +290,21 @@ export const createCycleStore: StateCreator<
             }
         });
 
-        updatePondType(sourcePondId, 'Ao sẵn sàng');
+        // updatePondType(sourcePondId, 'Ao sẵn sàng'); // Old string usage
+        const stateStore = get();
+        // Assuming 'Ao sẵn sàng' is the name we want.
+        // If master data isn't loaded, we might have an issue.
+        // We act optimistically or reuse existing type if possible?
+        // Better: Find the type from pondTypes
+        const readyType = stateStore.pondTypes.find(t => t.name === 'Ao sẵn sàng');
+        if (readyType) {
+            updatePondType(sourcePondId, readyType);
+        } else {
+            console.warn('Could not find PondType "Ao sẵn sàng" in master data');
+            // Fallback: if updatePondType strictly requires PondType object, we can't pass string.
+            // If we must update, and data is missing, we might skip or pass a dummy if allowed.
+            // For now, only update if found.
+        }
 
         set(draft => {
             draft.cycles = draft.cycles.map(cycle => {

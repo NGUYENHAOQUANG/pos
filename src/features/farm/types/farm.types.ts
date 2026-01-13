@@ -5,15 +5,40 @@ export const POND_TYPES = {
     SETTLING: 'Ao lắng',
     WASTE: 'Ao thải',
     TREATMENT: 'Ao xử lý',
-    WATER_STORAGE: 'Ao chứa nước',
+    WATER_STORAGE: 'Ao nước sạch',
 } as const;
 
-export type PondType = (typeof POND_TYPES)[keyof typeof POND_TYPES];
+// export type PondType = (typeof POND_TYPES)[keyof typeof POND_TYPES]; // Legacy
+
+export interface PondType {
+    id: number;
+    code: string;
+    name: string;
+    description?: string;
+}
+
+export interface PondTypeOperation {
+    id: number;
+    code: string;
+    name: string;
+    description?: string;
+}
+
+export interface Zone {
+    id: number;
+    name: string;
+    description?: string;
+    areaM2?: number;
+    activeFlag?: boolean;
+    address?: string;
+    code?: string;
+}
 
 export interface PondData {
     id: string;
     name: string;
-    area: string;
+    area?: string; // Legacy
+    areaSqm?: number; // From API
     type: PondType;
     lastUpdate?: string;
     lastActivity?: string;
@@ -22,7 +47,8 @@ export interface PondData {
     status?: string; // Trạng thái - ví dụ: "Đang hoạt động", "Chuẩn bị"
     farmCode?: string; // Mã trại - ví dụ: "KG-01"
     shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
-    depth?: string | number; // Độ sâu (m) - ví dụ: "1.5" hoặc 1.5
+    depth?: string | number; // Legacy
+    maxDepthCm?: number; // From API
 }
 
 export interface CycleData {

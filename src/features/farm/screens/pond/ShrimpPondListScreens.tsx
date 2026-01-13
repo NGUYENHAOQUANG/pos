@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,13 +10,13 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
+import { Loading } from '@/shared/components/ui/Loading';
 import { useFarm } from '@/features/farm/store/farmStore';
 
 interface ShrimpPondListScreensProps {}
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
-// Sort order map
 // Sort order map
 const POND_TYPE_ORDER: Record<string, number> = {
     [POND_TYPES.NURSERY]: 1,
@@ -30,19 +30,58 @@ const POND_TYPE_ORDER: Record<string, number> = {
 
 export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {
     const navigation = useNavigation<NavigationProp>();
-    const { ponds, activeCycles, getCyclesByPondId } = useFarm();
+    const {
+        ponds,
+        activeCycles,
+        getCyclesByPondId,
+        zones,
+        fetchZones,
+        selectedZoneId,
+        setSelectedZoneId,
+        fetchPondsByZone,
+        isLoadingPonds,
+        hasMore,
+        totalCount,
+    } = useFarm();
     const [selectedTab, setSelectedTab] = useState('all');
-    const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
-        id: '1',
-        label: 'Trại Kiên Giang',
-        value: '1',
-    });
+    const [isLoadMore, setIsLoadMore] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const farmOptions: DropDownItem[] = [
-        { id: '1', label: 'Trại Kiên Giang', value: '1' },
-        { id: '2', label: 'Trại Cà Mau', value: '2' },
-        { id: '3', label: 'Trại Bạc Liêu', value: '3' },
-    ];
+    useEffect(() => {
+        fetchZones();
+    }, [fetchZones]);
+
+    // Fetch ponds when selectedZoneId changes
+    useEffect(() => {
+        if (selectedZoneId) {
+            fetchPondsByZone(selectedZoneId);
+        }
+    }, [selectedZoneId, fetchPondsByZone]);
+
+    // Effect to select the first zone by default if none selected
+    useEffect(() => {
+        if (!selectedZoneId && zones.length > 0) {
+            // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
+            const targetZone = zones.find(z => z.id === 71) || zones[0];
+            if (targetZone) {
+                setSelectedZoneId(targetZone.id);
+            }
+        }
+    }, [zones, selectedZoneId, setSelectedZoneId]);
+
+    const farmOptions: DropDownItem[] = zones.map(zone => ({
+        id: zone.id.toString(),
+        label: zone.name,
+        value: zone.code || zone.id.toString(), // Use code if available, else ID
+    }));
+
+    const selectedFarm: DropDownItem | undefined =
+        farmOptions.find(f => f.id === selectedZoneId?.toString()) || farmOptions[0];
+
+    // Helper to handle selection
+    const handleSelectFarm = (item: DropDownItem) => {
+        setSelectedZoneId(Number(item.id));
+    };
 
     const handlePondPress = (pond: any) => {
         navigation.navigate('PondDetail', { pond });
@@ -53,6 +92,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     };
 
     const handleFarmInfoPress = () => {
+        if (!selectedFarm) return;
         const farmData: FarmData = {
             id: selectedFarm.id.toString(),
             name: selectedFarm.label,
@@ -90,11 +130,11 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
     // Calculate counts based on COMPUTED status (requires activity + generic rules)
     const counts = useMemo(() => {
-        const all = ponds.length;
+        const all = totalCount > 0 ? totalCount : ponds.length; // Use server total if available
         const active = ponds.filter(pond => getComputedStatus(pond) === 'active').length;
         const preparing = ponds.filter(pond => getComputedStatus(pond) === 'preparing').length;
         return { all, active, preparing };
-    }, [ponds, getComputedStatus]);
+    }, [ponds, getComputedStatus, totalCount]);
 
     const filteredData = useMemo(() => {
         let data = ponds;
@@ -104,12 +144,50 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
             data = ponds.filter(pond => getComputedStatus(pond) === 'preparing');
         }
 
+        // We rely on the store 'ponds' being correct for the selected zone.
+        // Pagination: The store accumulates ponds, so we just render them.
+
         return [...data].sort((a, b) => {
-            const orderA = POND_TYPE_ORDER[a.type] || 99;
-            const orderB = POND_TYPE_ORDER[b.type] || 99;
+            // pond.type is now an object, access name for mapping
+            // Safely handle if it's still a string during migration or API mismatch
+            const typeA = typeof a.type === 'string' ? a.type : a.type?.name;
+            const typeB = typeof b.type === 'string' ? b.type : b.type?.name;
+
+            const orderA = POND_TYPE_ORDER[typeA] || 99;
+            const orderB = POND_TYPE_ORDER[typeB] || 99;
             return orderA - orderB;
         });
     }, [selectedTab, ponds, getComputedStatus]);
+
+    const handleLoadMore = useCallback(async () => {
+        if (!hasMore || isLoadMore || isLoadingPonds) return;
+
+        setIsLoadMore(true);
+        if (selectedZoneId) {
+            try {
+                await fetchPondsByZone(selectedZoneId, { isLoadMore: true });
+            } finally {
+                setIsLoadMore(false);
+            }
+        }
+    }, [hasMore, isLoadMore, isLoadingPonds, selectedZoneId, fetchPondsByZone]);
+
+    const handleRefresh = useCallback(async () => {
+        if (!selectedZoneId || isRefreshing || isLoadingPonds) return;
+
+        setIsRefreshing(true);
+        try {
+            // Use isBackground to update silently (without full screen loader)
+            await fetchPondsByZone(selectedZoneId, { isBackground: true });
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [selectedZoneId, isRefreshing, isLoadingPonds, fetchPondsByZone]);
+
+    const renderFooter = useCallback(() => {
+        // Loading footer disabled per user request
+        return null;
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -117,7 +195,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                 type="list"
                 data={farmOptions}
                 value={selectedFarm}
-                onSelect={setSelectedFarm}
+                onSelect={handleSelectFarm}
                 onMenuPress={handleFarmInfoPress}
             />
             <HeadingFarm
@@ -126,11 +204,18 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                 tabType="dashboard"
                 counts={counts}
             />
-            <ShrimpPondList
-                data={filteredData}
-                onPondPress={handlePondPress}
-                onInfoPress={handlePondInfoPress}
-            />
+            <Loading isLoading={isLoadingPonds}>
+                <ShrimpPondList
+                    data={filteredData}
+                    onPondPress={handlePondPress}
+                    onInfoPress={handlePondInfoPress}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={renderFooter}
+                    refreshing={isRefreshing}
+                    onRefresh={handleRefresh}
+                />
+            </Loading>
         </View>
     );
 };

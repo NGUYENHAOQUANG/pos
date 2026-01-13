@@ -40,6 +40,7 @@ export interface DeviceData {
     isOn: boolean;
     errorMessage?: string;
     type: 'feeder' | 'fan' | 'oxy' | 'syphon'; // Add type for filtering
+    farmId?: string; // Add farmId for filtering
 
     // Extended properties for persistence
     feedingConfig?: FeedingConfig;

@@ -63,6 +63,7 @@ const createInitialPonds = (): Pond[] => {
                 isOn: isActive,
                 errorMessage: isMaintenance ? 'Đang bảo trì' : undefined,
                 type: d.type,
+                farmId: d.farmId,
             };
         });
 

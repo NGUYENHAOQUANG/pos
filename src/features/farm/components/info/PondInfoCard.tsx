@@ -25,17 +25,18 @@ interface PondInfoCardProps {
 export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
     const pondInfo = {
         name: pond?.name || '{ten ao nuoi tom}',
-        type: pond?.type || '{loại ao}',
-        shape: pond?.shape || '{hình dáng ao}',
-        area: pond?.area || '{diện tích}',
-        depth: pond?.depth || '{độ sâu}',
+        // Safely handle if type is string (old) or object (new)
+        type: (typeof pond?.type === 'object' ? pond?.type?.name : pond?.type) || '{loại ao}',
+        // shape: pond?.shape || '{hình dáng ao}',
+        area: pond?.areaSqm ? `${Number(pond.areaSqm).toFixed(2)} m²` : pond?.area || '{diện tích}',
+        depth: pond?.maxDepthCm ? `${pond.maxDepthCm} cm` : pond?.depth?.toString() || '{độ sâu}',
     };
 
     return (
         <View style={styles.card}>
             <InfoField label="Tên ao:" value={pondInfo.name} />
             <InfoField label="Loại ao:" value={pondInfo.type} />
-            <InfoField label="Hình dáng ao:" value={pondInfo.shape} />
+            {/* <InfoField label="Hình dáng ao:" value={pondInfo.shape} /> */}
             <InfoField label="Diện tích:" value={pondInfo.area} />
             <InfoField label="Độ sâu:" value={pondInfo.depth.toString()} />
         </View>
