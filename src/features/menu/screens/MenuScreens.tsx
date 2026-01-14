@@ -8,6 +8,7 @@ import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 import { FarmOperation } from '@/features/menu/components/FarmOperation';
 import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
+import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -104,6 +105,7 @@ export const MenuScreens: React.FC = () => {
                             <FarmOperation />
                             <RecordManagement />
                             <SecurityManagement />
+                            <DeleteAccountButton />
                         </View>
 
                         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
