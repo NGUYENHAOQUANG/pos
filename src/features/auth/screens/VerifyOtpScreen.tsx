@@ -107,7 +107,7 @@ export default function VerifyOTPScreen() {
 
             // Success! Store update (isAuthenticated=true) will trigger navigation to Main App
         } catch (error) {
-            setErrorMessage('Mã OTP không chính xác hoặc đã hết hạn.');
+            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         }
     };

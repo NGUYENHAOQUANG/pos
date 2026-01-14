@@ -16,9 +16,10 @@ import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
 import { authApi } from '@/features/auth/api/authApi';
+import { isPhoneRegistered } from '@/features/auth/data/mockUsers';
 import Toast from 'react-native-toast-message';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
-import { colors, spacing } from '@/styles';
+import { colors, spacing, typography } from '@/styles';
 import { AuthStackParamList } from '@/app/navigation/types';
 
 export default function AuthScreen() {
@@ -26,10 +27,12 @@ export default function AuthScreen() {
     const insets = useSafeAreaInsets();
     const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
+    const [isUnregistered, setIsUnregistered] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async () => {
         setError('');
+        setIsUnregistered(false);
 
         if (!phoneNumber.trim()) {
             setError('Vui lòng nhập số điện thoại.');
@@ -50,12 +53,15 @@ export default function AuthScreen() {
             return;
         }
 
-        if (rawPhone === '0908456789') {
-            setError('Số điện thoại không tồn tại, vui lòng kiểm tra và thử lại.');
+        console.log('Login pressed with phone:', rawPhone);
+
+        // Kiểm tra số điện thoại có được đăng ký không (sử dụng mock data)
+        if (!isPhoneRegistered(rawPhone)) {
+            setIsUnregistered(true);
+            setError('');
             return;
         }
 
-        console.log('Login pressed with phone:', rawPhone);
         setIsLoading(true);
 
         try {
@@ -75,7 +81,7 @@ export default function AuthScreen() {
                 contact: rawPhone,
                 otpCode: devOtp ? String(devOtp) : undefined,
             });
-        } catch (err) {
+        } catch (err: any) {
             console.error('Login failed:', err);
             setError('Đã có lỗi xảy ra, vui lòng thử lại.');
             Toast.show({
@@ -91,6 +97,65 @@ export default function AuthScreen() {
     const handleClearError = () => {
         setPhoneNumber('');
         setError('');
+        setIsUnregistered(false);
+    };
+
+    const handleRegisterPress = async () => {
+        setError('');
+        setIsUnregistered(false);
+
+        if (!phoneNumber.trim()) {
+            setError('Vui lòng nhập số điện thoại.');
+            return;
+        }
+
+        const rawPhone = phoneNumber.replace(/\s/g, '');
+
+        // Validate VN Phone Number Format
+        const vnPhoneRegex = /^(0)(3|5|7|8|9)([0-9]{8})$/;
+
+        if (!vnPhoneRegex.test(rawPhone)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Số điện thoại không hợp lệ',
+                text2: 'Vui lòng thử lại',
+            });
+            return;
+        }
+
+        console.log('Login pressed with phone:', rawPhone);
+
+        setIsLoading(true);
+
+        try {
+            const response = await authApi.requestOtp(rawPhone);
+
+            // In Dev environment, OTP is in response.data.testOtp
+            const devOtp = response?.data?.testOtp;
+            console.log('AuthScreen OTP Response:', JSON.stringify(response));
+
+            if (devOtp) {
+                // Show Notifee Notification as requested
+                await notificationHelper.displayOtpNotification(String(devOtp));
+            }
+
+            navigation.navigate('Verify-otp', {
+                method: 'phone',
+                contact: rawPhone,
+                otpCode: devOtp ? String(devOtp) : undefined,
+            });
+        } catch (err: any) {
+            console.error('Login failed:', err);
+            setError('Đã có lỗi xảy ra, vui lòng thử lại.');
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+        navigation.navigate('Register');
     };
 
     return (
@@ -133,10 +198,32 @@ export default function AuthScreen() {
                                         onChangeText={text => {
                                             setPhoneNumber(text);
                                             if (error) setError('');
+                                            if (isUnregistered) setIsUnregistered(false);
                                         }}
-                                        error={error}
+                                        error={isUnregistered ? 'error' : error}
                                         onClear={handleClearError}
                                     />
+
+                                    {/* Hiển thị error message cho số điện thoại chưa đăng ký */}
+                                    {isUnregistered && (
+                                        <View style={styles.unregisteredErrorContainer}>
+                                            <Text style={styles.unregisteredErrorText}>
+                                                Số điện thoại này chưa được đăng ký, vui lòng kiểm
+                                                tra và thử lại hoặc{' '}
+                                                <Text
+                                                    style={styles.unregisteredLinkText}
+                                                    onPress={handleRegisterPress}
+                                                >
+                                                    tạo tài khoản mới
+                                                </Text>
+                                            </Text>
+                                        </View>
+                                    )}
+
+                                    {/* Hiển thị error message thông thường (nếu có)
+                                    {error && !isUnregistered && (
+                                        <Text style={styles.errorText}>{error}</Text>
+                                    )} */}
 
                                     <View style={styles.buttonSection}>
                                         <Button
@@ -209,7 +296,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.lg,
     },
     buttonSection: {
-        marginTop: spacing.sm,
+        marginTop: spacing.md, // 16px từ error text đến button
+    },
+    errorText: {
+        fontSize: 14,
+        color: colors.error,
+        marginTop: 2, // 2px từ input container đến error text
+    },
+    unregisteredErrorContainer: {
+        marginTop: 2, // 2px từ input container đến error text
+    },
+    unregisteredErrorText: {
+        fontSize: typography.fontSize.sm, // 14px
+        color: colors.error,
+        lineHeight: 22, // 22px theo Figma
+        fontWeight: typography.fontWeight.regular, // 400
+        letterSpacing: 0,
+    },
+    unregisteredLinkText: {
+        color: colors.primary,
+        textDecorationLine: 'underline',
+        fontWeight: typography.fontWeight.regular, // 400
+        letterSpacing: 0,
     },
     loginButton: {
         backgroundColor: colors.primary,
