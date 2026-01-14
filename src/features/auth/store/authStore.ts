@@ -7,7 +7,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Storage } from '@/core/services/storage.service';
-import { authApi } from '../api/authApi';
+import { authApi } from '@/features/auth/api/authApi';
 import { decodeToken } from '@/core/utils/jwt';
 import { AuthUser, LoginCredentials, RegisterData } from '../types/auth.types';
 

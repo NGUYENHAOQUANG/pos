@@ -89,6 +89,14 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         }, 0);
     };
 
+    const scrollViewRef = React.useRef<ScrollView>(null);
+
+    const handleDropdownOpen = () => {
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+    };
+
     const formatCurrency = (value: number) => {
         return (
             <>
@@ -112,6 +120,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
 
                 <SafeInputLayout>
                     <ScrollView
+                        ref={scrollViewRef}
                         style={styles.content}
                         contentContainerStyle={styles.contentContainer}
                         showsVerticalScrollIndicator={false}
@@ -130,6 +139,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                             onUpdateMaterial={handleUpdateMaterial}
                             onAddMaterial={handleAddMaterial}
                             materialOptions={materialOptions}
+                            onDropdownOpen={handleDropdownOpen}
                         />
                     </ScrollView>
                 </SafeInputLayout>

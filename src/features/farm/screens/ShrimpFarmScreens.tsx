@@ -171,7 +171,8 @@ export const ShrimpFarmScreens: React.FC = () => {
         let jobTemplate: { type: JobType; items: never[] }[] = [];
 
         if (pond?.type) {
-            switch (pond.type) {
+            const typeValue = typeof pond.type === 'string' ? pond.type : pond.type.name;
+            switch (typeValue) {
                 case POND_TYPES.SETTLING:
                     jobTemplate = SETTLING_POND_JOBS_TEMPLATE;
                     break;

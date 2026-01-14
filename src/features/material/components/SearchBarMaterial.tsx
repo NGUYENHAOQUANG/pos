@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     TextInput,
@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from './material/DropdownMaterialGroup';
-import { TabType } from './HeadingMaterial';
-import { useMaterialStore } from '../store';
+import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
+import { TabType } from '@/features/material/components/HeadingMaterial';
+import { useMaterialTypes } from '@/features/material/hooks/useMaterials';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -41,17 +41,14 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const [materialGroup, setMaterialGroup] = useState('');
     const [voteStatus, setVoteStatus] = useState('');
 
-    // Get material types from store
-    const { fetchMaterialTypes, getAllMaterialTypeOptions, isLoadingMaterialTypes } =
-        useMaterialStore();
+    // Get material types from React Query
+    const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
 
-    // Fetch material types on mount
-    useEffect(() => {
-        fetchMaterialTypes();
-    }, [fetchMaterialTypes]);
-
-    // Get dropdown options from store
-    const materialTypeOptions = getAllMaterialTypeOptions();
+    // Get dropdown options from material types
+    const materialTypeOptions = [
+        'Tất cả loại vật tư',
+        ...materialTypes.map(t => t.name || '').filter(n => n),
+    ];
 
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
