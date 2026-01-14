@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
-import { CollapseHead } from '@/features/material/components/CollapseHead';
+import { CollapseHead } from '../CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
