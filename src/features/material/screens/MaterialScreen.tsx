@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useLayoutEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,18 +11,25 @@ import {
 import { HeadingMeterial, TabType } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { WarehouseListScreen } from './warehouse/WarehouseListScreen';
-import { MaterialListScreen } from './material/MaterialListScreen';
+import { WarehouseListScreen } from '@/features/material/screens/warehouse/WarehouseListScreen';
+import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
 import {
     IMaterial,
     IWarehouseReceipt,
     IWarehouseMaterialItem,
 } from '@/features/material/types/material.types';
-import { useMaterialStore } from '@/features/material/store';
+import { useWarehouseStore } from '@/features/material/store/warehouseStore';
+import { useInventoryStore } from '@/features/material/store/inventoryStore';
+import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
+import { useMaterials, useMaterialTypes } from '@/features/material/hooks/useMaterials';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { Loading } from '@/shared/components/ui/Loading';
+
+// Constants for pagination
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 100;
 
 export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -31,19 +38,47 @@ export const MeterialScreen = () => {
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
 
-    // Use Zustand store with simplified selectors
-    const materials = useMaterialStore(state => state.materials);
-    const warehouseList = useMaterialStore(state => state.warehouseList);
-    const inventoryList = useMaterialStore(state => state.inventoryList);
-    const searchText = useMaterialStore(state => state.searchText);
-    const filterGroup = useMaterialStore(state => state.filterGroup);
-    const filterType = useMaterialStore(state => state.filterType);
-    const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
-    const isLoadingMaterials = useMaterialStore(state => state.isLoadingMaterials);
-    const setSearchText = useMaterialStore(state => state.setSearchText);
-    const setFilterType = useMaterialStore(state => state.setFilterType);
-    const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
-    const fetchMaterials = useMaterialStore(state => state.fetchMaterials);
+    // React Query hooks for materials
+    const searchText = useMaterialFiltersStore(state => state.searchText);
+    const filterType = useMaterialFiltersStore(state => state.filterType);
+    const filterMaterialName = useMaterialFiltersStore(state => state.filterMaterialName);
+    const setSearchText = useMaterialFiltersStore(state => state.setSearchText);
+    const setFilterType = useMaterialFiltersStore(state => state.setFilterType);
+    const setFilterMaterialName = useMaterialFiltersStore(state => state.setFilterMaterialName);
+
+    // Fetch material types to map filterType name to ID
+    const { data: materialTypes = [] } = useMaterialTypes();
+
+    // Build API params - memoize to prevent unnecessary refetches
+    const materialParams = useMemo(() => {
+        const params: { Page: number; PageSize: number; MaterialTypeId?: number; Search?: string } =
+            {
+                Page: DEFAULT_PAGE,
+                PageSize: DEFAULT_PAGE_SIZE,
+            };
+
+        // Map filterType (type name) to MaterialTypeId
+        if (filterType && filterType !== '' && filterType !== 'Tất cả loại vật tư') {
+            const selectedType = materialTypes.find(t => t.name === filterType);
+            if (selectedType) {
+                params.MaterialTypeId = selectedType.id;
+            }
+        }
+
+        // Add Search param if searchText is set
+        if (searchText && searchText.trim()) {
+            params.Search = searchText.trim();
+        }
+
+        return params;
+    }, [filterType, searchText, materialTypes]);
+
+    // Fetch materials with React Query
+    const { data: materials = [], isLoading: isLoadingMaterials } = useMaterials(materialParams);
+
+    // Warehouse and Inventory stores (still using Zustand for now)
+    const warehouseList = useWarehouseStore(state => state.warehouseList);
+    const inventoryList = useInventoryStore(state => state.inventoryList);
 
     // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
@@ -62,28 +97,13 @@ export const MeterialScreen = () => {
     }, []);
 
     // Handle tab navigation from other screens
-    useEffect(() => {
+    React.useEffect(() => {
         const params = route.params as { selectedTab?: TabType } | undefined;
         if (params?.selectedTab) {
             setSelectedTab(params.selectedTab);
             navigation.setParams({ selectedTab: undefined } as any);
         }
     }, [route.params, navigation]);
-
-    // Fetch materials from API on mount and when filters change
-    useEffect(() => {
-        const loadMaterials = async () => {
-            try {
-                await fetchMaterials({
-                    Page: 1,
-                    PageSize: 100,
-                });
-            } catch (error) {
-                console.error('[MaterialScreen] Failed to fetch materials:', error);
-            }
-        };
-        loadMaterials();
-    }, [fetchMaterials, filterType, searchText]);
 
     useLayoutEffect(() => {
         // Always show tab bar on list screen
@@ -128,17 +148,12 @@ export const MeterialScreen = () => {
     const handleFilterType = useCallback(
         (type: string) => {
             setFilterType(type);
-            // Refetch materials when filter changes
-            fetchMaterials({
-                Page: 1,
-                PageSize: 100,
-            });
         },
-        [setFilterType, fetchMaterials]
+        [setFilterType]
     );
 
     const handleFilterPress = useCallback(() => {
-        console.log('Filter pressed');
+        // Filter pressed handler
     }, []);
 
     const handleTabSelect = useCallback(
@@ -161,16 +176,21 @@ export const MeterialScreen = () => {
         [setFilterMaterialName]
     );
 
+    // Client-side filtering (for search text matching)
+    // Note: API already handles MaterialTypeId and Search filters, but we do client-side
+    // filtering as a fallback for better UX
     const filteredMaterials = useMemo(() => {
+        if (!materials || materials.length === 0) {
+            return [];
+        }
         return materials.filter((item: IMaterial) => {
+            // API already handles MaterialTypeId and Search filters
+            // This is just for additional client-side matching if needed
+            if (!item.name) return false;
             const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase());
-            const matchesType =
-                filterType === '' ||
-                filterType === 'Tất cả loại vật tư' ||
-                item.type === filterType;
-            return matchesSearch && matchesType;
+            return matchesSearch;
         });
-    }, [materials, searchText, filterType]);
+    }, [materials, searchText]);
 
     const filteredWarehouseList = useMemo(() => {
         return warehouseList.filter((receipt: IWarehouseReceipt) => {
@@ -183,15 +203,6 @@ export const MeterialScreen = () => {
                     return false;
                 }
             }
-            if (filterGroup && filterGroup !== 'Tất cả nhóm vật tư') {
-                const hasGroup = receipt.materials.some((receiptItem: IWarehouseMaterialItem) => {
-                    const materialDef = materials.find(
-                        (m: IMaterial) => m.name === receiptItem.materialName
-                    );
-                    return materialDef?.group === filterGroup;
-                });
-                if (!hasGroup) return false;
-            }
             if (searchText) {
                 const lowerSearch = searchText.toLowerCase();
                 const matchesSupplier = receipt.supplier?.toLowerCase().includes(lowerSearch);
@@ -202,7 +213,7 @@ export const MeterialScreen = () => {
             }
             return true;
         });
-    }, [warehouseList, filterMaterialName, filterGroup, materials, searchText]);
+    }, [warehouseList, filterMaterialName, searchText]);
 
     return (
         <View style={styles.container}>
@@ -222,61 +233,43 @@ export const MeterialScreen = () => {
                 selectedTab={selectedTab}
             />
 
-            {useMemo(
-                () => (
-                    <View style={styles.content}>
-                        {selectedTab === 'list' && (
-                            <Loading isLoading={isLoadingMaterials}>
-                                <MaterialListScreen
-                                    materials={filteredMaterials}
-                                    onEdit={handleEditMaterial}
-                                    onAdd={handleAddMaterial}
-                                    onHistoryPress={handleHistoryPress}
-                                    onAdjustmentPress={adjustmentItem =>
-                                        navigation.navigate('AddInventory', {
-                                            initialMaterialName: adjustmentItem.name,
-                                        } as any)
-                                    }
-                                />
-                            </Loading>
-                        )}
-                        {selectedTab === 'history' &&
-                            (filteredWarehouseList.length > 0 ? (
-                                <WarehouseListScreen receipts={filteredWarehouseList} />
-                            ) : (
-                                <MaterialEmptyState tab="history" onPress={handleCreateImport} />
-                            ))}
-                        {selectedTab === 'inventory' &&
-                            (inventoryList.length > 0 ? (
-                                <FlatList
-                                    data={inventoryList}
-                                    keyExtractor={item => item.id}
-                                    renderItem={({ item }) => <InventoryCard data={item} />}
-                                    contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
-                                    showsVerticalScrollIndicator={false}
-                                />
-                            ) : (
-                                <MaterialEmptyState
-                                    tab="inventory"
-                                    onPress={handleCreateInventory}
-                                />
-                            ))}
-                    </View>
-                ),
-                [
-                    selectedTab,
-                    filteredMaterials,
-                    isLoadingMaterials,
-                    handleEditMaterial,
-                    handleAddMaterial,
-                    handleHistoryPress,
-                    navigation,
-                    filteredWarehouseList,
-                    handleCreateImport,
-                    inventoryList,
-                    handleCreateInventory,
-                ]
-            )}
+            <View style={styles.content}>
+                {selectedTab === 'list' &&
+                    (isLoadingMaterials ? (
+                        <Loading isLoading={isLoadingMaterials}></Loading>
+                    ) : filteredMaterials.length > 0 ? (
+                        <MaterialListScreen
+                            materials={filteredMaterials}
+                            onEdit={handleEditMaterial}
+                            onHistoryPress={handleHistoryPress}
+                            onAdjustmentPress={adjustmentItem =>
+                                navigation.navigate('AddInventory', {
+                                    initialMaterialName: adjustmentItem.name,
+                                } as any)
+                            }
+                        />
+                    ) : (
+                        <MaterialEmptyState tab="list" onPress={handleAddMaterial} />
+                    ))}
+                {selectedTab === 'history' &&
+                    (filteredWarehouseList.length > 0 ? (
+                        <WarehouseListScreen receipts={filteredWarehouseList} />
+                    ) : (
+                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                    ))}
+                {selectedTab === 'inventory' &&
+                    (inventoryList.length > 0 ? (
+                        <FlatList
+                            data={inventoryList}
+                            keyExtractor={item => item.id}
+                            renderItem={({ item }) => <InventoryCard data={item} />}
+                            contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    ) : (
+                        <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
+                    ))}
+            </View>
 
             <MaterialMenuOverlay
                 isOpen={menuOpen}

@@ -17,6 +17,7 @@ import { AutoScrollText } from '@/features/control/components/devices/AutoScroll
 export interface DropdownOption {
     label: string;
     value: string | number;
+    disabled?: boolean;
 }
 
 interface DropdownMaterialProps {
@@ -88,20 +89,35 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     }, [isOpen, inline]);
 
     const handleSelect = (option: DropdownOption) => {
+        // Don't handle selection if option is disabled
+        if (option.disabled) {
+            return;
+        }
         onChange?.(option.value);
         onToggle();
     };
 
     const renderItem = ({ item }: { item: DropdownOption }) => {
         const isSelected = item.value === value;
+        const isDisabled = item.disabled;
         return (
             <TouchableOpacity
-                style={[styles.item, isSelected && styles.itemSelected]}
+                style={[
+                    styles.item,
+                    isSelected && styles.itemSelected,
+                    isDisabled && styles.itemDisabled,
+                ]}
                 onPress={() => handleSelect(item)}
+                disabled={isDisabled}
+                activeOpacity={isDisabled ? 1 : 0.7}
             >
                 <AutoScrollText
                     text={item.label}
-                    style={[styles.itemText, isSelected && styles.itemTextSelected]}
+                    style={[
+                        styles.itemText,
+                        isSelected && styles.itemTextSelected,
+                        isDisabled && styles.itemTextDisabled,
+                    ]}
                     containerStyle={styles.autoScrollContainer}
                     speed={30}
                     spacing={40}
@@ -272,9 +288,13 @@ const styles = StyleSheet.create({
         marginHorizontal: spacing.xs,
         borderRadius: borderRadius.sm,
     },
+    itemDisabled: {
+        opacity: 0.5,
+    },
     itemSelected: { backgroundColor: '#F3F4F6' },
     itemText: { fontSize: 14, color: colors.text },
     itemTextSelected: { fontWeight: '500', color: colors.text },
+    itemTextDisabled: { color: colors.textSecondary },
     autoScrollContainer: {
         width: '100%',
         minHeight: 20,
