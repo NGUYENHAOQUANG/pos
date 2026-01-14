@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     View,
     Text,
@@ -14,28 +14,11 @@ import {
 } from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
-import { useMaterialStore } from '@/features/material/store';
-import { IMaterialGroup } from '@/features/material/types/material.types';
+import { IMaterialGroup, IMaterialType } from '@/features/material/types/material.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-// Mapping từ đơn vị tính chính sang các đơn vị sử dụng tương ứng
-// const UNIT_TO_USAGE_UNITS_MAP: Record<string, string[]> = {
-//     // Khối lượng
-//     Kg: ['Kg', 'g', 'mg'],
-//     g: ['g', 'mg', 'kg'],
-//     Gram: ['g', 'mg', 'kg'],
-//     mg: ['mg', 'g'],
-//     // Thể tích
-//     Lít: ['Lít', 'ml'],
-//     ml: ['ml', 'Lít'],
-//     // Chiều dài
-//     mét: ['m', 'cm', 'mm'],
-//     // Thể tích khối
-//     m3: ['m3', 'Lít', 'ml'],
-// };
 
 interface AddMaterialProps {
     // Basic Info
@@ -51,14 +34,11 @@ interface AddMaterialProps {
     unitOptions?: (string | DropdownOption)[];
     groupDisabled?: boolean;
     materialGroupsData?: IMaterialGroup[];
+    typesByGroup?: IMaterialType[]; // Material types filtered by selected group
 
     // Advanced Info
     usage?: string;
     onUsageChange?: (text: string) => void;
-    unitOfUse?: string;
-    onUnitOfUseChange?: (value: string) => void;
-    dosage?: string;
-    onDosageChange?: (text: string) => void;
     manufacturer?: string;
     onManufacturerChange?: (text: string) => void;
     onUnitDropdownOpen?: () => void;
@@ -78,75 +58,52 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     groupDisabled = false,
     usage,
     onUsageChange,
-    unitOfUse: _unitOfUse,
-    onUnitOfUseChange: _onUnitOfUseChange,
-    dosage: _dosage,
-    onDosageChange: _onDosageChange,
     manufacturer,
     onManufacturerChange,
-    onUnitDropdownOpen,
-    materialGroupsData = [],
+    onUnitDropdownOpen: _onUnitDropdownOpen,
+    materialGroupsData: _materialGroupsData = [],
+    typesByGroup = [],
 }) => {
     const [isBasicExpanded, setIsBasicExpanded] = useState(true);
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // Get material types from store
-    const fetchMaterialTypesByGroup = useMaterialStore(state => state.fetchMaterialTypesByGroup);
-    const getMaterialTypeOptions = useMaterialStore(state => state.getMaterialTypeOptions);
-    const isLoadingMaterialTypes = useMaterialStore(state => state.isLoadingMaterialTypes);
-
-    // Get type options for selected group
+    // Get type options for selected group from props
     const typeOptions = useMemo(() => {
         if (!group) return [];
-        return getMaterialTypeOptions(group);
-    }, [group, getMaterialTypeOptions]);
 
-    // Fetch material types when group changes
-    useEffect(() => {
-        if (group && materialGroupsData.length > 0) {
-            fetchMaterialTypesByGroup(group);
+        // Ensure typesByGroup is an array (handle undefined/null)
+        const typesArray = Array.isArray(typesByGroup) ? typesByGroup : [];
+
+        // Convert typesByGroup to dropdown options
+        const options: DropdownOption[] = typesArray
+            .filter(t => t && t.name) // Filter out types without name
+            .map(t => ({
+                label: t.name || '',
+                value: t.name || '',
+            }));
+
+        // If no options available, show disabled "no options" message
+        if (options.length === 0) {
+            return [
+                {
+                    label: 'Không có loại vật tư phù hợp',
+                    value: '__no_options__',
+                    disabled: true,
+                } as DropdownOption & { disabled: boolean },
+            ];
         }
-    }, [group, materialGroupsData, fetchMaterialTypesByGroup]);
+        return options;
+    }, [group, typesByGroup]);
 
     const handleToggleDropdown = (key: string) => {
         if (activeDropdown === key) {
             setActiveDropdown(null);
         } else {
             setActiveDropdown(key);
-            if (key === 'unitOfUse') {
-                onUnitDropdownOpen?.();
-            }
         }
     };
-
-    // Calculate options for Unit of Use based on selected Unit
-    // Commented out - UNIT_TO_USAGE_UNITS_MAP is no longer used
-    // const unitOfUseOptions = useMemo(() => {
-    //     if (!unit) return [];
-    //     // Find the label (name) corresponding to the unit value (id)
-    //     const selectedOption = unitOptions.find(opt =>
-    //         typeof opt === 'string' ? opt === unit : opt.value === unit
-    //     );
-    //     const unitName = typeof selectedOption === 'object' ? selectedOption.label : selectedOption;
-
-    //     return unitName && UNIT_TO_USAGE_UNITS_MAP[unitName]
-    //         ? UNIT_TO_USAGE_UNITS_MAP[unitName]
-    //         : [];
-    // }, [unit, unitOptions]);
-
-    // Reset unitOfUse if current value is not in the new options
-    // Commented out - unitOfUseOptions is no longer used
-    // useEffect(() => {
-    //     if (unit && unitOfUse && unitOfUseOptions.length > 0) {
-    //         if (!unitOfUseOptions.includes(unitOfUse)) {
-    //             onUnitOfUseChange?.('');
-    //         }
-    //     } else if (!unit) {
-    //         onUnitOfUseChange?.('');
-    //     }
-    // }, [unit, unitOfUse, unitOfUseOptions, onUnitOfUseChange]);
 
     const toggleBasicExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -180,7 +137,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Nhập tên vật tư"
-                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    placeholderTextColor={colors.textSecondary}
                                     value={name}
                                     onChangeText={onNameChange}
                                 />
@@ -218,7 +175,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
-                                        disabled={!group || isLoadingMaterialTypes}
+                                        disabled={!group}
                                     />
                                 </View>
                             </View>
@@ -246,7 +203,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
             {/* Advanced Info Section */}
             <View style={[styles.sectionContainer, styles.sectionContainerZ10]}>
                 <CollapseHead
-                    title="Thông tin nâng cao (không bắt buộc)"
+                    title="Thông tin nâng cao"
                     isExpanded={isAdvancedExpanded}
                     onToggle={toggleAdvancedExpand}
                 />
@@ -256,11 +213,14 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         <View style={styles.divider} />
                         <View style={styles.content}>
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Công dụng</Text>
+                                <View style={styles.labelContainer}>
+                                    <Text style={styles.required}>* </Text>
+                                    <Text style={styles.label}>Công dụng</Text>
+                                </View>
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
                                     placeholder="Nhập công dụng"
-                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    placeholderTextColor={colors.textSecondary}
                                     value={usage}
                                     onChangeText={onUsageChange}
                                     multiline
@@ -268,41 +228,15 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 />
                             </View>
 
-                            {/* <View style={styles.row}>
-                                <View style={styles.halfWidth}>
-                                    <UnitOfUse
-                                        label="Đơn vị sử dụng"
-                                        value={unitOfUse}
-                                        options={unitOfUseOptions}
-                                        onChange={onUnitOfUseChange}
-                                        isOpen={activeDropdown === 'unitOfUse'}
-                                        onToggle={() => handleToggleDropdown('unitOfUse')}
-                                        placeholder={
-                                            unit ? 'Chọn đơn vị sử dụng' : 'Chọn đơn vị tính trước'
-                                        }
-                                        disabled={!unit}
-                                    />
-                                </View>
-                                <View style={styles.halfWidth}>
-                                    <View style={styles.inputGroup}>
-                                        <Text style={styles.label}>Liều dùng</Text>
-                                        <TextInput
-                                            style={styles.input}
-                                            placeholder="Nhập liều dùng"
-                                            placeholderTextColor={colors.textSecondary || '#999'}
-                                            value={dosage}
-                                            onChangeText={onDosageChange}
-                                        />
-                                    </View>
-                                </View>
-                            </View> */}
-
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Nhà sản xuất</Text>
+                                <View style={styles.labelContainer}>
+                                    <Text style={styles.required}>* </Text>
+                                    <Text style={styles.label}>Nhà sản xuất</Text>
+                                </View>
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Nhập nhà sản xuất"
-                                    placeholderTextColor={colors.textSecondary || '#999'}
+                                    placeholderTextColor={colors.textSecondary}
                                     value={manufacturer}
                                     onChangeText={onManufacturerChange}
                                 />
