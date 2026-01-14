@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
-import { CollapseHead } from '../CollapseHead';
+import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -32,6 +32,7 @@ interface AddWarehouseMaterialProps {
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
     onAddMaterial: () => void;
     materialOptions?: { label: string; value: string; unit: string }[];
+    onDropdownOpen?: () => void;
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -39,6 +40,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     onUpdateMaterial,
     onAddMaterial,
     materialOptions = [],
+    onDropdownOpen,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -64,6 +66,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
             setActiveDropdownId(null);
         } else {
             setActiveDropdownId(id);
+            onDropdownOpen?.();
         }
     };
 
@@ -120,6 +123,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 showAllOption={false}
                                                 isOpen={isDropdownOpen}
                                                 onToggle={() => handleToggleDropdown(item.id)}
+                                                inline={true}
                                             />
                                         </View>
 
