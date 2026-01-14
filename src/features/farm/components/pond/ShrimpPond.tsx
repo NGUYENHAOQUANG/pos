@@ -51,14 +51,16 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 }) => {
     // Logic hasData: Now includes almost all functional ponds
     // Exclude 'Ao lắng' (Settling) as it has no tasks, unless specific logic arises later.
+    const typeValue = typeof type === 'string' ? type : type?.name;
+
     const hasData =
-        type === POND_TYPES.CULTIVATION ||
-        type === POND_TYPES.NURSERY ||
-        type === POND_TYPES.READY ||
-        type === POND_TYPES.TREATMENT ||
-        type === POND_TYPES.WATER_STORAGE ||
-        type === POND_TYPES.WASTE ||
-        type === POND_TYPES.SETTLING;
+        typeValue === POND_TYPES.CULTIVATION ||
+        typeValue === POND_TYPES.NURSERY ||
+        typeValue === POND_TYPES.READY ||
+        typeValue === POND_TYPES.TREATMENT ||
+        typeValue === POND_TYPES.WATER_STORAGE ||
+        typeValue === POND_TYPES.WASTE ||
+        typeValue === POND_TYPES.SETTLING;
 
     const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
 
@@ -137,7 +139,9 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                 <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
                 <View style={styles.infoContainer}>
                     <Text style={styles.nameText}>{name}</Text>
-                    <Text style={styles.areaText}>{area}</Text>
+                    <Text style={styles.areaText}>
+                        {area ? `${parseInt(area.toString().replace(/[^0-9.]/g, ''), 10)} m²` : ''}
+                    </Text>
                 </View>
                 <View style={styles.headerRight}>
                     <PondTypeTag type={displayType} style={styles.tag} />
