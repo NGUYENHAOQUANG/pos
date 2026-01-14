@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, Keyboard, Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
 
@@ -37,33 +36,9 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     secondaryButtonTextStyle,
     containerStyle,
 }) => {
-    const insets = useSafeAreaInsets();
-    const [visible, setVisible] = useState(true);
-
-    useEffect(() => {
-        const keyboardShowEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-        const keyboardHideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-        const showSubscription = Keyboard.addListener(keyboardShowEvent, () => {
-            setVisible(false);
-        });
-        const hideSubscription = Keyboard.addListener(keyboardHideEvent, () => {
-            setVisible(true);
-        });
-
-        return () => {
-            showSubscription.remove();
-            hideSubscription.remove();
-        };
-    }, []);
-
-    if (!visible) return null;
-
     // Consistent bottom spacing logic
-    // Use insets.bottom + 12px for consistent internal padding
-    // This ensures it doesn't stick to the home indicator on iOS
-    // and looks consistent on Android (where insets.bottom is usually 0)
-    const paddingBottom = insets.bottom + 12;
+    // User requested fixed padding 16 for both top and bottom
+    const paddingBottom = 16;
 
     const renderContent = () => {
         switch (mode) {
@@ -141,7 +116,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        paddingTop: 12, // Fixed top padding
+        paddingTop: 16, // Fixed top padding 16 as requested
         paddingHorizontal: spacing.md,
         // paddingBottom is handled dynamically
     },

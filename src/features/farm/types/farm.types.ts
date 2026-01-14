@@ -39,7 +39,7 @@ export interface PondData {
     name: string;
     area?: string; // Legacy
     areaSqm?: number; // From API
-    type: PondType;
+    type: PondType | string;
     lastUpdate?: string;
     lastActivity?: string;
     size?: string; // Kích thước (m) - ví dụ: "50×28"
