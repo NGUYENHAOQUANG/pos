@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { PondData } from '@/features/farm/types/farm.types';
-import { PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { PondData, PondType } from '@/features/farm/types/farm.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 
 export interface TabItem {
@@ -68,7 +67,11 @@ export const HeadingFarm: React.FC<HeadingFarmProps> = ({
                 <HeaderFarm
                     type="detail"
                     title={pond?.name || 'Ao số 1'}
-                    subtitle={pond?.area || '784 m²'}
+                    subtitle={
+                        pond?.area
+                            ? `${parseInt(pond.area.toString().replace(/[^0-9.]/g, ''), 10)} m²`
+                            : '784 m²'
+                    }
                     tagType={displayPondType || pond?.type || 'Ao vèo'}
                     status={status}
                     onBack={onBack}

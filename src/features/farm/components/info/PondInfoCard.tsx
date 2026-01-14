@@ -28,7 +28,11 @@ export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
         // Safely handle if type is string (old) or object (new)
         type: (typeof pond?.type === 'object' ? pond?.type?.name : pond?.type) || '{loại ao}',
         // shape: pond?.shape || '{hình dáng ao}',
-        area: pond?.areaSqm ? `${Number(pond.areaSqm).toFixed(2)} m²` : pond?.area || '{diện tích}',
+        area: pond?.areaSqm
+            ? `${Math.round(Number(pond.areaSqm))} m²`
+            : pond?.area
+            ? `${parseInt(pond.area.toString().replace(/[^0-9.]/g, ''), 10)} m²`
+            : '{diện tích}',
         depth: pond?.maxDepthCm ? `${pond.maxDepthCm} cm` : pond?.depth?.toString() || '{độ sâu}',
     };
 
