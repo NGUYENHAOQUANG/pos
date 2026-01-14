@@ -31,24 +31,10 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
     // --- HÀM XỬ LÝ CHECKBOX ĐÃ ĐƯỢC CẬP NHẬT ---
     const toggleReason = (reason: string) => {
         setSelectedReasons(prev => {
-            // TRƯỜNG HỢP 1: Người dùng click vào ô "Khác"
-            if (reason === OTHER_REASON_KEY) {
-                if (prev.includes(OTHER_REASON_KEY)) {
-                    return [];
-                }
-                return [OTHER_REASON_KEY];
-            }
-
-            // TRƯỜNG HỢP 2: Người dùng click vào các lý do thông thường
-            else {
-                if (prev.includes(OTHER_REASON_KEY)) {
-                    return [reason];
-                }
-                if (prev.includes(reason)) {
-                    return prev.filter(item => item !== reason);
-                } else {
-                    return [...prev, reason];
-                }
+            if (prev.includes(reason)) {
+                return prev.filter(item => item !== reason);
+            } else {
+                return [...prev, reason];
             }
         });
 
