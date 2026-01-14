@@ -21,6 +21,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import OTPInput, { OTPInputHandle } from '../components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
+import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 
 export default function RegisterScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -87,8 +88,6 @@ export default function RegisterScreen() {
         }
 
         try {
-            console.log('Verify Success:', otpString);
-
             // Call API verify OTP via Store (handles login)
             await verifyOtp(contact, otpString);
 
@@ -110,12 +109,10 @@ export default function RegisterScreen() {
         setErrorMessage('');
 
         otpInputRef.current?.focusFirst();
-
-        console.log('Resend OTP Sent');
     };
 
     const contact = '0908456789'; // Số điện thoại từ màn hình AuthScreen
-    const displayContact = contact.replace(/\D/g, '').replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+    const displayContact = formatAuthPhoneDisplay(contact);
 
     const isLoading = useAuthStore(state => state.loading);
 

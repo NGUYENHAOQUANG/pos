@@ -53,8 +53,6 @@ export default function AuthScreen() {
             return;
         }
 
-        console.log('Login pressed with phone:', rawPhone);
-
         // Kiểm tra số điện thoại có được đăng ký không (sử dụng mock data)
         if (!isPhoneRegistered(rawPhone)) {
             setIsUnregistered(true);
@@ -69,7 +67,6 @@ export default function AuthScreen() {
 
             // In Dev environment, OTP is in response.data.testOtp
             const devOtp = response?.data?.testOtp;
-            console.log('AuthScreen OTP Response:', JSON.stringify(response));
 
             if (devOtp) {
                 // Show Notifee Notification as requested
@@ -123,8 +120,6 @@ export default function AuthScreen() {
             return;
         }
 
-        console.log('Login pressed with phone:', rawPhone);
-
         setIsLoading(true);
 
         try {
@@ -132,7 +127,6 @@ export default function AuthScreen() {
 
             // In Dev environment, OTP is in response.data.testOtp
             const devOtp = response?.data?.testOtp;
-            console.log('AuthScreen OTP Response:', JSON.stringify(response));
 
             if (devOtp) {
                 // Show Notifee Notification as requested
