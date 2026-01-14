@@ -2,16 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
+import { SvgProps } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
+
+import PersonalInformationIcon from '@/assets/Icon/IconMenu/PersonalInformation.svg';
+import MemberManagementIcon from '@/assets/Icon/IconMenu/MemberManagement.svg';
 
 interface RecordManagementItemProps {
-    iconName: string;
+    Icon: React.FC<SvgProps>;
     title: string;
     onPress?: () => void;
     isLast?: boolean;
 }
 
 const RecordManagementItem: React.FC<RecordManagementItemProps> = ({
-    iconName,
+    Icon,
     title,
     onPress,
     isLast,
@@ -20,7 +27,7 @@ const RecordManagementItem: React.FC<RecordManagementItemProps> = ({
         <View>
             <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
                 <View style={styles.iconWrapper}>
-                    <AntDesign name={iconName} size={20} color={colors.text} />
+                    <Icon width={32} height={32} />
                 </View>
                 <Text style={styles.itemTitle}>{title}</Text>
                 <AntDesign name="right" size={20} color={colors.text} />
@@ -30,12 +37,6 @@ const RecordManagementItem: React.FC<RecordManagementItemProps> = ({
     );
 };
 
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
-
-// ... (RecordManagementItem remains same)
-
 export const RecordManagement: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MenuStackParamList>>();
 
@@ -43,13 +44,13 @@ export const RecordManagement: React.FC = () => {
         {
             id: 'profile',
             title: 'Thông tin cá nhân',
-            iconName: 'user',
+            Icon: PersonalInformationIcon,
             onPress: () => navigation.navigate('PersonalInformation'),
         },
         {
             id: 'members',
             title: 'Quản lý thành viên',
-            iconName: 'team',
+            Icon: MemberManagementIcon,
             onPress: () => navigation.navigate('MemberManagement'),
         },
     ];
@@ -62,7 +63,7 @@ export const RecordManagement: React.FC = () => {
                 {records.map((item, index) => (
                     <RecordManagementItem
                         key={item.id}
-                        iconName={item.iconName}
+                        Icon={item.Icon}
                         title={item.title}
                         isLast={index === records.length - 1}
                         onPress={item.onPress}
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
         marginBottom: 12,
@@ -114,17 +115,13 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     iconWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.blue[50],
+        marginRight: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
     },
     itemTitle: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '400',
     },
