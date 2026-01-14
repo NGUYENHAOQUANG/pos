@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 interface DeleteAccountInputStepProps {
     onNext: (phone: string, reason: string) => void;
 }
@@ -157,7 +157,13 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
                                                 isSelected && styles.checkboxSquareSelected,
                                             ]}
                                         >
-                                            {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                                            {isSelected && (
+                                                <Ionicons
+                                                    name="checkmark"
+                                                    size={16}
+                                                    color={colors.white}
+                                                />
+                                            )}
                                         </View>
                                         <Text style={styles.checkboxText}>{reason}</Text>
                                     </TouchableOpacity>
@@ -301,8 +307,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     checkboxSquareSelected: {
-        backgroundColor: colors.red[600],
-        borderColor: colors.red[600],
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     checkmark: {
         color: colors.white,
