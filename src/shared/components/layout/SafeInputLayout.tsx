@@ -25,9 +25,10 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
 }) => {
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            enabled={Platform.OS === 'ios'}
             style={[styles.container, style]}
-            keyboardVerticalOffset={keyboardVerticalOffset + (Platform.OS === 'android' ? 20 : 0)}
+            keyboardVerticalOffset={keyboardVerticalOffset}
         >
             {children}
         </KeyboardAvoidingView>

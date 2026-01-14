@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { JobCard, JobType, JobExecution } from './JobItem';
+import { JobCard, JobType } from '@/features/farm/components/pondwork/JobItem';
+import { JobExecution } from '@/features/farm/types/farm.types';
 
 interface JobData {
     type: JobType;

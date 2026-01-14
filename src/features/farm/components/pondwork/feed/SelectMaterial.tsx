@@ -63,8 +63,9 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
     // Auto-fill unit based on selected material
     useEffect(() => {
         if (selectedMaterial && selectedMaterial.unit) {
+            const targetUnit = selectedMaterial.unitName || selectedMaterial.unit;
             const unitToSelect = units.find(
-                u => u.label.toLowerCase() === selectedMaterial.unit?.toLowerCase()
+                u => u.label?.toLowerCase() === String(targetUnit).toLowerCase()
             );
             if (unitToSelect) {
                 setSelectedUnit(unitToSelect);
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
         zIndex: 1,
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
+                shadowColor: colors.black,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.25,
                 shadowRadius: 4,
