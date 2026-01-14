@@ -8,6 +8,7 @@ import {
     GetMaterialsParams,
     IAppResponse,
 } from '@/features/material/types/material.types';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 export const materialApi = {
     /**
@@ -41,6 +42,13 @@ export const materialApi = {
             API_ENDPOINTS.MATERIAL.CREATE,
             request
         );
+        if (!data.result) {
+            const errorMessage = getErrorMessage(
+                { response: { data } },
+                data.message || 'Tạo vật tư thất bại'
+            );
+            throw new Error(errorMessage);
+        }
         return data;
     },
 
@@ -54,6 +62,13 @@ export const materialApi = {
             API_ENDPOINTS.MATERIAL.UPDATE(id),
             request
         );
+        if (!data.result) {
+            const errorMessage = getErrorMessage(
+                { response: { data } },
+                data.message || 'Cập nhật vật tư thất bại'
+            );
+            throw new Error(errorMessage);
+        }
         return data;
     },
 
