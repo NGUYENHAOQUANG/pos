@@ -19,9 +19,9 @@ export const DeleteAccountWarningBox: React.FC<Props> = ({ style }) => {
 
 const styles = StyleSheet.create({
     warningBox: {
-        backgroundColor: colors.errorBackground,
+        backgroundColor: colors.volcano[100],
         borderWidth: 1,
-        borderColor: colors.red[300],
+        borderColor: colors.volcano[400],
         borderRadius: borderRadius.md,
         padding: spacing.sm,
         width: '100%',
