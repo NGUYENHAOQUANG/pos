@@ -1,31 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
+import { SvgProps } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+
+import FarmManagementIcon from '@/assets/Icon/IconMenu/FarmManagement.svg';
+import DeviceManagementIcon from '@/assets/Icon/IconMenu/DeviceManagement.svg';
+import SettingEnvironmentalIcon from '@/assets/Icon/IconMenu/SettingEnvironmental.svg';
 
 interface FarmOperationItemProps {
-    iconName: string;
-    iconColor: string;
-    iconBgColor: string;
+    Icon: React.FC<SvgProps>;
     title: string;
     onPress?: () => void;
     isLast?: boolean;
 }
 
-const FarmOperationItem: React.FC<FarmOperationItemProps> = ({
-    iconName,
-    iconColor,
-    iconBgColor,
-    title,
-    onPress,
-    isLast,
-}) => {
+const FarmOperationItem: React.FC<FarmOperationItemProps> = ({ Icon, title, onPress, isLast }) => {
     return (
         <View>
             <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-                <View style={[styles.iconWrapper, { backgroundColor: iconBgColor }]}>
-                    <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
+                <View style={styles.iconWrapper}>
+                    <Icon width={32} height={32} />
                 </View>
                 <Text style={styles.itemTitle}>{title}</Text>
                 <AntDesign name="right" size={20} color={colors.text} />
@@ -35,8 +31,6 @@ const FarmOperationItem: React.FC<FarmOperationItemProps> = ({
     );
 };
 
-import { useNavigation } from '@react-navigation/native';
-
 export const FarmOperation: React.FC = () => {
     const navigation = useNavigation<any>();
 
@@ -44,25 +38,19 @@ export const FarmOperation: React.FC = () => {
         {
             id: 'cycle',
             title: 'Quản lý vụ nuôi',
-            iconName: 'fish',
-            iconColor: colors.blue[600],
-            iconBgColor: colors.blue[50],
+            Icon: FarmManagementIcon,
             screen: 'AquacultureManagement',
         },
         {
             id: 'device-maintenance',
             title: 'Quản lý bảo trì thiết bị',
-            iconName: 'tools',
-            iconColor: colors.blue[600],
-            iconBgColor: colors.blue[50],
+            Icon: DeviceManagementIcon,
             screen: 'DeviceManagement',
         },
         {
             id: 'environment',
             title: 'Thiết lập thông số môi trường',
-            iconName: 'tune',
-            iconColor: colors.blue[600],
-            iconBgColor: colors.blue[50],
+            Icon: SettingEnvironmentalIcon,
             screen: 'SettingEnvironment',
         },
     ];
@@ -75,9 +63,7 @@ export const FarmOperation: React.FC = () => {
                 {operations.map((item, index) => (
                     <FarmOperationItem
                         key={item.id}
-                        iconName={item.iconName}
-                        iconColor={item.iconColor}
-                        iconBgColor={item.iconBgColor}
+                        Icon={item.Icon}
                         title={item.title}
                         isLast={index === operations.length - 1}
                         onPress={() => {
@@ -107,7 +93,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
         marginBottom: 12,
@@ -130,21 +116,17 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     iconWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.blue[50],
+        marginRight: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
     },
     icon: {
-        width: 24,
-        height: 24,
+        width: 32,
+        height: 32,
     },
     itemTitle: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '400',
     },

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { HeaderDevices } from '../components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
 import { DevicesStatus } from '../components/DevicesStatus';
@@ -11,17 +11,29 @@ import { ControlStackParamList } from '@/features/control/navigation/ControlNavi
 import { useControl } from '../store/controlStore';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Zone } from '@/features/farm/types/farm.types';
+import { Loading } from '@/shared/components/ui/Loading';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
-    const { zones, fetchZones } = useFarmStore();
+    const {
+        zones,
+        fetchZones,
+        ponds: farmPonds,
+        fetchPondsByZone,
+        isLoadingPonds,
+    } = useFarmStore();
+    const { ponds: devicePonds } = useControl();
+
+    const [selectedFarm, setSelectedFarm] = useState<FarmLocation | undefined>(undefined);
+
+    // Local loading state for immediate feedback
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Load zones on mount
     React.useEffect(() => {
         fetchZones();
     }, [fetchZones]);
-
-    const [selectedFarm, setSelectedFarm] = useState<FarmLocation | undefined>(undefined);
 
     // Map zones to FarmLocation format
     const farmLocations: FarmLocation[] = useMemo(() => {
@@ -32,42 +44,76 @@ export const DeviceControlScreens = () => {
         }));
     }, [zones]);
 
-    // Set default selected farm
+    // Default select Farm logic (Priority: ID 71 - Trại Kiên Giang)
     React.useEffect(() => {
         if (!selectedFarm && farmLocations.length > 0) {
-            setSelectedFarm(farmLocations[0]);
-        }
-    }, [farmLocations, selectedFarm]);
+            // Check for ID "71" (string) since we mapped it
+            const target = farmLocations.find(f => f.id === '71') || farmLocations[0];
 
-    const { ponds } = useControl();
+            // Defer selection slightly to allow UI/Loading animation to start smoothly
+            const timer = setTimeout(() => {
+                setSelectedFarm(target);
+            }, 50);
+
+            return () => clearTimeout(timer);
+        } else if (farmLocations.length === 0 && !isLoadingPonds && zones.length > 0) {
+            // If zones loaded but no locations mapped (unlikely) or empty
+            setIsFirstLoad(false);
+        }
+    }, [farmLocations, selectedFarm, zones, isLoadingPonds]);
+
+    // Fetch ponds when selected farm changes
+    React.useEffect(() => {
+        const loadPonds = async () => {
+            if (selectedFarm?.id) {
+                try {
+                    await fetchPondsByZone(Number(selectedFarm.id));
+                } finally {
+                    setIsFirstLoad(false);
+                }
+            }
+        };
+        loadPonds();
+    }, [selectedFarm, fetchPondsByZone]);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        if (selectedFarm?.id) {
+            await fetchPondsByZone(Number(selectedFarm.id));
+        }
+        // Artificial delay if needed, or rely on fetch
+        setTimeout(() => setIsRefreshing(false), 1000);
+    };
 
     const handleConnectDevice = (pondName: string) => {
         navigation.navigate('ConnectDevice', { pondName });
     };
 
-    const showDashboard = ponds.some(p => p.hasDevices);
-
     const filteredPonds = useMemo(() => {
-        if (!selectedFarm) return ponds;
+        if (!selectedFarm || !farmPonds) return [];
 
-        // Find the selected zone to get its code
-        const selectedZone = zones?.find(z => z.id.toString() === selectedFarm.id);
-        if (!selectedZone) return ponds;
+        const mappedPonds = farmPonds.map(realPond => {
+            // Find corresponding device data in controlStore
+            // Matching by name for now as controlStore uses names, but ideally should use ID
+            const devicePond = devicePonds.find(p => p.name === realPond.name);
 
-        return ponds.filter(pond => {
-            // Check if ANY device in the pond belongs to the selected farm/zone
-            // We assume device.farmId corresponds to zone.code
-            if (pond.devices && pond.devices.length > 0) {
-                return pond.devices.some(d => d.farmId === selectedZone.code);
-            }
-            // If pond has no devices, strictly it shouldn't show in Control screen for a specific farm unless we know its farm.
-            // But mock ponds (N01, etc) likely don't have farmId on the pond object itself in controlStore types.
-            // So we rely on mapping logic or assume they belong to the default farm if code matches.
-            // Since User complaining "Sao không get được", likely they selected valid farm but got nothing (or expected to see N01 etc).
-            // Logic: Filter STRICTLY. If no devices match, don't show.
-            return false;
+            return {
+                id: realPond.id,
+                name: realPond.name,
+                hasDevices: devicePond?.hasDevices ?? false,
+                devices: devicePond?.devices ?? [],
+                deviceStats: devicePond?.deviceStats,
+            };
         });
-    }, [ponds, selectedFarm, zones]);
+
+        // Sort: Ponds with devices first
+        return mappedPonds.sort((a, b) => {
+            if (a.hasDevices === b.hasDevices) return 0;
+            return a.hasDevices ? -1 : 1;
+        });
+    }, [farmPonds, devicePonds, selectedFarm]);
+
+    const showStats = filteredPonds.length > 0;
 
     // Calculate total active devices and warnings for summary based on FILTERED ponds
     const totalStats = useMemo(() => {
@@ -96,7 +142,7 @@ export const DeviceControlScreens = () => {
 
     return (
         <View style={styles.container}>
-            {showDashboard && (
+            {true && (
                 <HeaderCamLocation
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
@@ -107,37 +153,47 @@ export const DeviceControlScreens = () => {
             <HeaderDevices
                 title="Điều Khiển Thiết Bị"
                 showBackButton={false}
-                includeSafeArea={!showDashboard}
+                includeSafeArea={false}
             />
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={[styles.scrollContent, styles.scrollContentPadding]}
-            >
-                {showDashboard && (
-                    <>
-                        <DevicesStatus
-                            totalPonds={filteredPonds.length}
-                            activePonds={totalStats.active}
-                            warningPonds={totalStats.warning}
-                            otherPonds={totalStats.other}
+            <Loading isLoading={isLoadingPonds || isFirstLoad} transparent={!isFirstLoad}>
+                <FlatList
+                    data={filteredPonds}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <PondCard
+                            pondName={item.name}
+                            isEmpty={!item.hasDevices}
+                            deviceStats={item.deviceStats}
+                            onPressDetail={() =>
+                                navigation.navigate('ControlDetail', { pondName: item.name })
+                            }
+                            onAddDevice={() => handleConnectDevice(item.name)}
                         />
-                        <View style={styles.spacer} />
-                    </>
-                )}
-
-                {filteredPonds.map(pond => (
-                    <PondCard
-                        key={pond.id}
-                        pondName={pond.name}
-                        isEmpty={!pond.hasDevices}
-                        deviceStats={pond.deviceStats}
-                        onPressDetail={() =>
-                            navigation.navigate('ControlDetail', { pondName: pond.name })
-                        }
-                        onAddDevice={() => handleConnectDevice(pond.name)}
-                    />
-                ))}
-            </ScrollView>
+                    )}
+                    style={styles.content}
+                    contentContainerStyle={[styles.scrollContent, styles.scrollContentPadding]}
+                    ListHeaderComponent={
+                        showStats ? (
+                            <>
+                                <DevicesStatus
+                                    totalPonds={filteredPonds.length}
+                                    activePonds={totalStats.active}
+                                    warningPonds={totalStats.warning}
+                                    otherPonds={totalStats.other}
+                                />
+                                <View style={styles.spacer} />
+                            </>
+                        ) : null
+                    }
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    removeClippedSubviews={true}
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+                    }
+                />
+            </Loading>
         </View>
     );
 };

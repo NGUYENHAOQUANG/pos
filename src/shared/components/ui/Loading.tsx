@@ -5,18 +5,16 @@ import Animated, {
     useAnimatedStyle,
     withRepeat,
     withTiming,
-    withDelay,
-    withSequence,
     Easing,
     cancelAnimation,
     interpolate,
     FadeOut,
+    SharedValue,
 } from 'react-native-reanimated';
 import { colors } from '@/styles';
 
 const DOT_COUNT = 6;
 const CYCLE_DURATION = 2400;
-const STEP_DURATION = CYCLE_DURATION / DOT_COUNT;
 
 const getNumericSize = (size: 'small' | 'large' | number): number => {
     if (typeof size === 'number') return size;
@@ -25,51 +23,52 @@ const getNumericSize = (size: 'small' | 'large' | number): number => {
 
 // ... Dot component ...
 const Dot = React.memo(
-    ({ index, sizeNum, color }: { index: number; sizeNum: number; color: string }) => {
-        const progress = useSharedValue(0);
-
+    ({
+        index,
+        sizeNum,
+        color,
+        progress,
+    }: {
+        index: number;
+        sizeNum: number;
+        color: string;
+        progress: SharedValue<number>;
+    }) => {
         const angle = (index * 60 * Math.PI) / 180;
         const cosAngle = Math.cos(angle);
         const sinAngle = Math.sin(angle);
 
-        useEffect(() => {
-            const moveIn = withTiming(1, {
-                duration: STEP_DURATION,
-                easing: Easing.inOut(Easing.ease),
-            });
-            const moveOut = withTiming(0, {
-                duration: STEP_DURATION,
-                easing: Easing.inOut(Easing.ease),
-            });
-
-            const sequence = withSequence(
-                moveIn,
-                moveOut,
-                withTiming(0, { duration: (DOT_COUNT - 2) * STEP_DURATION })
-            );
-
-            const initialDelay = index * STEP_DURATION;
-
-            progress.value = withDelay(initialDelay, withRepeat(sequence, -1, false));
-
-            // CRITICAL FIX: Do NOT cancelAnimation on cleanup.
-            // This ensures the animation keeps running during the 'exiting' fade-out phase of the parent View.
-            // Reanimated will automatically garbage collect the shared value when the node is truly destroyed.
-        }, [index, progress]);
-
         const style = useAnimatedStyle(() => {
+            const step = 1 / DOT_COUNT;
+            let localP = (progress.value - index * step) % 1;
+            if (localP < 0) localP += 1;
+
+            let animValue = 0;
+
+            if (localP < step) {
+                // 0 -> 1 using smoothstep
+                const t = localP / step;
+                animValue = t * t * (3 - 2 * t);
+            } else if (localP < 2 * step) {
+                // 1 -> 0
+                const t = (localP - step) / step;
+                animValue = 1 - t * t * (3 - 2 * t);
+            } else {
+                animValue = 0;
+            }
+
             const maxRadius = sizeNum / 2 - sizeNum / 10;
             const minRadius = 0;
 
-            const currentRadius = interpolate(progress.value, [0, 1], [maxRadius, minRadius]);
-            const currentScale = interpolate(progress.value, [0, 1], [1, 0.4]);
+            const currentRadius = interpolate(animValue, [0, 1], [maxRadius, minRadius]);
+            const currentScale = interpolate(animValue, [0, 1], [1, 0.4]);
 
             const translateX = currentRadius * cosAngle;
             const translateY = currentRadius * sinAngle;
 
             return {
                 transform: [{ translateX }, { translateY }, { scale: currentScale }],
-                opacity: interpolate(progress.value, [0, 1], [1, 0.5]),
+                opacity: interpolate(animValue, [0, 1], [1, 0.5]),
             };
         });
 
@@ -99,6 +98,7 @@ interface LoadingProps {
     children?: React.ReactNode;
     isLoading?: boolean;
     animateExit?: boolean;
+    transparent?: boolean;
 }
 
 export const Loading: React.FC<LoadingProps> = ({
@@ -107,13 +107,16 @@ export const Loading: React.FC<LoadingProps> = ({
     children,
     isLoading = true,
     animateExit = true,
+    transparent = true,
 }) => {
     const sizeNum = getNumericSize(size);
     const mainColor = color as string;
 
     const rotation = useSharedValue(0);
+    const progress = useSharedValue(0);
 
     useEffect(() => {
+        // Continuous rotation
         rotation.value = withRepeat(
             withTiming(360, {
                 duration: 6000,
@@ -121,7 +124,16 @@ export const Loading: React.FC<LoadingProps> = ({
             }),
             -1
         );
-    }, [rotation]);
+
+        // Continuous pulse driver 0 -> 1
+        progress.value = withRepeat(
+            withTiming(1, {
+                duration: CYCLE_DURATION,
+                easing: Easing.linear,
+            }),
+            -1
+        );
+    }, [rotation, progress]);
 
     const containerStyle = useAnimatedStyle(() => ({
         transform: [{ rotate: `${rotation.value}deg` }],
@@ -141,11 +153,17 @@ export const Loading: React.FC<LoadingProps> = ({
                 ]}
             >
                 {Array.from({ length: DOT_COUNT }).map((_, i) => (
-                    <Dot key={i} index={i} sizeNum={sizeNum} color={mainColor} />
+                    <Dot
+                        key={i}
+                        index={i}
+                        sizeNum={sizeNum}
+                        color={mainColor}
+                        progress={progress}
+                    />
                 ))}
             </Animated.View>
         ),
-        [sizeNum, mainColor, containerStyle]
+        [sizeNum, mainColor, containerStyle, progress]
     );
 
     // --- Wrapper Mode Logic ---
@@ -188,7 +206,11 @@ export const Loading: React.FC<LoadingProps> = ({
                 */}
                 {isOverlayVisible && (
                     <Animated.View
-                        style={[styles.overlay, overlayAnimatedStyle]}
+                        style={[
+                            styles.overlay,
+                            overlayAnimatedStyle,
+                            !transparent && { backgroundColor: colors.white },
+                        ]}
                         pointerEvents={isLoading ? 'auto' : 'none'}
                     >
                         {Spinner}

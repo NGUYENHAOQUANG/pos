@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     profileName: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
         marginBottom: 4,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     roleText: {
         color: colors.blue[600],
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '400',
     },
     sectionContainer: {
         gap: 16,
