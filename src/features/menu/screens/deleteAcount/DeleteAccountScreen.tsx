@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import { DeleteAccountInputStep } from '../components/delete-account/DeleteAccountInputStep';
-import { DeleteAccountOtpStep } from '../components/delete-account/DeleteAccountOtpStep';
+import { DeleteAccountInputStep } from '../../../auth/components/delete-account/DeleteAccountInputStep';
+import { DeleteAccountOtpStep } from '../../../auth/components/delete-account/DeleteAccountOtpStep';
 import Toast from 'react-native-toast-message';
 import { colors } from '@/styles';
 
