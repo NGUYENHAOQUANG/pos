@@ -120,8 +120,12 @@ export const useControlStore = create<ControlStore>()(
                         '6': { type: 'syphon', defaultName: 'Hệ thống Xiphong X2' },
                     };
 
-                    const config = typeMap[code];
-                    if (!config) return;
+                    let config = typeMap[code];
+
+                    // Fallback for unknown codes
+                    if (!config) {
+                        config = { type: 'feeder', defaultName: `Thiết bị ${code}` };
+                    }
 
                     // Naming Logic - append number if name exists
                     let finalName = config.defaultName;

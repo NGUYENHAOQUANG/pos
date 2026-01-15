@@ -37,6 +37,7 @@ export type AuthStackParamList = {
     Register: undefined; // Added to fix type error in LoginScreen
     'Create-password': undefined;
     'Register-Success': undefined;
+    DeleteAccount: undefined;
 };
 
 // Type alias for Verify OTP parameters

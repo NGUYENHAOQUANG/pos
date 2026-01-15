@@ -59,8 +59,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.READY ||
         typeValue === POND_TYPES.TREATMENT ||
         typeValue === POND_TYPES.WATER_STORAGE ||
-        typeValue === POND_TYPES.WASTE ||
-        typeValue === POND_TYPES.SETTLING;
+        typeValue === POND_TYPES.WASTE;
 
     const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
 
@@ -155,7 +154,17 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
             {/* Info Section */}
             <View style={styles.body}>
-                {status && <Tag status={status} style={styles.statusTag} />}
+                {status && (
+                    <>
+                        <Tag status={status} style={styles.statusTag} />
+                        <View
+                            style={[
+                                styles.divider,
+                                { marginHorizontal: -spacing.md, marginBottom: spacing.sm },
+                            ]}
+                        />
+                    </>
+                )}
                 {hasData ? (
                     <>
                         <Text style={styles.bodyText}>

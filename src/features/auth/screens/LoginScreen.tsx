@@ -37,12 +37,6 @@ export default function LoginScreen() {
 
     // --- 3. Handlers ---
     const handleLogin = async () => {
-        console.log('Login pressed', {
-            tab: selectedTab === 0 ? 'Email' : 'Phone',
-            value: selectedTab === 0 ? email : phone,
-            password,
-        });
-
         // Mock login - update auth store to trigger navigation
         const { login } = useAuthStore.getState();
         await login({
@@ -52,7 +46,6 @@ export default function LoginScreen() {
     };
 
     const handleForgotPassWord = () => {
-        console.log('Forgot Password pressed');
         // navigation.navigate('ForgotPassword');
     };
 

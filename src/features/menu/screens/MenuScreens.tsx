@@ -8,6 +8,7 @@ import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 import { FarmOperation } from '@/features/menu/components/FarmOperation';
 import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
+import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -104,6 +105,7 @@ export const MenuScreens: React.FC = () => {
                             <FarmOperation />
                             <RecordManagement />
                             <SecurityManagement />
+                            <DeleteAccountButton />
                         </View>
 
                         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     profileName: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
         marginBottom: 4,
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
     roleText: {
         color: colors.blue[600],
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '400',
     },
     sectionContainer: {
         gap: 16,

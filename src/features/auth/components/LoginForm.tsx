@@ -27,11 +27,6 @@ export default function LoginForm() {
 
         setError(undefined);
 
-        console.log('Login request sent', {
-            phone,
-            countryCode,
-        });
-
         // Giả lập gửi OTP thành công -> Chuyển sang màn Verify
         // Truyền sđt sang màn OTP để hiển thị
         navigation.navigate('Verify-otp', {
