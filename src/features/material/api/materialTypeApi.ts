@@ -14,7 +14,6 @@ export const materialTypeApi = {
             API_ENDPOINTS.MATERIAL_TYPE.LIST,
             { params }
         );
-        console.log('[API] materialTypeApi.getList:', JSON.stringify(data, null, 2));
         return data;
     },
 };

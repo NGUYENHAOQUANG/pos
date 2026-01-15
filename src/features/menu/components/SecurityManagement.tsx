@@ -2,16 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
+import { SvgProps } from 'react-native-svg';
+
+import PrivacyPolicyIcon from '@/assets/Icon/IconMenu/PrivacyPolicy.svg';
+import TermsAndConditionsIcon from '@/assets/Icon/IconMenu/TermsAndConditions.svg';
 
 interface SecurityManagementItemProps {
-    iconName: string;
+    Icon: React.FC<SvgProps>;
     title: string;
     onPress?: () => void;
     isLast?: boolean;
 }
 
 const SecurityManagementItem: React.FC<SecurityManagementItemProps> = ({
-    iconName,
+    Icon,
     title,
     onPress,
     isLast,
@@ -20,7 +24,7 @@ const SecurityManagementItem: React.FC<SecurityManagementItemProps> = ({
         <View>
             <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
                 <View style={styles.iconWrapper}>
-                    <AntDesign name={iconName} size={20} color={colors.text} />
+                    <Icon width={32} height={32} />
                 </View>
                 <Text style={styles.itemTitle}>{title}</Text>
                 <AntDesign name="right" size={20} color={colors.text} />
@@ -35,12 +39,12 @@ export const SecurityManagement: React.FC = () => {
         {
             id: 'privacy',
             title: 'Chính sách bảo mật',
-            iconName: 'safety',
+            Icon: PrivacyPolicyIcon,
         },
         {
             id: 'terms',
             title: 'Điều khoản và điều kiện',
-            iconName: 'filetext1',
+            Icon: TermsAndConditionsIcon,
         },
     ];
 
@@ -52,7 +56,7 @@ export const SecurityManagement: React.FC = () => {
                 {items.map((item, index) => (
                     <SecurityManagementItem
                         key={item.id}
-                        iconName={item.iconName}
+                        Icon={item.Icon}
                         title={item.title}
                         isLast={index === items.length - 1}
                         onPress={() => {
@@ -83,7 +87,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
         marginBottom: 12,
@@ -106,17 +110,13 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     iconWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors.blue[50], // Consistent with other components
+        marginRight: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
     },
     itemTitle: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '400',
     },

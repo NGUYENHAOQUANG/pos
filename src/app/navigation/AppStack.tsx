@@ -69,6 +69,7 @@ import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesS
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
+import { DeleteAccountScreen } from '@/features/auth/screens/DeleteAccountScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
@@ -212,6 +213,7 @@ export type AppStackParamList = {
             resetTime?: boolean;
         };
     };
+    DeleteAccount: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -300,6 +302,8 @@ export const AppStack: React.FC = () => {
                 name="EditEquimentMaintenance"
                 component={EditEquimentMaintenanceWithProvider}
             />
+
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
         </Stack.Navigator>
     );
 };

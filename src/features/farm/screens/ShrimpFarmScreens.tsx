@@ -47,7 +47,6 @@ const WATER_STORAGE_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
 ];
 
 // 4. Ao Nuôi: Full tasks
-// 4. Ao Nuôi: Full tasks
 const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
     { type: JOB_TYPES.FEED, items: [] },
     { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
@@ -625,23 +624,26 @@ export const ShrimpFarmScreens: React.FC = () => {
             {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ.
                 User yêu cầu "Ao sẵn sàng" KHÔNG có bắt đầu chu kỳ nuôi.
             */}
-            {selectedTab === 'work' && !currentCycle && pond?.type !== POND_TYPES.READY && (
-                <View style={styles.footer}>
-                    <TouchableOpacity
-                        style={styles.startButton}
-                        onPress={handleStartCycle}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons
-                            name="add"
-                            size={20}
-                            color={colors.white}
-                            style={styles.startIcon}
-                        />
-                        <Text style={styles.startButtonText}>Bắt đầu chu kỳ nuôi</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+            {selectedTab === 'work' &&
+                !currentCycle &&
+                (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) !==
+                    POND_TYPES.READY && (
+                    <View style={styles.footer}>
+                        <TouchableOpacity
+                            style={styles.startButton}
+                            onPress={handleStartCycle}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons
+                                name="add"
+                                size={20}
+                                color={colors.white}
+                                style={styles.startIcon}
+                            />
+                            <Text style={styles.startButtonText}>Bắt đầu chu kỳ nuôi</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
 
             {/* Modal cảnh báo cần đo kích thước tôm trước khi sang ao */}
             <ConfirmationModal
