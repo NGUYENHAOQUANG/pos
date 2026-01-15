@@ -14,7 +14,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
@@ -305,9 +305,7 @@ export const AddHarvestScreen: React.FC = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Thu hoạch</Text>
                 {itemToEdit ? (
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
-                        <IconTrashOutlined width={18} height={18} />
-                    </TouchableOpacity>
+                    <DeleteButton onPress={handleDeletePress} />
                 ) : (
                     <View style={styles.headerSpacer} />
                 )}
@@ -417,16 +415,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
     scrollView: {
         flex: 1,

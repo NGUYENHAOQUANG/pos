@@ -15,7 +15,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
@@ -213,12 +213,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     {itemToEdit ? 'Chỉnh sửa đo kích thước' : 'Đo kích thước tôm'}
                 </Text>
                 {itemToEdit ? (
-                    <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => setIsDeleteModalVisible(true)}
-                    >
-                        <IconTrashOutlined width={18} height={18} />
-                    </TouchableOpacity>
+                    <DeleteButton onPress={() => setIsDeleteModalVisible(true)} />
                 ) : (
                     <View style={styles.headerSpacer} />
                 )}
@@ -302,16 +297,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
     headerTitle: {
         flex: 1,

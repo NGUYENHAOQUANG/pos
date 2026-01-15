@@ -15,7 +15,7 @@ import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/en
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -402,9 +402,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Đo thông số môi trường</Text>
                 {itemToEdit ? (
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
-                        <IconTrashOutlined width={18} height={18} />
-                    </TouchableOpacity>
+                    <DeleteButton onPress={handleDeletePress} />
                 ) : (
                     <View style={styles.headerSpacer} />
                 )}
@@ -537,16 +535,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
     scrollView: {
         flex: 1,

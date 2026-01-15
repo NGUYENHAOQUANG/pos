@@ -16,7 +16,7 @@ import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwor
 import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -221,9 +221,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Kiểm tra tôm</Text>
                 {itemToEdit ? (
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
-                        <IconTrashOutlined width={18} height={18} />
-                    </TouchableOpacity>
+                    <DeleteButton onPress={handleDeletePress} />
                 ) : (
                     <View style={styles.headerSpacer} />
                 )}
@@ -321,16 +319,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
     headerTitle: {
         flex: 1,
