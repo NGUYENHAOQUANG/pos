@@ -73,7 +73,7 @@ export const createPondListStore: StateCreator<
             await store.fetchMasterData();
         }
 
-        console.log('Current Pond Types in Store:', JSON.stringify(get().pondTypes, null, 2));
+        // console.log('Current Pond Types in Store:', JSON.stringify(get().pondTypes, null, 2));
 
         try {
             const { items: ponds, total } = await pondApi.getPondsByZone(zoneId, {
@@ -85,7 +85,7 @@ export const createPondListStore: StateCreator<
             set({ totalCount: total });
 
             const currentTypes = get().pondTypes;
-            console.log(`Fetched ${ponds.length} ponds. Mapping types...`);
+            // console.log(`Fetched ${ponds.length} ponds. Mapping types...`);
 
             // Map pondTypeId to type object
             const mappedPonds = ponds.map(pond => {

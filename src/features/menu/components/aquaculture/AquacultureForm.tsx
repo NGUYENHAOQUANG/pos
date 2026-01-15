@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
@@ -9,29 +9,33 @@ import {
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
 import { Aquaculture } from '@/features/menu/types/menu.types';
+import { Zone } from '@/features/farm/types/farm.types';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
 interface AquacultureFormProps {
-    initialValues?: Partial<Aquaculture>;
+    initialValues?: Partial<Aquaculture> & { zoneId?: number | string };
+    zones?: Zone[];
 }
 
 export interface AquacultureFormRef {
-    submit: () => Omit<Aquaculture, 'id' | 'createdAt'> | null;
+    submit: () => (Omit<Aquaculture, 'id' | 'createdAt'> & { zoneId?: string }) | null;
 }
 
 export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormProps>(
-    ({ initialValues }, ref) => {
-        // Mock Data
-        const farmOptions = [
-            { id: '1', label: 'Trại Kiên Giang' },
-            { id: '2', label: 'Trại Cà Mau' },
-        ];
+    ({ initialValues, zones = [] }, ref) => {
+        // Map zones to dropdown options
+        const farmOptions = useMemo(() => {
+            return zones.map(z => ({
+                id: z.id.toString(),
+                label: z.name,
+            }));
+        }, [zones]);
 
         // State
         const [farm, setFarm] = useState<DropDownItem | undefined>(() => {
-            if (initialValues?.farmId) {
-                return farmOptions.find(f => f.id === initialValues.farmId);
+            if (initialValues?.zoneId) {
+                return farmOptions.find(f => f.id === initialValues.zoneId?.toString());
             }
             return farmOptions[0];
         });
@@ -61,10 +65,6 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     Toast.show(ToastMessages.Aquaculture.CYCLE_NAME_REQUIRED);
                     return null;
                 }
-                if (!cycleCode.trim()) {
-                    Toast.show(ToastMessages.Aquaculture.CYCLE_CODE_REQUIRED);
-                    return null;
-                }
                 if (!startDate) {
                     Toast.show(ToastMessages.Aquaculture.START_DATE_REQUIRED);
                     return null;
@@ -73,13 +73,13 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 return {
                     farmId: String(farm.id),
                     farmName: farm.label,
+                    zoneId: farm.id.toString(), // Zone ID for API
                     name: cycleName,
                     code: cycleCode,
                     startDate: startDate,
                     endDate: endDate || undefined,
-                    status: status === 'active' ? 'active' : 'ended', // Map correctly to TagStatus
+                    status: status === 'active' ? 'active' : 'ended',
                     note: note,
-                    // id and createdAt will be handled by context
                 };
             },
         }));
@@ -117,11 +117,12 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     <View style={styles.flex1}>
                         <Input
                             label="Mã vụ nuôi"
-                            required
                             value={cycleCode}
                             onChangeText={setCycleCode}
-                            placeholder="Input"
+                            placeholder="Mã tự động"
                             containerStyle={styles.noMarginBottom}
+                            inputContainerStyle={styles.inputDisabledBox}
+                            disabled
                         />
                     </View>
                 </View>
@@ -355,5 +356,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text,
         lineHeight: 22,
+    },
+    inputDisabledBox: {
+        backgroundColor: colors.gray[200],
     },
 });

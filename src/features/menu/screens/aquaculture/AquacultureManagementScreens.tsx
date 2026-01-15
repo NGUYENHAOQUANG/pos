@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    FlatList,
+    RefreshControl,
+    ScrollView,
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { useMenuContext } from '@/features/menu/store/menuStore';
+import { useFarm } from '@/features/farm/store/farmStore'; // Updated import
 
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -12,13 +19,30 @@ import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
+import { useEffect } from 'react';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { aquacultures } = useMenuContext();
+    const { seasons, fetchSeasons, zones, fetchZones } = useFarm(); // Use useFarm
     const [selectedTab, setSelectedTab] = useState('all');
-    const [selectedFarm, setSelectedFarm] = useState<string>('all');
+    const [selectedZoneId, setSelectedZoneId] = useState<string>('all'); // Renamed selectedFarm to selectedZoneId
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await fetchZones();
+            // After fetching zones, if we have zones in store, we should trigger fetchSeasons.
+            // Since zones update is async in store, we might rely on the useEffect above.
+            // However, to ensure the spinner stays until everything is done, we might check:
+            if (zones.length > 0) {
+                await fetchSeasons(zones);
+            }
+        } finally {
+            setRefreshing(false);
+        }
+    }, [fetchSeasons, fetchZones, zones]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -33,38 +57,59 @@ export const AquacultureManagementScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // Mock data for dropdown
-    const farmOptions = [
-        { id: 'all', label: 'Tất cả trại' },
-        { id: '1', label: 'Trại Kiên Giang' },
-        { id: '2', label: 'Trại Cà Mau' },
-    ];
+    // Fetch data on mount
+    useEffect(() => {
+        // We only fetch zones here. Seasons will be fetched via the dependent effect below.
+        fetchZones();
+    }, [fetchZones]);
+
+    // Fetch seasons when zones change and are valid
+    useEffect(() => {
+        console.log('[AquaScreen] Zones updated:', zones);
+        if (zones && zones.length > 0) {
+            console.log('[AquaScreen] Found zones, fetching seasons...');
+            fetchSeasons(zones);
+        } else {
+            console.log('[AquaScreen] No zones available to fetch seasons.');
+        }
+    }, [zones, fetchSeasons]);
+
+    // Prepare zone options
+    const zoneOptions = React.useMemo(() => {
+        const options = [{ id: 'all', label: 'Tất cả trại' }];
+        const mappedZones = zones.map(z => ({
+            id: z.id.toString(),
+            label: z.name,
+        }));
+        return [...options, ...mappedZones];
+    }, [zones]);
 
     const activeData = React.useMemo(() => {
-        let filtered = aquacultures;
+        let filtered = seasons;
 
-        // Filter by farm
-        if (selectedFarm !== 'all') {
-            filtered = filtered.filter(i => i.farmId === selectedFarm);
+        // Filter by zone
+        if (selectedZoneId !== 'all') {
+            // Filter by zoneId which is stored during fetch
+            filtered = filtered.filter(s => s.zoneId?.toString() === selectedZoneId);
         }
 
         // Filter by status tab
         if (selectedTab === 'active') {
-            filtered = filtered.filter(i => i.status === 'active');
+            filtered = filtered.filter(i => i.status === 'Đang hoạt động');
         } else if (selectedTab === 'ended') {
-            filtered = filtered.filter(i => i.status === 'ended');
+            filtered = filtered.filter(i => i.status === 'Đã kết thúc');
         }
 
         return filtered;
-    }, [aquacultures, selectedTab, selectedFarm]);
+    }, [seasons, selectedTab, selectedZoneId]);
 
     const counts = React.useMemo(
         () => ({
-            all: aquacultures.length,
-            active: aquacultures.filter(i => i.status === 'active').length,
-            ended: aquacultures.filter(i => i.status === 'ended').length,
+            all: seasons.length,
+            active: seasons.filter(i => i.status === 'Đang hoạt động').length,
+            ended: seasons.filter(i => i.status === 'Đã kết thúc').length,
         }),
-        [aquacultures]
+        [seasons]
     );
 
     return (
@@ -89,28 +134,38 @@ export const AquacultureManagementScreens: React.FC = () => {
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>
                 <DropDownButton
-                    data={farmOptions}
-                    value={farmOptions.find(f => f.id === selectedFarm) || farmOptions[0]}
-                    onSelect={item => setSelectedFarm(item.id.toString())}
+                    data={zoneOptions}
+                    value={zoneOptions.find(f => f.id === selectedZoneId) || zoneOptions[0]}
+                    onSelect={item => setSelectedZoneId(item.id.toString())}
                     height={40}
                     borderRadius={6}
                 />
             </View>
 
             <View style={styles.content}>
-                {aquacultures.length === 0 ? (
-                    /* Empty State */
-                    <View style={styles.cardContainer}>
-                        <EmptyStateCard
-                            message="Chưa có vụ nuôi nào"
-                            buttonTitle="Tạo vụ nuôi"
-                            onPress={() => navigation.navigate('AddAquaculture')}
-                        />
-                    </View>
+                {seasons.length === 0 ? (
+                    /* Empty State - Wrapped in ScrollView for Refresh */
+                    <ScrollView
+                        contentContainerStyle={styles.emptyScrollContent}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
+                    >
+                        <View style={styles.cardContainer}>
+                            <EmptyStateCard
+                                message="Chưa có vụ nuôi nào"
+                                buttonTitle="Tạo vụ nuôi"
+                                onPress={() => navigation.navigate('AddAquaculture')}
+                            />
+                        </View>
+                    </ScrollView>
                 ) : (
                     <FlatList
                         data={activeData}
-                        keyExtractor={item => item.id}
+                        keyExtractor={item => item.id.toString()}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
                         renderItem={({ item }) => (
                             <AquacultureItem
                                 item={item}
@@ -136,14 +191,14 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        // padding: spacing.md, // Removed to allow full width cards
+        // padding: spacing.md,
         backgroundColor: colors.backgroundPrimary,
     },
     filterSection: {
         backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
         paddingTop: spacing.md,
-        paddingBottom: spacing.md, // Restored padding
+        paddingBottom: spacing.md,
         zIndex: 100,
     },
     cardContainer: {
@@ -163,5 +218,8 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingBottom: spacing.xl,
+    },
+    emptyScrollContent: {
+        flexGrow: 1,
     },
 });
