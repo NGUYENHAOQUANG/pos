@@ -1,0 +1,274 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Keyboard,
+    TouchableWithoutFeedback,
+    Platform,
+    KeyboardAvoidingView,
+    ScrollView,
+} from 'react-native';
+import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
+import { colors, spacing, borderRadius } from '@/styles';
+import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
+
+interface DeleteAccountOtpStepProps {
+    phoneNumber: string;
+    onVerify: (otp: string) => void;
+    onCancel: () => void;
+    onResend: () => void;
+}
+
+export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
+    phoneNumber,
+    onVerify,
+    onCancel,
+    onResend,
+}) => {
+    const [otp, setOtp] = useState<string[]>(['', '', '', '']);
+    const [countdown, setCountdown] = useState(59);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const otpInputRef = useRef<OTPInputHandle>(null);
+
+    useEffect(() => {
+        let timer: ReturnType<typeof setInterval>;
+        if (countdown > 0) {
+            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
+        }
+        return () => clearInterval(timer);
+    }, [countdown]);
+
+    const handleOtpChange = (newCode: string[]) => {
+        setOtp(newCode);
+        if (errorMessage) setErrorMessage('');
+    };
+
+    const handleResendInternal = () => {
+        setCountdown(59);
+        setOtp(['', '', '', '']);
+        setErrorMessage('');
+        otpInputRef.current?.focusFirst();
+        onResend();
+    };
+
+    const handleNext = () => {
+        const otpString = otp.join('');
+        if (otpString.length === 0) {
+            setErrorMessage('Vui lòng nhập mã xác nhận');
+            return;
+        }
+        if (otpString.length < 4) {
+            setErrorMessage('Vui lòng nhập đủ 4 số');
+            return;
+        }
+        onVerify(otpString);
+    };
+
+    const displayPhone = phoneNumber.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') || '09xx xxx xxx';
+
+    return (
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.container}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.innerContainer}>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <View style={styles.card}>
+                            <Text style={styles.title}>Nhập mã được gửi đến số điện thoại</Text>
+                            <Text style={styles.phoneText}>{displayPhone}</Text>
+
+                            {/* OTP Section */}
+                            <View style={styles.otpContainer}>
+                                <OTPInput
+                                    ref={otpInputRef}
+                                    code={otp}
+                                    onCodeChanged={handleOtpChange}
+                                    length={4}
+                                    isError={!!errorMessage}
+                                />
+                            </View>
+
+                            {/* Error Message */}
+                            <View style={styles.errorContainer}>
+                                {errorMessage ? (
+                                    <Text style={styles.errorText}>{errorMessage}</Text>
+                                ) : (
+                                    <View style={styles.errorPlaceholder} />
+                                )}
+                            </View>
+
+                            {/* Resend Section */}
+                            <View style={styles.resendContainer}>
+                                <Text style={styles.resendLabel}>Không nhận được mã? </Text>
+                                {countdown > 0 ? (
+                                    <Text style={styles.timerText}>
+                                        <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau
+                                        0:{countdown.toString().padStart(2, '0')})
+                                    </Text>
+                                ) : (
+                                    <TouchableOpacity onPress={handleResendInternal}>
+                                        <Text style={styles.activeLink}>Gửi lại mã</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            {/* Warning Box Component */}
+                            <DeleteAccountWarningBox />
+                        </View>
+                    </ScrollView>
+
+                    {/* FOOTER */}
+                    <View style={styles.footer}>
+                        <View style={styles.buttonRow}>
+                            {/* Nút Ngừng Xóa */}
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={onCancel}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.cancelButtonText}>Ngừng Xoá Tài Khoản</Text>
+                            </TouchableOpacity>
+
+                            <View style={{ width: 12 }} />
+
+                            {/* Nút Tiếp tục */}
+                            <TouchableOpacity
+                                style={styles.continueButton}
+                                onPress={handleNext}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={styles.continueButtonText}>Tiếp tục</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    innerContainer: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: spacing.sm,
+    },
+    card: {
+        backgroundColor: colors.white,
+        padding: spacing.lg,
+        alignItems: 'center',
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    title: {
+        fontSize: 16,
+        color: colors.text,
+        marginBottom: spacing.xs,
+        textAlign: 'center',
+    },
+    phoneText: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: spacing.xl,
+        textAlign: 'center',
+    },
+    otpContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: spacing.xs,
+    },
+    errorContainer: {
+        height: 24,
+        marginBottom: spacing.md,
+        justifyContent: 'center',
+    },
+    errorText: {
+        color: colors.red[600],
+        fontSize: 13,
+        textAlign: 'center',
+    },
+    errorPlaceholder: {
+        height: 1,
+    },
+    resendContainer: {
+        flexDirection: 'row',
+        marginBottom: spacing.lg,
+        alignItems: 'center',
+    },
+    resendLabel: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    timerText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    disabledLink: {
+        textDecorationLine: 'underline',
+        color: colors.textTertiary,
+    },
+    activeLink: {
+        fontSize: 14,
+        color: colors.primary,
+        fontWeight: '600',
+        textDecorationLine: 'underline',
+    },
+
+    footer: {
+        padding: spacing.md,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.borderLight,
+        width: '100%',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    cancelButton: {
+        flex: 1,
+        backgroundColor: colors.primary,
+        borderWidth: 1,
+        borderColor: colors.border,
+        height: 48,
+        borderRadius: borderRadius.md,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        color: colors.white,
+        fontSize: 16,
+        fontWeight: '400',
+    },
+    continueButton: {
+        flex: 1,
+        backgroundColor: colors.red[600],
+        height: 48,
+        borderRadius: borderRadius.md,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    continueButtonText: {
+        color: colors.white,
+        fontSize: 16,
+        fontWeight: '400',
+    },
+});
