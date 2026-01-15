@@ -33,7 +33,6 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
     const [otherReasonText, setOtherReasonText] = useState('');
     const [errors, setErrors] = useState({ phone: '', reason: '' });
 
-    // 1. Tạo Ref để điều khiển ScrollView
     const scrollViewRef = useRef<ScrollView>(null);
 
     const toggleReason = (reason: string) => {
@@ -85,19 +84,16 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
 
     return (
         <View style={styles.container}>
-            {/* KeyboardAvoidingView bọc ScrollView để co giãn vùng nội dung */}
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                // Tăng offset lên để bù trừ cho Header (nếu có)
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
             >
                 <ScrollView
-                    ref={scrollViewRef} // Gắn ref vào đây
+                    ref={scrollViewRef}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
-                    // Thuộc tính mới giúp tự động cuộn tới input khi bàn phím hiện (chủ yếu cho iOS mới)
                     automaticallyAdjustKeyboardInsets={true}
                 >
                     <View style={styles.card}>
@@ -186,9 +182,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
                                         }}
                                         multiline
                                         textAlignVertical="top"
-                                        //Tự động cuộn xuống đáy khi focus
                                         onFocus={() => {
-                                            // Chờ 1 chút để bàn phím bắt đầu hiện lên rồi mới scroll
                                             setTimeout(() => {
                                                 scrollViewRef.current?.scrollToEnd({
                                                     animated: true,
@@ -223,7 +217,6 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: spacing.sm,
-        paddingBottom: 250,
     },
     card: {
         backgroundColor: colors.white,
@@ -283,7 +276,6 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        // ZIndex thấp hơn keyboard nhưng cao hơn nội dung nền nếu cần
         zIndex: 1,
     },
     dangerButton: {
