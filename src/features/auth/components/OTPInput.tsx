@@ -6,6 +6,8 @@ import {
     TextInputKeyPressEventData,
 } from 'react-native';
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import { colors } from '@/styles';
+
 interface OTPInputProps {
     code: string[]; // Array of 4 characters ['1', '2', '', '']
     onCodeChanged: (code: string[]) => void;
@@ -87,9 +89,9 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
         return (
             <View style={styles.boxesContainer}>
                 {code.map((digit, index) => {
-                    let borderColor = '#E5E7EB'; // Default gray
-                    if (isError) borderColor = '#EF4444'; // Red on error
-                    else if (digit) borderColor = '#3B82F6'; // Blue when filled
+                    let borderColor: string = colors.gray[200];
+                    if (isError) borderColor = colors.red[600];
+                    else if (digit) borderColor = colors.blue[600];
 
                     return (
                         <TextInput
@@ -106,9 +108,9 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
                             textContentType="oneTimeCode"
                             autoComplete="sms-otp"
                             importantForAutofill="yes"
-                            selectTextOnFocus={true} // Auto select old value on focus
+                            selectTextOnFocus={true}
                             textAlign="center"
-                            cursorColor="#3B82F6"
+                            cursorColor={colors.blue[600]}
                         />
                     );
                 })}
@@ -131,8 +133,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         fontSize: 24,
         fontWeight: '500',
-        color: '#111827',
-        backgroundColor: '#FFFFFF',
+        color: colors.gray[900],
+        backgroundColor: colors.white,
         padding: 0,
         textAlign: 'center',
     },
