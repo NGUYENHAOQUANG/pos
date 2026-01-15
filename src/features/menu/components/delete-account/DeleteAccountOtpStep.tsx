@@ -19,6 +19,7 @@ interface DeleteAccountOtpStepProps {
     onVerify: (otp: string) => void;
     onCancel: () => void;
     onResend: () => void;
+    error?: string;
 }
 
 export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
@@ -26,10 +27,17 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
     onVerify,
     onCancel,
     onResend,
+    error,
 }) => {
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
     const [countdown, setCountdown] = useState(59);
     const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        if (error) {
+            setErrorMessage(error);
+        }
+    }, [error]);
 
     const otpInputRef = useRef<OTPInputHandle>(null);
 

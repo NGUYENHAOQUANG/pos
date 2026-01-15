@@ -15,6 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface DeleteAccountInputStepProps {
     onNext: (phone: string, reason: string) => void;
+    currentUserPhone?: string;
 }
 
 const OTHER_REASON_KEY = 'Lý do khác';
@@ -27,7 +28,10 @@ const DELETE_REASONS = [
     OTHER_REASON_KEY,
 ];
 
-export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ onNext }) => {
+export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
+    onNext,
+    currentUserPhone,
+}) => {
     const [phone, setPhone] = useState('');
     const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
     const [otherReasonText, setOtherReasonText] = useState('');
@@ -56,6 +60,9 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
             isValid = false;
         } else if (!phoneRegex.test(phone)) {
             newErrors.phone = 'Số điện thoại không chính xác';
+            isValid = false;
+        } else if (currentUserPhone && phone !== currentUserPhone) {
+            newErrors.phone = 'Số điện thoại không chính xác.';
             isValid = false;
         }
 

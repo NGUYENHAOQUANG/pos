@@ -14,6 +14,7 @@ import Animated, {
     withRepeat,
     withTiming,
 } from 'react-native-reanimated';
+import { Storage } from '@/core/services/storage.service';
 import Svg, { Ellipse } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -80,57 +81,72 @@ export function IntroScreen() {
     const sloganTranslateY = useSharedValue(15);
 
     useEffect(() => {
-        // Fade in wave background
-        waveOpacity.value = withTiming(1, {
-            duration: 1200,
-            easing: Easing.out(Easing.cubic),
-        });
+        const checkDirectLogin = async () => {
+            const skip = await Storage.getItem('SKIP_ONBOARDING');
+            if (skip === 'true') {
+                await Storage.removeItem('SKIP_ONBOARDING');
+                navigation.replace('Login');
+                return true;
+            }
+            return false;
+        };
 
-        waveProgress.value = withRepeat(
-            withTiming(1, {
-                duration: 7500,
-                easing: Easing.inOut(Easing.cubic),
-            }),
-            -1,
-            false
-        );
+        checkDirectLogin().then(shouldSkip => {
+            if (shouldSkip) return;
 
-        // Logo
-        logoOpacity.value = withTiming(1, {
-            duration: 1200,
-            easing: Easing.out(Easing.cubic),
-        });
-        logoTranslateY.value = withTiming(0, {
-            duration: 1200,
-            easing: Easing.out(Easing.cubic),
-        });
-        logoScale.value = withTiming(1, {
-            duration: 1200,
-            easing: Easing.out(Easing.cubic),
-        });
-
-        // Slogan
-        sloganOpacity.value = withDelay(
-            500,
-            withTiming(1, {
-                duration: 1000,
+            // Fade in wave background
+            waveOpacity.value = withTiming(1, {
+                duration: 1200,
                 easing: Easing.out(Easing.cubic),
-            })
-        );
-        sloganTranslateY.value = withDelay(
-            500,
-            withTiming(0, {
-                duration: 1000,
+            });
+
+            waveProgress.value = withRepeat(
+                withTiming(1, {
+                    duration: 7500,
+                    easing: Easing.inOut(Easing.cubic),
+                }),
+                -1,
+                false
+            );
+
+            // Logo
+            logoOpacity.value = withTiming(1, {
+                duration: 1200,
                 easing: Easing.out(Easing.cubic),
-            })
-        );
+            });
+            logoTranslateY.value = withTiming(0, {
+                duration: 1200,
+                easing: Easing.out(Easing.cubic),
+            });
+            logoScale.value = withTiming(1, {
+                duration: 1200,
+                easing: Easing.out(Easing.cubic),
+            });
 
-        // Auto navigate - use replace to prevent back navigation
-        const timer = setTimeout(() => {
-            navigation.replace('Onboarding');
-        }, 3000);
+            // Slogan
+            sloganOpacity.value = withDelay(
+                500,
+                withTiming(1, {
+                    duration: 1000,
+                    easing: Easing.out(Easing.cubic),
+                })
+            );
+            sloganTranslateY.value = withDelay(
+                500,
+                withTiming(0, {
+                    duration: 1000,
+                    easing: Easing.out(Easing.cubic),
+                })
+            );
 
-        return () => clearTimeout(timer);
+            // Auto navigate - use replace to prevent back navigation
+            const timer = setTimeout(() => {
+                navigation.replace('Onboarding');
+            }, 3000);
+
+            return () => clearTimeout(timer);
+        });
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [navigation]);
 
