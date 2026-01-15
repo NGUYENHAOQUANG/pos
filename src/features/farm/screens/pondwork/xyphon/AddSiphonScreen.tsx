@@ -21,7 +21,7 @@ import { IMaterial } from '@/features/material/types/material.types';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -229,9 +229,7 @@ export const AddSiphonScreen: React.FC = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Xi-Phông</Text>
                 {itemToEdit ? (
-                    <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePress}>
-                        <IconTrashOutlined width={18} height={18} />
-                    </TouchableOpacity>
+                    <DeleteButton onPress={handleDeletePress} />
                 ) : (
                     <View style={styles.headerSpacer} />
                 )}
@@ -325,16 +323,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
     scrollView: {
         flex: 1,

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
-import { colors, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
@@ -13,8 +13,7 @@ import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationD
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-
-import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditWaterTreatmentScreens'>;
 
@@ -100,11 +99,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         }
     };
 
-    const renderHeaderRight = () => (
-        <TouchableOpacity onPress={handleDelete} style={styles.headerDeleteButton}>
-            <DeleteIcon width={20} height={20} color={colors.red[900]} />
-        </TouchableOpacity>
-    );
+    const renderHeaderRight = () => <DeleteButton onPress={handleDelete} />;
 
     return (
         <>
@@ -162,15 +157,5 @@ const styles = StyleSheet.create({
     flex1: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-    },
-    headerDeleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.red[900],
-        backgroundColor: colors.white,
     },
 });
