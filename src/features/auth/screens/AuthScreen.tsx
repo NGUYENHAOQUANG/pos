@@ -105,7 +105,7 @@ export default function AuthScreen() {
         setIsUnregistered(false);
     };
 
-    const handleRegisterPress = async () => {
+    const handleRegisterPress = () => {
         setError('');
         setIsUnregistered(false);
 
@@ -128,42 +128,10 @@ export default function AuthScreen() {
             return;
         }
 
-        setIsLoading(true);
-
-        try {
-            // Call register API
-            const response = await authApi.register({ phoneNumber: rawPhone });
-
-            // In Dev environment, OTP is in response.data.testOtp
-            const devOtp = response?.data?.testOtp;
-
-            if (devOtp) {
-                // Show Notifee Notification as requested
-                await notificationHelper.displayOtpNotification(String(devOtp));
-            }
-
-            Toast.show({
-                type: 'success',
-                text1: 'Đăng ký thành công',
-                text2: 'Vui lòng nhập mã OTP để xác thực',
-            });
-
-            navigation.navigate('Verify-otp', {
-                method: 'phone',
-                contact: rawPhone,
-                otpCode: devOtp ? String(devOtp) : undefined,
-            });
-        } catch (err: any) {
-            console.error('Register failed:', err);
-            setError('Đăng ký thất bại, vui lòng thử lại.');
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: err?.message || 'Không thể đăng ký. Vui lòng thử lại.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        // Navigate to Register screen with phone number
+        navigation.navigate('Register', {
+            phoneNumber: rawPhone,
+        });
     };
 
     return (
