@@ -18,7 +18,7 @@ import { colors } from '@/styles';
 import { Button, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 import { useAuthStore } from '@/features/auth/store/authStore';
-import OTPInput, { OTPInputHandle } from '../components/OTPInput';
+import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
@@ -76,7 +76,7 @@ export default function VerifyOTPScreen() {
         if (errorMessage) setErrorMessage('');
     };
 
-    const handleVerifyOTP = async () => {
+    const handleVerifyOTP = React.useCallback(async () => {
         const otpString = otp.join('');
 
         if (otpString.length === 0) {
@@ -109,7 +109,15 @@ export default function VerifyOTPScreen() {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         }
-    };
+    }, [otp, contact, verifyOtp]);
+
+    // Auto-submit effect
+    useEffect(() => {
+        if (otp.join('').length === 4) {
+            handleVerifyOTP();
+        }
+    }, [otp, handleVerifyOTP]);
+
     const handleResendOTP = () => {
         setCountdown(59);
         setOtp(['', '', '', '']);
