@@ -10,7 +10,7 @@ import {
     Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,9 +22,15 @@ import OTPInput, { OTPInputHandle } from '../components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
+import { authApi } from '@/features/auth/api/authApi';
+import { notificationHelper } from '@/shared/utils/notificationHelper';
+
+type RegisterScreenRouteProp = RouteProp<AuthStackParamList, 'Register'>;
 
 export default function RegisterScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+    const route = useRoute<RegisterScreenRouteProp>();
+    const { phoneNumber } = route.params || {};
     const verifyOtp = useAuthStore(state => state.verifyOtp);
 
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
@@ -88,30 +94,95 @@ export default function RegisterScreen() {
         }
 
         try {
-            // Call API verify OTP via Store (handles login)
             await verifyOtp(contact, otpString);
 
             Toast.show({
                 type: 'success',
-                text1: 'Đăng nhập thành công',
+                text1: 'Đăng ký thành công',
                 visibilityTime: 2000,
             });
-
-            // Success! Store update (isAuthenticated=true) will trigger navigation to Main App
         } catch (error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         }
     };
-    const handleResendOTP = () => {
+    const handleResendOTP = async () => {
+        if (!phoneNumber) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Không có số điện thoại',
+            });
+            return;
+        }
+
         setCountdown(59);
         setOtp(['', '', '', '']);
         setErrorMessage('');
 
-        otpInputRef.current?.focusFirst();
+        try {
+            const response = await authApi.register({ phoneNumber });
+            const devOtp = response?.data?.testOtp;
+
+            if (devOtp) {
+                await notificationHelper.displayOtpNotification(String(devOtp));
+            }
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đã gửi lại mã OTP',
+            });
+
+            otpInputRef.current?.focusFirst();
+        } catch (err: any) {
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: err?.message || 'Không thể gửi lại mã OTP',
+            });
+        }
     };
 
-    const contact = '0908456789'; // Số điện thoại từ màn hình AuthScreen
+    // Register and get OTP on mount
+    useEffect(() => {
+        const registerAndGetOtp = async () => {
+            if (!phoneNumber) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lỗi',
+                    text2: 'Không có số điện thoại',
+                });
+                navigation.goBack();
+                return;
+            }
+
+            try {
+                const response = await authApi.register({ phoneNumber });
+                const devOtp = response?.data?.testOtp;
+
+                if (devOtp) {
+                    await notificationHelper.displayOtpNotification(String(devOtp));
+                }
+
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đăng ký thành công',
+                    text2: 'Vui lòng nhập mã OTP để xác thực',
+                });
+            } catch (err: any) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lỗi',
+                    text2: err?.message || 'Không thể đăng ký. Vui lòng thử lại.',
+                });
+                navigation.goBack();
+            }
+        };
+
+        registerAndGetOtp();
+    }, [phoneNumber, navigation]);
+
+    const contact = phoneNumber || '';
     const displayContact = formatAuthPhoneDisplay(contact);
 
     const isLoading = useAuthStore(state => state.loading);
