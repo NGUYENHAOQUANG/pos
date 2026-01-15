@@ -9,7 +9,7 @@
 export interface AuthUser {
     id: string; // sub
     name: string; // name
-    phone?: string; 
+    phone?: string;
     email?: string;
     avatar?: string;
     roles?: string[];
@@ -46,3 +46,14 @@ export interface AuthResponse {
     data: JwtResponse;
 }
 
+export interface OtpData {
+    testOtp?: string;
+    expiredIn?: number;
+}
+
+export interface OtpResponse {
+    result: boolean;
+    statusCode: number;
+    message?: string;
+    data: OtpData;
+}
