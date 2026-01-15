@@ -202,7 +202,7 @@ export const EditMemberScreens: React.FC = () => {
                 rightAction={
                     isPending ? (
                         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-                            <DeleteIcon width={18} height={18} color={colors.error} />
+                            <DeleteIcon width={20} height={20} color={colors.error} />
                         </TouchableOpacity>
                     ) : undefined
                 }
