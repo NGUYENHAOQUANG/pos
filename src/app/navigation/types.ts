@@ -34,7 +34,7 @@ export type AuthStackParamList = {
     Login: undefined;
     'Verify-otp': { method: string; contact: string; otpCode?: string };
     Test: undefined;
-    Register: undefined; // Added to fix type error in LoginScreen
+    Register: { phoneNumber: string };
     'Create-password': undefined;
     'Register-Success': undefined;
     DeleteAccount: undefined;
