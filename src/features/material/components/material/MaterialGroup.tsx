@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { MaterialGroupType } from '../../types/material.types';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 
 interface MaterialGroupProps {
     group: MaterialGroupType;
@@ -13,15 +13,15 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
             case 'Nuôi':
             case 'Thức ăn': // Keep for backward compatibility if needed
                 return {
-                    backgroundColor: colors.volcano[1],
-                    color: colors.volcano[6],
-                    borderColor: colors.volcano[3],
+                    backgroundColor: colors.volcano[200],
+                    color: colors.volcano[900],
+                    borderColor: colors.volcano[300],
                 };
             case 'Vật tư nội bộ':
                 return {
-                    backgroundColor: colors.geekblue[1],
-                    color: colors.geekblue[6],
-                    borderColor: colors.geekblue[3],
+                    backgroundColor: colors.geekblue[100],
+                    color: colors.geekblue[900],
+                    borderColor: colors.geekblue[300],
                 };
             case 'CCDC':
                 return {
@@ -31,9 +31,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                 };
             case 'Thiết bị điện':
                 return {
-                    backgroundColor: colors.magenta[1],
-                    color: colors.magenta[6],
-                    borderColor: colors.magenta[3],
+                    backgroundColor: colors.magenta[100],
+                    color: colors.magenta[900],
+                    borderColor: colors.magenta[300],
                 };
             case 'Chi phí khác':
                 return {
