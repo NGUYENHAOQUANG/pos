@@ -6,7 +6,7 @@
  */
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { AuthResponse, LoginCredentials, RegisterData } from '../types/auth.types';
+import { AuthResponse, LoginCredentials, OtpResponse } from '../types/auth.types';
 
 export const authApi = {
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -14,8 +14,10 @@ export const authApi = {
         return data;
     },
 
-    requestOtp: async (phoneNumber: string): Promise<any> => {
-        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, { phoneNumber });
+    requestOtp: async (phoneNumber: string): Promise<OtpResponse> => {
+        const { data } = await apiClient.post<OtpResponse>(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+            phoneNumber,
+        });
         return data;
     },
 
@@ -27,8 +29,8 @@ export const authApi = {
         return data;
     },
 
-    register: async (registerData: RegisterData): Promise<AuthResponse> => {
-        const { data } = await apiClient.post<AuthResponse>(
+    register: async (registerData: { phoneNumber: string }): Promise<OtpResponse> => {
+        const { data } = await apiClient.post<OtpResponse>(
             API_ENDPOINTS.AUTH.REGISTER,
             registerData
         );
