@@ -201,7 +201,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             onPress={handleDeletePress}
             activeOpacity={0.7}
         >
-            <IconTrashOutlined width={18} height={18} />
+            <IconTrashOutlined width={20} height={20} />
         </TouchableOpacity>
     );
 
