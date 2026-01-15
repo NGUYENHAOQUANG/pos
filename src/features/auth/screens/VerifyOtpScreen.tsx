@@ -8,6 +8,8 @@ import {
     KeyboardAvoidingView,
     TouchableOpacity,
     Keyboard,
+    AppState,
+    AppStateStatus,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -22,6 +24,9 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
+
+// Countdown duration in seconds
+const COUNTDOWN_DURATION = 59;
 
 export default function VerifyOTPScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -38,7 +43,9 @@ export default function VerifyOTPScreen() {
     //     }
     // }, [otpCode]);
     const [errorMessage, setErrorMessage] = useState('');
-    const [countdown, setCountdown] = useState(59);
+    const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
+    // Store the timestamp when countdown started (for real-time calculation)
+    const [countdownStartTime, setCountdownStartTime] = useState<number>(Date.now());
 
     const otpInputRef = useRef<OTPInputHandle>(null);
 
@@ -63,13 +70,46 @@ export default function VerifyOTPScreen() {
             keyboardShowListener.remove();
         };
     }, []);
+    // Calculate remaining countdown based on real elapsed time
+    const calculateRemainingTime = React.useCallback(() => {
+        const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
+        const remaining = COUNTDOWN_DURATION - elapsed;
+        return remaining > 0 ? remaining : 0;
+    }, [countdownStartTime]);
+
+    // Countdown timer with AppState support for background handling
     useEffect(() => {
-        let timer: ReturnType<typeof setInterval>;
-        if (countdown > 0) {
-            timer = setInterval(() => setCountdown(prev => prev - 1), 1000);
+        // Update countdown based on real time
+        const updateCountdown = () => {
+            const remaining = calculateRemainingTime();
+            setCountdown(remaining);
+        };
+
+        // Handle app state changes (background/foreground)
+        const handleAppStateChange = (nextAppState: AppStateStatus) => {
+            if (nextAppState === 'active') {
+                // App came to foreground, recalculate countdown
+                updateCountdown();
+            }
+        };
+
+        // Subscribe to app state changes
+        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
+        // Set up interval for countdown (only updates when app is active)
+        let timer: ReturnType<typeof setInterval> | undefined;
+        const remaining = calculateRemainingTime();
+        if (remaining > 0) {
+            timer = setInterval(updateCountdown, 1000);
         }
-        return () => clearInterval(timer);
-    }, [countdown]);
+
+        return () => {
+            appStateSubscription.remove();
+            if (timer) {
+                clearInterval(timer);
+            }
+        };
+    }, [calculateRemainingTime]);
 
     const handleOtpChange = (newCode: string[]) => {
         setOtp(newCode);
@@ -119,7 +159,9 @@ export default function VerifyOTPScreen() {
     }, [otp, handleVerifyOTP]);
 
     const handleResendOTP = () => {
-        setCountdown(59);
+        // Reset countdown start time to now for accurate real-time calculation
+        setCountdownStartTime(Date.now());
+        setCountdown(COUNTDOWN_DURATION);
         setOtp(['', '', '', '']);
         setErrorMessage('');
 
