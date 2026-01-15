@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
+    Keyboard,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
@@ -15,6 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface DeleteAccountInputStepProps {
     onNext: (phone: string, reason: string) => void;
+    currentUserPhone?: string;
 }
 
 const OTHER_REASON_KEY = 'Lý do khác';
@@ -27,13 +29,36 @@ const DELETE_REASONS = [
     OTHER_REASON_KEY,
 ];
 
-export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ onNext }) => {
+export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
+    onNext,
+    currentUserPhone,
+}) => {
     const [phone, setPhone] = useState('');
     const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
     const [otherReasonText, setOtherReasonText] = useState('');
     const [errors, setErrors] = useState({ phone: '', reason: '' });
 
+    // Ref cho ScrollView để điều khiển cuộn
     const scrollViewRef = useRef<ScrollView>(null);
+    // Ref cho TextInput "Lý do khác" để kiểm tra focus
+    const otherReasonInputRef = useRef<TextInput>(null);
+
+    useEffect(() => {
+        const handleKeyboardShow = () => {
+            if (otherReasonInputRef.current?.isFocused()) {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+            }
+        };
+
+        const showSubscription = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            handleKeyboardShow
+        );
+
+        return () => {
+            showSubscription.remove();
+        };
+    }, []);
 
     const toggleReason = (reason: string) => {
         setSelectedReasons(prev => {
@@ -56,6 +81,9 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
             isValid = false;
         } else if (!phoneRegex.test(phone)) {
             newErrors.phone = 'Số điện thoại không chính xác';
+            isValid = false;
+        } else if (currentUserPhone && phone !== currentUserPhone) {
+            newErrors.phone = 'Số điện thoại không chính xác.';
             isValid = false;
         }
 
@@ -94,7 +122,11 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
-                    automaticallyAdjustKeyboardInsets={true}
+                    onContentSizeChange={() => {
+                        if (otherReasonInputRef.current?.isFocused()) {
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }
+                    }}
                 >
                     <View style={styles.card}>
                         <DeleteAccountWarningBox style={{ marginBottom: spacing.lg }} />
@@ -167,12 +199,13 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({ 
                             {selectedReasons.includes(OTHER_REASON_KEY) && (
                                 <View style={{ marginTop: spacing.sm }}>
                                     <TextInput
+                                        ref={otherReasonInputRef}
                                         style={[
                                             styles.input,
                                             styles.textArea,
                                             errors.reason ? styles.inputError : null,
                                         ]}
-                                        placeholder="Nhập lý do khác..."
+                                        placeholder="Nhập lý do khác"
                                         placeholderTextColor={colors.textTertiary}
                                         value={otherReasonText}
                                         onChangeText={text => {
@@ -214,9 +247,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
+        position: 'relative',
     },
     scrollContent: {
         paddingTop: spacing.sm,
+        paddingBottom: 220,
     },
     card: {
         backgroundColor: colors.white,
@@ -271,12 +306,11 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.borderLight,
-
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 1,
+        zIndex: 10,
     },
     dangerButton: {
         backgroundColor: colors.red[600],

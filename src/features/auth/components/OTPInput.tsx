@@ -1,138 +1,143 @@
 import {
-  View,
-  TextInput,
-  StyleSheet,
-  NativeSyntheticEvent,
-  TextInputKeyPressEventData,
+    View,
+    TextInput,
+    StyleSheet,
+    NativeSyntheticEvent,
+    TextInputKeyPressEventData,
 } from 'react-native';
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
+import { colors } from '@/styles';
+
 interface OTPInputProps {
-  code: string[]; // Array of 4 characters ['1', '2', '', '']
-  onCodeChanged: (code: string[]) => void;
-  isError?: boolean;
-  length?: number; // Default is 4
+    code: string[]; // Array of 4 characters ['1', '2', '', '']
+    onCodeChanged: (code: string[]) => void;
+    isError?: boolean;
+    length?: number; // Default is 4
 }
 
 export interface OTPInputHandle {
-  focusFirst: () => void;
-  reset: () => void;
+    focusFirst: () => void;
+    reset: () => void;
 }
 
 const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
-  ({ code, onCodeChanged, isError = false, length = 4 }, ref) => {
-    // Refs for each input
-    const inputRefs = useRef<Array<TextInput | null>>([]);
+    ({ code, onCodeChanged, isError = false, length = 4 }, ref) => {
+        // Refs for each input
+        const inputRefs = useRef<Array<TextInput | null>>([]);
 
-    // Expose functions to parent (for "Resend Code" button)
-    useImperativeHandle(ref, () => ({
-      focusFirst: () => {
-        inputRefs.current[0]?.focus();
-      },
-      reset: () => {
-        // Optional reset logic if needed internally
-      },
-    }));
+        // Expose functions to parent (for "Resend Code" button)
+        useImperativeHandle(ref, () => ({
+            focusFirst: () => {
+                inputRefs.current[0]?.focus();
+            },
+            reset: () => {
+                // Optional reset logic if needed internally
+            },
+        }));
 
-    // Handle Input
-    const handleCodeChange = (text: string, index: number) => {
-      const cleanText = text.replace(/[^0-9]/g, '');
+        // Handle Input
+        const handleCodeChange = (text: string, index: number) => {
+            const cleanText = text.replace(/[^0-9]/g, '');
 
-      // Case 1: Pasting/Autofill full code (or part of it)
-      if (cleanText.length > 1) {
-        const newCode = [...code];
-        // Distribute characters starting from current index
-        for (let i = 0; i < cleanText.length; i++) {
-            if (index + i < length) {
-                newCode[index + i] = cleanText[i];
+            // Case 1: Pasting/Autofill full code (or part of it)
+            if (cleanText.length > 1) {
+                const newCode = [...code];
+                // Distribute characters starting from current index
+                for (let i = 0; i < cleanText.length; i++) {
+                    if (index + i < length) {
+                        newCode[index + i] = cleanText[i];
+                    }
+                }
+                onCodeChanged(newCode);
+
+                // Focus the last filled box or the next empty one
+                const nextIndex = Math.min(index + cleanText.length, length - 1);
+                inputRefs.current[nextIndex]?.focus();
+                return;
             }
-        }
-        onCodeChanged(newCode);
-        
-        // Focus the last filled box or the next empty one
-        const nextIndex = Math.min(index + cleanText.length, length - 1);
-        inputRefs.current[nextIndex]?.focus();
-        return;
-      }
 
-      // Case 2: Standard single character input
-      const newVal = cleanText.slice(-1); // Take last char
-      const newCode = [...code];
-      newCode[index] = newVal;
-      onCodeChanged(newCode);
+            // Case 2: Standard single character input
+            const newVal = cleanText.slice(-1); // Take last char
+            const newCode = [...code];
+            newCode[index] = newVal;
+            onCodeChanged(newCode);
 
-      // Auto focus next input if value exists
-      if (newVal && index < length - 1) {
-        inputRefs.current[index + 1]?.focus();
-      }
-    };
+            // Auto focus next input if value exists
+            if (newVal && index < length - 1) {
+                inputRefs.current[index + 1]?.focus();
+            }
+        };
 
-    // Handle Backspace
-    const handleKeyPress = (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
-      if (e.nativeEvent.key === 'Backspace') {
-        // If current input is empty and not the first one -> focus previous
-        if (!code[index] && index > 0) {
-          inputRefs.current[index - 1]?.focus();
+        // Handle Backspace
+        const handleKeyPress = (
+            e: NativeSyntheticEvent<TextInputKeyPressEventData>,
+            index: number
+        ) => {
+            if (e.nativeEvent.key === 'Backspace') {
+                // If current input is empty and not the first one -> focus previous
+                if (!code[index] && index > 0) {
+                    inputRefs.current[index - 1]?.focus();
 
-          // Optional: Clear previous input for smoother experience
-          const newCode = [...code];
-          newCode[index - 1] = '';
-          onCodeChanged(newCode);
-        }
-      }
-    };
+                    // Optional: Clear previous input for smoother experience
+                    const newCode = [...code];
+                    newCode[index - 1] = '';
+                    onCodeChanged(newCode);
+                }
+            }
+        };
 
-    return (
-      <View style={styles.boxesContainer}>
-        {code.map((digit, index) => {
-          let borderColor = '#E5E7EB'; // Default gray
-          if (isError) borderColor = '#EF4444'; // Red on error
-          else if (digit) borderColor = '#3B82F6'; // Blue when filled
+        return (
+            <View style={styles.boxesContainer}>
+                {code.map((digit, index) => {
+                    let borderColor: string = colors.gray[200];
+                    if (isError) borderColor = colors.red[600];
+                    else if (digit) borderColor = colors.blue[600];
 
-          return (
-            <TextInput
-              key={index}
-              ref={el => {
-                inputRefs.current[index] = el;
-              }}
-              style={[styles.otpBoxInput, { borderColor }]}
-              value={digit}
-              onChangeText={text => handleCodeChange(text, index)}
-              onKeyPress={e => handleKeyPress(e, index)}
-              keyboardType="number-pad"
-              maxLength={1}
-              textContentType="oneTimeCode"
-              autoComplete="sms-otp"
-              importantForAutofill="yes"
-              selectTextOnFocus={true} // Auto select old value on focus
-              textAlign="center"
-              cursorColor="#3B82F6"
-            />
-          );
-        })}
-      </View>
-    );
-  }
+                    return (
+                        <TextInput
+                            key={index}
+                            ref={el => {
+                                inputRefs.current[index] = el;
+                            }}
+                            style={[styles.otpBoxInput, { borderColor }]}
+                            value={digit}
+                            onChangeText={text => handleCodeChange(text, index)}
+                            onKeyPress={e => handleKeyPress(e, index)}
+                            keyboardType="number-pad"
+                            maxLength={length}
+                            textContentType="oneTimeCode"
+                            autoComplete="sms-otp"
+                            importantForAutofill="yes"
+                            selectTextOnFocus={true}
+                            textAlign="center"
+                            cursorColor={colors.blue[600]}
+                        />
+                    );
+                })}
+            </View>
+        );
+    }
 );
 
 const styles = StyleSheet.create({
-  boxesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    gap: 6,
-  },
-  otpBoxInput: {
-    width: 56,
-    height: 56,
-    borderWidth: 1.5,
-    borderRadius: 12,
-    fontSize: 24,
-    fontWeight: '500',
-    color: '#111827',
-    backgroundColor: '#FFFFFF',
-    padding: 0,
-    textAlign: 'center',
-  },
+    boxesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%',
+        gap: 6,
+    },
+    otpBoxInput: {
+        width: 56,
+        height: 56,
+        borderWidth: 1.5,
+        borderRadius: 12,
+        fontSize: 24,
+        fontWeight: '500',
+        color: colors.gray[900],
+        backgroundColor: colors.white,
+        padding: 0,
+        textAlign: 'center',
+    },
 });
 
 export default OTPInput;

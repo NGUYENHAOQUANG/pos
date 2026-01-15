@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
         RESET_PASSWORD: '/auth/reset-password',
         REQUEST_OTP: '/auth/request-otp',
         VERIFY_OTP: '/auth/verify-otp',
+        DELETE_ACCOUNT: '/auth/delete-account',
     },
     // Products
     PRODUCTS: {

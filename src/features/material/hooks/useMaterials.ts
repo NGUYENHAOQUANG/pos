@@ -160,35 +160,48 @@ export const useMaterials = (params?: GetMaterialsParams) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 
+    // Only enable query when groups and types are loaded (required for mapping)
+    const isReadyForMapping =
+        !isLoadingGroups && !isLoadingTypes && groups.length > 0 && types.length > 0;
+
     const query = useQuery({
         queryKey: materialKeys.list(params),
         queryFn: async () => {
             const response = await materialApi.getAll(params);
             if (response.result && response.data?.items) {
-                // Get current groups and types at query time
+                // Get current groups and types at query time (guaranteed to be available)
                 const currentGroups = groups.length > 0 ? groups : [];
                 const currentTypes = types.length > 0 ? types : [];
 
+                // Map materials with groups and types (mapping happens here)
                 return (response.data.items || []).map((item: MaterialResponse) =>
                     mapMaterialResponse(item, currentGroups, currentTypes)
                 );
             }
             throw new Error(response.message || 'Không thể tải danh sách vật tư');
         },
-        enabled: true,
+        enabled: isReadyForMapping,
         staleTime: STALE_TIME_SHORT,
     });
 
     // Refetch materials when groups/types finish loading to update mappings
     React.useEffect(() => {
-        if (!isLoadingGroups && !isLoadingTypes && groups.length > 0 && types.length > 0) {
+        if (isReadyForMapping && query.data) {
             // Invalidate to refetch with updated groups/types for proper mapping
             const queryKey = materialKeys.list(params);
             queryClient.invalidateQueries({ queryKey });
         }
-    }, [isLoadingGroups, isLoadingTypes, groups.length, types.length, queryClient, params]);
+    }, [isReadyForMapping, query.data, queryClient, params]);
 
-    return query;
+    // Combined loading state: true if groups/types are loading OR materials are loading/mapping
+    // This ensures UI shows loading during the entire mapping process
+    const isLoading = isLoadingGroups || isLoadingTypes || query.isLoading;
+
+    return {
+        ...query,
+        isLoading, // Override isLoading to include groups/types loading
+        data: query.data || [], // Ensure data is always an array
+    };
 };
 
 /**

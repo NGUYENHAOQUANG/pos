@@ -12,21 +12,60 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
-import { DeleteAccountInputStep } from '../../../auth/components/delete-account/DeleteAccountInputStep';
-import { DeleteAccountOtpStep } from '../../../auth/components/delete-account/DeleteAccountOtpStep';
+import { DeleteAccountInputStep } from '../../components/delete-account/DeleteAccountInputStep';
+import { DeleteAccountOtpStep } from '../../components/delete-account/DeleteAccountOtpStep';
 import Toast from 'react-native-toast-message';
 import { colors } from '@/styles';
+import { useAuthStore } from '@/features/auth/store/authStore';
+
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { notificationHelper } from '@/shared/utils/notificationHelper';
+import { Storage } from '@/core/services/storage.service';
 
 export const DeleteAccountScreen = () => {
     const navigation = useNavigation();
     const [step, setStep] = useState(1);
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [otpCode, setOtpCode] = useState('');
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [deleteReason, setDeleteReason] = useState('');
-    const handleInputNext = (phone: string, reason: string) => {
+    const [serverOtp, setServerOtp] = useState<string | null>(null);
+    const [otpError, setOtpError] = useState('');
+
+    const { logout, user } = useAuthStore();
+
+    const handleInputNext = async (phone: string, reason: string) => {
+        if (!phone || !reason) return;
         setPhoneNumber(phone);
         setDeleteReason(reason);
-        setStep(2);
+
+        try {
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+                phoneNumber: phone,
+            });
+
+            const otpCode =
+                response.data?.testOtp ||
+                response.data?.data?.testOtp ||
+                response.data?.data?.otpCode ||
+                response.data?.otpCode;
+
+            if (otpCode) {
+                setServerOtp(String(otpCode));
+                notificationHelper.displayOtpNotification(String(otpCode));
+            } else {
+                setServerOtp(null);
+            }
+
+            Toast.show({ type: 'success', text1: 'Mã xác nhận đã được gửi' });
+            setStep(2);
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: error.response?.data?.message || 'Không thể gửi mã xác nhận',
+            });
+        }
     };
 
     const handleOtpVerify = (otp: string) => {
@@ -34,15 +73,38 @@ export const DeleteAccountScreen = () => {
             Toast.show({ type: 'error', text1: 'Vui lòng nhập đủ 4 số OTP' });
             return;
         }
+
+        if (serverOtp && otp !== serverOtp) {
+            setOtpError('Mã xác thực không chính xác');
+            return;
+        }
+
+        setOtpCode(otp);
         setShowConfirmModal(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         setShowConfirmModal(false);
-        console.log('Xóa tài khoản:', phoneNumber);
-        console.log('Lý do xóa:', deleteReason);
-        Toast.show({ type: 'success', text1: 'Đã xóa tài khoản thành công' });
-        navigation.reset({ index: 0, routes: [{ name: 'Login' }] } as any);
+        try {
+            await apiClient.delete(API_ENDPOINTS.AUTH.DELETE_ACCOUNT, {
+                data: {
+                    phoneNumber,
+                    reason: deleteReason,
+                    otpCode: otpCode,
+                },
+            });
+
+            Toast.show({ type: 'success', text1: 'Đã xóa tài khoản thành công' });
+
+            await Storage.setItem('SKIP_ONBOARDING', 'true');
+
+            logout();
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: error.response?.data?.message || 'Xóa tài khoản thất bại',
+            });
+        }
     };
 
     const handleCancelDelete = () => {
@@ -51,6 +113,33 @@ export const DeleteAccountScreen = () => {
 
     const handleStopDelete = () => {
         navigation.goBack();
+    };
+
+    const handleResendOtp = async () => {
+        setOtpError('');
+        try {
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, { phoneNumber });
+
+            const otpCode =
+                response.data?.testOtp ||
+                response.data?.data?.testOtp ||
+                response.data?.data?.otpCode ||
+                response.data?.otpCode;
+
+            if (otpCode) {
+                setServerOtp(String(otpCode));
+                notificationHelper.displayOtpNotification(String(otpCode));
+            } else {
+                setServerOtp(null);
+            }
+
+            Toast.show({ type: 'success', text1: 'Đã gửi lại mã' });
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: error.response?.data?.message || 'Gửi lại mã thất bại',
+            });
+        }
     };
 
     return (
@@ -67,15 +156,17 @@ export const DeleteAccountScreen = () => {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={{ flex: 1 }}>
                         {step === 1 ? (
-                            <DeleteAccountInputStep onNext={handleInputNext} />
+                            <DeleteAccountInputStep
+                                onNext={handleInputNext}
+                                currentUserPhone={user?.phone}
+                            />
                         ) : (
                             <DeleteAccountOtpStep
                                 phoneNumber={phoneNumber}
                                 onVerify={handleOtpVerify}
                                 onCancel={handleStopDelete}
-                                onResend={() =>
-                                    Toast.show({ type: 'success', text1: 'Đã gửi lại mã' })
-                                }
+                                onResend={handleResendOtp}
+                                error={otpError}
                             />
                         )}
                     </View>
