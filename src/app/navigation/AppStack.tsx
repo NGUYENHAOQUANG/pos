@@ -69,7 +69,7 @@ import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesS
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
-import { DeleteAccountScreen } from '@/features/auth/screens/DeleteAccountScreen';
+import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';

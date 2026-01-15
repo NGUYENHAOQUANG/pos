@@ -32,14 +32,16 @@ export const colors = {
         900: '#111827',
     },
     volcano: {
-        1: '#FFF2E8',
-        3: '#FFBB96',
-        6: '#FA541C',
+        200: '#FFF2E8',
+        300: '#FFBB96',
+        400: '#FFA39E',
+        100: '#FFF1F0',
+        900: '#FA541C',
     },
     magenta: {
-        1: '#FFF0F6',
-        3: '#FFADD2',
-        6: '#EB2F96',
+        100: '#FFF0F6',
+        300: '#FFADD2',
+        900: '#EB2F96',
     },
     cyan: {
         50: '#E6FFFB',
@@ -56,9 +58,9 @@ export const colors = {
         800: '#061178',
     },
     geekblue: {
-        1: '#F0F5FF',
-        3: '#ADC6FF',
-        6: '#2F54EB',
+        100: '#F0F5FF',
+        300: '#ADC6FF',
+        900: '#2F54EB',
     },
     orange: {
         50: '#FFF2E8',
