@@ -100,12 +100,17 @@ export interface FarmData {
 }
 
 export interface SeasonData {
-    id: string; // Mã vụ nuôi - ví dụ: "VH2025-A"
-    name: string; // Tên vụ nuôi - ví dụ: "Vụ Hè 2025 – Khu A"
-    farmCode: string; // Mã trại - ví dụ: "KG-01"
-    startDate: string; // Ngày khởi tạo - ví dụ: "1/12/2025"
-    endDate: string; // Ngày kết thúc - ví dụ: "04/30/2025"
-    status: 'Đang hoạt động' | 'Đã kết thúc'; // Trạng thái
+    id: string | number; // Mã vụ nuôi
+    name: string; // Tên vụ nuôi
+    farmCode: string; // Mã trại (mapped from Zone or SeasonCode)
+    startDate: string; // Ngày khởi tạo
+    endDate: string; // Ngày kết thúc
+    status: 'Đang hoạt động' | 'Đã kết thúc' | number; // Trạng thái
+    zoneId?: string | number; // ID of the zone this season belongs to
+    // API raw fields (optional)
+    seasonName?: string;
+    seasonCode?: string;
+    cycleCount?: number;
 }
 
 export interface DropdownItem {

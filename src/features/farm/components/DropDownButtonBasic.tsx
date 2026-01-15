@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
+import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
 
 export interface DropDownItem {
     id: string | number;
@@ -86,11 +87,16 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                 onPress={() => handleSelect(item)}
                 activeOpacity={0.7}
             >
-                <Text
-                    style={[styles.dropdownItemText, isSelected && styles.dropdownItemTextSelected]}
-                >
-                    {item.label}
-                </Text>
+                <View style={styles.dropdownItemTextContainer}>
+                    <AutoScrollText
+                        text={item.label}
+                        style={[
+                            styles.dropdownItemText,
+                            isSelected && styles.dropdownItemTextSelected,
+                        ]}
+                        speed={25}
+                    />
+                </View>
                 {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
             </TouchableOpacity>
         );
@@ -150,7 +156,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                             {
                                 top: dropdownPosition.top,
                                 left: dropdownPosition.left,
-                                minWidth: dropdownPosition.width,
+                                width: dropdownPosition.width,
                                 borderRadius: customBorderRadius,
                             },
                         ]}
@@ -215,6 +221,10 @@ const styles = StyleSheet.create({
     },
     dropdownItemSelected: {
         backgroundColor: colors.blue[50],
+    },
+    dropdownItemTextContainer: {
+        flex: 1,
+        marginRight: spacing.xs,
     },
     dropdownItemText: {
         fontSize: 14,
