@@ -8,6 +8,7 @@ import {
     TouchableHighlight,
     Modal,
     TouchableWithoutFeedback,
+    Platform,
 } from 'react-native';
 import { HeaderDevices } from '../../components/HeaderDevices';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
@@ -225,7 +226,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'flex-end',
-        paddingTop: 60,
+        // Make popup appear just below the "+" button.
+        // iOS headers are taller, so we push it further down there.
+        paddingTop: Platform.select({
+            ios: 96,
+            android: 60,
+            default: 60,
+        }),
         paddingRight: spacing.md,
     },
     popupContainer: {
