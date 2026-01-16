@@ -90,4 +90,6 @@ package-lock.json
 .vscode
 .serena
 .cursor
+.agent
+.shared
 android/gradle.properties

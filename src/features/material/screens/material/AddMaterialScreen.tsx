@@ -20,7 +20,7 @@ import {
     useMaterialTypes,
     useUnits,
     useMaterialTypesByGroup,
-} from '@/features/material/hooks/useMaterials';
+} from '@/features/material/hooks';
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 

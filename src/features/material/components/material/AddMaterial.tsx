@@ -15,6 +15,7 @@ import {
 import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterialGroup, IMaterialType } from '@/features/material/types/material.types';
+import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -69,32 +70,10 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // Get type options for selected group from props
     const typeOptions = useMemo(() => {
         if (!group) return [];
-
-        // Ensure typesByGroup is an array (handle undefined/null)
-        const typesArray = Array.isArray(typesByGroup) ? typesByGroup : [];
-
-        // Convert typesByGroup to dropdown options
-        const options: DropdownOption[] = typesArray
-            .filter(t => t && t.name) // Filter out types without name
-            .map(t => ({
-                label: t.name || '',
-                value: t.name || '',
-            }));
-
-        // If no options available, show disabled "no options" message
-        if (options.length === 0) {
-            return [
-                {
-                    label: 'Không có loại vật tư phù hợp',
-                    value: '__no_options__',
-                    disabled: true,
-                } as DropdownOption & { disabled: boolean },
-            ];
-        }
-        return options;
+        // Use utility function with showEmptyMessage=true to handle empty case
+        return getMaterialTypeOptions(typesByGroup, true);
     }, [group, typesByGroup]);
 
     const handleToggleDropdown = (key: string) => {

@@ -13,7 +13,9 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterialStore } from '@/features/material/store';
+import { useInventoryStore } from '@/features/material/store';
+import { useMaterials } from '@/features/material/hooks';
+import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 
 interface AddInventoryScreenProps {}
 
@@ -34,8 +36,10 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
     const params = route.params;
     const initialMaterialName = params?.initialMaterialName;
-    const materials = useMaterialStore(state => state.materials);
-    const addInventoryTicket = useMaterialStore(state => state.addInventoryTicket);
+
+    // Use React Query for materials data
+    const { data: materialsData = [] } = useMaterials();
+    const addInventoryTicket = useInventoryStore(state => state.addInventoryTicket);
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -56,8 +60,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [newStock, setNewStock] = useState('');
     const [materialGroup, setMaterialGroup] = useState('');
 
-    // Derive options from store
-    const materialOptions = materials.map((m: IMaterial) => m.name);
+    // Derive options from materials data
+    const materialOptions = materialsData.map((m: IMaterial) => m.name);
 
     // --- Handlers ---
     const handleDropdownOpen = () => {
@@ -75,8 +79,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         (val: string) => {
             setMaterialName(val);
 
-            // Find material in store
-            const selectedMaterial = materials.find((m: IMaterial) => m.name === val);
+            // Find material in materials data
+            const selectedMaterial = materialsData.find((m: IMaterial) => m.name === val);
 
             if (selectedMaterial) {
                 setOldStock(selectedMaterial.remaining || 0);
@@ -88,7 +92,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
             setNewStock('');
         },
-        [materials]
+        [materialsData]
     );
 
     // Handle initial material selection
@@ -97,22 +101,6 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             handleMaterialSelect(initialMaterialName);
         }
     }, [initialMaterialName, handleMaterialSelect]);
-
-    const formatDate = (d: Date) => {
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-    const formatDateTime = (d: Date) => {
-        const hours = String(d.getHours()).padStart(2, '0');
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return `${hours}:${minutes} ${day}/${month}/${year}`;
-    };
 
     const handleSave = () => {
         // Validation
@@ -132,7 +120,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         const newTicket: IInventoryTicket = {
             id: Date.now().toString(),
             checkerName: 'Nguyễn Phương Duy',
-            date: formatDateTime(date),
+            date: formatMaterialDateTime(date),
             note: note || 'Phiếu mới',
             totalDifference: Number(newStock) - oldStock,
             items: [
@@ -169,8 +157,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 >
                     {/* Thông tin chung */}
                     <InventoryGeneralInfo
-                        date={formatDate(date)}
-                        createdDate={formatDateTime(date)}
+                        date={formatMaterialDate(date)}
+                        createdDate={formatMaterialDateTime(date)}
                         materialGroup={materialGroup}
                         note={note}
                         onDatePress={() => setDatePickerVisible(true)}
