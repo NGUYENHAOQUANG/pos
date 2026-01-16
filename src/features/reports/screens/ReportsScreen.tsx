@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
@@ -20,6 +20,7 @@ import { ReportStackParamList } from '@/features/reports/navigation/ReportNaviga
 import { PondInfor } from '@/features/reports/components/PondInfor';
 import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
+import { useScrollToTop } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
@@ -33,6 +34,10 @@ interface FarmData {
 
 export const ReportsScreen = ({ navigation }: Props) => {
     const insets = useSafeAreaInsets();
+    // Ref for scroll to top
+    const scrollViewRef = useRef<ScrollView>(null);
+    useScrollToTop(scrollViewRef as any);
+
     const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
         id: '1',
         label: 'Trại Kiên Giang',
@@ -145,6 +150,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
 
             <View style={styles.content}>
                 <ScrollView
+                    ref={scrollViewRef}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
                 >

@@ -22,6 +22,8 @@ interface AuthState {
     logout: () => void;
     setUser: (user: AuthUser | null) => void;
     setToken: (token: string | null) => void;
+    hasLaunched: boolean;
+    setHasLaunched: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             loading: false,
+            hasLaunched: false,
 
             login: async (credentials: LoginCredentials) => {
                 set({ loading: true });
@@ -141,6 +144,10 @@ export const useAuthStore = create<AuthState>()(
 
             setToken: (token: string | null) => {
                 set({ token });
+            },
+
+            setHasLaunched: (value: boolean) => {
+                set({ hasLaunched: value });
             },
         }),
         {

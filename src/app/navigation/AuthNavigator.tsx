@@ -11,16 +11,21 @@ import RegisterScreen from '@/features/auth/screens/RegisterScreen';
 // import TestScreen from '@/features/test/screens/TestScreen';
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
+import { useAuthStore } from '@/features/auth/store/authStore';
+import { colors } from '@/styles';
+
 export function AuthNavigator() {
+    const hasLaunched = useAuthStore(state => state.hasLaunched);
+
     return (
         <Stack.Navigator
-            initialRouteName="Intro"
+            initialRouteName={hasLaunched ? 'Login' : 'Intro'}
             screenOptions={{
                 headerShown: false,
                 headerStyle: {
-                    backgroundColor: '#fff',
+                    backgroundColor: colors.white,
                 },
-                headerTintColor: '#333',
+                headerTintColor: colors.black,
                 headerTitleStyle: {
                     fontWeight: '600',
                 },

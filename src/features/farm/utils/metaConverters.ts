@@ -302,35 +302,48 @@ export const convertMeasureSizeMetaToActivityData = (
 ): ActivityData[] => {
     const data: ActivityData[] = [];
 
-    if (meta.shrimpSize) {
-        data.push({ label: 'Cỡ tôm (con/kg)', value: meta.shrimpSize });
-    }
-    if (meta.remainingWeight) {
-        data.push({ label: 'Sản lượng còn lại (kg)', value: meta.remainingWeight });
-    }
-    if (meta.totalShrimpCount !== null && meta.totalShrimpCount !== undefined) {
-        data.push({
-            label: 'Tổng số tôm hiện tại (con)',
-            value: Math.round(meta.totalShrimpCount).toString(),
-        });
-    }
-    if (meta.survivalRate !== null && meta.survivalRate !== undefined) {
-        data.push({
-            label: 'Tỉ lệ sống dự kiến (%)',
-            value: `${Math.round(meta.survivalRate)}`,
-        });
-    }
+    // 1. Cỡ tôm
+    data.push({
+        label: 'Cỡ tôm (con/kg)',
+        value: meta.shrimpSize || '0',
+    });
 
+    // 2. Sản lượng còn lại
+    data.push({
+        label: 'Sản lượng còn lại (kg)',
+        value: meta.remainingWeight || '0',
+    });
+
+    // 3. Tổng số tôm hiện tại
+    data.push({
+        label: 'Tổng số tôm hiện tại (con)',
+        value:
+            meta.totalShrimpCount !== null && meta.totalShrimpCount !== undefined
+                ? Math.round(meta.totalShrimpCount).toString()
+                : '0',
+    });
+
+    // 4. Tỉ lệ sống dự kiến
+    data.push({
+        label: 'Tỉ lệ sống dự kiến (%)',
+        value:
+            meta.survivalRate !== null && meta.survivalRate !== undefined
+                ? `${Math.round(meta.survivalRate)}`
+                : '0',
+    });
+
+    // 5. Trọng lượng tôm
+    let weightDisplay = '0';
     if (meta.shrimpSize) {
         const size = parseFloat(meta.shrimpSize);
         if (!isNaN(size) && size > 0) {
-            const weight = Math.round(1000 / size);
-            data.push({
-                label: 'Trọng lượng tôm (g/con)',
-                value: `${weight}`,
-            });
+            weightDisplay = `${Math.round(1000 / size)}`;
         }
     }
+    data.push({
+        label: 'Trọng lượng tôm (g/con)',
+        value: weightDisplay,
+    });
 
     return data;
 };

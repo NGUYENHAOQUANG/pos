@@ -40,6 +40,7 @@ export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // React Query hooks for materials
     const searchText = useMaterialFiltersStore(state => state.searchText);
@@ -77,7 +78,11 @@ export const MeterialScreen = () => {
     }, [filterType, searchText, materialTypes]);
 
     // Fetch materials with React Query
-    const { data: materials = [], isLoading: isLoadingMaterials } = useMaterials(materialParams);
+    const {
+        data: materials = [],
+        isLoading: isLoadingMaterials,
+        refetch: refetchMaterials,
+    } = useMaterials(materialParams);
 
     // Warehouse and Inventory stores (still using Zustand for now)
     const warehouseList = useWarehouseStore(state => state.warehouseList);
@@ -186,6 +191,17 @@ export const MeterialScreen = () => {
         [setFilterMaterialName]
     );
 
+    const handleRefresh = useCallback(async () => {
+        if (isRefreshing || isLoadingMaterials) return;
+
+        setIsRefreshing(true);
+        try {
+            await refetchMaterials();
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [isRefreshing, isLoadingMaterials, refetchMaterials]);
+
     // Client-side filtering (for search text matching)
     // Note: API already handles MaterialTypeId and Search filters, but we do client-side
     // filtering as a fallback for better UX
@@ -268,7 +284,7 @@ export const MeterialScreen = () => {
 
             <View style={styles.content}>
                 {selectedTab === 'list' &&
-                    (isLoadingMaterials ? (
+                    (isLoadingMaterials || isRefreshing ? (
                         <MaterialListScreen
                             materials={[]}
                             onEdit={handleEditMaterial}
@@ -290,6 +306,8 @@ export const MeterialScreen = () => {
                                     initialMaterialName: adjustmentItem.name,
                                 } as any)
                             }
+                            refreshing={isRefreshing}
+                            onRefresh={handleRefresh}
                         />
                     ) : (
                         <MaterialEmptyState tab="list" onPress={handleAddMaterial} />
