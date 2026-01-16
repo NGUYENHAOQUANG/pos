@@ -12,14 +12,18 @@ import { HeadingMeterial, TabType } from '@/features/material/components/Heading
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { WarehouseListScreen } from '@/features/material/screens/warehouse/WarehouseListScreen';
+import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
 import {
     IMaterial,
     IWarehouseReceipt,
     IWarehouseMaterialItem,
+    IExportWarehouseReceipt,
+    IExportWarehouseMaterialItem,
 } from '@/features/material/types/material.types';
 import { useWarehouseStore } from '@/features/material/store/warehouseStore';
+import { useExportWarehouseStore } from '@/features/material/store/exportWarehouseStore';
 import { useInventoryStore } from '@/features/material/store/inventoryStore';
 import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
 import { useMaterials, useMaterialTypes } from '@/features/material/hooks';
@@ -36,6 +40,7 @@ export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // React Query hooks for materials
     const searchText = useMaterialFiltersStore(state => state.searchText);
@@ -73,10 +78,15 @@ export const MeterialScreen = () => {
     }, [filterType, searchText, materialTypes]);
 
     // Fetch materials with React Query
-    const { data: materials = [], isLoading: isLoadingMaterials } = useMaterials(materialParams);
+    const {
+        data: materials = [],
+        isLoading: isLoadingMaterials,
+        refetch: refetchMaterials,
+    } = useMaterials(materialParams);
 
     // Warehouse and Inventory stores (still using Zustand for now)
     const warehouseList = useWarehouseStore(state => state.warehouseList);
+    const exportWarehouseList = useExportWarehouseStore(state => state.exportWarehouseList);
     const inventoryList = useInventoryStore(state => state.inventoryList);
 
     // Menu state management
@@ -112,6 +122,12 @@ export const MeterialScreen = () => {
 
     const handleCreateImport = useCallback(() => {
         navigation.navigate('AddWarehouse', {
+            availableMaterials: materials,
+        } as any);
+    }, [navigation, materials]);
+
+    const handleCreateExport = useCallback(() => {
+        navigation.navigate('AddExportWarehouse', {
             availableMaterials: materials,
         } as any);
     }, [navigation, materials]);
@@ -158,7 +174,7 @@ export const MeterialScreen = () => {
     const handleTabSelect = useCallback(
         (tab: TabType) => {
             setSelectedTab(tab);
-            if (tab !== 'history') {
+            if (tab !== 'history' && tab !== 'export') {
                 setFilterMaterialName(null);
             } else if (filterMaterialName) {
                 setFilterMaterialName(null);
@@ -174,6 +190,17 @@ export const MeterialScreen = () => {
         },
         [setFilterMaterialName]
     );
+
+    const handleRefresh = useCallback(async () => {
+        if (isRefreshing || isLoadingMaterials) return;
+
+        setIsRefreshing(true);
+        try {
+            await refetchMaterials();
+        } finally {
+            setIsRefreshing(false);
+        }
+    }, [isRefreshing, isLoadingMaterials, refetchMaterials]);
 
     // Client-side filtering (for search text matching)
     // Note: API already handles MaterialTypeId and Search filters, but we do client-side
@@ -214,6 +241,29 @@ export const MeterialScreen = () => {
         });
     }, [warehouseList, filterMaterialName, searchText]);
 
+    const filteredExportWarehouseList = useMemo(() => {
+        return exportWarehouseList.filter((receipt: IExportWarehouseReceipt) => {
+            if (filterMaterialName) {
+                if (
+                    !receipt.materials.some(
+                        (m: IExportWarehouseMaterialItem) => m.materialName === filterMaterialName
+                    )
+                ) {
+                    return false;
+                }
+            }
+            if (searchText) {
+                const lowerSearch = searchText.toLowerCase();
+                const matchesFarm = receipt.farm?.toLowerCase().includes(lowerSearch);
+                const matchesMaterial = receipt.materials.some((m: IExportWarehouseMaterialItem) =>
+                    m.materialName.toLowerCase().includes(lowerSearch)
+                );
+                if (!matchesFarm && !matchesMaterial) return false;
+            }
+            return true;
+        });
+    }, [exportWarehouseList, filterMaterialName, searchText]);
+
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
@@ -234,7 +284,7 @@ export const MeterialScreen = () => {
 
             <View style={styles.content}>
                 {selectedTab === 'list' &&
-                    (isLoadingMaterials ? (
+                    (isLoadingMaterials || isRefreshing ? (
                         <MaterialListScreen
                             materials={[]}
                             onEdit={handleEditMaterial}
@@ -256,6 +306,8 @@ export const MeterialScreen = () => {
                                     initialMaterialName: adjustmentItem.name,
                                 } as any)
                             }
+                            refreshing={isRefreshing}
+                            onRefresh={handleRefresh}
                         />
                     ) : (
                         <MaterialEmptyState tab="list" onPress={handleAddMaterial} />
@@ -263,6 +315,12 @@ export const MeterialScreen = () => {
                 {selectedTab === 'history' &&
                     (filteredWarehouseList.length > 0 ? (
                         <WarehouseListScreen receipts={filteredWarehouseList} />
+                    ) : (
+                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                    ))}
+                {selectedTab === 'export' &&
+                    (filteredExportWarehouseList.length > 0 ? (
+                        <ExportWarehouseListScreen receipts={filteredExportWarehouseList} />
                     ) : (
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}
@@ -285,6 +343,7 @@ export const MeterialScreen = () => {
                 buttonPosition={menuPosition}
                 onClose={handleCloseMenu}
                 onPressCreateImport={handleCreateImport}
+                onPressCreateExport={handleCreateExport}
                 onPressCreateAdjustment={handleCreateInventory}
                 onPressCreateMaterial={handleCreateMaterial}
             />

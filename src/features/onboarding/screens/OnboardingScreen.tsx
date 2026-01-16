@@ -31,6 +31,7 @@ import OnboardingBackgroundOne from '@/features/onboarding/components/Onboarding
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import OnboardingBackgroundThree from '@/features/onboarding/components/OnboardingBackgroundThree.tsx';
 import { Logo } from '@/shared/components/brand/Logo';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -54,6 +55,7 @@ export default function OnboardingScreen() {
     const translateX = useSharedValue(0);
     const translateY = useSharedValue(SCREEN_HEIGHT / 2);
     const navigation = useNavigation<AuthStackNavigationProp>();
+    const { setHasLaunched } = useAuthStore();
 
     const sliderAnimatedStyle = useAnimatedStyle(() => {
         return {
@@ -135,7 +137,9 @@ export default function OnboardingScreen() {
         const isLastSlide: boolean = currentIndex === slidesData.length - 1;
         const mainButtonText = isLastSlide ? 'Bắt đầu ngay' : 'Tiếp tục';
 
+        // REMOVED useAuthStore call here
         const handleFinish = () => {
+            setHasLaunched(true);
             navigation.navigate('Login');
         };
 

@@ -220,7 +220,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                         />
                     </View>
                     <View style={styles.col35}>
-                        <Text style={styles.label}>
+                        <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit>
                             <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
                         </Text>
                         <TextInput
@@ -266,6 +266,8 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: spacing.sm,
         lineHeight: 22,
+        includeFontPadding: false,
+        textAlignVertical: 'center',
     },
     required: {
         color: colors.error,

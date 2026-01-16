@@ -1,4 +1,9 @@
-import { IMaterial, IWarehouseReceipt, IInventoryTicket } from '../types/material.types';
+import {
+    IMaterial,
+    IWarehouseReceipt,
+    IInventoryTicket,
+    IExportWarehouseReceipt,
+} from '../types/material.types';
 
 // Define local interface for Operation Usage if not in global types yet
 export interface IOperationUsage {
@@ -1284,6 +1289,120 @@ export const mockWarehouseList: IWarehouseReceipt[] = IMPORT_RECEIPTS_DATA.map(r
         })),
     };
 });
+
+// ==========================================
+// 2.1. WAREHOUSE EXPORT RECEIPTS (Phiếu xuất kho)
+// ==========================================
+
+const EXPORT_RECEIPTS_DATA: IExportWarehouseReceipt[] = [
+    {
+        id: 'PXK-20251202-01',
+        date: new Date('2025-12-02').toISOString(),
+        farm: 'Trang trại A',
+        materials: [],
+        totalAmount: 5000000,
+    },
+    {
+        id: 'PXK-20251204-02',
+        date: new Date('2025-12-04').toISOString(),
+        farm: 'Trang trại B',
+        materials: [],
+        totalAmount: 8000000,
+    },
+    {
+        id: 'PXK-20251206-03',
+        date: new Date('2025-12-06').toISOString(),
+        farm: 'Trang trại C',
+        materials: [],
+        totalAmount: 1200000,
+    },
+    {
+        id: 'PXK-20251208-04',
+        date: new Date('2025-12-08').toISOString(),
+        farm: 'Trang trại D',
+        materials: [],
+        totalAmount: 3500000,
+    },
+    {
+        id: 'PXK-20251210-05',
+        date: new Date('2025-12-10').toISOString(),
+        farm: 'Trang trại E',
+        materials: [],
+        totalAmount: 2800000,
+    },
+    {
+        id: 'PXK-20251216-07',
+        date: new Date('2025-12-16').toISOString(),
+        farm: 'Trang trại A',
+        materials: [],
+        totalAmount: 14000000,
+    },
+];
+
+const EXPORT_RECEIPT_RAW_DETAILS = [
+    {
+        receiptId: 'PXK-20251204-02',
+        materialId: 'VT-NU-02',
+        materialName: 'Nauplii',
+        quantity: 30,
+        price: 2000000,
+        total: 60000000,
+        unit: 'kg',
+    },
+    {
+        receiptId: 'PXK-20251208-04',
+        materialId: 'VT-NU-03',
+        materialName: 'Tôm giống (PL)',
+        quantity: 1500000,
+        price: 100,
+        total: 150000000,
+        unit: 'Con',
+    },
+    {
+        receiptId: 'PXK-20251210-05',
+        materialId: 'VT-NU-04',
+        materialName: 'Artemia Vĩnh Châu',
+        quantity: 80,
+        price: 1000000,
+        total: 80000000,
+        unit: 'kg',
+    },
+    {
+        receiptId: 'PXK-20251216-07',
+        materialId: 'VT-NU-05',
+        materialName: 'Thức ăn tôm số 1',
+        quantity: 400,
+        price: 18000,
+        total: 7200000,
+        unit: 'kg',
+    },
+    {
+        receiptId: 'PXK-20251216-07',
+        materialId: 'VT-NU-06',
+        materialName: 'Thức ăn tôm số 2',
+        quantity: 800,
+        price: 18500,
+        total: 14800000,
+        unit: 'kg',
+    },
+];
+
+export const mockExportWarehouseList: IExportWarehouseReceipt[] = EXPORT_RECEIPTS_DATA.map(
+    receipt => {
+        const details = EXPORT_RECEIPT_RAW_DETAILS.filter(d => d.receiptId === receipt.id);
+        return {
+            ...receipt,
+            materials: details.map((d, index) => ({
+                id: `${receipt.id}_${index}`,
+                materialName: d.materialName,
+                quantity: d.quantity.toString(),
+                price: d.price.toString(),
+                unit: d.unit,
+                total: d.total,
+            })),
+        };
+    }
+);
 
 // ==========================================
 // 3. INVENTORY TICKET (Phiếu kiểm kê)

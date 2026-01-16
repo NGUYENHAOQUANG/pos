@@ -1,18 +1,19 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
-import { HeaderDevices } from '../components/HeaderDevices';
-import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
-import { DevicesStatus } from '../components/DevicesStatus';
-import { PondCard } from '../components/devices/PondCard';
+
+import { HeaderDevices } from '@/features/control/components/HeaderDevices';
+import { HeaderCamLocation, FarmLocation } from '@/features/control/components/HeaderCamLocation';
+import { DevicesStatus } from '@/features/control/components/DevicesStatus';
+import { PondCard } from '@/features/control/components/devices/PondCard';
 import { HelpOptionsModal } from '../components/HelpOptionsModal';
 import { colors } from '@/styles';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
-import { useControl } from '../store/controlStore';
+import { useControl } from '@/features/control/store/controlStore';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Zone } from '@/features/farm/types/farm.types';
-import { Loading } from '@/shared/components/ui/Loading';
+import { DeviceControlSkeleton } from '@/features/control/components/DeviceControlSkeleton';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
@@ -72,27 +73,54 @@ export const DeviceControlScreens = () => {
         }
     }, [farmLocations, selectedFarm, zones, isLoadingPonds]);
 
+    // Track previous zone to detect switches
+    const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
+
+    // Ref for scroll to top
+    const flatListRef = useRef<FlatList>(null);
+    useScrollToTop(flatListRef as any);
+
     // Fetch ponds when selected farm changes
     React.useEffect(() => {
         const loadPonds = async () => {
             if (selectedFarm?.id) {
+                // Logic to prevent "Content -> Skeleton" flash on App Load
+                // But ensure Skeleton appears on Zone Switch.
+                const isZoneSwitch = selectedFarm.id !== prevFarmIdRef.current;
+
+                // If we have data and it's NOT a zone switch (e.g. App Load / Re-mount),
+                // use background fetch to keep showing content.
+                const isHydrated = farmPonds.length > 0;
+
+                // NOTE: 'isLoadingPonds' from farmStore might be global, so we rely on local logic + store updates
+                // But fetchPondsByZone in farmStore accepts isBackground.
+
+                const shouldBackgroundLoad = !isZoneSwitch && isHydrated;
+
+                // Update ref
+                prevFarmIdRef.current = selectedFarm.id;
+
                 try {
-                    await fetchPondsByZone(Number(selectedFarm.id));
+                    // Pass isBackground options if supported by store.
+                    // Looking at farmStore, fetchPondsByZone DOES accept { isBackground: boolean }
+                    await fetchPondsByZone(Number(selectedFarm.id), {
+                        isBackground: shouldBackgroundLoad,
+                    });
                 } finally {
                     setIsFirstLoad(false);
                 }
             }
         };
         loadPonds();
-    }, [selectedFarm, fetchPondsByZone]);
+    }, [selectedFarm, fetchPondsByZone, farmPonds.length]);
 
     const handleRefresh = async () => {
         setIsRefreshing(true);
         if (selectedFarm?.id) {
-            await fetchPondsByZone(Number(selectedFarm.id));
+            // Force skeleton on refresh per user request
+            await fetchPondsByZone(Number(selectedFarm.id), { isBackground: false });
         }
-        // Artificial delay if needed, or rely on fetch
-        setTimeout(() => setIsRefreshing(false), 1000);
+        setIsRefreshing(false);
     };
 
     const handleConnectDevice = (pondName: string) => {
@@ -170,8 +198,11 @@ export const DeviceControlScreens = () => {
                 showBackButton={false}
                 includeSafeArea={false}
             />
-            <Loading isLoading={isLoadingPonds || isFirstLoad} transparent={!isFirstLoad}>
+            {isLoadingPonds && isFirstLoad ? (
+                <DeviceControlSkeleton />
+            ) : (
                 <FlatList
+                    ref={flatListRef}
                     data={filteredPonds}
                     keyExtractor={item => item.id.toString()}
                     renderItem={({ item }) => (
@@ -208,7 +239,7 @@ export const DeviceControlScreens = () => {
                         <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
                     }
                 />
-            </Loading>
+            )}
 
             <HelpOptionsModal
                 isOpen={showHelpModal}

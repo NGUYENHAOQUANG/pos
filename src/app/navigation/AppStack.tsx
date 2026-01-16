@@ -46,6 +46,7 @@ import { EditEnvironmentScreens } from '@/features/menu/screens/environment/Edit
 import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
 import { EditMaterialScreen } from '@/features/material/screens/material/EditMaterialScreen';
 import { AddWarehouseScreen } from '@/features/material/screens/warehouse/AddWarehouseScreen';
+import { AddExportWarehouseScreen } from '@/features/material/screens/warehouse/AddExportWarehouseScreen';
 import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
 
 // Control screens
@@ -77,26 +78,11 @@ import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/typ
 import {
     IMaterial,
     IWarehouseReceipt,
+    IExportWarehouseReceipt,
     IInventoryTicket,
 } from '@/features/material/types/material.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-
-// Providers for wrapping screens
-// Providers for wrapping screens
-// Note: MenuProvider removed - now using Zustand store (useMenuStore)
-// Note: ControlProvider removed - now using Zustand store (useControlStore)
-
-// Wrapper factory for Menu screens - Removed as we use Zustand
-/*
-const withMenuProvider = <P extends object>(Component: React.ComponentType<P>) => {
-    return (props: P) => (
-        <MenuProvider>
-            <Component {...props} />
-        </MenuProvider>
-    );
-};
-*/
 
 // Wrapped Menu screens - Now using components directly
 const PersonalInformationWithProvider = PersonalInformationScreens;
@@ -112,8 +98,6 @@ const EditDeviceWithProvider = EditDevicesScreens;
 const HistoryDevicesWithProvider = HistoryDevicesScreens;
 const EquipmentMaintenanceWithProvider = EquipmentMaintenanceScreens;
 const EditEquimentMaintenanceWithProvider = EditEquimentMaintenanceScreens;
-
-// Note: Control screens no longer need provider wrappers - using Zustand store directly
 
 // Root Stack Param List - All screens in the app
 export type AppStackParamList = {
@@ -176,6 +160,10 @@ export type AppStackParamList = {
     AddWarehouse: {
         availableMaterials: IMaterial[];
         onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
+    };
+    AddExportWarehouse: {
+        availableMaterials: IMaterial[];
+        onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
     };
     AddInventory: { onSave?: (data: IInventoryTicket) => void; initialMaterialName?: string };
 
@@ -270,6 +258,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddMaterial" component={AddMaterialScreen} />
             <Stack.Screen name="EditMaterial" component={EditMaterialScreen} />
             <Stack.Screen name="AddWarehouse" component={AddWarehouseScreen} />
+            <Stack.Screen name="AddExportWarehouse" component={AddExportWarehouseScreen} />
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 
             {/* ============== Control Screens ============== */}

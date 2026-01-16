@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -11,7 +11,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { useFarm } from '@/features/farm/store/farmStore'; // Updated import
+import { useFarm } from '@/features/farm/store/farmStore';
+import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/SeasonListSkeleton';
 
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -19,28 +20,31 @@ import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
-import { useEffect } from 'react';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { seasons, fetchSeasons, zones, fetchZones } = useFarm(); // Use useFarm
+    const { seasons, fetchSeasons, zones, fetchZones, isLoadingSeasons, isLoadingZones } =
+        useFarm(); // Use useFarm
     const [selectedTab, setSelectedTab] = useState('all');
-    const [selectedZoneId, setSelectedZoneId] = useState<string>('all'); // Renamed selectedFarm to selectedZoneId
+    const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
     const [refreshing, setRefreshing] = useState(false);
+    // Only show "First Load" skeleton if we have NO data in the store
+    const [isFirstLoad, setIsFirstLoad] = useState(seasons.length === 0);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
+        // User wants skeleton on refresh
+        // We set isFirstLoad to true to force skeleton display
+        setIsFirstLoad(true);
         try {
             await fetchZones();
-            // After fetching zones, if we have zones in store, we should trigger fetchSeasons.
-            // Since zones update is async in store, we might rely on the useEffect above.
-            // However, to ensure the spinner stays until everything is done, we might check:
             if (zones.length > 0) {
                 await fetchSeasons(zones);
             }
         } finally {
             setRefreshing(false);
+            setIsFirstLoad(false);
         }
     }, [fetchSeasons, fetchZones, zones]);
 
@@ -66,13 +70,34 @@ export const AquacultureManagementScreens: React.FC = () => {
     // Fetch seasons when zones change and are valid
     useEffect(() => {
         console.log('[AquaScreen] Zones updated:', zones);
-        if (zones && zones.length > 0) {
-            console.log('[AquaScreen] Found zones, fetching seasons...');
-            fetchSeasons(zones);
-        } else {
-            console.log('[AquaScreen] No zones available to fetch seasons.');
-        }
+        const loadSeasons = async () => {
+            if (zones && zones.length > 0) {
+                console.log('[AquaScreen] Found zones, fetching seasons...');
+                try {
+                    await fetchSeasons(zones);
+                } finally {
+                    setIsFirstLoad(false);
+                }
+            } else {
+                console.log('[AquaScreen] No zones available to fetch seasons.');
+                // If zones are empty, we are done loading (unless still fetching zones?)
+                // But fetchZones updates 'zones' and 'isLoadingZones' together possibly.
+                // We will check !isLoadingZones just to be safe, or just turn off first load.
+                setIsFirstLoad(false);
+            }
+        };
+        // If we invoke this, we should make sure we are not preempting a fetch?
+        // But this effect reacts to 'zones' change.
+        loadSeasons();
     }, [zones, fetchSeasons]);
+
+    // Safety timeout for first load
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsFirstLoad(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Prepare zone options
     const zoneOptions = React.useMemo(() => {
@@ -143,7 +168,9 @@ export const AquacultureManagementScreens: React.FC = () => {
             </View>
 
             <View style={styles.content}>
-                {seasons.length === 0 ? (
+                {isFirstLoad || (seasons.length === 0 && (isLoadingZones || isLoadingSeasons)) ? (
+                    <SeasonListSkeleton />
+                ) : seasons.length === 0 ? (
                     /* Empty State - Wrapped in ScrollView for Refresh */
                     <ScrollView
                         contentContainerStyle={styles.emptyScrollContent}

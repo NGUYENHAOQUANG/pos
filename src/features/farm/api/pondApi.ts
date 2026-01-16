@@ -42,12 +42,13 @@ export const pondApi = {
         try {
             const response = await apiClient.get(API_ENDPOINTS.ZONES.PONDS(zoneId), {
                 params: {
-                    pageSize: params?.PageSize || 1000,
+                    pageSize: params?.PageSize || 100,
                     page: params?.PageNumber || 1,
-                    // size: params?.PageSize || 1000, // Try keeping both if unsure, but pageSize is standard
+                    // size: params?.PageSize || 100, // Try keeping both if unsure, but pageSize is standard
                 },
             });
             const responseData = response.data;
+            // Removed debug log
             let items: PondData[] = [];
             let total = 0;
 
