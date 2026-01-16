@@ -10,6 +10,7 @@ export { useMaterialFiltersStore } from '@/features/material/store/materialFilte
 export { useMaterialGroupsStore } from '@/features/material/store/materialGroupsStore';
 export { useMaterialTypesStore } from '@/features/material/store/materialTypesStore';
 export { useUnitsStore } from '@/features/material/store/unitsStore';
+export { useExportWarehouseStore } from '@/features/material/store/exportWarehouseStore';
 
 import { useMaterialsStore } from '@/features/material/store/materialsStore';
 import { useWarehouseStore } from '@/features/material/store/warehouseStore';

@@ -12,14 +12,18 @@ import { HeadingMeterial, TabType } from '@/features/material/components/Heading
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { WarehouseListScreen } from '@/features/material/screens/warehouse/WarehouseListScreen';
+import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
 import {
     IMaterial,
     IWarehouseReceipt,
     IWarehouseMaterialItem,
+    IExportWarehouseReceipt,
+    IExportWarehouseMaterialItem,
 } from '@/features/material/types/material.types';
 import { useWarehouseStore } from '@/features/material/store/warehouseStore';
+import { useExportWarehouseStore } from '@/features/material/store/exportWarehouseStore';
 import { useInventoryStore } from '@/features/material/store/inventoryStore';
 import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
 import { useMaterials, useMaterialTypes } from '@/features/material/hooks';
@@ -82,6 +86,7 @@ export const MeterialScreen = () => {
 
     // Warehouse and Inventory stores (still using Zustand for now)
     const warehouseList = useWarehouseStore(state => state.warehouseList);
+    const exportWarehouseList = useExportWarehouseStore(state => state.exportWarehouseList);
     const inventoryList = useInventoryStore(state => state.inventoryList);
 
     // Menu state management
@@ -117,6 +122,12 @@ export const MeterialScreen = () => {
 
     const handleCreateImport = useCallback(() => {
         navigation.navigate('AddWarehouse', {
+            availableMaterials: materials,
+        } as any);
+    }, [navigation, materials]);
+
+    const handleCreateExport = useCallback(() => {
+        navigation.navigate('AddExportWarehouse', {
             availableMaterials: materials,
         } as any);
     }, [navigation, materials]);
@@ -163,7 +174,7 @@ export const MeterialScreen = () => {
     const handleTabSelect = useCallback(
         (tab: TabType) => {
             setSelectedTab(tab);
-            if (tab !== 'history') {
+            if (tab !== 'history' && tab !== 'export') {
                 setFilterMaterialName(null);
             } else if (filterMaterialName) {
                 setFilterMaterialName(null);
@@ -230,6 +241,29 @@ export const MeterialScreen = () => {
         });
     }, [warehouseList, filterMaterialName, searchText]);
 
+    const filteredExportWarehouseList = useMemo(() => {
+        return exportWarehouseList.filter((receipt: IExportWarehouseReceipt) => {
+            if (filterMaterialName) {
+                if (
+                    !receipt.materials.some(
+                        (m: IExportWarehouseMaterialItem) => m.materialName === filterMaterialName
+                    )
+                ) {
+                    return false;
+                }
+            }
+            if (searchText) {
+                const lowerSearch = searchText.toLowerCase();
+                const matchesFarm = receipt.farm?.toLowerCase().includes(lowerSearch);
+                const matchesMaterial = receipt.materials.some((m: IExportWarehouseMaterialItem) =>
+                    m.materialName.toLowerCase().includes(lowerSearch)
+                );
+                if (!matchesFarm && !matchesMaterial) return false;
+            }
+            return true;
+        });
+    }, [exportWarehouseList, filterMaterialName, searchText]);
+
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
@@ -284,6 +318,12 @@ export const MeterialScreen = () => {
                     ) : (
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}
+                {selectedTab === 'export' &&
+                    (filteredExportWarehouseList.length > 0 ? (
+                        <ExportWarehouseListScreen receipts={filteredExportWarehouseList} />
+                    ) : (
+                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                    ))}
                 {selectedTab === 'inventory' &&
                     (inventoryList.length > 0 ? (
                         <FlatList
@@ -303,6 +343,7 @@ export const MeterialScreen = () => {
                 buttonPosition={menuPosition}
                 onClose={handleCloseMenu}
                 onPressCreateImport={handleCreateImport}
+                onPressCreateExport={handleCreateExport}
                 onPressCreateAdjustment={handleCreateInventory}
                 onPressCreateMaterial={handleCreateMaterial}
             />
