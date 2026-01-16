@@ -30,7 +30,15 @@ export const DeviceControlScreens = () => {
     // Local loading state for immediate feedback
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Help Modal State
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [helpButtonPosition, setHelpButtonPosition] = useState<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null>(null);
 
     // Load zones on mount
     React.useEffect(() => {
@@ -91,6 +99,11 @@ export const DeviceControlScreens = () => {
         navigation.navigate('ConnectDevice', { pondName });
     };
 
+    const handleHelpPress = (position: { x: number; y: number; width: number; height: number }) => {
+        setHelpButtonPosition(position);
+        setShowHelpModal(true);
+    };
+
     const filteredPonds = useMemo(() => {
         if (!selectedFarm || !farmPonds) return [];
 
@@ -149,7 +162,7 @@ export const DeviceControlScreens = () => {
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
                     onLocationSelect={setSelectedFarm}
-                    onHelpPress={() => setShowHelpModal(true)}
+                    onHelpPress={handleHelpPress}
                 />
             )}
             <HeaderDevices
@@ -198,7 +211,8 @@ export const DeviceControlScreens = () => {
             </Loading>
 
             <HelpOptionsModal
-                visible={showHelpModal}
+                isOpen={showHelpModal}
+                buttonPosition={helpButtonPosition}
                 onClose={() => setShowHelpModal(false)}
                 onPressUserManual={() => {
                     setShowHelpModal(false);
