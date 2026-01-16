@@ -5,10 +5,11 @@ import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 
 // Import device card SVGs
-import TurnOnCard from '@/assets/Icon/IconDevices/feeder.svg';
-import TurnOffCard from '@/assets/Icon/IconDevices/oxy.svg';
-import HandmadeCard from '@/assets/Icon/IconDevices/fan.svg';
-import OnSiteCard from '@/assets/Icon/IconDevices/syphon.svg';
+import TurnOnCard from '@/assets/Icon/IconDevices/TurnOnCard.svg';
+import TurnOffCard from '@/assets/Icon/IconDevices/TurnOffCard.svg';
+import HandmadeCard from '@/assets/Icon/IconDevices/HandmadeCard.svg';
+import OnSiteCard from '@/assets/Icon/IconDevices/OnSiteCard.svg';
+import ErrorCard from '@/assets/Icon/IconDevices/ErrorCard.svg';
 
 // Type definition for manual items
 interface ManualItem {
@@ -24,36 +25,51 @@ const MANUAL_DATA: ManualItem[] = [
         id: '1',
         CardSvg: TurnOnCard,
         descriptions: [
-            'Tên thiết bị: Máy cho ăn',
-            'Chức năng: Tự động phân phối thức ăn cho vật nuôi.',
-            'Điều khiển: Thiết bị được điều khiển bằng lịch trình (có thể lập trình hẹn giờ), có thể kích hoạt thủ công khi cần thiết.',
+            'Tên thiết bị: Thiết bị 1',
+            'Màu thiết bị: xanh = Thiết bị đang hoạt động',
+            'Tag Lịch trình = Thiết bị đang ở chế độ điều khiển bằng lịch trình',
+            'Nút điều khiển bật/tắt màu xanh: đang bật thiết bị',
         ],
     },
     {
         id: '2',
         CardSvg: HandmadeCard,
         descriptions: [
-            'Tên thiết bị: Quạt nước',
-            'Chức năng : Tạo oxy hòa tan trong nước và giúp lưu thông dòng nước, cải thiện môi trường sống cho các loài thủy sản, đặc biệt quan trọng trong nuôi trồng thâm canh.',
-            'Điều khiển: Thiết bị được điều khiển bằng lịch trình (sử dụng timer) hoặc liên tục trong thời gian dài, có thể bật/tắt thủ công.',
+            'Tên thiết bị: Thiết bị 1',
+            'Màu thiết bị: xanh = Thiết bị đang hoạt động',
+            'Tag Thủ công = Thiết bị đang ở chế độ điều khiển thủ công bằng app',
+            'Nút điều khiển bật/tắt màu xanh: đang bật thiết bị',
         ],
     },
     {
         id: '3',
         CardSvg: TurnOffCard,
         descriptions: [
-            'Tên thiết bị: Máy thổi khí',
-            'Chức năng: Cung cấp lượng lớn khí oxy vào nước thông qua các đường ống và đá sủi, duy trì nồng độ oxy cần thiết cho sự sống của động vật thủy sản',
-            'Điều khiển: Thiết bị được điều khiển bằng lịch trình (sử dụng timer) hoặc liên tục trong thời gian dài, có thể bật/tắt thủ công.',
+            'Tên thiết bị: Thiết bị 1',
+            'Màu thiết bị: xám = Thiết bị đang ngừng hoạt động',
+            'Tag Lịch trình = Thiết bị đang ở chế độ điều khiển bằng lịch trình',
+            'Nút điều khiển bật/tắt màu xám: đang tắt thiết bị',
         ],
     },
     {
         id: '4',
         CardSvg: OnSiteCard,
         descriptions: [
-            'Tên thiết bị: Xyphon đáy',
-            'Chức năng: Hút chất thải, thức ăn thừa và các chất cặn bẩn tích tụ dưới đáy ao, giúp làm sạch môi trường nước và duy trì chất lượng nước ổn định.',
-            'Điều khiển: Thiết bị được điều khiển thủ công bởi người dùng hoặc thông qua hệ thống bơm hút được điều khiển theo lịch trình.',
+            'Tên thiết bị: Thiết bị 1',
+            'Màu thiết bị: xanh = Thiết bị đang hoạt động',
+            'Tag Tại chỗ = Thiết bị đang ở chế độ điều khiển tại chỗ, tức là bật tắt tại tủ',
+            'Nút điều khiển bật/tắt bị mờ: không thể điều khiển thiết bị bằng app ở chế độ Tại chỗ',
+        ],
+        note: 'Nút điều khiển chỉ hoạt động khi thiết bị ở chế độ điều khiển thủ công/chạy theo lịch trình',
+    },
+    {
+        id: '5',
+        CardSvg: ErrorCard,
+        descriptions: [
+            'Tên thiết bị: Thiết bị 1',
+            'Màu thiết bị: đỏ = Thiết bị đang gặp sự cố',
+            'Tag Lịch trình = Thiết bị đang ở chế độ điều khiển bằng lịch trình',
+            'Thông báo lỗi hiển thị bên dưới icon thiết bị',
         ],
     },
 ];
@@ -135,13 +151,13 @@ const ManualRow: React.FC<{ item: ManualItem }> = ({ item }) => {
     );
 };
 
-export const UserManualScreens: React.FC = () => {
+export const GeneralUserManualScreens: React.FC = () => {
     const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
             <HeaderDevices
-                title="Giải thích các thiết bị"
+                title="Hướng Dẫn Sử Dụng"
                 showBackButton={true}
                 onBackPress={() => navigation.goBack()}
             />
@@ -156,7 +172,7 @@ export const UserManualScreens: React.FC = () => {
                         <Text style={styles.headerText}>Hình minh họa</Text>
                     </View>
                     <View style={styles.headerDescription}>
-                        <Text style={styles.headerText}>Giải thích</Text>
+                        <Text style={styles.headerText}>Mô tả</Text>
                     </View>
                 </View>
 

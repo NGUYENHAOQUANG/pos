@@ -4,6 +4,7 @@ import { HeaderDevices } from '../components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '../components/HeaderCamLocation';
 import { DevicesStatus } from '../components/DevicesStatus';
 import { PondCard } from '../components/devices/PondCard';
+import { HelpOptionsModal } from '../components/HelpOptionsModal';
 import { colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,6 +30,7 @@ export const DeviceControlScreens = () => {
     // Local loading state for immediate feedback
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     // Load zones on mount
     React.useEffect(() => {
@@ -147,7 +149,7 @@ export const DeviceControlScreens = () => {
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
                     onLocationSelect={setSelectedFarm}
-                    onHelpPress={() => navigation.navigate('UserManual')}
+                    onHelpPress={() => setShowHelpModal(true)}
                 />
             )}
             <HeaderDevices
@@ -194,6 +196,19 @@ export const DeviceControlScreens = () => {
                     }
                 />
             </Loading>
+
+            <HelpOptionsModal
+                visible={showHelpModal}
+                onClose={() => setShowHelpModal(false)}
+                onPressUserManual={() => {
+                    setShowHelpModal(false);
+                    navigation.navigate('GeneralUserManual');
+                }}
+                onPressDeviceExplanation={() => {
+                    setShowHelpModal(false);
+                    navigation.navigate('UserManual');
+                }}
+            />
         </View>
     );
 };
