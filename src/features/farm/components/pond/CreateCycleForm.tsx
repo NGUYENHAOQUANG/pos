@@ -266,6 +266,8 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: spacing.sm,
         lineHeight: 22,
+        includeFontPadding: false,
+        textAlignVertical: 'center',
     },
     required: {
         color: colors.error,
