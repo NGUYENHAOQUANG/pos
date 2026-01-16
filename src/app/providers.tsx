@@ -15,6 +15,15 @@ import { AppNavigator } from './navigation/AppNavigator';
 import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
+import NetInfo from '@react-native-community/netinfo';
+import { onlineManager } from '@tanstack/react-query';
+
+// Update React Query online status using NetInfo
+onlineManager.setEventListener(setOnline => {
+    return NetInfo.addEventListener(state => {
+        setOnline(!!state.isConnected);
+    });
+});
 
 const queryClient = new QueryClient({
     defaultOptions: {

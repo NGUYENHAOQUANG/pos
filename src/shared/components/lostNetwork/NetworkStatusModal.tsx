@@ -86,7 +86,7 @@ export const NetworkStatusModal = () => {
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: colors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,
@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     container: {
         width: width - 48,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.lg, // Assuming lg exists or use 16
-        padding: spacing.xl, // Assuming xl exists or use 24
+        borderRadius: borderRadius.lg,
+        padding: spacing.xl,
         alignItems: 'center',
         shadowColor: colors.shadow,
         shadowOffset: {
