@@ -18,20 +18,28 @@ import { SplashScreen } from '@/shared/components/layout/SplashScreen';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
 
-// Update React Query online status using NetInfo
-onlineManager.setEventListener(setOnline => {
-    return NetInfo.addEventListener(state => {
-        setOnline(!!state.isConnected);
-    });
-});
-
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
             staleTime: 5 * 60 * 1000, // 5 minutes
             retry: 3,
+            refetchOnReconnect: true,
         },
     },
+});
+
+// Update React Query online status using NetInfo
+onlineManager.setEventListener(setOnline => {
+    return NetInfo.addEventListener(state => {
+        const isConnected = !!state.isConnected;
+        setOnline(isConnected);
+
+        // Force refetch all active queries when connection is restored
+        // This ensures the app tries to download data immediately when network returns
+        if (isConnected) {
+            queryClient.invalidateQueries();
+        }
+    });
 });
 
 export function AppProviders() {
