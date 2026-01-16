@@ -4,7 +4,7 @@ import { colors, borderRadius } from '@/styles';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 
 interface PondTypeTagProps {
-    type: PondType;
+    type: PondType | string;
     style?: StyleProp<ViewStyle>;
 }
 

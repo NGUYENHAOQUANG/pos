@@ -7,11 +7,11 @@
  * @created 2025-11-16
  * @updated 2025-01-07
  */
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useFocusEffect } from '@react-navigation/native';
+
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors } from '@/styles';
 import { SvgProps } from 'react-native-svg';
@@ -107,72 +107,17 @@ const navigationItems: NavigationItem[] = [
 
 const Tab = createBottomTabNavigator();
 
-// Animation constants
-const BASE_DELAY = 10;
-const STAGGER_DELAY = 30;
-
-/**
- * Animated Tab Item Component
- * Spring animation from bottom, sequential from right to left
- */
 interface AnimatedTabItemProps {
     route: { key: string; name: string };
     item: NavigationItem;
     isFocused: boolean;
     onPress: () => void;
-    index: number;
-    totalItems: number;
-    animationKey: number; // Key to trigger re-animation
 }
 
-const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
-    route,
-    item,
-    isFocused,
-    onPress,
-    index,
-    totalItems,
-    animationKey,
-}) => {
-    const translateY = useRef(new Animated.Value(30)).current;
-    const opacity = useRef(new Animated.Value(0)).current;
+const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocused, onPress }) => {
     const indicatorScale = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        // Calculate delay: from center (Farm at index 2) outward to both sides
-        // Index order: 0-Reports, 1-Devices, 2-Farm, 3-Material, 4-Menu
-        const centerIndex = 2; // Farm is at center
-        const distanceFromCenter = Math.abs(index - centerIndex);
-        const delay = BASE_DELAY + distanceFromCenter * STAGGER_DELAY;
-
-        // Reset values IMMEDIATELY to prevent flash of old state
-        translateY.setValue(30);
-        opacity.setValue(0);
-        indicatorScale.setValue(0);
-
-        // Spring animation for icon and text
-        Animated.parallel([
-            Animated.sequence([
-                Animated.delay(delay),
-                Animated.spring(translateY, {
-                    toValue: 0,
-                    friction: 5,
-                    tension: 100,
-                    useNativeDriver: true,
-                }),
-            ]),
-            Animated.sequence([
-                Animated.delay(delay),
-                Animated.timing(opacity, {
-                    toValue: 1,
-                    duration: 150,
-                    useNativeDriver: true,
-                }),
-            ]),
-        ]).start();
-    }, [animationKey, translateY, opacity, indicatorScale, index, totalItems]);
-
-    // Animate active indicator when tab becomes focused or when animation key changes
+    // Animate active indicator when tab becomes focused
     useEffect(() => {
         if (isFocused) {
             indicatorScale.setValue(0);
@@ -183,7 +128,7 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
                 useNativeDriver: true,
             }).start();
         }
-    }, [isFocused, indicatorScale, animationKey]);
+    }, [isFocused, indicatorScale]);
 
     const IconComponent = isFocused ? item.IconActive : item.Icon;
 
@@ -194,15 +139,7 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
             onPress={onPress}
             activeOpacity={0.7}
         >
-            <Animated.View
-                style={[
-                    styles.tabItemContent,
-                    {
-                        opacity,
-                        transform: [{ translateY }],
-                    },
-                ]}
-            >
+            <View style={styles.tabItemContent}>
                 {/* Active indicator with scale animation */}
                 {isFocused && (
                     <Animated.View
@@ -220,7 +157,7 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({
                 <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>
                     {item.label}
                 </Text>
-            </Animated.View>
+            </View>
         </TouchableOpacity>
     );
 };
@@ -234,17 +171,6 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const safeBottom = Math.max(insets.bottom, PADDING_BOTTOM);
     const totalHeight = TAB_HEIGHT + safeBottom;
 
-    // Animation key to trigger re-animation when tab bar becomes visible
-    const [animationKey, setAnimationKey] = useState(0);
-
-    // Trigger animation when MainNavigator gains focus (coming back from detail screens)
-    useFocusEffect(
-        useCallback(() => {
-            // Increment key to trigger re-animation
-            setAnimationKey(prev => prev + 1);
-        }, [])
-    );
-
     const currentRoute = state.routes[state.index];
 
     return (
@@ -257,7 +183,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                 },
             ]}
         >
-            {state.routes.map((route, index) => {
+            {state.routes.map(route => {
                 const item = navigationItems.find(i => i.key === route.name);
                 const isFocused = route.name === currentRoute.name;
 
@@ -277,14 +203,11 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
                 return (
                     <AnimatedTabItem
-                        key={`${route.key}-${animationKey}`} // Force remount to ensure clean animation start
+                        key={route.key}
                         route={route}
                         item={item}
                         isFocused={isFocused}
                         onPress={onPress}
-                        index={index}
-                        totalItems={state.routes.length}
-                        animationKey={animationKey}
                     />
                 );
             })}

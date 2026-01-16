@@ -10,7 +10,7 @@ import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
 import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
 const { width } = Dimensions.get('window');
@@ -58,6 +58,11 @@ const ProfileCard = ({ onPress }: { onPress: () => void }) => {
 export const MenuScreens: React.FC = () => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<any>();
+
+    // Ref for scroll to top
+    const scrollViewRef = React.useRef<ScrollView>(null);
+    useScrollToTop(scrollViewRef as any);
+
     const [isLogoutModalVisible, setIsLogoutModalVisible] = React.useState(false);
 
     const handleLogout = () => {
@@ -98,6 +103,7 @@ export const MenuScreens: React.FC = () => {
 
                 <View style={styles.scrollWrapper}>
                     <ScrollView
+                        ref={scrollViewRef}
                         contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
                     >

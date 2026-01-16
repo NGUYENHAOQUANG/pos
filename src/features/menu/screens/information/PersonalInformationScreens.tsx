@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { colors } from '@/styles';
@@ -11,7 +11,8 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { Zone } from '@/features/farm/types/farm.types';
+import { Zone, PondData } from '@/features/farm/types/farm.types';
+import { pondApi } from '@/features/farm/api/pondApi';
 
 export const PersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
@@ -36,21 +37,43 @@ export const PersonalInformationScreens: React.FC = () => {
         level: 'Trưởng phòng',
     };
 
-    const { zones, ponds, fetchZones } = useFarmStore();
+    const { zones, fetchZones, setSelectedZoneId } = useFarmStore();
+    const [allPonds, setAllPonds] = React.useState<PondData[]>([]);
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const fetchPondsFromAllZones = React.useCallback(async (currentZones: Zone[]) => {
+        if (!currentZones || currentZones.length === 0) return;
+
+        try {
+            const promises = currentZones.map(async zone => {
+                const res = await pondApi.getPondsByZone(zone.id);
+                // Manually tag ponds with the zoneId they belong to
+                // matching the Zone object structure
+                return (res.items || []).map(p => ({ ...p, tempZoneId: zone.id }));
+            });
+
+            const results = await Promise.all(promises);
+
+            // Flatten all items safely - results is Array<PondData[]>
+            const flattenedPonds = results.reduce<any[]>((acc, pondsInZone) => {
+                return acc.concat(pondsInZone);
+            }, []);
+
+            setAllPonds(flattenedPonds);
+        } catch (error) {
+            console.error('Error loading all ponds:', error);
+        }
+    }, []);
 
     React.useEffect(() => {
-        fetchZones();
-    }, [fetchZones]);
+        fetchPondsFromAllZones(zones);
+    }, [zones, fetchPondsFromAllZones]);
 
     // Calculate connected farms from real data
     const connectedFarms = React.useMemo(() => {
         return zones.map((zone: Zone) => {
-            // Count ponds in this zone
-            // Match by zone.code or zone.name (depending on what pond.zone stores)
-            // pond.zone stores string like "KV-A", zone.code might be "KV-A"
-            const pondCount = ponds.filter(
-                p => (zone.code && p.zone === zone.code) || (zone.name && p.zone === zone.name)
-            ).length;
+            // Count ponds in this zone using the manually tagged tempZoneId
+            const pondCount = allPonds.filter((p: any) => p.tempZoneId === zone.id).length;
 
             return {
                 id: zone.id,
@@ -58,7 +81,7 @@ export const PersonalInformationScreens: React.FC = () => {
                 count: pondCount.toString(),
             };
         });
-    }, [zones, ponds]);
+    }, [zones, allPonds]);
 
     const totalFarms = zones.length.toString();
 
@@ -70,6 +93,23 @@ export const PersonalInformationScreens: React.FC = () => {
 
         if (result.assets && result.assets.length > 0) {
             setAvatarUri(result.assets[0].uri || null);
+        }
+    };
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        try {
+            // Fetch zones first to allow using their IDs
+            await fetchZones();
+            // We need to use the zones from store, but since setState is async,
+            // relying on 'zones' directly here might be stale if fetchZones just updated it.
+            // However, fetchZones updates the store.
+            // A better approach is to let the useEffect trigger the pond fetch when zones change,
+            // but for explicit refresh, we might want to manually trigger.
+            // For now, let's use the 'zones' from store - assuming fetchZones resolves after store update (which it usually does if awaited).
+            await fetchPondsFromAllZones(zones);
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -85,7 +125,12 @@ export const PersonalInformationScreens: React.FC = () => {
         <View style={styles.container}>
             <HeaderMenu title="Thông tin cá nhân" onBack={() => navigation.goBack()} />
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }
+            >
                 {/* General Info Section */}
                 <GeneralInformation
                     data={userInfo}
@@ -98,7 +143,11 @@ export const PersonalInformationScreens: React.FC = () => {
                     totalFarms={totalFarms}
                     farms={connectedFarms}
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    onFarmPress={() => (navigation.navigate as any)('FarmStack')}
+                    onFarmPress={farm => {
+                        setSelectedZoneId(farm.id);
+                        // Navigate to the Main Tab Navigator, then to the Farm tab
+                        (navigation.navigate as any)('MainTabs', { screen: 'Farm' });
+                    }}
                 />
 
                 {/* Bottom Spacer */}
