@@ -15,6 +15,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { IWarehouseReceipt } from '@/features/material/types/material.types';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -56,16 +57,6 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
         );
     };
 
-    const formatDate = (dateString: string | Date) => {
-        const date = new Date(dateString);
-        return `${date.getHours().toString().padStart(2, '0')}:${date
-            .getMinutes()
-            .toString()
-            .padStart(2, '0')} ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, '0')}/${date.getFullYear()}`;
-    };
-
     const renderItem = ({ item }: { item: IWarehouseReceipt }) => {
         const isExpanded = expandedIds.includes(item.id);
 
@@ -75,11 +66,11 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
                     {/* Header Info */}
                     <View style={styles.row}>
                         <Text style={styles.label}>Nhập kho:</Text>
-                        <Text style={styles.value}>{formatDate(item.date)}</Text>
+                        <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Tạo phiếu:</Text>
-                        <Text style={styles.value}>{formatDate(item.date)}</Text>
+                        <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
                     </View>
 
                     <View style={styles.divider} />

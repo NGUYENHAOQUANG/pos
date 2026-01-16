@@ -17,7 +17,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterialStore } from '@/features/material/store';
+import { useWarehouseStore } from '@/features/material/store';
+import { useMaterials } from '@/features/material/hooks';
 
 interface AddWarehouseScreenProps {}
 
@@ -25,8 +26,10 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute<RouteProp<MaterialStackParamList, 'AddWarehouse'>>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const materials = useMaterialStore(state => state.materials);
-    const addWarehouseReceipt = useMaterialStore(state => state.addWarehouseReceipt);
+
+    // Use React Query for materials data
+    const { data: materialsData = [] } = useMaterials();
+    const addWarehouseReceipt = useWarehouseStore(state => state.addWarehouseReceipt);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -38,12 +41,12 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
               availableMaterials?: IMaterial[];
           }
         | undefined;
-    const availableMaterials = params?.availableMaterials || materials;
+    const availableMaterials = params?.availableMaterials || materialsData;
     // Combine mock materials with passed available materials
     const materialOptions = availableMaterials.map((m: IMaterial) => ({
         label: m.name,
         value: m.name,
-        unit: m.unit,
+        unit: typeof m.unit === 'number' ? String(m.unit) : m.unitName || String(m.unit || ''),
     }));
 
     const [date, setDate] = useState(new Date());

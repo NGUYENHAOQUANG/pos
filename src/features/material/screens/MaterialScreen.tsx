@@ -22,10 +22,9 @@ import {
 import { useWarehouseStore } from '@/features/material/store/warehouseStore';
 import { useInventoryStore } from '@/features/material/store/inventoryStore';
 import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
-import { useMaterials, useMaterialTypes } from '@/features/material/hooks/useMaterials';
+import { useMaterials, useMaterialTypes } from '@/features/material/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { Loading } from '@/shared/components/ui/Loading';
 
 // Constants for pagination
 const DEFAULT_PAGE = 1;
@@ -236,7 +235,17 @@ export const MeterialScreen = () => {
             <View style={styles.content}>
                 {selectedTab === 'list' &&
                     (isLoadingMaterials ? (
-                        <Loading isLoading={isLoadingMaterials}></Loading>
+                        <MaterialListScreen
+                            materials={[]}
+                            onEdit={handleEditMaterial}
+                            onHistoryPress={handleHistoryPress}
+                            onAdjustmentPress={adjustmentItem =>
+                                navigation.navigate('AddInventory', {
+                                    initialMaterialName: adjustmentItem.name,
+                                } as any)
+                            }
+                            isLoading={true}
+                        />
                     ) : filteredMaterials.length > 0 ? (
                         <MaterialListScreen
                             materials={filteredMaterials}
