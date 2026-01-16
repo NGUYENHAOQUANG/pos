@@ -11,6 +11,8 @@ interface MaterialListScreenProps {
     onHistoryPress?: (item: IMaterial) => void;
     onAdjustmentPress?: (item: IMaterial) => void;
     isLoading?: boolean;
+    refreshing?: boolean;
+    onRefresh?: () => void;
 }
 
 export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
@@ -19,6 +21,8 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
     onHistoryPress,
     onAdjustmentPress,
     isLoading = false,
+    refreshing,
+    onRefresh,
 }) => {
     if (isLoading) {
         return (
@@ -43,6 +47,8 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
                 )}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
             />
         </View>
     );
