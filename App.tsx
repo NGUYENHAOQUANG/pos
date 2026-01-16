@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from './src/app/providers';
 import { LogBox } from 'react-native';
 import notifee from '@notifee/react-native';
+import { NetworkStatusModal } from './src/shared/components';
 // import {
 //   requestNotificationPermission,
 //   getFCMToken,
@@ -67,6 +68,7 @@ function App(): React.JSX.Element {
         <SafeAreaProvider>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
             <AppProviders />
+            <NetworkStatusModal />
             <Toast config={toastConfig} topOffset={0} />
         </SafeAreaProvider>
     );
