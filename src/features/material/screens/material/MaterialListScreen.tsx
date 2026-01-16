@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { MaterialList } from '@/features/material/components/material/MaterialList';
+import { MaterialListSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 
@@ -9,6 +10,7 @@ interface MaterialListScreenProps {
     onEdit: (item: IMaterial) => void;
     onHistoryPress?: (item: IMaterial) => void;
     onAdjustmentPress?: (item: IMaterial) => void;
+    isLoading?: boolean;
 }
 
 export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
@@ -16,7 +18,16 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
     onEdit,
     onHistoryPress,
     onAdjustmentPress,
+    isLoading = false,
 }) => {
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <MaterialListSkeleton />
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <FlatList

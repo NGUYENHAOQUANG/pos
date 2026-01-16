@@ -13,6 +13,7 @@ import CalenderIcon from '@/assets/Icon/Calender.svg';
 import { CollapseHead } from '../CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
+import { formatMaterialDate } from '@/features/material/utils/dateUtils';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -39,18 +40,6 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
         setIsExpanded(!isExpanded);
     };
 
-    const formatDate = (dateValue: Date) => {
-        if (!dateValue) return '';
-        // Ensure we have a valid date object
-        const d = new Date(dateValue);
-        if (isNaN(d.getTime())) return '';
-
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${day}/${month}/${year}`;
-    };
-
     return (
         <View style={styles.cardContainer}>
             <CollapseHead
@@ -73,7 +62,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                             activeOpacity={0.7}
                         >
                             <Text style={styles.dateText} numberOfLines={1}>
-                                {formatDate(date)}
+                                {formatMaterialDate(date)}
                             </Text>
                             <CalenderIcon width={20} height={20} />
                         </TouchableOpacity>

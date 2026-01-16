@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
-import { useMaterialTypes } from '@/features/material/hooks/useMaterials';
+import { useMaterialTypes } from '@/features/material/hooks';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
