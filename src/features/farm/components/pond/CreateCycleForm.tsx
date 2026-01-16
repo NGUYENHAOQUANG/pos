@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -83,7 +83,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
     }, [formData.stockingQuantity, pondId, getPondById]);
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             <SelectionInfoBox title="Chọn nguồn giống và vụ nuôi">
                 <View style={styles.breedSection}>
                     <View style={styles.inputGroupNoMargin}>
@@ -241,7 +241,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                 notes={formData.notes || ''}
                 onNotesChange={text => updateField('notes', text)}
             />
-        </ScrollView>
+        </View>
     );
 };
 
