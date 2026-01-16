@@ -57,6 +57,9 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const [usage, setUsage] = useState('');
     const [manufacturer, setManufacturer] = useState('');
 
+    // Status State
+    const [isActive, setIsActive] = useState<boolean>(true);
+
     // Fetch material types when group changes
     const { data: typesByGroup = [] } = useMaterialTypesByGroup(group);
 
@@ -80,6 +83,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             setType(initialData.type || '');
             setUsage(initialData.usage || '');
             setManufacturer(initialData.manufacturer || '');
+            setIsActive(initialData.isActive ?? true); // Sync isActive with data
         }
     }, [initialData]);
 
@@ -152,10 +156,10 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                 request: {
                     name: name.trim(),
                     materialTypeId: typeValidation.type.id,
-                    description: usage || '', // Map usage to description
+                    description: usage || '',
                     unitId: unitValidation.unitId,
                     manufacturer: manufacturer?.trim() || null,
-                    isActive: true,
+                    isActive: isActive,
                 },
             },
             {
@@ -244,6 +248,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
                             onUsageChange={setUsage}
                             manufacturer={manufacturer}
                             onManufacturerChange={setManufacturer}
+                            isActive={isActive}
+                            onIsActiveChange={setIsActive}
                             onUnitDropdownOpen={() => {
                                 setTimeout(() => {
                                     scrollViewRef.current?.scrollToEnd({ animated: true });

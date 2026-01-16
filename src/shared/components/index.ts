@@ -15,6 +15,7 @@ export * from './forms/CountrySelector';
 export * from './forms/ImagePickerActionSheet';
 export * from './forms/ImageUpload';
 export * from './forms/Input';
+export * from './forms/RadioButton';
 export * from './forms/SegmentedControl';
 
 // Layout

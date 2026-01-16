@@ -43,6 +43,7 @@ const mapMaterialResponse = (
         manufacturer: item.manufacturer || undefined,
         usage: item.description || undefined,
         remaining: 0,
+        isActive: item.isActive ?? true, // Default to true if undefined
     };
 };
 

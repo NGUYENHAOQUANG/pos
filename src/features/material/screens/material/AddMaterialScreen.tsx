@@ -48,6 +48,9 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const [usage, setUsage] = useState('');
     const [manufacturer, setManufacturer] = useState('');
 
+    // Status State
+    const [isActive, setIsActive] = useState<boolean>(true);
+
     // Fetch material types when group changes
     const { data: typesByGroup = [] } = useMaterialTypesByGroup(group);
 
@@ -88,10 +91,10 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
             {
                 name: name.trim(),
                 materialTypeId: typeValidation.type.id,
-                description: usage || '', // Map usage to description
+                description: usage || '',
                 unitId: unitValidation.unitId,
                 manufacturer: manufacturer?.trim() || null,
-                isActive: true,
+                isActive: isActive,
             },
             {
                 onSuccess: () => {
@@ -141,6 +144,8 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                             onUsageChange={setUsage}
                             manufacturer={manufacturer}
                             onManufacturerChange={setManufacturer}
+                            isActive={isActive}
+                            onIsActiveChange={setIsActive}
                             onUnitDropdownOpen={() => {
                                 setTimeout(() => {
                                     scrollViewRef.current?.scrollToEnd({ animated: true });
