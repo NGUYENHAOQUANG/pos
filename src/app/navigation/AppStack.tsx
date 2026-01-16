@@ -54,6 +54,7 @@ import { ConnectDeviceScreens } from '@/features/control/screens/devices/Connect
 import CustomFeedingMachine from '@/features/control/screens/CustomFeedingMachine/CustomFeedingMachineScreen';
 import { ScheduleActivitieScreens } from '@/features/control/screens/schedule/ScheduleActivitieScreens';
 import { UserManualScreens } from '@/features/control/screens/usermanual/UserManualScreens';
+import { GeneralUserManualScreens } from '@/features/control/screens/usermanual/GeneralUserManualScreens';
 import { HistoryActivitieScreens } from '@/features/control/screens/schedule/HistoryActivitieScreens';
 
 // Menu screens
@@ -178,6 +179,7 @@ export type AppStackParamList = {
     Schedule: { pondName: string };
     History: { pondName: string };
     UserManual: undefined;
+    GeneralUserManual: undefined;
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
@@ -267,6 +269,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
             <Stack.Screen name="History" component={HistoryActivitieScreens} />
             <Stack.Screen name="UserManual" component={UserManualScreens} />
+            <Stack.Screen name="GeneralUserManual" component={GeneralUserManualScreens} />
 
             {/* ============== Menu Screens ============== */}
             <Stack.Screen name="PersonalInformation" component={PersonalInformationWithProvider} />
