@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { View, StyleSheet, FlatList } from 'react-native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import { colors } from '@/styles';
 import { ShrimpPondList } from '@/features/farm/components/pond/ShrimpPondList';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -10,8 +9,8 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
-import { Loading } from '@/shared/components/ui/Loading';
 import { useFarm } from '@/features/farm/store/farmStore';
+import { PondListSkeleton } from '@/features/farm/components/pond/PondListSkeleton';
 
 interface ShrimpPondListScreensProps {}
 
@@ -47,6 +46,13 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const [isLoadMore, setIsLoadMore] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Track previous zone to detect switches
+    const prevZoneIdRef = useRef<number | null>(selectedZoneId);
+
+    // Ref for FlatList scrolling
+    const flatListRef = useRef<FlatList>(null);
+    useScrollToTop(flatListRef as any);
+
     useEffect(() => {
         fetchZones();
     }, [fetchZones]);
@@ -54,9 +60,21 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     // Fetch ponds when selectedZoneId changes
     useEffect(() => {
         if (selectedZoneId) {
-            fetchPondsByZone(selectedZoneId);
+            // Logic to prevent "Content -> Skeleton" flash on App Load
+            // But ensure Skeleton appears on Zone Switch.
+
+            const isZoneSwitch = selectedZoneId !== prevZoneIdRef.current;
+            // If we have data and it's NOT a zone switch (e.g. App Load / Re-mount),
+            // use background fetch to keep showing content.
+            const isHydrated = ponds.length > 0;
+            const shouldBackgroundLoad = !isZoneSwitch && isHydrated;
+
+            // Update ref
+            prevZoneIdRef.current = selectedZoneId;
+
+            fetchPondsByZone(selectedZoneId, { isBackground: shouldBackgroundLoad });
         }
-    }, [selectedZoneId, fetchPondsByZone]);
+    }, [selectedZoneId, fetchPondsByZone, ponds.length]);
 
     // Effect to select the first zone by default if none selected
     useEffect(() => {
@@ -65,6 +83,8 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
             const targetZone = zones.find(z => z.id === 71) || zones[0];
             if (targetZone) {
                 setSelectedZoneId(targetZone.id);
+                // Update ref to avoid triggering switch logic unnecessarily
+                prevZoneIdRef.current = targetZone.id;
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);
@@ -177,8 +197,9 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
         setIsRefreshing(true);
         try {
-            // Use isBackground to update silently (without full screen loader)
-            await fetchPondsByZone(selectedZoneId, { isBackground: true });
+            // User request: "When refresh, must also skeleton"
+            // So we use isBackground: false (default), which clears ponds and shows skeleton.
+            await fetchPondsByZone(selectedZoneId, { isBackground: false });
         } finally {
             setIsRefreshing(false);
         }
@@ -204,8 +225,11 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                 tabType="dashboard"
                 counts={counts}
             />
-            <Loading isLoading={isLoadingPonds}>
+            {isLoadingPonds ? (
+                <PondListSkeleton />
+            ) : (
                 <ShrimpPondList
+                    ref={flatListRef}
                     data={filteredData}
                     onPondPress={handlePondPress}
                     onInfoPress={handlePondInfoPress}
@@ -215,7 +239,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                     refreshing={isRefreshing}
                     onRefresh={handleRefresh}
                 />
-            </Loading>
+            )}
         </View>
     );
 };

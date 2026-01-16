@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     },
     itemTitle: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '400',
     },
