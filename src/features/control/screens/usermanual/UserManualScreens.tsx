@@ -1,11 +1,5 @@
-/**
- * @file UserManualScreens.tsx
- * @description User Manual Screen - Guide for device control features
- * @author Kindy
- * @created 2026-01-08
- */
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
@@ -161,7 +155,7 @@ export const UserManualScreens: React.FC = () => {
     const navigation = useNavigation();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <HeaderDevices
                 title="Hướng Dẫn Sử Dụng"
                 showBackButton={true}
@@ -187,7 +181,7 @@ export const UserManualScreens: React.FC = () => {
                     <ManualRow key={item.id} item={item} />
                 ))}
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 

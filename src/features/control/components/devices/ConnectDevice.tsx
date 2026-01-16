@@ -170,7 +170,11 @@ const styles = StyleSheet.create({
     },
     flashButton: {
         position: 'absolute',
-        top: 24, // Adjust top spacing (e.g. status bar + padding)
+        top: Platform.select({
+            ios: 60,
+            android: 24,
+            default: 24,
+        }),
         right: 20,
         width: 40,
         height: 40,

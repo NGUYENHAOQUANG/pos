@@ -50,7 +50,7 @@ export default function LoginScreen() {
     };
 
     const handleCreateAccount = () => {
-        navigation.navigate('Register');
+        navigation.navigate('Register', { phoneNumber: phone });
     };
 
     return (

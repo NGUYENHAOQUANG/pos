@@ -16,7 +16,6 @@ import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
 import { authApi } from '@/features/auth/api/authApi';
-import { isPhoneRegistered } from '@/features/auth/data/mockUsers';
 import Toast from 'react-native-toast-message';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { colors, spacing, typography } from '@/styles';
@@ -53,39 +52,48 @@ export default function AuthScreen() {
             return;
         }
 
-        // Kiểm tra số điện thoại có được đăng ký không (sử dụng mock data)
-        if (!isPhoneRegistered(rawPhone)) {
-            setIsUnregistered(true);
-            setError('');
-            return;
-        }
-
         setIsLoading(true);
 
         try {
             const response = await authApi.requestOtp(rawPhone);
 
-            // In Dev environment, OTP is in response.data.testOtp
-            const devOtp = response?.data?.testOtp;
+            if (response.statusCode === 200) {
+                // In Dev environment, OTP is in response.data.testOtp
+                const devOtp = response?.data?.testOtp;
 
-            if (devOtp) {
-                // Show Notifee Notification as requested
-                await notificationHelper.displayOtpNotification(String(devOtp));
+                if (devOtp) {
+                    // Show Notifee Notification as requested
+                    await notificationHelper.displayOtpNotification(String(devOtp));
+                }
+
+                navigation.navigate('Verify-otp', {
+                    method: 'phone',
+                    contact: rawPhone,
+                    otpCode: devOtp ? String(devOtp) : undefined,
+                });
+            } else {
+                setIsUnregistered(true);
             }
-
-            navigation.navigate('Verify-otp', {
-                method: 'phone',
-                contact: rawPhone,
-                otpCode: devOtp ? String(devOtp) : undefined,
-            });
         } catch (err: any) {
             console.error('Login failed:', err);
-            setError('Đã có lỗi xảy ra, vui lòng thử lại.');
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
-            });
+            // Check for user not found error (statusCode 404 or specific message)
+            // Assuming API returns 404 or specific error for unregistered user
+            // We need to inspect the error object structure from apiClient
+            if (
+                err?.status === 404 ||
+                err?.response?.status === 404 ||
+                err?.message?.includes('not found')
+            ) {
+                setIsUnregistered(true);
+                setError('');
+            } else {
+                setError('Đã có lỗi xảy ra, vui lòng thử lại.');
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lỗi',
+                    text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
+                });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -97,7 +105,7 @@ export default function AuthScreen() {
         setIsUnregistered(false);
     };
 
-    const handleRegisterPress = async () => {
+    const handleRegisterPress = () => {
         setError('');
         setIsUnregistered(false);
 
@@ -120,36 +128,10 @@ export default function AuthScreen() {
             return;
         }
 
-        setIsLoading(true);
-
-        try {
-            const response = await authApi.requestOtp(rawPhone);
-
-            // In Dev environment, OTP is in response.data.testOtp
-            const devOtp = response?.data?.testOtp;
-
-            if (devOtp) {
-                // Show Notifee Notification as requested
-                await notificationHelper.displayOtpNotification(String(devOtp));
-            }
-
-            navigation.navigate('Verify-otp', {
-                method: 'phone',
-                contact: rawPhone,
-                otpCode: devOtp ? String(devOtp) : undefined,
-            });
-        } catch (err: any) {
-            console.error('Login failed:', err);
-            setError('Đã có lỗi xảy ra, vui lòng thử lại.');
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-        navigation.navigate('Register');
+        // Navigate to Register screen with phone number
+        navigation.navigate('Register', {
+            phoneNumber: rawPhone,
+        });
     };
 
     return (

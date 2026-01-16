@@ -11,12 +11,13 @@ import {
     AquacultureForm,
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
-import { useMenuContext } from '@/features/menu/store/menuStore';
+import { useFarm } from '@/features/farm/store/farmStore';
+import { seasonApi } from '@/features/farm/api/seasonApi';
 
 export const AddAquacultureScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { addAquaculture } = useMenuContext();
+    const { zones, fetchSeasons } = useFarm();
     const formRef = useRef<AquacultureFormRef>(null);
 
     useFocusEffect(
@@ -33,12 +34,27 @@ export const AddAquacultureScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         const data = formRef.current?.submit();
-        if (data) {
-            addAquaculture(data);
-            Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
-            navigation.goBack();
+        if (data && data.zoneId) {
+            try {
+                // Call create API
+                await seasonApi.createSeason(data.zoneId, {
+                    seasonName: data.name,
+                    startDate: data.startDate?.toISOString(),
+                    endDate: data.endDate?.toISOString(),
+                });
+                Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
+                // Refresh seasons list
+                await fetchSeasons(zones);
+                navigation.goBack();
+            } catch (_error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lỗi',
+                    text2: 'Không thể tạo vụ nuôi',
+                });
+            }
         }
     };
 
@@ -47,7 +63,7 @@ export const AddAquacultureScreens: React.FC = () => {
             <HeaderMenu title="Tạo vụ nuôi" onBack={() => navigation.goBack()} />
 
             <View style={styles.content}>
-                <AquacultureForm ref={formRef} />
+                <AquacultureForm ref={formRef} zones={zones} />
             </View>
 
             <ButtonBarMenu

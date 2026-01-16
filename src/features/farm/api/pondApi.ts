@@ -94,7 +94,7 @@ export const pondApi = {
         try {
             const response = await apiClient.get(API_ENDPOINTS.POND_TYPES.LIST);
             const responseData = response.data;
-            console.log('Raw Pond Types Response:', JSON.stringify(responseData, null, 2));
+            // console.log('Raw Pond Types Response:', JSON.stringify(responseData, null, 2));
 
             if (Array.isArray(responseData)) return responseData;
 
@@ -123,10 +123,10 @@ export const pondApi = {
         try {
             const response = await apiClient.get(API_ENDPOINTS.POND_TYPE_OPERATIONS.LIST);
             const responseData = response.data;
-            console.log(
-                'Raw Pond Type Operations Response:',
-                JSON.stringify(responseData, null, 2)
-            );
+            // console.log(
+            //     'Raw Pond Type Operations Response:',
+            //     JSON.stringify(responseData, null, 2)
+            // );
 
             if (Array.isArray(responseData)) return responseData;
 

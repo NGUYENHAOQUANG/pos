@@ -76,4 +76,12 @@ export const API_ENDPOINTS = {
         UPDATE: (id: number) => `/materials/${id}`,
         DELETE: (id: number) => `/materials/${id}`,
     },
+    // Production Seasons
+    PRODUCTION_SEASONS: {
+        LIST: (zoneId: number | string) => `/zones/${zoneId}/seasons`,
+        DETAIL: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
+        CREATE: (zoneId: number | string) => `/zones/${zoneId}/seasons`,
+        UPDATE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
+        DELETE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
+    },
 } as const;
