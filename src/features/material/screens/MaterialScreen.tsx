@@ -22,7 +22,7 @@ import {
 import { useWarehouseStore } from '@/features/material/store/warehouseStore';
 import { useInventoryStore } from '@/features/material/store/inventoryStore';
 import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
-import { useMaterials, useMaterialTypes } from '@/features/material/hooks/useMaterials';
+import { useMaterials, useMaterialTypes } from '@/features/material/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 

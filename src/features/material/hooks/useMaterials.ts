@@ -1,9 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialApi } from '@/features/material/api/materialApi';
-import { materialGroupApi } from '@/features/material/api/materialGroupApi';
-import { materialTypeApi } from '@/features/material/api/materialTypeApi';
-import { unitApi } from '@/features/material/api/unitApi';
 import {
     CreateMaterialRequest,
     UpdateMaterialRequest,
@@ -15,27 +12,12 @@ import {
 } from '@/features/material/types/material.types';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
-
-// Constants for pagination
-const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 100;
+import { useMaterialGroups } from './useMaterialGroups';
+import { useMaterialTypes } from '@/features/material/hooks/useMaterialTypes';
+import { materialKeys } from '@/features/material/hooks/materialKeys';
 
 // Constants for staleTime (in milliseconds)
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-const STALE_TIME_LONG = 5 * 60 * 1000; // 5 minutes
-
-// Query Keys
-export const materialKeys = {
-    all: ['materials'] as const,
-    lists: () => [...materialKeys.all, 'list'] as const,
-    list: (params?: GetMaterialsParams) => [...materialKeys.lists(), params] as const,
-    details: () => [...materialKeys.all, 'detail'] as const,
-    detail: (id: number) => [...materialKeys.details(), id] as const,
-    groups: () => [...materialKeys.all, 'groups'] as const,
-    types: () => [...materialKeys.all, 'types'] as const,
-    typesByGroup: (groupName: string) => [...materialKeys.types(), 'by-group', groupName] as const,
-    units: () => [...materialKeys.all, 'units'] as const,
-};
 
 // Helper function to map MaterialResponse to IMaterial
 const mapMaterialResponse = (
@@ -62,94 +44,6 @@ const mapMaterialResponse = (
         usage: item.description || undefined,
         remaining: 0,
     };
-};
-
-/**
- * Hook to fetch material groups
- */
-export const useMaterialGroups = () => {
-    return useQuery({
-        queryKey: materialKeys.groups(),
-        queryFn: async () => {
-            const response = await materialGroupApi.getAll({
-                Page: DEFAULT_PAGE,
-                PageSize: DEFAULT_PAGE_SIZE,
-            });
-            if (response.result && response.data?.items) {
-                return response.data.items;
-            }
-            throw new Error(response.message || 'Không thể tải nhóm vật tư');
-        },
-        staleTime: STALE_TIME_LONG,
-    });
-};
-
-/**
- * Hook to fetch all material types
- */
-export const useMaterialTypes = () => {
-    return useQuery({
-        queryKey: materialKeys.types(),
-        queryFn: async () => {
-            const response = await materialTypeApi.getList({
-                Page: DEFAULT_PAGE,
-                PageSize: DEFAULT_PAGE_SIZE,
-            });
-            if (response.result && response.data?.items) {
-                return response.data.items;
-            }
-            throw new Error(response.message || 'Không thể tải loại vật tư');
-        },
-        staleTime: STALE_TIME_LONG,
-    });
-};
-
-/**
- * Hook to fetch material types by group name
- */
-export const useMaterialTypesByGroup = (groupName: string | null) => {
-    const { data: groups } = useMaterialGroups();
-
-    return useQuery({
-        queryKey: materialKeys.typesByGroup(groupName || ''),
-        queryFn: async () => {
-            if (!groupName || !groups) return [];
-
-            const selectedGroup = groups.find(g => g.name === groupName);
-            if (!selectedGroup) return [];
-
-            const response = await materialTypeApi.getList({
-                Page: DEFAULT_PAGE,
-                PageSize: DEFAULT_PAGE_SIZE,
-            });
-
-            if (response.result && response.data?.items) {
-                return (response.data.items || []).filter(
-                    item => item.materialGroupId === selectedGroup.id
-                );
-            }
-            throw new Error(response.message || 'Không thể tải loại vật tư');
-        },
-        enabled: !!groupName && !!groups,
-        staleTime: STALE_TIME_LONG,
-    });
-};
-
-/**
- * Hook to fetch units
- */
-export const useUnits = () => {
-    return useQuery({
-        queryKey: materialKeys.units(),
-        queryFn: async () => {
-            const response = await unitApi.getUnits();
-            if (response.data && response.data.items) {
-                return response.data.items;
-            }
-            throw new Error('Không thể tải đơn vị tính');
-        },
-        staleTime: STALE_TIME_LONG,
-    });
 };
 
 /**
