@@ -88,6 +88,7 @@ interface MaterialMenuOverlayProps {
     buttonPosition: { x: number; y: number; width: number; height: number };
     onClose: () => void;
     onPressCreateImport?: () => void;
+    onPressCreateExport?: () => void;
     onPressCreateAdjustment?: () => void;
     onPressCreateMaterial?: () => void;
 }
@@ -98,6 +99,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
         buttonPosition,
         onClose,
         onPressCreateImport,
+        onPressCreateExport,
         onPressCreateAdjustment,
         onPressCreateMaterial,
     } = props;
@@ -133,6 +135,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
 
     const menuItems = [
         { label: 'Tạo Phiếu Nhập Kho', onPress: onPressCreateImport },
+        { label: 'Tạo Phiếu Xuất Kho', onPress: onPressCreateExport },
         { label: 'Tạo Phiếu Điều Chỉnh Tồn Kho', onPress: onPressCreateAdjustment },
         { label: 'Tạo Vật Tư', onPress: onPressCreateMaterial },
     ];

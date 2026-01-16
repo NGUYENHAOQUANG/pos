@@ -47,6 +47,23 @@ export interface IWarehouseReceipt {
     totalAmount: number;
 }
 
+export interface IExportWarehouseMaterialItem {
+    id: string;
+    materialName: string;
+    quantity: string;
+    price: string;
+    unit?: string;
+    total?: number;
+}
+
+export interface IExportWarehouseReceipt {
+    id: string;
+    date: Date | string;
+    farm?: string; // Trường trại thay vì supplier
+    materials: IExportWarehouseMaterialItem[];
+    totalAmount: number;
+}
+
 export interface IInventoryTicketItem {
     id: string;
     materialName: string;
