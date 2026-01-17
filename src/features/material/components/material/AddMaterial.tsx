@@ -16,6 +16,7 @@ import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterialGroup, IMaterialType } from '@/features/material/types/material.types';
 import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -43,6 +44,10 @@ interface AddMaterialProps {
     manufacturer?: string;
     onManufacturerChange?: (text: string) => void;
     onUnitDropdownOpen?: () => void;
+
+    // Status
+    isActive?: boolean;
+    onIsActiveChange?: (value: boolean) => void;
 }
 
 export const AddMaterial: React.FC<AddMaterialProps> = ({
@@ -64,6 +69,8 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     onUnitDropdownOpen: _onUnitDropdownOpen,
     materialGroupsData: _materialGroupsData = [],
     typesByGroup = [],
+    isActive,
+    onIsActiveChange,
 }) => {
     const [isBasicExpanded, setIsBasicExpanded] = useState(true);
     const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
@@ -174,6 +181,21 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                     />
                                 </View>
                             </View>
+
+                            {/* Status Radio Buttons */}
+                            <View style={[styles.rowMarginTop]}>
+                                <View style={styles.labelContainer}>
+                                    <Text style={styles.label}>Trạng thái</Text>
+                                </View>
+                                <RadioButton
+                                    options={[
+                                        { label: 'Hoạt động', value: true },
+                                        { label: 'Ngưng', value: false },
+                                    ]}
+                                    value={isActive}
+                                    onValueChange={onIsActiveChange}
+                                />
+                            </View>
                         </View>
                     </>
                 )}
@@ -194,11 +216,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                             <View style={styles.inputGroup}>
                                 <View style={styles.labelContainer}>
                                     <Text style={styles.required}>* </Text>
-                                    <Text style={styles.label}>Công dụng</Text>
+                                    <Text style={styles.label}>Mô tả</Text>
                                 </View>
                                 <TextInput
                                     style={[styles.input, styles.textArea]}
-                                    placeholder="Nhập công dụng"
+                                    placeholder="Nhập mô tả chi tiết vật tư"
                                     placeholderTextColor={colors.textSecondary}
                                     value={usage}
                                     onChangeText={onUsageChange}
@@ -210,11 +232,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                             <View style={styles.inputGroup}>
                                 <View style={styles.labelContainer}>
                                     <Text style={styles.required}>* </Text>
-                                    <Text style={styles.label}>Nhà sản xuất</Text>
+                                    <Text style={styles.label}>Nhãn hiệu</Text>
                                 </View>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Nhập nhà sản xuất"
+                                    placeholder="Nhập nhãn hiệu"
                                     placeholderTextColor={colors.textSecondary}
                                     value={manufacturer}
                                     onChangeText={onManufacturerChange}
@@ -261,7 +283,6 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontWeight: '400',
         marginBottom: spacing.xs,
-        lineHeight: 20,
     },
     required: {
         fontSize: 14,
