@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '@/features/control/components/HeaderCamLocation';
@@ -11,26 +12,20 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useControl } from '@/features/control/store/controlStore';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Zone } from '@/features/farm/types/farm.types';
 import { DeviceControlSkeleton } from '@/features/control/components/DeviceControlSkeleton';
+import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
-    const {
-        zones,
-        fetchZones,
-        ponds: farmPonds,
-        fetchPondsByZone,
-        isLoadingPonds,
-    } = useFarmStore();
-    const { ponds: devicePonds } = useControl();
 
+    // React Query Hooks (replacing farmStore fetchers)
+    const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
+    // Fallback to empty array if undefined
+    const zones = useMemo(() => zonesData || [], [zonesData]);
+
+    // Local State
     const [selectedFarm, setSelectedFarm] = useState<FarmLocation | undefined>(undefined);
-
-    // Local loading state for immediate feedback
-    const [isFirstLoad, setIsFirstLoad] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Help Modal State
     const [showHelpModal, setShowHelpModal] = useState(false);
@@ -41,10 +36,28 @@ export const DeviceControlScreens = () => {
         height: number;
     } | null>(null);
 
-    // Load zones on mount
-    React.useEffect(() => {
-        fetchZones();
-    }, [fetchZones]);
+    // Track previous zone to detect switches
+    const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
+
+    // Get Ponds via React Query based on selected Farm
+    const {
+        data: pondsData,
+        isLoading: isLoadingPonds,
+        refetch,
+        isRefetching,
+        hasNextPage,
+        fetchNextPage,
+        isFetchingNextPage,
+    } = usePondsByZone(selectedFarm ? Number(selectedFarm.id) : null);
+
+    // Flatten pagination data and ensure valid array
+    const farmPonds = useMemo(() => {
+        if (!pondsData?.pages) return [];
+        return pondsData.pages.reduce((acc, page) => [...acc, ...page.items], [] as any[]);
+    }, [pondsData]);
+
+    // Device Data from Control Store (Local State)
+    const { ponds: devicePonds } = useControl();
 
     // Map zones to FarmLocation format
     const farmLocations: FarmLocation[] = useMemo(() => {
@@ -67,60 +80,42 @@ export const DeviceControlScreens = () => {
             }, 50);
 
             return () => clearTimeout(timer);
-        } else if (farmLocations.length === 0 && !isLoadingPonds && zones.length > 0) {
-            // If zones loaded but no locations mapped (unlikely) or empty
-            setIsFirstLoad(false);
         }
-    }, [farmLocations, selectedFarm, zones, isLoadingPonds]);
-
-    // Track previous zone to detect switches
-    const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
+    }, [farmLocations, selectedFarm]);
 
     // Ref for scroll to top
     const flatListRef = useRef<FlatList>(null);
     useScrollToTop(flatListRef as any);
 
-    // Fetch ponds when selected farm changes
+    // Update ref when farm changes
     React.useEffect(() => {
-        const loadPonds = async () => {
-            if (selectedFarm?.id) {
-                // Logic to prevent "Content -> Skeleton" flash on App Load
-                // But ensure Skeleton appears on Zone Switch.
-                const isZoneSwitch = selectedFarm.id !== prevFarmIdRef.current;
+        if (selectedFarm?.id) {
+            prevFarmIdRef.current = selectedFarm.id;
+        }
+    }, [selectedFarm]);
 
-                // If we have data and it's NOT a zone switch (e.g. App Load / Re-mount),
-                // use background fetch to keep showing content.
-                const isHydrated = farmPonds.length > 0;
+    // Combined Loading State
+    // Show skeleton if:
+    // 1. Loading Zones (App startup/First navigaton)
+    // 2. Zones loaded but Farm not yet selected (Init logic in useEffect)
+    // 3. Loading Ponds (React Query active)
+    // 4. Manual Refetch or Network Reconnect (but not Load More)
+    const { isConnected } = useNetInfo();
 
-                // NOTE: 'isLoadingPonds' from farmStore might be global, so we rely on local logic + store updates
-                // But fetchPondsByZone in farmStore accepts isBackground.
-
-                const shouldBackgroundLoad = !isZoneSwitch && isHydrated;
-
-                // Update ref
-                prevFarmIdRef.current = selectedFarm.id;
-
-                try {
-                    // Pass isBackground options if supported by store.
-                    // Looking at farmStore, fetchPondsByZone DOES accept { isBackground: boolean }
-                    await fetchPondsByZone(Number(selectedFarm.id), {
-                        isBackground: shouldBackgroundLoad,
-                    });
-                } finally {
-                    setIsFirstLoad(false);
-                }
-            }
-        };
-        loadPonds();
-    }, [selectedFarm, fetchPondsByZone, farmPonds.length]);
+    // Combined Loading State
+    // Show skeleton if:
+    // 1. Loading Zones (App startup/First navigaton)
+    // 2. Zones loaded but Farm not yet selected (Init logic in useEffect)
+    // 3. Loading Ponds (React Query active)
+    // 4. Manual Refetch or Network Reconnect (but not Load More)
+    const showSkeleton =
+        isLoadingZones ||
+        !selectedFarm ||
+        isLoadingPonds ||
+        (!!isConnected && isRefetching && !isFetchingNextPage);
 
     const handleRefresh = async () => {
-        setIsRefreshing(true);
-        if (selectedFarm?.id) {
-            // Force skeleton on refresh per user request
-            await fetchPondsByZone(Number(selectedFarm.id), { isBackground: false });
-        }
-        setIsRefreshing(false);
+        await refetch();
     };
 
     const handleConnectDevice = (pondName: string) => {
@@ -135,9 +130,8 @@ export const DeviceControlScreens = () => {
     const filteredPonds = useMemo(() => {
         if (!selectedFarm || !farmPonds) return [];
 
-        const mappedPonds = farmPonds.map(realPond => {
+        const mappedPonds = farmPonds.map((realPond: any) => {
             // Find corresponding device data in controlStore
-            // Matching by name for now as controlStore uses names, but ideally should use ID
             const devicePond = devicePonds.find(p => p.name === realPond.name);
 
             return {
@@ -150,7 +144,7 @@ export const DeviceControlScreens = () => {
         });
 
         // Sort: Ponds with devices first
-        return mappedPonds.sort((a, b) => {
+        return mappedPonds.sort((a: any, b: any) => {
             if (a.hasDevices === b.hasDevices) return 0;
             return a.hasDevices ? -1 : 1;
         });
@@ -160,8 +154,7 @@ export const DeviceControlScreens = () => {
 
     // Calculate total active devices and warnings for summary based on FILTERED ponds
     const totalStats = useMemo(() => {
-        // Calculate total warnings across all ponds (sum of all devices with warning status)
-        const sumWarnings = filteredPonds.reduce((acc, pond) => {
+        const sumWarnings = filteredPonds.reduce((acc: number, pond: any) => {
             if (!pond.deviceStats) return acc;
             const stats = pond.deviceStats;
             return (
@@ -173,8 +166,7 @@ export const DeviceControlScreens = () => {
             );
         }, 0);
 
-        // Calculate total active ponds (ponds that have at least one device connected)
-        const countPondsWithDevices = filteredPonds.filter(p => p.hasDevices).length;
+        const countPondsWithDevices = filteredPonds.filter((p: any) => p.hasDevices).length;
 
         return {
             warning: sumWarnings,
@@ -182,6 +174,12 @@ export const DeviceControlScreens = () => {
             other: filteredPonds.length - countPondsWithDevices,
         };
     }, [filteredPonds]);
+
+    const handleLoadMore = () => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -198,13 +196,13 @@ export const DeviceControlScreens = () => {
                 showBackButton={false}
                 includeSafeArea={false}
             />
-            {isLoadingPonds && isFirstLoad ? (
+            {showSkeleton ? (
                 <DeviceControlSkeleton />
             ) : (
                 <FlatList
                     ref={flatListRef}
                     data={filteredPonds}
-                    keyExtractor={item => item.id.toString()}
+                    keyExtractor={(item: any) => item.id.toString()}
                     renderItem={({ item }) => (
                         <PondCard
                             pondName={item.name}
@@ -236,8 +234,10 @@ export const DeviceControlScreens = () => {
                     windowSize={5}
                     removeClippedSubviews={true}
                     refreshControl={
-                        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
+                        <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
                     }
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
                 />
             )}
 
