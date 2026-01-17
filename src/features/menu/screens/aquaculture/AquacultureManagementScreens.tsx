@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     StyleSheet,
@@ -11,8 +11,11 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { useFarm } from '@/features/farm/store/farmStore';
+
 import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/SeasonListSkeleton';
+
+import { useNetInfo } from '@react-native-community/netinfo';
+import { useSeasons } from '@/features/farm/hooks/useSeasons';
 
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -24,29 +27,17 @@ import { AquacultureItem } from '@/features/menu/components/aquaculture/Aquacult
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { seasons, fetchSeasons, zones, fetchZones, isLoadingSeasons, isLoadingZones } =
-        useFarm(); // Use useFarm
+    const { isConnected } = useNetInfo();
+
+    // Use new React Query hook
+    const { seasons, zones, isLoading, isRefetching, refresh } = useSeasons();
+
     const [selectedTab, setSelectedTab] = useState('all');
     const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
-    const [refreshing, setRefreshing] = useState(false);
-    // Only show "First Load" skeleton if we have NO data in the store
-    const [isFirstLoad, setIsFirstLoad] = useState(seasons.length === 0);
 
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-        // User wants skeleton on refresh
-        // We set isFirstLoad to true to force skeleton display
-        setIsFirstLoad(true);
-        try {
-            await fetchZones();
-            if (zones.length > 0) {
-                await fetchSeasons(zones);
-            }
-        } finally {
-            setRefreshing(false);
-            setIsFirstLoad(false);
-        }
-    }, [fetchSeasons, fetchZones, zones]);
+    const onRefresh = useCallback(() => {
+        refresh();
+    }, [refresh]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -61,47 +52,11 @@ export const AquacultureManagementScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // Fetch data on mount
-    useEffect(() => {
-        // We only fetch zones here. Seasons will be fetched via the dependent effect below.
-        fetchZones();
-    }, [fetchZones]);
-
-    // Fetch seasons when zones change and are valid
-    useEffect(() => {
-        console.log('[AquaScreen] Zones updated:', zones);
-        const loadSeasons = async () => {
-            if (zones && zones.length > 0) {
-                console.log('[AquaScreen] Found zones, fetching seasons...');
-                try {
-                    await fetchSeasons(zones);
-                } finally {
-                    setIsFirstLoad(false);
-                }
-            } else {
-                console.log('[AquaScreen] No zones available to fetch seasons.');
-                // If zones are empty, we are done loading (unless still fetching zones?)
-                // But fetchZones updates 'zones' and 'isLoadingZones' together possibly.
-                // We will check !isLoadingZones just to be safe, or just turn off first load.
-                setIsFirstLoad(false);
-            }
-        };
-        // If we invoke this, we should make sure we are not preempting a fetch?
-        // But this effect reacts to 'zones' change.
-        loadSeasons();
-    }, [zones, fetchSeasons]);
-
-    // Safety timeout for first load
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsFirstLoad(false);
-        }, 5000);
-        return () => clearTimeout(timer);
-    }, []);
-
     // Prepare zone options
     const zoneOptions = React.useMemo(() => {
         const options = [{ id: 'all', label: 'Tất cả trại' }];
+        if (!zones) return options;
+
         const mappedZones = zones.map(z => ({
             id: z.id.toString(),
             label: z.name,
@@ -110,11 +65,10 @@ export const AquacultureManagementScreens: React.FC = () => {
     }, [zones]);
 
     const activeData = React.useMemo(() => {
-        let filtered = seasons;
+        let filtered = seasons || [];
 
         // Filter by zone
         if (selectedZoneId !== 'all') {
-            // Filter by zoneId which is stored during fetch
             filtered = filtered.filter(s => s.zoneId?.toString() === selectedZoneId);
         }
 
@@ -130,12 +84,15 @@ export const AquacultureManagementScreens: React.FC = () => {
 
     const counts = React.useMemo(
         () => ({
-            all: seasons.length,
-            active: seasons.filter(i => i.status === 'Đang hoạt động').length,
-            ended: seasons.filter(i => i.status === 'Đã kết thúc').length,
+            all: seasons?.length || 0,
+            active: seasons?.filter(i => i.status === 'Đang hoạt động').length || 0,
+            ended: seasons?.filter(i => i.status === 'Đã kết thúc').length || 0,
         }),
         [seasons]
     );
+
+    // Network-aware skeleton logic
+    const showSkeleton = isLoading || (!!isConnected && isRefetching);
 
     return (
         <View style={styles.container}>
@@ -168,14 +125,14 @@ export const AquacultureManagementScreens: React.FC = () => {
             </View>
 
             <View style={styles.content}>
-                {isFirstLoad || (seasons.length === 0 && (isLoadingZones || isLoadingSeasons)) ? (
+                {showSkeleton ? (
                     <SeasonListSkeleton />
-                ) : seasons.length === 0 ? (
+                ) : !seasons || seasons.length === 0 ? (
                     /* Empty State - Wrapped in ScrollView for Refresh */
                     <ScrollView
                         contentContainerStyle={styles.emptyScrollContent}
                         refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
                         }
                     >
                         <View style={styles.cardContainer}>
@@ -191,7 +148,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                         data={activeData}
                         keyExtractor={item => item.id.toString()}
                         refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
                         }
                         renderItem={({ item }) => (
                             <AquacultureItem

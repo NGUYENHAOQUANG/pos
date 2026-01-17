@@ -10,4 +10,6 @@ export const farmKeys = {
         types: () => [...farmKeys.all, 'master', 'types'] as const,
         operations: () => [...farmKeys.all, 'master', 'operations'] as const,
     },
+    seasons: (zoneId?: number | string) =>
+        [...farmKeys.all, 'seasons', ...(zoneId ? [zoneId] : [])] as const,
 };
