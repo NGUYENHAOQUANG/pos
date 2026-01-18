@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
@@ -11,6 +12,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { PondListSkeleton } from '@/features/farm/components/pond/PondListSkeleton';
+import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
 interface ShrimpPondListScreensProps {}
 
@@ -29,52 +31,39 @@ const POND_TYPE_ORDER: Record<string, number> = {
 
 export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {
     const navigation = useNavigation<NavigationProp>();
-    const {
-        ponds,
-        activeCycles,
-        getCyclesByPondId,
-        zones,
-        fetchZones,
-        selectedZoneId,
-        setSelectedZoneId,
-        fetchPondsByZone,
-        isLoadingPonds,
-        hasMore,
-        totalCount,
-    } = useFarm();
-    const [selectedTab, setSelectedTab] = useState('all');
-    const [isLoadMore, setIsLoadMore] = useState(false);
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Track previous zone to detect switches
-    const prevZoneIdRef = useRef<number | null>(selectedZoneId);
+    // Store hooks for Global State (Zone Selection) & Cycles logic
+    // We purposefully ignore the store's data fetching parts (ponds, zones, fetchers)
+    const { activeCycles, getCyclesByPondId, selectedZoneId, setSelectedZoneId } = useFarm();
+
+    // React Query Hooks for Data Fetching
+    const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
+    // Safely fallback to empty array
+    const zones = useMemo(() => zonesData || [], [zonesData]);
+
+    const {
+        data: pondsData,
+        isLoading: isLoadingPonds,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        refetch,
+        isRefetching,
+    } = usePondsByZone(selectedZoneId);
+
+    // Flatten pagination data using reduce instead of flatMap for better compatibility
+    const ponds = useMemo(() => {
+        if (!pondsData?.pages) return [];
+        return pondsData.pages.reduce((acc, page) => [...acc, ...page.items], [] as any[]);
+    }, [pondsData]);
+
+    const totalCount = pondsData?.pages[0]?.total || 0;
+
+    const [selectedTab, setSelectedTab] = useState('all');
 
     // Ref for FlatList scrolling
     const flatListRef = useRef<FlatList>(null);
     useScrollToTop(flatListRef as any);
-
-    useEffect(() => {
-        fetchZones();
-    }, [fetchZones]);
-
-    // Fetch ponds when selectedZoneId changes
-    useEffect(() => {
-        if (selectedZoneId) {
-            // Logic to prevent "Content -> Skeleton" flash on App Load
-            // But ensure Skeleton appears on Zone Switch.
-
-            const isZoneSwitch = selectedZoneId !== prevZoneIdRef.current;
-            // If we have data and it's NOT a zone switch (e.g. App Load / Re-mount),
-            // use background fetch to keep showing content.
-            const isHydrated = ponds.length > 0;
-            const shouldBackgroundLoad = !isZoneSwitch && isHydrated;
-
-            // Update ref
-            prevZoneIdRef.current = selectedZoneId;
-
-            fetchPondsByZone(selectedZoneId, { isBackground: shouldBackgroundLoad });
-        }
-    }, [selectedZoneId, fetchPondsByZone, ponds.length]);
 
     // Effect to select the first zone by default if none selected
     useEffect(() => {
@@ -83,8 +72,6 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
             const targetZone = zones.find(z => z.id === 71) || zones[0];
             if (targetZone) {
                 setSelectedZoneId(targetZone.id);
-                // Update ref to avoid triggering switch logic unnecessarily
-                prevZoneIdRef.current = targetZone.id;
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);
@@ -92,7 +79,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const farmOptions: DropDownItem[] = zones.map(zone => ({
         id: zone.id.toString(),
         label: zone.name,
-        value: zone.code || zone.id.toString(), // Use code if available, else ID
+        value: zone.code || zone.id.toString(),
     }));
 
     const selectedFarm: DropDownItem | undefined =
@@ -134,12 +121,9 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         [activeCycles, getCyclesByPondId]
     );
 
-    // Generic status checker for consistency with ShrimpPondList's getStatus
     const getComputedStatus = useCallback(
         (pond: any) => {
             const hasCycle = checkHasCycle(pond.id);
-
-            // User request: "Any pond with a cycle is Active, otherwise Preparing"
             if (hasCycle) {
                 return 'active';
             }
@@ -148,28 +132,25 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         [checkHasCycle]
     );
 
-    // Calculate counts based on COMPUTED status (requires activity + generic rules)
+    // Calculate counts
     const counts = useMemo(() => {
-        const all = totalCount > 0 ? totalCount : ponds.length; // Use server total if available
-        const active = ponds.filter(pond => getComputedStatus(pond) === 'active').length;
-        const preparing = ponds.filter(pond => getComputedStatus(pond) === 'preparing').length;
+        const all = totalCount > 0 ? totalCount : ponds.length;
+        const active = ponds.filter((pond: any) => getComputedStatus(pond) === 'active').length;
+        const preparing = ponds.filter(
+            (pond: any) => getComputedStatus(pond) === 'preparing'
+        ).length;
         return { all, active, preparing };
     }, [ponds, getComputedStatus, totalCount]);
 
     const filteredData = useMemo(() => {
         let data = ponds;
         if (selectedTab === 'active') {
-            data = ponds.filter(pond => getComputedStatus(pond) === 'active');
+            data = ponds.filter((pond: any) => getComputedStatus(pond) === 'active');
         } else if (selectedTab === 'preparing') {
-            data = ponds.filter(pond => getComputedStatus(pond) === 'preparing');
+            data = ponds.filter((pond: any) => getComputedStatus(pond) === 'preparing');
         }
 
-        // We rely on the store 'ponds' being correct for the selected zone.
-        // Pagination: The store accumulates ponds, so we just render them.
-
-        return [...data].sort((a, b) => {
-            // pond.type is now an object, access name for mapping
-            // Safely handle if it's still a string during migration or API mismatch
+        return [...data].sort((a: any, b: any) => {
             const typeA = typeof a.type === 'string' ? a.type : a.type?.name;
             const typeB = typeof b.type === 'string' ? b.type : b.type?.name;
 
@@ -179,34 +160,25 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         });
     }, [selectedTab, ponds, getComputedStatus]);
 
-    const handleLoadMore = useCallback(async () => {
-        if (!hasMore || isLoadMore || isLoadingPonds) return;
-
-        setIsLoadMore(true);
-        if (selectedZoneId) {
-            try {
-                await fetchPondsByZone(selectedZoneId, { isLoadMore: true });
-            } finally {
-                setIsLoadMore(false);
-            }
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
         }
-    }, [hasMore, isLoadMore, isLoadingPonds, selectedZoneId, fetchPondsByZone]);
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const handleRefresh = useCallback(async () => {
-        if (!selectedZoneId || isRefreshing || isLoadingPonds) return;
+    const handleRefresh = useCallback(() => {
+        refetch();
+    }, [refetch]);
 
-        setIsRefreshing(true);
-        try {
-            // User request: "When refresh, must also skeleton"
-            // So we use isBackground: false (default), which clears ponds and shows skeleton.
-            await fetchPondsByZone(selectedZoneId, { isBackground: false });
-        } finally {
-            setIsRefreshing(false);
-        }
-    }, [selectedZoneId, isRefreshing, isLoadingPonds, fetchPondsByZone]);
+    const { isConnected } = useNetInfo();
+
+    const showSkeleton =
+        isLoadingZones ||
+        !selectedZoneId ||
+        isLoadingPonds ||
+        (!!isConnected && isRefetching && !isFetchingNextPage);
 
     const renderFooter = useCallback(() => {
-        // Loading footer disabled per user request
         return null;
     }, []);
 
@@ -225,7 +197,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                 tabType="dashboard"
                 counts={counts}
             />
-            {isLoadingPonds ? (
+            {showSkeleton ? (
                 <PondListSkeleton />
             ) : (
                 <ShrimpPondList
@@ -236,7 +208,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={renderFooter}
-                    refreshing={isRefreshing}
+                    refreshing={isRefetching}
                     onRefresh={handleRefresh}
                 />
             )}

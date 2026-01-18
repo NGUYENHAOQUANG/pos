@@ -1,5 +1,6 @@
 import React, { useState, useLayoutEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
@@ -40,7 +41,6 @@ export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // React Query hooks for materials
     const searchText = useMaterialFiltersStore(state => state.searchText);
@@ -77,12 +77,17 @@ export const MeterialScreen = () => {
         return params;
     }, [filterType, searchText, materialTypes]);
 
-    // Fetch materials with React Query
+    // React Query hooks for materials
     const {
         data: materials = [],
         isLoading: isLoadingMaterials,
         refetch: refetchMaterials,
+        isRefetching: isRefetchingMaterials,
     } = useMaterials(materialParams);
+
+    const { isConnected } = useNetInfo();
+
+    const showSkeleton = isLoadingMaterials || (!!isConnected && isRefetchingMaterials);
 
     // Warehouse and Inventory stores (still using Zustand for now)
     const warehouseList = useWarehouseStore(state => state.warehouseList);
@@ -191,16 +196,9 @@ export const MeterialScreen = () => {
         [setFilterMaterialName]
     );
 
-    const handleRefresh = useCallback(async () => {
-        if (isRefreshing || isLoadingMaterials) return;
-
-        setIsRefreshing(true);
-        try {
-            await refetchMaterials();
-        } finally {
-            setIsRefreshing(false);
-        }
-    }, [isRefreshing, isLoadingMaterials, refetchMaterials]);
+    const handleRefresh = useCallback(() => {
+        refetchMaterials();
+    }, [refetchMaterials]);
 
     // Client-side filtering (for search text matching)
     // Note: API already handles MaterialTypeId and Search filters, but we do client-side
@@ -284,7 +282,7 @@ export const MeterialScreen = () => {
 
             <View style={styles.content}>
                 {selectedTab === 'list' &&
-                    (isLoadingMaterials || isRefreshing ? (
+                    (showSkeleton ? (
                         <MaterialListScreen
                             materials={[]}
                             onEdit={handleEditMaterial}
@@ -306,7 +304,7 @@ export const MeterialScreen = () => {
                                     initialMaterialName: adjustmentItem.name,
                                 } as any)
                             }
-                            refreshing={isRefreshing}
+                            refreshing={!!isRefetchingMaterials}
                             onRefresh={handleRefresh}
                         />
                     ) : (

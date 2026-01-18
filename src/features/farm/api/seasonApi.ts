@@ -5,32 +5,27 @@ import { SeasonData } from '@/features/farm/types/farm.types';
 export const seasonApi = {
     getSeasons: async (zoneId: number | string): Promise<SeasonData[]> => {
         const url = API_ENDPOINTS.PRODUCTION_SEASONS.LIST(zoneId);
-        try {
-            const response = await apiClient.get(url);
-            const responseData = response.data;
+        const response = await apiClient.get(url);
+        const responseData = response.data;
 
-            // Check for nested data.items structure (pagination response)
-            if (responseData?.data?.items && Array.isArray(responseData.data.items)) {
-                return responseData.data.items;
-            }
-            if (Array.isArray(responseData)) {
-                return responseData;
-            }
-            if (responseData?.data && Array.isArray(responseData.data)) {
-                return responseData.data;
-            }
-            if (responseData?.result && Array.isArray(responseData.result)) {
-                return responseData.result;
-            }
-            if (responseData?.items && Array.isArray(responseData.items)) {
-                return responseData.items;
-            }
-
-            return [];
-        } catch (_error) {
-            // Return empty array to avoid breaking Promise.all when one zone fails
-            return [];
+        // Check for nested data.items structure (pagination response)
+        if (responseData?.data?.items && Array.isArray(responseData.data.items)) {
+            return responseData.data.items;
         }
+        if (Array.isArray(responseData)) {
+            return responseData;
+        }
+        if (responseData?.data && Array.isArray(responseData.data)) {
+            return responseData.data;
+        }
+        if (responseData?.result && Array.isArray(responseData.result)) {
+            return responseData.result;
+        }
+        if (responseData?.items && Array.isArray(responseData.items)) {
+            return responseData.items;
+        }
+
+        return [];
     },
     getSeasonDetail: async (zoneId: number | string, id: string): Promise<SeasonData> => {
         const response = await apiClient.get(API_ENDPOINTS.PRODUCTION_SEASONS.DETAIL(zoneId, id));
