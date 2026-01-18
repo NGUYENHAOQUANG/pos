@@ -13,7 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
-import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
+import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 export interface DropDownItem {
     id: string | number;
