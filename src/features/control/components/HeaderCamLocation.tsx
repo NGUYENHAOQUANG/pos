@@ -15,7 +15,7 @@ interface HeaderCamLocationProps {
     locations?: FarmLocation[];
     selectedLocation?: FarmLocation;
     onLocationSelect?: (location: FarmLocation) => void;
-    onHelpPress?: () => void;
+    onHelpPress?: (position: { x: number; y: number; width: number; height: number }) => void;
     style?: StyleProp<ViewStyle>;
 }
 
@@ -34,6 +34,7 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
     style,
 }) => {
     const insets = useSafeAreaInsets();
+    const buttonRef = React.useRef<View>(null);
 
     // Adapt FarmLocation to DropDownItem
     const dropdownData: DropDownItem[] = locations.map(loc => ({
@@ -52,6 +53,19 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
         }
     };
 
+    const handleHelpPress = () => {
+        buttonRef.current?.measure((x, y, width, height, pageX, pageY) => {
+            if (onHelpPress) {
+                onHelpPress({
+                    x: pageX || 0,
+                    y: pageY || 0,
+                    width: width || 0,
+                    height: height || 0,
+                });
+            }
+        });
+    };
+
     return (
         <View style={[styles.container, { paddingTop: insets.top + 12 }, style]}>
             {/* Location Picker Reuse */}
@@ -66,7 +80,12 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
             </View>
 
             {/* Help Button */}
-            <TouchableOpacity style={styles.menuButton} onPress={onHelpPress} activeOpacity={0.7}>
+            <TouchableOpacity
+                ref={buttonRef}
+                style={styles.menuButton}
+                onPress={handleHelpPress}
+                activeOpacity={0.7}
+            >
                 <Ionicons name="help-circle-outline" size={24} color={colors.text} />
             </TouchableOpacity>
         </View>

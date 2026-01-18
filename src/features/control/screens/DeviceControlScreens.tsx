@@ -1,9 +1,11 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 import { HeaderCamLocation, FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
+import { HelpOptionsModal } from '../components/HelpOptionsModal';
 import { colors } from '@/styles';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,6 +31,15 @@ export const DeviceControlScreens = () => {
     // Local loading state for immediate feedback
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Help Modal State
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [helpButtonPosition, setHelpButtonPosition] = useState<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null>(null);
 
     // Load zones on mount
     React.useEffect(() => {
@@ -116,6 +127,11 @@ export const DeviceControlScreens = () => {
         navigation.navigate('ConnectDevice', { pondName });
     };
 
+    const handleHelpPress = (position: { x: number; y: number; width: number; height: number }) => {
+        setHelpButtonPosition(position);
+        setShowHelpModal(true);
+    };
+
     const filteredPonds = useMemo(() => {
         if (!selectedFarm || !farmPonds) return [];
 
@@ -174,7 +190,7 @@ export const DeviceControlScreens = () => {
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
                     onLocationSelect={setSelectedFarm}
-                    onHelpPress={() => navigation.navigate('UserManual')}
+                    onHelpPress={handleHelpPress}
                 />
             )}
             <HeaderDevices
@@ -224,6 +240,20 @@ export const DeviceControlScreens = () => {
                     }
                 />
             )}
+
+            <HelpOptionsModal
+                isOpen={showHelpModal}
+                buttonPosition={helpButtonPosition}
+                onClose={() => setShowHelpModal(false)}
+                onPressUserManual={() => {
+                    setShowHelpModal(false);
+                    navigation.navigate('GeneralUserManual');
+                }}
+                onPressDeviceExplanation={() => {
+                    setShowHelpModal(false);
+                    navigation.navigate('UserManual');
+                }}
+            />
         </View>
     );
 };
