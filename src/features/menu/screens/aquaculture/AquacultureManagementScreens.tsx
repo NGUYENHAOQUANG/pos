@@ -11,12 +11,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-
 import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/SeasonListSkeleton';
-
-import { useNetInfo } from '@react-native-community/netinfo';
 import { useSeasons } from '@/features/farm/hooks/useSeasons';
-
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
@@ -27,16 +23,18 @@ import { AquacultureItem } from '@/features/menu/components/aquaculture/Aquacult
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { isConnected } = useNetInfo();
 
     // Use new React Query hook
-    const { seasons, zones, isLoading, isRefetching, refresh } = useSeasons();
+    const { seasons, zones, isLoading, refresh } = useSeasons();
 
     const [selectedTab, setSelectedTab] = useState('all');
     const [selectedZoneId, setSelectedZoneId] = useState<string>('all');
+    const [isPulling, setIsPulling] = useState(false);
 
-    const onRefresh = useCallback(() => {
-        refresh();
+    const onRefresh = useCallback(async () => {
+        setIsPulling(true);
+        await refresh();
+        setIsPulling(false);
     }, [refresh]);
 
     useFocusEffect(
@@ -79,7 +77,16 @@ export const AquacultureManagementScreens: React.FC = () => {
             filtered = filtered.filter(i => i.status === 'Đã kết thúc');
         }
 
-        return filtered;
+        // Sort by ID descending (newest created first)
+        return [...filtered].sort((a, b) => {
+            const idA = Number(a.id);
+            const idB = Number(b.id);
+            if (!isNaN(idA) && !isNaN(idB)) {
+                return idB - idA;
+            }
+            // Fallback for non-numeric IDs
+            return String(b.id).localeCompare(String(a.id));
+        });
     }, [seasons, selectedTab, selectedZoneId]);
 
     const counts = React.useMemo(
@@ -91,8 +98,14 @@ export const AquacultureManagementScreens: React.FC = () => {
         [seasons]
     );
 
-    // Network-aware skeleton logic
-    const showSkeleton = isLoading || (!!isConnected && isRefetching);
+    // Only show skeleton on initial load.
+    // We DO NOT include isRefetching here to avoid the "loading forever" blocking UI.
+    // The RefreshControl spinner will show the update progress instead.
+    // UPDATE: User wants skeleton during transition to avoid "jerky" updates.
+    // We show skeleton if we are loading OR if we are refetching (but not pulling to refresh).
+    // isPulling check ensures we don't show skeleton + spinner at same time.
+    const { isRefetching } = useSeasons();
+    const showSkeleton = isLoading || (isRefetching && !isPulling);
 
     return (
         <View style={styles.container}>
@@ -132,7 +145,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                     <ScrollView
                         contentContainerStyle={styles.emptyScrollContent}
                         refreshControl={
-                            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
                         }
                     >
                         <View style={styles.cardContainer}>
@@ -148,7 +161,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                         data={activeData}
                         keyExtractor={item => item.id.toString()}
                         refreshControl={
-                            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+                            <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
                         }
                         renderItem={({ item }) => (
                             <AquacultureItem

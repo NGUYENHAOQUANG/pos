@@ -139,7 +139,7 @@ export const colors = {
     shadow: '#000000',
     overlay: 'rgba(0, 0, 0, 0.5)',
     overlayLight: 'rgba(0, 0, 0, 0.45)', // Lighter overlay for modals
-
+    overlayLoading: 'rgba(255, 255, 255, 0.7)',
     // Status colors (for DevicesStatus)
     status: {
         // Total ponds - Blue

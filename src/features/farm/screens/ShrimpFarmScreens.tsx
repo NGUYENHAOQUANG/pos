@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
+import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -16,6 +17,7 @@ import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -32,72 +34,8 @@ const JOB_TYPES = {
     TROUBLESHOOTING: 'TROUBLESHOOTING' as const,
 };
 
-// 1. Ao Lắng: KHÔNG có tác vụ
-const SETTLING_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [];
-
-// 2. Ao Xử Lý: Đo thông số môi trường, Xử lý nước
-const TREATMENT_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-];
-
-// 3. Ao Chứa Nước: Đo thông số môi trường
-const WATER_STORAGE_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-];
-
-// 4. Ao Nuôi: Full tasks
-const CULTIVATION_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.FEED, items: [] },
-    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
-    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-    { type: JOB_TYPES.WATER_CHANGE, items: [] },
-    { type: JOB_TYPES.SIPHON, items: [] },
-    { type: JOB_TYPES.TROUBLESHOOTING, items: [] }, // Xử lý sự cố
-    { type: JOB_TYPES.TRANSFER_POND, items: [] },
-    { type: JOB_TYPES.HARVEST, items: [] },
-    { type: JOB_TYPES.CLEAN_POND, items: [] },
-    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
-];
-
-// 5. Ao Vèo: Full tasks minus Harvest
-const NURSERY_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.FEED, items: [] },
-    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
-    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-    { type: JOB_TYPES.WATER_CHANGE, items: [] },
-    { type: JOB_TYPES.SIPHON, items: [] },
-    { type: JOB_TYPES.TROUBLESHOOTING, items: [] },
-    { type: JOB_TYPES.TRANSFER_POND, items: [] },
-    { type: JOB_TYPES.CLEAN_POND, items: [] },
-    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
-];
-
-// 6. Ao Sẵn Sàng (Backup/Ready): Full tasks
-const READY_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.FEED, items: [] },
-    { type: JOB_TYPES.SHRIMP_INSPECTION, items: [] },
-    { type: JOB_TYPES.MEASURE_SIZE, items: [] },
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-    { type: JOB_TYPES.WATER_CHANGE, items: [] },
-    { type: JOB_TYPES.SIPHON, items: [] },
-    { type: JOB_TYPES.TROUBLESHOOTING, items: [] },
-    { type: JOB_TYPES.TRANSFER_POND, items: [] },
-    { type: JOB_TYPES.HARVEST, items: [] },
-    { type: JOB_TYPES.CLEAN_POND, items: [] },
-    { type: JOB_TYPES.SUN_DRY_POND, items: [] },
-];
-
-// 7. Ao Thải: Đo thông số môi trường, Xử lý nước
-const WASTE_POND_JOBS_TEMPLATE: { type: JobType; items: never[] }[] = [
-    { type: JOB_TYPES.ENVIRONMENT, items: [] },
-    { type: JOB_TYPES.WATER_TREATMENT, items: [] },
-];
+// JOB_TYPES constant - used for mapping API operation types to job types
+// Note: Hardcoded job templates have been removed. Jobs are now fetched from API.
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
@@ -120,6 +58,9 @@ export const ShrimpFarmScreens: React.FC = () => {
         getPondById,
         ponds,
         cycles,
+        // API data for operations
+        operationsByPondType = {},
+        fetchMasterData,
         // Destructure all job maps to trigger re-renders
         feedJobs,
         shrimpInspectionJobs,
@@ -133,7 +74,23 @@ export const ShrimpFarmScreens: React.FC = () => {
         cleanPondJobs,
         sunDryJobs,
         harvestJobs,
+        isLoadingMasterData,
     } = useFarm();
+
+    // Fallback loading state if fetchMasterData is triggered but not reflected in store yet
+    const [localLoading, setLocalLoading] = useState(false);
+
+    // Fetch master data (operation types) if not loaded yet
+    useEffect(() => {
+        if (Object.keys(operationsByPondType).length === 0) {
+            setLocalLoading(true);
+            fetchMasterData()
+                .then(() => setLocalLoading(false))
+                .catch(() => setLocalLoading(false));
+        }
+    }, [operationsByPondType, fetchMasterData]);
+
+    const isLoading = isLoadingMasterData || localLoading;
 
     // Get fresh pond data from context instead of stale params
     const pond = useMemo(() => {
@@ -164,50 +121,40 @@ export const ShrimpFarmScreens: React.FC = () => {
         const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
         return currentCycleData || foundCycle;
     }, [pond?.id, activeCycles, foundCycle]);
-
-    // Chọn template dựa vào loại ao
+    // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
-        let jobTemplate: { type: JobType; items: never[] }[] = [];
+        // Get pondTypeId from pond
+        const pondTypeId = typeof pond?.type === 'object' ? pond.type.id : null;
 
-        if (pond?.type) {
-            const typeValue = typeof pond.type === 'string' ? pond.type : pond.type.name;
-            switch (typeValue) {
-                case POND_TYPES.SETTLING:
-                    jobTemplate = SETTLING_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.TREATMENT:
-                    jobTemplate = TREATMENT_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.WATER_STORAGE:
-                    jobTemplate = WATER_STORAGE_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.CULTIVATION:
-                    jobTemplate = CULTIVATION_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.NURSERY:
-                    jobTemplate = NURSERY_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.READY:
-                    jobTemplate = READY_POND_JOBS_TEMPLATE;
-                    break;
-                case POND_TYPES.WASTE:
-                    jobTemplate = WASTE_POND_JOBS_TEMPLATE;
-                    break;
-                default:
-                    jobTemplate = [];
+        // Get operations from API data
+        if (pondTypeId && operationsByPondType[pondTypeId]?.length > 0) {
+            const apiOperations = operationsByPondType[pondTypeId];
+
+            // Convert API operations to JobType format
+            const jobTypes: { type: JobType; items: JobExecution[] }[] = [];
+
+            for (const operation of apiOperations) {
+                const jobType = mapOperationTypeToJobType(operation.operationTypeName);
+                if (jobType) {
+                    jobTypes.push({
+                        type: jobType,
+                        items: pond?.id ? getPondJobItems(pond.id, jobType) : [],
+                    });
+                }
             }
+
+            return jobTypes;
         }
 
-        return jobTemplate.map(template => ({
-            ...template,
-            items: pond?.id ? getPondJobItems(pond.id, template.type) : [],
-        }));
+        // No API data available - return empty array
+        return [];
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         pond?.type,
         pond?.id,
         getPondJobItems,
         currentCycle,
+        operationsByPondType,
         // Add all job maps as dependencies
         feedJobs,
         shrimpInspectionJobs,
@@ -509,8 +456,20 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
     };
 
+    const [refreshing, setRefreshing] = useState(false);
     // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo" -> REMOVED
     const headerDisplayType = undefined;
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await fetchMasterData();
+        } catch (error) {
+            console.error('Refresh master data failed:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [fetchMasterData]);
 
     return (
         <View style={styles.container}>
@@ -534,6 +493,13 @@ export const ShrimpFarmScreens: React.FC = () => {
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['black']}
+                        />
+                    }
                 >
                     {selectedTab === 'work' ? (
                         <>
@@ -598,12 +564,16 @@ export const ShrimpFarmScreens: React.FC = () => {
                                 <PondCycleEmptyState />
                             )}
 
-                            <JobListCard
-                                jobs={jobs}
-                                onPressJob={handleJobPress}
-                                onPressAddJob={handleAddJobItem}
-                                onEditJobItem={handleEditJobItem}
-                            />
+                            {isLoading ? (
+                                <PondJobSkeleton />
+                            ) : (
+                                <JobListCard
+                                    jobs={jobs}
+                                    onPressJob={handleJobPress}
+                                    onPressAddJob={handleAddJobItem}
+                                    onEditJobItem={handleEditJobItem}
+                                />
+                            )}
                         </>
                     ) : selectedTab === 'log' ? (
                         <WorkLogScreens

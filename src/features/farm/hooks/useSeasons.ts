@@ -1,5 +1,5 @@
 import { useQueries, useQueryClient } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { seasonApi } from '@/features/farm/api/seasonApi';
 import { SeasonData } from '@/features/farm/types/farm.types';
 import { farmKeys } from './farmKeys';
@@ -63,10 +63,10 @@ export const useSeasons = () => {
 
     const queryClient = useQueryClient();
 
-    const refresh = async () => {
-        await queryClient.invalidateQueries({ queryKey: farmKeys.zones() });
-        await queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
-    };
+    const refresh = useCallback(async () => {
+        await queryClient.invalidateQueries({ queryKey: farmKeys.zones(), refetchType: 'all' });
+        await queryClient.invalidateQueries({ queryKey: farmKeys.seasons(), refetchType: 'all' });
+    }, [queryClient]);
 
     return {
         seasons,

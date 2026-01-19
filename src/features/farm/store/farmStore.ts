@@ -254,7 +254,7 @@ export const useFarmStore = create<FarmState>()(
             },
         })),
         {
-            name: 'farm-storage-v2',
+            name: 'farm-storage-v3',
             storage: createJSONStorage(() => AsyncStorage),
             partialize: state => ({
                 feedJobs: state.feedJobs,

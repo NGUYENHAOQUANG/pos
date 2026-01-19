@@ -1,5 +1,10 @@
 import { StateCreator } from 'zustand';
-import { PondData, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
+import {
+    OperationType,
+    PondData,
+    PondType,
+    PondTypeOperation,
+} from '@/features/farm/types/farm.types';
 import { pondApi } from '@/features/farm/api/pondApi';
 
 export interface PondListStore {
@@ -9,14 +14,20 @@ export interface PondListStore {
     hasMore: boolean;
     totalCount: number;
     pondTypes: PondType[];
+    operationTypes: OperationType[];
     pondTypeOperations: PondTypeOperation[];
+    // Map of pondTypeId -> operations available for that pond type
+    operationsByPondType: Record<number, PondTypeOperation[]>;
+    isLoadingMasterData: boolean; // Loading state for master data
     fetchPonds: () => Promise<void>;
     fetchPondsByZone: (
         zoneId: number | string,
         updates?: { isBackground?: boolean; isLoadMore?: boolean }
     ) => Promise<void>;
     fetchMasterData: () => Promise<void>;
+    fetchOperationsByPondType: (pondTypeId: number) => Promise<PondTypeOperation[]>;
     getPondById: (pondId: string) => PondData | undefined;
+    getOperationsForPond: (pondId: string) => PondTypeOperation[];
     updatePondType: (pondId: string, newType: PondType) => void;
 }
 
@@ -28,7 +39,10 @@ export const createPondListStore: StateCreator<
 > = (set, get) => ({
     ponds: [],
     pondTypes: [],
+    operationTypes: [],
     pondTypeOperations: [],
+    operationsByPondType: {},
+    isLoadingMasterData: false,
     isLoadingPonds: false,
     page: 1,
     hasMore: true,
@@ -91,7 +105,7 @@ export const createPondListStore: StateCreator<
             const mappedPonds = ponds.map(pond => {
                 // @ts-ignore - pondTypeId exists in API response but not yet in Interface?
                 // We should probably add pondTypeId to PondData interface too, but for now access property directly
-                const typeId = (pond as any).pondTypeId;
+                const typeId = (pond as unknown as { pondTypeId: number }).pondTypeId;
                 const matchedType = currentTypes.find(t => t.id === typeId);
 
                 // If matched, assign it. If not, keeping undefined/partial is better than crashing.
@@ -136,18 +150,76 @@ export const createPondListStore: StateCreator<
         }
     },
     fetchMasterData: async () => {
+        set({ isLoadingMasterData: true });
         try {
-            const [types, operations] = await Promise.all([
+            // Step 1: Fetch pond types and operation types
+            const [types, operationTypes] = await Promise.all([
                 pondApi.getPondTypes(),
-                pondApi.getPondTypeOperations(),
+                pondApi.getOperationTypes(),
             ]);
-            set({ pondTypes: types, pondTypeOperations: operations });
+
+            // Step 2: Fetch operations for each pond type
+            const operationsByPondType: Record<number, PondTypeOperation[]> = {};
+
+            // Fetch operations for each pond type in parallel
+            const operationPromises = types.map(async pondType => {
+                try {
+                    const ops = await pondApi.getOperationsByPondType(pondType.id);
+                    return { pondTypeId: pondType.id, operations: ops };
+                } catch (_error) {
+                    return { pondTypeId: pondType.id, operations: [] };
+                }
+            });
+
+            const results = await Promise.all(operationPromises);
+
+            // Group results into operationsByPondType
+            for (const result of results) {
+                if (result.operations.length > 0) {
+                    operationsByPondType[result.pondTypeId] = result.operations;
+                }
+            }
+
+            // Combine all operations for pondTypeOperations
+            const allOperations: PondTypeOperation[] = [];
+            for (const ops of Object.values(operationsByPondType)) {
+                allOperations.push(...ops);
+            }
+
+            set({
+                pondTypes: types,
+                operationTypes,
+                pondTypeOperations: allOperations,
+                operationsByPondType,
+                isLoadingMasterData: false,
+            });
         } catch (error) {
-            console.error('Failed to fetch master data:', error);
+            console.error('❌ [fetchMasterData] FAILED:', error);
+            set({ isLoadingMasterData: false });
+        }
+    },
+    fetchOperationsByPondType: async (pondTypeId: number) => {
+        try {
+            const operations = await pondApi.getOperationsByPondType(pondTypeId);
+            set(state => {
+                state.operationsByPondType[pondTypeId] = operations;
+            });
+            return operations;
+        } catch (error) {
+            console.error(`Failed to fetch operations for pond type ${pondTypeId}:`, error);
+            return [];
         }
     },
     getPondById: pondId => {
         return get().ponds.find(pond => pond.id === pondId);
+    },
+    // Get available operations for a pond based on its type
+    getOperationsForPond: (pondId: string) => {
+        const pond = get().ponds.find(p => p.id === pondId);
+        if (!pond || typeof pond.type === 'string') return [];
+
+        const pondTypeId = pond.type.id;
+        return get().operationsByPondType[pondTypeId] || [];
     },
     updatePondType: (pondId, newType) => {
         set(state => {

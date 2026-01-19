@@ -12,9 +12,12 @@ import {
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
 import { useFarm } from '@/features/farm/store/farmStore';
+import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData } from '@/features/farm/types/farm.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { useQueryClient } from '@tanstack/react-query';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 type EditAquacultureRouteProp = RouteProp<
     { EditAquaculture: { aquaculture: SeasonData } },
@@ -26,9 +29,17 @@ export const EditAquacultureScreens: React.FC = () => {
     const route = useRoute<EditAquacultureRouteProp>();
     const { aquaculture } = route.params;
     const { setTabBarVisible } = useTabBarVisibility();
-    const { updateSeasonApi, deleteSeasonApi, zones } = useFarm();
+    const { updateSeasonApi, deleteSeasonApi, zones, fetchZones } = useFarm();
     const formRef = useRef<AquacultureFormRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const queryClient = useQueryClient();
+
+    React.useEffect(() => {
+        if (zones.length === 0) {
+            fetchZones();
+        }
+    }, [zones.length, fetchZones]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -46,20 +57,35 @@ export const EditAquacultureScreens: React.FC = () => {
     const handleUpdate = async () => {
         const data = formRef.current?.submit();
         if (data && aquaculture.zoneId) {
-            const success = await updateSeasonApi(aquaculture.zoneId, aquaculture.id.toString(), {
-                seasonName: data.name,
-                startDate: data.startDate?.toISOString(),
-                endDate: data.endDate?.toISOString(),
-            });
-            if (success) {
-                Toast.show(ToastMessages.Aquaculture.UPDATE_SUCCESS);
-                navigation.goBack();
-            } else {
+            try {
+                setIsLoading(true);
+                const success = await updateSeasonApi(
+                    aquaculture.zoneId,
+                    aquaculture.id.toString(),
+                    {
+                        seasonName: data.name,
+                        startDate: data.startDate?.toISOString(),
+                        endDate: data.endDate?.toISOString(),
+                    }
+                );
+                if (success) {
+                    Toast.show(ToastMessages.Aquaculture.UPDATE_SUCCESS);
+                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
+                    navigation.goBack();
+                }
+            } catch (error: any) {
+                const errorMessage =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Không thể cập nhật vụ nuôi';
+
                 Toast.show({
                     type: 'error',
                     text1: 'Lỗi',
-                    text2: 'Không thể cập nhật vụ nuôi',
+                    text2: errorMessage,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -70,61 +96,86 @@ export const EditAquacultureScreens: React.FC = () => {
 
     const handleConfirmDelete = async () => {
         if (aquaculture.zoneId) {
-            const success = await deleteSeasonApi(aquaculture.zoneId, aquaculture.id.toString());
-            setDeleteModalVisible(false);
+            try {
+                setIsLoading(true);
+                const success = await deleteSeasonApi(
+                    aquaculture.zoneId,
+                    aquaculture.id.toString()
+                );
+                setDeleteModalVisible(false);
 
-            if (success) {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Thành công',
-                    text2: 'Đã xóa vụ nuôi',
-                });
-                navigation.goBack();
-            } else {
+                if (success) {
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: 'Đã xóa vụ nuôi',
+                    });
+                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
+                    navigation.goBack();
+                }
+            } catch (error: any) {
+                const errorMessage =
+                    error?.response?.data?.message || error?.message || 'Không thể xóa vụ nuôi';
+
                 Toast.show({
                     type: 'error',
                     text1: 'Lỗi',
-                    text2: 'Không thể xóa vụ nuôi',
+                    text2: errorMessage,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
     };
 
     return (
-        <View style={styles.container}>
-            <HeaderMenu
-                title="Chỉnh sửa vụ nuôi"
-                onBack={() => navigation.goBack()}
-                rightAction={
-                    <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-                        <DeleteIcon width={20} height={20} color={colors.error} />
-                    </TouchableOpacity>
-                }
-            />
+        <Loading isLoading={isLoading}>
+            <View style={styles.container}>
+                <HeaderMenu
+                    title="Chỉnh sửa vụ nuôi"
+                    onBack={() => navigation.goBack()}
+                    rightAction={
+                        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+                            <DeleteIcon width={20} height={20} color={colors.error} />
+                        </TouchableOpacity>
+                    }
+                />
 
-            <View style={styles.content}>
-                <AquacultureForm ref={formRef} initialValues={aquaculture as any} zones={zones} />
+                <View style={styles.content}>
+                    <AquacultureForm
+                        ref={formRef}
+                        initialValues={{
+                            ...aquaculture,
+                            id: aquaculture.id.toString(),
+                            code: aquaculture.seasonCode, // Map seasonCode to code for display
+                            startDate: new Date(aquaculture.startDate),
+                            endDate: new Date(aquaculture.endDate),
+                            status: aquaculture.status === 'Đang hoạt động' ? 'active' : 'ended',
+                        }}
+                        zones={zones}
+                    />
+                </View>
+
+                <ButtonBarMenu
+                    primaryTitle="Cập nhật thông tin"
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={handleUpdate}
+                    onSecondaryPress={() => {
+                        navigation.goBack();
+                    }}
+                    secondaryType="default"
+                />
+
+                <ConfirmationDeleteModal
+                    visible={deleteModalVisible}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setDeleteModalVisible(false)}
+                    title="Xoá vụ nuôi"
+                    message="Bạn có chắc chắn muốn xoá vụ nuôi này?"
+                    successMessage="Đã xóa vụ nuôi thành công"
+                />
             </View>
-
-            <ButtonBarMenu
-                primaryTitle="Cập nhật thông tin"
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handleUpdate}
-                onSecondaryPress={() => {
-                    navigation.goBack();
-                }}
-                secondaryType="default"
-            />
-
-            <ConfirmationDeleteModal
-                visible={deleteModalVisible}
-                onConfirm={handleConfirmDelete}
-                onCancel={() => setDeleteModalVisible(false)}
-                title="Xoá vụ nuôi"
-                message="Bạn có chắc chắn muốn xoá vụ nuôi này?"
-                successMessage="Đã xóa vụ nuôi thành công"
-            />
-        </View>
+        </Loading>
     );
 };
 
