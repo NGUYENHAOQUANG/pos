@@ -20,6 +20,7 @@ export interface IMaterial {
     remaining?: number;
     price?: number; // Sometimes used in warehouse context
     quantity?: string | number; // Sometimes used in warehouse context
+    isActive?: boolean; // Material status (active/inactive)
 }
 
 export interface IUnit {
@@ -182,6 +183,7 @@ export interface MaterialResponse {
     materialGroupId?: number;
     materialTypeId?: number;
     description?: string | null; // Map to usage field
+    isActive?: boolean; // Material status (active/inactive)
 }
 
 export interface CreateMaterialRequest {
