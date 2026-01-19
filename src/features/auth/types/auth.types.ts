@@ -30,12 +30,12 @@ export interface RegisterData {
 // Swagger: JwtResponse
 export interface JwtResponse {
     accessToken: string;
+    refreshToken: string;
     issued: string;
     refreshTokenExpireIn: number;
     refreshTokenExpires: string;
     accessTokenExpireIn: number;
     accessTokenExpires: string;
-    // Note: refreshToken string is missing from Swagger response properties
 }
 
 // Swagger: JwtResponseAppResponse

@@ -74,6 +74,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         : allOptions.filter(opt => opt.label !== 'Tất cả nhóm vật tư');
 
     const buttonRef = useRef<View>(null);
+    const flatListRef = useRef<FlatList<DropdownOption>>(null);
     const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0, width: 0 });
 
     useEffect(() => {
@@ -87,6 +88,39 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
             });
         }
     }, [isOpen, inline]);
+
+    // Track previous isOpen state to detect when dropdown opens
+    const prevIsOpenRef = useRef(isOpen);
+
+    // Scroll to selected item when dropdown opens
+    useEffect(() => {
+        // Only scroll when dropdown changes from closed to open
+        if (
+            isOpen &&
+            !prevIsOpenRef.current &&
+            value &&
+            flatListRef.current &&
+            displayOptions.length > 0
+        ) {
+            // Find the index of the selected item
+            const selectedIndex = displayOptions.findIndex(opt => opt.value === value);
+            if (selectedIndex >= 0) {
+                // Use setTimeout to ensure FlatList is rendered before scrolling
+                const timeoutId = setTimeout(() => {
+                    flatListRef.current?.scrollToIndex({
+                        index: selectedIndex,
+                        animated: true,
+                        viewPosition: 0.5, // Center the item in the visible area
+                    });
+                }, 150);
+
+                // Cleanup timeout on unmount or when dependencies change
+                return () => clearTimeout(timeoutId);
+            }
+        }
+        // Update previous isOpen state
+        prevIsOpenRef.current = isOpen;
+    }, [isOpen, value, displayOptions]);
 
     const handleSelect = (option: DropdownOption) => {
         // Don't handle selection if option is disabled
@@ -140,6 +174,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
             ]}
         >
             <FlatList
+                ref={flatListRef}
                 data={displayOptions}
                 keyExtractor={(item, index) => String(item.value) + index}
                 renderItem={renderItem}
@@ -148,6 +183,21 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={true}
                 indicatorStyle="black"
+                onScrollToIndexFailed={(info: {
+                    index: number;
+                    highestMeasuredFrameIndex: number;
+                    averageItemLength: number;
+                }) => {
+                    // Handle scroll to index failure by scrolling to offset
+                    const wait = new Promise<void>(resolve => setTimeout(() => resolve(), 500));
+                    wait.then(() => {
+                        flatListRef.current?.scrollToIndex({
+                            index: info.index,
+                            animated: true,
+                            viewPosition: 0.5,
+                        });
+                    });
+                }}
             />
         </View>
     );

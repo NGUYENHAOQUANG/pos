@@ -11,7 +11,7 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
     const getStyle = (type: MaterialGroupType) => {
         switch (type) {
             case 'Nuôi':
-            case 'Thức ăn': // Keep for backward compatibility if needed
+            case 'Thức ăn':
                 return {
                     backgroundColor: colors.volcano[200],
                     color: colors.volcano[900],
@@ -23,6 +23,8 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                     color: colors.geekblue[900],
                     borderColor: colors.geekblue[300],
                 };
+            case 'Công cụ':
+
             case 'CCDC':
                 return {
                     backgroundColor: colors.green[50],
