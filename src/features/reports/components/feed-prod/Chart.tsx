@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Path, Rect, G, Text as SvgText, Polygon } from 'react-native-svg';
 import { colors, spacing } from '@/styles';
 import {
-    CHART_WIDTH,
     CHART_HEIGHT,
     PADDING_LEFT,
+    PADDING_RIGHT,
     PADDING_TOP,
+    PADDING_BOTTOM,
     RAW_DATA,
     FeedProdDataPoint,
 } from './feedprodData';
@@ -17,6 +18,9 @@ interface ChartProps {
 }
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
+    const MIN_CHART_WIDTH = 450;
+    const actualWidth = Math.max(chartWidth, MIN_CHART_WIDTH);
+
     // ============================================================================
     // DATA PROCESSING (Computed from RAW_DATA)
     // ============================================================================
@@ -271,7 +275,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
     } = processedData;
 
     // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * chartWidth + PADDING_LEFT;
+    const getX = (day: number) => (day / TOTAL_DAYS) * actualWidth + PADDING_LEFT;
     const getY = (value: number) =>
         chartHeight - (value / Y_MAX_CHART1) * chartHeight + PADDING_TOP;
 
@@ -330,221 +334,250 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
 
     return (
         <View style={styles.container}>
-            <Svg width={CHART_WIDTH} height={CHART_HEIGHT}>
-                {/* Grid lines (horizontal, light gray) */}
-                {getYAxisLabels().map(value => {
-                    const y = getY(value);
-                    return (
-                        <Line
-                            key={`grid-${value}`}
-                            x1={PADDING_LEFT}
-                            y1={y}
-                            x2={PADDING_LEFT + chartWidth}
-                            y2={y}
-                            stroke={colors.gray[200]}
-                            strokeWidth={1}
-                        />
-                    );
-                })}
-
-                {/* Red divider axis X (horizontal X-axis) - split into 2 parts */}
-                <Line
-                    x1={PADDING_LEFT}
-                    y1={axisX_Y}
-                    x2={dividerX}
-                    y2={axisX_Y}
-                    stroke={colors.error}
-                    strokeWidth={2}
-                />
-                <Line
-                    x1={dividerX}
-                    y1={axisX_Y}
-                    x2={PADDING_LEFT + chartWidth}
-                    y2={axisX_Y}
-                    stroke={colors.textSecondary}
-                    strokeWidth={2}
-                />
-
-                {/* Left arrow */}
-                <Polygon
-                    points={`${PADDING_LEFT},${axisX_Y} ${PADDING_LEFT + 8},${axisX_Y - 4} ${
-                        PADDING_LEFT + 8
-                    },${axisX_Y + 4}`}
-                    fill="#FF0000"
-                />
-
-                {/* Right arrow */}
-                <Polygon
-                    points={`${PADDING_LEFT + chartWidth},${axisX_Y} ${
-                        PADDING_LEFT + chartWidth - 8
-                    },${axisX_Y - 4} ${PADDING_LEFT + chartWidth - 8},${axisX_Y + 4}`}
-                    fill={colors.textSecondary}
-                />
-
-                {/* Labels for divider */}
-                <G>
-                    <SvgText
-                        x={PADDING_LEFT + 15}
-                        y={axisX_Y - 8}
-                        fill="#FF0000"
-                        fontSize={10}
-                        textAnchor="start"
-                        fontWeight="400"
-                    >
-                        Dữ liệu từ đầu vụ tới hiện tại
-                    </SvgText>
-                    <SvgText
-                        x={PADDING_LEFT + chartWidth - 15}
-                        y={axisX_Y - 8}
-                        fill="#FF0000"
-                        fontSize={10}
-                        textAnchor="end"
-                        fontWeight="400"
-                    >
-                        Dữ liệu dự báo ngày tiếp theo
-                    </SvgText>
-                </G>
-
-                {/* Red vertical line at divider position */}
-                <Line
-                    x1={dividerX}
-                    y1={PADDING_TOP}
-                    x2={dividerX}
-                    y2={PADDING_TOP + chartHeight}
-                    stroke={colors.error}
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                />
-
-                {/* Blue line (historical) - smooth bezier curve */}
-                <Path
-                    d={createBluePathHistorical()}
-                    fill="none"
-                    stroke="#003EB3"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-
-                {/* Gray line (forecast, after divider) - smooth bezier curve */}
-                <Path
-                    d={createBluePathForecast()}
-                    fill="none"
-                    stroke={colors.gray[400]}
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-
-                {/* Orange line (historical) - drawn as stacked rectangles (step chart) */}
-                {ORANGE_DATA_HISTORICAL.map((point, index) => {
-                    if (index === 0) return null;
-
-                    const prevPoint = ORANGE_DATA_HISTORICAL[index - 1];
-                    const x1 = getX(prevPoint.day);
-                    const x2 = getX(point.day);
-                    const y1 = getY(prevPoint.value);
-                    const y2 = getY(point.value);
-
-                    return (
-                        <G key={`orange-step-${point.day}`}>
-                            <Rect x={x1} y={y1 - 2} width={x2 - x1} height={4} fill="#FA541C" />
-                            {y2 !== y1 && (
-                                <Rect
-                                    x={x2 - 2}
-                                    y={Math.min(y1, y2)}
-                                    width={4}
-                                    height={Math.abs(y2 - y1)}
-                                    fill="#FA541C"
-                                />
-                            )}
-                        </G>
-                    );
-                })}
-
-                {/* Orange line (forecast, after divider) - drawn as stacked rectangles with gray color */}
-                {ORANGE_DATA_FORECAST.map((point, index) => {
-                    const prevPoint =
-                        index === 0
-                            ? ORANGE_DATA_HISTORICAL[ORANGE_DATA_HISTORICAL.length - 1]
-                            : ORANGE_DATA_FORECAST[index - 1];
-
-                    const x1 = getX(prevPoint.day);
-                    const x2 = getX(point.day);
-                    const y1 = getY(prevPoint.value);
-                    const y2 = getY(point.value);
-
-                    return (
-                        <G key={`orange-forecast-step-${point.day}`}>
-                            <Rect
-                                x={x1}
-                                y={y1 - 2}
-                                width={x2 - x1}
-                                height={4}
-                                fill={colors.gray[400]}
-                            />
-                            {y2 !== y1 && (
-                                <Rect
-                                    x={x2 - 2}
-                                    y={Math.min(y1, y2)}
-                                    width={4}
-                                    height={Math.abs(y2 - y1)}
-                                    fill={colors.gray[400]}
-                                />
-                            )}
-                        </G>
-                    );
-                })}
-
-                {/* X-axis labels */}
-                {DAY_MARKS.map((day, index) => {
-                    const x = getX(day);
-                    const y = PADDING_TOP + chartHeight + 20;
-                    return (
-                        <SvgText
-                            key={`x-label-${day}`}
-                            x={x}
-                            y={y}
-                            fill={colors.textSecondary}
-                            fontSize={10}
-                            textAnchor="middle"
-                            transform={`rotate(-15 ${x} ${y})`}
-                        >
-                            {DAY_LABELS[index]}
-                        </SvgText>
-                    );
-                })}
-
-                {/* Y-axis labels */}
-                {getYAxisLabels().map(value => {
-                    const y = getY(value);
-                    return (
-                        <SvgText
-                            key={`y-label-${value}`}
-                            x={PADDING_LEFT - 10}
-                            y={y + 4}
-                            fill={colors.textSecondary}
-                            fontSize={10}
-                            textAnchor="end"
-                        >
-                            {Math.round(value * 100) / 100}
-                        </SvgText>
-                    );
-                })}
-
-                {/* Y-axis title */}
-                <SvgText
-                    x={12}
-                    y={PADDING_TOP + chartHeight / 2}
-                    fill={colors.text}
-                    fontSize={14}
-                    fontWeight="400"
-                    textAnchor="middle"
-                    transform={`rotate(-90 12 ${PADDING_TOP + chartHeight / 2})`}
+            <View style={{ position: 'relative' }}>
+                {/* Sticky Y-Axis Overlay */}
+                <View
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        height: CHART_HEIGHT - PADDING_BOTTOM,
+                        width: PADDING_LEFT,
+                        zIndex: 10,
+                        backgroundColor: colors.white,
+                    }}
+                    pointerEvents="none"
                 >
-                    Khối lượng (Tấn)
-                </SvgText>
-            </Svg>
+                    <Svg width={PADDING_LEFT} height={CHART_HEIGHT}>
+                        {/* Y-axis labels */}
+                        {getYAxisLabels().map(value => {
+                            const y = getY(value);
+                            return (
+                                <SvgText
+                                    key={`y-label-sticky-${value}`}
+                                    x={PADDING_LEFT - 10}
+                                    y={y + 4}
+                                    fill={colors.textSecondary}
+                                    fontSize={10}
+                                    textAnchor="end"
+                                >
+                                    {Math.round(value * 100) / 100}
+                                </SvgText>
+                            );
+                        })}
+
+                        {/* Y-axis title */}
+                        <SvgText
+                            x={12}
+                            y={PADDING_TOP + chartHeight / 2}
+                            fill={colors.text}
+                            fontSize={14}
+                            fontWeight="400"
+                            textAnchor="middle"
+                            transform={`rotate(-90 12 ${PADDING_TOP + chartHeight / 2})`}
+                        >
+                            Khối lượng (Tấn)
+                        </SvgText>
+                    </Svg>
+                </View>
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <Svg
+                        width={actualWidth + PADDING_LEFT + PADDING_RIGHT + 40}
+                        height={CHART_HEIGHT}
+                    >
+                        {/* Grid lines (horizontal, light gray) */}
+                        {getYAxisLabels().map(value => {
+                            const y = getY(value);
+                            return (
+                                <Line
+                                    key={`grid-${value}`}
+                                    x1={PADDING_LEFT}
+                                    y1={y}
+                                    x2={PADDING_LEFT + actualWidth}
+                                    y2={y}
+                                    stroke={colors.gray[200]}
+                                    strokeWidth={1}
+                                />
+                            );
+                        })}
+
+                        {/* Red divider axis X (horizontal X-axis) - split into 2 parts */}
+                        <Line
+                            x1={PADDING_LEFT}
+                            y1={axisX_Y}
+                            x2={dividerX}
+                            y2={axisX_Y}
+                            stroke={colors.error}
+                            strokeWidth={2}
+                        />
+                        <Line
+                            x1={dividerX}
+                            y1={axisX_Y}
+                            x2={PADDING_LEFT + actualWidth}
+                            y2={axisX_Y}
+                            stroke={colors.textSecondary}
+                            strokeWidth={2}
+                        />
+
+                        {/* Left arrow */}
+                        <Polygon
+                            points={`${PADDING_LEFT},${axisX_Y} ${PADDING_LEFT + 8},${
+                                axisX_Y - 4
+                            } ${PADDING_LEFT + 8},${axisX_Y + 4}`}
+                            fill="#FF0000"
+                        />
+
+                        {/* Right arrow */}
+                        <Polygon
+                            points={`${PADDING_LEFT + actualWidth},${axisX_Y} ${
+                                PADDING_LEFT + actualWidth - 8
+                            },${axisX_Y - 4} ${PADDING_LEFT + actualWidth - 8},${axisX_Y + 4}`}
+                            fill={colors.textSecondary}
+                        />
+
+                        {/* Labels for divider */}
+                        <G>
+                            <SvgText
+                                x={PADDING_LEFT + 15}
+                                y={axisX_Y - 8}
+                                fill="#FF0000"
+                                fontSize={10}
+                                textAnchor="start"
+                                fontWeight="400"
+                            >
+                                Dữ liệu từ đầu vụ tới hiện tại
+                            </SvgText>
+                            <SvgText
+                                x={PADDING_LEFT + actualWidth - 15}
+                                y={axisX_Y - 8}
+                                fill="#FF0000"
+                                fontSize={10}
+                                textAnchor="end"
+                                fontWeight="400"
+                            >
+                                Dữ liệu dự báo ngày tiếp theo
+                            </SvgText>
+                        </G>
+
+                        {/* Red vertical line at divider position */}
+                        <Line
+                            x1={dividerX}
+                            y1={PADDING_TOP}
+                            x2={dividerX}
+                            y2={PADDING_TOP + chartHeight}
+                            stroke={colors.error}
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                        />
+
+                        {/* Blue line (historical) - smooth bezier curve */}
+                        <Path
+                            d={createBluePathHistorical()}
+                            fill="none"
+                            stroke="#003EB3"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+
+                        {/* Gray line (forecast, after divider) - smooth bezier curve */}
+                        <Path
+                            d={createBluePathForecast()}
+                            fill="none"
+                            stroke={colors.gray[400]}
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+
+                        {/* Orange line (historical) - drawn as stacked rectangles (step chart) */}
+                        {ORANGE_DATA_HISTORICAL.map((point, index) => {
+                            if (index === 0) return null;
+
+                            const prevPoint = ORANGE_DATA_HISTORICAL[index - 1];
+                            const x1 = getX(prevPoint.day);
+                            const x2 = getX(point.day);
+                            const y1 = getY(prevPoint.value);
+                            const y2 = getY(point.value);
+
+                            return (
+                                <G key={`orange-step-${point.day}`}>
+                                    <Rect
+                                        x={x1}
+                                        y={y1 - 2}
+                                        width={x2 - x1}
+                                        height={4}
+                                        fill="#FA541C"
+                                    />
+                                    {y2 !== y1 && (
+                                        <Rect
+                                            x={x2 - 2}
+                                            y={Math.min(y1, y2)}
+                                            width={4}
+                                            height={Math.abs(y2 - y1)}
+                                            fill="#FA541C"
+                                        />
+                                    )}
+                                </G>
+                            );
+                        })}
+
+                        {/* Orange line (forecast, after divider) - drawn as stacked rectangles with gray color */}
+                        {ORANGE_DATA_FORECAST.map((point, index) => {
+                            const prevPoint =
+                                index === 0
+                                    ? ORANGE_DATA_HISTORICAL[ORANGE_DATA_HISTORICAL.length - 1]
+                                    : ORANGE_DATA_FORECAST[index - 1];
+
+                            const x1 = getX(prevPoint.day);
+                            const x2 = getX(point.day);
+                            const y1 = getY(prevPoint.value);
+                            const y2 = getY(point.value);
+
+                            return (
+                                <G key={`orange-forecast-step-${point.day}`}>
+                                    <Rect
+                                        x={x1}
+                                        y={y1 - 2}
+                                        width={x2 - x1}
+                                        height={4}
+                                        fill={colors.gray[400]}
+                                    />
+                                    {y2 !== y1 && (
+                                        <Rect
+                                            x={x2 - 2}
+                                            y={Math.min(y1, y2)}
+                                            width={4}
+                                            height={Math.abs(y2 - y1)}
+                                            fill={colors.gray[400]}
+                                        />
+                                    )}
+                                </G>
+                            );
+                        })}
+
+                        {/* X-axis labels */}
+                        {DAY_MARKS.map((day, index) => {
+                            const x = getX(day);
+                            const y = PADDING_TOP + chartHeight + 20;
+                            return (
+                                <SvgText
+                                    key={`x-label-${day}`}
+                                    x={x}
+                                    y={y}
+                                    fill={colors.textSecondary}
+                                    fontSize={10}
+                                    textAnchor="middle"
+                                    transform={`rotate(-15 ${x} ${y})`}
+                                >
+                                    {DAY_LABELS[index]}
+                                </SvgText>
+                            );
+                        })}
+                    </Svg>
+                </ScrollView>
+            </View>
         </View>
     );
 };

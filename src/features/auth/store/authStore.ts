@@ -14,6 +14,8 @@ import { AuthUser, LoginCredentials, RegisterData } from '../types/auth.types';
 interface AuthState {
     user: AuthUser | null;
     token: string | null;
+    refreshToken: string | null;
+    accessTokenExpires: string | null; // ISO string from API
     isAuthenticated: boolean;
     loading: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
@@ -22,15 +24,23 @@ interface AuthState {
     logout: () => void;
     setUser: (user: AuthUser | null) => void;
     setToken: (token: string | null) => void;
+    setRefreshToken: (refreshToken: string | null) => void;
+    setTokens: (
+        token: string | null,
+        refreshToken: string | null,
+        accessTokenExpires?: string | null
+    ) => void;
     hasLaunched: boolean;
     setHasLaunched: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        set => ({
+        (set, get) => ({
             user: null,
             token: null,
+            refreshToken: null,
+            accessTokenExpires: null,
             isAuthenticated: false,
             loading: false,
             hasLaunched: false,
@@ -42,6 +52,8 @@ export const useAuthStore = create<AuthState>()(
 
                     if (response.result && response.data.accessToken) {
                         const token = response.data.accessToken;
+                        const refreshToken = response.data.refreshToken;
+                        const accessTokenExpires = response.data.accessTokenExpires;
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 
@@ -56,6 +68,8 @@ export const useAuthStore = create<AuthState>()(
                         set({
                             user,
                             token,
+                            refreshToken,
+                            accessTokenExpires,
                             isAuthenticated: true,
                             loading: false,
                         });
@@ -75,6 +89,8 @@ export const useAuthStore = create<AuthState>()(
 
                     if (response.result && response.data.accessToken) {
                         const token = response.data.accessToken;
+                        const refreshToken = response.data.refreshToken;
+                        const accessTokenExpires = response.data.accessTokenExpires;
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 
@@ -88,6 +104,8 @@ export const useAuthStore = create<AuthState>()(
                         set({
                             user,
                             token,
+                            refreshToken,
+                            accessTokenExpires,
                             isAuthenticated: true,
                             loading: false,
                         });
@@ -125,14 +143,19 @@ export const useAuthStore = create<AuthState>()(
             },
 
             logout: async () => {
+                const refreshToken = get().refreshToken;
                 try {
-                    await authApi.logout();
+                    if (refreshToken) {
+                        await authApi.logout(refreshToken);
+                    }
                 } catch (error) {
                     console.error('Logout API failed:', error);
                 } finally {
                     set({
                         user: null,
                         token: null,
+                        refreshToken: null,
+                        accessTokenExpires: null,
                         isAuthenticated: false,
                     });
                 }
@@ -144,6 +167,18 @@ export const useAuthStore = create<AuthState>()(
 
             setToken: (token: string | null) => {
                 set({ token });
+            },
+
+            setRefreshToken: (refreshToken: string | null) => {
+                set({ refreshToken });
+            },
+
+            setTokens: (
+                token: string | null,
+                refreshToken: string | null,
+                accessTokenExpires?: string | null
+            ) => {
+                set({ token, refreshToken, accessTokenExpires: accessTokenExpires ?? null });
             },
 
             setHasLaunched: (value: boolean) => {
