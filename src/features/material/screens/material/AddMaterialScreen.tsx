@@ -5,6 +5,7 @@ import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { AddMaterial } from '@/features/material/components/material/AddMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -28,7 +29,7 @@ interface AddMaterialScreenProps {}
 
 export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const { mutate: createMaterial } = useCreateMaterial();
+    const { mutate: createMaterial, isPending: isCreatingMaterial } = useCreateMaterial();
 
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
@@ -107,67 +108,69 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <View style={styles.container}>
-                <HeaderMeterial
-                    title="Thêm Vật Tư"
-                    onBackPress={() => navigation.goBack()}
-                    rightComponent={null} // Hide the right button
-                />
+            <Loading isLoading={isCreatingMaterial}>
+                <View style={styles.container}>
+                    <HeaderMeterial
+                        title="Thêm Vật Tư"
+                        onBackPress={() => navigation.goBack()}
+                        rightComponent={null} // Hide the right button
+                    />
 
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        style={styles.content}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={false}
-                        nestedScrollEnabled={true}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        <AddMaterial
-                            name={name}
-                            onNameChange={setName}
-                            group={group}
-                            onGroupChange={val => {
-                                setGroup(val);
-                                setType('');
-                            }}
-                            type={type}
-                            onTypeChange={setType}
-                            unit={unit}
-                            onUnitChange={setUnit}
-                            groupOptions={materialGroupOptions}
-                            materialGroupsData={materialGroups}
-                            groupDisabled={isLoadingMaterialGroups}
-                            unitOptions={unitOptions}
-                            typesByGroup={typesByGroup}
-                            usage={usage}
-                            onUsageChange={setUsage}
-                            manufacturer={manufacturer}
-                            onManufacturerChange={setManufacturer}
-                            isActive={isActive}
-                            onIsActiveChange={setIsActive}
-                            onUnitDropdownOpen={() => {
-                                setTimeout(() => {
-                                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                                }, 100);
-                            }}
-                        />
-                    </ScrollView>
-                </SafeInputLayout>
+                    <SafeInputLayout>
+                        <ScrollView
+                            ref={scrollViewRef}
+                            style={styles.content}
+                            contentContainerStyle={styles.contentContainer}
+                            showsVerticalScrollIndicator={false}
+                            nestedScrollEnabled={true}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <AddMaterial
+                                name={name}
+                                onNameChange={setName}
+                                group={group}
+                                onGroupChange={val => {
+                                    setGroup(val);
+                                    setType('');
+                                }}
+                                type={type}
+                                onTypeChange={setType}
+                                unit={unit}
+                                onUnitChange={setUnit}
+                                groupOptions={materialGroupOptions}
+                                materialGroupsData={materialGroups}
+                                groupDisabled={isLoadingMaterialGroups}
+                                unitOptions={unitOptions}
+                                typesByGroup={typesByGroup}
+                                usage={usage}
+                                onUsageChange={setUsage}
+                                manufacturer={manufacturer}
+                                onManufacturerChange={setManufacturer}
+                                isActive={isActive}
+                                onIsActiveChange={setIsActive}
+                                onUnitDropdownOpen={() => {
+                                    setTimeout(() => {
+                                        scrollViewRef.current?.scrollToEnd({ animated: true });
+                                    }, 100);
+                                }}
+                            />
+                        </ScrollView>
+                    </SafeInputLayout>
 
-                <ButtonBarMaterial
-                    mode="double"
-                    primaryTitle="Lưu thông tin"
-                    secondaryTitle="Huỷ"
-                    containerStyle={{
-                        borderTopWidth: 1,
-                        borderTopColor: colors.border,
-                    }}
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={() => navigation.goBack()}
-                    // primaryDisabled={isCreating}
-                />
-            </View>
+                    <ButtonBarMaterial
+                        mode="double"
+                        primaryTitle="Lưu thông tin"
+                        secondaryTitle="Huỷ"
+                        containerStyle={{
+                            borderTopWidth: 1,
+                            borderTopColor: colors.border,
+                        }}
+                        onPrimaryPress={handleSave}
+                        onSecondaryPress={() => navigation.goBack()}
+                        primaryButtonDisabled={isCreatingMaterial}
+                    />
+                </View>
+            </Loading>
         </>
     );
 };
