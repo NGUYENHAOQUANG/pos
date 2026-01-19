@@ -31,6 +31,7 @@ export default function RegisterScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
     const route = useRoute<RegisterScreenRouteProp>();
     const { phoneNumber } = route.params || {};
+    const contact = phoneNumber || '';
     const verifyOtp = useAuthStore(state => state.verifyOtp);
 
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
@@ -80,7 +81,7 @@ export default function RegisterScreen() {
         if (errorMessage) setErrorMessage('');
     };
 
-    const handleVerifyOTP = async () => {
+    const handleVerifyOTP = React.useCallback(async () => {
         const otpString = otp.join('');
 
         if (otpString.length === 0) {
@@ -105,7 +106,14 @@ export default function RegisterScreen() {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         }
-    };
+    }, [otp, contact, verifyOtp]);
+
+    // Auto-submit effect
+    useEffect(() => {
+        if (otp.join('').length === 4) {
+            handleVerifyOTP();
+        }
+    }, [otp, handleVerifyOTP]);
     const handleResendOTP = async () => {
         if (!phoneNumber) {
             Toast.show({
@@ -182,7 +190,6 @@ export default function RegisterScreen() {
         registerAndGetOtp();
     }, [phoneNumber, navigation]);
 
-    const contact = phoneNumber || '';
     const displayContact = formatAuthPhoneDisplay(contact);
 
     const isLoading = useAuthStore(state => state.loading);

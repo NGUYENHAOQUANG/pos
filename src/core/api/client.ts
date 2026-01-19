@@ -21,6 +21,7 @@ export const apiClient: AxiosInstance = axios.create({
 
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
+
 let failedQueue: Array<{
     resolve: (value?: any) => void;
     reject: (error?: any) => void;
@@ -96,9 +97,11 @@ const handleTokenRefresh = async (
 
     const refreshToken = useAuthStore.getState().refreshToken;
     if (!refreshToken) {
+        if (!useAuthStore.getState().isSessionExpired && useAuthStore.getState().isAuthenticated) {
+            useAuthStore.getState().setSessionExpired(true);
+        }
         isRefreshing = false;
         processQueue(new Error('No refresh token'), null);
-        useAuthStore.getState().logout();
         return Promise.reject(new Error('No refresh token available'));
     }
 
@@ -130,9 +133,12 @@ const handleTokenRefresh = async (
             throw new Error('Invalid refresh token response');
         }
     } catch (refreshError) {
+        if (!useAuthStore.getState().isSessionExpired && useAuthStore.getState().isAuthenticated) {
+            useAuthStore.getState().setSessionExpired(true);
+        }
         isRefreshing = false;
         processQueue(refreshError, null);
-        useAuthStore.getState().logout();
+        console.log('Refresh token error:', refreshError);
         return Promise.reject(refreshError);
     }
 };
