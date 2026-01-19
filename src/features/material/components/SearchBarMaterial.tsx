@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -13,6 +13,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
 import { useMaterialTypes } from '@/features/material/hooks';
+import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -38,8 +39,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
-    const [materialGroup, setMaterialGroup] = useState('');
     const [voteStatus, setVoteStatus] = useState('');
+
+    // Get filterType from store to sync with selected value
+    const filterType = useMaterialFiltersStore(state => state.filterType);
+    const [materialGroup, setMaterialGroup] = useState(filterType || '');
 
     // Get material types from React Query
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
@@ -49,6 +53,13 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         'Tất cả loại vật tư',
         ...materialTypes.map(t => t.name || '').filter(n => n),
     ];
+
+    // Sync materialGroup with filterType from store
+    useEffect(() => {
+        if (filterType !== materialGroup) {
+            setMaterialGroup(filterType || '');
+        }
+    }, [filterType, materialGroup]);
 
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
