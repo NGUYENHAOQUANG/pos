@@ -37,7 +37,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
             if (initialValues?.zoneId) {
                 return farmOptions.find(f => f.id === initialValues.zoneId?.toString());
             }
-            return farmOptions[0];
+            return undefined;
         });
         const [cycleName, setCycleName] = useState(initialValues?.name || '');
         const [cycleCode, setCycleCode] = useState(initialValues?.code || '');
@@ -358,6 +358,6 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     inputDisabledBox: {
-        backgroundColor: colors.gray[200],
+        backgroundColor: colors.gray[100],
     },
 });

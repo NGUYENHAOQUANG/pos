@@ -12,16 +12,37 @@ export const POND_TYPES = {
 
 export interface PondType {
     id: number;
-    code: string;
     name: string;
+    code?: string; // Optional - API may not return this
     description?: string;
+    isDevice?: boolean;
+    creatorId?: number;
+    createdAt?: string;
+    lastModifierId?: number;
+    lastModifiedAt?: string;
 }
 
+// OperationType - represents types of operations/tasks in the system
+export interface OperationType {
+    id: number;
+    name: string;
+    associatedTable?: string;
+    createdAt?: string;
+    lastModifiedAt?: string;
+}
+
+// PondTypeOperation - mapping between PondType and OperationType
+// Defines which operations are available for each pond type
 export interface PondTypeOperation {
     id: number;
-    code: string;
-    name: string;
-    description?: string;
+    pondTypeId: number;
+    operationTypeId: number;
+    operationTypeName: string;
+    isMandatory: boolean;
+    defaultScheduleDay?: number;
+    priority?: number;
+    createdAt?: string;
+    lastModifiedAt?: string;
 }
 
 export interface Zone {

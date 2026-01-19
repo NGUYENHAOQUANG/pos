@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ColorValue } from 'react-native';
+import { View, StyleSheet, ColorValue, Modal } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -205,16 +205,22 @@ export const Loading: React.FC<LoadingProps> = ({
                    pointerEvents='none' as soon as fading starts (isLoading=false)
                 */}
                 {isOverlayVisible && (
-                    <Animated.View
-                        style={[
-                            styles.overlay,
-                            overlayAnimatedStyle,
-                            !transparent && { backgroundColor: colors.white },
-                        ]}
-                        pointerEvents={isLoading ? 'auto' : 'none'}
+                    <Modal
+                        transparent
+                        animationType="none" // Animation is handled by Animated.View
+                        visible={isOverlayVisible}
+                        statusBarTranslucent
                     >
-                        {Spinner}
-                    </Animated.View>
+                        <Animated.View
+                            style={[
+                                styles.overlay,
+                                overlayAnimatedStyle,
+                                !transparent && { backgroundColor: colors.white },
+                            ]}
+                        >
+                            {Spinner}
+                        </Animated.View>
+                    </Modal>
                 )}
             </View>
         );
@@ -242,7 +248,7 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backgroundColor: colors.overlayLoading,
         zIndex: 9999,
     },
     dot: {

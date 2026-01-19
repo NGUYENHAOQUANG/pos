@@ -1,6 +1,34 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { PondData, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
+import {
+    OperationType,
+    PondData,
+    PondType,
+    PondTypeOperation,
+} from '@/features/farm/types/farm.types';
+
+// Helper function to parse paginated API response
+const parseApiResponse = <T>(responseData: unknown): T[] => {
+    if (Array.isArray(responseData)) return responseData;
+
+    const data = responseData as Record<string, unknown>;
+
+    if (data?.data) {
+        if (Array.isArray(data.data)) return data.data;
+        const nestedData = data.data as Record<string, unknown>;
+        if (nestedData.items && Array.isArray(nestedData.items)) return nestedData.items;
+    }
+
+    if (data?.result) {
+        if (Array.isArray(data.result)) return data.result;
+        const resultData = data.result as Record<string, unknown>;
+        if (resultData.items && Array.isArray(resultData.items)) return resultData.items;
+    }
+
+    if (data?.items && Array.isArray(data.items)) return data.items;
+
+    return [];
+};
 
 export const pondApi = {
     getPonds: async (): Promise<PondData[]> => {
@@ -83,49 +111,36 @@ export const pondApi = {
         return { items, total };
     },
 
+    // Get all pond types (Ao nuôi, Ao vèo, Ao xử lý, etc.)
     getPondTypes: async (): Promise<PondType[]> => {
         const response = await apiClient.get(API_ENDPOINTS.POND_TYPES.LIST);
-        const responseData = response.data;
-
-        if (Array.isArray(responseData)) return responseData;
-
-        if (responseData?.data) {
-            if (Array.isArray(responseData.data)) return responseData.data;
-            if (responseData.data.items && Array.isArray(responseData.data.items))
-                return responseData.data.items;
-        }
-
-        if (responseData?.result) {
-            if (Array.isArray(responseData.result)) return responseData.result;
-            if (responseData.result.items && Array.isArray(responseData.result.items))
-                return responseData.result.items;
-        }
-
-        if (responseData?.items && Array.isArray(responseData.items)) return responseData.items;
-
-        return [];
+        return parseApiResponse<PondType>(response.data);
     },
 
+    // Get all operation types (Cho ăn, Đo môi trường, Xi phông, etc.)
+    getOperationTypes: async (): Promise<OperationType[]> => {
+        const response = await apiClient.get(API_ENDPOINTS.OPERATION_TYPES.LIST);
+        const operations = parseApiResponse<OperationType>(response.data);
+        console.log('=== OPERATION TYPES FROM API ===');
+        console.log(JSON.stringify(operations, null, 2));
+        return operations;
+    },
+
+    // Get all pond type operations (mapping of operations for all pond types)
     getPondTypeOperations: async (): Promise<PondTypeOperation[]> => {
         const response = await apiClient.get(API_ENDPOINTS.POND_TYPE_OPERATIONS.LIST);
-        const responseData = response.data;
+        return parseApiResponse<PondTypeOperation>(response.data);
+    },
 
-        if (Array.isArray(responseData)) return responseData;
-
-        if (responseData?.data) {
-            if (Array.isArray(responseData.data)) return responseData.data;
-            if (responseData.data.items && Array.isArray(responseData.data.items))
-                return responseData.data.items;
-        }
-
-        if (responseData?.result) {
-            if (Array.isArray(responseData.result)) return responseData.result;
-            if (responseData.result.items && Array.isArray(responseData.result.items))
-                return responseData.result.items;
-        }
-
-        if (responseData?.items && Array.isArray(responseData.items)) return responseData.items;
-
-        return [];
+    // Get operations available for a specific pond type
+    // Example: What operations are available for "Ao nuôi"? (Feeding, Environment monitoring, Siphon, etc.)
+    getOperationsByPondType: async (pondTypeId: number): Promise<PondTypeOperation[]> => {
+        const response = await apiClient.get(
+            API_ENDPOINTS.POND_TYPE_OPERATIONS.BY_POND_TYPE(pondTypeId)
+        );
+        const operations = parseApiResponse<PondTypeOperation>(response.data);
+        console.log(`=== OPERATIONS FOR POND TYPE ${pondTypeId} ===`);
+        console.log(JSON.stringify(operations, null, 2));
+        return operations;
     },
 };

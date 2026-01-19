@@ -88,6 +88,24 @@ export const createSeasonStore: StateCreator<
 
     updateSeasonApi: async (zoneId, seasonId, data) => {
         try {
+            // Frontend Validation: Check for duplicate name
+            if (data.seasonName) {
+                const currentSeasons = get().seasons;
+                const normalizeName = (name: string) => name.trim().toLowerCase();
+                const newName = normalizeName(data.seasonName);
+
+                const isDuplicate = currentSeasons.some(
+                    s =>
+                        String(s.zoneId) === String(zoneId) &&
+                        normalizeName(s.name) === newName &&
+                        String(s.id) !== String(seasonId)
+                );
+
+                if (isDuplicate) {
+                    throw new Error('Tên vụ nuôi đã tồn tại trong vùng nuôi này');
+                }
+            }
+
             await seasonApi.updateSeason(zoneId, seasonId, data);
             // Update local state
             set(state => {
@@ -99,7 +117,7 @@ export const createSeasonStore: StateCreator<
             return true;
         } catch (error) {
             console.error('[SeasonStore] Failed to update season:', error);
-            return false;
+            throw error;
         }
     },
 
@@ -113,7 +131,7 @@ export const createSeasonStore: StateCreator<
             return true;
         } catch (error) {
             console.error('[SeasonStore] Failed to delete season:', error);
-            return false;
+            throw error;
         }
     },
 

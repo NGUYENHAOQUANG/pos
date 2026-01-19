@@ -44,9 +44,15 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
     borderRadius: customBorderRadius,
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value || data[0]);
+    const [currentItem, setCurrentItem] = useState<DropDownItem | undefined>(value);
     const dropdownButtonRef = useRef<View>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+    React.useEffect(() => {
+        if (value !== undefined) {
+            setCurrentItem(value);
+        }
+    }, [value]);
 
     const handleDropdownPress = () => {
         if (dropdownButtonRef.current) {
@@ -195,7 +201,7 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     dropdownItemTextSelected: {
-        fontWeight: '500',
+        fontWeight: '400',
         color: colors.primary,
     },
 });

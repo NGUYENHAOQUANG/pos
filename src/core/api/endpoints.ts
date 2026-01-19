@@ -36,8 +36,13 @@ export const API_ENDPOINTS = {
     POND_TYPES: {
         LIST: '/pond-types',
     },
+    OPERATION_TYPES: {
+        LIST: '/operation-types',
+        DETAIL: (id: number) => `/operation-types/${id}`,
+    },
     POND_TYPE_OPERATIONS: {
         LIST: '/pond-type-operations',
+        BY_POND_TYPE: (pondTypeId: number) => `/pond-type-operations/${pondTypeId}`,
     },
     // Zones / Farms
     ZONES: {

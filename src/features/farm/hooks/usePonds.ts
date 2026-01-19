@@ -14,7 +14,7 @@ export const usePondMasterData = () => {
             ]);
             return { types, operations };
         },
-        staleTime: 24 * 60 * 60 * 1000, // 24 hours (static data)
+        staleTime: 60 * 60 * 1000, // 1 hour for master data (was 24h)
     });
 };
 
@@ -46,7 +46,7 @@ export const usePondsByZone = (zoneId: number | null) => {
             return undefined;
         },
         enabled: !!zoneId,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0, // Always fetch fresh data (was 5 mins)
     });
 
     // Reactive Mapping: Map pond types whenever masterData or query data changes
@@ -81,6 +81,8 @@ export const usePondsByZone = (zoneId: number | null) => {
     return {
         ...query,
         data: mappedData, // Return the mapped data
-        isLoading: query.isLoading || isLoadingMaster || (!masterData && !!zoneId),
+        // If master data fails (isLoadingMaster=false, data=undefined), we still show ponds with missing types
+        // rather than stuck in loading forever.
+        isLoading: query.isLoading || isLoadingMaster,
     };
 };
