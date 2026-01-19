@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Modal, Dimensions } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button } from '../buttons/Button';
+import { Button } from '@/shared/components/buttons/Button';
 
 const { width } = Dimensions.get('window');
 

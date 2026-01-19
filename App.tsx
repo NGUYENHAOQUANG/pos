@@ -5,14 +5,14 @@
 
 import React, { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
-import { toastConfig } from './src/config/toastConfig';
+import { toastConfig } from '@/config/toastConfig';
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AppProviders } from './src/app/providers';
+import { AppProviders } from '@/app/providers';
 import { LogBox } from 'react-native';
 import notifee from '@notifee/react-native';
-import { NetworkStatusModal, SessionExpiredModal } from './src/shared/components';
-import { useAuthStore } from './src/features/auth/store/authStore';
+import { NetworkStatusModal, SessionExpiredModal } from '@/shared/components';
+import { useAuthStore } from '@/features/auth/store/authStore';
 // import {
 //   requestNotificationPermission,
 //   getFCMToken,
