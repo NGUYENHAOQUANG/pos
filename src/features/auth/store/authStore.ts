@@ -30,6 +30,8 @@ interface AuthState {
         refreshToken: string | null,
         accessTokenExpires?: string | null
     ) => void;
+    isSessionExpired: boolean;
+    setSessionExpired: (value: boolean) => void;
     hasLaunched: boolean;
     setHasLaunched: (value: boolean) => void;
 }
@@ -42,6 +44,7 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             accessTokenExpires: null,
             isAuthenticated: false,
+            isSessionExpired: false,
             loading: false,
             hasLaunched: false,
 
@@ -144,20 +147,23 @@ export const useAuthStore = create<AuthState>()(
 
             logout: async () => {
                 const refreshToken = get().refreshToken;
+
+                // Clear state IMMEDIATELY to update UI and prevent interceptors from thinking we are logged in
+                set({
+                    user: null,
+                    token: null,
+                    refreshToken: null,
+                    accessTokenExpires: null,
+                    isAuthenticated: false,
+                    isSessionExpired: false,
+                });
+
                 try {
                     if (refreshToken) {
                         await authApi.logout(refreshToken);
                     }
                 } catch (error) {
                     console.error('Logout API failed:', error);
-                } finally {
-                    set({
-                        user: null,
-                        token: null,
-                        refreshToken: null,
-                        accessTokenExpires: null,
-                        isAuthenticated: false,
-                    });
                 }
             },
 
@@ -183,6 +189,10 @@ export const useAuthStore = create<AuthState>()(
 
             setHasLaunched: (value: boolean) => {
                 set({ hasLaunched: value });
+            },
+
+            setSessionExpired: (value: boolean) => {
+                set({ isSessionExpired: value });
             },
         }),
         {

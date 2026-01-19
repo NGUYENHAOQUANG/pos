@@ -11,7 +11,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from './src/app/providers';
 import { LogBox } from 'react-native';
 import notifee from '@notifee/react-native';
-import { NetworkStatusModal } from './src/shared/components';
+import { NetworkStatusModal, SessionExpiredModal } from './src/shared/components';
+import { useAuthStore } from './src/features/auth/store/authStore';
 // import {
 //   requestNotificationPermission,
 //   getFCMToken,
@@ -23,6 +24,12 @@ LogBox.ignoreAllLogs();
 
 function App(): React.JSX.Element {
     const isDarkMode = useColorScheme() === 'dark';
+    const { isSessionExpired, setSessionExpired, logout } = useAuthStore();
+
+    const handleSessionExpiredConfirm = () => {
+        setSessionExpired(false);
+        logout();
+    };
 
     useEffect(() => {
         const checkPermission = async () => {
@@ -69,6 +76,10 @@ function App(): React.JSX.Element {
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
             <AppProviders />
             <NetworkStatusModal />
+            <SessionExpiredModal
+                visible={isSessionExpired}
+                onConfirm={handleSessionExpiredConfirm}
+            />
             <Toast config={toastConfig} topOffset={0} />
         </SafeAreaProvider>
     );
