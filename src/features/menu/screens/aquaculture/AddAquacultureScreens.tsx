@@ -14,13 +14,16 @@ import {
 import { useFarm } from '@/features/farm/store/farmStore';
 import { seasonApi } from '@/features/farm/api/seasonApi';
 import { Loading } from '@/shared/components/ui/Loading';
+import { useQueryClient } from '@tanstack/react-query';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 export const AddAquacultureScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { zones, fetchSeasons, fetchZones, seasons } = useFarm();
+    const { zones, fetchZones, seasons } = useFarm();
     const formRef = useRef<AquacultureFormRef>(null);
     const [isLoading, setIsLoading] = React.useState(false);
+    const queryClient = useQueryClient();
 
     React.useEffect(() => {
         if (zones.length === 0) {
@@ -69,8 +72,8 @@ export const AddAquacultureScreens: React.FC = () => {
                     endDate: data.endDate?.toISOString(),
                 });
                 Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
-                // Refresh seasons list
-                await fetchSeasons(zones);
+                // Invalidate seasons query to trigger background refetch
+                queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
                 navigation.goBack();
             } catch (error: any) {
                 const errorMessage =

@@ -39,9 +39,6 @@ export const AquacultureManagementScreens: React.FC = () => {
 
     useFocusEffect(
         React.useCallback(() => {
-            // Trigger refresh when screen gains focus to update data
-            refresh();
-
             const timeout = setTimeout(() => {
                 setTabBarVisible(false);
             }, 100);
@@ -50,7 +47,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                 clearTimeout(timeout);
                 setTabBarVisible(true);
             };
-        }, [setTabBarVisible, refresh])
+        }, [setTabBarVisible])
     );
 
     // Prepare zone options
@@ -104,7 +101,11 @@ export const AquacultureManagementScreens: React.FC = () => {
     // Only show skeleton on initial load.
     // We DO NOT include isRefetching here to avoid the "loading forever" blocking UI.
     // The RefreshControl spinner will show the update progress instead.
-    const showSkeleton = isLoading;
+    // UPDATE: User wants skeleton during transition to avoid "jerky" updates.
+    // We show skeleton if we are loading OR if we are refetching (but not pulling to refresh).
+    // isPulling check ensures we don't show skeleton + spinner at same time.
+    const { isRefetching } = useSeasons();
+    const showSkeleton = isLoading || (isRefetching && !isPulling);
 
     return (
         <View style={styles.container}>

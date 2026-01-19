@@ -16,6 +16,8 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData } from '@/features/farm/types/farm.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { useQueryClient } from '@tanstack/react-query';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 type EditAquacultureRouteProp = RouteProp<
     { EditAquaculture: { aquaculture: SeasonData } },
@@ -31,6 +33,7 @@ export const EditAquacultureScreens: React.FC = () => {
     const formRef = useRef<AquacultureFormRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     React.useEffect(() => {
         if (zones.length === 0) {
@@ -67,6 +70,7 @@ export const EditAquacultureScreens: React.FC = () => {
                 );
                 if (success) {
                     Toast.show(ToastMessages.Aquaculture.UPDATE_SUCCESS);
+                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
                     navigation.goBack();
                 }
             } catch (error: any) {
@@ -106,6 +110,7 @@ export const EditAquacultureScreens: React.FC = () => {
                         text1: 'Thành công',
                         text2: 'Đã xóa vụ nuôi',
                     });
+                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
                     navigation.goBack();
                 }
             } catch (error: any) {
