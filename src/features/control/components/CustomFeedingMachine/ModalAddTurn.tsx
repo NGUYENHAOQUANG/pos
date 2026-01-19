@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from '
 import Icon from 'react-native-vector-icons/Fontisto';
 import { TimePickerModal } from './TimePickerModal';
 import { colors } from '@/styles';
-import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
+import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 interface ModalAddTurnProps {
     label?: string;

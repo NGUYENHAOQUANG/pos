@@ -9,7 +9,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
+import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { colors, spacing, borderRadius } from '@/styles';
 
 interface UnitOfUseProps {

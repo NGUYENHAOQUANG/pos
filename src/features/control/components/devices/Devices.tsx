@@ -5,7 +5,7 @@ import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
-import { AutoScrollText } from './AutoScrollText';
+import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
 
 // Responsive Scaling Helper

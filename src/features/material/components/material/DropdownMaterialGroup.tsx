@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { AutoScrollText } from '@/features/control/components/devices/AutoScrollText';
+import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 export interface DropdownOption {
     label: string;
