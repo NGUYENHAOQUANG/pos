@@ -111,7 +111,7 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
             <Loading isLoading={isCreatingMaterial}>
                 <View style={styles.container}>
                     <HeaderMeterial
-                        title="Thêm Vật Tư"
+                        title="Tạo Vật Tư"
                         onBackPress={() => navigation.goBack()}
                         rightComponent={null} // Hide the right button
                     />
