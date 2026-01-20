@@ -69,12 +69,14 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                         <Text style={styles.detailValue}>{item.type || '---'}</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Nhà sản xuất: </Text>
-                        <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
+                        <Text style={styles.detailValue}>
+                            <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
+                            {item.manufacturer || '---'}
+                        </Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailValue}>
-                            <Text style={styles.detailLabel}>Công dụng:</Text> {item.usage || '---'}
+                            <Text style={styles.detailLabel}>Mô tả:</Text> {item.usage || '---'}
                         </Text>
                     </View>
                     {/* Commented out - Đơn vị sử dụng và Liều dùng */}
