@@ -24,7 +24,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
                 onPress={onSchedulePress}
                 activeOpacity={0.7}
             >
-                <FieldTimeIcon width={20} height={20} style={styles.icon} />
+                <FieldTimeIcon width={18} height={18} style={styles.icon} />
                 <Text style={styles.text}>Lịch trình</Text>
             </TouchableOpacity>
 
@@ -33,7 +33,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
                 onPress={onStatisticPress}
                 activeOpacity={0.7}
             >
-                <LineChartIcon width={20} height={20} style={styles.icon} />
+                <LineChartIcon width={16} height={16} style={styles.icon} />
                 <Text style={styles.text}>Lịch sử & Thống kê</Text>
             </TouchableOpacity>
         </View>
@@ -88,13 +88,11 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     icon: {
-        width: 20,
-        height: 20,
-        marginRight: spacing.xs,
+        marginRight: spacing.sm,
     },
     text: {
-        fontSize: 14,
-        fontWeight: '500',
+        fontSize: 16,
+        fontWeight: '400',
         color: colors.text,
     },
 });
