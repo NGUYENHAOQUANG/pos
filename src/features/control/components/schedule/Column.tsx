@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     },
     timeColumnHeader: {
         width: 50,
+        marginRight: 30,
     },
     deviceColumn: {
         flex: 1,
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         width: 50,
+        marginRight: 30,
         fontSize: 12,
         color: colors.textSecondary,
         paddingLeft: 4,
