@@ -139,10 +139,16 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                         <FarmInput
                                             label="Số lượng"
                                             value={quantity}
-                                            onChangeText={text =>
-                                                setQuantity(text.replace(/[^0-9]/g, ''))
-                                            }
-                                            keyboardType="numeric"
+                                            onChangeText={text => {
+                                                let sanitized = text.replace(/[^0-9.]/g, '');
+                                                const parts = sanitized.split('.');
+                                                if (parts.length > 2) {
+                                                    sanitized =
+                                                        parts[0] + '.' + parts.slice(1).join('');
+                                                }
+                                                setQuantity(sanitized);
+                                            }}
+                                            keyboardType="decimal-pad"
                                             required
                                         />
                                     </View>

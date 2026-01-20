@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TextInputProps } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { colors, spacing } from '@/styles';
+import { Input, InputProps } from '@/shared/components/forms/Input';
 
-interface FarmInputProps extends TextInputProps {
+interface FarmInputProps extends Omit<InputProps, 'inputContainerStyle' | 'containerStyle'> {
     /** Label text displayed above the input */
     label?: string;
     /** Whether to show required indicator (*) */
@@ -11,6 +12,8 @@ interface FarmInputProps extends TextInputProps {
     height?: number;
     /** Whether to show label */
     showLabel?: boolean;
+    /** Custom style for the input container */
+    style?: ViewStyle;
 }
 
 /**
@@ -53,7 +56,7 @@ export const FarmInput: React.FC<FarmInputProps> = ({
     placeholderTextColor = colors.borderSubtle,
     keyboardType = 'numeric',
     style,
-    ...textInputProps
+    ...inputProps
 }) => {
     return (
         <View style={styles.container}>
@@ -63,19 +66,17 @@ export const FarmInput: React.FC<FarmInputProps> = ({
                     {label}
                 </Text>
             )}
-            <TextInput
-                style={[
-                    styles.textInput,
-                    {
-                        height,
-                    },
-                    style,
-                ]}
+            <Input
+                inputContainerStyle={{
+                    ...styles.textInput,
+                    height,
+                    ...(style as object),
+                }}
+                containerStyle={styles.inputWrapper}
                 placeholder={placeholder}
                 placeholderTextColor={placeholderTextColor}
                 keyboardType={keyboardType}
-                textAlignVertical="center"
-                {...textInputProps}
+                {...inputProps}
             />
         </View>
     );
@@ -93,6 +94,9 @@ const styles = StyleSheet.create({
     },
     required: {
         color: colors.error,
+    },
+    inputWrapper: {
+        marginBottom: 0,
     },
     textInput: {
         paddingHorizontal: spacing.md,
