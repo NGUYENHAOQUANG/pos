@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
     },
     textInput: {
         paddingHorizontal: spacing.md,
-        paddingVertical: 0,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,

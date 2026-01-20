@@ -242,11 +242,11 @@ const styles = StyleSheet.create({
         height: '100%', // Match container height
         // iOS doesn't support textAlignVertical, use lineHeight instead
         ...Platform.select({
-            ios: {
-                lineHeight: 40, // Same as inputContainer height to center text vertically
-            },
             android: {
                 textAlignVertical: 'center' as const,
+            },
+            ios: {
+                justifyContent: 'center', // Same as inputContainer height to center text vertically
             },
         }),
     },
