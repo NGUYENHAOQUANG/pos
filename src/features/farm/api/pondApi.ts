@@ -108,7 +108,10 @@ export const pondApi = {
             );
         }
 
-        return { items, total };
+        return {
+            items: items.map(p => ({ ...p, zoneId: Number(zoneId) })),
+            total,
+        };
     },
 
     // Get all pond types (Ao nuôi, Ao vèo, Ao xử lý, etc.)

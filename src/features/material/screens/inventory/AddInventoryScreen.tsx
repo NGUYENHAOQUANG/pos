@@ -14,8 +14,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useInventoryStore } from '@/features/material/store';
-import { useMaterials } from '@/features/material/hooks';
+import { useMaterials, useAddInventoryTicket } from '@/features/material/hooks';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 
 interface AddInventoryScreenProps {}
@@ -40,7 +39,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
-    const addInventoryTicket = useInventoryStore(state => state.addInventoryTicket);
+    const { mutate: addInventoryTicket } = useAddInventoryTicket();
 
     const { setTabBarVisible } = useTabBarVisibility();
 

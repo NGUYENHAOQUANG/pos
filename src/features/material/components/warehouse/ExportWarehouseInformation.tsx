@@ -23,37 +23,68 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 interface ExportWarehouseInformationProps {
     date: Date;
     onDateChange: (date: Date) => void;
-    farm: string;
-    onFarmChange: (value: string) => void;
+    selectedZone: string;
+    onZoneChange: (value: string) => void;
+    selectedPond: string;
+    onPondChange: (value: string) => void;
 }
 
 export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProps> = ({
     date,
     onDateChange,
-    farm,
-    onFarmChange,
+    selectedZone,
+    onZoneChange,
+    selectedPond,
+    onPondChange,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // Get ponds from farm store
-    const { ponds, fetchPonds, isLoadingPonds } = useFarm();
+    // Get zones and ponds from form store
+    const { zones, ponds, fetchZones, fetchPondsByZone, isLoadingZones, isLoadingPonds } =
+        useFarm();
 
-    // Fetch ponds on mount
+    // Fetch initial data (Zones)
     useEffect(() => {
-        if (ponds.length === 0) {
-            fetchPonds();
-        }
-    }, [ponds.length, fetchPonds]);
+        if (zones.length === 0) fetchZones();
+    }, [zones.length, fetchZones]);
 
-    // Convert ponds to dropdown options
-    const pondOptions: DropdownOption[] = useMemo(() => {
-        return ponds.map(pond => ({
-            label: pond.name,
-            value: pond.name,
+    // Fetch ponds when selectedZone changes
+    useEffect(() => {
+        if (selectedZone) {
+            fetchPondsByZone(selectedZone);
+        }
+    }, [selectedZone, fetchPondsByZone]);
+
+    // Auto-select "Trại Kiên Giang" or first zone if available and none selected
+    useEffect(() => {
+        if (!selectedZone && zones.length > 0) {
+            const defaultZone =
+                zones.find(z => z.name.toLowerCase().includes('kiên giang')) || zones[0];
+            onZoneChange(defaultZone.id.toString());
+        }
+    }, [zones, selectedZone, onZoneChange]);
+
+    // Zones Dropdown Options
+    const zoneOptions: DropdownOption[] = useMemo(() => {
+        return zones.map(z => ({
+            label: z.name,
+            value: z.id.toString(),
         }));
-    }, [ponds]);
+    }, [zones]);
+
+    // Filter Ponds based on selected Zone
+    const pondOptions: DropdownOption[] = useMemo(() => {
+        if (!selectedZone) return [];
+
+        const filteredPonds = ponds.filter(p => p.zoneId?.toString() === selectedZone);
+
+        return filteredPonds.map(p => ({
+            label: p.name,
+            value: p.name,
+        }));
+    }, [ponds, selectedZone]);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -96,21 +127,45 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                         </TouchableOpacity>
                     </View>
 
-                    {/* Farm Dropdown */}
+                    {/* Zone Dropdown */}
+                    <View style={styles.inputGroup}>
+                        <View style={styles.labelContainer}>
+                            <Text style={styles.required}>* </Text>
+                            <Text style={styles.label}>Trại nuôi</Text>
+                        </View>
+                        <DropdownMaterial
+                            value={selectedZone}
+                            options={zoneOptions}
+                            onChange={newValue => {
+                                onZoneChange(newValue);
+                                onPondChange('');
+                            }}
+                            placeholder="Chọn trại nuôi"
+                            showAllOption={false}
+                            isOpen={activeDropdown === 'zone'}
+                            onToggle={() => handleToggleDropdown('zone')}
+                            disabled={isLoadingZones}
+                            inline={false}
+                        />
+                    </View>
+
+                    {/* Pond Dropdown */}
                     <View style={styles.inputGroup}>
                         <View style={styles.labelContainer}>
                             <Text style={styles.required}>* </Text>
                             <Text style={styles.label}>Ao nuôi</Text>
                         </View>
                         <DropdownMaterial
-                            value={farm}
+                            value={selectedPond}
                             options={pondOptions}
-                            onChange={onFarmChange}
-                            placeholder="Chọn ao nuôi"
+                            onChange={onPondChange}
+                            placeholder={
+                                isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'
+                            }
                             showAllOption={false}
-                            isOpen={activeDropdown === 'farm'}
-                            onToggle={() => handleToggleDropdown('farm')}
-                            disabled={isLoadingPonds}
+                            isOpen={activeDropdown === 'pond'}
+                            onToggle={() => handleToggleDropdown('pond')}
+                            disabled={!selectedZone || isLoadingPonds}
                             inline={false}
                         />
                     </View>
@@ -161,7 +216,7 @@ const styles = StyleSheet.create({
     },
     required: {
         fontSize: 14,
-        color: colors.error || '#FF4D4F',
+        color: colors.error,
     },
     dateInput: {
         flexDirection: 'row',
