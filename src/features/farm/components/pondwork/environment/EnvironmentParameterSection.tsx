@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography } from '@/styles';
-import { IconEditOutlined } from '@/assets/icons';
+import { IconEditOutlined, IconCheckActive, IconCheckUnactive } from '@/assets/icons';
 
 export interface EnvironmentParameter {
     id: string;
@@ -55,15 +55,13 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
                             <View style={styles.childRow}>
                                 {/* Checkbox */}
                                 <TouchableOpacity
-                                    style={[
-                                        styles.checkbox,
-                                        param.isChecked && styles.checkboxChecked,
-                                    ]}
                                     onPress={() => onToggleParameter(param.id)}
                                     activeOpacity={0.7}
                                 >
-                                    {param.isChecked && (
-                                        <Ionicons name="checkmark" size={16} color={colors.white} />
+                                    {param.isChecked ? (
+                                        <IconCheckActive width={16} height={16} />
+                                    ) : (
+                                        <IconCheckUnactive width={16} height={16} />
                                     )}
                                 </TouchableOpacity>
 
@@ -142,20 +140,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         gap: spacing.md,
     },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: colors.border,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    checkboxChecked: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
+
     childColumn: {
         flex: 1,
     },

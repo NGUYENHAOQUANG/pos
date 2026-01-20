@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
 
 interface FilterOption {
     label: string;
@@ -144,19 +145,13 @@ export const Filter: React.FC<FilterProps> = ({
                                 onPress={handleToggleAll}
                                 activeOpacity={0.7}
                             >
-                                <View
-                                    style={[
-                                        styles.checkbox,
-                                        isAllSelected && styles.checkboxSelected,
-                                    ]}
-                                >
-                                    {isAllSelected && (
-                                        <Ionicons name="checkmark" size={16} color={colors.white} />
-                                    )}
-                                </View>
+                                {isAllSelected ? (
+                                    <IconCheckActive width={16} height={16} />
+                                ) : (
+                                    <IconCheckUnactive width={16} height={16} />
+                                )}
                                 <Text style={styles.checkboxLabel}>Chọn tất cả</Text>
                             </TouchableOpacity>
-
                             {/* Work Types List */}
                             {optionsToRender.map(option => {
                                 const isSelected = selectedTypes.includes(option.value);
@@ -167,20 +162,11 @@ export const Filter: React.FC<FilterProps> = ({
                                         onPress={() => handleToggleType(option.value)}
                                         activeOpacity={0.7}
                                     >
-                                        <View
-                                            style={[
-                                                styles.checkbox,
-                                                isSelected && styles.checkboxSelected,
-                                            ]}
-                                        >
-                                            {isSelected && (
-                                                <Ionicons
-                                                    name="checkmark"
-                                                    size={16}
-                                                    color={colors.white}
-                                                />
-                                            )}
-                                        </View>
+                                        {isSelected ? (
+                                            <IconCheckActive width={16} height={16} />
+                                        ) : (
+                                            <IconCheckUnactive width={16} height={16} />
+                                        )}
                                         <Text style={styles.checkboxLabel}>{option.label}</Text>
                                     </TouchableOpacity>
                                 );
@@ -256,24 +242,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: spacing.md,
     },
-    checkbox: {
-        width: 16,
-        height: 16,
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        marginRight: spacing.sm,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-    checkboxSelected: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
+
     checkboxLabel: {
         fontSize: typography.fontSize.base,
         color: colors.text,
         fontWeight: typography.fontWeight.regular,
+        marginLeft: spacing.sm,
     },
 });
