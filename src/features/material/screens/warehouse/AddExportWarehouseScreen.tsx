@@ -18,8 +18,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useExportWarehouseStore } from '@/features/material/store';
-import { useMaterials } from '@/features/material/hooks';
+import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
 
 interface AddExportWarehouseScreenProps {}
 
@@ -30,9 +29,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
-    const addExportWarehouseReceipt = useExportWarehouseStore(
-        state => state.addExportWarehouseReceipt
-    );
+    const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
 
     useEffect(() => {
         setTabBarVisible(false);
