@@ -10,6 +10,7 @@
 import { colors, sizes, spacing, typography } from '@/styles';
 import React, { useState } from 'react';
 import {
+    Platform,
     StyleSheet,
     Text,
     TextInput,
@@ -238,8 +239,16 @@ const styles = StyleSheet.create({
         color: colors.text,
         letterSpacing: 0,
         paddingVertical: 0,
-        textAlignVertical: 'center',
         height: '100%', // Match container height
+        // iOS doesn't support textAlignVertical, use lineHeight instead
+        ...Platform.select({
+            ios: {
+                lineHeight: 40, // Same as inputContainer height to center text vertically
+            },
+            android: {
+                textAlignVertical: 'center' as const,
+            },
+        }),
     },
     inputMultiline: {
         minHeight: sizes.input.md * 2,

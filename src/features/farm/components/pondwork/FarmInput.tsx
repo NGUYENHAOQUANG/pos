@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, Platform } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input, InputProps } from '@/shared/components/forms/Input';
 
@@ -105,17 +105,5 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 6,
-        fontSize: 16,
-        color: colors.text,
-        letterSpacing: 0,
-        // iOS doesn't support textAlignVertical, use lineHeight instead
-        ...Platform.select({
-            ios: {
-                lineHeight: 40, // Same as default height to center text vertically
-            },
-            android: {
-                textAlignVertical: 'center' as const,
-            },
-        }),
     },
 });
