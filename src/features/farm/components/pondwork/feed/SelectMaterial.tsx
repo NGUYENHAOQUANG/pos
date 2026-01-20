@@ -14,7 +14,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
-import { DropDownButtonBasic, DropDownItem } from '../../DropDownButtonBasic';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 
 interface SelectMaterialProps {
@@ -22,69 +21,51 @@ interface SelectMaterialProps {
     onClose: () => void;
     onSave: (data: { material: IMaterial; quantity: number; unit: string }) => void;
     materials: IMaterial[];
-    units?: DropDownItem[];
 }
-
-const DEFAULT_UNITS: DropDownItem[] = [
-    { id: 'kg', label: 'kg' },
-    { id: 'g', label: 'g' },
-    { id: 'l', label: 'L' },
-    { id: 'ml', label: 'ml' },
-    { id: 'bao', label: 'Bao' },
-    { id: 'chai', label: 'Chai' },
-];
 
 export const SelectMaterial: React.FC<SelectMaterialProps> = ({
     isVisible,
     onClose,
     onSave,
     materials,
-    units = DEFAULT_UNITS,
 }) => {
     const [selectedMaterial, setSelectedMaterial] = useState<IMaterial | undefined>();
     const [quantity, setQuantity] = useState('');
-    const [selectedUnit, setSelectedUnit] = useState<DropDownItem | undefined>();
+    const [selectedUnit, setSelectedUnit] = useState<string>('');
 
     // Reset form when modal closes
     useEffect(() => {
         if (!isVisible) {
             setSelectedMaterial(undefined);
             setQuantity('');
-            setSelectedUnit(undefined);
+            setSelectedUnit('');
         }
     }, [isVisible]);
 
-    // Initialize default unit when modal opens
-    useEffect(() => {
-        if (isVisible && !selectedUnit && units.length > 0) {
-            setSelectedUnit(units[0]);
-        }
-    }, [isVisible, units, selectedUnit]);
+    // Initialize default unit when modal opens - REMOVED or Simplified
+    // We strictly rely on material selection now as per request.
 
     // Auto-fill unit based on selected material
     useEffect(() => {
-        if (selectedMaterial && selectedMaterial.unit) {
-            const targetUnit = selectedMaterial.unitName || selectedMaterial.unit;
-            const unitToSelect = units.find(
-                u => u.label?.toLowerCase() === String(targetUnit).toLowerCase()
-            );
-            if (unitToSelect) {
-                setSelectedUnit(unitToSelect);
-            }
+        if (selectedMaterial) {
+            const targetUnit = selectedMaterial.unitName || selectedMaterial.unit || '';
+            setSelectedUnit(String(targetUnit));
+        } else {
+            setSelectedUnit('');
         }
-    }, [selectedMaterial, units]);
+    }, [selectedMaterial]);
 
     const handleSave = () => {
         if (selectedMaterial && quantity && selectedUnit) {
             onSave({
                 material: selectedMaterial,
                 quantity: parseFloat(quantity),
-                unit: selectedUnit.label,
+                unit: selectedUnit,
             });
             // Reset form
             setSelectedMaterial(undefined);
             setQuantity('');
-            setSelectedUnit(undefined);
+            setSelectedUnit('');
             onClose();
         }
     };
@@ -151,20 +132,17 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                         />
                                     </View>
 
-                                    {/* Unit Dropdown */}
+                                    {/* Unit Input - Disabled */}
                                     <View style={styles.quantityContainer}>
-                                        <Text style={styles.label}>
-                                            <Text style={styles.required}>* </Text>
-                                            Đơn vị
-                                        </Text>
-                                        <DropDownButtonBasic
-                                            data={units}
+                                        <FarmInput
+                                            label="Đơn vị"
                                             value={selectedUnit}
-                                            onSelect={setSelectedUnit}
-                                            style={styles.dropdown}
-                                            showIcon={false}
-                                            height={40}
-                                            borderRadius={6}
+                                            editable={false}
+                                            required
+                                            style={{
+                                                backgroundColor: colors.gray[100],
+                                                color: colors.textSecondary,
+                                            }}
                                         />
                                     </View>
                                 </View>
