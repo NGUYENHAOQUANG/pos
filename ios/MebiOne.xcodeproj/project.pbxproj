@@ -276,11 +276,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = CKQUH828N3;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = MebiOne/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MebiEco;
+				INFOPLIST_KEY_CFBundleDisplayName = Mebieco;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -310,10 +310,10 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = CKQUH828N3;
 				INFOPLIST_FILE = MebiOne/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MebiEco;
+				INFOPLIST_KEY_CFBundleDisplayName = Mebieco;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (

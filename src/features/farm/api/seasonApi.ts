@@ -41,11 +41,29 @@ export const seasonApi = {
             API_ENDPOINTS.PRODUCTION_SEASONS.UPDATE(zoneId, id),
             data
         );
-        return response.data;
+
+        const resData = response.data;
+        if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
+            let message = resData?.message || 'Cập nhật vụ nuôi thất bại';
+            if (message === 'Season name already exists.') {
+                message = 'Tên vụ nuôi đã tồn tại';
+            }
+            throw new Error(message);
+        }
+
+        return resData;
     },
 
     deleteSeason: async (zoneId: number | string, id: string): Promise<void> => {
-        await apiClient.delete(API_ENDPOINTS.PRODUCTION_SEASONS.DELETE(zoneId, id));
+        const response = await apiClient.delete(
+            API_ENDPOINTS.PRODUCTION_SEASONS.DELETE(zoneId, id)
+        );
+        const resData = response.data;
+        if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
+            let message = resData?.message || 'Xóa vụ nuôi thất bại';
+            // Translate common errors if needed
+            throw new Error(message);
+        }
     },
 
     createSeason: async (
@@ -56,6 +74,16 @@ export const seasonApi = {
             API_ENDPOINTS.PRODUCTION_SEASONS.CREATE(zoneId),
             data
         );
+
+        const resData = response.data;
+        if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
+            let message = resData?.message || 'Tạo vụ nuôi thất bại';
+            if (message === 'Season name already exists.') {
+                message = 'Tên vụ nuôi đã tồn tại';
+            }
+            throw new Error(message);
+        }
+
         return response.data;
     },
 };

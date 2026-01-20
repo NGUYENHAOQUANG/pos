@@ -13,12 +13,23 @@ import {
 } from '@/features/menu/components/aquaculture/AquacultureForm';
 import { useFarm } from '@/features/farm/store/farmStore';
 import { seasonApi } from '@/features/farm/api/seasonApi';
+import { Loading } from '@/shared/components/ui/Loading';
+import { useQueryClient } from '@tanstack/react-query';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 export const AddAquacultureScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { zones, fetchSeasons } = useFarm();
+    const { zones, fetchZones, seasons } = useFarm();
     const formRef = useRef<AquacultureFormRef>(null);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const queryClient = useQueryClient();
+
+    React.useEffect(() => {
+        if (zones.length === 0) {
+            fetchZones();
+        }
+    }, [zones.length, fetchZones]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -38,6 +49,22 @@ export const AddAquacultureScreens: React.FC = () => {
         const data = formRef.current?.submit();
         if (data && data.zoneId) {
             try {
+                setIsLoading(true);
+
+                // Frontend validation for duplicate name
+                const normalizeName = (name: string) => name.trim().toLowerCase();
+                const newName = normalizeName(data.name || '');
+
+                const isDuplicate = seasons.some(
+                    s =>
+                        String(s.zoneId) === String(data.zoneId) &&
+                        normalizeName(s.name) === newName
+                );
+
+                if (isDuplicate) {
+                    throw new Error('Tên vụ nuôi đã tồn tại trong vùng nuôi này');
+                }
+
                 // Call create API
                 await seasonApi.createSeason(data.zoneId, {
                     seasonName: data.name,
@@ -45,37 +72,44 @@ export const AddAquacultureScreens: React.FC = () => {
                     endDate: data.endDate?.toISOString(),
                 });
                 Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
-                // Refresh seasons list
-                await fetchSeasons(zones);
+                // Invalidate seasons query to trigger background refetch
+                queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
                 navigation.goBack();
-            } catch (_error) {
+            } catch (error: any) {
+                const errorMessage =
+                    error?.response?.data?.message || error?.message || 'Không thể tạo vụ nuôi';
+
                 Toast.show({
                     type: 'error',
                     text1: 'Lỗi',
-                    text2: 'Không thể tạo vụ nuôi',
+                    text2: errorMessage,
                 });
+            } finally {
+                setIsLoading(false);
             }
         }
     };
 
     return (
-        <View style={styles.container}>
-            <HeaderMenu title="Tạo vụ nuôi" onBack={() => navigation.goBack()} />
+        <Loading isLoading={isLoading}>
+            <View style={styles.container}>
+                <HeaderMenu title="Tạo vụ nuôi" onBack={() => navigation.goBack()} />
 
-            <View style={styles.content}>
-                <AquacultureForm ref={formRef} zones={zones} />
+                <View style={styles.content}>
+                    <AquacultureForm ref={formRef} zones={zones} />
+                </View>
+
+                <ButtonBarMenu
+                    primaryTitle="Tạo vụ nuôi"
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={handleCreate}
+                    onSecondaryPress={() => {
+                        navigation.goBack();
+                    }}
+                    secondaryType="default"
+                />
             </View>
-
-            <ButtonBarMenu
-                primaryTitle="Tạo vụ nuôi"
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handleCreate}
-                onSecondaryPress={() => {
-                    navigation.goBack();
-                }}
-                secondaryType="default"
-            />
-        </View>
+        </Loading>
     );
 };
 

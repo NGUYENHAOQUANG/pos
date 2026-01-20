@@ -10,6 +10,7 @@ import {
 } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -55,6 +56,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         { id: '1', materialName: '', quantity: '', price: '' },
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleAddMaterial = () => {
         setWarehouseItems([
@@ -114,96 +116,103 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <View style={styles.container}>
-                <HeaderMeterial
-                    title="Tạo Phiếu Nhập Kho"
-                    onBackPress={() => navigation.goBack()}
-                    rightComponent={null}
-                />
+            <Loading isLoading={isSubmitting}>
+                <View style={styles.container}>
+                    <HeaderMeterial
+                        title="Tạo Phiếu Nhập Kho"
+                        onBackPress={() => navigation.goBack()}
+                        rightComponent={null}
+                    />
 
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        style={styles.content}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={false}
-                        nestedScrollEnabled={true}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        <WarehouseInformation
-                            date={date}
-                            onDateChange={setDate}
-                            supplier={supplier}
-                            onSupplierChange={setSupplier}
-                        />
+                    <SafeInputLayout>
+                        <ScrollView
+                            ref={scrollViewRef}
+                            style={styles.content}
+                            contentContainerStyle={styles.contentContainer}
+                            showsVerticalScrollIndicator={false}
+                            nestedScrollEnabled={true}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <WarehouseInformation
+                                date={date}
+                                onDateChange={setDate}
+                                supplier={supplier}
+                                onSupplierChange={setSupplier}
+                            />
 
-                        <AddWarehouseMaterial
-                            materials={warehouseItems}
-                            onUpdateMaterial={handleUpdateMaterial}
-                            onAddMaterial={handleAddMaterial}
-                            materialOptions={materialOptions}
-                            onDropdownOpen={handleDropdownOpen}
-                        />
-                    </ScrollView>
-                </SafeInputLayout>
+                            <AddWarehouseMaterial
+                                materials={warehouseItems}
+                                onUpdateMaterial={handleUpdateMaterial}
+                                onAddMaterial={handleAddMaterial}
+                                materialOptions={materialOptions}
+                                onDropdownOpen={handleDropdownOpen}
+                            />
+                        </ScrollView>
+                    </SafeInputLayout>
 
-                <ButtonBarMaterial
-                    mode="total"
-                    totalLabel="Tổng tiền:"
-                    totalValue={formatCurrency(totalAmount)}
-                    primaryTitle="Gửi Phiếu"
-                    containerStyle={{
-                        borderTopWidth: 1,
-                        borderTopColor: colors.border,
-                    }}
-                    onPrimaryPress={() => {
-                        // Validation
-                        if (!supplier) {
-                            showValidationError('Vui lòng chọn nhà cung cấp');
-                            return;
-                        }
-                        if (warehouseItems.length === 0) {
-                            showValidationError('Vui lòng thêm ít nhất một vật tư');
-                            return;
-                        }
-                        // Check detailed items
-                        const invalidItemIndex = warehouseItems.findIndex(
-                            m => !m.materialName || !m.quantity || !m.price
-                        );
-                        if (invalidItemIndex !== -1) {
-                            showValidationError(
-                                `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
-                                    invalidItemIndex + 1
-                                })`
+                    <ButtonBarMaterial
+                        mode="total"
+                        totalLabel="Tổng tiền:"
+                        totalValue={formatCurrency(totalAmount)}
+                        primaryTitle="Gửi Phiếu"
+                        containerStyle={{
+                            borderTopWidth: 1,
+                            borderTopColor: colors.border,
+                        }}
+                        onPrimaryPress={() => {
+                            // Validation
+                            if (!supplier) {
+                                showValidationError('Vui lòng chọn nhà cung cấp');
+                                return;
+                            }
+                            if (warehouseItems.length === 0) {
+                                showValidationError('Vui lòng thêm ít nhất một vật tư');
+                                return;
+                            }
+                            // Check detailed items
+                            const invalidItemIndex = warehouseItems.findIndex(
+                                m => !m.materialName || !m.quantity || !m.price
                             );
-                            return;
-                        }
+                            if (invalidItemIndex !== -1) {
+                                showValidationError(
+                                    `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
+                                        invalidItemIndex + 1
+                                    })`
+                                );
+                                return;
+                            }
 
-                        setIsConfirmModalVisible(true);
-                    }}
-                />
+                            setIsConfirmModalVisible(true);
+                        }}
+                    />
 
-                <ConfirmSubmiss
-                    visible={isConfirmModalVisible}
-                    onClose={() => setIsConfirmModalVisible(false)}
-                    onConfirm={() => {
-                        setIsConfirmModalVisible(false);
-                        addWarehouseReceipt({
-                            date,
-                            supplier,
-                            materials: warehouseItems.map(m => ({
-                                id: m.id,
-                                materialName: m.materialName,
-                                quantity: m.quantity,
-                                price: m.price,
-                                total: parseFloat(m.quantity) * parseFloat(m.price),
-                            })),
-                            totalAmount,
-                        });
-                        navigation.goBack();
-                    }}
-                />
-            </View>
+                    <ConfirmSubmiss
+                        visible={isConfirmModalVisible}
+                        onClose={() => setIsConfirmModalVisible(false)}
+                        onConfirm={() => {
+                            setIsConfirmModalVisible(false);
+                            setIsSubmitting(true);
+                            addWarehouseReceipt({
+                                date,
+                                supplier,
+                                materials: warehouseItems.map(m => ({
+                                    id: m.id,
+                                    materialName: m.materialName,
+                                    quantity: m.quantity,
+                                    price: m.price,
+                                    total: parseFloat(m.quantity) * parseFloat(m.price),
+                                })),
+                                totalAmount,
+                            });
+                            // Delay to show loading before navigating back
+                            setTimeout(() => {
+                                setIsSubmitting(false);
+                                navigation.goBack();
+                            }, 500);
+                        }}
+                    />
+                </View>
+            </Loading>
         </>
     );
 };

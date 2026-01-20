@@ -6,6 +6,6 @@ export const useZones = () => {
     return useQuery({
         queryKey: farmKeys.zones(),
         queryFn: zoneApi.getZones,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 0, // Always fetch fresh data on mount (was 5 mins)
     });
 };

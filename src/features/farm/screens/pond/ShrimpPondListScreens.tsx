@@ -67,11 +67,16 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
     // Effect to select the first zone by default if none selected
     useEffect(() => {
-        if (!selectedZoneId && zones.length > 0) {
-            // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-            const targetZone = zones.find(z => z.id === 71) || zones[0];
-            if (targetZone) {
-                setSelectedZoneId(targetZone.id);
+        if (zones.length > 0) {
+            // Check if current selectedZoneId is valid
+            const isValidZone = selectedZoneId && zones.some(z => z.id === selectedZoneId);
+
+            if (!isValidZone) {
+                // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
+                const targetZone = zones.find(z => z.id === 71) || zones[0];
+                if (targetZone) {
+                    setSelectedZoneId(targetZone.id);
+                }
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);

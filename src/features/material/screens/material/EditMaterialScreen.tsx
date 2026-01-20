@@ -5,6 +5,7 @@ import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { AddMaterial } from '@/features/material/components/material/AddMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -35,8 +36,11 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const route = useRoute<RouteProp<MaterialStackParamList, 'EditMaterial'>>();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
-    const { mutate: updateMaterial } = useUpdateMaterial();
-    const { mutate: deleteMaterial } = useDeleteMaterial();
+    const { mutate: updateMaterial, isPending: isUpdatingMaterial } = useUpdateMaterial();
+    const { mutate: deleteMaterial, isPending: isDeletingMaterial } = useDeleteMaterial();
+
+    // Combined loading state for both update and delete operations
+    const isLoading = isUpdatingMaterial || isDeletingMaterial;
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     // React Query hooks
@@ -212,71 +216,74 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <View style={styles.container}>
-                <HeaderMeterial
-                    title="Sửa Thông Tin Vật Tư"
-                    onBackPress={() => navigation.goBack()}
-                    rightComponent={deleteButton}
-                />
+            <Loading isLoading={isLoading}>
+                <View style={styles.container}>
+                    <HeaderMeterial
+                        title="Sửa Thông Tin Vật Tư"
+                        onBackPress={() => navigation.goBack()}
+                        rightComponent={deleteButton}
+                    />
 
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        style={styles.content}
-                        contentContainerStyle={styles.contentContainer}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        <AddMaterial
-                            name={name}
-                            onNameChange={setName}
-                            group={group}
-                            onGroupChange={val => {
-                                setGroup(val);
-                                setType('');
-                            }}
-                            type={type}
-                            onTypeChange={setType}
-                            unit={unit}
-                            onUnitChange={setUnit}
-                            unitOptions={unitOptions}
-                            groupOptions={materialGroupOptions}
-                            materialGroupsData={materialGroups}
-                            groupDisabled={isLoadingMaterialGroups}
-                            typesByGroup={typesByGroup}
-                            usage={usage}
-                            onUsageChange={setUsage}
-                            manufacturer={manufacturer}
-                            onManufacturerChange={setManufacturer}
-                            isActive={isActive}
-                            onIsActiveChange={setIsActive}
-                            onUnitDropdownOpen={() => {
-                                setTimeout(() => {
-                                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                                }, 100);
-                            }}
-                        />
-                    </ScrollView>
-                </SafeInputLayout>
+                    <SafeInputLayout>
+                        <ScrollView
+                            ref={scrollViewRef}
+                            style={styles.content}
+                            contentContainerStyle={styles.contentContainer}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <AddMaterial
+                                name={name}
+                                onNameChange={setName}
+                                group={group}
+                                onGroupChange={val => {
+                                    setGroup(val);
+                                    setType('');
+                                }}
+                                type={type}
+                                onTypeChange={setType}
+                                unit={unit}
+                                onUnitChange={setUnit}
+                                unitOptions={unitOptions}
+                                groupOptions={materialGroupOptions}
+                                materialGroupsData={materialGroups}
+                                groupDisabled={isLoadingMaterialGroups}
+                                typesByGroup={typesByGroup}
+                                usage={usage}
+                                onUsageChange={setUsage}
+                                manufacturer={manufacturer}
+                                onManufacturerChange={setManufacturer}
+                                isActive={isActive}
+                                onIsActiveChange={setIsActive}
+                                onUnitDropdownOpen={() => {
+                                    setTimeout(() => {
+                                        scrollViewRef.current?.scrollToEnd({ animated: true });
+                                    }, 100);
+                                }}
+                            />
+                        </ScrollView>
+                    </SafeInputLayout>
 
-                <ButtonBar
-                    mode="double"
-                    primaryTitle="Lưu thông tin"
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={() => navigation.goBack()}
-                />
+                    <ButtonBar
+                        mode="double"
+                        primaryTitle="Lưu thông tin"
+                        secondaryTitle="Huỷ"
+                        onPrimaryPress={handleSave}
+                        onSecondaryPress={() => navigation.goBack()}
+                        primaryButtonDisabled={isLoading}
+                    />
 
-                {/* Delete Confirmation Modal */}
-                <ConfirmationDeleteModal
-                    visible={deleteModalVisible}
-                    onConfirm={handleConfirmDelete}
-                    onCancel={handleCancelDelete}
-                    title="Xóa vật tư"
-                    message="Bạn có chắc chắn muốn xóa vật tư này không?"
-                    successMessage="Đã xóa vật tư thành công"
-                />
-            </View>
+                    {/* Delete Confirmation Modal */}
+                    <ConfirmationDeleteModal
+                        visible={deleteModalVisible}
+                        onConfirm={handleConfirmDelete}
+                        onCancel={handleCancelDelete}
+                        title="Xóa vật tư"
+                        message="Bạn có chắc chắn muốn xóa vật tư này không?"
+                        showSuccessToast={false}
+                    />
+                </View>
+            </Loading>
         </>
     );
 };
