@@ -295,7 +295,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                 return;
             }
 
-            let latestShrimpSize: string | undefined = undefined;
+            let latestShrimpSize: string | undefined;
 
             // Sort by date (newest first), then by time (newest first)
             const sorted = [...measureSizeItems].sort((a, b) => {
@@ -677,6 +677,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         padding: spacing.md,
+        paddingBottom: 32,
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.border,

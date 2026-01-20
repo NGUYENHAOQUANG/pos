@@ -38,7 +38,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
 }) => {
     // Consistent bottom spacing logic
     // User requested fixed padding 16 for both top and bottom
-    const paddingBottom = 16;
+    const paddingBottom = 32;
 
     const renderContent = () => {
         switch (mode) {
