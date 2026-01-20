@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -12,7 +12,7 @@ import { useFarm } from '@/features/farm/store/farmStore';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
-
+import { Input } from '@/shared/components/forms/Input';
 interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
@@ -156,8 +156,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                         <Text style={styles.label}>
                             <Text style={styles.required}>* </Text>Tên chu kỳ
                         </Text>
-                        <TextInput
-                            style={styles.input}
+                        <Input
                             placeholder="Tên chu kỳ"
                             value={formData.cycleName || ''}
                             onChangeText={text => updateField('cycleName', text)}
@@ -201,8 +200,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                         <Text style={styles.label}>
                             <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)
                         </Text>
-                        <TextInput
-                            style={styles.input}
+                        <Input
                             placeholder="Vd: 200.000"
                             keyboardType="numeric"
                             value={
@@ -223,8 +221,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                         <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit>
                             <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
                         </Text>
-                        <TextInput
-                            style={styles.input}
+                        <Input
                             placeholder="Vd: 10"
                             keyboardType="numeric"
                             value={formData.age !== undefined ? String(formData.age) : ''}
