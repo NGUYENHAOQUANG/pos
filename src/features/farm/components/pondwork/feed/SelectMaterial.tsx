@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Platform,
+    KeyboardAvoidingView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
@@ -101,7 +102,10 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
     return (
         <Modal visible={isVisible} transparent animationType="fade" onRequestClose={onClose}>
             <TouchableWithoutFeedback onPress={onClose}>
-                <View style={styles.overlay}>
+                <KeyboardAvoidingView
+                    style={styles.overlay}
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                >
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                         <View style={styles.container}>
                             {/* Header */}
@@ -185,7 +189,7 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
-                </View>
+                </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
         </Modal>
     );
