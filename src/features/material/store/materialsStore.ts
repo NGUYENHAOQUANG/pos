@@ -1,62 +1,72 @@
-/**
- * @file materialsStore.ts
- * @description Materials Store - Zustand store for backward compatibility
- * @note This store is kept for backward compatibility. New code should use React Query hooks from useMaterials.ts
- * @created 2025-01-XX
- */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { IMaterial } from '@/features/material/types/material.types';
-import { mockMaterialList } from '@/features/material/data/materialData';
-import { showSuccessToast } from '@/features/material/utils/validationToast';
 
-/**
- * @deprecated This store is kept for backward compatibility only.
- * Use React Query hooks from @/features/material/hooks/useMaterials.ts instead.
- */
 interface MaterialsState {
-    // Data (for backward compatibility - now managed by React Query)
-    materials: IMaterial[];
+    // UI State (for MaterialScreen)
+    searchText: string;
+    filterGroup: string;
+    filterType: string; // Material type name for filtering
+    filterMaterialName: string | null;
 
-    // Actions - Materials (Local - for backward compatibility)
-    addMaterial: (material: Omit<IMaterial, 'id'>) => void;
-    getMaterialById: (id: string) => IMaterial | undefined;
-    getMaterials: () => IMaterial[];
+    // Actions - Filters
+    setSearchText: (text: string) => void;
+    setFilterGroup: (group: string) => void;
+    setFilterType: (type: string) => void;
+    setFilterMaterialName: (name: string | null) => void;
+    resetFilters: () => void;
 }
 
 export const useMaterialsStore = create<MaterialsState>()(
     persist(
-        immer((set, get) => ({
-            // Initial state (for backward compatibility)
-            materials: mockMaterialList,
+        immer(set => ({
+            // Initial state
+            searchText: '',
+            filterGroup: '',
+            filterType: '',
+            filterMaterialName: null,
 
-            // Material local actions (for backward compatibility)
-            addMaterial: (material: Omit<IMaterial, 'id'>) => {
-                const newMaterial: IMaterial = {
-                    ...material,
-                    id: Date.now().toString(),
-                };
+            // Filter actions
+            setSearchText: (text: string) =>
                 set(state => {
-                    state.materials.unshift(newMaterial);
-                });
-                showSuccessToast('Tạo vật tư thành công');
-            },
+                    state.searchText = text;
+                }),
 
-            getMaterialById: (id: string) => {
-                return get().materials.find(m => m.id === id);
-            },
+            setFilterGroup: (group: string) =>
+                set(state => {
+                    state.filterGroup = group;
+                }),
 
-            getMaterials: () => {
-                return get().materials;
-            },
+            setFilterType: (type: string) =>
+                set(state => {
+                    state.filterType = type;
+                }),
+
+            setFilterMaterialName: (name: string | null) =>
+                set(state => {
+                    state.filterMaterialName = name;
+                }),
+
+            resetFilters: () =>
+                set(state => {
+                    state.searchText = '';
+                    state.filterGroup = '';
+                    state.filterType = '';
+                    state.filterMaterialName = null;
+                }),
         })),
         {
             name: 'materials-storage',
             storage: createJSONStorage(() => AsyncStorage),
             partialize: state => ({
-                materials: state.materials,
+                // Persist only what's needed, usually UI filters might not need persistence across app restarts
+                // unless desired. For now, we persist them as they were in the original file.
+                // Or maybe we should NOT persist filters?
+                // The original file persisted them. I'll keep persistence.
+                searchText: state.searchText,
+                filterGroup: state.filterGroup,
+                filterType: state.filterType,
             }),
         }
     )

@@ -13,7 +13,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
 import { useMaterialTypes } from '@/features/material/hooks';
-import { useMaterialFiltersStore } from '@/features/material/store/materialFiltersStore';
+import { useMaterialsStore } from '@/features/material/store/materialsStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -42,7 +42,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const [voteStatus, setVoteStatus] = useState('');
 
     // Get filterType from store to sync with selected value
-    const filterType = useMaterialFiltersStore(state => state.filterType);
+    const filterType = useMaterialsStore(state => state.filterType);
     const [materialGroup, setMaterialGroup] = useState(filterType || '');
 
     // Get material types from React Query

@@ -12,4 +12,13 @@ export {
     useUpdateMaterial,
     useDeleteMaterial,
 } from '@/features/material/hooks/useMaterials';
+export {
+    useExportWarehouse,
+    useAddExportWarehouseReceipt,
+} from '@/features/material/hooks/useExportWarehouse';
+export { useInventoryTickets, useAddInventoryTicket } from '@/features/material/hooks/useInventory';
+export {
+    useWarehouseReceipts,
+    useAddWarehouseReceipt,
+} from '@/features/material/hooks/useWarehouse';
 export { materialKeys } from '@/features/material/hooks/materialKeys';
