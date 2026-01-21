@@ -47,6 +47,7 @@ export interface AuthResponse {
 }
 
 export interface OtpData {
+    status?: 'UNVERIFIED' | 'COMPLETED' | string;
     testOtp?: string;
     expiredIn?: number;
 }

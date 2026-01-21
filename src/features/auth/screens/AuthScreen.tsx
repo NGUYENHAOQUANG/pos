@@ -27,11 +27,13 @@ export default function AuthScreen() {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [error, setError] = useState('');
     const [isUnregistered, setIsUnregistered] = useState(false);
+    const [isUnverifiedAccount, setIsUnverifiedAccount] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async () => {
         setError('');
         setIsUnregistered(false);
+        setIsUnverifiedAccount(false);
 
         if (!phoneNumber.trim()) {
             setError('Vui lòng nhập số điện thoại.');
@@ -58,11 +60,21 @@ export default function AuthScreen() {
             const response = await authApi.requestOtp(rawPhone);
 
             if (response.statusCode === 200) {
-                // In Dev environment, OTP is in response.data.testOtp
+                // Check for UNVERIFIED status
+                const status = response?.data?.status;
                 const devOtp = response?.data?.testOtp;
 
+                if (status === 'UNVERIFIED') {
+                    // Account exists but not verified - show special error
+                    setIsUnverifiedAccount(true);
+                    setError(
+                        'Số điện thoại này đã được đăng ký nhưng chưa xác thực, vui lòng xác thực ngay'
+                    );
+                    return;
+                }
+
+                // Status is not UNVERIFIED (COMPLETED or other) - show OTP and proceed to OTP screen
                 if (devOtp) {
-                    // Show Notifee Notification as requested
                     await notificationHelper.displayOtpNotification(String(devOtp));
                 }
 
@@ -74,15 +86,18 @@ export default function AuthScreen() {
             } else {
                 setIsUnregistered(true);
             }
-        } catch (err: any) {
-            console.error('Login failed:', err);
+        } catch (err: unknown) {
+            const axiosError = err as {
+                status?: number;
+                response?: { status?: number };
+                message?: string;
+            };
+            console.error('Login failed:', axiosError);
             // Check for user not found error (statusCode 404 or specific message)
-            // Assuming API returns 404 or specific error for unregistered user
-            // We need to inspect the error object structure from apiClient
             if (
-                err?.status === 404 ||
-                err?.response?.status === 404 ||
-                err?.message?.includes('not found')
+                axiosError?.status === 404 ||
+                axiosError?.response?.status === 404 ||
+                axiosError?.message?.includes('not found')
             ) {
                 setIsUnregistered(true);
                 setError('');
@@ -99,10 +114,42 @@ export default function AuthScreen() {
         }
     };
 
+    const handleVerifyNow = async () => {
+        // For unverified accounts, call API again to get fresh OTP and navigate to verify
+        const rawPhone = phoneNumber.replace(/\s/g, '');
+
+        setIsLoading(true);
+        try {
+            const response = await authApi.requestOtp(rawPhone);
+            const devOtp = response?.data?.testOtp;
+
+            // Now show OTP notification since user explicitly clicked "Xác thực ngay"
+            if (devOtp) {
+                await notificationHelper.displayOtpNotification(String(devOtp));
+            }
+
+            navigation.navigate('Verify-otp', {
+                method: 'phone',
+                contact: rawPhone,
+                otpCode: devOtp ? String(devOtp) : undefined,
+            });
+        } catch (err) {
+            console.error('Verify now failed:', err);
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Không thể gửi mã OTP. Vui lòng thử lại.',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleClearError = () => {
         setPhoneNumber('');
         setError('');
         setIsUnregistered(false);
+        setIsUnverifiedAccount(false);
     };
 
     const handleRegisterPress = () => {
@@ -175,8 +222,11 @@ export default function AuthScreen() {
                                             setPhoneNumber(text);
                                             if (error) setError('');
                                             if (isUnregistered) setIsUnregistered(false);
+                                            if (isUnverifiedAccount) setIsUnverifiedAccount(false);
                                         }}
-                                        error={isUnregistered ? 'error' : error}
+                                        error={
+                                            isUnregistered || isUnverifiedAccount ? 'error' : error
+                                        }
                                         onClear={handleClearError}
                                     />
 
@@ -196,15 +246,24 @@ export default function AuthScreen() {
                                         </View>
                                     )}
 
-                                    {/* Hiển thị error message thông thường (nếu có)
-                                    {error && !isUnregistered && (
-                                        <Text style={styles.errorText}>{error}</Text>
-                                    )} */}
+                                    {/* Hiển thị error message cho tài khoản chưa xác thực */}
+                                    {isUnverifiedAccount && (
+                                        <View style={styles.unregisteredErrorContainer}>
+                                            <Text style={styles.unregisteredErrorText}>
+                                                Số điện thoại này đã được đăng ký nhưng chưa xác
+                                                thực, vui lòng xác thực ngay
+                                            </Text>
+                                        </View>
+                                    )}
 
                                     <View style={styles.buttonSection}>
                                         <Button
-                                            title="Đăng Nhập"
-                                            onPress={handleLogin}
+                                            title={
+                                                isUnverifiedAccount ? 'Xác thực ngay' : 'Đăng Nhập'
+                                            }
+                                            onPress={
+                                                isUnverifiedAccount ? handleVerifyNow : handleLogin
+                                            }
                                             variant="primary"
                                             fullWidth
                                             style={styles.loginButton}

@@ -68,20 +68,27 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
             }
         };
 
-        // Handle Backspace
+        // Handle Backspace - automatically move to previous input
         const handleKeyPress = (
             e: NativeSyntheticEvent<TextInputKeyPressEventData>,
             index: number
         ) => {
             if (e.nativeEvent.key === 'Backspace') {
-                // If current input is empty and not the first one -> focus previous
-                if (!code[index] && index > 0) {
-                    inputRefs.current[index - 1]?.focus();
+                const newCode = [...code];
 
-                    // Optional: Clear previous input for smoother experience
-                    const newCode = [...code];
+                // If current input has value, just clear it (stay in current box)
+                if (code[index]) {
+                    newCode[index] = '';
+                    onCodeChanged(newCode);
+                    // After clearing, the box is now empty, next backspace will move to previous
+                } else if (index > 0) {
+                    // Current input is empty, move to previous and clear it
                     newCode[index - 1] = '';
                     onCodeChanged(newCode);
+                    // Focus the previous input AFTER state update
+                    setTimeout(() => {
+                        inputRefs.current[index - 1]?.focus();
+                    }, 0);
                 }
             }
         };
