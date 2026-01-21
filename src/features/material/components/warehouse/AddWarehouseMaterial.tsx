@@ -32,7 +32,7 @@ interface AddWarehouseMaterialProps {
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
     onAddMaterial: () => void;
     materialOptions?: { label: string; value: string; unit: string }[];
-    onDropdownOpen?: () => void;
+    onDropdownOpen?: (itemIndex: number) => void;
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -61,12 +61,16 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
 
     const materialNames = materialOptions.map(opt => opt.label);
 
-    const handleToggleDropdown = (id: string) => {
+    // Store refs for each material item to measure position
+    const itemRefs = React.useRef<{ [key: string]: View | null }>({});
+
+    const handleToggleDropdown = (id: string, index: number) => {
         if (activeDropdownId === id) {
             setActiveDropdownId(null);
         } else {
             setActiveDropdownId(id);
-            onDropdownOpen?.();
+            // Pass item index for stable scroll calculation
+            onDropdownOpen?.(index);
         }
     };
 
@@ -88,6 +92,9 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                         return (
                             <View
                                 key={item.id}
+                                ref={ref => {
+                                    itemRefs.current[item.id] = ref;
+                                }}
                                 style={[
                                     styles.materialWrapper,
                                     isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
@@ -122,7 +129,9 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 placeholder="Chọn vật tư"
                                                 showAllOption={false}
                                                 isOpen={isDropdownOpen}
-                                                onToggle={() => handleToggleDropdown(item.id)}
+                                                onToggle={() =>
+                                                    handleToggleDropdown(item.id, index)
+                                                }
                                                 inline={true}
                                             />
                                         </View>
