@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Dimensions, Platform, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Dimensions, Platform, TouchableOpacity, Modal } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Animated, {
     useSharedValue,
@@ -65,49 +65,65 @@ export const HelpOptionsModal: React.FC<HelpOptionsModalProps> = ({
     const menuTop = safePosition.y + safePosition.height + 8;
 
     return (
-        <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
-            <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
+        <Modal
+            transparent
+            visible={true}
+            animationType="none"
+            onRequestClose={onClose}
+            statusBarTranslucent
+        >
+            <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
+                <TouchableOpacity
+                    style={StyleSheet.absoluteFill}
+                    onPress={onClose}
+                    activeOpacity={1}
+                />
 
-            <Animated.View
-                style={[
-                    styles.menuContainer,
-                    animatedMenuStyle,
-                    {
-                        top: menuTop,
-                        right: menuRight,
-                    },
-                ]}
-            >
-                <View style={styles.content}>
-                    <ButtonMaterialList
-                        title="Hướng dẫn sử dụng"
-                        onPress={() => {
-                            onClose();
-                            // Small delay to allow menu to start closing before nav
-                            setTimeout(onPressUserManual, 50);
-                        }}
-                        icon={<Ionicons name="book-outline" size={20} color={colors.text} />}
-                        style={styles.customButton}
-                        textStyle={styles.customButtonText}
-                    />
+                <Animated.View
+                    style={[
+                        styles.menuContainer,
+                        animatedMenuStyle,
+                        {
+                            top: menuTop,
+                            right: menuRight,
+                        },
+                    ]}
+                >
+                    <View style={styles.content}>
+                        <ButtonMaterialList
+                            title="Hướng dẫn sử dụng"
+                            onPress={() => {
+                                onClose();
+                                // Small delay to allow menu to start closing before nav
+                                setTimeout(onPressUserManual, 50);
+                            }}
+                            icon={<Ionicons name="book-outline" size={20} color={colors.text} />}
+                            style={styles.customButton}
+                            textStyle={styles.customButtonText}
+                        />
 
-                    <View style={styles.divider} />
+                        <View style={styles.divider} />
 
-                    <ButtonMaterialList
-                        title="Giải thích các thiết bị"
-                        onPress={() => {
-                            onClose();
-                            setTimeout(onPressDeviceExplanation, 50);
-                        }}
-                        icon={
-                            <Ionicons name="hardware-chip-outline" size={20} color={colors.text} />
-                        }
-                        style={styles.customButton}
-                        textStyle={styles.customButtonText}
-                    />
-                </View>
-            </Animated.View>
-        </View>
+                        <ButtonMaterialList
+                            title="Giải thích các thiết bị"
+                            onPress={() => {
+                                onClose();
+                                setTimeout(onPressDeviceExplanation, 50);
+                            }}
+                            icon={
+                                <Ionicons
+                                    name="hardware-chip-outline"
+                                    size={20}
+                                    color={colors.text}
+                                />
+                            }
+                            style={styles.customButton}
+                            textStyle={styles.customButtonText}
+                        />
+                    </View>
+                </Animated.View>
+            </View>
+        </Modal>
     );
 };
 

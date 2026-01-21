@@ -7,6 +7,7 @@ import {
     Platform,
     TouchableHighlight,
     Dimensions,
+    Modal,
 } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -144,36 +145,48 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
     const menuTop = (buttonPosition?.y || 0) + (buttonPosition?.height || 0) + 8;
 
     return (
-        <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
-            <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
+        <Modal
+            transparent
+            visible={true}
+            animationType="none"
+            onRequestClose={onClose}
+            statusBarTranslucent
+        >
+            <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
+                <TouchableOpacity
+                    style={StyleSheet.absoluteFill}
+                    onPress={onClose}
+                    activeOpacity={1}
+                />
 
-            <Animated.View
-                style={[
-                    styles.menuContainer,
-                    animatedMenuStyle,
-                    {
-                        top: menuTop,
-                        right: menuRight,
-                    },
-                ]}
-            >
-                {menuItems.map((item, index) => (
-                    <TouchableHighlight
-                        key={index}
-                        style={styles.menuItem}
-                        underlayColor="#F5F5F7"
-                        onPress={() => {
-                            onClose();
-                            setTimeout(() => {
-                                item.onPress?.();
-                            }, 50);
-                        }}
-                    >
-                        <Text style={styles.menuItemText}>{item.label}</Text>
-                    </TouchableHighlight>
-                ))}
-            </Animated.View>
-        </View>
+                <Animated.View
+                    style={[
+                        styles.menuContainer,
+                        animatedMenuStyle,
+                        {
+                            top: menuTop,
+                            right: menuRight,
+                        },
+                    ]}
+                >
+                    {menuItems.map((item, index) => (
+                        <TouchableHighlight
+                            key={index}
+                            style={styles.menuItem}
+                            underlayColor="#F5F5F7"
+                            onPress={() => {
+                                onClose();
+                                setTimeout(() => {
+                                    item.onPress?.();
+                                }, 50);
+                            }}
+                        >
+                            <Text style={styles.menuItemText}>{item.label}</Text>
+                        </TouchableHighlight>
+                    ))}
+                </Animated.View>
+            </View>
+        </Modal>
     );
 });
 
