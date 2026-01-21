@@ -13,7 +13,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
 import { IconPond } from '@/assets/icons'; // Import new SVG
-import { PondTypeTag, PondType } from '@/features/farm/components/pond/PondTypeTag';
+import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
+import { PondType } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
@@ -34,7 +35,7 @@ interface HeaderFarmProps {
     // Specific to 'detail' mode
     title?: string | React.ReactNode; // e.g. Pond Name or custom ReactNode
     subtitle?: string; // e.g. Area
-    tagType?: PondType;
+    tagType?: PondType | string;
     status?: TagStatus; // Added status prop
     onBack?: () => void;
     leftComponent?: React.ReactNode;
