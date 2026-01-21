@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
 
@@ -37,8 +37,8 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     containerStyle,
 }) => {
     // Consistent bottom spacing logic
-    // User requested fixed padding 16 for both top and bottom
-    const paddingBottom = 32;
+    // iOS: 32, Android: 16
+    const paddingBottom = Platform.OS === 'ios' ? 32 : 16;
 
     const renderContent = () => {
         switch (mode) {
