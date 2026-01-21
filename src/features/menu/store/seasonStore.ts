@@ -38,11 +38,6 @@ export const createSeasonStore: StateCreator<
                 return;
             }
 
-            console.log(
-                '[SeasonStore] trigger fetchSeasons for zones:',
-                zones.map(z => z.id)
-            );
-
             const promises = zones.map(async zone => {
                 const results = await seasonApi.getSeasons(zone.id);
                 // Map API raw data to Domain SeasonData

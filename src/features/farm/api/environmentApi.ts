@@ -65,7 +65,6 @@ export const environmentApi = {
     // --- Metric Types ---
     getEnvMetricTypes: async (): Promise<EnvMetricType[]> => {
         const response = await apiClient.get(API_ENDPOINTS.ENV_METRIC_TYPES.LIST);
-        console.log('getEnvMetricTypes response:', JSON.stringify(response.data, null, 2));
 
         // Handle potential array wrapper variations
         if (Array.isArray(response.data)) return response.data;
@@ -122,9 +121,7 @@ export const environmentApi = {
         zoneId: number | string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
-        console.log(`Creating Parameter Setting for Zone ${zoneId}:`, JSON.stringify(data));
         const response = await apiClient.post(API_ENDPOINTS.PARAMETER_SETTING.CREATE(zoneId), data);
-        console.log('Create Response:', response.status, response.data);
         if (response.data && response.data.result === false) {
             throw new Error(response.data.message || 'Create failed');
         }
@@ -135,21 +132,17 @@ export const environmentApi = {
         id: number | string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
-        console.log(`Updating Parameter Setting ${id} for Zone ${zoneId}:`, JSON.stringify(data));
         const response = await apiClient.put(
             API_ENDPOINTS.PARAMETER_SETTING.UPDATE(zoneId, id),
             data
         );
-        console.log('Update Response:', response.status, response.data);
         if (response.data && response.data.result === false) {
             throw new Error(response.data.message || 'Update failed');
         }
     },
 
     deleteParameterSetting: async (zoneId: number | string, id: number | string): Promise<void> => {
-        console.log(`Deleting Parameter Setting ${id} for Zone ${zoneId}`);
-        const response = await apiClient.delete(API_ENDPOINTS.PARAMETER_SETTING.DELETE(zoneId, id));
-        console.log('Delete Response:', response.status, response.data);
+        await apiClient.delete(API_ENDPOINTS.PARAMETER_SETTING.DELETE(zoneId, id));
     },
 
     // --- Environmental Parameters ---
