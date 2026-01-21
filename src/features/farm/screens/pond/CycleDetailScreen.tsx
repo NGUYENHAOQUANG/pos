@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
-import { useFarm } from '../../store/farmStore';
+import { useFarmStore } from '../../store/farmStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { CycleData } from '../../types/farm.types';
 import { FarmStackParamList } from '../../navigation/FarmNavigator';
@@ -21,7 +21,19 @@ export const CycleDetailScreen: React.FC = () => {
     // Lấy dữ liệu từ params truyền sang
     const { cycleData, pondId } = route.params || {};
     const typedCycleData = cycleData as CycleData | undefined;
-    const { breedOptions, seasonOptions, calculateDOC } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const breedOptions = useFarmStore(state => state.breedOptions);
+    const seasons = useFarmStore(state => state.seasons);
+    const seasonOptions = useMemo(
+        () =>
+            seasons.map(s => ({
+                label: s.name,
+                value: s.id.toString(),
+            })),
+        [seasons]
+    );
+    const calculateDOC = useFarmStore(state => state.calculateDOC);
 
     const breedLabel =
         breedOptions.find(b => b.value === typedCycleData?.breedSource)?.label || 'N/A';

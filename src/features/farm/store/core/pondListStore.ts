@@ -59,12 +59,6 @@ export const createPondListStore: StateCreator<
     },
     fetchPondsByZone: async (zoneId, updates = {}) => {
         const { isBackground = false, isLoadMore = false } = updates;
-        console.log('fetchPondsByZone called:', {
-            zoneId,
-            isLoadMore,
-            page: get().page,
-            hasMore: get().hasMore,
-        });
 
         // Reset if fresh load (not load more)
         if (!isLoadMore) {
@@ -73,7 +67,6 @@ export const createPondListStore: StateCreator<
         } else {
             // If loading more but no more data, stop
             if (!get().hasMore) {
-                console.log('Stopping load more: hasMore is false');
                 return;
             }
         }
@@ -136,7 +129,6 @@ export const createPondListStore: StateCreator<
                     hasMore: mappedPonds.length === pageSize && distinctItemsCount > 0,
                 }));
             } else {
-                console.log(`Initial Load: Received ${mappedPonds.length}`);
                 set({
                     ponds: mappedPonds,
                     isLoadingPonds: false,

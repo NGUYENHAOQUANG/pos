@@ -7,7 +7,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { showAddJobSuccessToast } from '@/features/farm/utils/toastMessages';
@@ -21,7 +21,10 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
     const pondId = pond?.id;
-    const { updatePondJob, getPondJobItems } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     const [executionDate, setExecutionDate] = useState<Date>(new Date());
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');

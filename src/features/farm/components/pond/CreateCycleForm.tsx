@@ -8,7 +8,7 @@ import { DateInputButton } from '@/features/farm/components/pondwork/DateInputBu
 import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
@@ -21,8 +21,18 @@ interface Props {
 }
 
 const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdit = false }) => {
-    // Lấy danh mục từ FarmContext
-    const { breedOptions, seasonOptions, getPondById } = useFarm();
+    // Lấy danh mục từ useFarmStore với selectors
+    const breedOptions = useFarmStore(state => state.breedOptions);
+    const seasons = useFarmStore(state => state.seasons);
+    const seasonOptions = useMemo(
+        () =>
+            seasons.map(s => ({
+                label: s.name,
+                value: s.id.toString(),
+            })),
+        [seasons]
+    );
+    const getPondById = useFarmStore(state => state.getPondById);
 
     const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));

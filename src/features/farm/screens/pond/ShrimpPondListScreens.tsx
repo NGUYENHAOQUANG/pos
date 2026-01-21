@@ -9,8 +9,8 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { FarmData, POND_TYPES } from '@/features/farm/types/farm.types';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { FarmData, POND_TYPES, PondData } from '@/features/farm/types/farm.types';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { PondListSkeleton } from '@/features/farm/components/pond/PondListSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
@@ -32,9 +32,11 @@ const POND_TYPE_ORDER: Record<string, number> = {
 export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () => {
     const navigation = useNavigation<NavigationProp>();
 
-    // Store hooks for Global State (Zone Selection) & Cycles logic
-    // We purposefully ignore the store's data fetching parts (ponds, zones, fetchers)
-    const { activeCycles, getCyclesByPondId, selectedZoneId, setSelectedZoneId } = useFarm();
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const activeCycles = useFarmStore(state => state.activeCycles);
+    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
 
     // React Query Hooks for Data Fetching
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
@@ -95,11 +97,11 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         setSelectedZoneId(Number(item.id));
     };
 
-    const handlePondPress = (pond: any) => {
+    const handlePondPress = (pond: PondData) => {
         navigation.navigate('PondDetail', { pond });
     };
 
-    const handlePondInfoPress = (pond: any) => {
+    const handlePondInfoPress = (pond: PondData) => {
         navigation.navigate('PondInfo', { pond });
     };
 
@@ -127,7 +129,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     );
 
     const getComputedStatus = useCallback(
-        (pond: any) => {
+        (pond: PondData) => {
             const hasCycle = checkHasCycle(pond.id);
             if (hasCycle) {
                 return 'active';
@@ -140,9 +142,11 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     // Calculate counts
     const counts = useMemo(() => {
         const all = totalCount > 0 ? totalCount : ponds.length;
-        const active = ponds.filter((pond: any) => getComputedStatus(pond) === 'active').length;
+        const active = ponds.filter(
+            (pond: PondData) => getComputedStatus(pond) === 'active'
+        ).length;
         const preparing = ponds.filter(
-            (pond: any) => getComputedStatus(pond) === 'preparing'
+            (pond: PondData) => getComputedStatus(pond) === 'preparing'
         ).length;
         return { all, active, preparing };
     }, [ponds, getComputedStatus, totalCount]);
@@ -150,12 +154,12 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const filteredData = useMemo(() => {
         let data = ponds;
         if (selectedTab === 'active') {
-            data = ponds.filter((pond: any) => getComputedStatus(pond) === 'active');
+            data = ponds.filter((pond: PondData) => getComputedStatus(pond) === 'active');
         } else if (selectedTab === 'preparing') {
-            data = ponds.filter((pond: any) => getComputedStatus(pond) === 'preparing');
+            data = ponds.filter((pond: PondData) => getComputedStatus(pond) === 'preparing');
         }
 
-        return [...data].sort((a: any, b: any) => {
+        return [...data].sort((a: PondData, b: PondData) => {
             const typeA = typeof a.type === 'string' ? a.type : a.type?.name;
             const typeB = typeof b.type === 'string' ? b.type : b.type?.name;
 

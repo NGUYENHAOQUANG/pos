@@ -14,7 +14,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
 import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -42,8 +42,12 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     // Get zones and ponds from form store
-    const { zones, ponds, fetchZones, fetchPondsByZone, isLoadingZones, isLoadingPonds } =
-        useFarm();
+    const zones = useFarmStore(state => state.zones);
+    const ponds = useFarmStore(state => state.ponds);
+    const fetchZones = useFarmStore(state => state.fetchZones);
+    const fetchPondsByZone = useFarmStore(state => state.fetchPondsByZone);
+    const isLoadingZones = useFarmStore(state => state.isLoadingZones);
+    const isLoadingPonds = useFarmStore(state => state.isLoadingPonds);
 
     // Fetch initial data (Zones)
     useEffect(() => {

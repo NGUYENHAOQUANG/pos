@@ -15,7 +15,7 @@ import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/Harv
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
 import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
@@ -32,14 +32,14 @@ export const AddHarvestScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
-    const {
-        getPondJobItems,
-        updatePondJob,
-        deleteActiveCycle,
-        deleteCycle,
-        activeCycles,
-        getCyclesByPondId,
-    } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
+    const deleteCycle = useFarmStore(state => state.deleteCycle);
+    const activeCycles = useFarmStore(state => state.activeCycles);
+    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
