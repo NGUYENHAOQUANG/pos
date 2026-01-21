@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
@@ -21,6 +21,8 @@ import { PondInfor } from '@/features/reports/components/PondInfor';
 import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useScrollToTop } from '@react-navigation/native';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useZones } from '@/features/farm/hooks';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
@@ -38,11 +40,34 @@ export const ReportsScreen = ({ navigation }: Props) => {
     const scrollViewRef = useRef<ScrollView>(null);
     useScrollToTop(scrollViewRef as any);
 
-    const [selectedFarm, setSelectedFarm] = useState<DropDownItem>({
-        id: '1',
-        label: 'Trại Kiên Giang',
-        value: 'KG',
-    });
+    // Global Farm State
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
+
+    // React Query Hooks (replacing farmStore fetchers)
+    const { data: zonesData = [] } = useZones();
+    // Fallback to empty array if undefined
+    const zones = useMemo(() => zonesData || [], [zonesData]);
+
+    // Map zones to DropDownItem format
+    const farmOptions: DropDownItem[] = useMemo(() => {
+        return zones.map(z => ({
+            id: z.id.toString(),
+            label: z.name,
+            value: z.code || z.id.toString(),
+        }));
+    }, [zones]);
+
+    // Derived selectedFarm from global ID
+    const selectedFarm = useMemo(() => {
+        const found = farmOptions.find(f => f.id === selectedZoneId?.toString());
+        return found || farmOptions[0] || { id: '1', label: 'Trại Kiên Giang' };
+    }, [farmOptions, selectedZoneId]);
+
+    const handleSelectFarm = (item: DropDownItem) => {
+        setSelectedZoneId(Number(item.id));
+    };
+
     const [selectedPond, setSelectedPond] = useState<DropDownItem>({ id: '1', label: 'Chọn ao' });
     const pondTypeData: DropDownItem[] = [
         { id: '1', label: 'Ao nuôi' },
@@ -67,12 +92,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
     ];
     const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
     const [isSeasonDisabled, setIsSeasonDisabled] = useState(false);
-
-    const farmOptions: DropDownItem[] = [
-        { id: '1', label: 'Trại Kiên Giang', value: '1' },
-        { id: '2', label: 'Trại Cà Mau', value: '2' },
-        { id: '3', label: 'Trại Bạc Liêu', value: '3' },
-    ];
 
     const handleSelectPondType = (item: DropDownItem) => {
         setSelectedPondType(item);
@@ -134,7 +153,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <HeadingReports
                 farmData={farmOptions}
                 selectedFarm={selectedFarm}
-                onSelectFarm={setSelectedFarm}
+                onSelectFarm={handleSelectFarm}
                 onRightPress={handleRightPress}
                 pondTypeData={pondTypeData}
                 selectedPondType={selectedPondType}
