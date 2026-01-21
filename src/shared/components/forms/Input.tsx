@@ -15,6 +15,7 @@ import {
     Text,
     TextInput,
     TextInputProps,
+    TextStyle,
     TouchableOpacity,
     View,
     ViewStyle,
@@ -50,7 +51,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
     containerStyle?: ViewStyle;
     /** Custom input styles */
     /** Custom input styles */
-    inputStyle?: ViewStyle;
+    inputStyle?: TextStyle;
     /** Custom input container styles (inner box) */
     inputContainerStyle?: ViewStyle;
 }
