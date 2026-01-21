@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
 
 interface DeleteAccountInputStepProps {
     onNext: (phone: string, reason: string) => void;
@@ -175,18 +175,11 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                                             onPress={() => toggleReason(reason)}
                                             activeOpacity={0.7}
                                         >
-                                            <View
-                                                style={[
-                                                    styles.checkboxSquare,
-                                                    isSelected && styles.checkboxSquareSelected,
-                                                ]}
-                                            >
-                                                {isSelected && (
-                                                    <Ionicons
-                                                        name="checkmark"
-                                                        size={16}
-                                                        color={colors.white}
-                                                    />
+                                            <View style={{ marginRight: spacing.sm }}>
+                                                {isSelected ? (
+                                                    <IconCheckActive width={16} height={16} />
+                                                ) : (
+                                                    <IconCheckUnactive width={16} height={16} />
                                                 )}
                                             </View>
                                             <Text style={styles.checkboxText}>{reason}</Text>
@@ -335,21 +328,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm + 4,
         paddingVertical: 2,
     },
-    checkboxSquare: {
-        height: 20,
-        width: 20,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: colors.border,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: spacing.sm,
-        backgroundColor: colors.white,
-    },
-    checkboxSquareSelected: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
+
     checkboxText: {
         fontSize: 15,
         color: colors.text,
