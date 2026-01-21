@@ -10,10 +10,12 @@
 import { colors, sizes, spacing, typography } from '@/styles';
 import React, { useState } from 'react';
 import {
+    Platform,
     StyleSheet,
     Text,
     TextInput,
     TextInputProps,
+    TextStyle,
     TouchableOpacity,
     View,
     ViewStyle,
@@ -49,7 +51,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
     containerStyle?: ViewStyle;
     /** Custom input styles */
     /** Custom input styles */
-    inputStyle?: ViewStyle;
+    inputStyle?: TextStyle;
     /** Custom input container styles (inner box) */
     inputContainerStyle?: ViewStyle;
 }
@@ -238,8 +240,16 @@ const styles = StyleSheet.create({
         color: colors.text,
         letterSpacing: 0,
         paddingVertical: 0,
-        textAlignVertical: 'center',
         height: '100%', // Match container height
+        // iOS doesn't support textAlignVertical, use lineHeight instead
+        ...Platform.select({
+            android: {
+                textAlignVertical: 'center' as const,
+            },
+            ios: {
+                justifyContent: 'center', // Same as inputContainer height to center text vertically
+            },
+        }),
     },
     inputMultiline: {
         minHeight: sizes.input.md * 2,

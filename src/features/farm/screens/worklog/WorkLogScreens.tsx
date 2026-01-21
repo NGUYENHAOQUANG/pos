@@ -6,7 +6,7 @@ import { IconFilter, IconFilterActive } from '@/assets/icons';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData, JobExecution } from '@/features/farm/types/farm.types';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
 import {
     TrackingDayCard,
@@ -49,20 +49,19 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const {
-        feedJobs,
-        shrimpInspectionJobs,
-        measureSizeJobs,
-        environmentJobs,
-        waterTreatmentJobs,
-        waterChangeJobs,
-        siphonJobs,
-        troubleshootingJobs,
-        transferPondJobs,
-        cleanPondJobs,
-        sunDryJobs,
-        harvestJobs,
-    } = useFarm();
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const feedJobs = useFarmStore(state => state.feedJobs);
+    const shrimpInspectionJobs = useFarmStore(state => state.shrimpInspectionJobs);
+    const measureSizeJobs = useFarmStore(state => state.measureSizeJobs);
+    const environmentJobs = useFarmStore(state => state.environmentJobs);
+    const waterTreatmentJobs = useFarmStore(state => state.waterTreatmentJobs);
+    const waterChangeJobs = useFarmStore(state => state.waterChangeJobs);
+    const siphonJobs = useFarmStore(state => state.siphonJobs);
+    const troubleshootingJobs = useFarmStore(state => state.troubleshootingJobs);
+    const transferPondJobs = useFarmStore(state => state.transferPondJobs);
+    const cleanPondJobs = useFarmStore(state => state.cleanPondJobs);
+    const sunDryJobs = useFarmStore(state => state.sunDryJobs);
+    const harvestJobs = useFarmStore(state => state.harvestJobs);
 
     const jobDataMap = useMemo(
         () => ({

@@ -18,15 +18,17 @@ import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
 import { Button, Logo } from '@/shared/components';
-import { Loading } from '@/shared/components/ui/Loading';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { notificationHelper } from '@/shared/utils/notificationHelper';
 import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 
 // Countdown duration in seconds
-const COUNTDOWN_DURATION = 59;
+const COUNTDOWN_DURATION = 60;
 
 export default function VerifyOTPScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -111,9 +113,17 @@ export default function VerifyOTPScreen() {
         };
     }, [calculateRemainingTime]);
 
+    // Flag to prevent auto-submit loop when OTP is wrong
+    const hasAutoSubmittedRef = useRef(false);
+
+    // Local loading state - don't use store loading to avoid blocking UI
+    const [isVerifying, setIsVerifying] = useState(false);
+
     const handleOtpChange = (newCode: string[]) => {
         setOtp(newCode);
         if (errorMessage) setErrorMessage('');
+        // Reset auto-submit flag when user changes OTP
+        hasAutoSubmittedRef.current = false;
     };
 
     const handleVerifyOTP = React.useCallback(async () => {
@@ -134,6 +144,7 @@ export default function VerifyOTPScreen() {
             return;
         }
 
+        setIsVerifying(true);
         try {
             // Call API verify OTP via Store (handles login)
             await verifyOtp(contact, otpString);
@@ -148,110 +159,149 @@ export default function VerifyOTPScreen() {
         } catch (error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
+        } finally {
+            setIsVerifying(false);
         }
     }, [otp, contact, verifyOtp]);
 
-    // Auto-submit effect
+    // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {
-        if (otp.join('').length === 4) {
+        if (otp.join('').length === 4 && !hasAutoSubmittedRef.current) {
+            hasAutoSubmittedRef.current = true;
             handleVerifyOTP();
         }
     }, [otp, handleVerifyOTP]);
 
-    const handleResendOTP = () => {
-        // Reset countdown start time to now for accurate real-time calculation
-        setCountdownStartTime(Date.now());
-        setCountdown(COUNTDOWN_DURATION);
-        setOtp(['', '', '', '']);
-        setErrorMessage('');
+    const [isResending, setIsResending] = useState(false);
 
-        otpInputRef.current?.focusFirst();
+    const handleResendOTP = async () => {
+        if (isResending) return;
+
+        setIsResending(true);
+        try {
+            // Convert contact to proper phone number format for API
+            // contact might be "+84 339546952" or similar, API needs "0339546952"
+            let phoneNumber = contact.replace(/\s+/g, ''); // Remove spaces
+            if (phoneNumber.startsWith('+84')) {
+                phoneNumber = '0' + phoneNumber.slice(3);
+            }
+
+            // Call API to resend OTP
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+                phoneNumber: phoneNumber,
+            });
+
+            // Extract OTP from response (for test/dev notification)
+            const otpCode =
+                response.data?.testOtp ||
+                response.data?.data?.testOtp ||
+                response.data?.data?.otpCode ||
+                response.data?.otpCode;
+
+            if (otpCode) {
+                notificationHelper.displayOtpNotification(String(otpCode));
+            }
+
+            // Reset countdown and UI
+            setCountdownStartTime(Date.now());
+            setCountdown(COUNTDOWN_DURATION);
+            setOtp(['', '', '', '']);
+            setErrorMessage('');
+            otpInputRef.current?.focusFirst();
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đã gửi lại mã OTP',
+                visibilityTime: 2000,
+            });
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            Toast.show({
+                type: 'error',
+                text1: axiosError.response?.data?.message || 'Gửi lại mã thất bại',
+                visibilityTime: 3000,
+            });
+        } finally {
+            setIsResending(false);
+        }
     };
 
     const displayContact = formatAuthPhoneDisplay(contact);
 
-    const isLoading = useAuthStore(state => state.loading);
-
     return (
-        <Loading isLoading={isLoading}>
-            <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-                {!isKeyboardVisible && (
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={24} color="#333" />
-                    </TouchableOpacity>
-                )}
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            {!isKeyboardVisible && (
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={24} color="#333" />
+                </TouchableOpacity>
+            )}
 
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'android' ? 'padding' : undefined}
-                    style={styles.keyboardView}
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'android' ? 'padding' : undefined}
+                style={styles.keyboardView}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                    bounces={false}
                 >
-                    <ScrollView
-                        contentContainerStyle={styles.scrollContent}
-                        keyboardShouldPersistTaps="handled"
-                        showsVerticalScrollIndicator={false}
-                        bounces={false}
-                    >
-                        <View style={styles.card}>
-                            <View style={styles.logoWrapper}>
-                                <Logo size="medium" />
-                            </View>
-                            <View style={styles.spacer} />
-                            <Text style={styles.title}>Đăng nhập</Text>
-                            <Text style={styles.subtitle}>Nhập mã được gửi đến số điện thoại</Text>
-                            <Text style={styles.phoneNumber}>{displayContact}</Text>
+                    <View style={styles.card}>
+                        <View style={styles.logoWrapper}>
+                            <Logo size="medium" />
+                        </View>
+                        <View style={styles.spacer} />
+                        <Text style={styles.title}>Đăng nhập</Text>
+                        <Text style={styles.subtitle}>Nhập mã được gửi đến số điện thoại</Text>
+                        <Text style={styles.phoneNumber}>{displayContact}</Text>
 
-                            <View style={styles.otpInputSection}>
-                                <OTPInput
-                                    ref={otpInputRef}
-                                    code={otp}
-                                    onCodeChanged={handleOtpChange}
-                                    isError={isError}
-                                    length={4}
-                                />
-                            </View>
+                        <View style={styles.otpInputSection}>
+                            <OTPInput
+                                ref={otpInputRef}
+                                code={otp}
+                                onCodeChanged={handleOtpChange}
+                                isError={isError}
+                                length={4}
+                            />
+                        </View>
 
-                            {isError ? (
-                                <Text
-                                    style={styles.errorText}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                >
-                                    {errorMessage}
+                        {isError ? (
+                            <Text style={styles.errorText} numberOfLines={1} adjustsFontSizeToFit>
+                                {errorMessage}
+                            </Text>
+                        ) : (
+                            <View style={styles.errorPlaceholder} />
+                        )}
+
+                        <View style={styles.resendContainer}>
+                            <Text style={styles.resendLabel}>Không nhận được mã? </Text>
+                            {countdown > 0 ? (
+                                <Text style={styles.timerText}>
+                                    <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
+                                    {countdown.toString().padStart(2, '0')})
                                 </Text>
                             ) : (
-                                <View style={styles.errorPlaceholder} />
+                                <TouchableOpacity onPress={handleResendOTP}>
+                                    <Text style={styles.activeLink}>Gửi lại mã</Text>
+                                </TouchableOpacity>
                             )}
-
-                            <View style={styles.resendContainer}>
-                                <Text style={styles.resendLabel}>Không nhận được mã? </Text>
-                                {countdown > 0 ? (
-                                    <Text style={styles.timerText}>
-                                        <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau
-                                        0:
-                                        {countdown.toString().padStart(2, '0')})
-                                    </Text>
-                                ) : (
-                                    <TouchableOpacity onPress={handleResendOTP}>
-                                        <Text style={styles.activeLink}>Gửi lại mã</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            <View style={styles.buttonWrapper}>
-                                <Button
-                                    title="Tiếp Tục"
-                                    onPress={handleVerifyOTP}
-                                    variant="primary"
-                                    fullWidth
-                                    style={styles.submitButton}
-                                />
-                            </View>
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </SafeAreaView>
-        </Loading>
+
+                        <View style={styles.buttonWrapper}>
+                            <Button
+                                title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
+                                onPress={handleVerifyOTP}
+                                variant="primary"
+                                fullWidth
+                                disabled={isVerifying}
+                                style={styles.submitButton}
+                            />
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 

@@ -1,9 +1,9 @@
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useCallback } from 'react';
-import { seasonApi } from '@/features/farm/api/seasonApi';
+import { seasonApi } from '@/features/menu/api/seasonApi';
 import { SeasonData } from '@/features/farm/types/farm.types';
-import { farmKeys } from './farmKeys';
-import { useZones } from './useZones';
+import { farmKeys } from '../../farm/hooks/farmKeys';
+import { useZones } from '../../farm/hooks/useZones';
 
 export const useSeasons = () => {
     // 1. Fetch Zones first

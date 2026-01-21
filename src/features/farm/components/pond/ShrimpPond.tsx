@@ -15,7 +15,7 @@ import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     ActionMenu,
     ActionMenuItem,
@@ -61,7 +61,11 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.WATER_STORAGE ||
         typeValue === POND_TYPES.WASTE;
 
-    const { activeCycles, getCyclesByPondId, breedOptions, calculateDOC } = useFarm();
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const activeCycles = useFarmStore(state => state.activeCycles);
+    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+    const breedOptions = useFarmStore(state => state.breedOptions);
+    const calculateDOC = useFarmStore(state => state.calculateDOC);
 
     // Get cycle data for this pond
     const cycleData = useMemo(() => {

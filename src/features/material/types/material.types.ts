@@ -213,3 +213,23 @@ export interface GetMaterialsParams {
 
 export type GetMaterialsResponse = IAppResponse<IPaginate<MaterialResponse>>;
 export type GetMaterialByIdResponse = IAppResponse<MaterialResponse>;
+
+export interface GetWarehouseParams {
+    Search?: string;
+    MaterialName?: string;
+    Page?: number;
+    PageSize?: number;
+}
+
+export interface GetExportWarehouseParams {
+    Search?: string;
+    MaterialName?: string;
+    Page?: number;
+    PageSize?: number;
+}
+
+export interface GetInventoryParams {
+    Search?: string;
+    Page?: number;
+    PageSize?: number;
+}

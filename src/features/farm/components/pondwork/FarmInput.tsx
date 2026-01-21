@@ -100,14 +100,9 @@ const styles = StyleSheet.create({
     },
     textInput: {
         paddingHorizontal: spacing.md,
-        paddingVertical: 0,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 6,
-        fontSize: 16,
-        color: colors.text,
-        letterSpacing: 0,
-        textAlignVertical: 'center',
     },
 });

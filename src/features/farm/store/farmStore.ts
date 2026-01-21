@@ -8,7 +8,7 @@ import { formatDate, parseDate, compareTime } from '@/features/farm/utils/dateUt
 
 // Core Slices
 import { createPondListStore, PondListStore } from './core/pondListStore';
-import { createSeasonStore, SeasonStore } from './core/seasonStore';
+import { createSeasonStore, SeasonStore } from '@/features/menu/store/seasonStore';
 import { createSettingStore, SettingStore } from './core/settingStore';
 import { createCycleStore, CycleStore } from './core/cycleStore';
 import { createZoneStore, ZoneStore } from './core/zoneStore';

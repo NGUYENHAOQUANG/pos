@@ -13,7 +13,7 @@ import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -40,7 +40,8 @@ export const HandleProblemScreen = () => {
     const route = useRoute<ScreenRouteProp>();
 
     const { pond, item, jobType = 'CLEAN_POND' } = route.params || {};
-    const { updatePondJob, getPondJobItems } = useFarm();
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     // Determine job type and title
     const currentJobType: JobType = jobType as JobType;

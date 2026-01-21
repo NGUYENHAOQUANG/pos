@@ -13,7 +13,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/environment/EnvironmentParametersBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
@@ -33,18 +33,17 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const {
-        getPondJobItems,
-        updatePondJob,
-        environmentSettings,
-        zones,
-        fetchZones,
-        metricTypes,
-        fetchMetricTypes,
-        parameterSettings,
-        fetchParameterSettings,
-        getSelectedZone,
-    } = useFarm();
+    // Decomposed useFarm() into selectors to respect develop branch optimization
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const environmentSettings = useFarmStore(state => state.environmentSettings);
+    const zones = useFarmStore(state => state.zones);
+    const fetchZones = useFarmStore(state => state.fetchZones);
+    const metricTypes = useFarmStore(state => state.metricTypes);
+    const fetchMetricTypes = useFarmStore(state => state.fetchMetricTypes);
+    const parameterSettings = useFarmStore(state => state.parameterSettings);
+    const fetchParameterSettings = useFarmStore(state => state.fetchParameterSettings);
+    const getSelectedZone = useFarmStore(state => state.getSelectedZone);
     const scrollViewRef = useRef<ScrollView>(null);
 
     // Find Zone ID based on Pond's Zone Name or ID
@@ -156,8 +155,6 @@ export const AddEnvironmentScreen: React.FC = () => {
         if (!value || !value.trim()) return false;
 
         const limit = parameterLimits[paramId];
-
-        if (!limit) return false;
 
         if (!limit) return false;
 

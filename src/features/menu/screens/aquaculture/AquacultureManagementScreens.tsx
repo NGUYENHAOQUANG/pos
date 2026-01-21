@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/SeasonListSkeleton';
-import { useSeasons } from '@/features/farm/hooks/useSeasons';
+import { useSeasons } from '@/features/menu/hooks/useSeasons';
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
@@ -174,6 +174,15 @@ export const AquacultureManagementScreens: React.FC = () => {
                             />
                         )}
                         contentContainerStyle={styles.listContent}
+                        ListEmptyComponent={
+                            <View style={styles.cardContainer}>
+                                <EmptyStateCard
+                                    message="Chưa có vụ nuôi nào"
+                                    buttonTitle="Tạo vụ nuôi"
+                                    onPress={() => navigation.navigate('AddAquaculture')}
+                                />
+                            </View>
+                        }
                     />
                 )}
             </View>

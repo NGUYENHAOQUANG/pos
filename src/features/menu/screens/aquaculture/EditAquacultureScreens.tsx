@@ -11,7 +11,7 @@ import {
     AquacultureForm,
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData } from '@/features/farm/types/farm.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
@@ -29,7 +29,10 @@ export const EditAquacultureScreens: React.FC = () => {
     const route = useRoute<EditAquacultureRouteProp>();
     const { aquaculture } = route.params;
     const { setTabBarVisible } = useTabBarVisibility();
-    const { updateSeasonApi, deleteSeasonApi, zones, fetchZones } = useFarm();
+    const updateSeasonApi = useFarmStore(state => state.updateSeasonApi);
+    const deleteSeasonApi = useFarmStore(state => state.deleteSeasonApi);
+    const zones = useFarmStore(state => state.zones);
+    const fetchZones = useFarmStore(state => state.fetchZones);
     const formRef = useRef<AquacultureFormRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);

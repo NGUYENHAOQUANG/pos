@@ -17,7 +17,7 @@ import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationD
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -38,7 +38,10 @@ export const WaterSupplyScreen = () => {
     const route = useRoute<ScreenRouteProp>();
 
     const { pond, item } = route.params || {};
-    const { updatePondJob, getPondJobItems } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     const [selectedDate, setSelectedDate] = useState(new Date());
 

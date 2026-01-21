@@ -18,8 +18,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useExportWarehouseStore } from '@/features/material/store';
-import { useMaterials } from '@/features/material/hooks';
+import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
 
 interface AddExportWarehouseScreenProps {}
 
@@ -30,9 +29,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
-    const addExportWarehouseReceipt = useExportWarehouseStore(
-        state => state.addExportWarehouseReceipt
-    );
+    const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -53,7 +50,8 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     }));
 
     const [date, setDate] = useState(new Date());
-    const [farm, setFarm] = useState('');
+    const [selectedZone, setSelectedZone] = useState('');
+    const [selectedPond, setSelectedPond] = useState('');
     const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
         { id: '1', materialName: '', quantity: '', price: '' },
     ]);
@@ -129,8 +127,10 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                             <ExportWarehouseInformation
                                 date={date}
                                 onDateChange={setDate}
-                                farm={farm}
-                                onFarmChange={setFarm}
+                                selectedZone={selectedZone}
+                                onZoneChange={setSelectedZone}
+                                selectedPond={selectedPond}
+                                onPondChange={setSelectedPond}
                             />
 
                             <AddWarehouseMaterial
@@ -154,8 +154,8 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                         }}
                         onPrimaryPress={() => {
                             // Validation
-                            if (!farm) {
-                                showValidationError('Vui lòng nhập ao nuôi');
+                            if (!selectedPond) {
+                                showValidationError('Vui lòng chọn ao nuôi');
                                 return;
                             }
                             if (warehouseItems.length === 0) {
@@ -187,7 +187,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                             setIsSubmitting(true);
                             addExportWarehouseReceipt({
                                 date,
-                                farm,
+                                farm: selectedPond,
                                 materials: warehouseItems.map(m => ({
                                     id: m.id,
                                     materialName: m.materialName,

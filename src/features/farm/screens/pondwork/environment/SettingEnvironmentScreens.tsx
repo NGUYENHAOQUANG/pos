@@ -25,7 +25,7 @@ import {
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import Toast from 'react-native-toast-message';
-import { useFarm, useFarmStore } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ParameterSetting } from '@/features/farm/api/environmentApi';
 
 type NavigationProp = CompositeNavigationProp<
@@ -40,16 +40,13 @@ export const SettingEnvironmentScreens: React.FC = () => {
     const { data: _data } = route.params || {};
     const insets = useSafeAreaInsets();
 
-    // Use FarmContext
-    // Use FarmContext
-    const {
-        metricTypes,
-        fetchMetricTypes,
-        parameterSettings,
-        fetchParameterSettings,
-        zones,
-        fetchZones,
-    } = useFarm();
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const metricTypes = useFarmStore(state => state.metricTypes);
+    const fetchMetricTypes = useFarmStore(state => state.fetchMetricTypes);
+    const parameterSettings = useFarmStore(state => state.parameterSettings);
+    const fetchParameterSettings = useFarmStore(state => state.fetchParameterSettings);
+    const zones = useFarmStore(state => state.zones);
+    const fetchZones = useFarmStore(state => state.fetchZones);
 
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     // Default to first available zone or a placeholder
