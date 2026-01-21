@@ -9,6 +9,23 @@ export interface JWTPayload {
     [key: string]: any;
 }
 
+export const isTokenExpiringSoon = (
+    expiresAt: number | string | null,
+    bufferSeconds = 30
+): boolean => {
+    if (!expiresAt) return true;
+
+    // Convert to milliseconds
+    const expirationMs =
+        typeof expiresAt === 'string' ? new Date(expiresAt).getTime() : expiresAt * 1000; // Assume number is seconds (standard JWT exp)
+
+    if (isNaN(expirationMs)) return true;
+
+    const now = Date.now();
+    // Check if token will expire within the buffer period
+    return expirationMs - now <= bufferSeconds * 1000;
+};
+
 export const decodeToken = (token: string): JWTPayload | null => {
     try {
         const parts = token.split('.');

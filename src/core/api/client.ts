@@ -6,6 +6,7 @@
  */
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { ENV } from '@/core/config/env';
+import { isTokenExpiringSoon } from '@/core/utils/jwt';
 
 // Import store for token access
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -53,19 +54,6 @@ const isAuthEndpoint = (url: string | undefined): boolean => {
         url.includes('/auth/verify-otp') ||
         false
     );
-};
-
-// Check if token is expired or about to expire (<= 1 minute)
-const hasTokenExpired = (expiresAt: string | null): boolean => {
-    if (!expiresAt) return true;
-    const now = Date.now();
-    const expirationTime = new Date(expiresAt).getTime();
-    const oneMinuteInMs = 60 * 1000;
-
-    // If expiration time is invalid/NaN, assume expired
-    if (isNaN(expirationTime)) return true;
-
-    return expirationTime - now <= oneMinuteInMs;
 };
 
 // Handle token refresh
@@ -128,10 +116,13 @@ apiClient.interceptors.request.use(
         // If we have a token (authenticated), checking validity
         if (token) {
             // Check if token is expired or about to expire
-            if (hasTokenExpired(accessTokenExpires)) {
+            if (isTokenExpiringSoon(accessTokenExpires)) {
                 if (!isRefreshing) {
                     handleTokenRefresh();
                 }
+
+                // Add current request to queue immediately
+                // It will be processed when handleTokenRefresh completes
                 return new Promise<InternalAxiosRequestConfig>((resolve, reject) => {
                     failedQueue.push({ resolve, reject, config });
                 });
