@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution, JobMeta } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
@@ -74,22 +74,8 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
 ): UseLogScreenDataResult => {
     const navigation = useNavigation<NavigationProp>();
 
-    // Destructure all slices to ensure reactivity
-    const {
-        getPondJobItemsGroupedByDate,
-        feedJobs,
-        shrimpInspectionJobs,
-        measureSizeJobs,
-        environmentJobs,
-        waterTreatmentJobs,
-        waterChangeJobs,
-        siphonJobs,
-        troubleshootingJobs,
-        transferPondJobs,
-        cleanPondJobs,
-        sunDryJobs,
-        harvestJobs,
-    } = useFarm();
+    // Use specific selectors to prevent re-renders from unrelated job updates
+    const getPondJobItemsGroupedByDate = useFarmStore(state => state.getPondJobItemsGroupedByDate);
 
     const [startDate, setStartDate] = useState(() => {
         const date = new Date();
@@ -99,51 +85,37 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
 
     const pondId = config.pond?.id || config.pondId;
 
-    // Determine which data slice to listen to based on jobType
-    const jobsSourceToCheck = useMemo(() => {
+    // Determine which data slice to listen to based on jobType using a selector
+    const jobsSourceToCheck = useFarmStore(state => {
         switch (config.jobType) {
             case 'FEED':
-                return feedJobs;
+                return state.feedJobs;
             case 'SHRIMP_INSPECTION':
-                return shrimpInspectionJobs;
+                return state.shrimpInspectionJobs;
             case 'MEASURE_SIZE':
-                return measureSizeJobs;
+                return state.measureSizeJobs;
             case 'ENVIRONMENT':
-                return environmentJobs;
+                return state.environmentJobs;
             case 'WATER_TREATMENT':
-                return waterTreatmentJobs;
+                return state.waterTreatmentJobs;
             case 'WATER_CHANGE':
-                return waterChangeJobs;
+                return state.waterChangeJobs;
             case 'SIPHON':
-                return siphonJobs;
+                return state.siphonJobs;
             case 'TROUBLESHOOTING':
-                return troubleshootingJobs;
+                return state.troubleshootingJobs;
             case 'TRANSFER_POND':
-                return transferPondJobs;
+                return state.transferPondJobs;
             case 'CLEAN_POND':
-                return cleanPondJobs;
+                return state.cleanPondJobs;
             case 'SUN_DRY_POND':
-                return sunDryJobs;
+                return state.sunDryJobs;
             case 'HARVEST':
-                return harvestJobs;
+                return state.harvestJobs;
             default:
                 return {};
         }
-    }, [
-        config.jobType,
-        feedJobs,
-        shrimpInspectionJobs,
-        measureSizeJobs,
-        environmentJobs,
-        waterTreatmentJobs,
-        waterChangeJobs,
-        siphonJobs,
-        troubleshootingJobs,
-        transferPondJobs,
-        cleanPondJobs,
-        sunDryJobs,
-        harvestJobs,
-    ]);
+    });
 
     const groupedData: TrackingGroup[] = useMemo(() => {
         if (!pondId) return [];

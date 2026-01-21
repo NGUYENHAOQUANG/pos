@@ -17,7 +17,7 @@ import {
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { TransferMeta } from '@/features/farm/types/farm.types';
 import {
     showAddJobSuccessToast,
@@ -36,15 +36,17 @@ export const AddTransferScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const {
-        getPondJobItems,
-        updatePondJob,
-        ponds,
-        getCurrentCycleForPond,
-        breedOptions,
-        handleTransferPond,
-        calculateTotalEstimatedShrimp,
-    } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const ponds = useFarmStore(state => state.ponds);
+    const getCurrentCycleForPond = useFarmStore(state => state.getCurrentCycleForPond);
+    const breedOptions = useFarmStore(state => state.breedOptions);
+    const handleTransferPond = useFarmStore(state => state.handleTransferPond);
+    const calculateTotalEstimatedShrimp = useFarmStore(
+        state => state.calculateTotalEstimatedShrimp
+    );
 
     // ========== ROUTE PARAMS ==========
     const {

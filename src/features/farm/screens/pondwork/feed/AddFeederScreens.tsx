@@ -5,7 +5,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -30,7 +30,10 @@ export const AddFeederScreens = () => {
     const navigation = useNavigation();
     const route = useRoute<ScreenRouteProp>();
     const { pondId } = route.params || {}; // Assuming pondId is passed
-    const { updatePondJob, getPondJobItems } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);

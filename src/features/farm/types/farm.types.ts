@@ -45,6 +45,8 @@ export interface PondTypeOperation {
     lastModifiedAt?: string;
 }
 
+import { IMaterial } from '@/features/material/types/material.types';
+
 export interface Zone {
     id: number;
     name: string;
@@ -238,7 +240,7 @@ export interface JobExecution {
     note?: string;
     pondId?: string;
     materials?: {
-        material: any;
+        material: IMaterial;
         quantity: number;
         unit: string;
     }[];

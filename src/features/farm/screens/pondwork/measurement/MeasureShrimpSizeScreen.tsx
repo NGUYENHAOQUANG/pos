@@ -13,7 +13,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -24,8 +24,12 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
-    // Correctly destructure only the needed functions
-    const { updatePondJob, getPondJobItems, activeCycles, getCyclesByPondId } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const activeCycles = useFarmStore(state => state.activeCycles);
+    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
 
     const { itemToEdit, pond: routePond } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
