@@ -6,6 +6,7 @@
  */
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { ENV } from '@/core/config/env';
+import { isTokenExpiringSoon } from '@/core/utils/jwt';
 
 // Import store for token access
 import { useAuthStore } from '@/features/auth/store/authStore';
@@ -22,46 +23,26 @@ export const apiClient: AxiosInstance = axios.create({
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
 
+// Queue for pending requests during token refresh
 let failedQueue: Array<{
-    resolve: (value?: any) => void;
-    reject: (error?: any) => void;
+    resolve: (config: InternalAxiosRequestConfig) => void;
+    reject: (error: any) => void;
     config: InternalAxiosRequestConfig;
 }> = [];
 
 const processQueue = (error: any, token: string | null = null) => {
     failedQueue.forEach(({ resolve, reject, config }) => {
         if (token) {
-            // Update config with new token and retry
+            // Update config with new token
             if (config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
-            resolve(apiClient(config));
+            resolve(config);
         } else {
             reject(error);
         }
     });
     failedQueue = [];
-};
-
-// Check if response has Unauthorized in data (even if status is 200)
-const checkUnauthorizedResponse = (response: AxiosResponse): Error | null => {
-    if (response.data && typeof response.data === 'object' && response.data.result === false) {
-        const message = response.data.message || '';
-        if (
-            message.toLowerCase().includes('unauthorized') ||
-            message.toLowerCase().includes('unauthenticated')
-        ) {
-            const error: any = new Error(message || 'Unauthorized');
-            error.response = {
-                ...response,
-                status: 401,
-                statusText: 'Unauthorized',
-            };
-            error.config = response.config;
-            return error;
-        }
-    }
-    return null;
 };
 
 // Check if endpoint is auth endpoint
@@ -75,24 +56,8 @@ const isAuthEndpoint = (url: string | undefined): boolean => {
     );
 };
 
-// Handle token refresh when 401 error occurs
-const handleTokenRefresh = async (
-    originalRequest: InternalAxiosRequestConfig & { _retry?: boolean }
-): Promise<any> => {
-    // Skip refresh for auth endpoints
-    if (isAuthEndpoint(originalRequest.url)) {
-        useAuthStore.getState().logout();
-        return Promise.reject(new Error('Unauthorized on auth endpoint'));
-    }
-
-    // If already refreshing, queue this request
-    if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject, config: originalRequest });
-        });
-    }
-
-    originalRequest._retry = true;
+// Handle token refresh
+const handleTokenRefresh = async (): Promise<string | null> => {
     isRefreshing = true;
 
     const refreshToken = useAuthStore.getState().refreshToken;
@@ -102,7 +67,7 @@ const handleTokenRefresh = async (
         }
         isRefreshing = false;
         processQueue(new Error('No refresh token'), null);
-        return Promise.reject(new Error('No refresh token available'));
+        return null;
     }
 
     try {
@@ -118,17 +83,11 @@ const handleTokenRefresh = async (
             // Update tokens in store
             useAuthStore.getState().setTokens(accessToken, newRefreshToken, accessTokenExpires);
 
-            // Update the original request with new token
-            if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            }
-
-            // Process queued requests
+            // Process queued requests with new token
             processQueue(null, accessToken);
             isRefreshing = false;
 
-            // Retry the original request
-            return apiClient(originalRequest);
+            return accessToken;
         } else {
             throw new Error('Invalid refresh token response');
         }
@@ -139,18 +98,41 @@ const handleTokenRefresh = async (
         isRefreshing = false;
         processQueue(refreshError, null);
         console.log('Refresh token error:', refreshError);
-        return Promise.reject(refreshError);
+        return null;
     }
 };
 
-// Request interceptor - Add auth token
+// Request interceptor - Add auth token and handle expiration
 apiClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-        // Get token from store
-        const token = useAuthStore.getState().token;
-        if (token && config.headers) {
-            config.headers.Authorization = `Bearer ${token}`;
+    async (config: InternalAxiosRequestConfig) => {
+        if (isAuthEndpoint(config.url)) {
+            return config;
         }
+
+        const authStore = useAuthStore.getState();
+        const token = authStore.token;
+        const accessTokenExpires = authStore.accessTokenExpires;
+
+        // If we have a token (authenticated), checking validity
+        if (token) {
+            // Check if token is expired or about to expire
+            if (isTokenExpiringSoon(accessTokenExpires)) {
+                if (!isRefreshing) {
+                    handleTokenRefresh();
+                }
+
+                // Add current request to queue immediately
+                // It will be processed when handleTokenRefresh completes
+                return new Promise<InternalAxiosRequestConfig>((resolve, reject) => {
+                    failedQueue.push({ resolve, reject, config });
+                });
+            }
+
+            if (config.headers) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+
         return config;
     },
     error => {
@@ -158,33 +140,12 @@ apiClient.interceptors.request.use(
     }
 );
 
-// Response interceptor - Handle errors and refresh token
+// Response interceptor - Just handle network errors, 401 removed as requested
 apiClient.interceptors.response.use(
-    async (response: AxiosResponse) => {
-        const unauthorizedError = checkUnauthorizedResponse(response);
-        if (unauthorizedError) {
-            const originalRequest = response.config as InternalAxiosRequestConfig & {
-                _retry?: boolean;
-            };
-            if (!originalRequest._retry && !isAuthEndpoint(originalRequest.url)) {
-                return handleTokenRefresh(originalRequest);
-            }
-            return Promise.reject(unauthorizedError);
-        }
+    (response: AxiosResponse) => {
         return response;
     },
     async error => {
-        const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-        // Handle 401 - Unauthorized
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !isAuthEndpoint(originalRequest.url)
-        ) {
-            return handleTokenRefresh(originalRequest);
-        }
-
         // Handle network errors
         if (!error.response) {
             error.message = 'Network error. Please check your connection.';

@@ -339,14 +339,14 @@ export const GrowthChart = () => {
                                                 <Path
                                                     d={paths?.expectedPath || ''}
                                                     fill="none"
-                                                    stroke="#FFAB76"
+                                                    stroke={colors.orange[600]}
                                                     strokeWidth={2}
                                                 />
                                                 {paths?.actualPath && (
                                                     <Path
                                                         d={paths.actualPath}
                                                         fill="none"
-                                                        stroke="#0057FF"
+                                                        stroke={colors.blue[600]}
                                                         strokeWidth={2}
                                                     />
                                                 )}
@@ -381,8 +381,8 @@ export const GrowthChart = () => {
                                                 <AnimatedCircle
                                                     animatedProps={dotProps}
                                                     r={7}
-                                                    fill="#0057FF"
-                                                    stroke="#FFFFFF"
+                                                    fill={colors.blue[600]}
+                                                    stroke={colors.white}
                                                     strokeWidth={2}
                                                 />
                                             </Svg>
@@ -405,10 +405,10 @@ export const GrowthChart = () => {
                                                         : '...'}
                                                 </Text>
                                                 <View style={styles.tooltipRow}>
-                                                    <Text style={styles.tooltipLabel}>
+                                                    <Text style={styles.tooltipLabelOrange}>
                                                         Kỳ vọng:{' '}
                                                     </Text>
-                                                    <Text style={styles.tooltipValueOrange}>
+                                                    <Text style={styles.tooltipValue}>
                                                         {activeGrowthDataPoint
                                                             ? `${activeGrowthDataPoint.expected.toLocaleString(
                                                                   'vi-VN'
@@ -421,10 +421,10 @@ export const GrowthChart = () => {
                                                     </Text>
                                                 </View>
                                                 <View style={styles.tooltipRow}>
-                                                    <Text style={styles.tooltipLabel}>
+                                                    <Text style={styles.tooltipLabelBlue}>
                                                         Thực tế:{' '}
                                                     </Text>
-                                                    <Text style={styles.tooltipValueBlue}>
+                                                    <Text style={styles.tooltipValue}>
                                                         {activeGrowthDataPoint
                                                             ? `${(
                                                                   activeGrowthDataPoint.actual ?? 0
@@ -447,7 +447,7 @@ export const GrowthChart = () => {
                                         <View
                                             style={[
                                                 styles.legendDot,
-                                                { backgroundColor: '#FFAB76' },
+                                                { backgroundColor: colors.orange[600] },
                                             ]}
                                         />
                                         <Text style={styles.legendText}>Kỳ vọng</Text>
@@ -456,7 +456,7 @@ export const GrowthChart = () => {
                                         <View
                                             style={[
                                                 styles.legendDot,
-                                                { backgroundColor: '#0057FF' },
+                                                { backgroundColor: colors.blue[600] },
                                             ]}
                                         />
                                         <Text style={styles.legendText}>Ước tính</Text>
@@ -465,7 +465,7 @@ export const GrowthChart = () => {
                                         <View
                                             style={[
                                                 styles.legendDot,
-                                                { backgroundColor: '#D1D5DB' },
+                                                { backgroundColor: colors.gray[300] },
                                             ]}
                                         />
                                         <Text style={styles.legendText}>Thực tế</Text>
@@ -507,9 +507,9 @@ const styles = StyleSheet.create({
         height: 48,
         paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomColor: colors.gray[100],
         borderTopWidth: 1,
-        borderTopColor: '#F3F4F6',
+        borderTopColor: colors.gray[100],
         alignItems: 'center',
         justifyContent: 'center',
         gap: 24,
@@ -521,15 +521,15 @@ const styles = StyleSheet.create({
     },
     selectedTab: {
         borderBottomWidth: 2,
-        borderBottomColor: '#0057FF',
+        borderBottomColor: colors.blue[600],
     },
     tabText: {
         fontSize: 14,
-        color: '#374151',
+        color: colors.gray[700],
         fontWeight: '400',
     },
     selectedTabText: {
-        color: '#0057FF',
+        color: colors.blue[600],
         fontWeight: '500',
     },
     chartWrapper: {
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     },
     tooltip: {
         position: 'absolute',
-        backgroundColor: 'white',
+        backgroundColor: colors.white,
         padding: 10,
         borderRadius: 8,
         shadowColor: '#000',
@@ -548,12 +548,12 @@ const styles = StyleSheet.create({
         elevation: 4,
         zIndex: 999,
         borderWidth: 0.5,
-        borderColor: '#E5E7EB',
+        borderColor: colors.gray[200],
     },
     tooltipTitle: {
         fontSize: 13,
         fontWeight: '500',
-        color: '#111827',
+        color: colors.gray[900],
         marginBottom: 4,
     },
     tooltipRow: {
@@ -562,28 +562,29 @@ const styles = StyleSheet.create({
         minWidth: 90,
         marginBottom: 2,
     },
-    tooltipLabel: {
+    tooltipLabelOrange: {
         fontSize: 12,
-        color: '#6B7280',
-    },
-    tooltipValueOrange: {
-        fontSize: 12,
-        color: '#FFAB76',
+        color: colors.orange[600],
         fontWeight: '600',
     },
-    tooltipValueBlue: {
+    tooltipLabelBlue: {
         fontSize: 12,
-        color: '#0057FF',
+        color: colors.blue[600],
         fontWeight: '600',
+    },
+    tooltipValue: {
+        fontSize: 12,
+        color: colors.gray[900],
+        fontWeight: '500',
     },
     activeDateBox: {
         position: 'absolute',
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: '#D1D5DB',
+        backgroundColor: colors.gray[300],
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#9CA3AF',
+        borderColor: colors.gray[400],
         zIndex: 998,
         alignItems: 'center',
         justifyContent: 'center',
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
     activeDateText: {
         fontSize: 11,
         fontWeight: '500',
-        color: '#374151',
+        color: colors.gray[700],
     },
     legendContainer: {
         flexDirection: 'row',
@@ -600,7 +601,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         gap: 24,
         borderTopWidth: 1,
-        borderTopColor: '#F3F4F6',
+        borderTopColor: colors.gray[100],
     },
     legendItem: {
         flexDirection: 'row',
@@ -614,7 +615,7 @@ const styles = StyleSheet.create({
     },
     legendText: {
         fontSize: 13,
-        color: '#374151',
+        color: colors.gray[700],
     },
     loadingContainer: {
         minHeight: 300,
