@@ -8,7 +8,7 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution, CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -49,33 +49,36 @@ export const ShrimpFarmScreens: React.FC = () => {
     const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
     const { setTabBarVisible } = useTabBarVisibility();
 
-    const {
-        getPondJobItems,
-        updatePondJob,
-        activeCycles,
-        breedOptions,
-        getCyclesByPondId,
-        getPondById,
-        ponds,
-        cycles,
-        // API data for operations
-        operationsByPondType = {},
-        fetchMasterData,
-        // Destructure all job maps to trigger re-renders
-        feedJobs,
-        shrimpInspectionJobs,
-        measureSizeJobs,
-        environmentJobs,
-        waterTreatmentJobs,
-        waterChangeJobs,
-        siphonJobs,
-        troubleshootingJobs,
-        transferPondJobs,
-        cleanPondJobs,
-        sunDryJobs,
-        harvestJobs,
-        isLoadingMasterData,
-    } = useFarm();
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const activeCycles = useFarmStore(state => state.activeCycles);
+    const breedOptions = useFarmStore(state => state.breedOptions);
+    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+    const getPondById = useFarmStore(state => state.getPondById);
+    const ponds = useFarmStore(state => state.ponds);
+    const cycles = useFarmStore(state => state.cycles);
+    const operationsByPondTypeRaw = useFarmStore(state => state.operationsByPondType);
+    const operationsByPondType = useMemo(
+        () => operationsByPondTypeRaw || {},
+        [operationsByPondTypeRaw]
+    );
+    const fetchMasterData = useFarmStore(state => state.fetchMasterData);
+    const isLoadingMasterData = useFarmStore(state => state.isLoadingMasterData);
+
+    // Job maps for dependency tracking
+    const feedJobs = useFarmStore(state => state.feedJobs);
+    const shrimpInspectionJobs = useFarmStore(state => state.shrimpInspectionJobs);
+    const measureSizeJobs = useFarmStore(state => state.measureSizeJobs);
+    const environmentJobs = useFarmStore(state => state.environmentJobs);
+    const waterTreatmentJobs = useFarmStore(state => state.waterTreatmentJobs);
+    const waterChangeJobs = useFarmStore(state => state.waterChangeJobs);
+    const siphonJobs = useFarmStore(state => state.siphonJobs);
+    const troubleshootingJobs = useFarmStore(state => state.troubleshootingJobs);
+    const transferPondJobs = useFarmStore(state => state.transferPondJobs);
+    const cleanPondJobs = useFarmStore(state => state.cleanPondJobs);
+    const sunDryJobs = useFarmStore(state => state.sunDryJobs);
+    const harvestJobs = useFarmStore(state => state.harvestJobs);
 
     // Fallback loading state if fetchMasterData is triggered but not reflected in store yet
     const [localLoading, setLocalLoading] = useState(false);

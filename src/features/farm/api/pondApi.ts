@@ -124,8 +124,7 @@ export const pondApi = {
     getOperationTypes: async (): Promise<OperationType[]> => {
         const response = await apiClient.get(API_ENDPOINTS.OPERATION_TYPES.LIST);
         const operations = parseApiResponse<OperationType>(response.data);
-        console.log('=== OPERATION TYPES FROM API ===');
-        console.log(JSON.stringify(operations, null, 2));
+
         return operations;
     },
 
@@ -142,8 +141,7 @@ export const pondApi = {
             API_ENDPOINTS.POND_TYPE_OPERATIONS.BY_POND_TYPE(pondTypeId)
         );
         const operations = parseApiResponse<PondTypeOperation>(response.data);
-        console.log(`=== OPERATIONS FOR POND TYPE ${pondTypeId} ===`);
-        console.log(JSON.stringify(operations, null, 2));
+
         return operations;
     },
 };

@@ -8,7 +8,7 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -33,7 +33,10 @@ export const EditFeederScreens = () => {
     const route = useRoute<ScreenRouteProp>();
     // TODO: Add jobId or similar to params to identify what to edit
     const { pondId, jobId } = route.params || {};
-    const { updatePondJob, getPondJobItems } = useFarm();
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);

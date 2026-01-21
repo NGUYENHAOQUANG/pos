@@ -72,12 +72,10 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
 
     const handleCreateNewMaterial = () => {
         // Logic for creating new material - to be implemented or passed as prop
-        console.log('Create new material');
     };
 
-    const handleImportMore = (item: IMaterial) => {
+    const handleImportMore = (_item: IMaterial) => {
         // Logic for importing more material
-        console.log('Import more material', item.name);
     };
 
     return (
@@ -143,11 +141,11 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                         <FarmInput
                                             label="Đơn vị"
                                             value={selectedUnit}
+                                            onChangeText={() => {}}
                                             editable={false}
                                             required
                                             style={{
                                                 backgroundColor: colors.gray[100],
-                                                color: colors.textSecondary,
                                             }}
                                         />
                                     </View>

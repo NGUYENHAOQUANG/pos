@@ -18,7 +18,7 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { IMaterial } from '@/features/material/types/material.types';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -38,8 +38,11 @@ export const AddSiphonScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob } = useFarm();
     const scrollViewRef = useRef<ScrollView>(null);
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
 
     // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as SiphonMeta) || {}, [itemToEdit?.meta]);

@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
 import { SeasonData, DropdownItem } from '@/features/farm/types/farm.types';
-import { seasonApi } from '@/features/farm/api/seasonApi';
+import { seasonApi } from '@/features/menu/api/seasonApi';
 
 export interface SeasonStore {
     seasons: SeasonData[];
@@ -62,11 +62,9 @@ export const createSeasonStore: StateCreator<
             });
 
             const results = await Promise.all(promises);
-            console.log('[SeasonStore] fetchSeasons raw results length:', results.length);
 
             // Flatten the results using concat for compatibility
             const allSeasons = ([] as SeasonData[]).concat(...results);
-            console.log('[SeasonStore] merged seasons count:', allSeasons.length);
 
             set({ seasons: allSeasons, isLoadingSeasons: false });
         } catch (error) {

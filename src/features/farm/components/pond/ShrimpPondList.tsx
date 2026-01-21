@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
 
 import { spacing } from '@/styles';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ShrimpPond } from '@/features/farm/components/pond/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';
@@ -32,7 +32,10 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
         },
         ref
     ) => {
-        const { getLatestPondActivity, activeCycles, getCyclesByPondId } = useFarm();
+        // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+        const getLatestPondActivity = useFarmStore(state => state.getLatestPondActivity);
+        const activeCycles = useFarmStore(state => state.activeCycles);
+        const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
 
         const checkHasCycle = (pondId: string) => {
             const currentCycle = activeCycles[pondId];

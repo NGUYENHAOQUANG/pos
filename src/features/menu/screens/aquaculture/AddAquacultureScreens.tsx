@@ -11,8 +11,8 @@ import {
     AquacultureForm,
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
-import { useFarm } from '@/features/farm/store/farmStore';
-import { seasonApi } from '@/features/farm/api/seasonApi';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { seasonApi } from '@/features/menu/api/seasonApi';
 import { Loading } from '@/shared/components/ui/Loading';
 import { useQueryClient } from '@tanstack/react-query';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
@@ -20,7 +20,9 @@ import { farmKeys } from '@/features/farm/hooks/farmKeys';
 export const AddAquacultureScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { zones, fetchZones, seasons } = useFarm();
+    const zones = useFarmStore(state => state.zones);
+    const fetchZones = useFarmStore(state => state.fetchZones);
+    const seasons = useFarmStore(state => state.seasons);
     const formRef = useRef<AquacultureFormRef>(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const queryClient = useQueryClient();

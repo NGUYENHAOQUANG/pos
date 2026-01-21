@@ -9,7 +9,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import Toast from 'react-native-toast-message';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
@@ -21,8 +21,10 @@ export const CreateCycleScreen: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const route = useRoute<ScreenRouteProp>();
 
-    // Lấy các hàm từ FarmContext
-    const { saveActiveCycle, deleteActiveCycle, deleteCycle } = useFarm();
+    // Lấy các hàm từ useFarmStore với selectors
+    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
+    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
+    const deleteCycle = useFarmStore(state => state.deleteCycle);
 
     const { pondId, initialData } = route.params;
     const isEdit = !!initialData;

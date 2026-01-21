@@ -13,7 +13,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/environment/EnvironmentParametersBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
@@ -33,8 +33,12 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob, environmentSettings } = useFarm();
     const scrollViewRef = useRef<ScrollView>(null);
+
+    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const environmentSettings = useFarmStore(state => state.environmentSettings);
 
     const checkLimit = (value: string, paramId: string): boolean => {
         if (!value || !value.trim()) return false;

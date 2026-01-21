@@ -4,7 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { parseDate, compareTime } from '@/features/farm/utils/dateUtils';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 
@@ -19,7 +19,7 @@ export const SunDryPondLogScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
-    const { getPondJobItemsGroupedByDate } = useFarm();
+    const getPondJobItemsGroupedByDate = useFarmStore(state => state.getPondJobItemsGroupedByDate);
 
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
