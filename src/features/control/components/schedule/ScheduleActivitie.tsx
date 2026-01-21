@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
         alignItems: 'stretch', // Ensure vertical lines connect
     },
     timeColumnHeader: {
-        width: 40,
+        width: 60,
         borderRightWidth: 1,
         borderRightColor: colors.gray[200],
     },
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     timeColumn: {
-        width: 40,
+        width: 60,
         height: '100%',
         borderRightWidth: 1,
         borderRightColor: colors.gray[400],
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
 
     currentTimeLine: {
         position: 'absolute',
-        left: 40,
+        left: 60,
         right: 0,
         top: '50%',
         height: 1,
