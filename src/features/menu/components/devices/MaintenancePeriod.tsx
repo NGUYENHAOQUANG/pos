@@ -81,8 +81,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
-        // borderRadius: borderRadius.lg, // Removed border radius
-        // marginTop: spacing.md, // Already separated by marginBottom in previous component or natural flow
+        marginBottom: 100,
     },
     title: {
         fontSize: typography.fontSize.lg,
