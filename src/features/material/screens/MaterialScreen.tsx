@@ -39,6 +39,19 @@ export const MeterialScreen = () => {
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
 
+    // Menu state management
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
+    // Auto-close menu when navigating away
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setMenuOpen(false);
+            };
+        }, [])
+    );
+
     // React Query hooks for materials
     const searchText = useMaterialStore(state => state.searchText);
     const filterType = useMaterialStore(state => state.filterType);
@@ -115,10 +128,6 @@ export const MeterialScreen = () => {
     const { data: inventoryList = [], refetch: refetchInventory } =
         useInventoryTickets(inventoryParams);
 
-    // Menu state management
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
-
     const handleShowMenu = useCallback(
         (position: { x: number; y: number; width: number; height: number }) => {
             setMenuPosition(position);
@@ -130,15 +139,6 @@ export const MeterialScreen = () => {
     const handleCloseMenu = useCallback(() => {
         setMenuOpen(false);
     }, []);
-
-    // Auto-close menu when navigating away
-    useFocusEffect(
-        React.useCallback(() => {
-            return () => {
-                setMenuOpen(false);
-            };
-        }, [])
-    );
 
     // Handle tab navigation from other screens
     React.useEffect(() => {
@@ -160,7 +160,6 @@ export const MeterialScreen = () => {
             availableMaterials: materials,
         } as any);
     }, [navigation, materials]);
-
     const handleCreateExport = useCallback(() => {
         navigation.navigate('AddExportWarehouse', {
             availableMaterials: materials,

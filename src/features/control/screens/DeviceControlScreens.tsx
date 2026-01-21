@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 
@@ -16,10 +16,16 @@ import { Zone } from '@/features/farm/types/farm.types';
 import { DeviceControlSkeleton } from '@/features/control/components/DeviceControlSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
-import { useFarmStore } from '@/features/farm/store/farmStore';
-
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
+
+    // React Query Hooks (replacing farmStore fetchers)
+    const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
+    // Fallback to empty array if undefined
+    const zones = useMemo(() => zonesData || [], [zonesData]);
+
+    // Local State
+    const [selectedFarm, setSelectedFarm] = useState<FarmLocation | undefined>(undefined);
 
     // Help Modal State
     const [showHelpModal, setShowHelpModal] = useState(false);
@@ -29,36 +35,6 @@ export const DeviceControlScreens = () => {
         width: number;
         height: number;
     } | null>(null);
-
-    // Auto-close modal when navigating away
-    useFocusEffect(
-        React.useCallback(() => {
-            return () => {
-                setShowHelpModal(false);
-            };
-        }, [])
-    );
-
-    // Global Farm State
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
-    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
-
-    // React Query Hooks (replacing farmStore fetchers)
-    const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
-    // Fallback to empty array if undefined
-    const zones = useMemo(() => zonesData || [], [zonesData]);
-
-    // Derived selectedFarm from global ID
-    const selectedFarm = useMemo(() => {
-        if (!zones || zones.length === 0) return undefined;
-        // Default to first zone if no ID selected yet, or find by ID
-        // Logic will be handled in effect below, but here we can derive for render
-        const found = zones.find(z => z.id === selectedZoneId);
-        if (found) {
-            return { id: found.id.toString(), name: found.name };
-        }
-        return undefined;
-    }, [zones, selectedZoneId]);
 
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
@@ -92,25 +68,33 @@ export const DeviceControlScreens = () => {
         }));
     }, [zones]);
 
-    // Default select Farm logic (Global Sync)
+    // Default select Farm logic (Priority: ID 71 - Trại Kiên Giang)
     React.useEffect(() => {
-        if (zones.length > 0) {
-            // Check if current selectedZoneId is valid
-            const isValidZone = selectedZoneId && zones.some(z => z.id === selectedZoneId);
+        if (!selectedFarm && farmLocations.length > 0) {
+            // Check for ID "71" (string) since we mapped it
+            const target = farmLocations.find(f => f.id === '71') || farmLocations[0];
 
-            if (!isValidZone) {
-                // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => z.id === 71) || zones[0];
-                if (targetZone) {
-                    setSelectedZoneId(targetZone.id);
-                }
-            }
+            // Defer selection slightly to allow UI/Loading animation to start smoothly
+            const timer = setTimeout(() => {
+                setSelectedFarm(target);
+            }, 50);
+
+            return () => clearTimeout(timer);
         }
-    }, [zones, selectedZoneId, setSelectedZoneId]);
+    }, [farmLocations, selectedFarm]);
 
     // Ref for scroll to top
     const flatListRef = useRef<FlatList>(null);
     useScrollToTop(flatListRef as any);
+
+    // Close help modal automatically when leaving this tab/screen
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setShowHelpModal(false);
+            };
+        }, [])
+    );
 
     // Update ref when farm changes
     React.useEffect(() => {
@@ -212,7 +196,7 @@ export const DeviceControlScreens = () => {
                 <HeaderCamLocation
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
-                    onLocationSelect={loc => setSelectedZoneId(Number(loc.id))}
+                    onLocationSelect={setSelectedFarm}
                     onHelpPress={handleHelpPress}
                 />
             )}
