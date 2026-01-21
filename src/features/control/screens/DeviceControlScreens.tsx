@@ -8,7 +8,7 @@ import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
 import { HelpOptionsModal } from '../components/HelpOptionsModal';
 import { colors } from '@/styles';
-import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useControl } from '@/features/control/store/controlStore';
@@ -20,6 +20,24 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
+
+    // Help Modal State
+    const [showHelpModal, setShowHelpModal] = useState(false);
+    const [helpButtonPosition, setHelpButtonPosition] = useState<{
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    } | null>(null);
+
+    // Auto-close modal when navigating away
+    useFocusEffect(
+        React.useCallback(() => {
+            return () => {
+                setShowHelpModal(false);
+            };
+        }, [])
+    );
 
     // Global Farm State
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
@@ -41,15 +59,6 @@ export const DeviceControlScreens = () => {
         }
         return undefined;
     }, [zones, selectedZoneId]);
-
-    // Help Modal State
-    const [showHelpModal, setShowHelpModal] = useState(false);
-    const [helpButtonPosition, setHelpButtonPosition] = useState<{
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    } | null>(null);
 
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);

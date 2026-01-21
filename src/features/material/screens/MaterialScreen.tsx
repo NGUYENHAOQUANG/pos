@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -130,6 +130,15 @@ export const MeterialScreen = () => {
     const handleCloseMenu = useCallback(() => {
         setMenuOpen(false);
     }, []);
+
+    // Auto-close menu when navigating away
+    useFocusEffect(
+        React.useCallback(() => {
+            return () => {
+                setMenuOpen(false);
+            };
+        }, [])
+    );
 
     // Handle tab navigation from other screens
     React.useEffect(() => {
