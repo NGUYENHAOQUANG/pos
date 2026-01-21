@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
@@ -63,22 +63,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
         const found = farmOptions.find(f => f.id === selectedZoneId?.toString());
         return found || farmOptions[0] || { id: '1', label: 'Trại Kiên Giang' };
     }, [farmOptions, selectedZoneId]);
-
-    // Default select Farm logic (Global Sync)
-    useEffect(() => {
-        if (zones.length > 0) {
-            // Check if current selectedZoneId is valid
-            const isValidZone = selectedZoneId && zones.some(z => z.id === selectedZoneId);
-
-            if (!isValidZone) {
-                // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => z.id === 71) || zones[0];
-                if (targetZone) {
-                    setSelectedZoneId(targetZone.id);
-                }
-            }
-        }
-    }, [zones, selectedZoneId, setSelectedZoneId]);
 
     const handleSelectFarm = (item: DropDownItem) => {
         setSelectedZoneId(Number(item.id));
