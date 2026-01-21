@@ -1,0 +1,127 @@
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Skeleton } from '@/shared/components/ui/Skeleton';
+import { spacing, colors } from '@/styles';
+
+const CardSkeleton: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <View style={styles.card}>
+        <View style={styles.cardHeader}>
+            <Skeleton width={150} height={16} borderRadius={4} />
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.cardContent}>{children}</View>
+    </View>
+);
+
+const InputSkeleton: React.FC = () => (
+    <View>
+        <Skeleton width={100} height={14} style={{ marginBottom: 8 }} borderRadius={4} />
+        <Skeleton width="100%" height={48} borderRadius={8} />
+    </View>
+);
+
+export const EnvSkeleton: React.FC = () => {
+    return (
+        <View style={styles.container}>
+            {/* Header: Thông tin chung */}
+            <CardSkeleton>
+                <InputSkeleton />
+            </CardSkeleton>
+
+            {/* Header: Chỉ số môi trường */}
+            <CardSkeleton>
+                {/* Grid of Inputs (3 rows x 2 cols) */}
+                {[1, 2, 3].map(row => (
+                    <View key={row} style={[styles.gridRow, styles.marginBottom]}>
+                        <View style={styles.gridItem}>
+                            <InputSkeleton />
+                        </View>
+                        <View style={styles.gridSpace} />
+                        <View style={styles.gridItem}>
+                            <InputSkeleton />
+                        </View>
+                    </View>
+                ))}
+
+                {/* Setup Button */}
+                <View style={{ marginTop: 8 }}>
+                    <Skeleton width="100%" height={48} borderRadius={8} />
+                </View>
+            </CardSkeleton>
+
+            {/* Header: Ghi chú */}
+            <CardSkeleton>
+                <View>
+                    <Skeleton
+                        width={100}
+                        height={14}
+                        style={{ marginBottom: 8 }}
+                        borderRadius={4}
+                    />
+                    <Skeleton width="100%" height={100} borderRadius={8} />
+                </View>
+            </CardSkeleton>
+
+            {/* Footer Buttons */}
+            <View style={styles.footer}>
+                <View style={{ flex: 1, marginRight: 12 }}>
+                    <Skeleton width="100%" height={48} borderRadius={8} />
+                </View>
+                <View style={{ flex: 1 }}>
+                    <Skeleton width="100%" height={48} borderRadius={8} />
+                </View>
+            </View>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        // Match AddEnvironmentScreen container padding if any, usually it has scrollview content container padding
+        padding: spacing.md,
+    },
+    card: {
+        backgroundColor: colors.white,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 12,
+        marginTop: 8,
+        borderRadius: 0,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        elevation: 1,
+        marginBottom: spacing.md,
+    },
+    cardHeader: {
+        marginBottom: 12,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginBottom: 12,
+        marginHorizontal: -spacing.md,
+    },
+    cardContent: {
+        gap: spacing.md,
+    },
+    marginBottom: {
+        marginBottom: spacing.md,
+    },
+    gridRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    gridItem: {
+        flex: 1,
+    },
+    gridSpace: {
+        width: spacing.md,
+    },
+    footer: {
+        flexDirection: 'row',
+        marginTop: spacing.sm,
+        paddingBottom: spacing.xl,
+    },
+});

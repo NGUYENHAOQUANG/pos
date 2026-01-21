@@ -89,4 +89,24 @@ export const API_ENDPOINTS = {
         UPDATE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
         DELETE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
     },
+    ENV_METRIC_TYPES: {
+        LIST: '/env-metric-types',
+        DETAIL: (id: number) => `/env-metric-types/${id}`,
+        CREATE: '/env-metric-types',
+        UPDATE: (id: number) => `/env-metric-types/${id}`,
+        DELETE: (id: number) => `/env-metric-types/${id}`,
+    },
+    ENVIRONMENTAL_PARAMETER: {
+        LIST: (pondId: number | string) => `/pond/${pondId}/EnvironmentalParameter`,
+    },
+    PARAMETER_SETTING: {
+        LIST: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
+        DETAIL: (zoneId: number | string, id: number | string) =>
+            `/zones/${zoneId}/parameter-setting/${id}`,
+        CREATE: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
+        UPDATE: (zoneId: number | string, id: number | string) =>
+            `/zones/${zoneId}/parameter-setting/${id}`,
+        DELETE: (zoneId: number | string, id: number | string) =>
+            `/zones/${zoneId}/parameter-setting/${id}`,
+    },
 } as const;

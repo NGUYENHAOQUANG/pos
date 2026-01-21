@@ -54,7 +54,6 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                         value={lowerLimit}
                         onChangeText={onLowerLimitChange}
                         keyboardType="numeric"
-                        placeholder="0"
                         placeholderTextColor={colors.textSecondary}
                     />
                 </View>
@@ -69,7 +68,6 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                         value={upperLimit}
                         onChangeText={onUpperLimitChange}
                         keyboardType="numeric"
-                        placeholder="100"
                         placeholderTextColor={colors.textSecondary}
                     />
                 </View>
