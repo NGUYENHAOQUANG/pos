@@ -14,6 +14,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/environment/EnvironmentParametersBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
@@ -84,6 +85,10 @@ export const AddEnvironmentScreen: React.FC = () => {
 
     // Fetch necessary data
     // Fetch necessary data on focus (Replaced useEffect with useFocusEffect)
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch necessary data
+    // Fetch necessary data on focus (Replaced useEffect with useFocusEffect)
     useFocusEffect(
         useCallback(() => {
             const loadData = async () => {
@@ -95,6 +100,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                     console.log('DEBUG: Fetching settings for Zone:', currentZone.id);
                     await fetchParameterSettings(currentZone.id);
                 }
+                setIsLoading(false);
             };
             loadData();
         }, [currentZone, fetchMetricTypes, fetchZones, fetchParameterSettings, zones.length])
@@ -600,6 +606,10 @@ export const AddEnvironmentScreen: React.FC = () => {
 
     const isFormComplete = hasAtLeastOneParameter;
     const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
+
+    if (isLoading) {
+        return <EnvSkeleton />;
+    }
 
     return (
         <View style={styles.container}>
