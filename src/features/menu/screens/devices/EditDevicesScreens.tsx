@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
     GeneralInformation,
     GeneralInformationData,
@@ -147,22 +148,24 @@ export const EditDevicesScreens = () => {
                 rightAction={renderRightAction()}
             />
 
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                <GeneralInformation
-                    onDataChange={handleGeneralInfoChange}
-                    triggerValidation={triggerValidation}
-                    initialData={initialGeneralData}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <GeneralInformation
+                        onDataChange={handleGeneralInfoChange}
+                        triggerValidation={triggerValidation}
+                        initialData={initialGeneralData}
+                    />
 
-                <MaintenancePeriod
-                    onDataChange={handleMaintenanceInfoChange}
-                    triggerValidation={triggerValidation}
-                    initialData={initialMaintenanceData}
-                />
-            </ScrollView>
+                    <MaintenancePeriod
+                        onDataChange={handleMaintenanceInfoChange}
+                        triggerValidation={triggerValidation}
+                        initialData={initialMaintenanceData}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             <ButtonBarMenu
                 primaryTitle="Cập nhật thông tin"
