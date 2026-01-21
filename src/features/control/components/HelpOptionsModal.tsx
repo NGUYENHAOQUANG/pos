@@ -59,6 +59,7 @@ export const HelpOptionsModal: React.FC<HelpOptionsModalProps> = ({
     if (!isVisible && !isOpen) return null;
 
     // Calculate position
+    // Calculate position
     // Default to strict null check handling
     const safePosition = buttonPosition || { x: 0, y: 0, width: 0, height: 0 };
     const menuRight = SCREEN_WIDTH - safePosition.x - safePosition.width;
