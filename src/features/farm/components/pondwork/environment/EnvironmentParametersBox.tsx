@@ -5,6 +5,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { IconError } from '@/assets/icons';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
 
 interface EnvironmentParametersBoxProps {
     pH: string;
@@ -30,6 +31,8 @@ interface EnvironmentParametersBoxProps {
     onMagieChange?: (value: string) => void;
     no3?: string;
     onNo3Change?: (value: string) => void;
+    limits?: Record<string, string>; // ID -> Limit string (e.g., "7.5 - 8.5")
+    visibleMetricIds?: string[];
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -56,21 +59,37 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onMagieChange,
     no3 = '',
     onNo3Change,
+    limits = {},
+    visibleMetricIds = ['1', '2', '3', '4', '10', '15', '17', '18', '19', '20'], // Default to all if not provided
 }) => {
+    // Helper to generate label
+    const getLabel = (baseName: string, id: string, unit: string = '') => {
+        const limit = limits[id];
+
+        if (limit) {
+            return `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
+        }
+
+        // Default: Name (Unit) or just Name
+        return unit ? `${baseName} (${unit})` : baseName;
+    };
+
+    const isVisible = (id: string) => visibleMetricIds.includes(id);
+
     // Map advanced parameter IDs to render fields
     const getAdvancedParameterValue = (id: string): string => {
-        if (id === '7') return kali;
-        if (id === '8') return tan;
-        if (id === '9') return magie;
-        if (id === '10') return no3;
+        if (id === ENVIRONMENT_METRIC_IDS.KALI) return kali;
+        if (id === ENVIRONMENT_METRIC_IDS.TAN) return tan;
+        if (id === ENVIRONMENT_METRIC_IDS.MAGIE) return magie;
+        if (id === ENVIRONMENT_METRIC_IDS.NO3) return no3;
         return '';
     };
 
     const getAdvancedParameterOnChange = (id: string): ((value: string) => void) | undefined => {
-        if (id === '7') return onKaliChange;
-        if (id === '8') return onTanChange;
-        if (id === '9') return onMagieChange;
-        if (id === '10') return onNo3Change;
+        if (id === ENVIRONMENT_METRIC_IDS.KALI) return onKaliChange;
+        if (id === ENVIRONMENT_METRIC_IDS.TAN) return onTanChange;
+        if (id === ENVIRONMENT_METRIC_IDS.MAGIE) return onMagieChange;
+        if (id === ENVIRONMENT_METRIC_IDS.NO3) return onNo3Change;
         return undefined;
     };
 
@@ -104,35 +123,43 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 <View style={styles.row}>
                     <View style={styles.column}>
                         <FarmInput
-                            label="pH (1-14)"
+                            label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH)}
                             value={pH}
                             keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onPHChange)}
                         />
                     </View>
-                    <View style={styles.column}>
-                        <FarmInput
-                            label="DO (mg/L)"
-                            value={doValue}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onDOChange)}
-                        />
-                    </View>
+                    {isVisible(ENVIRONMENT_METRIC_IDS.DO) && (
+                        <View style={styles.column}>
+                            <FarmInput
+                                label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
+                                value={doValue}
+                                keyboardType="default"
+                                onChangeText={text => handleNumericInput(text, onDOChange)}
+                            />
+                        </View>
+                    )}
                 </View>
 
                 {/* Row 2 */}
                 <View style={styles.row}>
+                    {isVisible(ENVIRONMENT_METRIC_IDS.TEMPERATURE) && (
+                        <View style={styles.column}>
+                            <FarmInput
+                                label={getLabel(
+                                    'Nhiệt độ',
+                                    ENVIRONMENT_METRIC_IDS.TEMPERATURE,
+                                    '°C'
+                                )}
+                                value={temperature}
+                                keyboardType="default"
+                                onChangeText={text => handleNumericInput(text, onTemperatureChange)}
+                            />
+                        </View>
+                    )}
                     <View style={styles.column}>
                         <FarmInput
-                            label="Nhiệt độ (°C)"
-                            value={temperature}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onTemperatureChange)}
-                        />
-                    </View>
-                    <View style={styles.column}>
-                        <FarmInput
-                            label="Độ mặn (ppt)"
+                            label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
                             value={salinity}
                             keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onSalinityChange)}
@@ -144,20 +171,28 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 <View style={styles.row}>
                     <View style={styles.column}>
                         <FarmInput
-                            label="Độ kiềm (mg/L)"
+                            label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
                             value={alkalinity}
                             keyboardType="default"
                             onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                         />
                     </View>
-                    <View style={styles.column}>
-                        <FarmInput
-                            label="Độ trong (cm)"
-                            value={transparency}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onTransparencyChange)}
-                        />
-                    </View>
+                    {isVisible(ENVIRONMENT_METRIC_IDS.TRANSPARENCY) && (
+                        <View style={styles.column}>
+                            <FarmInput
+                                label={getLabel(
+                                    'Độ trong',
+                                    ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
+                                    'cm'
+                                )}
+                                value={transparency}
+                                keyboardType="default"
+                                onChangeText={text =>
+                                    handleNumericInput(text, onTransparencyChange)
+                                }
+                            />
+                        </View>
+                    )}
                 </View>
 
                 {/* Advanced Parameters */}
@@ -167,10 +202,24 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         const paramOnChange = getAdvancedParameterOnChange(param.id);
                         if (!paramOnChange) return null;
 
+                        // Advanced params usually come as "Name (Unit)" (e.g. "Kali (mg/L)")
+                        // If limit exists using same logic:
+                        const limit = limits[param.id];
+                        let label = param.name;
+
+                        if (limit) {
+                            // Extract unit if present in (...)
+                            const match = param.name.match(/\((.*?)\)/);
+                            const unit = match ? match[1] : '';
+                            const baseName = param.name.split(' (')[0];
+
+                            label = `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
+                        }
+
                         return (
                             <View key={param.id} style={styles.fullWidthRow}>
                                 <FarmInput
-                                    label={param.name}
+                                    label={label}
                                     value={paramValue}
                                     keyboardType="default"
                                     onChangeText={text => handleNumericInput(text, paramOnChange)}

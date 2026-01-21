@@ -254,3 +254,16 @@ export interface ShrimpInspectionData {
     time?: string;
     notes?: string;
 }
+
+export const ENVIRONMENT_METRIC_IDS = {
+    PH: '1',
+    DO: '10',
+    TEMPERATURE: '4',
+    SALINITY: '2',
+    ALKALINITY: '3',
+    TRANSPARENCY: '15',
+    KALI: '17',
+    TAN: '18',
+    MAGIE: '19',
+    NO3: '20',
+} as const;

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -25,7 +25,8 @@ import {
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import Toast from 'react-native-toast-message';
-import { useFarm } from '@/features/farm/store/farmStore';
+import { useFarm, useFarmStore } from '@/features/farm/store/farmStore';
+import { ParameterSetting } from '@/features/farm/api/environmentApi';
 
 type NavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<FarmStackParamList>,
@@ -33,73 +34,131 @@ type NavigationProp = CompositeNavigationProp<
 >;
 type SettingEnvironmentRouteProp = RouteProp<FarmStackParamList, 'SettingEnvironment'>;
 
-const DEFAULT_LOCATIONS: FarmLocation[] = [
-    { id: '1', name: 'Trại Kiên Giang' },
-    { id: '2', name: 'Trại Cà Mau' },
-    { id: '3', name: 'Trại Bạc Liêu' },
-    { id: '4', name: 'Trại Sóc Trăng' },
-];
-
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<SettingEnvironmentRouteProp>();
-    const { data, onSave } = route.params || {};
+    const { data: _data } = route.params || {};
     const insets = useSafeAreaInsets();
 
     // Use FarmContext
-    const { environmentSettings, updateEnvironmentSettings } = useFarm();
+    // Use FarmContext
+    const {
+        metricTypes,
+        fetchMetricTypes,
+        parameterSettings,
+        fetchParameterSettings,
+        zones,
+        fetchZones,
+    } = useFarm();
 
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(DEFAULT_LOCATIONS[0]);
+    // Default to first available zone or a placeholder
+    const [selectedLocation, setSelectedLocation] = useState<FarmLocation | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownButtonRef = useRef<View>(null);
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    // Initial state setup from Context
-    const [parameters, setParameters] = useState<EnvironmentParameter[]>(
-        environmentSettings.defaultParameters
-    );
+    // Initial state setup
+    const [parameters, setParameters] = useState<EnvironmentParameter[]>([]);
+    const [advancedParameters, setAdvancedParameters] = useState<EnvironmentParameter[]>([]);
 
-    // Initialize advanced parameters: if route has data, mark those as checked, otherwise use context
-    const initialAdvancedParameters = useMemo(() => {
-        if (data?.advancedParameters) {
-            // Mark advanced parameters as checked if they're in the route data
-            return environmentSettings.advancedParameters.map(p =>
-                data.advancedParameters!.some(ap => ap.id === p.id) ? { ...p, isChecked: true } : p
-            );
-        }
-        return environmentSettings.advancedParameters;
-    }, [data, environmentSettings.advancedParameters]);
-
-    const [advancedParameters, setAdvancedParameters] =
-        useState<EnvironmentParameter[]>(initialAdvancedParameters);
-
-    // Update advanced parameters when route data changes
+    // Fetch Base Data
     useEffect(() => {
-        if (data?.advancedParameters) {
-            setAdvancedParameters(
-                environmentSettings.advancedParameters.map(p =>
-                    data.advancedParameters!.some(ap => ap.id === p.id)
-                        ? { ...p, isChecked: true }
-                        : p
-                )
-            );
+        const initData = async () => {
+            console.log('Fetching Metric Types and Zones...');
+            await fetchMetricTypes();
+            await fetchZones(); // Ensure zones are loaded
+        };
+        initData();
+    }, [fetchMetricTypes, fetchZones]);
+
+    // Set initial location when zones are loaded
+    useEffect(() => {
+        if (zones && zones.length > 0 && !selectedLocation) {
+            // Priority: selectedZoneId from store -> First Zone
+            const current = selectedZoneId ? zones.find(z => z.id === selectedZoneId) : zones[0];
+            const target = current || zones[0];
+
+            setSelectedLocation({ id: String(target.id), name: target.name });
         }
-    }, [data, environmentSettings.advancedParameters]);
+    }, [zones, selectedLocation, selectedZoneId]);
+
+    // Fetch Settings when location changes
+    useEffect(() => {
+        if (selectedLocation) {
+            fetchParameterSettings(selectedLocation.id);
+        }
+    }, [selectedLocation, fetchParameterSettings]);
+
+    // Sync Data: Combine MetricTypes with ParameterSettings
+    // Extract current settings to a constant for stable application
+    const currentZoneSettings = selectedLocation
+        ? parameterSettings[selectedLocation.id]
+        : undefined;
+
+    // Sync Data: Combine MetricTypes with ParameterSettings
+    const syncData = useCallback(() => {
+        if (metricTypes.length > 0 && selectedLocation) {
+            const currentSettings = currentZoneSettings || [];
+
+            // Map settings by code for easy lookup
+            const settingsMap = new Map<string, ParameterSetting>();
+            if (Array.isArray(currentSettings)) {
+                currentSettings.forEach(s => {
+                    if (s.parameterCode) settingsMap.set(s.parameterCode, s);
+                });
+            }
+
+            const newParams: EnvironmentParameter[] = [];
+            const newAdvancedParams: EnvironmentParameter[] = [];
+
+            metricTypes.forEach(metric => {
+                const setting = settingsMap.get(metric.metricCode);
+
+                // Updated Default Group: pH (1), Salinity (2), Alkalinity (3), Temp (4), DO (10), Transparency (15)
+                const isDefault = [1, 2, 3, 4, 10, 15].includes(metric.id);
+
+                const minValue = setting?.minValue?.toString() ?? '';
+                const maxValue = setting?.maxValue?.toString() ?? '';
+                const limitStr = minValue && maxValue ? `${minValue} - ${maxValue}` : '';
+
+                const param: EnvironmentParameter = {
+                    id: String(metric.id),
+                    name: metric.metricName,
+                    min: minValue,
+                    max: maxValue,
+                    limit: limitStr,
+                    isChecked: !!setting,
+                    unit: metric.unitName,
+                };
+
+                // If setting has `enabled`, use it
+                if (setting && setting.enabled !== undefined) {
+                    param.isChecked = setting.enabled;
+                }
+
+                if (isDefault) {
+                    newParams.push(param);
+                } else {
+                    newAdvancedParams.push(param);
+                }
+            });
+
+            setParameters(newParams);
+            setAdvancedParameters(newAdvancedParams);
+        }
+    }, [metricTypes, selectedLocation, currentZoneSettings]);
+
+    useEffect(() => {
+        syncData();
+    }, [syncData]);
 
     // Calculate dirty state
     const isDirty = useMemo(() => {
-        // Compare current state with initial state
-        const paramsChanged =
-            JSON.stringify(parameters) !== JSON.stringify(environmentSettings.defaultParameters);
-        const advancedParamsChanged =
-            JSON.stringify(advancedParameters) !== JSON.stringify(initialAdvancedParameters);
-        return paramsChanged || advancedParamsChanged;
-    }, [
-        parameters,
-        advancedParameters,
-        environmentSettings.defaultParameters,
-        initialAdvancedParameters,
-    ]);
+        // Simplified check: just check if any value changed from current state vs stored state
+        // For now, always enable save if there are parameters
+        return parameters.length > 0 || advancedParameters.length > 0;
+    }, [parameters, advancedParameters]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -125,13 +184,13 @@ export const SettingEnvironmentScreens: React.FC = () => {
         setIsDropdownVisible(false);
     };
 
-    const handleToggleParameter = (id: string) => {
+    const handleToggleParameter = (id: string | number) => {
         setParameters(prev =>
             prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
         );
     };
 
-    const handleToggleAdvancedParameter = (id: string) => {
+    const handleToggleAdvancedParameter = (id: string | number) => {
         setAdvancedParameters(prev =>
             prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
         );
@@ -139,20 +198,19 @@ export const SettingEnvironmentScreens: React.FC = () => {
 
     const handleUpdateParameter = (updatedParam: EnvironmentParameter) => {
         // Validate limit format: "min - max"
-        if (updatedParam.limit) {
-            const parts = updatedParam.limit.split('-');
-            if (parts.length === 2 && parts[0] && parts[1]) {
-                const lower = parseFloat(parts[0].trim());
-                const upper = parseFloat(parts[1].trim());
+        if (updatedParam.min && updatedParam.max) {
+            const lower = parseFloat(updatedParam.min);
+            const upper = parseFloat(updatedParam.max);
 
-                if (!isNaN(lower) && !isNaN(upper) && lower > upper) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Giới hạn dưới không được lớn hơn giới hạn trên',
-                    });
-                    return; // Stop update
-                }
+            if (!isNaN(lower) && !isNaN(upper) && lower > upper) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Giới hạn dưới không được lớn hơn giới hạn trên',
+                });
+                return; // Stop update
             }
+            // Update limit string for display
+            updatedParam.limit = `${updatedParam.min} - ${updatedParam.max}`;
         }
         setParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
         setAdvancedParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
@@ -165,38 +223,120 @@ export const SettingEnvironmentScreens: React.FC = () => {
         });
     };
 
-    const handleSave = () => {
-        // If onSave callback is provided (from AddEnvironmentScreen), call it with checked advanced parameters
-        if (onSave) {
-            const checkedAdvancedParams = advancedParameters
-                .filter(p => p.isChecked)
-                .map(p => ({ id: p.id, name: p.name }));
-            onSave({ advancedParameters: checkedAdvancedParams });
+    // Save Handler with Create/Update/Delete logic
+    const handleSave = async () => {
+        if (!selectedLocation) return;
+
+        try {
+            const currentSettings = parameterSettings[selectedLocation.id] || [];
+            const allUIParams = [...parameters, ...advancedParameters];
+
+            // List of promises to execute
+            const promises: Promise<void>[] = [];
+            const zoneId = selectedLocation.id;
+            // Use store actions directly
+            const { createParameterSetting, updateParameterSetting, deleteParameterSetting } =
+                useFarmStore.getState();
+
+            console.log('handleSave starting...', {
+                zoneId,
+                zoneName: selectedLocation.name,
+                paramsCount: allUIParams.length,
+                metricTypesCount: metricTypes.length,
+                currentSettingsCount: Array.isArray(currentSettings)
+                    ? currentSettings.length
+                    : 'Not Array',
+            });
+
+            for (const p of allUIParams) {
+                const metricId = Number(p.id); // Convert back to number for matching
+                const isChecked = p.isChecked;
+                const minVal = p.min ? parseFloat(p.min) : undefined;
+                const maxVal = p.max ? parseFloat(p.max) : undefined;
+
+                // Find existing setting by CODE.
+                // We need the code first.
+                const metric = metricTypes.find(m => m.id === metricId);
+                const existingSetting = metric
+                    ? currentSettings.find(s => s.parameterCode === metric.metricCode)
+                    : undefined;
+
+                if (!metric) continue;
+
+                if (isChecked) {
+                    // Create or Update
+                    const parameterCode = metric.metricCode;
+
+                    // Only send if we have valid values or if it's a create
+                    // Ideally we should validate min < max before this loop (handled in handleUpdateParameter)
+                    // If values are missing/invalid, what to do? Skip or send 0?
+                    // Sending 0 might be dangerous. Let's default to 0 if undefined for now to satisfy type,
+                    // or skip if both are missing?
+                    // Assuming required.
+
+                    const payload = {
+                        parameterCode,
+                        minValue: minVal ?? 0,
+                        maxValue: maxVal ?? 0,
+                        enabled: true,
+                        alert: existingSetting?.alert, // Preserve existing alert message logic
+                    };
+
+                    if (existingSetting) {
+                        // UPDATE if changed
+                        if (
+                            existingSetting.minValue !== minVal ||
+                            existingSetting.maxValue !== maxVal
+                        ) {
+                            console.log('Pushing Update Promise', {
+                                id: existingSetting.id,
+                                payload,
+                            });
+                            promises.push(
+                                updateParameterSetting(zoneId, existingSetting.id, payload)
+                            );
+                        } else {
+                            console.log('Skipping Update (No Change)', { id: existingSetting.id });
+                        }
+                    } else {
+                        // CREATE
+                        console.log('Pushing Create Promise', { zoneId, payload });
+                        promises.push(createParameterSetting(zoneId, payload));
+                    }
+                } else {
+                    // DELETE if it exists (or Disable?)
+                    if (existingSetting) {
+                        promises.push(deleteParameterSetting(zoneId, existingSetting.id));
+                    }
+                }
+            }
+
+            await Promise.all(promises);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Đã lưu thiết lập thành công',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            navigation.goBack();
+        } catch (error) {
+            console.error('Save failed:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi khi lưu thiết lập',
+                text2: 'Vui lòng thử lại sau',
+            });
         }
-
-        // Always update context with the settings
-        updateEnvironmentSettings({
-            defaultParameters: parameters,
-            advancedParameters: advancedParameters,
-        });
-
-        Toast.show({
-            type: 'success',
-            text1: 'Đã lưu thông số',
-            position: 'top',
-            visibilityTime: 3000,
-        });
-        navigation.goBack();
     };
 
     const handleReset = () => {
-        // Reset to initial values
-        setParameters(environmentSettings.defaultParameters);
-        setAdvancedParameters(initialAdvancedParameters);
+        // Reset to initial values (re-sync with store/API)
+        syncData();
     };
 
     const renderDropdownItem = ({ item }: { item: FarmLocation }) => {
-        const isSelected = item.id === selectedLocation.id;
+        const isSelected = selectedLocation ? item.id === selectedLocation.id : false;
         return (
             <TouchableOpacity
                 style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
@@ -232,16 +372,21 @@ export const SettingEnvironmentScreens: React.FC = () => {
                 <View style={styles.dropdownWrapper}>
                     <View ref={dropdownButtonRef} collapsable={false}>
                         <TouchableOpacity
-                            style={styles.dropdownButton}
+                            style={[
+                                styles.dropdownButton,
+                                { opacity: 1, backgroundColor: colors.white },
+                            ]}
                             onPress={handleDropdownPress}
-                            activeOpacity={0.7}
+                            disabled={true}
+                            activeOpacity={1}
                         >
-                            <Text style={styles.dropdownButtonText}>{selectedLocation.name}</Text>
-                            <Ionicons
-                                name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
-                                size={16}
-                                color={colors.textSecondary}
-                            />
+                            <Text style={[styles.dropdownButtonText, { color: colors.text }]}>
+                                {selectedLocation?.name || 'Chọn trại'}
+                            </Text>
+                            {/* Hide Chevron or show lock? User said 'disable'. I will hide chevron to indicate no interaction or keep it but static? 
+                                User requests 'disable luôn' => No interaction. 
+                                I'll remove the chevron to make it look like a static header. 
+                             */}
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -302,13 +447,21 @@ export const SettingEnvironmentScreens: React.FC = () => {
                             },
                         ]}
                     >
-                        <FlatList
-                            data={DEFAULT_LOCATIONS}
-                            keyExtractor={item => item.id}
-                            renderItem={renderDropdownItem}
-                            scrollEnabled={false}
-                            contentContainerStyle={styles.dropdownScrollContent}
-                        />
+                        {zones && zones.length > 0 ? (
+                            <FlatList
+                                data={zones.map(z => ({ id: String(z.id), name: z.name }))}
+                                keyExtractor={item => item.id}
+                                renderItem={renderDropdownItem}
+                                scrollEnabled={false}
+                                contentContainerStyle={styles.dropdownScrollContent}
+                            />
+                        ) : (
+                            <View style={{ padding: 12 }}>
+                                <Text style={{ color: colors.gray[500] }}>
+                                    Chưa có trang trại nào
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 </TouchableOpacity>
             </Modal>

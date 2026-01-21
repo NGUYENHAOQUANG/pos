@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,7 +20,7 @@ import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
-import { EnvironmentMeta } from '@/features/farm/types/farm.types';
+import { EnvironmentMeta, ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 
@@ -33,23 +33,135 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const { getPondJobItems, updatePondJob, environmentSettings } = useFarm();
+    const {
+        getPondJobItems,
+        updatePondJob,
+        environmentSettings,
+        zones,
+        fetchZones,
+        metricTypes,
+        fetchMetricTypes,
+        parameterSettings,
+        fetchParameterSettings,
+        getSelectedZone,
+    } = useFarm();
     const scrollViewRef = useRef<ScrollView>(null);
+
+    // Find Zone ID based on Pond's Zone Name or ID
+    const currentZone = useMemo(() => {
+        console.log('DEBUG: Resolve Zone - Pond Keys:', Object.keys(pond || {}));
+        console.log('DEBUG: Resolve Zone - Pond:', pond);
+
+        if (!pond || !zones) return null;
+
+        // Try direct ID match if pond has zoneId
+        const pondZoneId = (pond as any).zoneId || (pond as any).zone_id;
+        if (pondZoneId) {
+            const byId = zones.find(z => z.id === pondZoneId);
+            if (byId) {
+                console.log('DEBUG: Matched Zone by ID:', byId);
+                return byId;
+            }
+        }
+
+        // Try name match
+        if (pond.zone) {
+            const byName = zones.find(z => z.name === pond.zone);
+            if (byName) {
+                console.log('DEBUG: Matched Zone by Name:', byName);
+                return byName;
+            }
+        }
+
+        // Fallback to currently selected global zone
+        const globalZone = getSelectedZone();
+        if (globalZone) {
+            console.log('DEBUG: Fallback to Global Selected Zone:', globalZone);
+            return globalZone;
+        }
+
+        return null;
+    }, [pond, zones, getSelectedZone]);
+
+    // Fetch necessary data
+    // Fetch necessary data on focus (Replaced useEffect with useFocusEffect)
+    useFocusEffect(
+        useCallback(() => {
+            const loadData = async () => {
+                console.log('DEBUG: Refreshing Data on Focus');
+                await fetchMetricTypes();
+                if (zones.length === 0) await fetchZones();
+
+                if (currentZone) {
+                    console.log('DEBUG: Fetching settings for Zone:', currentZone.id);
+                    await fetchParameterSettings(currentZone.id);
+                }
+            };
+            loadData();
+        }, [currentZone, fetchMetricTypes, fetchZones, fetchParameterSettings, zones.length])
+    );
+
+    // Compute Limits map from ParameterSettings
+    const parameterLimits = useMemo(() => {
+        const limits: Record<string, string> = {};
+        if (!currentZone) return limits;
+
+        const settings = parameterSettings[currentZone.id];
+
+        if (!settings || !Array.isArray(settings)) return limits;
+
+        settings.forEach(setting => {
+            const metric = metricTypes.find(m => m.metricCode === setting.parameterCode);
+            if (metric) {
+                // Only map limit if min < max and both are valid, and setting is enabled
+                if (
+                    setting.enabled &&
+                    setting.minValue !== undefined &&
+                    setting.maxValue !== undefined &&
+                    setting.minValue < setting.maxValue
+                ) {
+                    limits[String(metric.id)] = `${setting.minValue} - ${setting.maxValue}`;
+                }
+            }
+        });
+        return limits;
+    }, [currentZone, parameterSettings, metricTypes]);
+
+    // Compute Visible Metrics (Defaults + Enabled Advanced)
+    const visibleMetricIds = useMemo(() => {
+        const ids = ['1', '2', '3', '4', '10', '15']; // Default: pH, Salinity, Alkalinity, Temp, DO, Transparency
+
+        if (currentZone) {
+            const settings = parameterSettings[currentZone.id];
+            if (settings && Array.isArray(settings)) {
+                settings.forEach(setting => {
+                    if (setting.enabled) {
+                        const metric = metricTypes.find(
+                            m => m.metricCode === setting.parameterCode
+                        );
+                        if (metric) {
+                            const id = String(metric.id);
+                            if (!ids.includes(id)) {
+                                ids.push(id);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        return ids;
+    }, [currentZone, parameterSettings, metricTypes]);
 
     const checkLimit = (value: string, paramId: string): boolean => {
         if (!value || !value.trim()) return false;
 
-        // Find parameter in default settings
-        let param = environmentSettings.defaultParameters.find(p => p.id === paramId);
+        const limit = parameterLimits[paramId];
 
-        // If not found in default, look in advanced settings
-        if (!param) {
-            param = environmentSettings.advancedParameters.find(p => p.id === paramId);
-        }
+        if (!limit) return false;
 
-        if (!param || !param.limit) return false;
+        if (!limit) return false;
 
-        const parts = param.limit.split('-');
+        const parts = limit.split('-');
         if (parts.length !== 2) return false;
 
         const min = parseFloat(parts[0].trim());
@@ -85,25 +197,64 @@ export const AddEnvironmentScreen: React.FC = () => {
             // When editing: get from meta
             const advancedParams: Array<{ id: string; name: string }> = [];
             if (meta.kali !== undefined) {
-                advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.KALI, name: 'Kali (mg/L)' });
             }
             if (meta.tan !== undefined) {
-                advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.TAN, name: 'TAN (mg/L)' });
             }
             if (meta.magie !== undefined) {
-                advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.MAGIE, name: 'Magie (mg/L)' });
             }
             if (meta.no3 !== undefined) {
-                advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.NO3, name: 'NO3 (mg/L)' });
             }
             return advancedParams;
         } else {
-            // When creating new: get from environmentSettings (checked ones)
+            // When creating new: use API settings if available.
+            if (currentZone && parameterSettings[currentZone.id]) {
+                const settings = parameterSettings[currentZone.id];
+                const validAdvanced: Array<{ id: string; name: string }> = [];
+
+                const advancedIds = [
+                    ENVIRONMENT_METRIC_IDS.KALI,
+                    ENVIRONMENT_METRIC_IDS.TAN,
+                    ENVIRONMENT_METRIC_IDS.MAGIE,
+                    ENVIRONMENT_METRIC_IDS.NO3,
+                ];
+
+                if (Array.isArray(settings) && metricTypes.length > 0) {
+                    settings.forEach(setting => {
+                        const metric = metricTypes.find(
+                            m => m.metricCode === setting.parameterCode
+                        );
+                        if (metric && setting.enabled) {
+                            const id = String(metric.id);
+                            if ((advancedIds as readonly string[]).includes(id)) {
+                                validAdvanced.push({ id, name: metric.metricName });
+                            }
+                        }
+                    });
+
+                    // Sort
+                    validAdvanced.sort((a, b) => Number(a.id) - Number(b.id));
+
+                    return validAdvanced;
+                }
+            }
+
+            // Fallback to legacy
             return environmentSettings.advancedParameters
                 .filter(p => p.isChecked)
                 .map(p => ({ id: p.id, name: p.name }));
         }
-    }, [itemToEdit, meta, environmentSettings.advancedParameters]);
+    }, [
+        itemToEdit,
+        meta,
+        environmentSettings.advancedParameters,
+        currentZone,
+        parameterSettings,
+        metricTypes,
+    ]);
 
     const [advancedParameters, setAdvancedParameters] =
         useState<Array<{ id: string; name: string }>>(initialAdvancedParams);
@@ -152,26 +303,71 @@ export const AddEnvironmentScreen: React.FC = () => {
             // When editing: get from meta
             const advancedParams: Array<{ id: string; name: string }> = [];
             if (meta.kali !== undefined) {
-                advancedParams.push({ id: '7', name: 'Kali (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.KALI, name: 'Kali (mg/L)' });
             }
             if (meta.tan !== undefined) {
-                advancedParams.push({ id: '8', name: 'TAN (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.TAN, name: 'TAN (mg/L)' });
             }
             if (meta.magie !== undefined) {
-                advancedParams.push({ id: '9', name: 'Magie (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.MAGIE, name: 'Magie (mg/L)' });
             }
             if (meta.no3 !== undefined) {
-                advancedParams.push({ id: '10', name: 'NO3 (mg/L)' });
+                advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.NO3, name: 'NO3 (mg/L)' });
             }
             setAdvancedParameters(advancedParams);
         } else {
-            // When creating new: get from environmentSettings (checked ones)
+            // Create mode: Check global settings first
+            if (currentZone && parameterSettings[currentZone.id]) {
+                const settings = parameterSettings[currentZone.id];
+                const validAdvanced: Array<{ id: string; name: string }> = [];
+
+                const advancedIds = [
+                    ENVIRONMENT_METRIC_IDS.KALI,
+                    ENVIRONMENT_METRIC_IDS.TAN,
+                    ENVIRONMENT_METRIC_IDS.MAGIE,
+                    ENVIRONMENT_METRIC_IDS.NO3,
+                ];
+
+                if (Array.isArray(settings) && metricTypes.length > 0) {
+                    settings.forEach(setting => {
+                        const metric = metricTypes.find(
+                            m => m.metricCode === setting.parameterCode
+                        );
+                        if (metric && setting.enabled) {
+                            const id = String(metric.id);
+                            if ((advancedIds as readonly string[]).includes(id)) {
+                                validAdvanced.push({ id, name: metric.metricName });
+                            } else {
+                                console.log('DEBUG: SKIPPED PARAM:', {
+                                    id,
+                                    name: metric.metricName,
+                                    code: setting.parameterCode,
+                                });
+                            }
+                        }
+                    });
+
+                    // Sort
+                    validAdvanced.sort((a, b) => Number(a.id) - Number(b.id));
+                    setAdvancedParameters(validAdvanced);
+                    return;
+                }
+            }
+
+            // Fallback to legacy
             const checkedParams = environmentSettings.advancedParameters
                 .filter(p => p.isChecked)
                 .map(p => ({ id: p.id, name: p.name }));
             setAdvancedParameters(checkedParams);
         }
-    }, [itemToEdit, meta, environmentSettings.advancedParameters]); // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        itemToEdit,
+        meta,
+        environmentSettings.advancedParameters,
+        currentZone,
+        parameterSettings,
+        metricTypes,
+    ]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -193,10 +389,10 @@ export const AddEnvironmentScreen: React.FC = () => {
         // In edit mode: clear to allow updating (removing the field is an update)
         if (uncheckedIds.length > 0) {
             uncheckedIds.forEach(id => {
-                if (id === '7') setKali('');
-                if (id === '8') setTan('');
-                if (id === '9') setMagie('');
-                if (id === '10') setNo3('');
+                if (id === ENVIRONMENT_METRIC_IDS.KALI) setKali('');
+                if (id === ENVIRONMENT_METRIC_IDS.TAN) setTan('');
+                if (id === ENVIRONMENT_METRIC_IDS.MAGIE) setMagie('');
+                if (id === ENVIRONMENT_METRIC_IDS.NO3) setNo3('');
             });
         }
 
@@ -232,37 +428,52 @@ export const AddEnvironmentScreen: React.FC = () => {
                 note: notes.trim() || undefined,
                 meta: {
                     pH: pH.trim() || undefined,
-                    pHWarning: checkLimit(pH, '1'),
+                    pHWarning: checkLimit(pH, ENVIRONMENT_METRIC_IDS.PH),
                     do: dissolvedOxygen.trim() || undefined,
-                    doWarning: checkLimit(dissolvedOxygen, '2'),
+                    doWarning: checkLimit(dissolvedOxygen, ENVIRONMENT_METRIC_IDS.DO),
                     temperature: temperature.trim() || undefined,
-                    temperatureWarning: checkLimit(temperature, '3'),
+                    temperatureWarning: checkLimit(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE),
                     salinity: salinity.trim() || undefined,
-                    salinityWarning: checkLimit(salinity, '5'),
+                    salinityWarning: checkLimit(salinity, ENVIRONMENT_METRIC_IDS.SALINITY),
                     alkalinity: alkalinity.trim() || undefined,
-                    alkalinityWarning: checkLimit(alkalinity, '6'),
+                    alkalinityWarning: checkLimit(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY),
                     transparency: transparency.trim() || undefined,
-                    transparencyWarning: checkLimit(transparency, '4'),
+                    transparencyWarning: checkLimit(
+                        transparency,
+                        ENVIRONMENT_METRIC_IDS.TRANSPARENCY
+                    ),
                     // Only save advanced parameters if they are checked
-                    kali: advancedParameters.some(p => p.id === '7') ? kali.trim() : undefined,
+                    kali: advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.KALI)
+                        ? kali.trim()
+                        : undefined,
                     kaliWarning:
-                        advancedParameters.some(p => p.id === '7') && kali.trim()
-                            ? checkLimit(kali, '7')
+                        advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.KALI) &&
+                        kali.trim()
+                            ? checkLimit(kali, ENVIRONMENT_METRIC_IDS.KALI)
                             : undefined,
-                    tan: advancedParameters.some(p => p.id === '8') ? tan.trim() : undefined,
+                    tan: advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.TAN)
+                        ? tan.trim()
+                        : undefined,
                     tanWarning:
-                        advancedParameters.some(p => p.id === '8') && tan.trim()
-                            ? checkLimit(tan, '8')
+                        advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.TAN) &&
+                        tan.trim()
+                            ? checkLimit(tan, ENVIRONMENT_METRIC_IDS.TAN)
                             : undefined,
-                    magie: advancedParameters.some(p => p.id === '9') ? magie.trim() : undefined,
+                    magie: advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.MAGIE)
+                        ? magie.trim()
+                        : undefined,
                     magieWarning:
-                        advancedParameters.some(p => p.id === '9') && magie.trim()
-                            ? checkLimit(magie, '9')
+                        advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.MAGIE) &&
+                        magie.trim()
+                            ? checkLimit(magie, ENVIRONMENT_METRIC_IDS.MAGIE)
                             : undefined,
-                    no3: advancedParameters.some(p => p.id === '10') ? no3.trim() : undefined,
+                    no3: advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.NO3)
+                        ? no3.trim()
+                        : undefined,
                     no3Warning:
-                        advancedParameters.some(p => p.id === '10') && no3.trim()
-                            ? checkLimit(no3, '10')
+                        advancedParameters.some(p => p.id === ENVIRONMENT_METRIC_IDS.NO3) &&
+                        no3.trim()
+                            ? checkLimit(no3, ENVIRONMENT_METRIC_IDS.NO3)
                             : undefined,
                 },
             };
@@ -470,6 +681,8 @@ export const AddEnvironmentScreen: React.FC = () => {
                         no3={no3}
                         onNo3Change={setNo3}
                         showError={showParameterError}
+                        limits={parameterLimits}
+                        visibleMetricIds={visibleMetricIds}
                     />
 
                     <SelectionNotesBox

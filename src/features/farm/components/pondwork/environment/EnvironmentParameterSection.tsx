@@ -9,6 +9,9 @@ export interface EnvironmentParameter {
     name: string;
     limit: string;
     isChecked: boolean;
+    unit?: string;
+    min?: string;
+    max?: string;
 }
 
 interface EnvironmentParameterSectionProps {
