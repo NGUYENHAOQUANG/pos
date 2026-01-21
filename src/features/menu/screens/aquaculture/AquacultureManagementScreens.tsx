@@ -174,6 +174,15 @@ export const AquacultureManagementScreens: React.FC = () => {
                             />
                         )}
                         contentContainerStyle={styles.listContent}
+                        ListEmptyComponent={
+                            <View style={styles.cardContainer}>
+                                <EmptyStateCard
+                                    message="Chưa có vụ nuôi nào"
+                                    buttonTitle="Tạo vụ nuôi"
+                                    onPress={() => navigation.navigate('AddAquaculture')}
+                                />
+                            </View>
+                        }
                     />
                 )}
             </View>
