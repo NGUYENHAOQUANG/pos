@@ -9,6 +9,9 @@ import { Platform, ScrollView, StyleSheet, Text, View, StatusBar } from 'react-n
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/styles';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { notificationHelper } from '@/shared/utils/notificationHelper';
 
 export default function LoginForm() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -17,18 +20,67 @@ export default function LoginForm() {
     const [phone, setPhone] = useState('');
     const [countryCode, setCountryCode] = useState('+84');
     const [error, setError] = useState<string | undefined>(undefined);
+    const [isUnverified, setIsUnverified] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async () => {
-        // Validate đơn giản
+        // Validate phone number
         if (!phone || phone.length < 9) {
             setError('Số điện thoại không tồn tại, vui lòng kiểm tra và thử lại.');
             return;
         }
 
         setError(undefined);
+        setIsLoading(true);
 
-        // Giả lập gửi OTP thành công -> Chuyển sang màn Verify
-        // Truyền sđt sang màn OTP để hiển thị
+        try {
+            // Convert phone to proper format (remove spaces, add leading 0 if needed)
+            let phoneNumber = phone.replace(/\s+/g, '');
+            if (!phoneNumber.startsWith('0')) {
+                phoneNumber = '0' + phoneNumber;
+            }
+
+            // Call API to request OTP and check status
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+                phoneNumber: phoneNumber,
+            });
+            // API returns: { data: { status, testOtp, expiredIn }, result, statusCode, message }
+            const responseData = response.data;
+            const data = responseData?.data;
+            const status = data?.status;
+            const otpCode = data?.testOtp || data?.otpCode;
+            if (otpCode) {
+                notificationHelper.displayOtpNotification(String(otpCode));
+            }
+
+            if (status === 'UNVERIFIED') {
+                // Account exists but not verified - show special error and stay on login screen
+                console.log('[LoginForm] Status is UNVERIFIED, showing error');
+                setError(
+                    'Số điện thoại này đã được đăng ký nhưng chưa xác thực, vui lòng xác thực ngay'
+                );
+                setIsUnverified(true);
+                // DO NOT navigate here - just show error and change button
+                return;
+            }
+
+            // Status is COMPLETED or other - proceed to OTP screen
+            setIsUnverified(false);
+            navigation.navigate('Verify-otp', {
+                method: 'phone',
+                contact: `${countryCode} ${phone}`,
+            });
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: { message?: string } } };
+            setError(axiosError.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+            setIsUnverified(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyNow = async () => {
+        // For unverified accounts, navigate directly to OTP screen
         navigation.navigate('Verify-otp', {
             method: 'phone',
             contact: `${countryCode} ${phone}`,
@@ -74,7 +126,10 @@ export default function LoginForm() {
                             value={phone}
                             onChangeText={text => {
                                 setPhone(text);
-                                if (error) setError(undefined); // Clear error khi user nhập lại
+                                if (error) {
+                                    setError(undefined);
+                                    setIsUnverified(false);
+                                }
                             }}
                             countryCode={countryCode}
                             onCountryCodeChange={setCountryCode}
@@ -86,11 +141,12 @@ export default function LoginForm() {
 
                         <View style={styles.buttonContainer}>
                             <Button
-                                title="Đăng Nhập"
-                                onPress={handleLogin}
+                                title={isUnverified ? 'Xác thực ngay' : 'Đăng Nhập'}
+                                onPress={isUnverified ? handleVerifyNow : handleLogin}
                                 variant="primary"
                                 fullWidth
                                 style={styles.loginButton}
+                                loading={isLoading}
                             />
                         </View>
                     </View>
