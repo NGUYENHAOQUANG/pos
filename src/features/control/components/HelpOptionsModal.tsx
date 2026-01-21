@@ -63,7 +63,7 @@ export const HelpOptionsModal: React.FC<HelpOptionsModalProps> = ({
     // Default to strict null check handling
     const safePosition = buttonPosition || { x: 0, y: 0, width: 0, height: 0 };
     const menuRight = SCREEN_WIDTH - safePosition.x - safePosition.width;
-    const menuTop = safePosition.y + safePosition.height;
+    const menuTop = safePosition.y + safePosition.height + 8;
 
     return (
         <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>

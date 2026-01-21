@@ -141,7 +141,7 @@ export const MaterialMenuOverlay: React.FC<MaterialMenuOverlayProps> = React.mem
     ];
 
     const menuRight = SCREEN_WIDTH - (buttonPosition?.x || 0) - (buttonPosition?.width || 0);
-    const menuTop = (buttonPosition?.y || 0) + (buttonPosition?.height || 0);
+    const menuTop = (buttonPosition?.y || 0) + (buttonPosition?.height || 0) + 8;
 
     return (
         <View style={styles.absoluteOverlay} pointerEvents={isOpen ? 'auto' : 'none'}>
