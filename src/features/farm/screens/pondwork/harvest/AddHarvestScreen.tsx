@@ -353,7 +353,7 @@ export const AddHarvestScreen: React.FC = () => {
             {/* Footer Buttons */}
             <View style={styles.footer}>
                 <ButtonBarFarm
-                    primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                    primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Thu hoạch hết'}
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={handleCancel}
