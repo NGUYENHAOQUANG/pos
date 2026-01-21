@@ -4,7 +4,6 @@ import Svg, { Line, Path, Rect, G, Text as SvgText } from 'react-native-svg';
 import { colors, spacing } from '@/styles';
 import {
     CHART_WIDTH,
-    CHART_HEIGHT,
     PADDING_LEFT,
     PADDING_TOP,
     RAW_PROFIT_DATA,
@@ -73,7 +72,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                 marks.push(day);
             }
 
-            if (marks[marks.length - 1] !== totalDays) {
+            if (totalDays - marks[marks.length - 1] > step / 2) {
                 marks.push(totalDays);
             }
 
@@ -265,9 +264,17 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
     // Calculate bar width (spacing between bars)
     const barWidth = (chartWidth / (TOTAL_DAYS + 1)) * 0.6; // 60% of available space for bars
 
+    // Calculate dynamic height to remove empty space at bottom
+    // We cut off the chart at the lowest grid line (-2/3 Y_MAX) plus padding
+    const step = Y_MAX / 3;
+    const lowestGridValue = -step * 2;
+    const bottomY = getY(lowestGridValue);
+    // PADDING_BOTTOM (40) is sufficient for labels and ticks
+    const dynamicHeight = bottomY + 40;
+
     return (
         <View style={styles.chartContainer}>
-            <Svg width={CHART_WIDTH} height={CHART_HEIGHT}>
+            <Svg width={CHART_WIDTH} height={dynamicHeight}>
                 {/* Grid lines (horizontal) - 5 lines: 2 below zero, 3 above zero */}
                 {getYAxisGridLines().map(value => {
                     const y = getY(value);
@@ -362,7 +369,12 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                 {/* X-axis tick marks (vertical lines below axis) */}
                 {DAY_MARKS.map(day => {
                     const x = getX(day);
-                    const axisY = PADDING_TOP + chartHeight;
+                    // Axis Y position should be at the lowest grid line level (-2/3 Y_MAX),
+                    // not the mathematical bottom (-Y_MAX) which leaves empty space.
+                    const step = Y_MAX / 3;
+                    const minGridValue = -step * 2;
+                    const axisY = getY(minGridValue);
+
                     return (
                         <Line
                             key={`x-tick-${day}`}
@@ -380,13 +392,17 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                 {/* X-axis labels */}
                 {DAY_MARKS.map((day, index) => {
                     const x = getX(day);
-                    const y = PADDING_TOP + chartHeight + 30;
+                    const step = Y_MAX / 3;
+                    const minGridValue = -step * 2;
+                    const axisY = getY(minGridValue);
+                    const y = axisY + 20;
+
                     return (
                         <SvgText
                             key={`x-label-${day}`}
                             x={x}
                             y={y}
-                            fill={colors.textSecondary}
+                            fill={colors.text}
                             fontSize={10}
                             textAnchor="middle"
                         >
@@ -403,7 +419,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                             key={`y-label-${value}`}
                             x={PADDING_LEFT - 10}
                             y={y + 4}
-                            fill={colors.textSecondary}
+                            fill={colors.text}
                             fontSize={10}
                             textAnchor="end"
                         >
