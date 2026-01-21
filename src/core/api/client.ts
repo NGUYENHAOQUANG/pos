@@ -130,7 +130,7 @@ apiClient.interceptors.request.use(
             // Check if token is expired or about to expire
             if (hasTokenExpired(accessTokenExpires)) {
                 if (!isRefreshing) {
-                    await handleTokenRefresh();
+                    handleTokenRefresh();
                 }
                 return new Promise<InternalAxiosRequestConfig>((resolve, reject) => {
                     failedQueue.push({ resolve, reject, config });
