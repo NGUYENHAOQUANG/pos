@@ -27,8 +27,8 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     useEnvironmentInit,
     useParameterConfiguration,
-} from '@/features/farm/hooks/useEnvironmentLogic';
-import { useSettingEnvironment } from '@/features/farm/hooks/useSettingEnvironment';
+} from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+import { useSettingEnvironment } from '@/features/farm/hooks/envhooks/useSettingEnvironment';
 
 type NavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<FarmStackParamList>,

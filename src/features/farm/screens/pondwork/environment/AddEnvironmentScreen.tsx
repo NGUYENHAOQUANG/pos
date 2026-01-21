@@ -25,8 +25,8 @@ import {
     useEnvironmentInit,
     useZoneResolution,
     useParameterConfiguration,
-} from '@/features/farm/hooks/useEnvironmentLogic';
-import { useAddEnvironment } from '@/features/farm/hooks/useAddEnvironment';
+} from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+import { useAddEnvironment } from '@/features/farm/hooks/envhooks/useAddEnvironment';
 
 // ... (keep imports)
 
