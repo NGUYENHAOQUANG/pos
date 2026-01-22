@@ -3,11 +3,12 @@ import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
+import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
 
 interface UseSettingEnvironmentProps {
     selectedLocation: { id: string | number; name: string } | null;
-    metricTypes: any[];
-    parameterSettings: any;
+    metricTypes: EnvMetricType[];
+    parameterSettings: Record<string | number, ParameterSetting[]>;
     uiParameters: {
         parameters: EnvironmentParameter[];
         advancedParameters: EnvironmentParameter[];
@@ -110,7 +111,7 @@ export const useSettingEnvironment = ({
                 // Find existing setting by CODE.
                 const metric = metricTypes.find(m => m.id === metricId);
                 const existingSetting = metric
-                    ? currentSettings.find((s: any) => s.parameterCode === metric.metricCode)
+                    ? currentSettings.find(s => s.parameterCode === metric.metricCode)
                     : undefined;
 
                 if (!metric) continue;

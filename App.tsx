@@ -6,7 +6,7 @@
 import React, { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/config/toastConfig';
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProviders } from '@/app/providers';
 import { LogBox } from 'react-native';
@@ -23,7 +23,6 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 LogBox.ignoreAllLogs();
 
 function App(): React.JSX.Element {
-    const isDarkMode = useColorScheme() === 'dark';
     const { isSessionExpired, setSessionExpired, logout } = useAuthStore();
 
     const handleSessionExpiredConfirm = () => {
@@ -73,7 +72,7 @@ function App(): React.JSX.Element {
 
     return (
         <SafeAreaProvider>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
             <AppProviders />
             <NetworkStatusModal />
             <SessionExpiredModal

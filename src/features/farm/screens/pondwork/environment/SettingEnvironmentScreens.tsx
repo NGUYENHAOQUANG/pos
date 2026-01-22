@@ -135,6 +135,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
                         ref={dropdownButtonRef}
                         style={styles.dropdownButton}
                         onPress={handleDropdownPress}
+                        disabled={true}
                     >
                         <Text style={styles.dropdownText}>
                             {selectedLocation ? selectedLocation.name : 'Chọn khu nuôi'}
