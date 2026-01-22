@@ -124,7 +124,7 @@ export const useSettingEnvironment = ({
                         minValue: minVal ?? 0,
                         maxValue: maxVal ?? 0,
                         enabled: true,
-                        alert: existingSetting?.alert, // Preserve existing alert message logic
+                        alert: p.alertEnabled ? 'true' : 'false', // Save alert warning state
                     };
 
                     if (existingSetting) {
