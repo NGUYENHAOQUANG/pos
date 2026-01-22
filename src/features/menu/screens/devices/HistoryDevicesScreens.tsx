@@ -3,14 +3,16 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
-import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
-type HistoryDevicesScreenRouteProp = RouteProp<MenuStackParamList, 'HistoryDevices'>;
+type HistoryDevicesScreenRouteProp = RouteProp<AppStackParamList, 'HistoryDevices'>;
+type HistoryDevicesScreenNavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
 
@@ -20,7 +22,7 @@ import { formatDate } from '@/features/farm/utils/dateUtils';
 import { INSTALLATION_HISTORY, MAINTENANCE_HISTORY } from '@/features/control/data/devicesData';
 
 export const HistoryDevicesScreens = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<HistoryDevicesScreenNavigationProp>();
     const route = useRoute<HistoryDevicesScreenRouteProp>();
     const { deviceId } = route.params || {};
     const { devices, updateDevice } = useMenuContext();
@@ -35,7 +37,7 @@ export const HistoryDevicesScreens = () => {
     const [endDate, setEndDate] = useState(new Date('2025-12-01'));
 
     useEffect(() => {
-        if ((route.params as any)?.success) {
+        if (route.params?.success) {
             setSelectedTab('maintenance');
             Toast.show(ToastMessages.Device.MAINTENANCE_ADD_SUCCESS);
 
@@ -45,7 +47,7 @@ export const HistoryDevicesScreens = () => {
             }
 
             // Add a maintenance record from params
-            const params = route.params as any;
+            const params = route.params;
             if (device && params?.maintenanceData && updateDevice) {
                 const { date, description, resetTime } = params.maintenanceData;
                 const maintenanceDate = new Date(date);
@@ -68,7 +70,7 @@ export const HistoryDevicesScreens = () => {
                                 },
                             ],
                             onEdit: () => {
-                                (navigation.navigate as any)('EditEquimentMaintenance', {
+                                navigation.navigate('EditEquimentMaintenance', {
                                     deviceId: device.id,
                                     maintenanceId: newRecord.id,
                                     initialData: {
@@ -91,7 +93,7 @@ export const HistoryDevicesScreens = () => {
             }
 
             // Clear param
-            navigation.setParams({ success: undefined } as any);
+            navigation.setParams({ success: undefined });
         }
     }, [route.params, navigation, device, deviceId, updateDevice]);
 
@@ -210,7 +212,7 @@ export const HistoryDevicesScreens = () => {
     const handleEmptyStatePress = () => {
         // Action for empty state button
         if (selectedTab === 'maintenance' && device) {
-            (navigation.navigate as any)('EquipmentMaintenance', { deviceId: device.id });
+            navigation.navigate('EquipmentMaintenance', { deviceId: device.id });
         }
     };
 
@@ -218,7 +220,7 @@ export const HistoryDevicesScreens = () => {
         <View style={styles.container}>
             <HeaderMenu
                 title="Lịch sử thiết bị"
-                onBack={() => (navigation.navigate as any)('DeviceManagement')}
+                onBack={() => navigation.navigate('DeviceManagement')}
             />
 
             <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
