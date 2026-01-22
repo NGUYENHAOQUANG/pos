@@ -19,9 +19,13 @@ export const EditEnvironmentScreens: React.FC = () => {
     const parameter = route.params?.parameter;
 
     const [name, setName] = useState(parameter?.name || '');
-    const [lowerLimit, setLowerLimit] = useState(parameter?.limit?.split(' - ')[0] || '');
-    const [upperLimit, setUpperLimit] = useState(parameter?.limit?.split(' - ')[1] || '');
-    const [isAlertEnabled, setIsAlertEnabled] = useState(true);
+    const [lowerLimit, setLowerLimit] = useState(
+        parameter?.min || parameter?.limit?.split(' - ')[0] || ''
+    );
+    const [upperLimit, setUpperLimit] = useState(
+        parameter?.max || parameter?.limit?.split(' - ')[1] || ''
+    );
+    const [isAlertEnabled, setIsAlertEnabled] = useState(parameter?.isChecked ?? true);
 
     // No explicit tab bar handling needed
 
@@ -44,7 +48,10 @@ export const EditEnvironmentScreens: React.FC = () => {
         const updatedParameter = {
             ...parameter,
             name,
-            limit: `${lowerLimit} - ${upperLimit}`,
+            min: lowerLimit,
+            max: upperLimit,
+            limit: lowerLimit && upperLimit ? `${lowerLimit} - ${upperLimit}` : '',
+            isChecked: isAlertEnabled,
         };
 
         // Call the callback to update state in parent screen

@@ -357,7 +357,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                                     key={`y-label-sticky-${value}`}
                                     x={PADDING_LEFT - 10}
                                     y={y + 4}
-                                    fill={colors.textSecondary}
+                                    fill={colors.text}
                                     fontSize={10}
                                     textAnchor="end"
                                 >
@@ -557,22 +557,31 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                             );
                         })}
 
-                        {/* X-axis labels */}
                         {DAY_MARKS.map((day, index) => {
                             const x = getX(day);
                             const y = PADDING_TOP + chartHeight + 20;
                             return (
-                                <SvgText
-                                    key={`x-label-${day}`}
-                                    x={x}
-                                    y={y}
-                                    fill={colors.textSecondary}
-                                    fontSize={10}
-                                    textAnchor="middle"
-                                    transform={`rotate(-15 ${x} ${y})`}
-                                >
-                                    {DAY_LABELS[index]}
-                                </SvgText>
+                                <G key={`x-label-group-${day}`}>
+                                    <Line
+                                        x1={x}
+                                        y1={PADDING_TOP + chartHeight}
+                                        x2={x}
+                                        y2={PADDING_TOP + chartHeight + 5}
+                                        stroke={colors.secondary}
+                                        strokeWidth={1}
+                                    />
+                                    <SvgText
+                                        key={`x-label-${day}`}
+                                        x={x}
+                                        y={y}
+                                        fill={colors.text}
+                                        fontSize={10}
+                                        textAnchor="middle"
+                                        transform={`rotate(-15 ${x} ${y})`}
+                                    >
+                                        {DAY_LABELS[index]}
+                                    </SvgText>
+                                </G>
                             );
                         })}
                     </Svg>

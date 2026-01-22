@@ -1,11 +1,23 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, ImageSourcePropType, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useEffect } from 'react';
+
+import { colors } from '@/styles';
+import PhoneLarger from '@/assets/Icon/IconOnBoarding/phone-lager.svg';
 import ShrimpChatPreview from '@/features/onboarding/components/AnimatedChatBubble.tsx';
 
+// Image assets
+const growthChartImage: ImageSourcePropType = require('@/assets/backgrounds/growth-chart.png');
+const iconForQuestionImage: ImageSourcePropType = require('@/assets/backgrounds/icon-for-question.png');
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+const PHONE_WIDTH = SCREEN_WIDTH * 0.9;
+const PHONE_HEIGHT = SCREEN_HEIGHT * 0.6;
+
 export default function OnboardingBackgroundThree() {
-    const rotateSmartphone = useSharedValue(0);
+    const rotateSmartphone = useSharedValue(-20); // Start tilted
     const smartphoneTranslateY = useSharedValue(0);
 
     const rotateSmartphoneStyle = useAnimatedStyle(() => {
@@ -18,7 +30,8 @@ export default function OnboardingBackgroundThree() {
     });
 
     useEffect(() => {
-        rotateSmartphone.value = withTiming(10, {
+        rotateSmartphone.value = withTiming(0, {
+            // Animate to upright
             duration: 1000,
         });
         smartphoneTranslateY.value = withTiming(-150, {
@@ -31,24 +44,20 @@ export default function OnboardingBackgroundThree() {
         <>
             <View style={styles.layerBackground} pointerEvents="none">
                 <LinearGradient
-                    colors={['rgba(233,253,255, 1)', 'rgba(252,242,240, 1)']}
+                    colors={[colors.onboarding.gradientTop, colors.onboarding.gradientBottom]}
                     start={{ x: 0.5, y: 0 }}
                     end={{ x: 0.5, y: 1 }}
                     style={styles.linearGradient}
                 >
-                    <Image
-                        source={require('@/assets/backgrounds/growth-chart.png')}
-                        style={styles.backgroundGrowthChart}
-                    />
+                    <Image source={growthChartImage} style={styles.backgroundGrowthChart} />
 
                     <View style={styles.centerContainer}>
-                        <Animated.Image
-                            source={require('@/assets/backgrounds/smartphone.png')}
-                            style={[styles.backgroundSmartphone, rotateSmartphoneStyle]}
-                        />
+                        <Animated.View style={[styles.backgroundSmartphone, rotateSmartphoneStyle]}>
+                            <PhoneLarger width={PHONE_WIDTH} height={PHONE_HEIGHT} />
+                        </Animated.View>
                         <View style={styles.animatedChatBuddle}>
                             <ShrimpChatPreview
-                                avatarSource={require('@/assets/backgrounds/icon-for-question.png')}
+                                avatarSource={iconForQuestionImage}
                                 question="Ao tôm của tôi hôm nay thế nào rồi?"
                                 answer="Mức oxy hôm nay rất tốt đó!"
                                 metrics={[
@@ -57,14 +66,14 @@ export default function OnboardingBackgroundThree() {
                                         label: 'Nhiệt độ',
                                         value: '2,450',
                                         iconName: 'thermometer',
-                                        iconColor: '#ef4444',
+                                        iconColor: colors.red[900],
                                     },
                                     {
                                         id: 'ph',
                                         label: 'Độ pH',
                                         value: '7.2',
                                         iconName: 'water',
-                                        iconColor: '#0ea5e9',
+                                        iconColor: colors.cyan[800],
                                     },
                                     {
                                         id: 'oxy',
@@ -72,14 +81,14 @@ export default function OnboardingBackgroundThree() {
                                         value: '8.5',
                                         unit: 'mg/L',
                                         iconName: 'flash',
-                                        iconColor: '#f97316',
+                                        iconColor: colors.orange[700],
                                     },
                                     {
                                         id: 'shrimp',
                                         label: 'Số lượng tôm',
                                         value: '2,450',
                                         iconName: 'fish',
-                                        iconColor: '#22c55e',
+                                        iconColor: colors.green[600],
                                     },
                                 ]}
                             />
@@ -107,11 +116,9 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     backgroundSmartphone: {
-        position: 'absolute',
-        bottom: '20%',
-        left: 0,
-        right: 0,
+        alignSelf: 'center',
         zIndex: 2,
+        marginTop: '20%',
     },
     animatedChatBuddle: {
         flex: 1,

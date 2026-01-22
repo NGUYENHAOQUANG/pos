@@ -165,6 +165,11 @@ export const colors = {
         schedule: '#FFF3CD',
         local: '#D4EDDA',
     },
+
+    onboarding: {
+        gradientTop: 'rgba(233,253,255, 1)',
+        gradientBottom: 'rgba(252,242,240, 1)',
+    },
 } as const;
 
 export type Colors = typeof colors;

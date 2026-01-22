@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -14,7 +14,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-// import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
@@ -24,8 +23,12 @@ import {
     EnvironmentParameter,
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import Toast from 'react-native-toast-message';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import {
+    useEnvironmentInit,
+    useParameterConfiguration,
+} from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+import { useSettingEnvironment } from '@/features/farm/hooks/envhooks/useSettingEnvironment';
 
 type NavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<FarmStackParamList>,
@@ -33,74 +36,57 @@ type NavigationProp = CompositeNavigationProp<
 >;
 type SettingEnvironmentRouteProp = RouteProp<FarmStackParamList, 'SettingEnvironment'>;
 
-const DEFAULT_LOCATIONS: FarmLocation[] = [
-    { id: '1', name: 'Trại Kiên Giang' },
-    { id: '2', name: 'Trại Cà Mau' },
-    { id: '3', name: 'Trại Bạc Liêu' },
-    { id: '4', name: 'Trại Sóc Trăng' },
-];
-
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<SettingEnvironmentRouteProp>();
-    const { data, onSave } = route.params || {};
+    const { data: _data } = route.params || {};
     const insets = useSafeAreaInsets();
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const environmentSettings = useFarmStore(state => state.environmentSettings);
-    const updateEnvironmentSettings = useFarmStore(state => state.updateEnvironmentSettings);
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const parameterSettings = useFarmStore(state => state.parameterSettings);
 
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<FarmLocation>(DEFAULT_LOCATIONS[0]);
+    const [selectedLocation, setSelectedLocation] = useState<FarmLocation | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownButtonRef = useRef<View>(null);
 
-    // Initial state setup from Context
-    const [parameters, setParameters] = useState<EnvironmentParameter[]>(
-        environmentSettings.defaultParameters
+    // 1. Init Data
+    const { metricTypes, zones } = useEnvironmentInit(selectedLocation?.id);
+
+    // 2. Set initial location when zones are loaded
+    useEffect(() => {
+        if (zones && zones.length > 0 && !selectedLocation) {
+            // Priority: selectedZoneId from store -> First Zone
+            const current = selectedZoneId ? zones.find(z => z.id === selectedZoneId) : zones[0];
+            const target = current || zones[0];
+
+            setSelectedLocation({ id: String(target.id), name: target.name });
+        }
+    }, [zones, selectedLocation, selectedZoneId]);
+
+    // 3. Compute UI Parameters
+    const { uiParameters } = useParameterConfiguration(
+        selectedLocation?.id,
+        metricTypes,
+        parameterSettings
     );
 
-    // Initialize advanced parameters: if route has data, mark those as checked, otherwise use context
-    const initialAdvancedParameters = useMemo(() => {
-        if (data?.advancedParameters) {
-            // Mark advanced parameters as checked if they're in the route data
-            return environmentSettings.advancedParameters.map(p =>
-                data.advancedParameters!.some(ap => ap.id === p.id) ? { ...p, isChecked: true } : p
-            );
-        }
-        return environmentSettings.advancedParameters;
-    }, [data, environmentSettings.advancedParameters]);
-
-    const [advancedParameters, setAdvancedParameters] =
-        useState<EnvironmentParameter[]>(initialAdvancedParameters);
-
-    // Update advanced parameters when route data changes
-    useEffect(() => {
-        if (data?.advancedParameters) {
-            setAdvancedParameters(
-                environmentSettings.advancedParameters.map(p =>
-                    data.advancedParameters!.some(ap => ap.id === p.id)
-                        ? { ...p, isChecked: true }
-                        : p
-                )
-            );
-        }
-    }, [data, environmentSettings.advancedParameters]);
-
-    // Calculate dirty state
-    const isDirty = useMemo(() => {
-        // Compare current state with initial state
-        const paramsChanged =
-            JSON.stringify(parameters) !== JSON.stringify(environmentSettings.defaultParameters);
-        const advancedParamsChanged =
-            JSON.stringify(advancedParameters) !== JSON.stringify(initialAdvancedParameters);
-        return paramsChanged || advancedParamsChanged;
-    }, [
+    // 4. Use Setting Environment Logic Hook
+    const {
         parameters,
         advancedParameters,
-        environmentSettings.defaultParameters,
-        initialAdvancedParameters,
-    ]);
+        isDirty,
+        handleToggleParameter,
+        handleToggleAdvancedParameter,
+        handleUpdateParameter,
+        handleReset,
+        handleSave,
+    } = useSettingEnvironment({
+        selectedLocation,
+        metricTypes,
+        parameterSettings,
+        uiParameters,
+    });
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -110,12 +96,8 @@ export const SettingEnvironmentScreens: React.FC = () => {
 
     const handleDropdownPress = () => {
         if (dropdownButtonRef.current) {
-            dropdownButtonRef.current.measureInWindow((x, y, width, height) => {
-                setDropdownPosition({
-                    top: y + height + 4,
-                    left: x,
-                    width: width,
-                });
+            dropdownButtonRef.current.measure((fx, fy, width, height, px, py) => {
+                setDropdownPosition({ top: py + height, left: px, width: width });
                 setIsDropdownVisible(true);
             });
         }
@@ -126,39 +108,6 @@ export const SettingEnvironmentScreens: React.FC = () => {
         setIsDropdownVisible(false);
     };
 
-    const handleToggleParameter = (id: string) => {
-        setParameters(prev =>
-            prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
-        );
-    };
-
-    const handleToggleAdvancedParameter = (id: string) => {
-        setAdvancedParameters(prev =>
-            prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
-        );
-    };
-
-    const handleUpdateParameter = (updatedParam: EnvironmentParameter) => {
-        // Validate limit format: "min - max"
-        if (updatedParam.limit) {
-            const parts = updatedParam.limit.split('-');
-            if (parts.length === 2 && parts[0] && parts[1]) {
-                const lower = parseFloat(parts[0].trim());
-                const upper = parseFloat(parts[1].trim());
-
-                if (!isNaN(lower) && !isNaN(upper) && lower > upper) {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Giới hạn dưới không được lớn hơn giới hạn trên',
-                    });
-                    return; // Stop update
-                }
-            }
-        }
-        setParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
-        setAdvancedParameters(prev => prev.map(p => (p.id === updatedParam.id ? updatedParam : p)));
-    };
-
     const handleEdit = (parameter: EnvironmentParameter) => {
         (navigation as any).navigate('EditEnvironment', {
             parameter,
@@ -166,136 +115,71 @@ export const SettingEnvironmentScreens: React.FC = () => {
         });
     };
 
-    const handleSave = () => {
-        // If onSave callback is provided (from AddEnvironmentScreen), call it with checked advanced parameters
-        if (onSave) {
-            const checkedAdvancedParams = advancedParameters
-                .filter(p => p.isChecked)
-                .map(p => ({ id: p.id, name: p.name }));
-            onSave({ advancedParameters: checkedAdvancedParams });
-        }
-
-        // Always update context with the settings
-        updateEnvironmentSettings({
-            defaultParameters: parameters,
-            advancedParameters: advancedParameters,
-        });
-
-        Toast.show({
-            type: 'success',
-            text1: 'Đã lưu thông số',
-            position: 'top',
-            visibilityTime: 3000,
-        });
-        navigation.goBack();
-    };
-
-    const handleReset = () => {
-        // Reset to initial values
-        setParameters(environmentSettings.defaultParameters);
-        setAdvancedParameters(initialAdvancedParameters);
-    };
-
-    const renderDropdownItem = ({ item }: { item: FarmLocation }) => {
-        const isSelected = item.id === selectedLocation.id;
-        return (
-            <TouchableOpacity
-                style={[styles.dropdownItem, isSelected && styles.dropdownItemSelected]}
-                onPress={() => handleSelectLocation(item)}
-                activeOpacity={0.7}
-            >
-                <Text
-                    style={[styles.dropdownItemText, isSelected && styles.dropdownItemTextSelected]}
-                >
-                    {item.name}
-                </Text>
-                {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
-            </TouchableOpacity>
-        );
-    };
-
     return (
         <View style={styles.container}>
-            <View style={styles.headerSection}>
-                {/* Header */}
-                <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Thiết lập thông số môi trường</Text>
-                    <View style={styles.headerSpacer} />
-                </View>
-
-                {/* Divider between header and dropdown */}
-                <View style={styles.headerDivider} />
-
-                {/* Dropdown Button */}
-                <View style={styles.dropdownWrapper}>
-                    <View ref={dropdownButtonRef} collapsable={false}>
-                        <TouchableOpacity
-                            style={styles.dropdownButton}
-                            onPress={handleDropdownPress}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.dropdownButtonText}>{selectedLocation.name}</Text>
-                            <Ionicons
-                                name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
-                                size={16}
-                                color={colors.textSecondary}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+            {/* Header */}
+            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Thiết lập thông số môi trường</Text>
+                <View style={[styles.backButton, { opacity: 0 }]} />
             </View>
 
             {/* Content */}
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                {/* Section - Nhóm mặc định */}
-                <EnvironmentParameterSection
-                    title="Nhóm mặc định"
-                    subtitle="Bộ thông số chuẩn khi đo môi trường."
-                    parameters={parameters}
-                    onToggleParameter={handleToggleParameter}
-                    onEdit={handleEdit}
-                />
+            <View style={styles.content}>
+                {/* Location Dropdown */}
+                <View style={styles.dropdownContainer}>
+                    <Text style={styles.label}>Ao nuôi / Khu nuôi</Text>
+                    <TouchableOpacity
+                        ref={dropdownButtonRef}
+                        style={styles.dropdownButton}
+                        onPress={handleDropdownPress}
+                    >
+                        <Text style={styles.dropdownText}>
+                            {selectedLocation ? selectedLocation.name : 'Chọn khu nuôi'}
+                        </Text>
+                        <Ionicons name="chevron-down" size={20} color={colors.gray[600]} />
+                    </TouchableOpacity>
+                </View>
 
-                {/* Section - Nhóm nâng cao */}
-                <EnvironmentParameterSection
-                    title="Nhóm nâng cao"
-                    subtitle="Bộ thông số mở rộng để theo dõi."
-                    parameters={advancedParameters}
-                    onToggleParameter={handleToggleAdvancedParameter}
-                    onEdit={handleEdit}
-                />
-            </ScrollView>
+                <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+                    <EnvironmentParameterSection
+                        title="Nhóm cơ bản"
+                        subtitle="Bộ thông số phổ biến để theo dõi."
+                        parameters={parameters}
+                        onToggleParameter={handleToggleParameter}
+                        onEdit={handleEdit}
+                    />
 
-            {/* Footer Buttons */}
-            <View style={styles.footerContainer}>
-                <ButtonBarFarm
-                    primaryTitle="Lưu thông tin"
-                    secondaryTitle="Thiết lập lại"
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={handleReset}
-                    primaryDisabled={!isDirty}
-                    secondaryType="primary"
-                />
+                    <EnvironmentParameterSection
+                        title="Nhóm nâng cao"
+                        subtitle="Bộ thông số mở rộng để theo dõi."
+                        parameters={advancedParameters}
+                        onToggleParameter={handleToggleAdvancedParameter}
+                        onEdit={handleEdit}
+                    />
+                </ScrollView>
             </View>
 
-            {/* Dropdown Modal */}
-            <Modal
-                visible={isDropdownVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setIsDropdownVisible(false)}
-            >
+            {/* Footer */}
+            <ButtonBarFarm
+                primaryTitle="Lưu"
+                secondaryTitle="Thiết lập lại"
+                onPrimaryPress={handleSave}
+                onSecondaryPress={handleReset}
+                primaryDisabled={!isDirty}
+            />
+
+            {/* Location Dropdown Modal */}
+            <Modal visible={isDropdownVisible} transparent animationType="fade">
                 <TouchableOpacity
                     style={styles.modalOverlay}
-                    activeOpacity={1}
                     onPress={() => setIsDropdownVisible(false)}
                 >
                     <View
                         style={[
-                            styles.dropdownModal,
+                            styles.dropdownMenu,
                             {
                                 top: dropdownPosition.top,
                                 left: dropdownPosition.left,
@@ -303,13 +187,51 @@ export const SettingEnvironmentScreens: React.FC = () => {
                             },
                         ]}
                     >
-                        <FlatList
-                            data={DEFAULT_LOCATIONS}
-                            keyExtractor={item => item.id}
-                            renderItem={renderDropdownItem}
-                            scrollEnabled={false}
-                            contentContainerStyle={styles.dropdownScrollContent}
-                        />
+                        {zones && zones.length > 0 ? (
+                            <FlatList
+                                data={zones.map(z => ({ id: String(z.id), name: z.name }))}
+                                keyExtractor={item => item.id}
+                                renderItem={({ item }) => {
+                                    const isSelected = selectedLocation
+                                        ? item.id === selectedLocation.id
+                                        : false;
+                                    return (
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.dropdownItem,
+                                                isSelected && styles.dropdownItemSelected,
+                                            ]}
+                                            onPress={() => handleSelectLocation(item)}
+                                            activeOpacity={0.7}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.dropdownItemText,
+                                                    isSelected && styles.dropdownItemTextSelected,
+                                                ]}
+                                            >
+                                                {item.name}
+                                            </Text>
+                                            {isSelected && (
+                                                <Ionicons
+                                                    name="checkmark"
+                                                    size={18}
+                                                    color={colors.primary}
+                                                />
+                                            )}
+                                        </TouchableOpacity>
+                                    );
+                                }}
+                                scrollEnabled={false}
+                                contentContainerStyle={styles.dropdownScrollContent}
+                            />
+                        ) : (
+                            <View style={{ padding: 12 }}>
+                                <Text style={{ color: colors.gray[500] }}>
+                                    Chưa có trang trại nào
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 </TouchableOpacity>
             </Modal>
@@ -357,6 +279,21 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: colors.borderLight,
     },
+    content: {
+        flex: 1,
+    },
+    dropdownContainer: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+        backgroundColor: colors.white,
+        paddingBottom: spacing.sm,
+    },
+    label: {
+        fontSize: 14,
+        color: colors.text,
+        marginBottom: 8,
+        fontWeight: '500',
+    },
     dropdownWrapper: {
         marginHorizontal: spacing.md,
         marginVertical: spacing.sm,
@@ -381,6 +318,10 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         color: colors.text,
     },
+    dropdownText: {
+        fontSize: 14,
+        color: colors.text,
+    },
     scrollView: {
         flex: 1,
     },
@@ -395,6 +336,15 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
+    },
+    dropdownMenu: {
+        position: 'absolute',
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        ...shadows.md,
+        marginTop: 4,
     },
     dropdownModal: {
         position: 'absolute',

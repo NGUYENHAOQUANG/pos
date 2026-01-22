@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
     GeneralInformation,
     GeneralInformationData,
@@ -78,20 +79,22 @@ export const AddDeviceScreens = () => {
         <View style={styles.container}>
             <HeaderMenu title="Thêm thiết bị" onBack={handleBack} />
 
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                <GeneralInformation
-                    onDataChange={handleGeneralInfoChange}
-                    triggerValidation={triggerValidation}
-                />
+            <SafeInputLayout>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <GeneralInformation
+                        onDataChange={handleGeneralInfoChange}
+                        triggerValidation={triggerValidation}
+                    />
 
-                <MaintenancePeriod
-                    onDataChange={handleMaintenanceInfoChange}
-                    triggerValidation={triggerValidation}
-                />
-            </ScrollView>
+                    <MaintenancePeriod
+                        onDataChange={handleMaintenanceInfoChange}
+                        triggerValidation={triggerValidation}
+                    />
+                </ScrollView>
+            </SafeInputLayout>
 
             <ButtonBarMenu
                 primaryTitle="Thêm thiết bị"

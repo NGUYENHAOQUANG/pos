@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -38,6 +38,19 @@ export const MeterialScreen = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     const [selectedTab, setSelectedTab] = useState<TabType>('list');
+
+    // Menu state management
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
+    // Auto-close menu when navigating away
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setMenuOpen(false);
+            };
+        }, [])
+    );
 
     // React Query hooks for materials
     const searchText = useMaterialStore(state => state.searchText);
@@ -115,10 +128,6 @@ export const MeterialScreen = () => {
     const { data: inventoryList = [], refetch: refetchInventory } =
         useInventoryTickets(inventoryParams);
 
-    // Menu state management
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
-
     const handleShowMenu = useCallback(
         (position: { x: number; y: number; width: number; height: number }) => {
             setMenuPosition(position);
@@ -151,7 +160,6 @@ export const MeterialScreen = () => {
             availableMaterials: materials,
         } as any);
     }, [navigation, materials]);
-
     const handleCreateExport = useCallback(() => {
         navigation.navigate('AddExportWarehouse', {
             availableMaterials: materials,
