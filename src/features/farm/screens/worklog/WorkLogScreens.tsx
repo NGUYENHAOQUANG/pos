@@ -26,6 +26,15 @@ import {
     convertWaterTreatmentJobToActivityData,
     convertMeasureSizeMetaToActivityData,
 } from '@/features/farm/utils/metaConverters';
+import {
+    ShrimpInspectionMeta,
+    MeasureSizeMeta,
+    EnvironmentMeta,
+    WaterSupplyMeta,
+    SiphonMeta,
+    TransferMeta,
+    HarvestMeta,
+} from '@/features/farm/types/farm.types';
 
 interface WorkLogScreensProps {
     pond?: PondData;
@@ -100,21 +109,29 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             case 'FEED':
                 return convertFeedJobToActivityData(item);
             case 'SHRIMP_INSPECTION':
-                return convertShrimpInspectionMetaToActivityData((item.meta as any) || {});
+                return convertShrimpInspectionMetaToActivityData(
+                    (item.meta as ShrimpInspectionMeta) || {}
+                );
             case 'MEASURE_SIZE':
-                return convertMeasureSizeMetaToActivityData(item, (item.meta as any) || {});
+                return convertMeasureSizeMetaToActivityData(
+                    item,
+                    (item.meta as MeasureSizeMeta) || {}
+                );
             case 'ENVIRONMENT':
-                return convertEnvironmentMetaToActivityData((item.meta as any) || {});
+                return convertEnvironmentMetaToActivityData((item.meta as EnvironmentMeta) || {});
             case 'WATER_TREATMENT':
                 return convertWaterTreatmentJobToActivityData(item);
             case 'WATER_CHANGE':
-                return convertWaterSupplyMetaToActivityData(item, (item.meta as any) || {});
+                return convertWaterSupplyMetaToActivityData(
+                    item,
+                    (item.meta as WaterSupplyMeta) || {}
+                );
             case 'SIPHON':
-                return convertSiphonMetaToActivityData(item, (item.meta as any) || {});
+                return convertSiphonMetaToActivityData(item, (item.meta as SiphonMeta) || {});
             case 'TRANSFER_POND':
-                return convertTransferMetaToActivityData((item.meta as any) || {});
+                return convertTransferMetaToActivityData((item.meta as TransferMeta) || {});
             case 'HARVEST':
-                return convertHarvestMetaToActivityData(item, (item.meta as any) || {});
+                return convertHarvestMetaToActivityData(item, (item.meta as HarvestMeta) || {});
             case 'CLEAN_POND':
             case 'SUN_DRY_POND':
                 // These might not have specific meta converters or use generic ones

@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
     },
     imagePound: {
         position: 'absolute',
-        right: 2,
-        top: '22.25%',
+        right: '0%',
+        top: '22%',
     },
     pondIcon: {
         zIndex: 1,
@@ -192,10 +192,10 @@ const styles = StyleSheet.create({
     },
     shrimpBgContainer: {
         position: 'absolute',
-        top: 130,
-        left: 40,
-        width: 230,
-        height: 180,
+        top: '10%',
+        left: '5%',
+        width: '55%',
+        aspectRatio: 200 / 120,
         zIndex: 5,
         alignItems: 'center',
         justifyContent: 'center',
