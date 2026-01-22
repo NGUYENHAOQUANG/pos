@@ -1,19 +1,9 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    Platform,
-    LayoutAnimation,
-    UIManager,
-} from 'react-native';
-import CalenderIcon from '@/assets/Icon/Calender.svg';
+import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '../CollapseHead';
-import { colors, spacing, borderRadius } from '@/styles';
-import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
-import { formatMaterialDate } from '@/features/material/utils/dateUtils';
+import { colors, spacing } from '@/styles';
+import { Input } from '@/shared/components/forms/Input';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -33,7 +23,6 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
     onSupplierChange,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -51,46 +40,25 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
             {isExpanded && (
                 <View style={styles.content}>
                     {/* Date Input */}
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.required}>* </Text>
-                            <Text style={styles.label}>Ngày nhập</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.dateInput}
-                            onPress={() => setDatePickerVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.dateText} numberOfLines={1}>
-                                {formatMaterialDate(date)}
-                            </Text>
-                            <CalenderIcon width={20} height={20} />
-                        </TouchableOpacity>
-                    </View>
+                    <DateInputButton
+                        label="Ngày nhập"
+                        required
+                        date={date}
+                        onDateChange={onDateChange}
+                        dateOnly
+                        formatOptions={{ showCurrentLabel: false }}
+                    />
 
                     {/* Supplier Input */}
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.required}>* </Text>
-                            <Text style={styles.label}>Nhà cung cấp</Text>
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Nhập nhà cung cấp"
-                            placeholderTextColor={colors.textSecondary || '#999'}
-                            value={supplier}
-                            onChangeText={onSupplierChange}
-                        />
-                    </View>
+                    <Input
+                        label="Nhà cung cấp"
+                        required
+                        placeholder="Nhập nhà cung cấp"
+                        value={supplier}
+                        onChangeText={onSupplierChange}
+                    />
                 </View>
             )}
-
-            <DatePickerModal
-                visible={isDatePickerVisible}
-                onClose={() => setDatePickerVisible(false)}
-                date={date}
-                onSelectDate={onDateChange}
-            />
         </View>
     );
 };
@@ -110,53 +78,10 @@ const styles = StyleSheet.create({
                 elevation: 2,
             },
         }),
-        // overflow: 'hidden',
     },
 
     content: {
         padding: spacing.md,
-    },
-    inputGroup: {
-        marginBottom: spacing.md,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    required: {
-        fontSize: 14,
-        color: colors.error || '#FF4D4F',
-    },
-    dateInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    dateText: {
-        fontSize: 15,
-        color: colors.text,
-        flex: 1,
-        marginRight: spacing.sm,
-    },
-    input: {
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        fontSize: 15,
-        color: colors.text,
+        gap: 12,
     },
 });

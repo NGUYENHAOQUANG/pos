@@ -1,22 +1,32 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { EnvironmentMeta, ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
+import {
+    EnvironmentMeta,
+    ENVIRONMENT_METRIC_IDS,
+    PondData,
+    Zone,
+    JobExecution,
+} from '@/features/farm/types/farm.types';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
+import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
 
 interface UseAddEnvironmentProps {
-    pond: any;
-    itemToEdit: any;
-    currentZone: any;
-    metricTypes: any[];
-    parameterSettings: any;
-    environmentSettings: any;
-    updatePondJob: any;
-    getPondJobItems: any;
+    pond: PondData;
+    itemToEdit?: JobExecution;
+    currentZone?: Zone | null;
+    metricTypes: EnvMetricType[];
+    parameterSettings: Record<string | number, ParameterSetting[]>;
+    environmentSettings: {
+        advancedParameters: Array<{ id: string; name: string; isChecked: boolean }>;
+    };
+    updatePondJob: (pondId: string, jobType: JobType, data: JobExecution[]) => void;
+    getPondJobItems: (pondId: string, jobType: JobType) => JobExecution[];
     parameterLimits: Record<string, string>;
 }
 
@@ -99,9 +109,9 @@ export const useAddEnvironment = ({
                 ];
 
                 if (Array.isArray(settings) && metricTypes.length > 0) {
-                    settings.forEach((setting: any) => {
+                    settings.forEach((setting: ParameterSetting) => {
                         const metric = metricTypes.find(
-                            (m: any) => m.metricCode === setting.parameterCode
+                            (m: EnvMetricType) => m.metricCode === setting.parameterCode
                         );
                         if (metric && setting.enabled) {
                             const id = String(metric.id);
@@ -115,8 +125,8 @@ export const useAddEnvironment = ({
                 }
             }
             return environmentSettings.advancedParameters
-                .filter((p: any) => p.isChecked)
-                .map((p: any) => ({ id: p.id, name: p.name }));
+                .filter(p => p.isChecked)
+                .map(p => ({ id: p.id, name: p.name }));
         }
     }, [
         itemToEdit,
@@ -132,13 +142,6 @@ export const useAddEnvironment = ({
 
     // Effect to update advanced params on prop change
     useEffect(() => {
-        // ... (Logic from existing useEffect)
-        // Re-using the logic inside initialization for simplicity,
-        // but to ensure sync we can just reset if dependencies change.
-        // However, user edits might be lost if we reset.
-        // The original code had a separate effect to setAdvancedParameters based on similar logic.
-        // Let's just use the initial state logic but we must sync it if it's a create action and zone changes.
-
         if (itemToEdit && meta) {
             const advancedParams: Array<{ id: string; name: string }> = [];
             if (meta.kali !== undefined)
@@ -151,7 +154,6 @@ export const useAddEnvironment = ({
                 advancedParams.push({ id: ENVIRONMENT_METRIC_IDS.NO3, name: 'NO3 (mg/L)' });
             setAdvancedParameters(advancedParams);
         } else if (currentZone && parameterSettings[currentZone.id]) {
-            // ... same logic
             const settings = parameterSettings[currentZone.id];
             const validAdvanced: Array<{ id: string; name: string }> = [];
             const advancedIds = [
@@ -161,9 +163,9 @@ export const useAddEnvironment = ({
                 ENVIRONMENT_METRIC_IDS.NO3,
             ];
             if (Array.isArray(settings) && metricTypes.length > 0) {
-                settings.forEach((setting: any) => {
+                settings.forEach((setting: ParameterSetting) => {
                     const metric = metricTypes.find(
-                        (m: any) => m.metricCode === setting.parameterCode
+                        (m: EnvMetricType) => m.metricCode === setting.parameterCode
                     );
                     if (metric && setting.enabled) {
                         const id = String(metric.id);
@@ -177,8 +179,8 @@ export const useAddEnvironment = ({
             }
         } else {
             const checkedParams = environmentSettings.advancedParameters
-                .filter((p: any) => p.isChecked)
-                .map((p: any) => ({ id: p.id, name: p.name }));
+                .filter(p => p.isChecked)
+                .map(p => ({ id: p.id, name: p.name }));
             setAdvancedParameters(checkedParams);
         }
     }, [
@@ -188,7 +190,6 @@ export const useAddEnvironment = ({
         currentZone,
         parameterSettings,
         metricTypes,
-        // Removed initialAdvancedParams from deps to avoid loop if it was a dep
     ]);
 
     const hasAtLeastOneParameter = useMemo(() => {
@@ -312,7 +313,7 @@ export const useAddEnvironment = ({
                 minute: '2-digit',
             });
 
-            const itemData = {
+            const itemData: Partial<JobExecution> = {
                 label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
                 time: timeString,
                 date: formatDate(selectedDate),
@@ -369,14 +370,14 @@ export const useAddEnvironment = ({
             };
 
             if (itemToEdit) {
-                const updatedItems = currentItems.map((item: any) =>
+                const updatedItems = currentItems.map((item: JobExecution) =>
                     item.id === itemToEdit.id ? { ...item, ...itemData } : item
                 );
                 updatePondJob(pond.id, 'ENVIRONMENT', updatedItems);
                 showEditJobSuccessToast('ENVIRONMENT');
             } else {
                 let maxIndex = 0;
-                currentItems.forEach((item: any) => {
+                currentItems.forEach((item: JobExecution) => {
                     const match = item.label.match(/Lần (\d+)/);
                     if (match) {
                         const index = parseInt(match[1], 10);
@@ -384,12 +385,12 @@ export const useAddEnvironment = ({
                     }
                 });
                 const nextIndex = maxIndex + 1;
-                const newItem = {
+                const newItem: JobExecution = {
                     id: Date.now().toString(),
                     ...itemData,
                     label: `Lần ${nextIndex}`,
                     pondId: pond.id,
-                };
+                } as JobExecution;
                 updatePondJob(pond.id, 'ENVIRONMENT', [...currentItems, newItem]);
                 showAddJobSuccessToast('ENVIRONMENT');
             }
@@ -400,7 +401,9 @@ export const useAddEnvironment = ({
     const handleDelete = () => {
         if (pond?.id && itemToEdit) {
             const currentItems = getPondJobItems(pond.id, 'ENVIRONMENT');
-            const updatedItems = currentItems.filter((item: any) => item.id !== itemToEdit.id);
+            const updatedItems = currentItems.filter(
+                (item: JobExecution) => item.id !== itemToEdit!.id
+            );
             updatePondJob(pond.id, 'ENVIRONMENT', updatedItems);
             setDeleteModalVisible(false);
             navigation.goBack();

@@ -13,7 +13,6 @@ import {
     Platform,
     StyleSheet,
     Text,
-    TextInput,
     TextInputProps,
     TextStyle,
     TouchableOpacity,
@@ -21,16 +20,17 @@ import {
     ViewStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { InputItem } from '@ant-design/react-native';
 
-export interface InputProps extends Omit<TextInputProps, 'style'> {
+export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 'value'> {
     /** Label text displayed above the input */
     label?: string | React.ReactNode;
     /** Placeholder text */
     placeholder?: string;
     /** Input value */
-    value: string;
+    value?: string;
     /** Callback when text changes */
-    onChangeText: (text: string) => void;
+    onChangeText?: (text: string) => void;
     /** Callback when input loses focus */
     onBlur?: () => void;
     /** Icon name from Ionicons (left side) */
@@ -49,7 +49,6 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
     disabled?: boolean;
     /** Custom container styles */
     containerStyle?: ViewStyle;
-    /** Custom input styles */
     /** Custom input styles */
     inputStyle?: TextStyle;
     /** Custom input container styles (inner box) */
@@ -120,7 +119,6 @@ export function Input({
                     {label}
                 </Text>
             )}
-
             {/* Input Container */}
             <View
                 style={[
@@ -142,33 +140,57 @@ export function Input({
                     />
                 )}
 
-                {/* Text Input */}
-                <TextInput
-                    style={[
-                        styles.input,
-                        multiline && styles.inputMultiline,
-                        disabled && styles.inputDisabled,
-                        inputStyle,
-                    ]}
-                    value={value}
-                    onChangeText={onChangeText}
-                    onBlur={() => {
-                        setIsFocused(false);
-                        onBlur?.();
-                    }}
-                    onFocus={() => setIsFocused(true)}
-                    placeholder={placeholder}
-                    placeholderTextColor={colors.textTertiary}
-                    secureTextEntry={secureTextEntry && !isPasswordVisible}
-                    keyboardType={keyboardType}
-                    autoCapitalize={autoCapitalize}
-                    editable={!disabled}
-                    multiline={multiline}
-                    numberOfLines={numberOfLines}
-                    {...restProps}
-                />
+                {/* Input Field using Ant Design InputItem */}
+                <View style={{ flex: 1 }}>
+                    <InputItem
+                        value={value}
+                        onChange={onChangeText} // InputItem passes string directly in onChange
+                        placeholder={placeholder}
+                        placeholderTextColor={colors.textTertiary}
+                        editable={!disabled}
+                        type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
+                        keyboardType={keyboardType}
+                        autoCapitalize={autoCapitalize as any}
+                        multiline={multiline}
+                        numberOfLines={numberOfLines}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => {
+                            setIsFocused(false);
+                            onBlur?.();
+                        }}
+                        style={[
+                            styles.input,
+                            inputStyle,
+                            multiline && styles.inputMultiline,
+                            // Override InputItem specific defaults if necessary
+                            {
+                                height: '100%',
+                                paddingVertical: 0,
+                                fontSize: 16,
+                                color: disabled ? colors.textTertiary : colors.text,
+                            },
+                        ]}
+                        // Override internal styles of InputItem container to remove List styling
+                        styles={{
+                            container: {
+                                borderBottomWidth: 0,
+                                marginLeft: 0,
+                                paddingRight: 0,
+                                minHeight: 0,
+                                height: '100%',
+                            },
+                            input: {
+                                fontSize: 16,
+                                color: colors.text,
+                                height: '100%',
+                                paddingVertical: 0,
+                            },
+                        }}
+                        {...(restProps as any)}
+                    />
+                </View>
 
-                {/* Right Icon or Password Toggle */}
+                {/* Right Icon / Password Toggle */}
                 {(iconRight || showPasswordToggle) && (
                     <TouchableOpacity
                         onPress={showPasswordToggle ? handlePasswordToggle : onIconPress}
@@ -190,12 +212,13 @@ export function Input({
                     </TouchableOpacity>
                 )}
             </View>
-
-            {/* Error Message */}
+            Error Message
             {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
     );
 }
+
+const INPUT_HEIGHT = 40;
 
 const styles = StyleSheet.create({
     container: {
@@ -218,7 +241,7 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: 8,
         backgroundColor: colors.white,
-        height: 40,
+        height: INPUT_HEIGHT,
         paddingHorizontal: spacing.md,
     },
     inputContainerFocused: {
@@ -240,6 +263,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         letterSpacing: 0,
         paddingVertical: 0,
+        // textAlign: 'center',
         height: '100%', // Match container height
         // iOS doesn't support textAlignVertical, use lineHeight instead
         ...Platform.select({
@@ -247,7 +271,8 @@ const styles = StyleSheet.create({
                 textAlignVertical: 'center' as const,
             },
             ios: {
-                justifyContent: 'center', // Same as inputContainer height to center text vertically
+                // lineHeight: INPUT_LINE_HEIGHT,
+                // paddingVertical: (INPUT_HEIGHT - INPUT_LINE_HEIGHT) / 2 - 6, // Slight adjustment for optical center
             },
         }),
     },

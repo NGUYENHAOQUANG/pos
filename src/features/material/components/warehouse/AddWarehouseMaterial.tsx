@@ -3,7 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    TextInput,
     TouchableOpacity,
     LayoutAnimation,
     UIManager,
@@ -15,6 +14,7 @@ import { DropdownMaterial } from '../material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { CollapseHead } from '../CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
+import { Input } from '@/shared/components/forms/Input';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -138,77 +138,63 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
 
                                         <View style={[styles.row, styles.zIndexNormal]}>
                                             <View style={styles.halfWidth}>
-                                                <View style={styles.labelContainer}>
-                                                    <Text style={styles.required}>* </Text>
-                                                    <Text style={styles.label}>Số lượng</Text>
-                                                </View>
-                                                <View style={styles.inputContainer}>
-                                                    <TextInput
-                                                        style={styles.innerInput}
-                                                        placeholder="Nhập số lượng"
-                                                        placeholderTextColor={colors.textSecondary}
-                                                        value={item.quantity}
-                                                        onChangeText={val => {
-                                                            if (/^\d*\.?\d*$/.test(val)) {
-                                                                onUpdateMaterial(
-                                                                    item.id,
-                                                                    'quantity',
-                                                                    val
-                                                                );
-                                                            }
-                                                        }}
-                                                        keyboardType="numeric"
-                                                    />
-                                                    <Text style={styles.unitText}>
-                                                        {materialOptions.find(
-                                                            opt => opt.value === item.materialName
-                                                        )?.unit || ''}
-                                                    </Text>
-                                                </View>
+                                                <Input
+                                                    label="Số lượng"
+                                                    required
+                                                    placeholder="Nhập số lượng"
+                                                    value={item.quantity}
+                                                    onChangeText={val => {
+                                                        if (/^\d*\.?\d*$/.test(val)) {
+                                                            onUpdateMaterial(
+                                                                item.id,
+                                                                'quantity',
+                                                                val
+                                                            );
+                                                        }
+                                                    }}
+                                                    keyboardType="numeric"
+                                                    containerStyle={{ marginBottom: 0 }}
+                                                />
                                             </View>
 
                                             <View style={styles.halfWidth}>
-                                                <View style={styles.labelContainer}>
-                                                    <Text style={styles.required}>* </Text>
-                                                    <Text style={styles.label}>
-                                                        Đơn giá (
-                                                        <Text
-                                                            style={{
-                                                                textDecorationLine: 'underline',
-                                                            }}
-                                                        >
-                                                            đ
+                                                <Input
+                                                    label={
+                                                        <Text>
+                                                            Đơn giá (
+                                                            <Text
+                                                                style={{
+                                                                    textDecorationLine: 'underline',
+                                                                }}
+                                                            >
+                                                                đ
+                                                            </Text>
+                                                            )
                                                         </Text>
-                                                        )
-                                                    </Text>
-                                                </View>
-                                                <View style={styles.inputContainer}>
-                                                    <TextInput
-                                                        style={styles.innerInput}
-                                                        placeholder="Nhập đơn giá"
-                                                        placeholderTextColor={colors.textSecondary}
-                                                        value={item.price.replace(
-                                                            /\B(?=(\d{3})+(?!\d))/g,
-                                                            ','
-                                                        )}
-                                                        onChangeText={val => {
-                                                            // Remove commas for storage/validation
-                                                            const cleanVal = val.replace(/,/g, '');
-                                                            if (
-                                                                numericStringSchema.safeParse(
-                                                                    cleanVal
-                                                                ).success
-                                                            ) {
-                                                                onUpdateMaterial(
-                                                                    item.id,
-                                                                    'price',
-                                                                    cleanVal
-                                                                );
-                                                            }
-                                                        }}
-                                                        keyboardType="numeric"
-                                                    />
-                                                </View>
+                                                    }
+                                                    required
+                                                    placeholder="Nhập đơn giá"
+                                                    value={item.price.replace(
+                                                        /\B(?=(\d{3})+(?!\d))/g,
+                                                        ','
+                                                    )}
+                                                    onChangeText={val => {
+                                                        // Remove commas for storage/validation
+                                                        const cleanVal = val.replace(/,/g, '');
+                                                        if (
+                                                            numericStringSchema.safeParse(cleanVal)
+                                                                .success
+                                                        ) {
+                                                            onUpdateMaterial(
+                                                                item.id,
+                                                                'price',
+                                                                cleanVal
+                                                            );
+                                                        }
+                                                    }}
+                                                    keyboardType="numeric"
+                                                    containerStyle={{ marginBottom: 0 }}
+                                                />
                                             </View>
                                         </View>
 
@@ -330,6 +316,15 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: colors.text,
         padding: 0,
+        ...Platform.select({
+            android: {
+                textAlignVertical: 'center',
+            },
+            ios: {
+                lineHeight: 24,
+                paddingVertical: (44 - 24) / 2 - 2,
+            },
+        }),
     },
     unitText: {
         fontSize: 15,
