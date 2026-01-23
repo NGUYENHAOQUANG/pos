@@ -36,9 +36,11 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                             <AvatarIcon width={80} height={80} />
                         )}
                     </View>
-                    <TouchableOpacity onPress={onChangePhoto}>
-                        <Text style={styles.changePhotoText}>Đổi ảnh</Text>
-                    </TouchableOpacity>
+                    {onChangePhoto && (
+                        <TouchableOpacity onPress={onChangePhoto}>
+                            <Text style={styles.changePhotoText}>Đổi ảnh</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 <View style={styles.divider} />
@@ -97,7 +99,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
-        overflow: 'hidden', // Ensure image clips to circle
+        overflow: 'hidden',
     },
     avatarImage: {
         width: 80,
