@@ -15,7 +15,7 @@ export const authApi = {
     },
 
     requestOtp: async (phoneNumber: string): Promise<OtpResponse> => {
-        const { data } = await apiClient.post<OtpResponse>(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+        const { data } = await apiClient.post<OtpResponse>(API_ENDPOINTS.AUTH.SEND_OTP, {
             phoneNumber,
         });
         return data;

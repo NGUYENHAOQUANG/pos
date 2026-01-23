@@ -179,15 +179,13 @@ export default function VerifyOTPScreen() {
 
         setIsResending(true);
         try {
-            // Convert contact to proper phone number format for API
-            // contact might be "+84 339546952" or similar, API needs "0339546952"
             let phoneNumber = contact.replace(/\s+/g, ''); // Remove spaces
             if (phoneNumber.startsWith('+84')) {
                 phoneNumber = '0' + phoneNumber.slice(3);
             }
 
             // Call API to resend OTP
-            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_OTP, {
                 phoneNumber: phoneNumber,
             });
 

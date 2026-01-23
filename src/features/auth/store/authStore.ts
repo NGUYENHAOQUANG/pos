@@ -53,10 +53,11 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await authApi.login(credentials);
 
-                    if (response.result && response.data.accessToken) {
+                    if ((response.success || response.result) && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
-                        const accessTokenExpires = response.data.accessTokenExpires;
+                        const accessTokenExpires =
+                            response.data.accessTokenExpiresAt || response.data.accessTokenExpires;
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 
@@ -90,10 +91,11 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await authApi.verifyOtp(contact, otpCode);
 
-                    if (response.result && response.data.accessToken) {
+                    if ((response.success || response.result) && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
-                        const accessTokenExpires = response.data.accessTokenExpires;
+                        const accessTokenExpires =
+                            response.data.accessTokenExpiresAt || response.data.accessTokenExpires;
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 

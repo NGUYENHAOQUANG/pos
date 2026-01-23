@@ -32,29 +32,39 @@ export interface JwtResponse {
     accessToken: string;
     refreshToken: string;
     issued: string;
-    refreshTokenExpireIn: number;
     refreshTokenExpires: string;
-    accessTokenExpireIn: number;
+    refreshTokenExpiresAt?: string; // New API format
     accessTokenExpires: string;
+    accessTokenExpiresAt?: string; // New API format
 }
 
 // Swagger: JwtResponseAppResponse
 export interface AuthResponse {
-    result: boolean;
-    statusCode: number;
+    result?: boolean; // Keep for backward compatibility
+    success?: boolean; // New API format
+    statusCode?: number;
     message?: string;
     data: JwtResponse;
 }
 
 export interface OtpData {
-    status?: 'UNVERIFIED' | 'COMPLETED' | string;
+    status?: 'Unverified' | 'COMPLETED' | string;
     testOtp?: string;
-    expiredIn?: number;
+    otpCode?: string; // Added based on new API response
+    expiredInSeconds?: number;
+    canResendAt?: string;
+    message?: string;
+    isPending?: boolean;
 }
 
 export interface OtpResponse {
-    result: boolean;
-    statusCode: number;
+    result?: boolean; // Keep for backward compatibility if needed
+    success?: boolean; // New field
+    statusCode?: number;
     message?: string;
     data: OtpData;
+    errorCode?: string | null;
+    validationErrors?: any | null;
+    details?: any | null;
+    timestamp?: string;
 }
