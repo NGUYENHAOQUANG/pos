@@ -25,7 +25,8 @@ export const EditEnvironmentScreens: React.FC = () => {
     const [upperLimit, setUpperLimit] = useState(
         parameter?.max || parameter?.limit?.split(' - ')[1] || ''
     );
-    const [isAlertEnabled, setIsAlertEnabled] = useState(parameter?.isChecked ?? true);
+    // Initialize from alertEnabled, default to true if undefined
+    const [isAlertEnabled, setIsAlertEnabled] = useState(parameter?.alertEnabled ?? true);
 
     // No explicit tab bar handling needed
 
@@ -51,7 +52,10 @@ export const EditEnvironmentScreens: React.FC = () => {
             min: lowerLimit,
             max: upperLimit,
             limit: lowerLimit && upperLimit ? `${lowerLimit} - ${upperLimit}` : '',
-            isChecked: isAlertEnabled,
+            // Don't update isChecked here, as that controls visibility.
+            // isChecked is passed through from original parameter.
+            // We update alertEnabled.
+            alertEnabled: isAlertEnabled,
         };
 
         // Call the callback to update state in parent screen
@@ -69,7 +73,7 @@ export const EditEnvironmentScreens: React.FC = () => {
             const limits = parameter.limit?.split(' - ');
             setLowerLimit(limits[0] || '');
             setUpperLimit(limits[1] || '');
-            setIsAlertEnabled(true);
+            setIsAlertEnabled(parameter.alertEnabled ?? true);
         }
     };
 

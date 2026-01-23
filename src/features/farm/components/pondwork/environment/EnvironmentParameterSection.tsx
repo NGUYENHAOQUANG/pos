@@ -12,6 +12,7 @@ export interface EnvironmentParameter {
     unit?: string;
     min?: string;
     max?: string;
+    alertEnabled?: boolean;
 }
 
 interface EnvironmentParameterSectionProps {

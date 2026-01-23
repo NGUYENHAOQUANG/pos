@@ -192,7 +192,15 @@ export type AppStackParamList = {
     DeviceManagement: undefined;
     AddDevice: undefined;
     EditDevice: { deviceId: string };
-    HistoryDevices: { deviceId?: string };
+    HistoryDevices: {
+        deviceId?: string;
+        success?: boolean;
+        maintenanceData?: {
+            date: string;
+            description: string;
+            resetTime: boolean;
+        };
+    };
     EquipmentMaintenance: { deviceId?: string };
     EditEquimentMaintenance: {
         deviceId: string;

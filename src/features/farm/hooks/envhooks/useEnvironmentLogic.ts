@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { ParameterSetting } from '@/features/farm/api/environmentApi';
+import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
+import { ENVIRONMENT_METRIC_IDS, PondData, Zone } from '@/features/farm/types/farm.types';
 
 /**
  * Hook to initialize environment data (Metric Types, Zones)
@@ -21,6 +21,7 @@ export const useEnvironmentInit = (currentZoneId?: string | number) => {
     useFocusEffect(
         useCallback(() => {
             const loadData = async () => {
+                setIsLoading(true);
                 await fetchMetricTypes();
                 if (zones.length === 0) await fetchZones();
 
@@ -39,14 +40,14 @@ export const useEnvironmentInit = (currentZoneId?: string | number) => {
 /**
  * Hook to resolve the correct Zone based on Pond Data or Global Selection
  */
-export const useZoneResolution = (pond: any, zones: any[]) => {
+export const useZoneResolution = (pond: PondData, zones: Zone[]) => {
     const getSelectedZone = useFarmStore(state => state.getSelectedZone);
 
     const currentZone = useMemo(() => {
         if (!pond || !zones) return null;
 
         // Try direct ID match
-        const pondZoneId = pond.zoneId || pond.zone_id;
+        const pondZoneId = pond.zoneId;
         if (pondZoneId) {
             const byId = zones.find(z => z.id === pondZoneId);
             if (byId) return byId;
@@ -73,7 +74,7 @@ export const useZoneResolution = (pond: any, zones: any[]) => {
  */
 export const useParameterConfiguration = (
     currentZoneId: string | number | undefined,
-    metricTypes: any[],
+    metricTypes: EnvMetricType[],
     rawParameterSettings: Record<string, ParameterSetting[]>
 ) => {
     const currentSettings = currentZoneId ? rawParameterSettings[currentZoneId] : undefined;
@@ -164,6 +165,7 @@ export const useParameterConfiguration = (
                 limit: limitStr,
                 isChecked: !!setting,
                 unit: metric.unitName,
+                alertEnabled: setting?.alert === 'true',
             };
 
             if (setting && setting.enabled !== undefined) {
