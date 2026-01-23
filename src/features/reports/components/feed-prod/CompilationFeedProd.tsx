@@ -107,11 +107,10 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     headerCollapsed: {
-        paddingHorizontal: 16,
         paddingVertical: 12,
+        paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
     },
     chartSection: {
         backgroundColor: colors.white,
