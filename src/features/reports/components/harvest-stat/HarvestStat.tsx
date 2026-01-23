@@ -99,10 +99,10 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     sectionHeader: {
-        backgroundColor: colors.white,
-        borderWidth: 0,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
         borderBottomWidth: 1,
-        borderColor: colors.borderLight,
+        borderBottomColor: colors.borderLight,
     },
     listContainer: {
         paddingTop: 8,
