@@ -7,6 +7,7 @@ import AuthScreen from '@/features/auth/screens/AuthScreen';
 import VerifyOtpScreen from '@/features/auth/screens/VerifyOtpScreen';
 import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
 import RegisterScreen from '@/features/auth/screens/RegisterScreen';
+import InfoScreen from '@/features/auth/screens/InfoScreen';
 
 // import TestScreen from '@/features/test/screens/TestScreen';
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -36,6 +37,7 @@ export function AuthNavigator() {
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="Verify-otp" component={VerifyOtpScreen} />
             <Stack.Screen name="Login" component={AuthScreen} />
+            <Stack.Screen name="Info" component={InfoScreen} />
             <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
         </Stack.Navigator>
