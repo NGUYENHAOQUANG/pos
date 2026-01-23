@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -30,10 +32,66 @@ export default function InfoScreen() {
     const [avatar, setAvatar] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    const { user, completeProfile } = useAuthStore();
+
+    // Auto-fill phone if available from user store or params
+    // But InfoScreen might need route params if user is not fully set in store?
+    // Store sets user but isAuthenticated=false, so we can access user.
+
     const handleSubmit = async () => {
-        // TODO: Implement submit logic
-        console.log('Submit:', { fullName, email, address, avatar });
+        if (!fullName.trim()) {
+            Alert.alert('Thông báo', 'Vui lòng nhập họ và tên');
+            return;
+        }
+
+        // Debug logging
+        console.log('Complete Profile Payload:', {
+            userId: user?.id,
+            fullName,
+            email,
+            address,
+            avatarUrl: avatar,
+        });
+
         setIsLoading(true);
+        try {
+            if (!user?.id) throw new Error('Không tìm thấy thông tin người dùng');
+
+            const payload: any = {
+                userId: user.id,
+                fullName,
+            };
+
+            if (email) payload.email = email;
+            if (address) payload.address = address;
+            if (avatar) payload.avatarUrl = avatar;
+
+            await completeProfile(payload);
+
+            // Success handler usually handled by store updating isAuthenticated
+            Toast.show({
+                type: 'success',
+                text1: 'Cập nhật thông tin thành công',
+            });
+        } catch (error: any) {
+            console.error('Complete Profile Error:', error);
+            if (error.response) {
+                console.log('Error Data:', error.response.data);
+                console.log('Error Status:', error.response.status);
+            }
+
+            const message = error.response?.data?.message || error.message || 'Cập nhật thất bại';
+            const validationErrors = error.response?.data?.validationErrors;
+
+            let displayMessage = message;
+            if (validationErrors) {
+                displayMessage += '\n' + JSON.stringify(validationErrors);
+            }
+
+            Alert.alert('Lỗi', displayMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleChoosePhoto = () => {

@@ -144,20 +144,28 @@ export default function RegisterScreen() {
 
         setIsVerifying(true);
         try {
-            await verifyOtp(contact, otpString);
+            const status = await verifyOtp(contact, otpString);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Đăng ký thành công',
-                visibilityTime: 2000,
-            });
+            if (status === 'REQUIRE_UPDATE_PROFILE') {
+                // Register successful & verified, now update profile
+                navigation.replace('Info', {
+                    phone: contact,
+                    userId: useAuthStore.getState().user?.id,
+                } as any);
+            } else {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đăng ký thành công',
+                    visibilityTime: 2000,
+                });
+            }
         } catch (error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         } finally {
             setIsVerifying(false);
         }
-    }, [otp, contact, verifyOtp]);
+    }, [otp, contact, verifyOtp, navigation]);
 
     // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {

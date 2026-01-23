@@ -4,7 +4,7 @@ import { Zone } from '@/features/farm/types/farm.types';
 
 export const zoneApi = {
     getZones: async (): Promise<Zone[]> => {
-        const response = await apiClient.get(API_ENDPOINTS.ZONES.LIST);
+        const response = await apiClient.get(API_ENDPOINTS.ZONE.LIST);
         const responseData = response.data;
 
         // Handle different potential response structures

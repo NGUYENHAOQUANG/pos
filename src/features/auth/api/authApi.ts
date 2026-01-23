@@ -6,7 +6,12 @@
  */
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { AuthResponse, LoginCredentials, OtpResponse } from '../types/auth.types';
+import {
+    AuthResponse,
+    CompleteProfilePayload,
+    LoginCredentials,
+    OtpResponse,
+} from '../types/auth.types';
 
 export const authApi = {
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -45,6 +50,14 @@ export const authApi = {
         const { data } = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.REFRESH, {
             refreshToken,
         });
+        return data;
+    },
+
+    completeProfile: async (payload: CompleteProfilePayload): Promise<AuthResponse> => {
+        const { data } = await apiClient.post<AuthResponse>(
+            API_ENDPOINTS.AUTH.COMPLETE_PROFILE,
+            payload
+        );
         return data;
     },
 };

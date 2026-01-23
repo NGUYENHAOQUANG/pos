@@ -9,7 +9,12 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { Storage } from '@/core/services/storage.service';
 import { authApi } from '@/features/auth/api/authApi';
 import { decodeToken } from '@/core/utils/jwt';
-import { AuthUser, LoginCredentials, RegisterData } from '../types/auth.types';
+import {
+    AuthUser,
+    LoginCredentials,
+    RegisterData,
+    CompleteProfilePayload,
+} from '../types/auth.types';
 
 interface AuthState {
     user: AuthUser | null;
@@ -19,8 +24,8 @@ interface AuthState {
     isAuthenticated: boolean;
     loading: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
-    verifyOtp: (contact: string, otpCode: string) => Promise<void>;
-    register: (data: RegisterData) => Promise<void>;
+    verifyOtp: (contact: string, otpCode: string) => Promise<string | undefined>; // Return string (status) or undefined
+    register: (data: RegisterData) => Promise<any>;
     logout: () => void;
     setUser: (user: AuthUser | null) => void;
     setToken: (token: string | null) => void;
@@ -34,6 +39,8 @@ interface AuthState {
     setSessionExpired: (value: boolean) => void;
     hasLaunched: boolean;
     setHasLaunched: (value: boolean) => void;
+    // New action
+    completeProfile: (data: CompleteProfilePayload) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -56,8 +63,7 @@ export const useAuthStore = create<AuthState>()(
                     if ((response.success || response.result) && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
-                        const accessTokenExpires =
-                            response.data.accessTokenExpiresAt || response.data.accessTokenExpires;
+                        const accessTokenExpires = response.data.accessTokenExpiresAt;
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 
@@ -94,26 +100,45 @@ export const useAuthStore = create<AuthState>()(
                     if ((response.success || response.result) && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
-                        const accessTokenExpires =
-                            response.data.accessTokenExpiresAt || response.data.accessTokenExpires;
+                        const accessTokenExpires = response.data.accessTokenExpiresAt;
+                        const loginStatus = response.data.loginStatus;
+
                         // Decode token to get user info
                         const decoded = decodeToken(token);
 
                         const user: AuthUser = {
-                            id: decoded?.sub || decoded?.id || 'unknown',
-                            name: decoded?.name || decoded?.unique_name || 'User',
-                            phone: decoded?.phone || contact,
+                            id: response.data.userId || decoded?.sub || decoded?.id || 'unknown',
+                            name:
+                                response.data.fullName ||
+                                decoded?.name ||
+                                decoded?.unique_name ||
+                                'User',
+                            phone: response.data.phoneNumber || decoded?.phone || contact,
                             roles: decoded?.role || decoded?.roles,
+                            loginStatus: loginStatus, // Add login status to user
                         };
+
+                        // If profile update required, we set partial state but NOT full authentication
+                        // OR we set authenticated but redirect?
+                        // User request: "link to InfoScreen".
+                        // Better approach: Set tokens (so API calls work) but keep a flag or let UI decide.
+                        // If we set isAuthenticated=true, MainNavigator might take over.
+                        // Let's set isAuthenticated=true BUT rely on AuthNavigator/RootNavigator to check checking?
+                        // Wait, if isAuthenticated=true, usually we go to Main.
+                        // Let's look at Navigation.
+                        // For now: Set all data. The UI (VerifyOtpScreen) will check the return/state and navigate.
 
                         set({
                             user,
                             token,
                             refreshToken,
                             accessTokenExpires,
-                            isAuthenticated: true,
+                            isAuthenticated: loginStatus !== 'REQUIRE_UPDATE_PROFILE', // Only authenticated if profile complete
                             loading: false,
                         });
+
+                        // Return the status so the caller can decide
+                        return loginStatus;
                     } else {
                         throw new Error(response.message || 'OTP Verification failed');
                     }
@@ -126,21 +151,17 @@ export const useAuthStore = create<AuthState>()(
             register: async (data: RegisterData) => {
                 set({ loading: true });
                 try {
-                    // Demo: Mock register - không call API
-                    // Tạo mock user với phone
-                    const mockUser: AuthUser = {
-                        id: '1',
-                        phone: data.phone,
-                        name: data.name,
-                    };
-                    const mockToken = 'mock-token-' + Date.now();
+                    const response = await authApi.register({ phoneNumber: data.phone });
 
-                    set({
-                        user: mockUser,
-                        token: mockToken,
-                        isAuthenticated: true,
-                        loading: false,
-                    });
+                    if (response.success || response.result) {
+                        // Registration successful, usually returns OTP data
+                        // logic handled by caller (RegisterScreen) to navigate/show OTP
+                        set({ loading: false });
+                        // We don't authenticate yet, wait for OTP verify
+                    } else {
+                        throw new Error(response.message || 'Register failed');
+                    }
+                    return response; // Return response so caller can get testOtp
                 } catch (error) {
                     set({ loading: false });
                     throw error;
@@ -195,6 +216,34 @@ export const useAuthStore = create<AuthState>()(
 
             setSessionExpired: (value: boolean) => {
                 set({ isSessionExpired: value });
+            },
+
+            completeProfile: async (data: CompleteProfilePayload) => {
+                set({ loading: true });
+                try {
+                    const response = await authApi.completeProfile(data);
+                    if (response.success || response.result) {
+                        // Update user status and authenticate
+                        set(state => ({
+                            loading: false,
+                            isAuthenticated: true,
+                            user: state.user
+                                ? {
+                                      ...state.user,
+                                      name: data.fullName,
+                                      email: data.email || state.user.email,
+                                      avatar: data.avatarUrl || state.user.avatar,
+                                      loginStatus: 'COMPLETED',
+                                  }
+                                : null,
+                        }));
+                    } else {
+                        throw new Error(response.message || 'Complete profile failed');
+                    }
+                } catch (error) {
+                    set({ loading: false });
+                    throw error;
+                }
             },
         }),
         {

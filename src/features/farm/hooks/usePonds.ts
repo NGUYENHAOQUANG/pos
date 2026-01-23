@@ -18,7 +18,7 @@ export const usePondMasterData = () => {
     });
 };
 
-export const usePondsByZone = (zoneId: number | null) => {
+export const usePondsByZone = (zoneId: number | string | null) => {
     const { data: masterData, isLoading: isLoadingMaster } = usePondMasterData();
 
     const query = useInfiniteQuery({

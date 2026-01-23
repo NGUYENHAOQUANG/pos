@@ -139,7 +139,7 @@ export default function VerifyOTPScreen() {
             return;
         }
 
-        if (otpString === '0000') {
+        if (otpString === '9999') {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             return;
         }
@@ -147,22 +147,29 @@ export default function VerifyOTPScreen() {
         setIsVerifying(true);
         try {
             // Call API verify OTP via Store (handles login)
-            await verifyOtp(contact, otpString);
+            const status = await verifyOtp(contact, otpString);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Đăng nhập thành công',
-                visibilityTime: 2000,
-            });
+            if (status === 'REQUIRE_UPDATE_PROFILE') {
+                navigation.replace('Info', {
+                    phone: contact,
+                    userId: useAuthStore.getState().user?.id,
+                } as any); // Type cast if needed or update Params List
+            } else {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đăng nhập thành công',
+                    visibilityTime: 2000,
+                });
+            }
 
-            // Success! Store update (isAuthenticated=true) will trigger navigation to Main App
+            // Success! Store update (isAuthenticated=true) will trigger navigation to Main App if status is COMPLETED
         } catch (error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         } finally {
             setIsVerifying(false);
         }
-    }, [otp, contact, verifyOtp]);
+    }, [otp, contact, verifyOtp, navigation]);
 
     // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {
