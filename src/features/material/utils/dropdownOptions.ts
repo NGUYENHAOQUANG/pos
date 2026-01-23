@@ -2,13 +2,14 @@
  * @file dropdownOptions.ts
  * @description Utilities for converting data to dropdown options
  */
-import { IMaterialGroup, IMaterialType, IUnit } from '@/features/material/types/material.types';
+import { IMaterialType, IUnit } from '@/features/material/types/material.types';
+import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 
 /**
  * Convert material groups to dropdown options
  */
-export const getMaterialGroupOptions = (groups: IMaterialGroup[]): string[] => {
+export const getMaterialGroupOptions = (groups: IMaterialGroupV2[]): string[] => {
     return ['Tất cả nhóm vật tư', ...groups.map(g => g.name || '').filter(n => n)];
 };
 

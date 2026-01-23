@@ -55,11 +55,11 @@ export const API_ENDPOINTS = {
     },
     // Material Group
     MATERIAL_GROUP: {
-        LIST: '/material-groups',
-        DETAIL: (id: number) => `/material-groups/${id}`,
-        CREATE: '/material-groups',
-        UPDATE: (id: number) => `/material-groups/${id}`,
-        DELETE: (id: number) => `/material-groups/${id}`,
+        LIST: '/materialgroup',
+        DETAIL: (id: number) => `/materialgroup/${id}`,
+        CREATE: '/materialgroup',
+        UPDATE: (id: number) => `/materialgroup/${id}`,
+        DELETE: (id: number) => `/materialgroup/${id}`,
     },
     // Material Type
     MATERIAL_TYPE: {

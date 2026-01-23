@@ -14,7 +14,8 @@ import {
 } from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/features/material/components/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IMaterialGroup, IMaterialType } from '@/features/material/types/material.types';
+import { IMaterialType } from '@/features/material/types/material.types';
+import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 
@@ -35,7 +36,7 @@ interface AddMaterialProps {
     groupOptions?: string[];
     unitOptions?: (string | DropdownOption)[];
     groupDisabled?: boolean;
-    materialGroupsData?: IMaterialGroup[];
+    materialGroupsData?: IMaterialGroupV2[];
     typesByGroup?: IMaterialType[]; // Material types filtered by selected group
 
     // Advanced Info
