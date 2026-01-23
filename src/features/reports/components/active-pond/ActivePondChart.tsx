@@ -439,7 +439,12 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         marginBottom: 8,
     },
-    headerButton: { borderWidth: 0, backgroundColor: colors.white },
+    headerButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+    },
 
     contentContainer: { paddingBottom: 16 },
 
