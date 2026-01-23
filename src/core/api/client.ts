@@ -73,15 +73,26 @@ const handleTokenRefresh = async (): Promise<string | null> => {
     try {
         const response = await authApi.refreshToken(refreshToken);
 
-        if (response.result && response.data.accessToken && response.data.refreshToken) {
+        if (
+            (response.success || response.result) &&
+            response.data.accessToken &&
+            response.data.refreshToken
+        ) {
             const {
                 accessToken,
                 refreshToken: newRefreshToken,
-                accessTokenExpires,
+                accessTokenExpiresAt, // New field name from API
+                accessTokenExpires, // Old field name fallback
             } = response.data;
 
             // Update tokens in store
-            useAuthStore.getState().setTokens(accessToken, newRefreshToken, accessTokenExpires);
+            useAuthStore
+                .getState()
+                .setTokens(
+                    accessToken,
+                    newRefreshToken,
+                    accessTokenExpiresAt || accessTokenExpires
+                );
 
             // Process queued requests with new token
             processQueue(null, accessToken);

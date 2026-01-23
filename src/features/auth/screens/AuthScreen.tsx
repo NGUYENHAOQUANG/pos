@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     KeyboardAvoidingView,
     Platform,
@@ -9,177 +9,27 @@ import {
     Text,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
-import { authApi } from '@/features/auth/api/authApi';
-import Toast from 'react-native-toast-message';
-import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { colors, spacing, typography } from '@/styles';
-import { AuthStackParamList } from '@/app/navigation/types';
+import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
 
 export default function AuthScreen() {
-    const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
     const insets = useSafeAreaInsets();
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [error, setError] = useState('');
-    const [isUnregistered, setIsUnregistered] = useState(false);
-    const [isUnverifiedAccount, setIsUnverifiedAccount] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleLogin = async () => {
-        setError('');
-        setIsUnregistered(false);
-        setIsUnverifiedAccount(false);
-
-        if (!phoneNumber.trim()) {
-            setError('Vui lòng nhập số điện thoại.');
-            return;
-        }
-
-        const rawPhone = phoneNumber.replace(/\s/g, '');
-
-        // Validate VN Phone Number Format
-        const vnPhoneRegex = /^(0)(3|5|7|8|9)([0-9]{8})$/;
-
-        if (!vnPhoneRegex.test(rawPhone)) {
-            Toast.show({
-                type: 'error',
-                text1: 'Số điện thoại không hợp lệ',
-                text2: 'Vui lòng thử lại',
-            });
-            return;
-        }
-
-        setIsLoading(true);
-
-        try {
-            const response = await authApi.requestOtp(rawPhone);
-
-            if (response.statusCode === 200) {
-                // Check for UNVERIFIED status
-                const status = response?.data?.status;
-                const devOtp = response?.data?.testOtp;
-
-                if (status === 'UNVERIFIED') {
-                    // Account exists but not verified - show special error
-                    setIsUnverifiedAccount(true);
-                    setError(
-                        'Số điện thoại này đã được đăng ký nhưng chưa xác thực, vui lòng xác thực ngay'
-                    );
-                    return;
-                }
-
-                // Status is not UNVERIFIED (COMPLETED or other) - show OTP and proceed to OTP screen
-                if (devOtp) {
-                    await notificationHelper.displayOtpNotification(String(devOtp));
-                }
-
-                navigation.navigate('Verify-otp', {
-                    method: 'phone',
-                    contact: rawPhone,
-                    otpCode: devOtp ? String(devOtp) : undefined,
-                });
-            } else {
-                setIsUnregistered(true);
-            }
-        } catch (err: unknown) {
-            const axiosError = err as {
-                status?: number;
-                response?: { status?: number };
-                message?: string;
-            };
-            console.error('Login failed:', axiosError);
-            // Check for user not found error (statusCode 404 or specific message)
-            if (
-                axiosError?.status === 404 ||
-                axiosError?.response?.status === 404 ||
-                axiosError?.message?.includes('not found')
-            ) {
-                setIsUnregistered(true);
-                setError('');
-            } else {
-                setError('Đã có lỗi xảy ra, vui lòng thử lại.');
-                Toast.show({
-                    type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
-                });
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleVerifyNow = async () => {
-        // For unverified accounts, call API again to get fresh OTP and navigate to verify
-        const rawPhone = phoneNumber.replace(/\s/g, '');
-
-        setIsLoading(true);
-        try {
-            const response = await authApi.requestOtp(rawPhone);
-            const devOtp = response?.data?.testOtp;
-
-            // Now show OTP notification since user explicitly clicked "Xác thực ngay"
-            if (devOtp) {
-                await notificationHelper.displayOtpNotification(String(devOtp));
-            }
-
-            navigation.navigate('Verify-otp', {
-                method: 'phone',
-                contact: rawPhone,
-                otpCode: devOtp ? String(devOtp) : undefined,
-            });
-        } catch (err) {
-            console.error('Verify now failed:', err);
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không thể gửi mã OTP. Vui lòng thử lại.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleClearError = () => {
-        setPhoneNumber('');
-        setError('');
-        setIsUnregistered(false);
-        setIsUnverifiedAccount(false);
-    };
-
-    const handleRegisterPress = () => {
-        setError('');
-        setIsUnregistered(false);
-
-        if (!phoneNumber.trim()) {
-            setError('Vui lòng nhập số điện thoại.');
-            return;
-        }
-
-        const rawPhone = phoneNumber.replace(/\s/g, '');
-
-        // Validate VN Phone Number Format
-        const vnPhoneRegex = /^(0)(3|5|7|8|9)([0-9]{8})$/;
-
-        if (!vnPhoneRegex.test(rawPhone)) {
-            Toast.show({
-                type: 'error',
-                text1: 'Số điện thoại không hợp lệ',
-                text2: 'Vui lòng thử lại',
-            });
-            return;
-        }
-
-        // Navigate to Register screen with phone number
-        navigation.navigate('Register', {
-            phoneNumber: rawPhone,
-        });
-    };
+    const {
+        phoneNumber,
+        error,
+        isUnregistered,
+        isUnverifiedAccount,
+        isLoading,
+        handleLogin,
+        handleVerifyNow,
+        handleRegisterPress,
+        handleClearError,
+        handlePhoneChange,
+    } = useLoginFlow();
 
     return (
         <ErrorBoundary>
@@ -218,12 +68,7 @@ export default function AuthScreen() {
                                 <View style={styles.formContent}>
                                     <PhoneInput
                                         value={phoneNumber}
-                                        onChangeText={text => {
-                                            setPhoneNumber(text);
-                                            if (error) setError('');
-                                            if (isUnregistered) setIsUnregistered(false);
-                                            if (isUnverifiedAccount) setIsUnverifiedAccount(false);
-                                        }}
+                                        onChangeText={handlePhoneChange}
                                         error={
                                             isUnregistered || isUnverifiedAccount ? 'error' : error
                                         }
