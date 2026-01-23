@@ -38,6 +38,7 @@ export type AuthStackParamList = {
     'Create-password': undefined;
     'Register-Success': undefined;
     DeleteAccount: undefined;
+    Info: { phoneNumber: string };
 };
 
 // Type alias for Verify OTP parameters
