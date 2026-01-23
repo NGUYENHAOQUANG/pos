@@ -41,7 +41,7 @@ export default function LoginForm() {
             }
 
             // Call API to request OTP and check status
-            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_OTP, {
                 phoneNumber: phoneNumber,
             });
             // API returns: { data: { status, testOtp, expiredIn }, result, statusCode, message }
@@ -53,14 +53,11 @@ export default function LoginForm() {
                 notificationHelper.displayOtpNotification(String(otpCode));
             }
 
-            if (status === 'UNVERIFIED') {
-                // Account exists but not verified - show special error and stay on login screen
-                console.log('[LoginForm] Status is UNVERIFIED, showing error');
+            if (status === 'Unverified') {
                 setError(
                     'Số điện thoại này đã được đăng ký nhưng chưa xác thực, vui lòng xác thực ngay'
                 );
                 setIsUnverified(true);
-                // DO NOT navigate here - just show error and change button
                 return;
             }
 
@@ -133,7 +130,7 @@ export default function LoginForm() {
                             }}
                             countryCode={countryCode}
                             onCountryCodeChange={setCountryCode}
-                            error={error} // Truyền prop error vào để hiển thị viền đỏ
+                            error={error} // Truyền prop error vào để hiển thị viềnđỏ
                         />
 
                         {/* Hiển thị text lỗi bên dưới input */}
