@@ -11,6 +11,7 @@ import { isTokenExpiringSoon } from '@/core/utils/jwt';
 // Import store for token access
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { authApi } from '@/features/auth/api/authApi';
+import { normalizeApiError } from '@/core/api/errorHandler';
 
 export const apiClient: AxiosInstance = axios.create({
     baseURL: ENV.API_URL,
@@ -151,11 +152,6 @@ apiClient.interceptors.response.use(
         return response;
     },
     async error => {
-        // Handle network errors
-        if (!error.response) {
-            error.message = 'Network error. Please check your connection.';
-        }
-
-        return Promise.reject(error);
+        return Promise.reject(normalizeApiError(error));
     }
 );
