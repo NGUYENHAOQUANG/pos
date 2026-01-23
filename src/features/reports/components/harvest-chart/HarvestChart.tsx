@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, layout, typography } from '@/styles';
+import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { mockHarvestChartData } from './harvestData';
@@ -47,7 +47,7 @@ export const HarvestChart: React.FC = () => {
             <BasicDropDownButton
                 label="BIỂU ĐỒ THU HOẠCH"
                 onPress={() => setIsCollapsed(!isCollapsed)}
-                style={styles.headerButton}
+                style={styles.sectionHeader}
                 isExpanded={!isCollapsed}
             />
 
@@ -119,12 +119,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         marginBottom: 8,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: layout.rowBetween.justifyContent,
-        alignItems: layout.centered.alignItems,
-        minHeight: 54,
-        paddingHorizontal: spacing.md,
+    sectionHeader: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
     },
