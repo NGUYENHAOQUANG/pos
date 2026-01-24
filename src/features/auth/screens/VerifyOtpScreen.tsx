@@ -26,6 +26,7 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 // Countdown duration in seconds
 const COUNTDOWN_DURATION = 60;
@@ -163,9 +164,10 @@ export default function VerifyOTPScreen() {
             }
 
             // Success! Store update (isAuthenticated=true) will trigger navigation to Main App if status is COMPLETED
-        } catch (error) {
-            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
+        } catch (err) {
+            const error = err as NormalizedError;
             console.error(error);
+            setErrorMessage(error.message);
         } finally {
             setIsVerifying(false);
         }
@@ -219,11 +221,11 @@ export default function VerifyOTPScreen() {
                 text1: 'Đã gửi lại mã OTP',
                 visibilityTime: 2000,
             });
-        } catch (error: unknown) {
-            const axiosError = error as { response?: { data?: { message?: string } } };
+        } catch (err) {
+            const error = err as NormalizedError;
             Toast.show({
                 type: 'error',
-                text1: axiosError.response?.data?.message || 'Gửi lại mã thất bại',
+                text1: error.message || 'Gửi lại mã thất bại',
                 visibilityTime: 3000,
             });
         } finally {

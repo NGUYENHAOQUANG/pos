@@ -12,6 +12,7 @@ import { authApi } from '@/features/auth/api/authApi';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { OtpResponse } from '../types/auth.types';
 import { NormalizedError } from '@/core/api/errorHandler';
+const VN_PHONE_REGEX = /^(0)(3|5|7|8|9)([0-9]{8})$/;
 
 interface UseLoginFlowReturn {
     // State
@@ -39,9 +40,25 @@ export function useLoginFlow(): UseLoginFlowReturn {
     const [isUnverifiedAccount, setIsUnverifiedAccount] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    /**
-     * Handle phone input change - clear errors when user types
-     */
+    const validatePhoneNumber = (phone: string): boolean => {
+        if (!phone.trim()) {
+            setError('Vui lòng nhập số điện thoại.');
+            return false;
+        }
+
+        const rawPhone = phone.replace(/\s/g, '');
+        if (!VN_PHONE_REGEX.test(rawPhone)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Số điện thoại không hợp lệ',
+                text2: 'Vui lòng kiểm tra lại số điện thoại',
+            });
+            return false;
+        }
+
+        return true;
+    };
+
     const handlePhoneChange = (text: string) => {
         setPhoneNumber(text);
         if (error) setError('');
@@ -49,13 +66,14 @@ export function useLoginFlow(): UseLoginFlowReturn {
         if (isUnverifiedAccount) setIsUnverifiedAccount(false);
     };
 
-    /**
-     * Handle login button press - request OTP
-     */
     const handleLogin = async () => {
         setError('');
         setIsUnregistered(false);
         setIsUnverifiedAccount(false);
+
+        if (!validatePhoneNumber(phoneNumber)) {
+            return;
+        }
 
         const rawPhone = phoneNumber.replace(/\s/g, '');
         setIsLoading(true);
@@ -255,6 +273,10 @@ export function useLoginFlow(): UseLoginFlowReturn {
     const handleRegisterPress = () => {
         setError('');
         setIsUnregistered(false);
+
+        if (!validatePhoneNumber(phoneNumber)) {
+            return;
+        }
 
         const rawPhone = phoneNumber.replace(/\s/g, '');
         navigation.navigate('Register', {
