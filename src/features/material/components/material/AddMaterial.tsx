@@ -216,7 +216,6 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                         <View style={styles.content}>
                             <View style={styles.inputGroup}>
                                 <View style={styles.labelContainer}>
-                                    <Text style={styles.required}>* </Text>
                                     <Text style={styles.label}>Mô tả</Text>
                                 </View>
                                 <TextInput

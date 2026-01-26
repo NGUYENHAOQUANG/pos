@@ -31,7 +31,7 @@ export const getMaterialTypeOptions = (
         .filter(t => t && t.name) // Filter out types without name
         .map(t => ({
             label: t.name || '',
-            value: t.name || '',
+            value: t.id,
         }));
 
     // If no options available and showEmptyMessage is true, show disabled message
