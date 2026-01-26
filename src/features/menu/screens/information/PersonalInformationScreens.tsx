@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { colors } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { GeneralInformation } from '@/features/menu/components/information/GeneralInformation';
@@ -14,7 +16,7 @@ import EditOutlinedIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 export const PersonalInformationScreens: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { setTabBarVisible } = useTabBarVisibility();
     const { userData, refetch } = useUserProfile();
 
@@ -135,7 +137,6 @@ export const PersonalInformationScreens: React.FC = () => {
                 }
             >
                 {/* General Info Section */}
-                {/* General Info Section */}
                 <GeneralInformation
                     data={{
                         name: userData.name,
@@ -152,11 +153,11 @@ export const PersonalInformationScreens: React.FC = () => {
                 {showFarms ? (
                     <FarmConnecter
                         totalFarms={totalFarms}
-                        farms={connectedFarms as any}
+                        farms={connectedFarms}
                         onFarmPress={farm => {
-                            setSelectedZoneId(farm.id as any);
+                            setSelectedZoneId(farm.id);
                             // Navigate to the Main Tab Navigator, then to the Farm tab
-                            (navigation.navigate as any)('MainTabs', { screen: 'Farm' });
+                            navigation.navigate('MainTabs', { screen: 'Farm' });
                         }}
                     />
                 ) : (
@@ -166,7 +167,7 @@ export const PersonalInformationScreens: React.FC = () => {
                         onPondPress={() => {
                             // Optional: Navigate to detail of pond if needed,
                             // for now just stay or go to Farm tab
-                            (navigation.navigate as any)('MainTabs', { screen: 'Farm' });
+                            navigation.navigate('MainTabs', { screen: 'Farm' });
                         }}
                     />
                 )}

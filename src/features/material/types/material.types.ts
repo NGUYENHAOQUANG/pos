@@ -24,7 +24,7 @@ export interface IMaterial {
 }
 
 export interface IUnit {
-    id: number;
+    id: string;
     name: string;
 }
 
@@ -140,7 +140,7 @@ export type GetMaterialGroupByIdResponse = IAppResponse<IMaterialGroup>;
 
 // ============ Material Type Types ============
 export interface IMaterialType {
-    id: number;
+    id: string;
     creatorId?: number | null;
     createdAt?: string | null;
     lastModifierId?: number | null;

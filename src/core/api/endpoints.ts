@@ -53,23 +53,23 @@ export const API_ENDPOINTS = {
     },
     // Material Type
     MATERIAL_TYPE: {
-        LIST: '/material-types',
-        DETAIL: (id: number) => `/material-types/${id}`,
-        CREATE: '/material-types',
-        UPDATE: (id: number) => `/material-types/${id}`,
-        DELETE: (id: number) => `/material-types/${id}`,
+        LIST: '/materialtype',
+        DETAIL: (id: string) => `/materialtype/${id}`,
+        CREATE: '/materialtype',
+        UPDATE: (id: string) => `/materialtype/${id}`,
+        DELETE: (id: string) => `/materialtype/${id}`,
     },
     // Units
     UNITS: {
-        LIST: '/units',
+        LIST: '/unit',
     },
     // Materials
     MATERIAL: {
-        LIST: '/materials',
-        DETAIL: (id: number) => `/materials/${id}`,
-        CREATE: '/materials',
-        UPDATE: (id: number) => `/materials/${id}`,
-        DELETE: (id: number) => `/materials/${id}`,
+        LIST: '/material',
+        DETAIL: (id: string) => `/material/${id}`,
+        CREATE: '/material',
+        UPDATE: (id: string) => `/material/${id}`,
+        DELETE: (id: string) => `/material/${id}`,
     },
 
     ENV_METRIC_TYPES: {
