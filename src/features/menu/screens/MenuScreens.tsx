@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Dimensions,
+    TouchableOpacity,
+    Image,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles';
 import BackgroundMenu from '@/assets/backgrounds/BackgroundMenu.svg';
@@ -11,44 +19,32 @@ import { SecurityManagement } from '@/features/menu/components/SecurityManagemen
 import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+import { useUserStore } from '@/features/menu/store/userStore';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
 const { width } = Dimensions.get('window');
 
-import { launchImageLibrary } from 'react-native-image-picker';
-import { Image } from 'react-native';
-
 const ProfileCard = ({ onPress }: { onPress: () => void }) => {
-    const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
-
-    const handleChoosePhoto = async () => {
-        const result = await launchImageLibrary({
-            mediaType: 'photo',
-            quality: 1,
-        });
-
-        if (result.assets && result.assets.length > 0) {
-            setAvatarUri(result.assets[0].uri || null);
-        }
-    };
+    // Read from global store
+    const { name, role, avatarUri } = useUserStore();
 
     return (
         <TouchableOpacity style={styles.profileCard} onPress={onPress}>
             <View style={styles.avatarContainer}>
-                <TouchableOpacity onPress={handleChoosePhoto}>
-                    <View style={styles.avatar}>
-                        {avatarUri ? (
-                            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-                        ) : (
-                            <AvatarIcon width={64} height={64} />
-                        )}
-                    </View>
-                </TouchableOpacity>
+                <View style={styles.avatar}>
+                    {avatarUri ? (
+                        <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+                    ) : (
+                        <AvatarIcon width={64} height={64} />
+                    )}
+                </View>
             </View>
             <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>Nguyễn Văn A</Text>
+                <Text style={styles.profileName}>{name}</Text>
                 <View style={styles.roleTag}>
-                    <Text style={styles.roleText}>{'Quản trị viên'}</Text>
+                    <Text style={styles.roleText}>{role || 'Quản trị viên'}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -57,7 +53,7 @@ const ProfileCard = ({ onPress }: { onPress: () => void }) => {
 
 export const MenuScreens: React.FC = () => {
     const insets = useSafeAreaInsets();
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -173,14 +169,13 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     scrollContent: {
-        paddingHorizontal: 0, // Wrapper handles margin
+        paddingHorizontal: 0,
         paddingTop: 0,
         paddingBottom: 100,
     },
     fixedContent: {
         paddingHorizontal: 16,
         zIndex: 1,
-        // backgroundColor: colors.backgroundPrimary, // Not strictly needed unless overlapping
         paddingBottom: 0,
     },
     profileCard: {
