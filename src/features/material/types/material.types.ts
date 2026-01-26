@@ -24,7 +24,7 @@ export interface IMaterial {
 }
 
 export interface IUnit {
-    id: number;
+    id: string;
     name: string;
 }
 

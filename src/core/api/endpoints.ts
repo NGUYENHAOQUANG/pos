@@ -72,7 +72,7 @@ export const API_ENDPOINTS = {
     },
     // Units
     UNITS: {
-        LIST: '/units',
+        LIST: '/unit',
     },
     // Materials
     MATERIAL: {

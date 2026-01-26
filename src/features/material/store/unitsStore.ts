@@ -8,11 +8,11 @@ import { immer } from 'zustand/middleware/immer';
 
 interface UnitsState {
     // Client state
-    selectedUnitId: number | null;
+    selectedUnitId: string | null;
     selectedUnitName: string | null;
 
     // Actions
-    setSelectedUnit: (unitId: number | null, unitName: string | null) => void;
+    setSelectedUnit: (unitId: string | null, unitName: string | null) => void;
     clearSelection: () => void;
 }
 
