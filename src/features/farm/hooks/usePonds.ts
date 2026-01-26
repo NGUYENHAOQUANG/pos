@@ -5,17 +5,24 @@ import { farmKeys } from './farmKeys';
 import { PondData } from '@/features/farm/types/farm.types';
 
 export const usePondMasterData = () => {
-    return useQuery({
+    const query = useQuery({
         queryKey: farmKeys.masterData.types(),
         queryFn: async () => {
-            const [types, operations] = await Promise.all([
-                pondApi.getPondTypes(),
-                pondApi.getPondTypeOperations(),
-            ]);
+            // Execute sequentially to handle errors independently
+            const types = await pondApi.getPondTypes();
+            let operations: any[] = [];
+            try {
+                operations = await pondApi.getPondTypeOperations();
+            } catch {
+                // Ignore failure
+            }
+
             return { types, operations };
         },
-        staleTime: 60 * 60 * 1000, // 1 hour for master data (was 24h)
+        staleTime: 60 * 60 * 1000,
     });
+
+    return query;
 };
 
 export const usePondsByZone = (zoneId: number | string | null) => {
@@ -26,9 +33,8 @@ export const usePondsByZone = (zoneId: number | string | null) => {
         queryFn: async ({ pageParam = 1 }) => {
             if (!zoneId) return { items: [], total: 0 };
 
-            // Just fetch raw data, don't map here to avoid stale closure issues
+            // Fetch raw data
             const response = await pondApi.getPondsByZone(zoneId, {
-                PageSize: 100,
                 PageNumber: pageParam,
             });
 
@@ -46,11 +52,10 @@ export const usePondsByZone = (zoneId: number | string | null) => {
             return undefined;
         },
         enabled: !!zoneId,
-        staleTime: 0, // Always fetch fresh data (was 5 mins)
+        staleTime: 5 * 60 * 1000, // 5 mins
     });
 
     // Reactive Mapping: Map pond types whenever masterData or query data changes
-    // This fixes the issue where types were missing if masterData loaded after ponds
     const mappedData = useMemo(() => {
         if (!query.data) return query.data;
 
@@ -59,8 +64,8 @@ export const usePondsByZone = (zoneId: number | string | null) => {
             items: page.items.map((pond: any) => {
                 const mappedPond = { ...pond };
                 if (masterData?.types) {
-                    // Try to find type by ID first (API usually returns pondTypeId)
-                    const typeId = pond.pondTypeId;
+                    // Try to find type by ID first (API usually returns pondCategoryId)
+                    const typeId = (pond as any).pondCategoryId;
                     if (typeId) {
                         const matchedType = masterData.types.find(t => t.id === typeId);
                         if (matchedType) mappedPond.type = matchedType;
@@ -76,13 +81,9 @@ export const usePondsByZone = (zoneId: number | string | null) => {
         };
     }, [query.data, masterData]);
 
-    // Merge loading state: isLoading is true if either ponds OR master data is loading
-    // This ensures skeleton persists until we have Types to map
     return {
         ...query,
         data: mappedData, // Return the mapped data
-        // If master data fails (isLoadingMaster=false, data=undefined), we still show ponds with missing types
-        // rather than stuck in loading forever.
         isLoading: query.isLoading || isLoadingMaster,
     };
 };

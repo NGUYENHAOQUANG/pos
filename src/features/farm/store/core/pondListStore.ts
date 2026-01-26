@@ -17,15 +17,15 @@ export interface PondListStore {
     operationTypes: OperationType[];
     pondTypeOperations: PondTypeOperation[];
     // Map of pondTypeId -> operations available for that pond type
-    operationsByPondType: Record<number, PondTypeOperation[]>;
+    operationsByPondType: Record<string, PondTypeOperation[]>;
     isLoadingMasterData: boolean; // Loading state for master data
-    fetchPonds: () => Promise<void>;
+
     fetchPondsByZone: (
         zoneId: number | string,
         updates?: { isBackground?: boolean; isLoadMore?: boolean }
     ) => Promise<void>;
     fetchMasterData: () => Promise<void>;
-    fetchOperationsByPondType: (pondTypeId: number) => Promise<PondTypeOperation[]>;
+    fetchOperationsByPondType: (pondTypeId: string) => Promise<PondTypeOperation[]>;
     getPondById: (pondId: string) => PondData | undefined;
     getOperationsForPond: (pondId: string) => PondTypeOperation[];
     updatePondType: (pondId: string, newType: PondType) => void;
@@ -47,16 +47,7 @@ export const createPondListStore: StateCreator<
     page: 1,
     hasMore: true,
     totalCount: 0,
-    fetchPonds: async () => {
-        set({ isLoadingPonds: true });
-        try {
-            const ponds = await pondApi.getPonds();
-            set({ ponds, isLoadingPonds: false });
-        } catch (error) {
-            set({ isLoadingPonds: false });
-            console.error('Error fetching ponds:', error);
-        }
-    },
+
     fetchPondsByZone: async (zoneId, updates = {}) => {
         const { isBackground = false, isLoadMore = false } = updates;
 
@@ -96,9 +87,9 @@ export const createPondListStore: StateCreator<
 
             // Map pondTypeId to type object
             const mappedPonds = ponds.map(pond => {
-                // @ts-ignore - pondTypeId exists in API response but not yet in Interface?
-                // We should probably add pondTypeId to PondData interface too, but for now access property directly
-                const typeId = (pond as unknown as { pondTypeId: number }).pondTypeId;
+                // @ts-ignore - API returns pondCategoryId for mapping
+                // We should probably add pondCategoryId to PondData interface too, but for now access property directly
+                const typeId = (pond as unknown as { pondCategoryId: string }).pondCategoryId;
                 const matchedType = currentTypes.find(t => t.id === typeId);
 
                 // If matched, assign it. If not, keeping undefined/partial is better than crashing.
@@ -151,7 +142,7 @@ export const createPondListStore: StateCreator<
             ]);
 
             // Step 2: Fetch operations for each pond type
-            const operationsByPondType: Record<number, PondTypeOperation[]> = {};
+            const operationsByPondType: Record<string, PondTypeOperation[]> = {};
 
             // Fetch operations for each pond type in parallel
             const operationPromises = types.map(async pondType => {
@@ -190,7 +181,7 @@ export const createPondListStore: StateCreator<
             set({ isLoadingMasterData: false });
         }
     },
-    fetchOperationsByPondType: async (pondTypeId: number) => {
+    fetchOperationsByPondType: async (pondTypeId: string) => {
         try {
             const operations = await pondApi.getOperationsByPondType(pondTypeId);
             set(state => {
