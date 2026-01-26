@@ -48,13 +48,19 @@ export interface PondTypeOperation {
 import { IMaterial } from '@/features/material/types/material.types';
 
 export interface Zone {
-    id: number;
+    id: string;
+    zoneId?: string;
     name: string;
-    description?: string;
-    areaM2?: number;
-    activeFlag?: boolean;
-    address?: string;
     code?: string;
+    description?: string;
+    area?: number;
+    isActive?: boolean;
+    address?: string;
+    no?: number;
+    createdAt?: string;
+    editedAt?: string;
+    creator?: string | null;
+    editor?: string | null;
 }
 
 export interface PondData {

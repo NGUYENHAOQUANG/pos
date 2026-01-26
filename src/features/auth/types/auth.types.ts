@@ -13,6 +13,7 @@ export interface AuthUser {
     email?: string;
     avatar?: string;
     roles?: string[];
+    loginStatus?: string;
 }
 
 // Swagger: LoginRequest
@@ -27,15 +28,27 @@ export interface RegisterData {
     name: string;
 }
 
-// Swagger: JwtResponse
 export interface JwtResponse {
     accessToken: string;
     refreshToken: string;
-    issued: string;
-    refreshTokenExpires: string;
-    refreshTokenExpiresAt?: string; // New API format
-    accessTokenExpires: string;
-    accessTokenExpiresAt?: string; // New API format
+    issued?: string;
+    refreshTokenExpiresAt?: string;
+    accessTokenExpiresAt?: string;
+    userId?: string;
+    phoneNumber?: string;
+    fullName?: string | null;
+    roleCode?: string;
+    policies?: string[];
+    loginStatus?: 'REQUIRE_UPDATE_PROFILE' | 'COMPLETED' | string;
+    isProfileCompleted?: boolean;
+}
+
+export interface CompleteProfilePayload {
+    userId: string;
+    fullName: string;
+    email?: string;
+    address?: string;
+    avatarUrl?: string;
 }
 
 // Swagger: JwtResponseAppResponse

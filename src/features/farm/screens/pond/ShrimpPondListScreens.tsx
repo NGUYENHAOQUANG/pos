@@ -56,7 +56,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     // Flatten pagination data using reduce instead of flatMap for better compatibility
     const ponds = useMemo(() => {
         if (!pondsData?.pages) return [];
-        return pondsData.pages.reduce((acc, page) => [...acc, ...page.items], [] as any[]);
+        return pondsData.pages.reduce((acc, page) => [...acc, ...page.items], [] as PondData[]);
     }, [pondsData]);
 
     const totalCount = pondsData?.pages[0]?.total || 0;
@@ -64,7 +64,8 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const [selectedTab, setSelectedTab] = useState('all');
 
     // Ref for FlatList scrolling
-    const flatListRef = useRef<FlatList>(null);
+    // Ref for FlatList scrolling
+    const flatListRef = useRef<FlatList<PondData>>(null);
     useScrollToTop(flatListRef as any);
 
     // Effect to select the first zone by default if none selected
@@ -75,7 +76,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
             if (!isValidZone) {
                 // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => z.id === 71) || zones[0];
+                const targetZone = zones.find(z => z.id === '71') || zones[0];
                 if (targetZone) {
                     setSelectedZoneId(targetZone.id);
                 }
@@ -94,7 +95,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
     // Helper to handle selection
     const handleSelectFarm = (item: DropDownItem) => {
-        setSelectedZoneId(Number(item.id));
+        setSelectedZoneId(String(item.id));
     };
 
     const handlePondPress = (pond: PondData) => {

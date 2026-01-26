@@ -1,13 +1,12 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
-    CreateMaterialRequest,
-    UpdateMaterialRequest,
-    GetMaterialsResponse,
-    GetMaterialByIdResponse,
-    GetMaterialsParams,
-    IAppResponse,
-} from '@/features/material/types/material.types';
+    CreateMaterialV2Request,
+    UpdateMaterialV2Request,
+    GetMaterialsV2Params,
+    GetMaterialsV2Response,
+    GetMaterialByIdV2Response,
+} from '@/features/material/types/materialGroup.types';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 export const materialApi = {
@@ -15,8 +14,8 @@ export const materialApi = {
      * Get list of materials with pagination and filters
      * @param params - Query params (Search, MaterialTypeId, Page, PageSize)
      */
-    getAll: async (params?: GetMaterialsParams): Promise<GetMaterialsResponse> => {
-        const { data } = await apiClient.get<GetMaterialsResponse>(API_ENDPOINTS.MATERIAL.LIST, {
+    getAll: async (params?: GetMaterialsV2Params): Promise<GetMaterialsV2Response> => {
+        const { data } = await apiClient.get<GetMaterialsV2Response>(API_ENDPOINTS.MATERIAL.LIST, {
             params,
         });
         return data;
@@ -26,8 +25,8 @@ export const materialApi = {
      * Get material by ID
      * @param id - Material ID
      */
-    getById: async (id: number): Promise<GetMaterialByIdResponse> => {
-        const { data } = await apiClient.get<GetMaterialByIdResponse>(
+    getById: async (id: number): Promise<GetMaterialByIdV2Response> => {
+        const { data } = await apiClient.get<GetMaterialByIdV2Response>(
             API_ENDPOINTS.MATERIAL.DETAIL(id)
         );
         return data;
@@ -37,12 +36,12 @@ export const materialApi = {
      * Create a new material
      * @param request - Create material request data
      */
-    create: async (request: CreateMaterialRequest): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.post<IAppResponse<null>>(
+    create: async (request: CreateMaterialV2Request): Promise<GetMaterialsV2Response> => {
+        const { data } = await apiClient.post<GetMaterialsV2Response>(
             API_ENDPOINTS.MATERIAL.CREATE,
             request
         );
-        if (!data.result) {
+        if (!data.success) {
             const errorMessage = getErrorMessage(
                 { response: { data } },
                 data.message || 'Tạo vật tư thất bại'
@@ -57,12 +56,15 @@ export const materialApi = {
      * @param id - Material ID
      * @param request - Update material request data
      */
-    update: async (id: number, request: UpdateMaterialRequest): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.put<IAppResponse<null>>(
+    update: async (
+        id: number,
+        request: UpdateMaterialV2Request
+    ): Promise<GetMaterialsV2Response> => {
+        const { data } = await apiClient.put<GetMaterialsV2Response>(
             API_ENDPOINTS.MATERIAL.UPDATE(id),
             request
         );
-        if (!data.result) {
+        if (!data.success) {
             const errorMessage = getErrorMessage(
                 { response: { data } },
                 data.message || 'Cập nhật vật tư thất bại'
@@ -76,8 +78,8 @@ export const materialApi = {
      * Delete a material
      * @param id - Material ID
      */
-    delete: async (id: number): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.delete<IAppResponse<null>>(
+    delete: async (id: number): Promise<GetMaterialsV2Response> => {
+        const { data } = await apiClient.delete<GetMaterialsV2Response>(
             API_ENDPOINTS.MATERIAL.DELETE(id)
         );
         return data;

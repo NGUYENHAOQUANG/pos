@@ -24,8 +24,10 @@ import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 import { authApi } from '@/features/auth/api/authApi';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
-
+import { NormalizedError } from '@/core/api/errorHandler';
 // Countdown duration in seconds
 const COUNTDOWN_DURATION = 60;
 
@@ -144,20 +146,28 @@ export default function RegisterScreen() {
 
         setIsVerifying(true);
         try {
-            await verifyOtp(contact, otpString);
+            const status = await verifyOtp(contact, otpString);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Đăng ký thành công',
-                visibilityTime: 2000,
-            });
+            if (status === 'REQUIRE_UPDATE_PROFILE') {
+                // Register successful & verified, now update profile
+                navigation.replace('Info', {
+                    phone: contact,
+                    userId: useAuthStore.getState().user?.id,
+                } as any);
+            } else {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đăng ký thành công',
+                    visibilityTime: 2000,
+                });
+            }
         } catch (error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             console.error(error);
         } finally {
             setIsVerifying(false);
         }
-    }, [otp, contact, verifyOtp]);
+    }, [otp, contact, verifyOtp, navigation]);
 
     // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {
@@ -171,24 +181,27 @@ export default function RegisterScreen() {
     const handleResendOTP = async () => {
         if (isResending) return;
 
-        if (!phoneNumber) {
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: 'Không có số điện thoại',
-            });
-            return;
-        }
-
         setIsResending(true);
         try {
-            const response = await authApi.requestOtp(phoneNumber);
+            let phoneNumber = contact.replace(/\s+/g, ''); // Remove spaces
+            if (phoneNumber.startsWith('+84')) {
+                phoneNumber = '0' + phoneNumber.slice(3);
+            }
+
+            // Call API to resend OTP
+            const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_OTP, {
+                phoneNumber: phoneNumber,
+            });
 
             // Extract OTP from response (for test/dev notification)
-            const otpCode = response?.data?.testOtp;
+            const otpCode =
+                response.data?.testOtp ||
+                response.data?.data?.testOtp ||
+                response.data?.data?.otpCode ||
+                response.data?.otpCode;
 
             if (otpCode) {
-                await notificationHelper.displayOtpNotification(String(otpCode));
+                notificationHelper.displayOtpNotification(String(otpCode));
             }
 
             // Reset countdown and UI
@@ -203,11 +216,11 @@ export default function RegisterScreen() {
                 text1: 'Đã gửi lại mã OTP',
                 visibilityTime: 2000,
             });
-        } catch (err: unknown) {
-            const axiosError = err as { response?: { data?: { message?: string } } };
+        } catch (err) {
+            const error = err as NormalizedError;
             Toast.show({
                 type: 'error',
-                text1: axiosError.response?.data?.message || 'Gửi lại mã thất bại',
+                text1: error.message || 'Gửi lại mã thất bại',
                 visibilityTime: 3000,
             });
         } finally {

@@ -67,7 +67,7 @@ export const pondApi = {
         zoneId: number | string,
         params?: { PageSize?: number; PageNumber?: number }
     ): Promise<{ items: PondData[]; total: number }> => {
-        const response = await apiClient.get(API_ENDPOINTS.ZONES.PONDS(zoneId), {
+        const response = await apiClient.get(API_ENDPOINTS.ZONE.PONDS(zoneId), {
             params: {
                 pageSize: params?.PageSize || 100,
                 page: params?.PageNumber || 1,

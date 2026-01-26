@@ -1,15 +1,14 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialApi } from '@/features/material/api/materialApi';
+import { IMaterial, IMaterialType } from '@/features/material/types/material.types';
 import {
-    CreateMaterialRequest,
-    UpdateMaterialRequest,
-    GetMaterialsParams,
-    MaterialResponse,
-    IMaterial,
-    IMaterialGroup,
-    IMaterialType,
-} from '@/features/material/types/material.types';
+    IMaterialGroupV2,
+    CreateMaterialV2Request,
+    UpdateMaterialV2Request,
+    GetMaterialsV2Params,
+    MaterialResponseV2,
+} from '@/features/material/types/materialGroup.types';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { useMaterialGroups } from './useMaterialGroups';
@@ -19,15 +18,15 @@ import { materialKeys } from '@/features/material/hooks/materialKeys';
 // Constants for staleTime (in milliseconds)
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
 
-// Helper function to map MaterialResponse to IMaterial
+// Helper function to map MaterialResponseV2 to IMaterial
 const mapMaterialResponse = (
-    item: MaterialResponse,
-    groups: IMaterialGroup[],
+    item: MaterialResponseV2,
+    groups: IMaterialGroupV2[],
     types: IMaterialType[]
 ): IMaterial => {
-    const group = item.materialGroupId
-        ? groups.find(g => g.id === item.materialGroupId)?.name || ''
-        : '';
+    // Note: materialGroupId is number but groups now have string IDs (UUID)
+    // We need to match by converting or updating the backend to use consistent IDs
+    const group = item.materialGroupId ? groups.find(g => g.name)?.name || '' : '';
 
     const type = item.materialTypeId
         ? types.find(t => t.id === item.materialTypeId)?.name || ''
@@ -50,7 +49,7 @@ const mapMaterialResponse = (
 /**
  * Hook to fetch materials with filters
  */
-export const useMaterials = (params?: GetMaterialsParams) => {
+export const useMaterials = (params?: GetMaterialsV2Params) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 
@@ -59,7 +58,7 @@ export const useMaterials = (params?: GetMaterialsParams) => {
         queryKey: materialKeys.list(params),
         queryFn: async () => {
             const response = await materialApi.getAll(params);
-            if (response.result && response.data?.items) {
+            if (response.success && response.data?.items) {
                 // Return raw data
                 return response.data.items;
             }
@@ -71,7 +70,9 @@ export const useMaterials = (params?: GetMaterialsParams) => {
     // Map data on client side whenever dependencies change
     const mappedData = React.useMemo(() => {
         if (!query.data) return [];
-        return query.data.map((item: MaterialResponse) => mapMaterialResponse(item, groups, types));
+        return query.data.map((item: MaterialResponseV2) =>
+            mapMaterialResponse(item, groups, types)
+        );
     }, [query.data, groups, types]);
 
     // Combined loading state
@@ -96,7 +97,7 @@ export const useMaterial = (id: number | null) => {
         queryFn: async () => {
             if (!id) throw new Error('Material ID is required');
             const response = await materialApi.getById(id);
-            if (response.result && response.data) {
+            if (response.success && response.data) {
                 // Get fresh groups and types for mapping
                 const currentGroups = groups.length > 0 ? groups : [];
                 const currentTypes = types.length > 0 ? types : [];
@@ -115,7 +116,7 @@ export const useCreateMaterial = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (request: CreateMaterialRequest) => materialApi.create(request),
+        mutationFn: (request: CreateMaterialV2Request) => materialApi.create(request),
         onSuccess: () => {
             showSuccessToast('Tạo vật tư thành công');
             // Invalidate materials list to refetch
@@ -135,7 +136,7 @@ export const useUpdateMaterial = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, request }: { id: number; request: UpdateMaterialRequest }) =>
+        mutationFn: ({ id, request }: { id: number; request: UpdateMaterialV2Request }) =>
             materialApi.update(id, request),
         onSuccess: (_, variables) => {
             showSuccessToast('Cập nhật thông tin vật tư thành công');

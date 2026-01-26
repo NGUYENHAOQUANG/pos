@@ -26,6 +26,7 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 // Countdown duration in seconds
 const COUNTDOWN_DURATION = 60;
@@ -139,7 +140,7 @@ export default function VerifyOTPScreen() {
             return;
         }
 
-        if (otpString === '0000') {
+        if (otpString === '9999') {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
             return;
         }
@@ -147,22 +148,30 @@ export default function VerifyOTPScreen() {
         setIsVerifying(true);
         try {
             // Call API verify OTP via Store (handles login)
-            await verifyOtp(contact, otpString);
+            const status = await verifyOtp(contact, otpString);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Đăng nhập thành công',
-                visibilityTime: 2000,
-            });
+            if (status === 'REQUIRE_UPDATE_PROFILE') {
+                navigation.replace('Info', {
+                    phone: contact,
+                    userId: useAuthStore.getState().user?.id,
+                } as any); // Type cast if needed or update Params List
+            } else {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Đăng nhập thành công',
+                    visibilityTime: 2000,
+                });
+            }
 
-            // Success! Store update (isAuthenticated=true) will trigger navigation to Main App
-        } catch (error) {
-            setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
+            // Success! Store update (isAuthenticated=true) will trigger navigation to Main App if status is COMPLETED
+        } catch (err) {
+            const error = err as NormalizedError;
             console.error(error);
+            setErrorMessage(error.message);
         } finally {
             setIsVerifying(false);
         }
-    }, [otp, contact, verifyOtp]);
+    }, [otp, contact, verifyOtp, navigation]);
 
     // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {
@@ -212,11 +221,11 @@ export default function VerifyOTPScreen() {
                 text1: 'Đã gửi lại mã OTP',
                 visibilityTime: 2000,
             });
-        } catch (error: unknown) {
-            const axiosError = error as { response?: { data?: { message?: string } } };
+        } catch (err) {
+            const error = err as NormalizedError;
             Toast.show({
                 type: 'error',
-                text1: axiosError.response?.data?.message || 'Gửi lại mã thất bại',
+                text1: error.message || 'Gửi lại mã thất bại',
                 visibilityTime: 3000,
             });
         } finally {
