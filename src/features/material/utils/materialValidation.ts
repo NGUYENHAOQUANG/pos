@@ -15,8 +15,8 @@ export const materialFormSchema = z.object({
     type: z.string().min(1, 'Vui lòng chọn loại vật tư'),
     unit: z.union([z.string(), z.number()]).refine(
         val => {
-            const num = typeof val === 'number' ? val : Number(val);
-            return !isNaN(num) && num > 0;
+            if (typeof val === 'number') return val > 0;
+            return val && val.toString().trim().length > 0;
         },
         { message: 'Vui lòng chọn đơn vị tính' }
     ),
@@ -96,9 +96,9 @@ export const validateMaterialFormWithToast = (data: {
  */
 export const validateMaterialType = (
     typeName: string,
-    materialTypes: Array<{ name: string | null; id: number }>,
-    typesByGroup: Array<{ name: string | null; id: number }>
-): { isValid: boolean; type?: { name: string | null; id: number } } => {
+    materialTypes: Array<{ name: string | null; id: string | number }>,
+    typesByGroup: Array<{ name: string | null; id: string | number }>
+): { isValid: boolean; type?: { name: string | null; id: string | number } } => {
     const selectedType =
         materialTypes.find(t => t.name === typeName) || typesByGroup.find(t => t.name === typeName);
 
@@ -116,10 +116,23 @@ export const validateMaterialType = (
  */
 export const validateAndConvertUnit = (
     unit: string | number
-): { isValid: boolean; unitId?: number; error?: string } => {
-    const unitId = typeof unit === 'number' ? unit : Number(unit);
+): { isValid: boolean; unitId?: string | number; error?: string } => {
+    // If it's a number, check positive
+    if (typeof unit === 'number') {
+        if (unit <= 0) {
+            return {
+                isValid: false,
+                error: 'Đơn vị tính không hợp lệ',
+            };
+        }
+        return {
+            isValid: true,
+            unitId: unit,
+        };
+    }
 
-    if (isNaN(unitId) || unitId <= 0) {
+    // If it's a string, ensure not empty
+    if (!unit || unit.trim() === '') {
         return {
             isValid: false,
             error: 'Đơn vị tính không hợp lệ',
@@ -128,6 +141,6 @@ export const validateAndConvertUnit = (
 
     return {
         isValid: true,
-        unitId,
+        unitId: unit,
     };
 };

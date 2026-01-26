@@ -91,9 +91,9 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
         createMaterial(
             {
                 name: name.trim(),
-                materialTypeId: typeValidation.type.id,
+                materialTypeId: typeValidation.type!.id.toString(),
                 description: usage || '',
-                unitId: unitValidation.unitId,
+                unitId: unitValidation.unitId!.toString(),
                 manufacturer: manufacturer?.trim() || null,
                 isActive: isActive,
             },

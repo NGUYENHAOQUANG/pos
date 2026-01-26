@@ -31,7 +31,7 @@ export const PersonalInformationScreens: React.FC = () => {
 
     // Extend PondData to include tempZoneId for local processing
     interface PondWithZone extends PondData {
-        tempZoneId?: number;
+        tempZoneId?: string | number;
     }
 
     const { zones, fetchZones, setSelectedZoneId } = useFarmStore();
@@ -182,7 +182,7 @@ export const PersonalInformationScreens: React.FC = () => {
                         totalFarms={totalFarms}
                         farms={connectedFarms}
                         onFarmPress={farm => {
-                            setSelectedZoneId(farm.id);
+                            setSelectedZoneId(farm.id.toString());
                             // Navigate to the Main Tab Navigator, then to the Farm tab
                             (navigation.navigate as any)('MainTabs', { screen: 'Farm' });
                         }}
