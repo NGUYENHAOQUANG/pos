@@ -7,7 +7,15 @@ import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
 
 // Custom Toast Component to handle dynamic safe area positioning
 // This ensures the toast is always centered vertically relative to the HeaderSection content
-const CustomToast = ({ text1, text2, type }: { text1?: string; text2?: string; type: 'success' | 'error' }) => {
+const CustomToast = ({
+    text1,
+    text2,
+    type,
+}: {
+    text1?: string;
+    text2?: string;
+    type: 'success' | 'error';
+}) => {
     // HeaderSection uses padding: insets.top + 12
     // We want the toast top to align effectively with the header content top.
 
@@ -29,14 +37,8 @@ const CustomToast = ({ text1, text2, type }: { text1?: string; text2?: string; t
                 )}
             </View>
             <View style={styles.contentContainer}>
-                <Text style={styles.text} numberOfLines={1}>
-                    {text1}
-                </Text>
-                {text2 ? (
-                    <Text style={styles.subText} numberOfLines={1}>
-                        {text2}
-                    </Text>
-                ) : null}
+                <Text style={styles.text}>{text1}</Text>
+                {text2 ? <Text style={styles.subText}>{text2}</Text> : null}
             </View>
         </View>
     );
@@ -74,7 +76,8 @@ const styles = StyleSheet.create({
     iconWrapper: {
         marginRight: 8,
     },
-    contentContainer: { // New container for texts
+    contentContainer: {
+        // New container for texts
         flexShrink: 1,
     },
     text: {
@@ -82,7 +85,8 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontWeight: '500', // Slightly bolder for title
     },
-    subText: { // New style for text2
+    subText: {
+        // New style for text2
         fontSize: 13,
         color: colors.textSecondary,
         fontWeight: '400',
