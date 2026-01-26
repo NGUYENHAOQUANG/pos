@@ -10,8 +10,10 @@ export interface IMaterial {
     id: string;
     name: string;
     group: MaterialGroupType;
+    groupId?: string; // groupId for API calls
     type?: string;
-    unit: string | number; // unitId for API calls
+    typeId?: string; // typeId for API calls
+    unit: string; // unitId for API calls
     unitName?: string; // unitName for display
     usage?: string;
     unitOfUse?: string;
