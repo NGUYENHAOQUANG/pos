@@ -147,8 +147,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
         }
 
         // Get material id (convert string to number)
-        const materialId = Number(initialData.id);
-        if (isNaN(materialId)) {
+        const materialId = initialData.id;
+        if (!materialId) {
             showValidationError('ID vật tư không hợp lệ');
             return;
         }
@@ -184,8 +184,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             return;
         }
 
-        const materialId = Number(initialData.id);
-        if (isNaN(materialId)) {
+        const materialId = initialData.id;
+        if (!materialId) {
             showValidationError('ID vật tư không hợp lệ');
             return;
         }

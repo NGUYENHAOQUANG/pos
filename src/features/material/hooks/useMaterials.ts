@@ -35,7 +35,7 @@ const mapMaterialResponse = (
         : '';
 
     return {
-        id: item.id.toString(),
+        id: item.id,
         name: item.name || '',
         group: group,
         type: type,
