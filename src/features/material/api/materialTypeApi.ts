@@ -7,7 +7,7 @@ import { IAppResponseV2, IPaginateV2 } from '@/features/material/types/materialG
 export interface GetMaterialTypesParams {
     Page?: number;
     PageSize?: number;
-    MaterialGroupId?: number;
+    MaterialGroupId?: string;
 }
 
 export type GetMaterialTypesResponse = IAppResponseV2<IPaginateV2<IMaterialType>>;
