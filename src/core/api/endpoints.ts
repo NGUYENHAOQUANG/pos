@@ -100,6 +100,9 @@ export const API_ENDPOINTS = {
     ENVIRONMENTAL_PARAMETER: {
         LIST: (pondId: number | string) => `/pond/${pondId}/EnvironmentalParameter`,
     },
+    INVENTORY_CHECK: {
+        LIST: '/inventorycheck',
+    },
     PARAMETER_SETTING: {
         LIST: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
         DETAIL: (zoneId: number | string, id: number | string) =>

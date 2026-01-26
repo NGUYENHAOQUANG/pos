@@ -7,9 +7,11 @@ import {
     LayoutAnimation,
     Platform,
     UIManager,
+    ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import { inventoryApi } from '@/features/material/api/inventoryApi';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -38,11 +40,40 @@ interface InventoryCardProps {
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
+    const [items, setItems] = useState<InventoryDetailItem[]>(data.items || []);
+    const [isLoading, setIsLoading] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
     };
+
+    React.useEffect(() => {
+        if (isExpanded && items.length === 0 && data.id) {
+            const fetchDetails = async () => {
+                setIsLoading(true);
+                try {
+                    const response = await inventoryApi.getDetail(data.id);
+                    if (response.success && response.data?.items) {
+                        const mappedItems: InventoryDetailItem[] = response.data.items.map(
+                            item => ({
+                                id: item.inventoryCheckItemId,
+                                materialName: item.materialName || item.materialCode || 'N/A',
+                                beforeQuantity: item.expectedQty,
+                                afterQuantity: item.actualQty,
+                            })
+                        );
+                        setItems(mappedItems);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch inventory details:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchDetails();
+        }
+    }, [isExpanded, items.length, data.id]);
 
     return (
         <View style={styles.container}>
@@ -89,23 +120,39 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
             {isExpanded && (
                 <View style={styles.expandedContainer}>
-                    {data.items.map(item => (
-                        <View key={item.id} style={styles.detailItemContainer}>
-                            <Text style={styles.materialName}>{item.materialName}</Text>
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                    ) : items.length > 0 ? (
+                        items.map(item => (
+                            <View key={item.id} style={styles.detailItemContainer}>
+                                <Text style={styles.materialName}>{item.materialName}</Text>
 
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>
-                                    Tồn kho trước khi điều chỉnh:
-                                </Text>
-                                <Text style={styles.detailValue}>{item.beforeQuantity}</Text>
-                            </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>
+                                        Tồn kho trước khi điều chỉnh:
+                                    </Text>
+                                    <Text style={styles.detailValue}>{item.beforeQuantity}</Text>
+                                </View>
 
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Tồn kho sau khi điều chỉnh:</Text>
-                                <Text style={styles.detailValue}>{item.afterQuantity}</Text>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>
+                                        Tồn kho sau khi điều chỉnh:
+                                    </Text>
+                                    <Text style={styles.detailValue}>{item.afterQuantity}</Text>
+                                </View>
                             </View>
-                        </View>
-                    ))}
+                        ))
+                    ) : (
+                        <Text
+                            style={{
+                                textAlign: 'center',
+                                color: colors.textSecondary,
+                                marginBottom: spacing.sm,
+                            }}
+                        >
+                            Không có chi tiết
+                        </Text>
+                    )}
                 </View>
             )}
 
