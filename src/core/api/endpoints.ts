@@ -76,11 +76,11 @@ export const API_ENDPOINTS = {
     },
     // Materials
     MATERIAL: {
-        LIST: '/materials',
-        DETAIL: (id: number) => `/materials/${id}`,
-        CREATE: '/materials',
-        UPDATE: (id: number) => `/materials/${id}`,
-        DELETE: (id: number) => `/materials/${id}`,
+        LIST: '/material',
+        DETAIL: (id: string) => `/material/${id}`,
+        CREATE: '/material',
+        UPDATE: (id: string) => `/material/${id}`,
+        DELETE: (id: string) => `/material/${id}`,
     },
     // Production Seasons
     PRODUCTION_SEASONS: {

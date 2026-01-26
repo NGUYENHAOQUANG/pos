@@ -94,35 +94,35 @@ export interface MaterialResponseV2 {
     code?: string | null;
     name?: string | null;
     manufacturer?: string | null;
-    unitId: number;
+    unitId: string;
     unitName?: string | null;
-    materialGroupId?: number;
-    materialTypeId?: number;
+    materialGroupId?: string;
+    materialTypeId?: string;
     description?: string | null;
     isActive?: boolean;
 }
 
 export interface CreateMaterialV2Request {
     name: string;
-    materialTypeId: number;
+    materialTypeId: string;
     description: string;
-    unitId: number;
+    unitId: string;
     manufacturer?: string | null;
     isActive?: boolean;
 }
 
 export interface UpdateMaterialV2Request {
     name?: string | null;
-    materialTypeId?: number | null;
+    materialTypeId?: string | null;
     description?: string | null;
-    unitId?: number | null;
+    unitId?: string | null;
     manufacturer?: string | null;
     isActive?: boolean | null;
 }
 
 export interface GetMaterialsV2Params {
-    Search?: string;
-    MaterialTypeId?: number;
+    SearchText?: string;
+    materialTypeId?: string;
     Page?: number;
     PageSize?: number;
 }
