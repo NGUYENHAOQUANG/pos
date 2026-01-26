@@ -47,12 +47,12 @@ export const useMaterialTypesByGroup = (groupName: string | null) => {
             const response = await materialTypeApi.getList({
                 Page: DEFAULT_PAGE,
                 PageSize: DEFAULT_PAGE_SIZE,
+                MaterialGroupId: selectedGroup.id,
             });
 
             if (response.success && response.data?.items) {
                 return (response.data.items || []).filter(item => {
-                    const itemGroup = groups.find(g => g.id === String(item.materialGroupId));
-                    return itemGroup?.name === selectedGroup.name;
+                    return String(item.materialGroupId) === String(selectedGroup.id);
                 });
             }
             throw new Error(response.message || 'Không thể tải loại vật tư');
