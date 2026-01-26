@@ -11,7 +11,7 @@ export const POND_TYPES = {
 // export type PondType = (typeof POND_TYPES)[keyof typeof POND_TYPES]; // Legacy
 
 export interface PondType {
-    id: number;
+    id: string;
     name: string;
     code?: string; // Optional - API may not return this
     description?: string;
@@ -35,7 +35,7 @@ export interface OperationType {
 // Defines which operations are available for each pond type
 export interface PondTypeOperation {
     id: number;
-    pondTypeId: number;
+    pondTypeId: string;
     operationTypeId: number;
     operationTypeName: string;
     isMandatory: boolean;
