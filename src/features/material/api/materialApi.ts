@@ -25,7 +25,7 @@ export const materialApi = {
      * Get material by ID
      * @param id - Material ID
      */
-    getById: async (id: number): Promise<GetMaterialByIdV2Response> => {
+    getById: async (id: string): Promise<GetMaterialByIdV2Response> => {
         const { data } = await apiClient.get<GetMaterialByIdV2Response>(
             API_ENDPOINTS.MATERIAL.DETAIL(id)
         );
@@ -57,10 +57,10 @@ export const materialApi = {
      * @param request - Update material request data
      */
     update: async (
-        id: number,
+        id: string,
         request: UpdateMaterialV2Request
     ): Promise<GetMaterialsV2Response> => {
-        const { data } = await apiClient.put<GetMaterialsV2Response>(
+        const { data } = await apiClient.patch<GetMaterialsV2Response>(
             API_ENDPOINTS.MATERIAL.UPDATE(id),
             request
         );
@@ -78,7 +78,7 @@ export const materialApi = {
      * Delete a material
      * @param id - Material ID
      */
-    delete: async (id: number): Promise<GetMaterialsV2Response> => {
+    delete: async (id: string): Promise<GetMaterialsV2Response> => {
         const { data } = await apiClient.delete<GetMaterialsV2Response>(
             API_ENDPOINTS.MATERIAL.DELETE(id)
         );

@@ -64,23 +64,27 @@ export const MeterialScreen = () => {
     const { data: materialTypes = [] } = useMaterialTypes();
 
     const materialParams = useMemo(() => {
-        const params: { Page: number; PageSize: number; MaterialTypeId?: number; Search?: string } =
-            {
-                Page: DEFAULT_PAGE,
-                PageSize: DEFAULT_PAGE_SIZE,
-            };
+        const params: {
+            Page: number;
+            PageSize: number;
+            materialTypeId?: string;
+            SearchText?: string;
+        } = {
+            Page: DEFAULT_PAGE,
+            PageSize: DEFAULT_PAGE_SIZE,
+        };
 
         // Map filterType (type name) to MaterialTypeId
         if (filterType && filterType !== '' && filterType !== 'Tất cả loại vật tư') {
             const selectedType = materialTypes.find(t => t.name === filterType);
             if (selectedType) {
-                params.MaterialTypeId = selectedType.id;
+                params.materialTypeId = selectedType.id.toString();
             }
         }
 
         // Add Search param if searchText is set
         if (searchText && searchText.trim()) {
-            params.Search = searchText.trim();
+            params.SearchText = searchText.trim();
         }
 
         return params;
