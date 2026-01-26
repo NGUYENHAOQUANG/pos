@@ -6,6 +6,7 @@ import {
     GetMaterialsV2Params,
     GetMaterialsV2Response,
     GetMaterialByIdV2Response,
+    DeleteMaterialResponse,
 } from '@/features/material/types/materialGroup.types';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
@@ -78,8 +79,8 @@ export const materialApi = {
      * Delete a material
      * @param id - Material ID
      */
-    delete: async (id: string): Promise<GetMaterialsV2Response> => {
-        const { data } = await apiClient.delete<GetMaterialsV2Response>(
+    delete: async (id: string): Promise<DeleteMaterialResponse> => {
+        const { data } = await apiClient.delete<DeleteMaterialResponse>(
             API_ENDPOINTS.MATERIAL.DELETE(id)
         );
         return data;
