@@ -37,8 +37,8 @@ export const materialApi = {
      * Create a new material
      * @param request - Create material request data
      */
-    create: async (request: CreateMaterialV2Request): Promise<GetMaterialsV2Response> => {
-        const { data } = await apiClient.post<GetMaterialsV2Response>(
+    create: async (request: CreateMaterialV2Request): Promise<CreateMaterialResponse> => {
+        const { data } = await apiClient.post<CreateMaterialResponse>(
             API_ENDPOINTS.MATERIAL.CREATE,
             request
         );

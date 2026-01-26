@@ -31,43 +31,11 @@ const parseApiResponse = <T>(responseData: unknown): T[] => {
 };
 
 export const pondApi = {
-    getPonds: async (): Promise<PondData[]> => {
-        try {
-            const response = await apiClient.get(API_ENDPOINTS.PONDS.LIST);
-            const responseData = response.data;
-
-            // Handle different potential response structures (similar to zoneApi)
-            if (Array.isArray(responseData)) {
-                return responseData;
-            } else if (responseData?.data) {
-                if (Array.isArray(responseData.data)) {
-                    return responseData.data;
-                } else if (responseData.data.items && Array.isArray(responseData.data.items)) {
-                    return responseData.data.items;
-                }
-            } else if (responseData?.result) {
-                if (Array.isArray(responseData.result)) {
-                    return responseData.result;
-                } else if (responseData.result.items && Array.isArray(responseData.result.items)) {
-                    return responseData.result.items;
-                }
-            } else if (responseData?.items && Array.isArray(responseData.items)) {
-                return responseData.items;
-            }
-
-            console.warn('Unknown Pond API response structure:', responseData);
-            return [];
-        } catch (error) {
-            console.error('Failed to fetch ponds API:', error);
-            throw error;
-        }
-    },
-
     getPondsByZone: async (
         zoneId: number | string,
         params?: { PageSize?: number; PageNumber?: number }
     ): Promise<{ items: PondData[]; total: number }> => {
-        const response = await apiClient.get(API_ENDPOINTS.ZONE.PONDS(zoneId), {
+        const response = await apiClient.get(API_ENDPOINTS.ZONE.PONDS(String(zoneId)), {
             params: {
                 pageSize: params?.PageSize || 100,
                 page: params?.PageNumber || 1,
@@ -136,7 +104,7 @@ export const pondApi = {
 
     // Get operations available for a specific pond type
     // Example: What operations are available for "Ao nuôi"? (Feeding, Environment monitoring, Siphon, etc.)
-    getOperationsByPondType: async (pondTypeId: number): Promise<PondTypeOperation[]> => {
+    getOperationsByPondType: async (pondTypeId: number | string): Promise<PondTypeOperation[]> => {
         const response = await apiClient.get(
             API_ENDPOINTS.POND_TYPE_OPERATIONS.BY_POND_TYPE(pondTypeId)
         );

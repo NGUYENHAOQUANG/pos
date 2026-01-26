@@ -62,8 +62,6 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const totalCount = pondsData?.pages[0]?.total || 0;
 
     const [selectedTab, setSelectedTab] = useState('all');
-
-    // Ref for FlatList scrolling
     // Ref for FlatList scrolling
     const flatListRef = useRef<FlatList<PondData>>(null);
     useScrollToTop(flatListRef as any);
@@ -75,8 +73,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
             const isValidZone = selectedZoneId && zones.some(z => z.id === selectedZoneId);
 
             if (!isValidZone) {
-                // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => z.id === '71') || zones[0];
+                const targetZone = zones.find(z => z.name === 'Trại Kiên Giang') || zones[0];
                 if (targetZone) {
                     setSelectedZoneId(targetZone.id);
                 }
