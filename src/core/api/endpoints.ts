@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
         SEND_OTP: '/auth/send-otp',
         VERIFY_OTP: '/auth/verify-otp',
         DELETE_ACCOUNT: '/auth/delete-account',
+        COMPLETE_PROFILE: '/auth/complete-profile',
     },
     // Products
     PRODUCTS: {
@@ -45,13 +46,13 @@ export const API_ENDPOINTS = {
         BY_POND_TYPE: (pondTypeId: number) => `/pond-type-operations/${pondTypeId}`,
     },
     // Zones / Farms
-    ZONES: {
-        LIST: '/zones',
-        DETAIL: (id: number | string) => `/zones/${id}`,
-        CREATE: '/zones',
-        UPDATE: (id: number | string) => `/zones/${id}`,
-        DELETE: (id: number | string) => `/zones/${id}`,
-        PONDS: (id: number | string) => `/zones/${id}/ponds`,
+    ZONE: {
+        LIST: '/zone',
+        DETAIL: (id: number | string) => `/zone/${id}`,
+        CREATE: '/zone',
+        UPDATE: (id: number | string) => `/zone/${id}`,
+        DELETE: (id: number | string) => `/zone/${id}`,
+        PONDS: (id: number | string) => `/zone/${id}/ponds`,
     },
     // Material Group
     MATERIAL_GROUP: {

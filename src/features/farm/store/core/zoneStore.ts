@@ -6,8 +6,8 @@ export interface ZoneStore {
     zones: Zone[];
     isLoadingZones: boolean;
     fetchZones: () => Promise<void>;
-    selectedZoneId: number | null;
-    setSelectedZoneId: (id: number | null) => void;
+    selectedZoneId: string | null;
+    setSelectedZoneId: (id: string | null) => void;
     // Helper to get selected zone object
     getSelectedZone: () => Zone | undefined;
 }

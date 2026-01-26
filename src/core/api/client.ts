@@ -76,24 +76,19 @@ const handleTokenRefresh = async (): Promise<string | null> => {
 
         if (
             (response.success || response.result) &&
-            response.data.accessToken &&
-            response.data.refreshToken
+            response.data?.accessToken &&
+            response.data?.refreshToken
         ) {
             const {
                 accessToken,
                 refreshToken: newRefreshToken,
-                accessTokenExpiresAt, // New field name from API
-                accessTokenExpires, // Old field name fallback
+                accessTokenExpiresAt,
             } = response.data;
 
+            const expiresAt = accessTokenExpiresAt;
+
             // Update tokens in store
-            useAuthStore
-                .getState()
-                .setTokens(
-                    accessToken,
-                    newRefreshToken,
-                    accessTokenExpiresAt || accessTokenExpires
-                );
+            useAuthStore.getState().setTokens(accessToken, newRefreshToken, expiresAt);
 
             // Process queued requests with new token
             processQueue(null, accessToken);
@@ -109,7 +104,6 @@ const handleTokenRefresh = async (): Promise<string | null> => {
         }
         isRefreshing = false;
         processQueue(refreshError, null);
-        console.log('Refresh token error:', refreshError);
         return null;
     }
 };

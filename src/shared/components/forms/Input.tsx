@@ -212,7 +212,7 @@ export function Input({
                     </TouchableOpacity>
                 )}
             </View>
-            Error Message
+            {/* Error Message */}
             {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
     );

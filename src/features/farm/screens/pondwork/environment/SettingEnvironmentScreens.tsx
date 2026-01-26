@@ -8,14 +8,14 @@ import {
     FlatList,
     ScrollView,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+// FarmStackParamList removed to use AppStackParamList
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import {
@@ -30,16 +30,16 @@ import {
 } from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
 import { useSettingEnvironment } from '@/features/farm/hooks/envhooks/useSettingEnvironment';
 
+import { AppStackParamList } from '@/app/navigation/AppStack';
+
 type NavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<FarmStackParamList>,
+    NativeStackNavigationProp<AppStackParamList>,
     NativeStackNavigationProp<MenuStackParamList>
 >;
-type SettingEnvironmentRouteProp = RouteProp<FarmStackParamList, 'SettingEnvironment'>;
 
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
-    const route = useRoute<SettingEnvironmentRouteProp>();
-    const { data: _data } = route.params || {};
+    // Unused param _data removed
     const insets = useSafeAreaInsets();
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
@@ -109,8 +109,13 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleEdit = (parameter: EnvironmentParameter) => {
-        (navigation as any).navigate('EditEnvironment', {
-            parameter,
+        navigation.navigate('EditEnvironment', {
+            parameter: {
+                id: parameter.id,
+                name: parameter.name,
+                limit: parameter.limit,
+                isChecked: parameter.isChecked,
+            },
             onSave: handleUpdateParameter,
         });
     };
