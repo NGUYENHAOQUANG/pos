@@ -3,51 +3,26 @@
  * @description Error handling utilities for Material API
  * @created 2025-01-XX
  */
-
-/**
- * API Error Response structure
- */
-interface ApiErrorResponse {
-    data?: {
-        errors?: Record<string, string[]>;
-    };
-    result: boolean;
-    statusCode: number;
-    message?: string | null;
-    exception?: string | null;
-}
+import { normalizeApiError } from '@/core/api/errorHandler';
 
 /**
  * Extract error message from API error response
- * Priority: validation errors > message > default message
+ * Uses the core normalizeApiError function for consistent error handling
  */
 export const getErrorMessage = (error: unknown, defaultMessage: string): string => {
-    // Check if it's an Axios error with response
-    if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: ApiErrorResponse } };
-        const errorData = axiosError.response?.data;
+    const normalizedError = normalizeApiError(error);
 
-        if (errorData) {
-            // Check for validation errors first
-            if (errorData.data?.errors) {
-                const errors = errorData.data.errors;
-                // Get first error message from first field
-                const firstField = Object.keys(errors)[0];
-                if (firstField && errors[firstField] && errors[firstField].length > 0) {
-                    return errors[firstField][0];
-                }
-            }
-
-            // Fallback to message field
-            if (errorData.message) {
-                return errorData.message;
+    // If normalizedError has a specific message, use it
+    if (normalizedError.message) {
+        // For validation errors, we might want to be more specific if needed
+        // But normalizeApiError already checks validationErrors and sets message
+        if (normalizedError.type === 'VALIDATION_ERROR' && normalizedError.fields) {
+            const firstField = Object.keys(normalizedError.fields)[0];
+            if (firstField && normalizedError.fields[firstField]?.length > 0) {
+                return normalizedError.fields[firstField][0];
             }
         }
-    }
-
-    // Check if it's a regular Error
-    if (error instanceof Error) {
-        return error.message;
+        return normalizedError.message;
     }
 
     return defaultMessage;
