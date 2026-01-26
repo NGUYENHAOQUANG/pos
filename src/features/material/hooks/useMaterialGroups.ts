@@ -20,7 +20,7 @@ export const useMaterialGroups = () => {
                 Page: DEFAULT_PAGE,
                 PageSize: DEFAULT_PAGE_SIZE,
             });
-            if (response.result && response.data?.items) {
+            if (response.success && response.data?.items) {
                 return response.data.items;
             }
             throw new Error(response.message || 'Không thể tải nhóm vật tư');

@@ -1,25 +1,22 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
-    CreateMaterialGroupRequest,
-    UpdateMaterialGroupRequest,
-    GetMaterialGroupsResponse,
-    GetMaterialGroupByIdResponse,
-    IAppResponse,
-} from '@/features/material/types/material.types';
-
-export interface GetMaterialGroupsParams {
-    Page?: number;
-    PageSize?: number;
-}
+    CreateMaterialGroupV2Request,
+    UpdateMaterialGroupV2Request,
+    GetMaterialGroupsV2Response,
+    GetMaterialGroupByIdV2Response,
+    GetMaterialGroupsV2Params,
+    IAppResponseV2,
+} from '@/features/material/types/materialGroup.types';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 export const materialGroupApi = {
     /**
      * Get all material groups with pagination
-     * @param params - Pagination params (Page, PageSize)
+     * @param params - Query params (Page, PageSize, Name, Code, etc.)
      */
-    getAll: async (params?: GetMaterialGroupsParams): Promise<GetMaterialGroupsResponse> => {
-        const { data } = await apiClient.get<GetMaterialGroupsResponse>(
+    getAll: async (params?: GetMaterialGroupsV2Params): Promise<GetMaterialGroupsV2Response> => {
+        const { data } = await apiClient.get<GetMaterialGroupsV2Response>(
             API_ENDPOINTS.MATERIAL_GROUP.LIST,
             { params }
         );
@@ -28,11 +25,11 @@ export const materialGroupApi = {
 
     /**
      * Get material group by ID
-     * @param id - Material group ID
+     * @param id - Material group ID (UUID string)
      */
-    getById: async (id: number): Promise<GetMaterialGroupByIdResponse> => {
-        const { data } = await apiClient.get<GetMaterialGroupByIdResponse>(
-            API_ENDPOINTS.MATERIAL_GROUP.DETAIL(id)
+    getById: async (id: string): Promise<GetMaterialGroupByIdV2Response> => {
+        const { data } = await apiClient.get<GetMaterialGroupByIdV2Response>(
+            API_ENDPOINTS.MATERIAL_GROUP.DETAIL(id as any)
         );
         return data;
     },
@@ -41,37 +38,51 @@ export const materialGroupApi = {
      * Create a new material group
      * @param request - Create material group request data
      */
-    create: async (request: CreateMaterialGroupRequest): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.post<IAppResponse<null>>(
+    create: async (request: CreateMaterialGroupV2Request): Promise<IAppResponseV2<null>> => {
+        const { data } = await apiClient.post<IAppResponseV2<null>>(
             API_ENDPOINTS.MATERIAL_GROUP.CREATE,
             request
         );
+        if (!data.success) {
+            const errorMessage = getErrorMessage(
+                { response: { data } },
+                data.message || 'Tạo nhóm vật tư thất bại'
+            );
+            throw new Error(errorMessage);
+        }
         return data;
     },
 
     /**
      * Update an existing material group
-     * @param id - Material group ID
+     * @param id - Material group ID (UUID string)
      * @param request - Update material group request data
      */
     update: async (
-        id: number,
-        request: UpdateMaterialGroupRequest
-    ): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.put<IAppResponse<null>>(
-            API_ENDPOINTS.MATERIAL_GROUP.UPDATE(id),
+        id: string,
+        request: UpdateMaterialGroupV2Request
+    ): Promise<IAppResponseV2<null>> => {
+        const { data } = await apiClient.put<IAppResponseV2<null>>(
+            API_ENDPOINTS.MATERIAL_GROUP.UPDATE(id as any),
             request
         );
+        if (!data.success) {
+            const errorMessage = getErrorMessage(
+                { response: { data } },
+                data.message || 'Cập nhật nhóm vật tư thất bại'
+            );
+            throw new Error(errorMessage);
+        }
         return data;
     },
 
     /**
      * Delete a material group
-     * @param id - Material group ID
+     * @param id - Material group ID (UUID string)
      */
-    delete: async (id: number): Promise<IAppResponse<null>> => {
-        const { data } = await apiClient.delete<IAppResponse<null>>(
-            API_ENDPOINTS.MATERIAL_GROUP.DELETE(id)
+    delete: async (id: string): Promise<IAppResponseV2<null>> => {
+        const { data } = await apiClient.delete<IAppResponseV2<null>>(
+            API_ENDPOINTS.MATERIAL_GROUP.DELETE(id as any)
         );
         return data;
     },

@@ -21,7 +21,7 @@ export const useMaterialTypes = () => {
                 Page: DEFAULT_PAGE,
                 PageSize: DEFAULT_PAGE_SIZE,
             });
-            if (response.result && response.data?.items) {
+            if (response.success && response.data?.items) {
                 return response.data.items;
             }
             throw new Error(response.message || 'Không thể tải loại vật tư');
@@ -49,10 +49,11 @@ export const useMaterialTypesByGroup = (groupName: string | null) => {
                 PageSize: DEFAULT_PAGE_SIZE,
             });
 
-            if (response.result && response.data?.items) {
-                return (response.data.items || []).filter(
-                    item => item.materialGroupId === selectedGroup.id
-                );
+            if (response.success && response.data?.items) {
+                return (response.data.items || []).filter(item => {
+                    const itemGroup = groups.find(g => g.id === String(item.materialGroupId));
+                    return itemGroup?.name === selectedGroup.name;
+                });
             }
             throw new Error(response.message || 'Không thể tải loại vật tư');
         },
