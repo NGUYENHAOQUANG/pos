@@ -26,7 +26,9 @@ const mapMaterialResponse = (
 ): IMaterial => {
     // Note: materialGroupId is number but groups now have string IDs (UUID)
     // We need to match by converting or updating the backend to use consistent IDs
-    const group = item.materialGroupId ? groups.find(g => g.name)?.name || '' : '';
+    const group = item.materialGroupId
+        ? groups.find(g => g.id === item.materialGroupId)?.name || ''
+        : '';
 
     const type = item.materialTypeId
         ? types.find(t => t.id === item.materialTypeId)?.name || ''
@@ -53,7 +55,6 @@ export const useMaterials = (params?: GetMaterialsV2Params) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 
-    // Parallel fetching: No longer dependent on groups/types loading
     const query = useQuery({
         queryKey: materialKeys.list(params),
         queryFn: async () => {
@@ -88,12 +89,12 @@ export const useMaterials = (params?: GetMaterialsV2Params) => {
 /**
  * Hook to fetch a single material by ID
  */
-export const useMaterial = (id: number | null) => {
+export const useMaterial = (id: string | null) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 
     return useQuery({
-        queryKey: materialKeys.detail(id || 0),
+        queryKey: materialKeys.detail(id || ''),
         queryFn: async () => {
             if (!id) throw new Error('Material ID is required');
             const response = await materialApi.getById(id);
@@ -136,7 +137,7 @@ export const useUpdateMaterial = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, request }: { id: number; request: UpdateMaterialV2Request }) =>
+        mutationFn: ({ id, request }: { id: string; request: UpdateMaterialV2Request }) =>
             materialApi.update(id, request),
         onSuccess: (_, variables) => {
             showSuccessToast('Cập nhật thông tin vật tư thành công');
@@ -158,7 +159,7 @@ export const useDeleteMaterial = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: number) => materialApi.delete(id),
+        mutationFn: (id: string) => materialApi.delete(id),
         onSuccess: () => {
             showSuccessToast('Xóa vật tư thành công');
             // Invalidate materials list
