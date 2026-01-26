@@ -80,7 +80,6 @@ export function useLoginFlow(): UseLoginFlowReturn {
 
         try {
             const response = await authApi.requestOtp(rawPhone);
-            console.log('API Response requestOtp:', JSON.stringify(response, null, 2));
 
             if (response.success || response.statusCode === 200) {
                 const status = response?.data?.status;

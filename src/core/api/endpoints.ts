@@ -18,24 +18,8 @@ export const API_ENDPOINTS = {
         DELETE_ACCOUNT: '/auth/delete-account',
         COMPLETE_PROFILE: '/auth/complete-profile',
     },
-    // Products
-    PRODUCTS: {
-        LIST: '/products',
-        DETAIL: (id: string) => `/products/${id}`,
-        CREATE: '/products',
-        UPDATE: (id: string) => `/products/${id}`,
-        DELETE: (id: string) => `/products/${id}`,
-    },
-    // Ponds
-    PONDS: {
-        LIST: '/ponds',
-        DETAIL: (id: string) => `/ponds/${id}`,
-        CREATE: '/ponds',
-        UPDATE: (id: string) => `/ponds/${id}`,
-        DELETE: (id: string) => `/ponds/${id}`,
-    },
     POND_TYPES: {
-        LIST: '/pond-types',
+        LIST: '/pondcategory',
     },
     OPERATION_TYPES: {
         LIST: '/operation-types',
@@ -43,16 +27,13 @@ export const API_ENDPOINTS = {
     },
     POND_TYPE_OPERATIONS: {
         LIST: '/pond-type-operations',
-        BY_POND_TYPE: (pondTypeId: number) => `/pond-type-operations/${pondTypeId}`,
+        BY_POND_TYPE: (pondTypeId: string | number) => `/pond-type-operations/${pondTypeId}`,
     },
     // Zones / Farms
     ZONE: {
         LIST: '/zone',
-        DETAIL: (id: number | string) => `/zone/${id}`,
-        CREATE: '/zone',
-        UPDATE: (id: number | string) => `/zone/${id}`,
-        DELETE: (id: number | string) => `/zone/${id}`,
-        PONDS: (id: number | string) => `/zone/${id}/ponds`,
+        DETAIL: (id: string) => `/zone/${id}`,
+        PONDS: (id: string) => `/zone/${id}/ponds`,
     },
     // Material Group
     MATERIAL_GROUP: {
