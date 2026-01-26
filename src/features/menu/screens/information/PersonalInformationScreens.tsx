@@ -11,14 +11,12 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Zone, PondData } from '@/features/farm/types/farm.types';
 import { pondApi } from '@/features/farm/api/pondApi';
 import EditOutlinedIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
-import { useUserStore } from '@/features/menu/store/userStore';
+import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 export const PersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
-
-    // User Data from Store
-    const { name, phone, email, role, level, avatarUri } = useUserStore();
+    const { userData, refetch } = useUserProfile();
 
     useFocusEffect(
         React.useCallback(() => {
@@ -31,75 +29,39 @@ export const PersonalInformationScreens: React.FC = () => {
 
     // Extend PondData to include tempZoneId for local processing
     interface PondWithZone extends PondData {
-        tempZoneId?: number;
+        tempZoneId?: string;
     }
 
     const { zones, fetchZones, setSelectedZoneId } = useFarmStore();
     const [allPonds, setAllPonds] = React.useState<PondWithZone[]>([]);
     const [refreshing, setRefreshing] = React.useState(false);
 
-    const mockPonds = React.useMemo<PondWithZone[]>(
-        () => [
-            {
-                id: 'mock-1',
-                name: 'Ao 01',
-                type: 'Ao nuôi',
-                status: 'Chuẩn bị',
-                zoneId: 1,
-            },
-            {
-                id: 'mock-2',
-                name: 'Ao 02',
-                type: 'Ao nuôi',
-                status: 'Hoạt động',
-                zoneId: 1,
-            },
-        ],
-        []
-    );
-
-    const mockFarms = React.useMemo(
-        () => [
-            { id: 1, name: 'Trại tôm Ánh Dương', count: '5' },
-            { id: 2, name: 'Trại tôm Bình Minh', count: '3' },
-        ],
-        []
-    );
-
-    const fetchPondsFromAllZones = React.useCallback(
-        async (currentZones: Zone[]) => {
-            // If we have real zones, try fetching real data
-            if (currentZones && currentZones.length > 0) {
-                try {
-                    const promises = currentZones.map(async zone => {
+    const fetchPondsFromAllZones = React.useCallback(async (currentZones: Zone[]) => {
+        if (currentZones && currentZones.length > 0) {
+            try {
+                const promises = currentZones.map(async zone => {
+                    try {
                         const res = await pondApi.getPondsByZone(zone.id);
                         return (res.items || []).map(p => ({ ...p, tempZoneId: zone.id }));
-                    });
-
-                    const results = await Promise.all(promises);
-                    const flattenedPonds = results.reduce<PondWithZone[]>((acc, pondsInZone) => {
-                        return acc.concat(pondsInZone);
-                    }, []);
-
-                    // If real data exists, use it. Otherwise fallback to mock.
-                    // For this specific user request to "ensure it looks like the design",
-                    // we will prioritize merging or showing mock data if list is empty.
-                    if (flattenedPonds.length > 0) {
-                        setAllPonds(flattenedPonds);
-                    } else {
-                        setAllPonds(mockPonds);
+                    } catch (_) {
+                        return [];
                     }
-                } catch (error) {
-                    console.error('Error loading all ponds:', error);
-                    setAllPonds(mockPonds); // Fallback on error
-                }
-            } else {
-                // No zones found, just show mock ponds for display
-                setAllPonds(mockPonds);
+                });
+
+                const results = await Promise.all(promises);
+                const flattenedPonds = results.reduce<PondWithZone[]>((acc, pondsInZone) => {
+                    return acc.concat(pondsInZone);
+                }, []);
+
+                setAllPonds(flattenedPonds);
+            } catch (_) {
+                // Should rarely reach here if individual promises catch errors
+                setAllPonds([]);
             }
-        },
-        [mockPonds]
-    );
+        } else {
+            setAllPonds([]);
+        }
+    }, []);
 
     React.useEffect(() => {
         // Fetch data initially
@@ -110,7 +72,7 @@ export const PersonalInformationScreens: React.FC = () => {
         fetchPondsFromAllZones(zones);
     }, [zones, fetchPondsFromAllZones]);
 
-    // Calculate connected farms from real data OR use Mock
+    // Calculate connected farms from real data
     const connectedFarms = React.useMemo(() => {
         if (zones.length > 0) {
             return zones.map((zone: Zone) => {
@@ -122,24 +84,27 @@ export const PersonalInformationScreens: React.FC = () => {
                 };
             });
         }
-        return mockFarms;
-    }, [zones, allPonds, mockFarms]);
+        return [];
+    }, [zones, allPonds]);
 
     // Calculate totals based on what's being displayed (Mock or Real)
     const totalFarms = connectedFarms.length.toString();
     const totalPonds = allPonds.length.toString();
 
     // Determine if user manages farms or ponds based on level text
-    const isFarmManager = level?.toLowerCase().includes('trại');
-    const isPondManager = level?.toLowerCase().includes('ao');
+    const isFarmManager = userData.level?.toLowerCase().includes('trại');
+    const isPondManager = userData.level?.toLowerCase().includes('ao');
     // Default to farm manager if ambiguous, or check exact strings if preferred
     const showFarms = isFarmManager || (!isPondManager && !isFarmManager);
 
     const handleRefresh = async () => {
         setRefreshing(true);
         try {
+            await refetch();
             await fetchZones();
             await fetchPondsFromAllZones(zones);
+        } catch (error) {
+            console.error('Refresh error:', error);
         } finally {
             setRefreshing(false);
         }
@@ -170,9 +135,16 @@ export const PersonalInformationScreens: React.FC = () => {
                 }
             >
                 {/* General Info Section */}
+                {/* General Info Section */}
                 <GeneralInformation
-                    data={{ name, phone, email, role, level }}
-                    avatarUri={avatarUri}
+                    data={{
+                        name: userData.name,
+                        phone: userData.phone,
+                        email: userData.email,
+                        role: userData.role,
+                        level: userData.level,
+                    }}
+                    avatarUri={userData.avatarUri}
                     // No onChangePhoto passed, so it will be read-only
                 />
 
@@ -180,9 +152,9 @@ export const PersonalInformationScreens: React.FC = () => {
                 {showFarms ? (
                     <FarmConnecter
                         totalFarms={totalFarms}
-                        farms={connectedFarms}
+                        farms={connectedFarms as any}
                         onFarmPress={farm => {
-                            setSelectedZoneId(farm.id);
+                            setSelectedZoneId(farm.id as any);
                             // Navigate to the Main Tab Navigator, then to the Farm tab
                             (navigation.navigate as any)('MainTabs', { screen: 'Farm' });
                         }}

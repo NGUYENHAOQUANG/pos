@@ -21,14 +21,13 @@ import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationD
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { useUserStore } from '@/features/menu/store/userStore';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 
 const { width } = Dimensions.get('window');
 
-const ProfileCard = ({ onPress }: { onPress: () => void }) => {
-    // Read from global store
-    const { name, role, avatarUri } = useUserStore();
+const ProfileCard = ({ onPress, userData }: { onPress: () => void; userData: UserProfileData }) => {
+    const { name, role, avatarUri } = userData;
 
     return (
         <TouchableOpacity style={styles.profileCard} onPress={onPress}>
@@ -44,7 +43,7 @@ const ProfileCard = ({ onPress }: { onPress: () => void }) => {
             <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>{name}</Text>
                 <View style={styles.roleTag}>
-                    <Text style={styles.roleText}>{role || 'Quản trị viên'}</Text>
+                    <Text style={styles.roleText}>{role || 'Quản lý'}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -54,6 +53,7 @@ const ProfileCard = ({ onPress }: { onPress: () => void }) => {
 export const MenuScreens: React.FC = () => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+    const { userData } = useUserProfile();
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -94,7 +94,7 @@ export const MenuScreens: React.FC = () => {
                 </View>
 
                 <View style={styles.fixedContent}>
-                    <ProfileCard onPress={handleProfilePress} />
+                    <ProfileCard onPress={handleProfilePress} userData={userData} />
                 </View>
 
                 <View style={styles.scrollWrapper}>

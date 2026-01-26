@@ -23,6 +23,8 @@ import { colors, spacing, typography } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 
+import { NormalizedError } from '@/core/api/errorHandler';
+
 export default function InfoScreen() {
     const insets = useSafeAreaInsets();
 
@@ -80,15 +82,31 @@ export default function InfoScreen() {
                 console.log('Error Status:', error.response.status);
             }
 
-            const message = error.response?.data?.message || error.message || 'Cập nhật thất bại';
-            const validationErrors = error.response?.data?.validationErrors;
+            const normalizedError = error as NormalizedError;
+            const message = normalizedError.message || 'Cập nhật thất bại';
+
+            // Check for validation errors if available in data
+            const validationErrors = normalizedError.data?.validationErrors;
 
             let displayMessage = message;
             if (validationErrors) {
+                // Format validation errors for display if needed, or just show main message
+                // For toast, usually main message is enough, or we line break?
+                // Toast text2 supports multiple lines.
+                // let details = '';
+                // Object.values(validationErrors).forEach((errs: any) => {
+                //    details += (details ? '\n' : '') + errs.join(', ');
+                // });
+                // if (details) displayMessage += '\n' + details;
                 displayMessage += '\n' + JSON.stringify(validationErrors);
             }
 
-            Alert.alert('Lỗi', displayMessage);
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: displayMessage,
+                visibilityTime: 4000,
+            });
         } finally {
             setIsLoading(false);
         }

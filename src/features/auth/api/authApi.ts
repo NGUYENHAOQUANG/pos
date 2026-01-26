@@ -60,4 +60,9 @@ export const authApi = {
         );
         return data;
     },
+
+    getMe: async (): Promise<AuthResponse> => {
+        const { data } = await apiClient.get<AuthResponse>(API_ENDPOINTS.AUTH.PROFILE);
+        return data;
+    },
 };
