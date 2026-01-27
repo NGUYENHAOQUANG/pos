@@ -235,3 +235,19 @@ export interface GetInventoryParams {
     Page?: number;
     PageSize?: number;
 }
+// ============ Warehouse Types (Real API) ============
+export interface IWarehouse {
+    id: string;
+    name: string;
+    code: string;
+    zoneId?: string;
+    description?: string;
+    address?: string;
+}
+
+export interface GetWarehousesParams {
+    ZoneId?: string;
+    Search?: string;
+    Page?: number;
+    PageSize?: number;
+}
