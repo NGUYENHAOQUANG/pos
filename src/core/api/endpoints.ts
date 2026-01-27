@@ -82,6 +82,20 @@ export const API_ENDPOINTS = {
     ENVIRONMENTAL_PARAMETER: {
         LIST: (pondId: number | string) => `/pond/${pondId}/EnvironmentalParameter`,
     },
+    INVENTORY_CHECK: {
+        LIST: '/inventorycheck',
+        CREATE: '/inventorycheck',
+        DETAIL: (id: string) => `/inventorycheck/${id}`,
+        UPDATE: (id: string) => `/inventorycheck/${id}`,
+        DELETE: (id: string) => `/inventorycheck/${id}`,
+        ITEMS: (id: string) => `/inventorycheck/${id}/items`,
+        UPDATE_ITEMS: (id: string) => `/inventorycheck/${id}/items`,
+        DELETE_ITEM: (checkId: string, itemId: string) =>
+            `/inventorycheck/${checkId}/items/${itemId}`,
+        SUBMISSION: (id: string) => `/inventorycheck/${id}/submission`,
+        APPROVAL: (id: string) => `/inventorycheck/${id}/approval`,
+        REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
+    },
     PARAMETER_SETTING: {
         LIST: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
         DETAIL: (zoneId: number | string, id: number | string) =>
@@ -91,5 +105,12 @@ export const API_ENDPOINTS = {
             `/zones/${zoneId}/parameter-setting/${id}`,
         DELETE: (zoneId: number | string, id: number | string) =>
             `/zones/${zoneId}/parameter-setting/${id}`,
+    },
+    WAREHOUSE: {
+        LIST: '/warehouses',
+        DETAIL: (id: string) => `/warehouses/${id}`,
+        CREATE: '/warehouses',
+        UPDATE: (id: string) => `/warehouses/${id}`,
+        DELETE: (id: string) => `/warehouses/${id}`,
     },
 } as const;

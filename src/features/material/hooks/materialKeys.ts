@@ -20,4 +20,5 @@ export const materialKeys = {
         [...materialKeys.all, 'export-warehouse', params] as const,
     inventory: (params?: GetInventoryParams) => [...materialKeys.all, 'inventory', params] as const,
     warehouse: (params?: GetWarehouseParams) => [...materialKeys.all, 'warehouse', params] as const,
+    warehouses: (params?: any) => [...materialKeys.all, 'warehouses', params] as const,
 };
