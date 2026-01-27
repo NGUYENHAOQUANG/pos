@@ -7,21 +7,15 @@ import {
     TouchableOpacity,
     LayoutAnimation,
     Platform,
-    UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { IPaginate } from '@/shared/types/common.types';
-import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
-
-if (Platform.OS === 'android') {
-    if (UIManager.setLayoutAnimationEnabledExperimental) {
-        UIManager.setLayoutAnimationEnabledExperimental(true);
-    }
-}
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 
 interface ImportReceiptListProps {
     data: IPaginate<ImportReceipt> | undefined;
@@ -29,6 +23,7 @@ interface ImportReceiptListProps {
     refreshing?: boolean;
     onRefresh?: () => void;
     isLoading?: boolean;
+    onPressCreate?: () => void;
 }
 
 export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
@@ -37,6 +32,7 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
     refreshing,
     onRefresh,
     isLoading,
+    onPressCreate,
 }) => {
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
     const receipts = data?.items || [];
@@ -131,12 +127,18 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
                 data={receipts}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContainer}
+                contentContainerStyle={[
+                    styles.listContainer,
+                    receipts.length === 0 && styles.emptyContent,
+                ]}
                 showsVerticalScrollIndicator={false}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.5}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
+                ListEmptyComponent={
+                    <MaterialEmptyState tab="history" onPress={onPressCreate || (() => {})} />
+                }
             />
         </View>
     );
@@ -149,6 +151,10 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingBottom: 100,
+        flexGrow: 1,
+    },
+    emptyContent: {
+        flex: 1,
     },
     card: {
         backgroundColor: colors.white,

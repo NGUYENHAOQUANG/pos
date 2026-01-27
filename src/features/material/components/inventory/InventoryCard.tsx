@@ -11,36 +11,21 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import { IInventoryTicket, IInventoryTicketItem } from '@/features/material/types/material.types';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export interface InventoryDetailItem {
-    id: string;
-    materialName: string;
-    beforeQuantity: number;
-    afterQuantity: number;
-}
-
-export interface InventoryTicket {
-    id: string;
-    checkerName: string;
-    date: string;
-    note: string;
-    totalDifference: number;
-    items: InventoryDetailItem[];
-}
-
 interface InventoryCardProps {
-    data: InventoryTicket;
+    data: IInventoryTicket;
 }
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
-    const [items, setItems] = useState<InventoryDetailItem[]>(data.items || []);
+    const [items, setItems] = useState<IInventoryTicketItem[]>(data.items || []);
     const [isLoading, setIsLoading] = useState(false);
 
     const toggleExpand = () => {
@@ -57,7 +42,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 try {
                     const response = await inventoryApi.getDetail(data.id);
                     if (response.success && response.data?.items) {
-                        const mappedItems: InventoryDetailItem[] = response.data.items.map(
+                        const mappedItems: IInventoryTicketItem[] = response.data.items.map(
                             item => ({
                                 id: item.inventoryCheckItemId,
                                 materialName: item.materialName || item.materialCode || 'N/A',
