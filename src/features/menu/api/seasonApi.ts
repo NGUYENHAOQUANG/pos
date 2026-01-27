@@ -3,12 +3,10 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { SeasonData } from '@/features/farm/types/farm.types';
 
 export const seasonApi = {
-    getSeasons: async (zoneId: number | string): Promise<SeasonData[]> => {
-        const url = API_ENDPOINTS.PRODUCTION_SEASONS.LIST(zoneId);
+    getSeasons: async (zoneId: string): Promise<SeasonData[]> => {
+        const url = API_ENDPOINTS.ZONE.SEASONS.LIST(zoneId);
         const response = await apiClient.get(url);
         const responseData = response.data;
-
-        // Check for nested data.items structure (pagination response)
         if (responseData?.data?.items && Array.isArray(responseData.data.items)) {
             return responseData.data.items;
         }
@@ -27,20 +25,17 @@ export const seasonApi = {
 
         return [];
     },
-    getSeasonDetail: async (zoneId: number | string, id: string): Promise<SeasonData> => {
-        const response = await apiClient.get(API_ENDPOINTS.PRODUCTION_SEASONS.DETAIL(zoneId, id));
+    getSeasonDetail: async (zoneId: string, id: string): Promise<SeasonData> => {
+        const response = await apiClient.get(API_ENDPOINTS.ZONE.SEASONS.DETAIL(zoneId, id));
         return response.data;
     },
 
     updateSeason: async (
-        zoneId: number | string,
+        zoneId: string,
         id: string,
         data: Partial<SeasonData>
     ): Promise<SeasonData> => {
-        const response = await apiClient.put(
-            API_ENDPOINTS.PRODUCTION_SEASONS.UPDATE(zoneId, id),
-            data
-        );
+        const response = await apiClient.put(API_ENDPOINTS.ZONE.SEASONS.UPDATE(zoneId, id), data);
 
         const resData = response.data;
         if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
@@ -54,10 +49,8 @@ export const seasonApi = {
         return resData;
     },
 
-    deleteSeason: async (zoneId: number | string, id: string): Promise<void> => {
-        const response = await apiClient.delete(
-            API_ENDPOINTS.PRODUCTION_SEASONS.DELETE(zoneId, id)
-        );
+    deleteSeason: async (zoneId: string, id: string): Promise<void> => {
+        const response = await apiClient.delete(API_ENDPOINTS.ZONE.SEASONS.DELETE(zoneId, id));
         const resData = response.data;
         if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
             let message = resData?.message || 'Xóa vụ nuôi thất bại';
@@ -66,14 +59,8 @@ export const seasonApi = {
         }
     },
 
-    createSeason: async (
-        zoneId: number | string,
-        data: Partial<SeasonData>
-    ): Promise<SeasonData> => {
-        const response = await apiClient.post(
-            API_ENDPOINTS.PRODUCTION_SEASONS.CREATE(zoneId),
-            data
-        );
+    createSeason: async (zoneId: string, data: Partial<SeasonData>): Promise<SeasonData> => {
+        const response = await apiClient.post(API_ENDPOINTS.ZONE.SEASONS.CREATE(zoneId), data);
 
         const resData = response.data;
         if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {

@@ -12,39 +12,34 @@ import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { pondApi } from '@/features/farm/api/pondApi';
-import { useUserStore } from '@/features/menu/store/userStore';
+import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 export const EditPersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
 
-    // Global User Store
-    const userStore = useUserStore();
+    // Global User Data from Hook
+    const { userData } = useUserProfile();
 
-    // Local Form State (initialized from User Store)
-    const [name, setName] = useState(userStore.name);
-    const [phone, setPhone] = useState(userStore.phone);
-    const [email, setEmail] = useState(userStore.email);
-    const [role, setRole] = useState(userStore.role);
-    const [level, setLevel] = useState(userStore.level);
-    const [avatarUri, setAvatarUri] = useState<string | null>(userStore.avatarUri);
+    // Local Form State (initialized empty, then synced)
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
+    const [role, setRole] = useState('');
+    const [level, setLevel] = useState('');
+    const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
-    // Sync local state when store changes (optional, but good if store updates elsewhere)
+    // Sync local state when userData changes
     useEffect(() => {
-        setName(userStore.name);
-        setPhone(userStore.phone);
-        setEmail(userStore.email);
-        setRole(userStore.role);
-        setLevel(userStore.level);
-        setAvatarUri(userStore.avatarUri);
-    }, [
-        userStore.name,
-        userStore.phone,
-        userStore.email,
-        userStore.role,
-        userStore.level,
-        userStore.avatarUri,
-    ]);
+        if (userData) {
+            setName(userData.name);
+            setPhone(userData.phone);
+            setEmail(userData.email);
+            setRole(userData.role);
+            setLevel(userData.level);
+            setAvatarUri(userData.avatarUri);
+        }
+    }, [userData]);
 
     // Farm/Pond State
     const { zones, fetchZones } = useFarmStore();
@@ -108,16 +103,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
     };
 
     const handleSave = () => {
-        // Update global store
-        userStore.setUserInfo({
-            name,
-            phone,
-            email,
-            role,
-            level,
-            avatarUri,
-        });
-
+        // TODO: Call API to update profile here
         Toast.show({
             type: 'success',
             text1: 'Cập nhật thông tin thành công',

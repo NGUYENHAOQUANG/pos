@@ -1,8 +1,8 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
     DropDownButton,
@@ -47,8 +47,10 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
         const [endDate, setEndDate] = useState<Date | null>(
             initialValues?.endDate ? new Date(initialValues.endDate) : null
         );
-        const [status /*, setStatus*/] = useState<'active' | 'ended'>(
-            initialValues?.status === 'active' || initialValues?.status === 'ended'
+        const [status, setStatus] = useState<'preparing' | 'active' | 'ended'>(
+            initialValues?.status === 'active' ||
+                initialValues?.status === 'ended' ||
+                initialValues?.status === 'preparing'
                 ? initialValues.status
                 : 'active'
         );
@@ -159,49 +161,15 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Status */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>Chọn trạng thái</Text>
-                    {/* <View style={styles.radioGroup}>
-                        <TouchableOpacity
-                            style={styles.radioItem}
-                            onPress={() => setStatus('active')}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    status === 'active' && styles.radioOuterSelected,
-                                ]}
-                            >
-                                {status === 'active' && <View style={styles.radioInner} />}
-                            </View>
-                            <Text style={styles.radioLabel}>Hoạt động</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.radioItem}
-                            onPress={() => setStatus('ended')}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    status === 'ended' && styles.radioOuterSelected,
-                                ]}
-                            >
-                                {status === 'ended' && <View style={styles.radioInner} />}
-                            </View>
-                            <Text style={styles.radioLabel}>Đã kết thúc</Text>
-                        </TouchableOpacity>
-                    </View> */}
-                    <TouchableOpacity
-                        style={styles.checkboxContainer}
-                        onPress={() => {}} // Disabled toggle as per request
-                        activeOpacity={1}
-                    >
-                        <View style={[styles.checkbox, styles.checkboxChecked]}>
-                            <Ionicons name="checkmark" size={16} color={colors.white} />
-                        </View>
-                        <Text style={styles.checkboxLabel}>Đang nuôi</Text>
-                    </TouchableOpacity>
+                    <RadioButton
+                        options={[
+                            { label: 'Chuẩn bị', value: 'preparing' },
+                            { label: 'Đang nuôi', value: 'active' },
+                        ]}
+                        value={status}
+                        onValueChange={val => setStatus(val as 'preparing' | 'active' | 'ended')}
+                        disabled={initialValues?.status === 'ended'}
+                    />
                 </View>
 
                 {/* Note */}

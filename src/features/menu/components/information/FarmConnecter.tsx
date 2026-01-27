@@ -4,7 +4,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors } from '@/styles';
 
 interface Farm {
-    id: string | number;
+    id: string;
     name: string;
     count: string;
 }
