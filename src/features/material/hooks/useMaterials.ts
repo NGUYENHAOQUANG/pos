@@ -38,7 +38,9 @@ const mapMaterialResponse = (
         id: item.id.toString(),
         name: item.name || '',
         group: group,
+        groupId: item.materialGroupId,
         type: type,
+        typeId: item.materialTypeId,
         unit: item.unitId,
         unitName: item.unitName || undefined,
         manufacturer: item.manufacturer || undefined,
@@ -117,7 +119,10 @@ export const useCreateMaterial = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (request: CreateMaterialV2Request) => materialApi.create(request),
+        mutationFn: (request: CreateMaterialV2Request) => {
+            console.log('request', request);
+            return materialApi.create(request);
+        },
         onSuccess: () => {
             showSuccessToast('Tạo vật tư thành công');
             // Invalidate materials list to refetch
@@ -141,11 +146,18 @@ export const useUpdateMaterial = () => {
             materialApi.update(id, request),
         onSuccess: (_, variables) => {
             showSuccessToast('Cập nhật thông tin vật tư thành công');
-            // Invalidate both list and detail queries
             queryClient.invalidateQueries({ queryKey: materialKeys.lists() });
             queryClient.invalidateQueries({ queryKey: materialKeys.detail(variables.id) });
         },
-        onError: (error: unknown) => {
+        onError: (error: any) => {
+            if (error?.statusCode === 400 && error?.data?.details) {
+                const splitMessage = error.data.details.split(';')[0];
+                if (splitMessage) {
+                    showErrorToast(splitMessage.trim());
+                    return;
+                }
+            }
+
             const errorMessage = getErrorMessage(error, 'Cập nhật vật tư thất bại');
             showErrorToast(errorMessage);
         },

@@ -12,6 +12,7 @@ interface BaseError {
 export type ValidationError = BaseError & {
     type: 'VALIDATION_ERROR';
     fields: Record<string, string[]>;
+    details?: string;
 };
 
 export type UnauthorizedError = BaseError & {
@@ -83,8 +84,8 @@ export const normalizeApiError = (error: unknown): NormalizedError => {
         if (status === 400 && data?.validationErrors) {
             return {
                 type: 'VALIDATION_ERROR',
-                fields: data.validationErrors,
-                message: data.message || 'Lỗi xác thực dữ liệu.',
+                fields: data?.validationErrors || {},
+                message: data?.message || 'Lỗi xác thực dữ liệu.',
                 data,
                 statusCode: status,
             };
