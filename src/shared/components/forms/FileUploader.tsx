@@ -52,21 +52,38 @@ export const FileUploader = ({
                 setUploadingFiles(result);
 
                 try {
-                    const uploadedDocs = await documentApi.upload(result);
+                    // Upload files in parallel to ensure reliability
+                    // Some backends/network stacks exhibit issues with multi-part bulk uploads
+                    const uploadPromises = result.map(async file => {
+                        try {
+                            const response = await documentApi.upload([file]);
+                            if (response && response.length > 0 && response[0].id) {
+                                return {
+                                    ...file,
+                                    id: response[0].id,
+                                };
+                            }
+                            return null;
+                        } catch (err) {
+                            console.error(`Failed to upload file ${file.name}:`, err);
+                            return null;
+                        }
+                    });
 
-                    // Map uploaded docs to file format with ID
-                    if (uploadedDocs && uploadedDocs.length === result.length) {
-                        const newFiles = result.map((r, i) => ({
-                            ...r,
-                            id: uploadedDocs[i]?.id,
-                        }));
+                    const uploadedFiles = (await Promise.all(uploadPromises)).filter(
+                        f => f !== null
+                    ) as DocumentPickerResponse[];
 
-                        // Update parent state with SUCCESSFUL files only
-                        onFilesSelected([...files, ...newFiles]);
+                    // Update parent state with SUCCESSFUL files only
+                    if (uploadedFiles.length > 0) {
+                        onFilesSelected([...files, ...uploadedFiles]);
+                    } else if (result.length > 0) {
+                        // If all failed
+                        Alert.alert('Lỗi', 'Không thể tải tệp lên. Vui lòng thử lại.');
                     }
                 } catch (uploadErr) {
-                    console.error('Upload to Azure FAILED:', uploadErr);
-                    Alert.alert('Lỗi', 'Tải tệp lên thất bại');
+                    console.error('Upload process failed:', uploadErr);
+                    Alert.alert('Lỗi', 'Có lỗi xảy ra trong quá trình xử lý');
                 } finally {
                     // Clear loading state
                     setUploadingFiles([]);
