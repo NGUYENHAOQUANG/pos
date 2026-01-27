@@ -20,8 +20,7 @@ export const materialFormSchema = z.object({
         },
         { message: 'Vui lòng chọn đơn vị tính' }
     ),
-    usage: z.string().min(1, 'Vui lòng nhập công dụng').trim(),
-    manufacturer: z.string().min(1, 'Vui lòng nhập nhà sản xuất').trim(),
+    manufacturer: z.string().min(1, 'Vui lòng nhập nhãn hiệu').trim(),
 });
 
 export type MaterialFormData = z.infer<typeof materialFormSchema>;
@@ -85,62 +84,4 @@ export const validateMaterialFormWithToast = (data: {
     }
 
     return true;
-};
-
-/**
- * Validate material type exists in the provided types list
- * @param typeName - Type name to validate
- * @param materialTypes - List of material types
- * @param typesByGroup - List of types filtered by group
- * @returns true if type exists, false otherwise
- */
-export const validateMaterialType = (
-    typeName: string,
-    materialTypes: Array<{ name: string | null; id: string | number }>,
-    typesByGroup: Array<{ name: string | null; id: string | number }>
-): { isValid: boolean; type?: { name: string | null; id: string | number } } => {
-    const selectedType =
-        materialTypes.find(t => t.name === typeName) || typesByGroup.find(t => t.name === typeName);
-
-    if (!selectedType) {
-        return { isValid: false };
-    }
-
-    return { isValid: true, type: selectedType };
-};
-
-/**
- * Validate and convert unit to unitId
- * @param unit - Unit value (string or number)
- * @returns Validation result with unitId
- */
-export const validateAndConvertUnit = (
-    unit: string | number
-): { isValid: boolean; unitId?: string | number; error?: string } => {
-    // If it's a number, check positive
-    if (typeof unit === 'number') {
-        if (unit <= 0) {
-            return {
-                isValid: false,
-                error: 'Đơn vị tính không hợp lệ',
-            };
-        }
-        return {
-            isValid: true,
-            unitId: unit,
-        };
-    }
-
-    // If it's a string, ensure not empty
-    if (!unit || unit.trim() === '') {
-        return {
-            isValid: false,
-            error: 'Đơn vị tính không hợp lệ',
-        };
-    }
-
-    return {
-        isValid: true,
-        unitId: unit,
-    };
 };

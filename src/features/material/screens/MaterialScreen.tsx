@@ -78,7 +78,7 @@ export const MeterialScreen = () => {
         if (filterType && filterType !== '' && filterType !== 'Tất cả loại vật tư') {
             const selectedType = materialTypes.find(t => t.name === filterType);
             if (selectedType) {
-                params.materialTypeId = selectedType.id.toString();
+                params.materialTypeId = selectedType.id;
             }
         }
 

@@ -11,23 +11,18 @@ import { IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import {
-    validateMaterialFormWithToast,
-    validateMaterialType,
-    validateAndConvertUnit,
-} from '@/features/material/utils/materialValidation';
 import { showValidationError } from '@/features/material/utils/validationToast';
 import {
     useUpdateMaterial,
     useDeleteMaterial,
     useMaterialGroups,
-    useMaterialTypes,
     useUnits,
     useMaterialTypesByGroup,
 } from '@/features/material/hooks';
 import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { IconTrashOutlined } from '@/assets/icons';
+import { validateMaterialFormWithToast } from '@/features/material/utils/materialValidation';
 
 interface EditMaterialScreenProps {}
 
@@ -45,7 +40,6 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
 
     // React Query hooks
     const { data: materialGroups = [], isLoading: isLoadingMaterialGroups } = useMaterialGroups();
-    const { data: materialTypes = [] } = useMaterialTypes();
     const { data: units = [] } = useUnits();
 
     const params = route.params as { material: IMaterial } | undefined;
@@ -55,7 +49,7 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState<string | number>('');
+    const [unit, setUnit] = useState<string>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -79,32 +73,21 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
     ];
     const unitOptions: DropdownOption[] = units.map(u => ({ label: u.name, value: u.id }));
 
-    // Set basic fields when initialData is available
     useEffect(() => {
         if (initialData) {
             setName(initialData.name || '');
             setGroup(initialData.group || '');
-            setType(initialData.type || '');
+            setType(initialData.typeId || '');
             setUsage(initialData.usage || '');
             setManufacturer(initialData.manufacturer || '');
-            setIsActive(initialData.isActive ?? true); // Sync isActive with data
+            setIsActive(initialData.isActive ?? true);
         }
     }, [initialData]);
 
-    // Set unit when units are loaded and initialData is available
     useEffect(() => {
         if (initialData && units.length > 0) {
-            // Convert unit to number to match unitOptions value format
-            const unitId =
-                typeof initialData.unit === 'number'
-                    ? initialData.unit
-                    : typeof initialData.unit === 'string' && initialData.unit !== ''
-                    ? Number(initialData.unit)
-                    : null;
-
-            // Only set unit if it's a valid number and exists in units
-            if (unitId !== null && !isNaN(unitId) && units.some(u => u.id === unitId)) {
-                setUnit(unitId);
+            if (units.some(u => u.id === initialData.unit)) {
+                setUnit(initialData.unit);
             } else {
                 // If unitId doesn't match, try to find by unitName
                 if (initialData.unitName) {
@@ -127,42 +110,20 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             return;
         }
 
-        // Validate form data
         if (!validateMaterialFormWithToast({ name, group, type, unit, usage, manufacturer })) {
-            return;
-        }
-
-        // Validate material type
-        const typeValidation = validateMaterialType(type, materialTypes, typesByGroup);
-        if (!typeValidation.isValid || !typeValidation.type) {
-            showValidationError('Loại vật tư không hợp lệ');
-            return;
-        }
-
-        // Validate and convert unit
-        const unitValidation = validateAndConvertUnit(unit);
-        if (!unitValidation.isValid || !unitValidation.unitId) {
-            showValidationError(unitValidation.error || 'Đơn vị tính không hợp lệ');
-            return;
-        }
-
-        // Get material id (convert string to number)
-        const materialId = Number(initialData.id);
-        if (isNaN(materialId)) {
-            showValidationError('ID vật tư không hợp lệ');
             return;
         }
 
         // Update material via API
         updateMaterial(
             {
-                id: materialId,
+                id: initialData.id,
                 request: {
                     name: name.trim(),
-                    materialTypeId: typeValidation.type.id,
+                    materialTypeId: type,
                     description: usage || '',
-                    unitId: unitValidation.unitId,
-                    manufacturer: manufacturer?.trim() || null,
+                    unitId: unit,
+                    manufacturer: manufacturer?.trim() || '',
                     isActive: isActive,
                 },
             },
@@ -184,8 +145,8 @@ export const EditMaterialScreen: React.FC<EditMaterialScreenProps> = () => {
             return;
         }
 
-        const materialId = Number(initialData.id);
-        if (isNaN(materialId)) {
+        const materialId = initialData.id;
+        if (!materialId) {
             showValidationError('ID vật tư không hợp lệ');
             return;
         }

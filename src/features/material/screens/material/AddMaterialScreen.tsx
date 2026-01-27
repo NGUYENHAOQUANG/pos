@@ -10,19 +10,13 @@ import { colors, spacing } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import {
-    validateMaterialFormWithToast,
-    validateMaterialType,
-    validateAndConvertUnit,
-} from '@/features/material/utils/materialValidation';
+import { validateMaterialFormWithToast } from '@/features/material/utils/materialValidation';
 import {
     useCreateMaterial,
     useMaterialGroups,
-    useMaterialTypes,
     useUnits,
     useMaterialTypesByGroup,
 } from '@/features/material/hooks';
-import { showValidationError } from '@/features/material/utils/validationToast';
 import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 
 interface AddMaterialScreenProps {}
@@ -36,14 +30,13 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
 
     // React Query hooks
     const { data: materialGroups = [], isLoading: isLoadingMaterialGroups } = useMaterialGroups();
-    const { data: materialTypes = [] } = useMaterialTypes();
     const { data: units = [] } = useUnits();
 
     // Basic Info State
     const [name, setName] = useState('');
     const [group, setGroup] = useState('');
     const [type, setType] = useState('');
-    const [unit, setUnit] = useState<string | number>('');
+    const [unit, setUnit] = useState<string>('');
 
     // Advanced Info State
     const [usage, setUsage] = useState('');
@@ -68,34 +61,18 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
     const unitOptions: DropdownOption[] = units.map(u => ({ label: u.name, value: u.id }));
 
     const handleSave = async () => {
-        // Validate form data
         if (!validateMaterialFormWithToast({ name, group, type, unit, usage, manufacturer })) {
             return;
         }
 
-        // Validate material type
-        const typeValidation = validateMaterialType(type, materialTypes, typesByGroup);
-        if (!typeValidation.isValid || !typeValidation.type) {
-            showValidationError('Loại vật tư không hợp lệ');
-            return;
-        }
-
-        // Validate and convert unit
-        const unitValidation = validateAndConvertUnit(unit);
-        if (!unitValidation.isValid || !unitValidation.unitId) {
-            showValidationError(unitValidation.error || 'Đơn vị tính không hợp lệ');
-            return;
-        }
-
-        // Create material via API
         createMaterial(
             {
-                name: name.trim(),
-                materialTypeId: typeValidation.type!.id.toString(),
+                name: name.trim() || '',
+                materialTypeId: type,
                 description: usage || '',
-                unitId: unitValidation.unitId!.toString(),
-                manufacturer: manufacturer?.trim() || null,
-                isActive: isActive,
+                unitId: unit,
+                manufacturer: manufacturer?.trim() || '',
+                isActive: isActive || false,
             },
             {
                 onSuccess: () => {
