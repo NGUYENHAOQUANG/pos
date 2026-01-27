@@ -66,6 +66,7 @@ export interface IExportWarehouseReceipt {
     materials: IExportWarehouseMaterialItem[];
     totalAmount: number;
     totalItems?: number;
+    status?: string;
 }
 
 export interface IInventoryTicketItem {

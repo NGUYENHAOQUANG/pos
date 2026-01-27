@@ -249,6 +249,7 @@ export const MeterialScreen = () => {
             materials: item.materials || [],
             totalAmount: item.totalAmount || 0,
             totalItems: item.totalItems || 0,
+            status: item.status,
         }));
     }, [exportWarehouseList]);
     const handleAdjustmentPress = useCallback(

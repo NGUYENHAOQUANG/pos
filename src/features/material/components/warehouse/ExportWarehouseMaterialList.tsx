@@ -16,6 +16,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { IExportWarehouseReceipt } from '@/features/material/types/material.types';
 import { ExportWarehouseReceiptItems } from '@/features/material/components/warehouse/ExportWarehouseReceiptItems';
 
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
+
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
         UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -63,6 +65,23 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
         );
     }
 
+    const getStatusLabel = (status?: string) => {
+        // Map API status to MaterialGroup display/color keys
+        switch (status) {
+            case 'Draft':
+                return 'Bản nháp';
+            case 'Pending':
+                return 'Chờ duyệt';
+            case 'Approved':
+                return 'Hoàn thành';
+            case 'Rejected':
+                return 'Từ chối';
+            default:
+                // Return raw status if unknown, so we don't hide new API statuses as 'Draft'
+                return status || 'Bản nháp';
+        }
+    };
+
     const renderItem = ({ item }: { item: IExportWarehouseReceipt }) => {
         const isExpanded = expandedIds.includes(item.id);
 
@@ -70,6 +89,10 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
             <View style={styles.card}>
                 <View style={styles.cardContent}>
                     {/* Header Info */}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Trạng thái:</Text>
+                        <MaterialGroup group={getStatusLabel(item.status)} />
+                    </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Xuất kho:</Text>
                         <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
@@ -95,17 +118,31 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                             <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
                         </Text>
                     </View>
+
+                    {/* Farm Info - Visible when Expanded */}
+                    {isExpanded && (
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Ao yêu cầu:</Text>
+                            <Text style={styles.value}>{item.farm || '---'}</Text>
+                        </View>
+                    )}
+
+                    {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
+                    {(item.status === 'Draft' || !item.status) && (
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={() => {
+                                // Handle edit logic
+                            }}
+                        >
+                            <Text style={styles.editButtonText}>Sửa thông tin</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Expanded Details */}
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
-                        {/* Farm Info */}
-                        <View style={styles.customerRow}>
-                            <Text style={styles.label}>Ao yêu cầu:</Text>
-                            <Text style={styles.value}>{item.farm || '---'}</Text>
-                        </View>
-
                         <ExportWarehouseReceiptItems materials={item.materials} />
                     </View>
                 )}
@@ -212,5 +249,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
         marginBottom: spacing.md,
+    },
+    editButton: {
+        marginTop: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.white,
+    },
+    editButtonText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
     },
 });
