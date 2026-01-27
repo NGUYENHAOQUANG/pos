@@ -139,23 +139,23 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         }
     }, [initialMaterialName, warehouseItems, handleMaterialSelect]);
 
-    const handleSave = () => {
-        // Validation
+    // Common validation logic
+    const validateForm = () => {
         if (!note.trim()) {
             showValidationError('Vui lòng nhập ghi chú lý do điều chỉnh');
-            return;
+            return false;
         }
         if (!selectedMaterialId) {
             showValidationError('Vui lòng chọn vật tư');
-            return;
+            return false;
         }
         if (!newStock.trim()) {
             showValidationError('Vui lòng nhập tồn kho mới');
-            return;
+            return false;
         }
         if (!warehouseId) {
             showValidationError('Không tìm thấy kho cho trang trại hiện tại');
-            return;
+            return false;
         }
 
         const selectedItem = warehouseItems.find(
@@ -163,12 +163,22 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         );
         if (!selectedItem) {
             showValidationError('Vật tư không hợp lệ hoặc không tìm thấy');
-            return;
+            return false;
         }
+        return true;
+    };
+
+    // Handler for "Lưu Nháp" (Save Draft) - shouldSubmit = false
+    const handleSaveDraft = () => {
+        if (!validateForm()) return;
+
+        const selectedItem = warehouseItems.find(
+            (m: IWarehouseItem) => m.materialId === selectedMaterialId
+        )!;
 
         const payload = {
             header: {
-                warehouseId: warehouseId,
+                warehouseId: warehouseId!,
                 note: note || 'Phiếu mới',
             },
             items: [
@@ -178,12 +188,47 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                     actualQty: Number(newStock),
                 },
             ],
+            shouldSubmit: false, // Keep as Draft
         };
 
         createInventoryCheck(payload, {
             onSuccess: () => {
                 setTimeout(() => {
-                    // Return to Inventory tab
+                    navigation.navigate('MainTabs', {
+                        screen: 'Material',
+                        params: { selectedTab: 'inventory' },
+                    });
+                }, 500);
+            },
+        });
+    };
+
+    // Handler for "Gửi Phiếu" (Submit) - shouldSubmit = true
+    const handleSubmit = () => {
+        if (!validateForm()) return;
+
+        const selectedItem = warehouseItems.find(
+            (m: IWarehouseItem) => m.materialId === selectedMaterialId
+        )!;
+
+        const payload = {
+            header: {
+                warehouseId: warehouseId!,
+                note: note || 'Phiếu mới',
+            },
+            items: [
+                {
+                    materialId: selectedItem.materialId,
+                    expectedQty: oldStock,
+                    actualQty: Number(newStock),
+                },
+            ],
+            shouldSubmit: true, // Submit to Pending status
+        };
+
+        createInventoryCheck(payload, {
+            onSuccess: () => {
+                setTimeout(() => {
                     navigation.navigate('MainTabs', {
                         screen: 'Material',
                         params: { selectedTab: 'inventory' },
@@ -249,8 +294,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                         mode="double"
                         primaryTitle="Gửi Phiếu"
                         secondaryTitle="Lưu Nháp"
-                        onPrimaryPress={handleSave}
-                        onSecondaryPress={handleSave}
+                        onPrimaryPress={handleSubmit}
+                        onSecondaryPress={handleSaveDraft}
                         containerStyle={{
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],

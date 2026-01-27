@@ -15,6 +15,7 @@ export const useCreateInventoryCheck = () => {
         mutationFn: async (payload: {
             header: CreateInventoryCheckRequest;
             items: AddInventoryCheckItemsRequest['items'];
+            shouldSubmit?: boolean; // New parameter to control submission
         }) => {
             // 1. Create Header WITH Items (Required by Backend)
             // We cannot split Create and AddItems because backend returns "Items field is required".
@@ -26,7 +27,7 @@ export const useCreateInventoryCheck = () => {
                     actualQty: item.actualQty,
                     expectedQty: item.expectedQty,
                 })),
-                autoSubmit: false, // Create draft first
+                autoSubmit: false, // Always create draft first
             };
 
             try {
@@ -37,12 +38,13 @@ export const useCreateInventoryCheck = () => {
                 }
                 const headerId = createRes.data.id;
 
-                // 2. Submit (Separate Step)
+                // 2. Submit (Only if shouldSubmit is true)
+                if (payload.shouldSubmit) {
+                    const submitRes = await inventoryApi.submit(headerId);
 
-                const submitRes = await inventoryApi.submit(headerId);
-
-                if (!submitRes.success) {
-                    console.warn('Submit warning:', submitRes.message);
+                    if (!submitRes.success) {
+                        console.warn('Submit warning:', submitRes.message);
+                    }
                 }
 
                 return headerId;
