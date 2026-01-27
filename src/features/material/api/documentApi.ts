@@ -9,6 +9,19 @@ export interface DocumentResponse {
     publicUrl?: string;
     contentType?: string;
     size?: number;
+    no?: number;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface UploadDocumentsResult {
+    id: string; // Request ID
+    no?: number;
+    createdAt?: string;
+    editedAt?: string;
+    creator?: any;
+    editor?: any;
+    documents: DocumentResponse[]; // Array of uploaded documents
 }
 
 export type UploadDocumentsResponse = DocumentResponse[];
@@ -27,29 +40,25 @@ export const documentApi = {
 
         formData.append('StorageType', 'Azure');
 
-        const { data } = await apiClient.post<UploadDocumentsResponse>(
-            API_ENDPOINTS.DOCUMENT.UPLOAD,
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            }
-        );
-        console.log('Upload to Azure SUCCESS:', data);
+        const { data } = await apiClient.post<{
+            success: boolean;
+            data: UploadDocumentsResult;
+            message?: string;
+        }>(API_ENDPOINTS.DOCUMENT.UPLOAD, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
-        // Unwrap the response if it's wrapped in { success: true, data: ... }
-        if (data && 'data' in data) {
-            const responseData = (data as any).data;
-            if (Array.isArray(responseData)) {
-                return responseData;
-            } else if (responseData) {
-                // Determine if responseData is a single object or something else
-                return [responseData];
+        if (data && 'data' in data && (data as any).data) {
+            const result = (data as any).data as UploadDocumentsResult;
+
+            if (result.documents && Array.isArray(result.documents)) {
+                return result.documents;
             }
         }
 
-        // Fallback if data is already the array
+        // Legacy fallback - if response is already array (old API format)
         if (Array.isArray(data)) {
             return data;
         }

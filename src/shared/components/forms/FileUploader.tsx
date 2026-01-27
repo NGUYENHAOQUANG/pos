@@ -35,6 +35,7 @@ export const FileUploader = ({
 }: FileUploaderProps) => {
     const [uploadingFiles, setUploadingFiles] = React.useState<DocumentPickerResponse[]>([]);
     const [isPicking, setIsPicking] = React.useState(false);
+    const [deletingFileIndex, setDeletingFileIndex] = React.useState<number | null>(null);
 
     const handlePickFiles = useCallback(async () => {
         if (isPicking) return;
@@ -52,38 +53,19 @@ export const FileUploader = ({
                 setUploadingFiles(result);
 
                 try {
-                    // Upload files in parallel to ensure reliability
-                    // Some backends/network stacks exhibit issues with multi-part bulk uploads
-                    const uploadPromises = result.map(async file => {
-                        try {
-                            const response = await documentApi.upload([file]);
-                            if (response && response.length > 0 && response[0].id) {
-                                return {
-                                    ...file,
-                                    id: response[0].id,
-                                };
-                            }
-                            return null;
-                        } catch (err) {
-                            console.error(`Failed to upload file ${file.name}:`, err);
-                            return null;
-                        }
-                    });
+                    const uploadedDocs = await documentApi.upload(result);
 
-                    const uploadedFiles = (await Promise.all(uploadPromises)).filter(
-                        f => f !== null
-                    ) as DocumentPickerResponse[];
-
-                    // Update parent state with SUCCESSFUL files only
-                    if (uploadedFiles.length > 0) {
-                        onFilesSelected([...files, ...uploadedFiles]);
-                    } else if (result.length > 0) {
-                        // If all failed
-                        Alert.alert('Lỗi', 'Không thể tải tệp lên. Vui lòng thử lại.');
+                    // Map uploaded docs to file format with ID
+                    if (uploadedDocs && uploadedDocs.length === result.length) {
+                        const newFiles = result.map((r, i) => ({
+                            ...r,
+                            id: uploadedDocs[i]?.id,
+                        }));
+                        // Update parent state with SUCCESSFUL files only
+                        onFilesSelected([...files, ...newFiles]);
                     }
-                } catch (uploadErr) {
-                    console.error('Upload process failed:', uploadErr);
-                    Alert.alert('Lỗi', 'Có lỗi xảy ra trong quá trình xử lý');
+                } catch (_uploadErr) {
+                    Alert.alert('Lỗi', 'Tải tệp lên thất bại');
                 } finally {
                     // Clear loading state
                     setUploadingFiles([]);
@@ -92,9 +74,6 @@ export const FileUploader = ({
         } catch (err) {
             if (isErrorWithCode(err) && err.code === errorCodes.OPERATION_CANCELED) {
                 // User cancelled
-            } else {
-                console.error('Error picking files:', err);
-                // Alert.alert('Lỗi', 'Không thể chọn tệp');
             }
         } finally {
             setIsPicking(false);
@@ -104,17 +83,29 @@ export const FileUploader = ({
     const handleRemoveFile = useCallback(
         async (indexToRemove: number) => {
             const fileToRemove = files[indexToRemove];
-            // Call delete API if file has ID
-            if ((fileToRemove as any).id) {
-                try {
-                    await documentApi.delete((fileToRemove as any).id);
-                } catch (e) {
-                    console.error('Delete failed', e);
-                }
-            }
 
-            const newFiles = files.filter((_, index) => index !== indexToRemove);
-            onFilesSelected(newFiles);
+            // Set loading state for this file
+            setDeletingFileIndex(indexToRemove);
+
+            try {
+                if ((fileToRemove as any).id) {
+                    try {
+                        await documentApi.delete((fileToRemove as any).id);
+                    } catch (e) {
+                        if ((e as any).statusCode === 404) {
+                        } else {
+                            Alert.alert('Lỗi', 'Không thể xóa tệp');
+                            return;
+                        }
+                    }
+                }
+
+                const newFiles = files.filter((_, index) => index !== indexToRemove);
+                onFilesSelected(newFiles);
+            } finally {
+                // Clear loading state
+                setDeletingFileIndex(null);
+            }
         },
         [files, onFilesSelected]
     );
@@ -126,25 +117,51 @@ export const FileUploader = ({
             {(files.length > 0 || uploadingFiles.length > 0) && (
                 <View style={styles.fileList}>
                     {/* Render Existing (Uploaded) Files */}
-                    {files.map((file, index) => (
-                        <View key={`${file.uri}-${index}`} style={styles.fileItem}>
-                            <View style={styles.fileInfo}>
-                                <LinkIcon width={16} height={16} style={styles.fileIcon} />
-                                <View style={styles.fileDetails}>
-                                    <Text
-                                        style={styles.fileName}
-                                        numberOfLines={1}
-                                        ellipsizeMode="middle"
-                                    >
-                                        {file.name}
-                                    </Text>
+                    {files.map((file, index) => {
+                        const isDeleting = deletingFileIndex === index;
+                        return (
+                            <View key={`${file.uri}-${index}`} style={styles.fileItem}>
+                                <View style={styles.fileInfo}>
+                                    {isDeleting ? (
+                                        <ActivityIndicator
+                                            size="small"
+                                            color={colors.primary}
+                                            style={styles.fileIcon}
+                                        />
+                                    ) : (
+                                        <LinkIcon width={16} height={16} style={styles.fileIcon} />
+                                    )}
+                                    <View style={styles.fileDetails}>
+                                        <Text
+                                            style={[
+                                                styles.fileName,
+                                                isDeleting && { color: colors.textSecondary },
+                                            ]}
+                                            numberOfLines={1}
+                                            ellipsizeMode="middle"
+                                        >
+                                            {file.name}
+                                            {isDeleting && ' (Đang xóa...)'}
+                                        </Text>
+                                    </View>
                                 </View>
+                                <TouchableOpacity
+                                    onPress={() => handleRemoveFile(index)}
+                                    hitSlop={8}
+                                    disabled={isDeleting}
+                                >
+                                    <Icon
+                                        name="close-circle"
+                                        size={16}
+                                        color={
+                                            isDeleting ? colors.textTertiary : colors.textTertiary
+                                        }
+                                        style={{ opacity: isDeleting ? 0.5 : 1 }}
+                                    />
+                                </TouchableOpacity>
                             </View>
-                            <TouchableOpacity onPress={() => handleRemoveFile(index)} hitSlop={8}>
-                                <Icon name="close-circle" size={16} color={colors.textTertiary} />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
+                        );
+                    })}
 
                     {/* Render Uploading Files */}
                     {uploadingFiles.map((file, index) => (
