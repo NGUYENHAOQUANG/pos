@@ -65,6 +65,7 @@ export interface IExportWarehouseReceipt {
     farm?: string; // Trường trại thay vì supplier
     materials: IExportWarehouseMaterialItem[];
     totalAmount: number;
+    totalItems?: number;
 }
 
 export interface IInventoryTicketItem {

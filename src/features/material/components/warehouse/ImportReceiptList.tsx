@@ -94,9 +94,8 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
                     <View style={styles.row}>
                         <Text style={styles.label}>Tổng giá trị:</Text>
                         <Text style={styles.value}>
-                            {item.totalAmount
-                                ? `${formatCurrencyValue(item.totalAmount)} đ`
-                                : '0 đ'}
+                            {item.totalAmount ? formatCurrencyValue(item.totalAmount) : '0'}{' '}
+                            <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
                         </Text>
                     </View>
                 </View>

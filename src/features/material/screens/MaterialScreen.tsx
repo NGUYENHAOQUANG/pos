@@ -130,8 +130,12 @@ export const MeterialScreen = () => {
         isRefetching: isRefetchingImportReceipts,
         isLoading: isLoadingImportReceipts,
     } = useImportReceipts(warehouseParams);
-    const { data: exportWarehouseList = [], refetch: refetchExportWarehouse } =
-        useExportWarehouse(exportWarehouseParams);
+    const {
+        data: exportWarehouseList,
+        refetch: refetchExportWarehouse,
+        isRefetching: isRefetchingExportWarehouse,
+        isLoading: isLoadingExportWarehouse,
+    } = useExportWarehouse(exportWarehouseParams);
     const { data: inventoryList = [], refetch: refetchInventory } =
         useInventoryTickets(inventoryParams);
 
@@ -232,6 +236,18 @@ export const MeterialScreen = () => {
         [setFilterMaterialName]
     );
 
+    const mappedExportReceipts = useMemo(() => {
+        const items = exportWarehouseList?.items || [];
+        return items.map((item: any) => ({
+            id: item.id,
+            date: item.createdAt,
+            farm: item.pondName || item.warehouseName || item.farm || '---',
+            materials: item.materials || [],
+            totalAmount: item.totalAmount || 0,
+            totalItems: item.totalItems || 0,
+        }));
+    }, [exportWarehouseList]);
+
     const handleRefresh = useCallback(() => {
         refetchMaterials();
         refetchImportReceipts();
@@ -300,8 +316,14 @@ export const MeterialScreen = () => {
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}
                 {selectedTab === 'export' &&
-                    (exportWarehouseList.length > 0 ? (
-                        <ExportWarehouseListScreen receipts={exportWarehouseList} />
+                    (isLoadingExportWarehouse ? (
+                        <ExportWarehouseListScreen receipts={[]} isLoading={true} />
+                    ) : mappedExportReceipts.length > 0 ? (
+                        <ExportWarehouseListScreen
+                            receipts={mappedExportReceipts}
+                            refreshing={!!isRefetchingExportWarehouse}
+                            onRefresh={handleRefresh}
+                        />
                     ) : (
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}
