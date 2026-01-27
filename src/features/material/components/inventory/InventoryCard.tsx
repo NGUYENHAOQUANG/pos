@@ -11,7 +11,11 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IInventoryTicket, IInventoryTicketItem } from '@/features/material/types/material.types';
+import {
+    IInventoryTicket,
+    IInventoryTicketItem,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 
@@ -71,18 +75,18 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         return data.totalDifference;
     }, [items, data.totalDifference]);
 
-    const getStatusLabel = (status: string) => {
+    const getStatusLabel = (status: string): MaterialGroupType => {
         switch (status) {
             case 'Draft':
-                return 'Bản nháp';
+                return MaterialGroupType.DRAFT;
             case 'Pending':
-                return 'Chờ duyệt';
+                return MaterialGroupType.PENDING;
             case 'Approved':
-                return 'Hoàn thành';
+                return MaterialGroupType.COMPLETED;
             case 'Rejected':
-                return 'Từ chối';
+                return MaterialGroupType.REJECTED;
             default:
-                return status || 'Nháp';
+                return MaterialGroupType.DRAFT;
         }
     };
 
