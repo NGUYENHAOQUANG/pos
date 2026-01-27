@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
             DETAIL: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
             CREATE: (zoneId: string) => `/zone/${zoneId}/seasons`,
             UPDATE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
+            STATUS: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}/status`,
             DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
         },
     },

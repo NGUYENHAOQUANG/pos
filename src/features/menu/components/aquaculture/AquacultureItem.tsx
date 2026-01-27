@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { Aquaculture } from '@/features/menu/types/menu.types';
-import { SeasonData } from '@/features/farm/types/farm.types';
+import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { Tag } from '@/features/menu/components/Tag';
 import EditIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
 
@@ -27,9 +27,11 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
     }`;
 
     // Map status from SeasonData to Tag status if needed
-    const getStatus = (status: string | number): 'active' | 'ended' => {
-        if (status === 'Đang hoạt động' || status === 0) return 'active';
-        if (status === 'Đã kết thúc' || status === 1) return 'ended';
+    // Map status from SeasonData to Tag status if needed
+    const getStatus = (status: string | number): 'active' | 'ended' | 'preparing' => {
+        if (status === SeasonStatus.Active) return 'active';
+        if (status === SeasonStatus.Closed) return 'ended';
+        if (status === SeasonStatus.Preparation) return 'preparing';
         // Default to active for unknown status
         return 'active';
     };

@@ -13,6 +13,7 @@ import {
 } from '@/features/menu/components/aquaculture/AquacultureForm';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { seasonApi } from '@/features/menu/api/seasonApi';
+import { SeasonStatus } from '@/features/farm/types/farm.types';
 import { Loading } from '@/shared/components/ui/Loading';
 import { useQueryClient } from '@tanstack/react-query';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
@@ -68,10 +69,16 @@ export const AddAquacultureScreens: React.FC = () => {
                 }
 
                 // Call create API
+                // Call create API
+                let newStatus: SeasonStatus | undefined;
+                if (data.status === 'preparing') newStatus = SeasonStatus.Preparation;
+                else if (data.status === 'active') newStatus = SeasonStatus.Active;
+
                 await seasonApi.createSeason(data.zoneId, {
                     seasonName: data.name,
                     startDate: data.startDate?.toISOString(),
                     endDate: data.endDate?.toISOString(),
+                    status: newStatus,
                 });
                 Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
                 // Invalidate seasons query to trigger background refetch
