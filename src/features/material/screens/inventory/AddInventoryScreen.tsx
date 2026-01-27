@@ -9,13 +9,16 @@ import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
-import { IInventoryTicket, IMaterial } from '@/features/material/types/material.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterials, useAddInventoryTicket } from '@/features/material/hooks';
+import { useMaterials } from '@/features/material/hooks';
+import { useCreateInventoryCheck } from '@/features/material/hooks/useCreateInventoryCheck';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
+import { IMaterial } from '@/features/material/types/material.types';
 
 interface AddInventoryScreenProps {}
 
@@ -39,7 +42,11 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
-    const { mutate: addInventoryTicket } = useAddInventoryTicket();
+
+    // Real API Hooks
+    const { mutate: createInventoryCheck, isPending: isSubmitting } = useCreateInventoryCheck();
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -59,7 +66,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [oldStock, setOldStock] = useState(0);
     const [newStock, setNewStock] = useState('');
     const [materialGroup, setMaterialGroup] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Auto-select warehouse
+    const warehouseId = warehouses?.[0]?.id;
 
     // Derive options from materials data
     const materialOptions = materialsData.map((m: IMaterial) => m.name);
@@ -117,34 +126,42 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             showValidationError('Vui lòng nhập tồn kho mới');
             return;
         }
+        if (!warehouseId) {
+            showValidationError('Không tìm thấy kho cho trang trại hiện tại');
+            return;
+        }
 
-        setIsSubmitting(true);
+        const selectedMaterial = materialsData.find((m: IMaterial) => m.name === materialName);
+        if (!selectedMaterial) {
+            showValidationError('Vật tư không hợp lệ');
+            return;
+        }
 
-        const newTicket: IInventoryTicket = {
-            id: Date.now().toString(),
-            checkerName: 'Nguyễn Phương Duy',
-            date: formatMaterialDateTime(date),
-            note: note || 'Phiếu mới',
-            totalDifference: Number(newStock) - oldStock,
+        const payload = {
+            header: {
+                warehouseId: warehouseId,
+                note: note || 'Phiếu mới',
+            },
             items: [
                 {
-                    id: '1',
-                    materialName: materialName,
-                    beforeQuantity: oldStock,
-                    afterQuantity: Number(newStock),
+                    materialId: selectedMaterial.id,
+                    expectedQty: oldStock,
+                    actualQty: Number(newStock),
                 },
             ],
         };
-        addInventoryTicket(newTicket);
-        // Delay to show loading before navigating back
-        setTimeout(() => {
-            setIsSubmitting(false);
-            // Return to Inventory tab
-            navigation.navigate('MainTabs', {
-                screen: 'Material',
-                params: { selectedTab: 'inventory' },
-            });
-        }, 500);
+
+        createInventoryCheck(payload, {
+            onSuccess: () => {
+                setTimeout(() => {
+                    // Return to Inventory tab
+                    navigation.navigate('MainTabs', {
+                        screen: 'Material',
+                        params: { selectedTab: 'inventory' },
+                    });
+                }, 500);
+            },
+        });
     };
 
     return (

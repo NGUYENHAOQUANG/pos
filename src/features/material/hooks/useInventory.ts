@@ -20,6 +20,7 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
                 Page: params?.Page || 1,
                 PageSize: params?.PageSize || 100,
                 CheckCode: params?.Search, // Map Search to CheckCode
+                OrderBy: 'CreatedAt desc',
             };
 
             const response = await inventoryApi.getList(apiParams);

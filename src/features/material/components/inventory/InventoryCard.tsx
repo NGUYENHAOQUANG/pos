@@ -48,8 +48,10 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         setIsExpanded(!isExpanded);
     };
 
+    const [hasFetched, setHasFetched] = useState(false);
+
     React.useEffect(() => {
-        if (isExpanded && items.length === 0 && data.id) {
+        if (!hasFetched && data.id) {
             const fetchDetails = async () => {
                 setIsLoading(true);
                 try {
@@ -69,11 +71,19 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                     console.error('Failed to fetch inventory details:', error);
                 } finally {
                     setIsLoading(false);
+                    setHasFetched(true);
                 }
             };
             fetchDetails();
         }
-    }, [isExpanded, items.length, data.id]);
+    }, [hasFetched, data.id]);
+
+    const totalDifference = React.useMemo(() => {
+        if (items.length > 0) {
+            return items.reduce((sum, item) => sum + (item.afterQuantity - item.beforeQuantity), 0);
+        }
+        return data.totalDifference;
+    }, [items, data.totalDifference]);
 
     return (
         <View style={styles.container}>
@@ -114,7 +124,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
                 <View style={[styles.row, styles.alignRight]}>
                     <Text style={styles.label}>Tổng chênh lệch:</Text>
-                    <Text style={styles.value}>{data.totalDifference}</Text>
+                    <Text style={styles.value}>{totalDifference}</Text>
                 </View>
             </View>
 

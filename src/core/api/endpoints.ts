@@ -106,4 +106,11 @@ export const API_ENDPOINTS = {
         DELETE: (zoneId: number | string, id: number | string) =>
             `/zones/${zoneId}/parameter-setting/${id}`,
     },
+    WAREHOUSE: {
+        LIST: '/warehouses',
+        DETAIL: (id: string) => `/warehouses/${id}`,
+        CREATE: '/warehouses',
+        UPDATE: (id: string) => `/warehouses/${id}`,
+        DELETE: (id: string) => `/warehouses/${id}`,
+    },
 } as const;
