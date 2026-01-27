@@ -20,6 +20,11 @@ import { MaterialStackParamList } from '@/features/material/navigation/MaterialN
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
 
+// New Imports
+import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+
 interface AddExportWarehouseScreenProps {}
 
 export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> = () => {
@@ -30,6 +35,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
     const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
+    const { submitWithFiles, isUploading } = useFileSubmit();
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -52,6 +58,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     const [date, setDate] = useState(new Date());
     const [selectedZone, setSelectedZone] = useState('');
     const [selectedPond, setSelectedPond] = useState('');
+    const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
     const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
         { id: '1', materialName: '', quantity: '', price: '' },
     ]);
@@ -116,7 +123,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isSubmitting}>
+            <Loading isLoading={isSubmitting || isUploading}>
                 <View style={styles.container}>
                     <HeaderMeterial
                         title="Tạo Phiếu Xuất Kho"
@@ -140,7 +147,13 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 onZoneChange={setSelectedZone}
                                 selectedPond={selectedPond}
                                 onPondChange={setSelectedPond}
-                            />
+                            >
+                                <FileUploader
+                                    files={files}
+                                    onFilesSelected={setFiles}
+                                    maxFiles={5}
+                                />
+                            </ExportWarehouseInformation>
 
                             <AddWarehouseMaterial
                                 materials={warehouseItems}
@@ -191,26 +204,33 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
                         onClose={() => setIsConfirmModalVisible(false)}
-                        onConfirm={() => {
+                        onConfirm={async () => {
                             setIsConfirmModalVisible(false);
-                            setIsSubmitting(true);
-                            addExportWarehouseReceipt({
-                                date,
-                                farm: selectedPond,
-                                materials: warehouseItems.map(m => ({
-                                    id: m.id,
-                                    materialName: m.materialName,
-                                    quantity: m.quantity,
-                                    price: m.price,
-                                    total: parseFloat(m.quantity) * parseFloat(m.price),
-                                })),
-                                totalAmount,
+                            await submitWithFiles(files, async documentIds => {
+                                setIsSubmitting(true);
+                                addExportWarehouseReceipt(
+                                    {
+                                        warehouseId: selectedZone || 'DEFAULT', // Needs backend logic for warehouseId
+                                        pondId: selectedPond,
+                                        documentIds: documentIds,
+                                        items: warehouseItems.map(m => ({
+                                            materialId: m.id, // Ensure this maps to actual material ID
+                                            quantity: parseFloat(m.quantity),
+                                        })),
+                                        note: '',
+                                        autoSubmit: true,
+                                    },
+                                    {
+                                        onSuccess: () => {
+                                            setIsSubmitting(false);
+                                            navigation.goBack();
+                                        },
+                                        onError: () => {
+                                            setIsSubmitting(false);
+                                        },
+                                    }
+                                );
                             });
-                            // Delay to show loading before navigating back
-                            setTimeout(() => {
-                                setIsSubmitting(false);
-                                navigation.goBack();
-                            }, 500);
                         }}
                     />
                 </View>
