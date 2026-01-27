@@ -1,6 +1,6 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { SeasonData } from '@/features/farm/types/farm.types';
+import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 
 export const seasonApi = {
     getSeasons: async (zoneId: string): Promise<SeasonData[]> => {
@@ -27,7 +27,14 @@ export const seasonApi = {
     },
     getSeasonDetail: async (zoneId: string, id: string): Promise<SeasonData> => {
         const response = await apiClient.get(API_ENDPOINTS.ZONE.SEASONS.DETAIL(zoneId, id));
-        return response.data;
+        const resData = response.data;
+        if (resData?.data) {
+            return resData.data;
+        }
+        if (resData?.result && typeof resData.result === 'object') {
+            return resData.result;
+        }
+        return resData;
     },
 
     updateSeason: async (
@@ -35,7 +42,7 @@ export const seasonApi = {
         id: string,
         data: Partial<SeasonData>
     ): Promise<SeasonData> => {
-        const response = await apiClient.put(API_ENDPOINTS.ZONE.SEASONS.UPDATE(zoneId, id), data);
+        const response = await apiClient.patch(API_ENDPOINTS.ZONE.SEASONS.UPDATE(zoneId, id), data);
 
         const resData = response.data;
         if (resData?.result === false || (resData?.statusCode && resData.statusCode >= 400)) {
@@ -47,6 +54,28 @@ export const seasonApi = {
         }
 
         return resData;
+    },
+
+    updateSeasonStatus: async (
+        zoneId: string,
+        id: string,
+        status: SeasonStatus
+    ): Promise<boolean> => {
+        const payload = { status };
+        const response = await apiClient.post(
+            API_ENDPOINTS.ZONE.SEASONS.STATUS(zoneId, id),
+            payload
+        );
+        const resData = response.data;
+        if (
+            resData?.success === false ||
+            (resData?.statusCode && resData.statusCode >= 400) ||
+            resData?.result === false
+        ) {
+            const message = resData?.message || 'Cập nhật trạng thái thất bại';
+            throw new Error(message);
+        }
+        return true;
     },
 
     deleteSeason: async (zoneId: string, id: string): Promise<void> => {
