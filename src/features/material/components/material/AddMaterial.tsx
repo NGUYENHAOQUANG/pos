@@ -18,6 +18,7 @@ import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import { getMaterialTypeOptions } from '@/features/material/utils/dropdownOptions';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { Input } from '@/shared/components/forms/Input';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -116,19 +117,15 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                     <>
                         <View style={styles.divider} />
                         <View style={styles.content}>
-                            <View style={styles.inputGroup}>
-                                <View style={styles.labelContainer}>
-                                    <Text style={styles.required}>* </Text>
-                                    <Text style={styles.label}>Tên vật tư</Text>
-                                </View>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Nhập tên vật tư"
-                                    placeholderTextColor={colors.textSecondary}
-                                    value={name}
-                                    onChangeText={onNameChange}
-                                />
-                            </View>
+                            <Input
+                                label="Tên vật tư"
+                                required
+                                // style={styles.input}
+                                placeholder="Nhập tên vật tư"
+                                placeholderTextColor={colors.textSecondary}
+                                value={name}
+                                onChangeText={onNameChange}
+                            />
 
                             <View style={[styles.row, styles.rowZ30]}>
                                 <View style={styles.halfWidth}>
@@ -148,6 +145,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         isOpen={activeDropdown === 'group'}
                                         onToggle={() => handleToggleDropdown('group')}
                                         disabled={groupDisabled}
+                                        useAutoScroll={true}
                                     />
                                 </View>
                                 <View style={styles.halfWidth}>
@@ -163,6 +161,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         isOpen={activeDropdown === 'type'}
                                         onToggle={() => handleToggleDropdown('type')}
                                         disabled={!group}
+                                        useAutoScroll={true}
                                     />
                                 </View>
                             </View>
@@ -179,6 +178,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                         onToggle={() => handleToggleDropdown('unit')}
                                         placeholder="Chọn đơn vị tính"
                                         showAllOption={false}
+                                        useAutoScroll={true}
                                     />
                                 </View>
                             </View>
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     inputGroup: {
-        marginBottom: spacing.md,
+        marginBottom: 12,
     },
     labelContainer: {
         flexDirection: 'row',

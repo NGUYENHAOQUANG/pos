@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
         padding: spacing.md,
     },
     inputGroup: {
-        marginBottom: spacing.md,
+        marginBottom: 12,
     },
     labelContainer: {
         flexDirection: 'row',
@@ -294,8 +294,8 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: 'row',
-        gap: spacing.md,
-        marginBottom: spacing.md,
+        gap: spacing.sm,
+        marginBottom: 12,
     },
     halfWidth: {
         flex: 1,
@@ -336,23 +336,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: spacing.xs,
-        paddingTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: '#F3F4F6',
     },
     footerLabel: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '400',
     },
     footerValue: {
-        fontSize: 15,
+        fontSize: 14,
         color: '#FF4D4F',
         fontWeight: '500',
         textAlign: 'right',
         flex: 1,
-        marginLeft: spacing.md,
+        marginLeft: spacing.sm,
     },
     placeholderText: {
         color: colors.textSecondary || '#999',
