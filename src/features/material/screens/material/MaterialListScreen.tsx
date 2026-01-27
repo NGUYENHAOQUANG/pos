@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { MaterialList } from '@/features/material/components/material/MaterialList';
-import { MaterialListSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
+import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
+
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 
 interface MaterialListScreenProps {
     materials: IMaterial[];
@@ -13,6 +15,7 @@ interface MaterialListScreenProps {
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
+    onPressCreate?: () => void;
 }
 
 export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
@@ -23,11 +26,18 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
     isLoading = false,
     refreshing,
     onRefresh,
+    onPressCreate,
 }) => {
     if (isLoading) {
         return (
             <View style={styles.container}>
-                <MaterialListSkeleton />
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <MaterialItemSkeleton />}
+                    keyExtractor={item => item.toString()}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                />
             </View>
         );
     }
@@ -45,10 +55,16 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
                         onAdjustmentPress={onAdjustmentPress}
                     />
                 )}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                    styles.listContent,
+                    materials.length === 0 && styles.emptyContent,
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
+                ListEmptyComponent={
+                    <MaterialEmptyState tab="list" onPress={onPressCreate || (() => {})} />
+                }
             />
         </View>
     );
@@ -58,10 +74,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    emptyContainer: {
+    emptyContent: {
         flex: 1,
     },
     listContent: {
         paddingBottom: spacing.xl,
+        flexGrow: 1,
     },
 });

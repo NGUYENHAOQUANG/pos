@@ -8,6 +8,7 @@ const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
 
 import { GetInventoryParams, IInventoryTicket } from '@/features/material/types/material.types';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { GetInventoryChecksParams } from '@/features/material/types/inventory.types';
 
 /**
  * Hook to fetch inventory tickets (Mock Data)
@@ -16,7 +17,7 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
     return useQuery({
         queryKey: materialKeys.inventory(params),
         queryFn: async () => {
-            const apiParams = {
+            const apiParams: GetInventoryChecksParams = {
                 Page: params?.Page || 1,
                 PageSize: params?.PageSize || 100,
                 CheckCode: params?.Search, // Map Search to CheckCode

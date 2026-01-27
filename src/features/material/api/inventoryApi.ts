@@ -1,78 +1,13 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { IAppResponseV2, IPaginateV2 } from '@/features/material/types/materialGroup.types';
-
-export interface IInventoryCheck {
-    id: string;
-    no: number;
-    createdAt: string;
-    editedAt: string;
-    creator: {
-        id: number;
-        fullName?: string;
-        userName?: string;
-    } | null;
-    editor: {
-        id: number;
-        fullName?: string;
-        userName?: string;
-    } | null;
-    checkCode: string;
-    warehouseId: string;
-    warehouseName: string;
-    status: string;
-    totalItems: number;
-    note: string;
-    approverId?: string;
-    approvedAt?: string;
-    isRejected: boolean;
-}
-
-export interface GetInventoryChecksParams {
-    Page?: number;
-    PageSize?: number;
-    WarehouseId?: string;
-    Status?: string;
-    CheckCode?: string;
-    CreateAtFrom?: string;
-    CreateAtTo?: string;
-    OrderBy?: string;
-}
-
-export type GetInventoryChecksResponse = IAppResponseV2<IPaginateV2<IInventoryCheck>>;
-
-export interface IInventoryCheckItem {
-    inventoryCheckItemId: string;
-    materialId: string;
-    materialName: string | null;
-    materialCode: string | null;
-    expectedQty: number;
-    actualQty: number;
-    difference: number;
-}
-
-export interface IInventoryCheckDetail extends IInventoryCheck {
-    items: IInventoryCheckItem[];
-}
-
-export type GetInventoryCheckDetailResponse = IAppResponseV2<IInventoryCheckDetail>;
-
-export interface CreateInventoryCheckRequest {
-    warehouseId: string;
-    note?: string;
-}
-
-export interface InventoryCheckItemDto {
-    materialId: string;
-    expectedQty: number;
-    actualQty: number;
-    reason?: string;
-}
-
-export interface AddInventoryCheckItemsRequest {
-    inventoryCheckId: string;
-    items: InventoryCheckItemDto[];
-}
+import { IApiResponse } from '@/shared/types/common.types';
+import {
+    GetInventoryChecksParams,
+    GetInventoryChecksResponse,
+    GetInventoryCheckDetailResponse,
+    CreateInventoryCheckRequest,
+    AddInventoryCheckItemsRequest,
+} from '../types/inventory.types';
 
 export const inventoryApi = {
     getList: async (params?: GetInventoryChecksParams): Promise<GetInventoryChecksResponse> => {
@@ -88,8 +23,8 @@ export const inventoryApi = {
         );
         return data;
     },
-    create: async (body: CreateInventoryCheckRequest): Promise<IAppResponseV2<{ id: string }>> => {
-        const { data } = await apiClient.post<IAppResponseV2<{ id: string }>>(
+    create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<{ id: string }>> => {
+        const { data } = await apiClient.post<IApiResponse<{ id: string }>>(
             API_ENDPOINTS.INVENTORY_CHECK.CREATE,
             body
         );
@@ -98,33 +33,33 @@ export const inventoryApi = {
     addItems: async (
         id: string,
         body: AddInventoryCheckItemsRequest
-    ): Promise<IAppResponseV2<any>> => {
-        const { data } = await apiClient.post<IAppResponseV2<any>>(
+    ): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.ITEMS(id),
             body
         );
         return data;
     },
-    delete: async (id: string): Promise<IAppResponseV2<any>> => {
-        const { data } = await apiClient.delete<IAppResponseV2<any>>(
+    delete: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.delete<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.DELETE(id)
         );
         return data;
     },
-    submit: async (id: string): Promise<IAppResponseV2<any>> => {
-        const { data } = await apiClient.post<IAppResponseV2<any>>(
+    submit: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.SUBMISSION(id)
         );
         return data;
     },
-    approve: async (id: string): Promise<IAppResponseV2<any>> => {
-        const { data } = await apiClient.post<IAppResponseV2<any>>(
+    approve: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.APPROVAL(id)
         );
         return data;
     },
-    reject: async (id: string): Promise<IAppResponseV2<any>> => {
-        const { data } = await apiClient.post<IAppResponseV2<any>>(
+    reject: async (id: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.REJECTION(id)
         );
         return data;
