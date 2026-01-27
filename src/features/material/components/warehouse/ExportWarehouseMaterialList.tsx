@@ -13,7 +13,10 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { IExportWarehouseReceipt } from '@/features/material/types/material.types';
+import {
+    IExportWarehouseReceipt,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
 import { ExportWarehouseReceiptItems } from '@/features/material/components/warehouse/ExportWarehouseReceiptItems';
 
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
@@ -65,20 +68,20 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
         );
     }
 
-    const getStatusLabel = (status?: string) => {
+    const getStatusLabel = (status?: string): MaterialGroupType => {
         // Map API status to MaterialGroup display/color keys
         switch (status) {
             case 'Draft':
-                return 'Bản nháp';
+                return MaterialGroupType.DRAFT;
             case 'Pending':
-                return 'Chờ duyệt';
+                return MaterialGroupType.PENDING;
             case 'Approved':
-                return 'Hoàn thành';
+                return MaterialGroupType.COMPLETED;
             case 'Rejected':
-                return 'Từ chối';
+                return MaterialGroupType.REJECTED;
             default:
                 // Return raw status if unknown, so we don't hide new API statuses as 'Draft'
-                return status || 'Bản nháp';
+                return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
         }
     };
 
