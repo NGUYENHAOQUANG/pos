@@ -5,6 +5,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 export type TagStatus =
     | 'pending'
     | 'active'
+    | 'preparing'
     | 'paused'
     | 'ended'
     | 'installed'
@@ -28,11 +29,17 @@ export const Tag: React.FC<TagProps> = ({ status, style }) => {
                 };
             case 'active':
                 return {
-                    // label: 'Hoạt động',
                     label: 'Đang nuôi',
                     color: colors.green[600],
                     backgroundColor: colors.green[50],
                     borderColor: colors.green[300],
+                };
+            case 'preparing':
+                return {
+                    label: 'Chuẩn bị',
+                    color: colors.yellow[600],
+                    backgroundColor: colors.yellow[50],
+                    borderColor: colors.yellow[600],
                 };
             case 'paused':
                 return {

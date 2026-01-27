@@ -14,7 +14,7 @@ import {
     LoginCredentials,
     RegisterData,
     CompleteProfilePayload,
-} from '../types/auth.types';
+} from '@/features/auth/types/auth.types';
 
 interface AuthState {
     user: AuthUser | null;
@@ -117,17 +117,6 @@ export const useAuthStore = create<AuthState>()(
                             roles: decoded?.role || decoded?.roles,
                             loginStatus: loginStatus, // Add login status to user
                         };
-
-                        // If profile update required, we set partial state but NOT full authentication
-                        // OR we set authenticated but redirect?
-                        // User request: "link to InfoScreen".
-                        // Better approach: Set tokens (so API calls work) but keep a flag or let UI decide.
-                        // If we set isAuthenticated=true, MainNavigator might take over.
-                        // Let's set isAuthenticated=true BUT rely on AuthNavigator/RootNavigator to check checking?
-                        // Wait, if isAuthenticated=true, usually we go to Main.
-                        // Let's look at Navigation.
-                        // For now: Set all data. The UI (VerifyOtpScreen) will check the return/state and navigate.
-
                         set({
                             user,
                             token,
@@ -137,7 +126,6 @@ export const useAuthStore = create<AuthState>()(
                             loading: false,
                         });
 
-                        // Return the status so the caller can decide
                         return loginStatus;
                     } else {
                         throw new Error(response.message || 'OTP Verification failed');
@@ -154,14 +142,11 @@ export const useAuthStore = create<AuthState>()(
                     const response = await authApi.register({ phoneNumber: data.phone });
 
                     if (response.success || response.result) {
-                        // Registration successful, usually returns OTP data
-                        // logic handled by caller (RegisterScreen) to navigate/show OTP
                         set({ loading: false });
-                        // We don't authenticate yet, wait for OTP verify
                     } else {
                         throw new Error(response.message || 'Register failed');
                     }
-                    return response; // Return response so caller can get testOtp
+                    return response;
                 } catch (error) {
                     set({ loading: false });
                     throw error;

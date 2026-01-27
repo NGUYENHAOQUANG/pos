@@ -9,8 +9,8 @@ interface ButtonBarMenuProps {
     onPrimaryPress?: () => void;
     onSecondaryPress?: () => void;
     primaryDisabled?: boolean;
-    // secondaryType: 'default' (gray border) | 'primary' (blue border)
-    secondaryType?: 'default' | 'primary';
+    // secondaryType: 'default' | 'primary' | 'danger'
+    secondaryType?: 'default' | 'primary' | 'danger';
     style?: StyleProp<ViewStyle>;
 }
 
@@ -33,6 +33,10 @@ export const ButtonBarMenu: React.FC<ButtonBarMenuProps> = ({
     if (secondaryType === 'primary') {
         secondaryButtonStyle.borderColor = colors.primary;
         secondaryButtonTextStyle.color = colors.primary;
+    } else if (secondaryType === 'danger') {
+        secondaryButtonStyle.backgroundColor = colors.error;
+        secondaryButtonStyle.borderColor = colors.error;
+        secondaryButtonTextStyle.color = colors.white;
     } else {
         // default styling is already handled in shared ButtonBar (gray border, black text)
         secondaryButtonStyle.borderColor = colors.defaultBorder || colors.border;
