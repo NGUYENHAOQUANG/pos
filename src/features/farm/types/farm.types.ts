@@ -129,17 +129,38 @@ export interface FarmData {
     address?: string;
 }
 
+export enum SeasonStatus {
+    Preparation = 'Preparation',
+    Active = 'Active',
+    Closed = 'Closed',
+}
+
+export const getSeasonStatusName = (status: string | SeasonStatus): string => {
+    switch (status) {
+        case SeasonStatus.Preparation:
+            return 'Chuẩn bị';
+        case SeasonStatus.Active:
+            return 'Hoạt động';
+        case SeasonStatus.Closed:
+            return 'Đã kết thúc';
+        default:
+            return 'Không xác định';
+    }
+};
+
 export interface SeasonData {
     id: string | number; // Mã vụ nuôi
     name: string; // Tên vụ nuôi
     farmCode: string; // Mã trại (mapped from Zone or SeasonCode)
     startDate: string; // Ngày khởi tạo
     endDate: string; // Ngày kết thúc
-    status: 'Đang hoạt động' | 'Đã kết thúc' | number; // Trạng thái
+    status: SeasonStatus; // Trạng thái
+    statusName?: string; // Tên trạng thái hiển thị
     zoneId?: string | number; // ID of the zone this season belongs to
     // API raw fields (optional)
     seasonName?: string;
     seasonCode?: string;
+    code?: string; // New API field
     cycleCount?: number;
 }
 

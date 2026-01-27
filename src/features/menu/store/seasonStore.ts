@@ -1,20 +1,30 @@
 import { StateCreator } from 'zustand';
-import { SeasonData, DropdownItem } from '@/features/farm/types/farm.types';
+import {
+    SeasonData,
+    DropdownItem,
+    SeasonStatus,
+    getSeasonStatusName,
+} from '@/features/farm/types/farm.types';
 import { seasonApi } from '@/features/menu/api/seasonApi';
 
 export interface SeasonStore {
     seasons: SeasonData[];
     isLoadingSeasons: boolean;
     selectedSeasonId: string | null;
-    fetchSeasons: (zones?: { id: number | string; code?: string }[]) => Promise<void>;
+    fetchSeasons: (zones?: { id: string; code?: string }[]) => Promise<void>;
     setSelectedSeasonId: (id: string | null) => void;
     updateSeason: (seasonId: string, data: Partial<SeasonData>) => void;
     updateSeasonApi: (
-        zoneId: number | string,
+        zoneId: string,
         seasonId: string,
         data: Partial<SeasonData>
     ) => Promise<boolean>;
-    deleteSeasonApi: (zoneId: number | string, seasonId: string) => Promise<boolean>;
+    updateSeasonStatusApi: (
+        zoneId: string,
+        seasonId: string,
+        status: SeasonStatus
+    ) => Promise<boolean>;
+    deleteSeasonApi: (zoneId: string, seasonId: string) => Promise<boolean>;
     getSeasonOptions: () => DropdownItem[];
 }
 
@@ -28,7 +38,7 @@ export const createSeasonStore: StateCreator<
     isLoadingSeasons: false,
     selectedSeasonId: null,
 
-    fetchSeasons: async (zones?: { id: number | string; code?: string }[]) => {
+    fetchSeasons: async (zones?: { id: string; code?: string }[]) => {
         set({ isLoadingSeasons: true });
         try {
             // If no zones provided, we can't fetch anything as endpoint requires zoneId
@@ -49,10 +59,9 @@ export const createSeasonStore: StateCreator<
                     // Store zoneId for filtering
                     zoneId: zone.id,
                     // Map status number to string if needed.
-                    status: (item.status === 0 ? 'Đang hoạt động' : 'Đã kết thúc') as
-                        | 'Đang hoạt động'
-                        | 'Đã kết thúc',
-                    id: item.id.toString(), // Ensure string ID
+                    status: item.status as SeasonStatus,
+                    statusName: getSeasonStatusName(item.status),
+                    id: item.id, // Ensure string ID
                 }));
             });
 
@@ -99,7 +108,7 @@ export const createSeasonStore: StateCreator<
                 }
             }
 
-            await seasonApi.updateSeason(zoneId, seasonId, data);
+            await seasonApi.updateSeason(zoneId.toString(), seasonId, data);
             // Update local state
             set(state => {
                 const season = state.seasons.find(s => s.id.toString() === seasonId);
@@ -114,9 +123,27 @@ export const createSeasonStore: StateCreator<
         }
     },
 
+    updateSeasonStatusApi: async (zoneId, seasonId, status) => {
+        try {
+            await seasonApi.updateSeasonStatus(zoneId.toString(), seasonId, status);
+            // Update local state
+            set(state => {
+                const season = state.seasons.find(s => s.id.toString() === seasonId);
+                if (season) {
+                    season.status = status;
+                    season.statusName = getSeasonStatusName(status);
+                }
+            });
+            return true;
+        } catch (error) {
+            console.error('[SeasonStore] Failed to update season status:', error);
+            throw error;
+        }
+    },
+
     deleteSeasonApi: async (zoneId, seasonId) => {
         try {
-            await seasonApi.deleteSeason(zoneId, seasonId);
+            await seasonApi.deleteSeason(zoneId.toString(), seasonId);
             // Remove from local state
             set(state => {
                 state.seasons = state.seasons.filter(s => s.id.toString() !== seasonId);

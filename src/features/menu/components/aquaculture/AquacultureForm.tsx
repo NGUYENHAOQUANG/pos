@@ -1,8 +1,8 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
     DropDownButton,
@@ -16,6 +16,7 @@ import { ToastMessages } from '@/features/menu/utils/toastMessages';
 interface AquacultureFormProps {
     initialValues?: Partial<Aquaculture> & { zoneId?: number | string };
     zones?: Zone[];
+    isEdit?: boolean;
 }
 
 export interface AquacultureFormRef {
@@ -23,7 +24,7 @@ export interface AquacultureFormRef {
 }
 
 export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormProps>(
-    ({ initialValues, zones = [] }, ref) => {
+    ({ initialValues, zones = [], isEdit = false }, ref) => {
         // Map zones to dropdown options
         const farmOptions = useMemo(() => {
             return zones.map(z => ({
@@ -47,12 +48,40 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
         const [endDate, setEndDate] = useState<Date | null>(
             initialValues?.endDate ? new Date(initialValues.endDate) : null
         );
-        const [status /*, setStatus*/] = useState<'active' | 'ended'>(
-            initialValues?.status === 'active' || initialValues?.status === 'ended'
+        const [status, setStatus] = useState<'preparing' | 'active' | 'ended'>(
+            initialValues?.status === 'active' ||
+                initialValues?.status === 'ended' ||
+                initialValues?.status === 'preparing'
                 ? initialValues.status
                 : 'active'
         );
         const [note, setNote] = useState(initialValues?.note || '');
+
+        // Sync state with initialValues when they change (e.g. after refetch)
+        React.useEffect(() => {
+            if (initialValues) {
+                if (initialValues.name) setCycleName(initialValues.name);
+                if (initialValues.code) setCycleCode(initialValues.code);
+                if (initialValues.startDate) setStartDate(new Date(initialValues.startDate));
+                if (initialValues.endDate) setEndDate(new Date(initialValues.endDate));
+                if (initialValues.status) {
+                    const newStatus =
+                        initialValues.status === 'active' ||
+                        initialValues.status === 'preparing' ||
+                        initialValues.status === 'ended'
+                            ? initialValues.status
+                            : 'active';
+                    setStatus(newStatus);
+                }
+                if (initialValues.note !== undefined) setNote(initialValues.note);
+                if (initialValues.zoneId && zones.length > 0) {
+                    const foundFarm = farmOptions.find(
+                        f => f.id === initialValues.zoneId?.toString()
+                    );
+                    if (foundFarm) setFarm(foundFarm);
+                }
+            }
+        }, [initialValues, zones, farmOptions]);
 
         useImperativeHandle(ref, () => ({
             submit: () => {
@@ -78,7 +107,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     code: cycleCode,
                     startDate: startDate,
                     endDate: endDate || undefined,
-                    status: status === 'active' ? 'active' : 'ended',
+                    status: status,
                     note: note,
                 };
             },
@@ -89,17 +118,28 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Farm Selection */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Chọn trại nuôi
+                        <Text style={styles.required}>* </Text>
+                        {isEdit ? 'Trại nuôi' : 'Chọn trại nuôi'}
                     </Text>
-                    <DropDownButton
-                        data={farmOptions}
-                        value={farm}
-                        onSelect={setFarm}
-                        placeholder="Chọn trại nuôi"
-                        style={styles.dropdown}
-                        height={40}
-                        borderRadius={6}
-                    />
+                    {isEdit ? (
+                        <Input
+                            value={farm?.label || ''}
+                            editable={false}
+                            placeholder="Trại nuôi"
+                            containerStyle={styles.noMarginBottom}
+                            inputContainerStyle={styles.inputDisabledBox}
+                        />
+                    ) : (
+                        <DropDownButton
+                            data={farmOptions}
+                            value={farm}
+                            onSelect={setFarm}
+                            placeholder="Chọn trại nuôi"
+                            style={styles.dropdown}
+                            height={40}
+                            borderRadius={6}
+                        />
+                    )}
                 </View>
 
                 {/* Cycle Name & Code */}
@@ -159,49 +199,18 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Status */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>Chọn trạng thái</Text>
-                    {/* <View style={styles.radioGroup}>
-                        <TouchableOpacity
-                            style={styles.radioItem}
-                            onPress={() => setStatus('active')}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    status === 'active' && styles.radioOuterSelected,
-                                ]}
-                            >
-                                {status === 'active' && <View style={styles.radioInner} />}
-                            </View>
-                            <Text style={styles.radioLabel}>Hoạt động</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.radioItem}
-                            onPress={() => setStatus('ended')}
-                            activeOpacity={0.8}
-                        >
-                            <View
-                                style={[
-                                    styles.radioOuter,
-                                    status === 'ended' && styles.radioOuterSelected,
-                                ]}
-                            >
-                                {status === 'ended' && <View style={styles.radioInner} />}
-                            </View>
-                            <Text style={styles.radioLabel}>Đã kết thúc</Text>
-                        </TouchableOpacity>
-                    </View> */}
-                    <TouchableOpacity
-                        style={styles.checkboxContainer}
-                        onPress={() => {}} // Disabled toggle as per request
-                        activeOpacity={1}
-                    >
-                        <View style={[styles.checkbox, styles.checkboxChecked]}>
-                            <Ionicons name="checkmark" size={16} color={colors.white} />
-                        </View>
-                        <Text style={styles.checkboxLabel}>Đang nuôi</Text>
-                    </TouchableOpacity>
+                    <RadioButton
+                        options={[
+                            { label: 'Chuẩn bị', value: 'preparing' },
+                            { label: 'Đang nuôi', value: 'active' },
+                            ...(initialValues?.status === 'ended'
+                                ? [{ label: 'Đã kết thúc', value: 'ended' }]
+                                : []),
+                        ]}
+                        value={status}
+                        onValueChange={val => setStatus(val as 'preparing' | 'active' | 'ended')}
+                        disabled={initialValues?.status === 'ended'}
+                    />
                 </View>
 
                 {/* Note */}

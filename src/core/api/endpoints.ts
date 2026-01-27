@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
         VERIFY_OTP: '/auth/verify-otp',
         DELETE_ACCOUNT: '/auth/delete-account',
         COMPLETE_PROFILE: '/auth/complete-profile',
+        PROFILE: '/auth/me',
     },
     POND_TYPES: {
         LIST: '/pondcategory',
@@ -34,6 +35,14 @@ export const API_ENDPOINTS = {
         LIST: '/zone',
         DETAIL: (id: string) => `/zone/${id}`,
         PONDS: (id: string) => `/zone/${id}/ponds`,
+        SEASONS: {
+            LIST: (zoneId: string) => `/zone/${zoneId}/seasons`,
+            DETAIL: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
+            CREATE: (zoneId: string) => `/zone/${zoneId}/seasons`,
+            UPDATE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
+            STATUS: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}/status`,
+            DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
+        },
     },
     // Material Group
     MATERIAL_GROUP: {
@@ -63,14 +72,7 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/material/${id}`,
         DELETE: (id: string) => `/material/${id}`,
     },
-    // Production Seasons
-    PRODUCTION_SEASONS: {
-        LIST: (zoneId: number | string) => `/zones/${zoneId}/seasons`,
-        DETAIL: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
-        CREATE: (zoneId: number | string) => `/zones/${zoneId}/seasons`,
-        UPDATE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
-        DELETE: (zoneId: number | string, id: string) => `/zones/${zoneId}/seasons/${id}`,
-    },
+
     ENV_METRIC_TYPES: {
         LIST: '/env-metric-types',
         DETAIL: (id: number) => `/env-metric-types/${id}`,

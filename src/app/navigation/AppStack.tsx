@@ -103,7 +103,8 @@ const EditEquimentMaintenanceWithProvider = EditEquimentMaintenanceScreens;
 // Root Stack Param List - All screens in the app
 export type AppStackParamList = {
     // Main Tabs (Tab Bar visible)
-    MainTabs: undefined;
+    // Main Tabs (Tab Bar visible)
+    MainTabs: { screen: string; params?: any } | undefined;
 
     // ============== Farm Screens (Tab Bar hidden) ==============
     PondDetail: { pond: PondData };
