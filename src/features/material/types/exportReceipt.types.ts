@@ -25,6 +25,20 @@ export interface ExportReceipt {
     materials?: any[]; // To support UI compatibility (even if empty from List API)
 }
 
+export interface ExportReceiptItemRequest {
+    materialId: string;
+    quantity: number;
+}
+
+export interface CreateExportReceiptRequest {
+    warehouseId: string;
+    pondId?: string;
+    note?: string;
+    documentIds?: string[];
+    items: ExportReceiptItemRequest[];
+    autoSubmit?: boolean;
+}
+
 export interface GetExportReceiptsParams {
     ReceiptCode?: string;
     Status?: string;

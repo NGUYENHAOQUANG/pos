@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     GetExportWarehouseParams,
-    ExportReceipt,
+    CreateExportReceiptRequest,
 } from '@/features/material/types/exportReceipt.types';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
@@ -34,28 +34,16 @@ export const useAddExportWarehouseReceipt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (receipt: Omit<ExportReceipt, 'id'>) => {
-            // Simulate API delay
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-            // In a real app, the server returns the new created object
-            const newReceipt: ExportReceipt = {
-                ...receipt,
-                id: Date.now().toString(),
-            };
-            return newReceipt;
+        mutationFn: async (payload: CreateExportReceiptRequest) => {
+            const response = await exportReceiptApi.create(payload);
+            return response;
         },
-        onSuccess: newReceipt => {
+        onSuccess: () => {
             showSuccessToast('Tạo phiếu xuất kho thành công');
-            // Optimistically update the list in mock data scenario
-            // In real app, we would invalidate queries, but since we use mock data,
-            // subsequent fetches might return the original mock list unless we modify it in memory or API.
-            // For now, we update the cache manually to simulate persistence in SPA session.
-            queryClient.setQueryData(
-                materialKeys.exportWarehouse(),
-                (oldData: ExportReceipt[] | undefined) => {
-                    return oldData ? [newReceipt, ...oldData] : [newReceipt];
-                }
-            );
+            // Invalidate the list query to refetch data
+            queryClient.invalidateQueries({
+                queryKey: materialKeys.exportWarehouse(),
+            });
         },
         onError: (error: unknown) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');

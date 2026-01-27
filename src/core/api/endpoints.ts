@@ -110,5 +110,10 @@ export const API_ENDPOINTS = {
     },
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',
+        CREATE: '/exportreceipt',
+    },
+    DOCUMENT: {
+        UPLOAD: '/document',
+        DELETE: (id: string) => `/document/${id}`,
     },
 } as const;
