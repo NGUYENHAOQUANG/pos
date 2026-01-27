@@ -125,7 +125,6 @@ export const useCreateMaterial = () => {
 
     return useMutation({
         mutationFn: (request: CreateMaterialV2Request) => {
-            console.log('request', request);
             return materialApi.create(request);
         },
         onSuccess: () => {
