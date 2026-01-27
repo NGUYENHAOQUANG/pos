@@ -104,6 +104,7 @@ export const API_ENDPOINTS = {
         CREATE: '/warehouses',
         UPDATE: (id: string) => `/warehouses/${id}`,
         DELETE: (id: string) => `/warehouses/${id}`,
+        ITEMS: (id: string) => `/warehouses/${id}/items`,
     },
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',

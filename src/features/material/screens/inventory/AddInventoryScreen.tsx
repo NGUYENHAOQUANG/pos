@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Platform, StatusBar } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform, StatusBar, Text } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
@@ -13,12 +13,13 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterials } from '@/features/material/hooks';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 import { useCreateInventoryCheck } from '@/features/material/hooks/useCreateInventoryCheck';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
-import { IMaterial } from '@/features/material/types/material.types';
+import { IWarehouseItem } from '@/features/material/types/material.types';
+import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 interface AddInventoryScreenProps {}
 
@@ -40,13 +41,28 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const params = route.params;
     const initialMaterialName = params?.initialMaterialName;
 
+    // Get current user from User Profile Hook (fetches fresh data from API)
+    const { userData } = useUserProfile();
+    const creatorName = userData.name || '---';
+
     // Use React Query for materials data
-    const { data: materialsData = [] } = useMaterials();
+    // Auto-select warehouse
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
+    const warehouseId = warehouses?.[0]?.id;
+
+    // Fetch materials filtered by Warehouse
+    // This ensures we only see items valid for this warehouse context
+    const { data: warehouseItemsResponse } = useWarehouseItems(warehouseId, undefined, {
+        enabled: !!warehouseId,
+    });
+    const warehouseItems = React.useMemo(
+        () => warehouseItemsResponse?.items || [],
+        [warehouseItemsResponse]
+    );
 
     // Real API Hooks
     const { mutate: createInventoryCheck, isPending: isSubmitting } = useCreateInventoryCheck();
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
-    const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
 
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -66,12 +82,17 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const [oldStock, setOldStock] = useState(0);
     const [newStock, setNewStock] = useState('');
     const [materialGroup, setMaterialGroup] = useState('');
+    const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
 
     // Auto-select warehouse
-    const warehouseId = warehouses?.[0]?.id;
+    // warehouseId is already defined at top of component for filtering
+    // const warehouseId = warehouses?.[0]?.id; // Removed duplicate
 
-    // Derive options from materials data
-    const materialOptions = materialsData.map((m: IMaterial) => m.name);
+    // Utilize DropdownOption[] for robust selection
+    const materialOptions = warehouseItems.map((m: IWarehouseItem) => ({
+        label: m.materialName || 'Unknown Material',
+        value: m.materialId,
+    }));
 
     // --- Handlers ---
     const handleDropdownOpen = () => {
@@ -87,30 +108,36 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     const handleMaterialSelect = useCallback(
         (val: string) => {
-            setMaterialName(val);
+            // val is now the ID
+            setSelectedMaterialId(val);
+            // Find material by ID
+            const selectedItem = warehouseItems.find((m: IWarehouseItem) => m.materialId === val);
 
-            // Find material in materials data
-            const selectedMaterial = materialsData.find((m: IMaterial) => m.name === val);
-
-            if (selectedMaterial) {
-                setOldStock(selectedMaterial.remaining || 0);
-                setMaterialGroup(selectedMaterial.group);
+            if (selectedItem) {
+                setMaterialName(selectedItem.materialName || '');
+                setOldStock(selectedItem.quantity || 0);
+                setMaterialGroup(''); // WarehouseItem might not have group info directly
             } else {
+                setMaterialName('');
                 setOldStock(0);
                 setMaterialGroup('');
             }
-
             setNewStock('');
         },
-        [materialsData]
+        [warehouseItems]
     );
 
     // Handle initial material selection
     useEffect(() => {
-        if (initialMaterialName) {
-            handleMaterialSelect(initialMaterialName);
+        if (initialMaterialName && warehouseItems.length > 0) {
+            const materialToSelect = warehouseItems.find(
+                m => m.materialName === initialMaterialName
+            );
+            if (materialToSelect) {
+                handleMaterialSelect(materialToSelect.materialId);
+            }
         }
-    }, [initialMaterialName, handleMaterialSelect]);
+    }, [initialMaterialName, warehouseItems, handleMaterialSelect]);
 
     const handleSave = () => {
         // Validation
@@ -118,7 +145,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             showValidationError('Vui lòng nhập ghi chú lý do điều chỉnh');
             return;
         }
-        if (!materialName) {
+        if (!selectedMaterialId) {
             showValidationError('Vui lòng chọn vật tư');
             return;
         }
@@ -131,9 +158,11 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             return;
         }
 
-        const selectedMaterial = materialsData.find((m: IMaterial) => m.name === materialName);
-        if (!selectedMaterial) {
-            showValidationError('Vật tư không hợp lệ');
+        const selectedItem = warehouseItems.find(
+            (m: IWarehouseItem) => m.materialId === selectedMaterialId
+        );
+        if (!selectedItem) {
+            showValidationError('Vật tư không hợp lệ hoặc không tìm thấy');
             return;
         }
 
@@ -144,7 +173,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
             },
             items: [
                 {
-                    materialId: selectedMaterial.id,
+                    materialId: selectedItem.materialId,
                     expectedQty: oldStock,
                     actualQty: Number(newStock),
                 },
@@ -190,12 +219,20 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                                 note={note}
                                 onDatePress={() => setDatePickerVisible(true)}
                                 onNoteChange={setNote}
+                                warehouseName={warehouses?.[0]?.name}
+                                creatorName={creatorName}
                             />
 
                             {/* Nhập liệu vật tư */}
                             <View style={styles.dropdownSection}>
+                                {warehouseItems.length === 0 && (
+                                    <Text style={styles.warningText}>
+                                        Kho hiện tại chưa có vật tư nào. Vui lòng nhập kho trước.
+                                    </Text>
+                                )}
                                 <InventoryMaterialInput
                                     materialName={materialName}
+                                    selectedMaterialId={selectedMaterialId}
                                     oldStock={oldStock}
                                     newStock={newStock}
                                     onMaterialSelect={handleMaterialSelect}
@@ -209,15 +246,18 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
                     {/* Nút Gửi Phiếu */}
                     <ButtonBarMaterial
-                        mode="single"
+                        mode="double"
                         primaryTitle="Gửi Phiếu"
+                        secondaryTitle="Lưu Nháp"
                         onPrimaryPress={handleSave}
+                        onSecondaryPress={handleSave}
                         containerStyle={{
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],
                         }}
+                        secondaryButtonStyle={{ flex: 1, minWidth: 0 }}
+                        primaryButtonStyle={{ flex: 1 }}
                     />
-
                     {/* Modal Chọn Ngày */}
                     <DatePickerModal
                         visible={isDatePickerVisible}
@@ -249,5 +289,11 @@ const styles = StyleSheet.create({
             android: { elevation: 5 },
             ios: { zIndex: 100 },
         }),
+    },
+    warningText: {
+        color: colors.orange[500],
+        fontSize: 14,
+        marginBottom: spacing.xs,
+        fontStyle: 'italic',
     },
 });

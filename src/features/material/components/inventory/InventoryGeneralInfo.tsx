@@ -18,12 +18,14 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface InventoryGeneralInfoProps {
-    date: string; // Định dạng hiển thị 'dd/mm/yyyy' (Ngày kiểm kê)
+    date: string;
     note: string;
     onDatePress: () => void;
     onNoteChange: (text: string) => void;
     materialGroup?: string;
     createdDate?: string;
+    warehouseName?: string;
+    creatorName?: string;
 }
 
 export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
@@ -33,6 +35,8 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     onNoteChange,
     materialGroup = '---',
     createdDate = '',
+    warehouseName = '',
+    creatorName = '---',
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -54,9 +58,9 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
             {isExpanded && (
                 <View style={styles.body}>
                     {/* Read-only info rows */}
-                    <InfoRow label="Kho" value="Trại Kiên Giang" />
+                    <InfoRow label="Kho" value={warehouseName || '---'} />
                     <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
-                    <InfoRow label="Người tạo phiếu:" value="Nguyễn Phương Duy" />
+                    <InfoRow label="Người tạo phiếu:" value={creatorName} />
                     <InfoRow label="Nhóm vật tư" value={materialGroup} isLast />
 
                     {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
