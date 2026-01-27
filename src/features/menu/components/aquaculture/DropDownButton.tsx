@@ -140,7 +140,6 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
                             data={data}
                             keyExtractor={item => item.id.toString()}
                             renderItem={renderItem}
-                            scrollEnabled={false}
                             contentContainerStyle={styles.dropdownScrollContent}
                         />
                     </View>
