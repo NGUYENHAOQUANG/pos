@@ -81,6 +81,7 @@ export interface IInventoryTicket {
     note: string;
     totalDifference: number;
     items: IInventoryTicketItem[];
+    status: string;
 }
 
 export interface IInventoryFormItem {

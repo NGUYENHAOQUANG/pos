@@ -37,6 +37,7 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
                     note: item.note || '',
                     totalDifference: 0, // Not available in list API
                     items: [], // Details not available in list API
+                    status: item.status || 'Draft',
                 })) as IInventoryTicket[];
             }
 

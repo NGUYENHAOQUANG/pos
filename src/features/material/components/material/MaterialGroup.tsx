@@ -43,6 +43,31 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                     color: colors.purple[600],
                     borderColor: colors.purple[300],
                 };
+            // --- STATUS TAGS ---
+            case 'Bản nháp':
+                return {
+                    backgroundColor: colors.neutral,
+                    color: colors.text,
+                    borderColor: colors.defaultBorder,
+                };
+            case 'Chờ duyệt':
+                return {
+                    backgroundColor: colors.yellow[50],
+                    color: colors.status.warningHighlightText,
+                    borderColor: colors.yellow[300],
+                };
+            case 'Hoàn thành':
+                return {
+                    backgroundColor: colors.green[50],
+                    color: colors.green[600],
+                    borderColor: colors.green[300],
+                };
+            case 'Từ chối':
+                return {
+                    backgroundColor: colors.errorBackground,
+                    color: colors.red[500],
+                    borderColor: colors.volcano[400],
+                };
             default:
                 return {
                     backgroundColor: colors.gray[100],
