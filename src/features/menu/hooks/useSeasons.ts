@@ -1,7 +1,7 @@
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useCallback } from 'react';
 import { seasonApi } from '@/features/menu/api/seasonApi';
-import { SeasonData } from '@/features/farm/types/farm.types';
+import { SeasonData, SeasonStatus, getSeasonStatusName } from '@/features/farm/types/farm.types';
 import { farmKeys } from '../../farm/hooks/farmKeys';
 import { useZones } from '../../farm/hooks/useZones';
 
@@ -28,10 +28,8 @@ export const useSeasons = () => {
                     farmCode: zone.code || item.seasonCode || '',
                     // Store zoneId for filtering
                     zoneId: zone.id,
-                    // Map status number to string if needed.
-                    status: (item.status === 0 ? 'Đang hoạt động' : 'Đã kết thúc') as
-                        | 'Đang hoạt động'
-                        | 'Đã kết thúc',
+                    status: item.status as SeasonStatus,
+                    statusName: getSeasonStatusName(item.status),
                     id: item.id.toString(), // Ensure string ID
                 }));
             },

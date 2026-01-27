@@ -16,6 +16,7 @@ import { ToastMessages } from '@/features/menu/utils/toastMessages';
 interface AquacultureFormProps {
     initialValues?: Partial<Aquaculture> & { zoneId?: number | string };
     zones?: Zone[];
+    isEdit?: boolean;
 }
 
 export interface AquacultureFormRef {
@@ -23,7 +24,7 @@ export interface AquacultureFormRef {
 }
 
 export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormProps>(
-    ({ initialValues, zones = [] }, ref) => {
+    ({ initialValues, zones = [], isEdit = false }, ref) => {
         // Map zones to dropdown options
         const farmOptions = useMemo(() => {
             return zones.map(z => ({
@@ -56,6 +57,32 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
         );
         const [note, setNote] = useState(initialValues?.note || '');
 
+        // Sync state with initialValues when they change (e.g. after refetch)
+        React.useEffect(() => {
+            if (initialValues) {
+                if (initialValues.name) setCycleName(initialValues.name);
+                if (initialValues.code) setCycleCode(initialValues.code);
+                if (initialValues.startDate) setStartDate(new Date(initialValues.startDate));
+                if (initialValues.endDate) setEndDate(new Date(initialValues.endDate));
+                if (initialValues.status) {
+                    const newStatus =
+                        initialValues.status === 'active' ||
+                        initialValues.status === 'preparing' ||
+                        initialValues.status === 'ended'
+                            ? initialValues.status
+                            : 'active';
+                    setStatus(newStatus);
+                }
+                if (initialValues.note !== undefined) setNote(initialValues.note);
+                if (initialValues.zoneId && zones.length > 0) {
+                    const foundFarm = farmOptions.find(
+                        f => f.id === initialValues.zoneId?.toString()
+                    );
+                    if (foundFarm) setFarm(foundFarm);
+                }
+            }
+        }, [initialValues, zones, farmOptions]);
+
         useImperativeHandle(ref, () => ({
             submit: () => {
                 // Validation
@@ -80,7 +107,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     code: cycleCode,
                     startDate: startDate,
                     endDate: endDate || undefined,
-                    status: status === 'active' ? 'active' : 'ended',
+                    status: status,
                     note: note,
                 };
             },
@@ -91,17 +118,28 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Farm Selection */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Chọn trại nuôi
+                        <Text style={styles.required}>* </Text>
+                        {isEdit ? 'Trại nuôi' : 'Chọn trại nuôi'}
                     </Text>
-                    <DropDownButton
-                        data={farmOptions}
-                        value={farm}
-                        onSelect={setFarm}
-                        placeholder="Chọn trại nuôi"
-                        style={styles.dropdown}
-                        height={40}
-                        borderRadius={6}
-                    />
+                    {isEdit ? (
+                        <Input
+                            value={farm?.label || ''}
+                            editable={false}
+                            placeholder="Trại nuôi"
+                            containerStyle={styles.noMarginBottom}
+                            inputContainerStyle={styles.inputDisabledBox}
+                        />
+                    ) : (
+                        <DropDownButton
+                            data={farmOptions}
+                            value={farm}
+                            onSelect={setFarm}
+                            placeholder="Chọn trại nuôi"
+                            style={styles.dropdown}
+                            height={40}
+                            borderRadius={6}
+                        />
+                    )}
                 </View>
 
                 {/* Cycle Name & Code */}
@@ -165,6 +203,9 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                         options={[
                             { label: 'Chuẩn bị', value: 'preparing' },
                             { label: 'Đang nuôi', value: 'active' },
+                            ...(initialValues?.status === 'ended'
+                                ? [{ label: 'Đã kết thúc', value: 'ended' }]
+                                : []),
                         ]}
                         value={status}
                         onValueChange={val => setStatus(val as 'preparing' | 'active' | 'ended')}

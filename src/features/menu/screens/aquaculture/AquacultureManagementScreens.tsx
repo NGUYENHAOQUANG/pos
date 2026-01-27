@@ -19,6 +19,7 @@ import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
+import { SeasonStatus } from '@/features/farm/types/farm.types';
 
 export const AquacultureManagementScreens: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -72,9 +73,11 @@ export const AquacultureManagementScreens: React.FC = () => {
 
         // Filter by status tab
         if (selectedTab === 'active') {
-            filtered = filtered.filter(i => i.status === 'Đang hoạt động');
+            filtered = filtered.filter(i => i.status === SeasonStatus.Active);
+        } else if (selectedTab === 'preparing') {
+            filtered = filtered.filter(i => i.status === SeasonStatus.Preparation);
         } else if (selectedTab === 'ended') {
-            filtered = filtered.filter(i => i.status === 'Đã kết thúc');
+            filtered = filtered.filter(i => i.status === SeasonStatus.Closed);
         }
 
         // Sort by ID descending (newest created first)
@@ -92,11 +95,19 @@ export const AquacultureManagementScreens: React.FC = () => {
     const counts = React.useMemo(
         () => ({
             all: seasons?.length || 0,
-            active: seasons?.filter(i => i.status === 'Đang hoạt động').length || 0,
-            ended: seasons?.filter(i => i.status === 'Đã kết thúc').length || 0,
+            preparing: seasons?.filter(i => i.status === SeasonStatus.Preparation).length || 0,
+            active: seasons?.filter(i => i.status === SeasonStatus.Active).length || 0,
+            ended: seasons?.filter(i => i.status === SeasonStatus.Closed).length || 0,
         }),
         [seasons]
     );
+
+    const tabs = [
+        { key: 'all', label: 'Tất cả', count: counts.all },
+        { key: 'preparing', label: 'Chuẩn bị', count: counts.preparing },
+        { key: 'active', label: 'Đang nuôi', count: counts.active },
+        { key: 'ended', label: 'Đã kết thúc', count: counts.ended },
+    ];
 
     // Only show skeleton on initial load.
     // We DO NOT include isRefetching here to avoid the "loading forever" blocking UI.
@@ -124,7 +135,7 @@ export const AquacultureManagementScreens: React.FC = () => {
             />
 
             {/* Tabs */}
-            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} counts={counts} />
+            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
 
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>
