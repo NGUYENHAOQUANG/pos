@@ -135,11 +135,12 @@ export interface SeasonData {
     farmCode: string; // Mã trại (mapped from Zone or SeasonCode)
     startDate: string; // Ngày khởi tạo
     endDate: string; // Ngày kết thúc
-    status: 'Đang hoạt động' | 'Đã kết thúc' | number; // Trạng thái
+    status: 'Đang hoạt động' | 'Đã kết thúc' | number | string; // Trạng thái
     zoneId?: string | number; // ID of the zone this season belongs to
     // API raw fields (optional)
     seasonName?: string;
     seasonCode?: string;
+    code?: string; // New API field
     cycleCount?: number;
 }
 

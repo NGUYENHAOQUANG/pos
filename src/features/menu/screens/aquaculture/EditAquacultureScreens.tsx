@@ -150,7 +150,7 @@ export const EditAquacultureScreens: React.FC = () => {
                         initialValues={{
                             ...aquaculture,
                             id: aquaculture.id.toString(),
-                            code: aquaculture.seasonCode, // Map seasonCode to code for display
+                            code: aquaculture.code,
                             startDate: new Date(aquaculture.startDate),
                             endDate: new Date(aquaculture.endDate),
                             status: aquaculture.status === 'Đang hoạt động' ? 'active' : 'ended',
@@ -161,12 +161,22 @@ export const EditAquacultureScreens: React.FC = () => {
 
                 <ButtonBarMenu
                     primaryTitle="Cập nhật thông tin"
-                    secondaryTitle="Huỷ"
+                    secondaryTitle={
+                        (aquaculture.status as string) === 'ended' ||
+                        (aquaculture.status as string) === 'Đã kết thúc'
+                            ? 'Huỷ'
+                            : 'Đóng vụ nuôi'
+                    }
                     onPrimaryPress={handleUpdate}
                     onSecondaryPress={() => {
                         navigation.goBack();
                     }}
-                    secondaryType="default"
+                    secondaryType={
+                        (aquaculture.status as string) === 'ended' ||
+                        (aquaculture.status as string) === 'Đã kết thúc'
+                            ? 'default'
+                            : 'danger'
+                    }
                 />
 
                 <ConfirmationDeleteModal
