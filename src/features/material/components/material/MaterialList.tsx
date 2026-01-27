@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 2 },
+                shadowOffset: { width: 0, height: 0.4 },
                 shadowOpacity: 0.1,
-                shadowRadius: 4,
+                shadowRadius: 1,
             },
             android: {
-                elevation: 2,
+                elevation: 1,
             },
         }),
     },

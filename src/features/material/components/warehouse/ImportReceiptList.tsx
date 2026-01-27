@@ -10,12 +10,12 @@ import {
     UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { WarehouseReceiptItems } from './WarehouseReceiptItems';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-import { IWarehouseReceipt } from '@/features/material/types/material.types';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ImportReceipt } from '@/features/material/types/importReceipt.types';
+import { IPaginate } from '@/shared/types/common.types';
+import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,12 +23,37 @@ if (Platform.OS === 'android') {
     }
 }
 
-interface WarehouseMaterialListProps {
-    receipts: IWarehouseReceipt[];
+interface ImportReceiptListProps {
+    data: IPaginate<ImportReceipt> | undefined;
+    onEndReached?: () => void;
+    refreshing?: boolean;
+    onRefresh?: () => void;
+    isLoading?: boolean;
 }
 
-export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ receipts }) => {
+export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
+    data,
+    onEndReached,
+    refreshing,
+    onRefresh,
+    isLoading,
+}) => {
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
+    const receipts = data?.items || [];
+
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <ImportReceiptSkeleton />}
+                    keyExtractor={item => item.toString()}
+                    contentContainerStyle={styles.listContainer}
+                    showsVerticalScrollIndicator={false}
+                />
+            </View>
+        );
+    }
 
     const toggleExpand = (id: string) => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -39,25 +64,7 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
         }
     };
 
-    const formatCurrency = (value: number) => {
-        if (value >= 1000000) {
-            const millions = parseFloat((value / 1000000).toFixed(6));
-            return (
-                <>
-                    {formatCurrencyValue(millions)} Triệu{' '}
-                    <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-                </>
-            );
-        }
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
-    };
-
-    const renderItem = ({ item }: { item: IWarehouseReceipt }) => {
+    const renderItem = ({ item }: { item: ImportReceipt }) => {
         const isExpanded = expandedIds.includes(item.id);
 
         return (
@@ -66,23 +73,31 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
                     {/* Header Info */}
                     <View style={styles.row}>
                         <Text style={styles.label}>Nhập kho:</Text>
-                        <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
+                        <Text style={styles.value}>
+                            {item.createdAt ? formatMaterialDateTime(item.editedAt) : '---'}
+                        </Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Tạo phiếu:</Text>
-                        <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
+                        <Text style={styles.value}>
+                            {item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
+                        </Text>
                     </View>
 
                     <View style={styles.divider} />
 
                     {/* Summary Info */}
                     <View style={styles.row}>
-                        <Text style={styles.label}>Tổng hàng hoá:</Text>
-                        <Text style={styles.value}>{item.materials.length}</Text>
+                        <Text style={styles.label}>Tổng hàng hóa:</Text>
+                        <Text style={styles.value}>{item.totalItems ?? '---'}</Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Tổng giá trị:</Text>
-                        <Text style={styles.value}>{formatCurrency(item.totalAmount)}</Text>
+                        <Text style={styles.value}>
+                            {item.totalAmount
+                                ? `${formatCurrencyValue(item.totalAmount)} đ`
+                                : '0 đ'}
+                        </Text>
                     </View>
                 </View>
 
@@ -92,10 +107,8 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
                         {/* Supplier Info */}
                         <View style={styles.supplierRow}>
                             <Text style={styles.label}>Nhà cung cấp:</Text>
-                            <Text style={styles.value}>{item.supplier || '---'}</Text>
+                            <Text style={styles.value}>{item.supplierName || '---'}</Text>
                         </View>
-
-                        <WarehouseReceiptItems materials={item.materials} />
                     </View>
                 )}
 
@@ -113,17 +126,27 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({ re
     };
 
     return (
-        <FlatList
-            data={receipts}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-        />
+        <View style={styles.container}>
+            <FlatList
+                data={receipts}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.listContainer}
+                showsVerticalScrollIndicator={false}
+                onEndReached={onEndReached}
+                onEndReachedThreshold={0.5}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: spacing.md,
+    },
     listContainer: {
         paddingBottom: 100,
     },
@@ -133,16 +156,15 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
+                shadowColor: colors.shadow,
+                shadowOffset: { width: 0, height: 0.4 },
                 shadowOpacity: 0.1,
-                shadowRadius: 4,
+                shadowRadius: 1,
             },
             android: {
-                elevation: 2,
+                elevation: 1,
             },
         }),
-        overflow: 'hidden',
         paddingBottom: spacing.sm,
     },
     cardContent: {

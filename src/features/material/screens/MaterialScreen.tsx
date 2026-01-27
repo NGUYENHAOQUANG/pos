@@ -12,23 +12,22 @@ import {
 import { HeadingMeterial, TabType } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { WarehouseListScreen } from '@/features/material/screens/warehouse/WarehouseListScreen';
+import { ImportReceiptList } from '@/features/material/components/warehouse/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
 import { IMaterial } from '@/features/material/types/material.types';
 import {
-    useWarehouseReceipts,
     useExportWarehouse,
     useInventoryTickets,
     useMaterials,
     useMaterialTypes,
+    useImportReceipts,
 } from '@/features/material/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
 
-// Constants for pagination
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -125,8 +124,12 @@ export const MeterialScreen = () => {
         [searchText]
     );
 
-    const { data: warehouseList = [], refetch: refetchWarehouse } =
-        useWarehouseReceipts(warehouseParams);
+    const {
+        data: importReceiptsData,
+        refetch: refetchImportReceipts,
+        isRefetching: isRefetchingImportReceipts,
+        isLoading: isLoadingImportReceipts,
+    } = useImportReceipts(warehouseParams);
     const { data: exportWarehouseList = [], refetch: refetchExportWarehouse } =
         useExportWarehouse(exportWarehouseParams);
     const { data: inventoryList = [], refetch: refetchInventory } =
@@ -231,10 +234,10 @@ export const MeterialScreen = () => {
 
     const handleRefresh = useCallback(() => {
         refetchMaterials();
-        refetchWarehouse();
+        refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchMaterials, refetchWarehouse, refetchExportWarehouse, refetchInventory]);
+    }, [refetchMaterials, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
 
     return (
         <View style={styles.container}>
@@ -285,8 +288,14 @@ export const MeterialScreen = () => {
                         <MaterialEmptyState tab="list" onPress={handleAddMaterial} />
                     ))}
                 {selectedTab === 'history' &&
-                    (warehouseList.length > 0 ? (
-                        <WarehouseListScreen receipts={warehouseList} />
+                    (isLoadingImportReceipts ? (
+                        <ImportReceiptList data={undefined} isLoading={true} />
+                    ) : importReceiptsData?.items && importReceiptsData.items.length > 0 ? (
+                        <ImportReceiptList
+                            data={importReceiptsData}
+                            refreshing={!!isRefetchingImportReceipts}
+                            onRefresh={handleRefresh}
+                        />
                     ) : (
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}

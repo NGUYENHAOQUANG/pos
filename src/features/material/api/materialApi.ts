@@ -7,6 +7,8 @@ import {
     GetMaterialsV2Response,
     GetMaterialByIdV2Response,
     DeleteMaterialResponse,
+    CreateMaterialResponse,
+    UpdateMaterialResponse,
 } from '@/features/material/types/materialGroup.types';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
@@ -60,8 +62,8 @@ export const materialApi = {
     update: async (
         id: string,
         request: UpdateMaterialV2Request
-    ): Promise<GetMaterialsV2Response> => {
-        const { data } = await apiClient.patch<GetMaterialsV2Response>(
+    ): Promise<UpdateMaterialResponse> => {
+        const { data } = await apiClient.patch<UpdateMaterialResponse>(
             API_ENDPOINTS.MATERIAL.UPDATE(id),
             request
         );

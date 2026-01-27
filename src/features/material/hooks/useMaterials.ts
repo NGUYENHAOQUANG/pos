@@ -11,7 +11,7 @@ import {
 } from '@/features/material/types/materialGroup.types';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
-import { useMaterialGroups } from './useMaterialGroups';
+import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useMaterialTypes } from '@/features/material/hooks/useMaterialTypes';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 
