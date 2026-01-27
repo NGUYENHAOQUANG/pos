@@ -83,7 +83,7 @@ export interface GetMaterialTypesV2Params {
 
 // ============ Material API Types ============
 export interface MaterialResponseV2 {
-    id: string; // UUID
+    id: string;
     creatorId?: number | null;
     createdAt?: string | null;
     lastModifierId?: number | null;
@@ -129,4 +129,4 @@ export interface GetMaterialsV2Params {
 
 export type GetMaterialsV2Response = IAppResponseV2<IPaginateV2<MaterialResponseV2>>;
 export type GetMaterialByIdV2Response = IAppResponseV2<MaterialResponseV2>;
-export type CreateMaterialResponse = IAppResponseV2<MaterialResponseV2>;
+export type DeleteMaterialResponse = IAppResponseV2<string>;
