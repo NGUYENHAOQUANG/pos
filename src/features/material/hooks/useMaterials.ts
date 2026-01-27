@@ -1,7 +1,11 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialApi } from '@/features/material/api/materialApi';
-import { IMaterial, IMaterialType } from '@/features/material/types/material.types';
+import {
+    IMaterial,
+    IMaterialType,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
 import {
     IMaterialGroupV2,
     CreateMaterialV2Request,
@@ -26,7 +30,7 @@ const mapMaterialResponse = (
 ): IMaterial => {
     // Note: materialGroupId is number but groups now have string IDs (UUID)
     // We need to match by converting or updating the backend to use consistent IDs
-    const group = item.materialGroupId
+    const groupName = item.materialGroupId
         ? groups.find(g => g.id === item.materialGroupId)?.name || ''
         : '';
 
@@ -37,7 +41,7 @@ const mapMaterialResponse = (
     return {
         id: item.id,
         name: item.name || '',
-        group: group,
+        group: groupName as MaterialGroupType, // Cast string to Enum as API returns matching values
         groupId: item.materialGroupId,
         type: type,
         typeId: item.materialTypeId,
@@ -53,7 +57,7 @@ const mapMaterialResponse = (
 /**
  * Hook to fetch materials with filters
  */
-export const useMaterials = (params?: GetMaterialsV2Params) => {
+export const useMaterials = (params?: GetMaterialsV2Params, options?: { enabled?: boolean }) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 
@@ -68,6 +72,7 @@ export const useMaterials = (params?: GetMaterialsV2Params) => {
             throw new Error(response.message || 'Không thể tải danh sách vật tư');
         },
         staleTime: STALE_TIME_SHORT,
+        enabled: options?.enabled,
     });
 
     // Map data on client side whenever dependencies change

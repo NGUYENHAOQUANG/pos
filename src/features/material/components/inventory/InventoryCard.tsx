@@ -11,7 +11,12 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IInventoryTicket, IInventoryTicketItem } from '@/features/material/types/material.types';
+import {
+    IInventoryTicket,
+    IInventoryTicketItem,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -70,9 +75,28 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         return data.totalDifference;
     }, [items, data.totalDifference]);
 
+    const getStatusLabel = (status: string): MaterialGroupType => {
+        switch (status) {
+            case 'Draft':
+                return MaterialGroupType.DRAFT;
+            case 'Pending':
+                return MaterialGroupType.PENDING;
+            case 'Approved':
+                return MaterialGroupType.COMPLETED;
+            case 'Rejected':
+                return MaterialGroupType.REJECTED;
+            default:
+                return MaterialGroupType.DRAFT;
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.col}>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Trạng thái:</Text>
+                    <MaterialGroup group={getStatusLabel(data.status)} />
+                </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Người kiểm:</Text>
                     <Text style={styles.value}>{data.checkerName}</Text>
@@ -112,6 +136,18 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                     <Text style={styles.value}>{totalDifference}</Text>
                 </View>
             </View>
+
+            {/* Edit Button (Only for Draft) */}
+            {data.status === 'Draft' && (
+                <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => {
+                        /* Handle Edit */
+                    }}
+                >
+                    <Text style={styles.editButtonText}>Sửa thông tin</Text>
+                </TouchableOpacity>
+            )}
 
             {isExpanded && (
                 <View style={styles.expandedContainer}>
@@ -190,6 +226,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: spacing.xs,
+        alignItems: 'center',
     },
     col: {
         paddingBottom: 0,
@@ -205,6 +242,7 @@ const styles = StyleSheet.create({
     value: {
         fontSize: 14,
         color: colors.text,
+        textAlign: 'right',
     },
     noteRow: {
         flexDirection: 'row',
@@ -236,12 +274,37 @@ const styles = StyleSheet.create({
         fontSize: 14,
         width: '70%',
     },
+    separator: {
+        marginTop: spacing.sm,
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginHorizontal: -spacing.md,
+    },
+    colWithMargin: {
+        marginTop: spacing.sm,
+    },
+    editButton: {
+        marginTop: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.white,
+    },
+    editButtonText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
+    },
     toggleButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: spacing.sm,
         gap: 4,
+        marginTop: spacing.xs,
     },
     toggleText: {
         fontSize: 14,
@@ -250,9 +313,8 @@ const styles = StyleSheet.create({
     },
     expandedContainer: {
         marginTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-        paddingTop: spacing.md,
+        borderTopWidth: 0,
+        paddingTop: spacing.xs,
     },
     detailItemContainer: {
         borderRadius: borderRadius.sm,
@@ -268,6 +330,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
         marginBottom: spacing.sm,
+        fontWeight: '600',
     },
     detailRow: {
         flexDirection: 'row',
@@ -277,20 +340,11 @@ const styles = StyleSheet.create({
     },
     detailLabel: {
         fontSize: 14,
-        color: colors.text,
-        fontWeight: '700',
+        color: colors.textSecondary,
     },
     detailValue: {
-        fontSize: 13,
+        fontSize: 14,
         color: colors.text,
-    },
-    separator: {
-        marginTop: spacing.sm,
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-    colWithMargin: {
-        marginTop: spacing.sm,
+        fontWeight: '500',
     },
 });
