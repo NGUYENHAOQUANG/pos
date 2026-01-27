@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,23 +12,22 @@ import {
 import { HeadingMeterial, TabType } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { WarehouseListScreen } from '@/features/material/screens/warehouse/WarehouseListScreen';
+import { ImportReceiptList } from '@/features/material/components/warehouse/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
-import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
+import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
 import { IMaterial } from '@/features/material/types/material.types';
 import {
-    useWarehouseReceipts,
     useExportWarehouse,
     useInventoryTickets,
     useMaterials,
     useMaterialTypes,
+    useImportReceipts,
 } from '@/features/material/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
 
-// Constants for pagination
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -125,12 +124,24 @@ export const MeterialScreen = () => {
         [searchText]
     );
 
-    const { data: warehouseList = [], refetch: refetchWarehouse } =
-        useWarehouseReceipts(warehouseParams);
-    const { data: exportWarehouseList = [], refetch: refetchExportWarehouse } =
-        useExportWarehouse(exportWarehouseParams);
-    const { data: inventoryList = [], refetch: refetchInventory } =
-        useInventoryTickets(inventoryParams);
+    const {
+        data: importReceiptsData,
+        refetch: refetchImportReceipts,
+        isRefetching: isRefetchingImportReceipts,
+        isLoading: isLoadingImportReceipts,
+    } = useImportReceipts(warehouseParams);
+    const {
+        data: exportWarehouseList,
+        refetch: refetchExportWarehouse,
+        isRefetching: isRefetchingExportWarehouse,
+        isLoading: isLoadingExportWarehouse,
+    } = useExportWarehouse(exportWarehouseParams);
+    const {
+        data: inventoryList = [],
+        refetch: refetchInventory,
+        isLoading: isLoadingInventory,
+        isRefetching: isRefetchingInventory,
+    } = useInventoryTickets(inventoryParams);
 
     const handleShowMenu = useCallback(
         (position: { x: number; y: number; width: number; height: number }) => {
@@ -162,27 +173,27 @@ export const MeterialScreen = () => {
     const handleCreateImport = useCallback(() => {
         navigation.navigate('AddWarehouse', {
             availableMaterials: materials,
-        } as any);
+        });
     }, [navigation, materials]);
     const handleCreateExport = useCallback(() => {
         navigation.navigate('AddExportWarehouse', {
             availableMaterials: materials,
-        } as any);
+        });
     }, [navigation, materials]);
 
     const handleCreateInventory = useCallback(() => {
-        navigation.navigate('AddInventory', {} as any);
+        navigation.navigate('AddInventory', {});
     }, [navigation]);
 
     const handleCreateMaterial = useCallback(() => {
-        navigation.navigate('AddMaterial', {} as any);
+        navigation.navigate('AddMaterial', {});
     }, [navigation]);
 
     const handleEditMaterial = useCallback(
         (item: IMaterial) => {
             navigation.navigate('EditMaterial', {
                 material: item,
-            } as any);
+            });
         },
         [navigation]
     );
@@ -229,12 +240,32 @@ export const MeterialScreen = () => {
         [setFilterMaterialName]
     );
 
+    const mappedExportReceipts = useMemo(() => {
+        const items = exportWarehouseList?.items || [];
+        return items.map((item: any) => ({
+            id: item.id,
+            date: item.createdAt,
+            farm: item.pondName || item.warehouseName || item.farm || '---',
+            materials: item.materials || [],
+            totalAmount: item.totalAmount || 0,
+            totalItems: item.totalItems || 0,
+        }));
+    }, [exportWarehouseList]);
+    const handleAdjustmentPress = useCallback(
+        (item: IMaterial) => {
+            navigation.navigate('AddInventory', {
+                initialMaterialName: item.name,
+            });
+        },
+        [navigation]
+    );
+
     const handleRefresh = useCallback(() => {
         refetchMaterials();
-        refetchWarehouse();
+        refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchMaterials, refetchWarehouse, refetchExportWarehouse, refetchInventory]);
+    }, [refetchMaterials, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
 
     return (
         <View style={styles.container}>
@@ -255,59 +286,48 @@ export const MeterialScreen = () => {
             />
 
             <View style={styles.content}>
-                {selectedTab === 'list' &&
-                    (showSkeleton ? (
-                        <MaterialListScreen
-                            materials={[]}
-                            onEdit={handleEditMaterial}
-                            onHistoryPress={handleHistoryPress}
-                            onAdjustmentPress={adjustmentItem =>
-                                navigation.navigate('AddInventory', {
-                                    initialMaterialName: adjustmentItem.name,
-                                } as any)
-                            }
-                            isLoading={true}
-                        />
-                    ) : materials.length > 0 ? (
-                        <MaterialListScreen
-                            materials={materials}
-                            onEdit={handleEditMaterial}
-                            onHistoryPress={handleHistoryPress}
-                            onAdjustmentPress={adjustmentItem =>
-                                navigation.navigate('AddInventory', {
-                                    initialMaterialName: adjustmentItem.name,
-                                } as any)
-                            }
-                            refreshing={!!isRefetchingMaterials}
+                {selectedTab === 'list' && (
+                    <MaterialListScreen
+                        materials={materials}
+                        onEdit={handleEditMaterial}
+                        onHistoryPress={handleHistoryPress}
+                        onAdjustmentPress={handleAdjustmentPress}
+                        isLoading={showSkeleton}
+                        refreshing={!!isRefetchingMaterials}
+                        onRefresh={handleRefresh}
+                        onPressCreate={handleAddMaterial}
+                    />
+                )}
+                {selectedTab === 'history' && (
+                    <ImportReceiptList
+                        data={importReceiptsData}
+                        isLoading={isLoadingImportReceipts}
+                        refreshing={!!isRefetchingImportReceipts}
+                        onRefresh={handleRefresh}
+                        onPressCreate={handleCreateImport}
+                    />
+                )}
+                {selectedTab === 'export' &&
+                    (isLoadingExportWarehouse ? (
+                        <ExportWarehouseListScreen receipts={[]} isLoading={true} />
+                    ) : mappedExportReceipts.length > 0 ? (
+                        <ExportWarehouseListScreen
+                            receipts={mappedExportReceipts}
+                            refreshing={!!isRefetchingExportWarehouse}
                             onRefresh={handleRefresh}
                         />
                     ) : (
-                        <MaterialEmptyState tab="list" onPress={handleAddMaterial} />
-                    ))}
-                {selectedTab === 'history' &&
-                    (warehouseList.length > 0 ? (
-                        <WarehouseListScreen receipts={warehouseList} />
-                    ) : (
                         <MaterialEmptyState tab="history" onPress={handleCreateImport} />
                     ))}
-                {selectedTab === 'export' &&
-                    (exportWarehouseList.length > 0 ? (
-                        <ExportWarehouseListScreen receipts={exportWarehouseList} />
-                    ) : (
-                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
-                    ))}
-                {selectedTab === 'inventory' &&
-                    (inventoryList.length > 0 ? (
-                        <FlatList
-                            data={inventoryList}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => <InventoryCard data={item} />}
-                            contentContainerStyle={{ paddingBottom: spacing['3xl'] }}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    ) : (
-                        <MaterialEmptyState tab="inventory" onPress={handleCreateInventory} />
-                    ))}
+                {selectedTab === 'inventory' && (
+                    <InventoryScreen
+                        data={inventoryList}
+                        isLoading={isLoadingInventory}
+                        refreshing={!!isRefetchingInventory}
+                        onRefresh={handleRefresh}
+                        onPressCreate={handleCreateInventory}
+                    />
+                )}
             </View>
 
             <MaterialMenuOverlay

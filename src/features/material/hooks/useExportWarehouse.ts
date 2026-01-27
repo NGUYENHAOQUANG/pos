@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     GetExportWarehouseParams,
-    IExportWarehouseReceipt,
-} from '@/features/material/types/material.types';
-import { mockExportWarehouseList } from '@/features/material/data/materialData';
+    CreateExportReceiptRequest,
+} from '@/features/material/types/exportReceipt.types';
+import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
@@ -17,37 +17,11 @@ export const useExportWarehouse = (params?: GetExportWarehouseParams) => {
     return useQuery({
         queryKey: materialKeys.exportWarehouse(params),
         queryFn: async () => {
-            // Simulate API delay
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-
-            let data = [...mockExportWarehouseList];
-
-            if (params) {
-                if (params.Search) {
-                    const searchLower = params.Search.toLowerCase();
-                    data = data.filter(
-                        item =>
-                            item.farm?.toLowerCase().includes(searchLower) ||
-                            item.materials.some(m =>
-                                m.materialName.toLowerCase().includes(searchLower)
-                            )
-                    );
-                }
-
-                if (params.MaterialName) {
-                    data = data.filter(item =>
-                        item.materials.some(m => m.materialName === params.MaterialName)
-                    );
-                }
-
-                if (params.Page && params.PageSize) {
-                    const start = (params.Page - 1) * params.PageSize;
-                    const end = start + params.PageSize;
-                    data = data.slice(start, end);
-                }
+            const response = await exportReceiptApi.getAll(params);
+            if (response.success && response.data?.items) {
+                return response.data;
             }
-
-            return data;
+            return response.data || { items: [], totalCount: 0 };
         },
         staleTime: STALE_TIME_SHORT,
     });
@@ -60,28 +34,16 @@ export const useAddExportWarehouseReceipt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (receipt: Omit<IExportWarehouseReceipt, 'id'>) => {
-            // Simulate API delay
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-            // In a real app, the server returns the new created object
-            const newReceipt: IExportWarehouseReceipt = {
-                ...receipt,
-                id: Date.now().toString(),
-            };
-            return newReceipt;
+        mutationFn: async (payload: CreateExportReceiptRequest) => {
+            const response = await exportReceiptApi.create(payload);
+            return response;
         },
-        onSuccess: newReceipt => {
+        onSuccess: () => {
             showSuccessToast('Tạo phiếu xuất kho thành công');
-            // Optimistically update the list in mock data scenario
-            // In real app, we would invalidate queries, but since we use mock data,
-            // subsequent fetches might return the original mock list unless we modify it in memory or API.
-            // For now, we update the cache manually to simulate persistence in SPA session.
-            queryClient.setQueryData(
-                materialKeys.exportWarehouse(),
-                (oldData: IExportWarehouseReceipt[] | undefined) => {
-                    return oldData ? [newReceipt, ...oldData] : [newReceipt];
-                }
-            );
+            // Invalidate the list query to refetch data
+            queryClient.invalidateQueries({
+                queryKey: materialKeys.exportWarehouse(),
+            });
         },
         onError: (error: unknown) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');

@@ -65,6 +65,7 @@ export interface IExportWarehouseReceipt {
     farm?: string; // Trường trại thay vì supplier
     materials: IExportWarehouseMaterialItem[];
     totalAmount: number;
+    totalItems?: number;
 }
 
 export interface IInventoryTicketItem {
@@ -231,6 +232,22 @@ export interface GetExportWarehouseParams {
 }
 
 export interface GetInventoryParams {
+    Search?: string;
+    Page?: number;
+    PageSize?: number;
+}
+// ============ Warehouse Types (Real API) ============
+export interface IWarehouse {
+    id: string;
+    name: string;
+    code: string;
+    zoneId?: string;
+    description?: string;
+    address?: string;
+}
+
+export interface GetWarehousesParams {
+    ZoneId?: string;
     Search?: string;
     Page?: number;
     PageSize?: number;

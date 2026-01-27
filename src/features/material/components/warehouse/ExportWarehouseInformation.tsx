@@ -27,6 +27,7 @@ interface ExportWarehouseInformationProps {
     onZoneChange: (value: string) => void;
     selectedPond: string;
     onPondChange: (value: string) => void;
+    children?: React.ReactNode;
 }
 
 export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProps> = ({
@@ -36,6 +37,7 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     onZoneChange,
     selectedPond,
     onPondChange,
+    children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
@@ -173,6 +175,9 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                             inline={false}
                         />
                     </View>
+
+                    {/* Children Content (e.g., File Uploader) */}
+                    {children}
                 </View>
             )}
 

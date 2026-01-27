@@ -1,11 +1,4 @@
-/**
- * @file materialGroup.types.ts
- * @description Material Group types for new API structure
- * @author Kindy
- * @created 2026-01-23
- */
-
-// ============ Material Group Types (New API) ============
+import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 export interface IMaterialGroupV2 {
     id: string; // UUID format
     name: string;
@@ -30,30 +23,8 @@ export interface UpdateMaterialGroupV2Request {
     description?: string;
 }
 
-// ============ Pagination Types (New API) ============
-export interface IPaginateV2<T> {
-    items: T[];
-    pageNumber: number;
-    totalPages: number;
-    totalCount: number;
-    pageSize: number;
-    hasPreviousPage: boolean;
-    hasNextPage: boolean;
-}
-
-// ============ Response Types (New API) ============
-export interface IAppResponseV2<T> {
-    success: boolean;
-    data: T;
-    message?: string | null;
-    errorCode?: string | null;
-    validationErrors?: any;
-    details?: string | null;
-    timestamp?: string;
-}
-
-export type GetMaterialGroupsV2Response = IAppResponseV2<IPaginateV2<IMaterialGroupV2>>;
-export type GetMaterialGroupByIdV2Response = IAppResponseV2<IMaterialGroupV2>;
+export type GetMaterialGroupsV2Response = IApiResponse<IPaginate<IMaterialGroupV2>>;
+export type GetMaterialGroupByIdV2Response = IApiResponse<IMaterialGroupV2>;
 
 // ============ Query Params ============
 export interface GetMaterialGroupsV2Params {
@@ -127,6 +98,13 @@ export interface GetMaterialsV2Params {
     PageSize?: number;
 }
 
-export type GetMaterialsV2Response = IAppResponseV2<IPaginateV2<MaterialResponseV2>>;
-export type GetMaterialByIdV2Response = IAppResponseV2<MaterialResponseV2>;
-export type DeleteMaterialResponse = IAppResponseV2<string>;
+export interface UpdateMaterialResponseData {
+    materialId: string;
+    name: string;
+}
+
+export type GetMaterialsV2Response = IApiResponse<IPaginate<MaterialResponseV2>>;
+export type GetMaterialByIdV2Response = IApiResponse<MaterialResponseV2>;
+export type CreateMaterialResponse = IApiResponse<MaterialResponseV2>;
+export type UpdateMaterialResponse = IApiResponse<UpdateMaterialResponseData>;
+export type DeleteMaterialResponse = IApiResponse<string>;
