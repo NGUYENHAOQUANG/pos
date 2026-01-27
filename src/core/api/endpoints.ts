@@ -108,4 +108,7 @@ export const API_ENDPOINTS = {
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',
     },
+    EXPORT_RECEIPT: {
+        LIST: '/exportreceipt',
+    },
 } as const;

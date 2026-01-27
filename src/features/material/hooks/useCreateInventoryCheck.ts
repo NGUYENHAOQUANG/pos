@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { inventoryApi } from '@/features/material/api/inventoryApi';
 import {
-    inventoryApi,
     CreateInventoryCheckRequest,
     AddInventoryCheckItemsRequest,
-} from '@/features/material/api/inventoryApi';
+} from '@/features/material/types/inventory.types';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';

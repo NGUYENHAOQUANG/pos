@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     GetExportWarehouseParams,
-    IExportWarehouseReceipt,
-} from '@/features/material/types/material.types';
-import { mockExportWarehouseList } from '@/features/material/data/materialData';
+    ExportReceipt,
+} from '@/features/material/types/exportReceipt.types';
+import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
@@ -17,37 +17,11 @@ export const useExportWarehouse = (params?: GetExportWarehouseParams) => {
     return useQuery({
         queryKey: materialKeys.exportWarehouse(params),
         queryFn: async () => {
-            // Simulate API delay
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-
-            let data = [...mockExportWarehouseList];
-
-            if (params) {
-                if (params.Search) {
-                    const searchLower = params.Search.toLowerCase();
-                    data = data.filter(
-                        item =>
-                            item.farm?.toLowerCase().includes(searchLower) ||
-                            item.materials.some(m =>
-                                m.materialName.toLowerCase().includes(searchLower)
-                            )
-                    );
-                }
-
-                if (params.MaterialName) {
-                    data = data.filter(item =>
-                        item.materials.some(m => m.materialName === params.MaterialName)
-                    );
-                }
-
-                if (params.Page && params.PageSize) {
-                    const start = (params.Page - 1) * params.PageSize;
-                    const end = start + params.PageSize;
-                    data = data.slice(start, end);
-                }
+            const response = await exportReceiptApi.getAll(params);
+            if (response.success && response.data?.items) {
+                return response.data;
             }
-
-            return data;
+            return response.data || { items: [], totalCount: 0 };
         },
         staleTime: STALE_TIME_SHORT,
     });
@@ -60,11 +34,11 @@ export const useAddExportWarehouseReceipt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (receipt: Omit<IExportWarehouseReceipt, 'id'>) => {
+        mutationFn: async (receipt: Omit<ExportReceipt, 'id'>) => {
             // Simulate API delay
             await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
             // In a real app, the server returns the new created object
-            const newReceipt: IExportWarehouseReceipt = {
+            const newReceipt: ExportReceipt = {
                 ...receipt,
                 id: Date.now().toString(),
             };
@@ -78,7 +52,7 @@ export const useAddExportWarehouseReceipt = () => {
             // For now, we update the cache manually to simulate persistence in SPA session.
             queryClient.setQueryData(
                 materialKeys.exportWarehouse(),
-                (oldData: IExportWarehouseReceipt[] | undefined) => {
+                (oldData: ExportReceipt[] | undefined) => {
                     return oldData ? [newReceipt, ...oldData] : [newReceipt];
                 }
             );

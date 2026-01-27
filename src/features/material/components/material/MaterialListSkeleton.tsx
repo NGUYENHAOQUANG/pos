@@ -3,9 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { colors, spacing, borderRadius } from '@/styles';
 
-const SKELETON_COUNT = 5;
-
-const MaterialListSkeletonItem: React.FC = () => {
+export const MaterialItemSkeleton: React.FC = () => {
     return (
         <View style={styles.container}>
             {/* Header Row */}
@@ -35,16 +33,6 @@ const MaterialListSkeletonItem: React.FC = () => {
                 <View style={styles.spacer} />
                 <Skeleton width="48%" height={36} style={styles.buttonSkeleton} />
             </View>
-        </View>
-    );
-};
-
-export const MaterialListSkeleton: React.FC = () => {
-    return (
-        <View style={styles.listContainer}>
-            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-                <MaterialListSkeletonItem key={index} />
-            ))}
         </View>
     );
 };
