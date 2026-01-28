@@ -95,14 +95,14 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     const scrollViewRef = React.useRef<ScrollView>(null);
 
-    // Smooth scroll based on item index - more stable than measuring position
-    const HEADER_HEIGHT = 280; // Approximate height of ExportWarehouseInformation + header
-    const ITEM_HEIGHT = 280; // Approximate height of each material item
+    const HEADER_HEIGHT = 280;
+    const FILE_ROW_HEIGHT = 40;
+    const ITEM_HEIGHT = 280;
 
     const handleDropdownOpen = (itemIndex: number) => {
         setTimeout(() => {
-            // Calculate scroll position based on index
-            const scrollY = HEADER_HEIGHT + itemIndex * ITEM_HEIGHT;
+            const fileSectionHeight = files.length * FILE_ROW_HEIGHT;
+            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
             scrollViewRef.current?.scrollTo({
                 y: Math.max(0, scrollY - 50), // Small offset to show context
                 animated: true,

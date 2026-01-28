@@ -199,9 +199,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                     <ButtonBarMaterial
                         mode="double"
                         primaryTitle="Gửi Phiếu"
-                        secondaryTitle={isEditMode ? 'Hủy' : 'Lưu Nháp'}
+                        secondaryTitle="Lưu Nháp"
                         onPrimaryPress={handleSubmit}
-                        onSecondaryPress={isEditMode ? () => navigation.goBack() : handleSaveDraft}
+                        onSecondaryPress={handleSaveDraft}
                         containerStyle={{
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],
