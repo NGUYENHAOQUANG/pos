@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { CollapseHead } from '../CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
@@ -34,7 +34,7 @@ interface AddWarehouseMaterialProps {
     materials: MaterialItem[];
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: any) => void;
     onAddMaterial: () => void;
-    materialOptions?: { label: string; value: string; unit: string }[];
+    materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
 }
 

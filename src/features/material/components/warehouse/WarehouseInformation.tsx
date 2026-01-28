@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '../CollapseHead';
 import { colors, spacing } from '@/styles';
-import { Input } from '@/shared/components/forms/Input';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import {
+    DropdownMaterial,
+    DropdownOption,
+} from '@/features/material/components/material/DropdownMaterialGroup';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -14,6 +17,7 @@ interface WarehouseInformationProps {
     onDateChange: (date: Date) => void;
     supplier: string;
     onSupplierChange: (text: string) => void;
+    supplierOptions?: DropdownOption[];
     children?: React.ReactNode;
 }
 
@@ -22,9 +26,11 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
     onDateChange,
     supplier,
     onSupplierChange,
+    supplierOptions = [],
     children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -51,14 +57,19 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                         formatOptions={{ showCurrentLabel: false }}
                     />
 
-                    {/* Supplier Input */}
-                    <Input
+                    {/* Supplier Dropdown */}
+                    <DropdownMaterial
                         label="Nhà cung cấp"
                         required
-                        placeholder="Nhập nhà cung cấp"
                         value={supplier}
-                        onChangeText={onSupplierChange}
-                        containerStyle={{ marginBottom: 0 }}
+                        options={supplierOptions}
+                        onChange={onSupplierChange}
+                        placeholder="Chọn nhà cung cấp"
+                        showAllOption={false}
+                        isOpen={isDropdownOpen}
+                        onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
+                        inline={false}
+                        useAutoScroll={true}
                     />
 
                     {children}

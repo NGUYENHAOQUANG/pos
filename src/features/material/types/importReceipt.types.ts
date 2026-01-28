@@ -37,3 +37,26 @@ export interface GetImportReceiptsParams {
 }
 
 export type GetImportReceiptsResponse = IApiResponse<IPaginate<ImportReceipt>>;
+
+export interface ImportReceiptItem {
+    materialId: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export enum ImportSourceEnum {
+    Supplier = 'Supplier',
+    InternalOperation = 'InternalOperation',
+}
+
+export interface CreateImportReceiptRequest {
+    supplierId: string;
+    warehouseId: string;
+    notes?: string;
+    autoSubmit: boolean;
+    items: ImportReceiptItem[];
+    importSourceEnum: ImportSourceEnum;
+    documentIds: string[];
+}
+
+export type CreateImportReceiptResponse = IApiResponse<string>;
