@@ -1,20 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Platform,
-    LayoutAnimation,
-    UIManager,
-} from 'react-native';
-import CalenderIcon from '@/assets/Icon/Calender.svg';
-import { CollapseHead } from '../CollapseHead';
-import { colors, spacing, borderRadius } from '@/styles';
-import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
-import { formatMaterialDate } from '@/features/material/utils/dateUtils';
+import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
+import { colors, spacing } from '@/styles';
 import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import { formatMaterialDate } from '@/features/material/utils/dateUtils';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -40,7 +31,6 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     // Get zones and ponds from form store
@@ -117,77 +107,47 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
             {isExpanded && (
                 <View style={styles.content}>
                     {/* Date Input */}
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.required}>* </Text>
-                            <Text style={styles.label}>Ngày xuất</Text>
-                        </View>
-                        <TouchableOpacity
-                            style={styles.dateInput}
-                            onPress={() => setDatePickerVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.dateText} numberOfLines={1}>
-                                {formatMaterialDate(date)}
-                            </Text>
-                            <CalenderIcon width={20} height={20} />
-                        </TouchableOpacity>
-                    </View>
+                    <DateInputButton
+                        label="Ngày xuất"
+                        date={date}
+                        dateText={formatMaterialDate(date)}
+                        onDateChange={onDateChange}
+                        required
+                    />
 
-                    {/* Zone Dropdown */}
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.required}>* </Text>
-                            <Text style={styles.label}>Trại nuôi</Text>
-                        </View>
-                        <DropdownMaterial
-                            value={selectedZone}
-                            options={zoneOptions}
-                            onChange={newValue => {
-                                onZoneChange(newValue);
-                                onPondChange('');
-                            }}
-                            placeholder="Chọn trại nuôi"
-                            showAllOption={false}
-                            isOpen={activeDropdown === 'zone'}
-                            onToggle={() => handleToggleDropdown('zone')}
-                            disabled={isLoadingZones}
-                            inline={false}
-                        />
-                    </View>
-
-                    {/* Pond Dropdown */}
-                    <View style={styles.inputGroup}>
-                        <View style={styles.labelContainer}>
-                            <Text style={styles.required}>* </Text>
-                            <Text style={styles.label}>Ao nuôi</Text>
-                        </View>
-                        <DropdownMaterial
-                            value={selectedPond}
-                            options={pondOptions}
-                            onChange={onPondChange}
-                            placeholder={
-                                isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'
-                            }
-                            showAllOption={false}
-                            isOpen={activeDropdown === 'pond'}
-                            onToggle={() => handleToggleDropdown('pond')}
-                            disabled={!selectedZone || isLoadingPonds}
-                            inline={false}
-                        />
-                    </View>
-
+                    <DropdownMaterial
+                        label="Trại nuôi"
+                        value={selectedZone}
+                        options={zoneOptions}
+                        onChange={newValue => {
+                            onZoneChange(newValue);
+                            onPondChange('');
+                        }}
+                        placeholder="Chọn trại nuôi"
+                        showAllOption={false}
+                        isOpen={activeDropdown === 'zone'}
+                        onToggle={() => handleToggleDropdown('zone')}
+                        disabled={isLoadingZones}
+                        inline={false}
+                        required
+                    />
+                    <DropdownMaterial
+                        label="Ao nuôi"
+                        value={selectedPond}
+                        options={pondOptions}
+                        onChange={onPondChange}
+                        placeholder={isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'}
+                        showAllOption={false}
+                        isOpen={activeDropdown === 'pond'}
+                        onToggle={() => handleToggleDropdown('pond')}
+                        disabled={!selectedZone || isLoadingPonds}
+                        inline={false}
+                        required
+                    />
                     {/* Children Content (e.g., File Uploader) */}
                     {children}
                 </View>
             )}
-
-            <DatePickerModal
-                visible={isDatePickerVisible}
-                onClose={() => setDatePickerVisible(false)}
-                date={date}
-                onSelectDate={onDateChange}
-            />
         </View>
     );
 };
@@ -195,7 +155,7 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: colors.white,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -211,38 +171,11 @@ const styles = StyleSheet.create({
 
     content: {
         padding: spacing.md,
+        gap: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.gray[100],
     },
     inputGroup: {
         marginBottom: spacing.md,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    required: {
-        fontSize: 14,
-        color: colors.error,
-    },
-    dateInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 44,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    dateText: {
-        fontSize: 15,
-        color: colors.text,
-        flex: 1,
-        marginRight: spacing.sm,
     },
 });
