@@ -65,4 +65,28 @@ export const authApi = {
         const { data } = await apiClient.get<AuthResponse>(API_ENDPOINTS.AUTH.PROFILE);
         return data;
     },
+
+    updateProfile: async (profileData: {
+        fullName: string;
+        email: string;
+        address: string;
+        avatarUrl: string;
+    }): Promise<AuthResponse> => {
+        const { data } = await apiClient.put<AuthResponse>(
+            API_ENDPOINTS.AUTH.UPDATE_PROFILE,
+            profileData
+        );
+        return data;
+    },
+
+    deleteAccount: async (payload: {
+        phoneNumber: string;
+        selectedReasons: string[];
+        otherReasonNote: string;
+        otpCode: string;
+    }): Promise<void> => {
+        await apiClient.delete(API_ENDPOINTS.AUTH.DELETE_ACCOUNT, {
+            data: payload,
+        });
+    },
 };

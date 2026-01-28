@@ -105,12 +105,16 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
     const handleFarmInfoPress = () => {
         if (!selectedFarm) return;
+
+        // Find the full zone object to get area and address
+        const fullZoneData = zones.find(z => z.id.toString() === selectedFarm.id.toString());
+
         const farmData: FarmData = {
             id: selectedFarm.id.toString(),
             name: selectedFarm.label,
             code: selectedFarm.value,
-            area: '',
-            address: '',
+            area: fullZoneData?.area?.toString() || '',
+            address: fullZoneData?.address || '',
         };
         navigation.navigate('FarmInfo', { farm: farmData });
     };

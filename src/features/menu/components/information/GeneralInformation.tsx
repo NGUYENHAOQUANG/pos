@@ -9,6 +9,7 @@ interface GeneralInformationProps {
         email: string;
         role: string;
         level: string;
+        address: string;
     };
     avatarUri?: string | null;
     onChangePhoto?: () => void;
@@ -49,6 +50,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                 <InfoRow label="Tên:" value={data.name} />
                 <InfoRow label="Số điện thoại:" value={data.phone} />
                 <InfoRow label="Email:" value={data.email} />
+                <InfoRow label="Địa chỉ:" value={data.address} />
                 <InfoRow label="Chức vụ" value={data.role} />
                 <InfoRow label="Cấp quản lý" value={data.level} />
             </View>
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: colors.gray[300], // Placeholder color
+        backgroundColor: colors.gray[300],
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,

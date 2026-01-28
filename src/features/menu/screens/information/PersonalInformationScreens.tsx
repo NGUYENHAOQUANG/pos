@@ -144,6 +144,7 @@ export const PersonalInformationScreens: React.FC = () => {
                         email: userData.email,
                         role: userData.role,
                         level: userData.level,
+                        address: userData.address || '',
                     }}
                     avatarUri={userData.avatarUri}
                     // No onChangePhoto passed, so it will be read-only

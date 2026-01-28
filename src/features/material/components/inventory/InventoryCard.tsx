@@ -10,6 +10,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { colors, spacing, borderRadius } from '@/styles';
 import {
     IInventoryTicket,
@@ -18,6 +21,8 @@ import {
 } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
+
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -28,6 +33,7 @@ interface InventoryCardProps {
 }
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
+    const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
     const [items, setItems] = useState<IInventoryTicketItem[]>(data.items || []);
@@ -39,6 +45,12 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     };
 
     const [hasFetched, setHasFetched] = useState(false);
+
+    // Reset hasFetched when data changes (e.g., after update)
+    React.useEffect(() => {
+        setHasFetched(false);
+        setItems([]);
+    }, [data.id, data.status]);
 
     React.useEffect(() => {
         if (!hasFetched && data.id) {
@@ -142,7 +154,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => {
-                        /* Handle Edit */
+                        navigation.navigate('AddInventory', { inventoryId: data.id });
                     }}
                 >
                     <Text style={styles.editButtonText}>Sửa thông tin</Text>

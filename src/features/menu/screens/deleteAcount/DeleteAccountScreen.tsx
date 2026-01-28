@@ -18,10 +18,9 @@ import Toast from 'react-native-toast-message';
 import { colors } from '@/styles';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
-import { apiClient } from '@/core/api/client';
-import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { Storage } from '@/core/services/storage.service';
+import { authApi } from '@/features/auth/api/authApi';
 
 export const DeleteAccountScreen = () => {
     const navigation = useNavigation();
@@ -29,27 +28,31 @@ export const DeleteAccountScreen = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [otpCode, setOtpCode] = useState('');
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [deleteReason, setDeleteReason] = useState('');
+
+    // New state for array format
+    const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
+    const [otherReasonNote, setOtherReasonNote] = useState('');
+
     const [serverOtp, setServerOtp] = useState<string | null>(null);
     const [otpError, setOtpError] = useState('');
 
     const { logout, user } = useAuthStore();
 
-    const handleInputNext = async (phone: string, reason: string) => {
-        if (!phone || !reason) return;
+    const handleInputNext = async (phone: string, reasons: string[], otherReason: string) => {
+        if (!phone) return;
         setPhoneNumber(phone);
-        setDeleteReason(reason);
+        setSelectedReasons(reasons);
+        setOtherReasonNote(otherReason);
 
         try {
-            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, {
-                phoneNumber: phone,
-            });
+            const response = await authApi.requestOtp(phone);
+            // authApi.requestOtp returns data directly now
+            // But checking previous code it was doing manual post.
+            // Let's stick to authApi usage if possible or minimal change.
+            // Wait, previous code manually extracted testOtp.
+            // authApi.requestOtp returns OtpResponse which has testOtp/otpCode etc.
 
-            const otpCode =
-                response.data?.testOtp ||
-                response.data?.data?.testOtp ||
-                response.data?.data?.otpCode ||
-                response.data?.otpCode;
+            const otpCode = response.data?.testOtp || response.data?.otpCode;
 
             if (otpCode) {
                 setServerOtp(String(otpCode));
@@ -86,12 +89,11 @@ export const DeleteAccountScreen = () => {
     const handleConfirmDelete = async () => {
         setShowConfirmModal(false);
         try {
-            await apiClient.delete(API_ENDPOINTS.AUTH.DELETE_ACCOUNT, {
-                data: {
-                    phoneNumber,
-                    reason: deleteReason,
-                    otpCode: otpCode,
-                },
+            await authApi.deleteAccount({
+                phoneNumber,
+                selectedReasons,
+                otherReasonNote,
+                otpCode,
             });
 
             Toast.show({ type: 'success', text1: 'Đã xóa tài khoản thành công' });
@@ -118,13 +120,9 @@ export const DeleteAccountScreen = () => {
     const handleResendOtp = async () => {
         setOtpError('');
         try {
-            const response = await apiClient.post(API_ENDPOINTS.AUTH.REQUEST_OTP, { phoneNumber });
+            const response = await authApi.requestOtp(phoneNumber);
 
-            const otpCode =
-                response.data?.testOtp ||
-                response.data?.data?.testOtp ||
-                response.data?.data?.otpCode ||
-                response.data?.otpCode;
+            const otpCode = response.data?.testOtp || response.data?.otpCode;
 
             if (otpCode) {
                 setServerOtp(String(otpCode));

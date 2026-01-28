@@ -90,7 +90,7 @@ export const pondApi = {
 
     // Get all operation types (Cho ăn, Đo môi trường, Xi phông, etc.)
     getOperationTypes: async (): Promise<OperationType[]> => {
-        const response = await apiClient.get(API_ENDPOINTS.OPERATION_TYPES.LIST);
+        const response = await apiClient.get(API_ENDPOINTS.POND_OPERATION.LIST);
         const operations = parseApiResponse<OperationType>(response.data);
 
         return operations;
@@ -98,18 +98,8 @@ export const pondApi = {
 
     // Get all pond type operations (mapping of operations for all pond types)
     getPondTypeOperations: async (): Promise<PondTypeOperation[]> => {
-        const response = await apiClient.get(API_ENDPOINTS.POND_TYPE_OPERATIONS.LIST);
+        // Use POND_OPERATION.LIST (/pondoperation) instead of POND_TYPE_OPERATIONS.LIST (/pond-type-operations)
+        const response = await apiClient.get(API_ENDPOINTS.POND_OPERATION.LIST);
         return parseApiResponse<PondTypeOperation>(response.data);
-    },
-
-    // Get operations available for a specific pond type
-    // Example: What operations are available for "Ao nuôi"? (Feeding, Environment monitoring, Siphon, etc.)
-    getOperationsByPondType: async (pondTypeId: number | string): Promise<PondTypeOperation[]> => {
-        const response = await apiClient.get(
-            API_ENDPOINTS.POND_TYPE_OPERATIONS.BY_POND_TYPE(pondTypeId)
-        );
-        const operations = parseApiResponse<PondTypeOperation>(response.data);
-
-        return operations;
     },
 };
