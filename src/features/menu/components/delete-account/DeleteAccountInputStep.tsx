@@ -15,7 +15,7 @@ import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
 import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
 
 interface DeleteAccountInputStepProps {
-    onNext: (phone: string, reason: string) => void;
+    onNext: (phone: string, selectedReasons: string[], otherReason: string) => void;
     currentUserPhone?: string;
 }
 
@@ -101,12 +101,8 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
 
     const handleNext = () => {
         if (validate()) {
-            const reasonsToSend = selectedReasons.filter(r => r !== OTHER_REASON_KEY);
-            if (selectedReasons.includes(OTHER_REASON_KEY) && otherReasonText.trim()) {
-                reasonsToSend.push(`Lý do khác: ${otherReasonText.trim()}`);
-            }
-            const finalReasonString = reasonsToSend.join(', ');
-            onNext(phone, finalReasonString);
+            const cleanSelectedReasons = selectedReasons.filter(r => r !== OTHER_REASON_KEY);
+            onNext(phone, cleanSelectedReasons, otherReasonText.trim());
         }
     };
 

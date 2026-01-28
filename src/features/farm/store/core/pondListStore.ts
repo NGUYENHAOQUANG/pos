@@ -25,7 +25,7 @@ export interface PondListStore {
         updates?: { isBackground?: boolean; isLoadMore?: boolean }
     ) => Promise<void>;
     fetchMasterData: () => Promise<void>;
-    fetchOperationsByPondType: (pondTypeId: string) => Promise<PondTypeOperation[]>;
+
     getPondById: (pondId: string) => PondData | undefined;
     getOperationsForPond: (pondId: string) => PondTypeOperation[];
     updatePondType: (pondId: string, newType: PondType) => void;
@@ -141,33 +141,24 @@ export const createPondListStore: StateCreator<
                 pondApi.getOperationTypes(),
             ]);
 
-            // Step 2: Fetch operations for each pond type
+            // Step 2: Fetch all operations for all pond types at once
+            const allOperations = await pondApi.getPondTypeOperations();
+
+            // operationsByPondType: Record<string, PondTypeOperation[]>
             const operationsByPondType: Record<string, PondTypeOperation[]> = {};
 
-            // Fetch operations for each pond type in parallel
-            const operationPromises = types.map(async pondType => {
-                try {
-                    const ops = await pondApi.getOperationsByPondType(pondType.id);
-                    return { pondTypeId: pondType.id, operations: ops };
-                } catch (_error) {
-                    return { pondTypeId: pondType.id, operations: [] };
+            // Group by pondCategoryId
+            allOperations.forEach(op => {
+                const typeId = op.pondCategoryId;
+                if (!typeId) return;
+
+                if (!operationsByPondType[typeId]) {
+                    operationsByPondType[typeId] = [];
                 }
+                operationsByPondType[typeId].push(op);
             });
 
-            const results = await Promise.all(operationPromises);
-
-            // Group results into operationsByPondType
-            for (const result of results) {
-                if (result.operations.length > 0) {
-                    operationsByPondType[result.pondTypeId] = result.operations;
-                }
-            }
-
-            // Combine all operations for pondTypeOperations
-            const allOperations: PondTypeOperation[] = [];
-            for (const ops of Object.values(operationsByPondType)) {
-                allOperations.push(...ops);
-            }
+            // allOperations is already flat list from API
 
             set({
                 pondTypes: types,
@@ -181,18 +172,7 @@ export const createPondListStore: StateCreator<
             set({ isLoadingMasterData: false });
         }
     },
-    fetchOperationsByPondType: async (pondTypeId: string) => {
-        try {
-            const operations = await pondApi.getOperationsByPondType(pondTypeId);
-            set(state => {
-                state.operationsByPondType[pondTypeId] = operations;
-            });
-            return operations;
-        } catch (error) {
-            console.error(`Failed to fetch operations for pond type ${pondTypeId}:`, error);
-            return [];
-        }
-    },
+
     getPondById: pondId => {
         return get().ponds.find(pond => pond.id === pondId);
     },

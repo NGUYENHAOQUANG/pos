@@ -135,9 +135,11 @@ export const ShrimpFarmScreens: React.FC = () => {
 
             // Convert API operations to JobType format
             const jobTypes: { type: JobType; items: JobExecution[] }[] = [];
-
             for (const operation of apiOperations) {
-                const jobType = mapOperationTypeToJobType(operation.operationTypeName);
+                // Use new field operationName, fallback to old if missing
+                const opName = operation.operationName || operation.operationTypeName || '';
+                const jobType = mapOperationTypeToJobType(opName);
+
                 if (jobType) {
                     jobTypes.push({
                         type: jobType,
@@ -146,7 +148,25 @@ export const ShrimpFarmScreens: React.FC = () => {
                 }
             }
 
-            return jobTypes;
+            const JOB_PRIORITY: Record<string, number> = {
+                [JOB_TYPES.FEED]: 1,
+                [JOB_TYPES.SHRIMP_INSPECTION]: 2,
+                [JOB_TYPES.MEASURE_SIZE]: 3,
+                [JOB_TYPES.ENVIRONMENT]: 4,
+                [JOB_TYPES.WATER_TREATMENT]: 5,
+                [JOB_TYPES.WATER_CHANGE]: 6,
+                [JOB_TYPES.SIPHON]: 7,
+                [JOB_TYPES.TROUBLESHOOTING]: 8,
+                [JOB_TYPES.TRANSFER_POND]: 9,
+                [JOB_TYPES.HARVEST]: 10,
+                [JOB_TYPES.CLEAN_POND]: 11,
+                [JOB_TYPES.SUN_DRY_POND]: 12,
+            };
+            return jobTypes.sort((a, b) => {
+                const priorityA = JOB_PRIORITY[a.type] || 99;
+                const priorityB = JOB_PRIORITY[b.type] || 99;
+                return priorityA - priorityB;
+            });
         }
 
         // No API data available - return empty array
@@ -599,8 +619,8 @@ export const ShrimpFarmScreens: React.FC = () => {
             */}
             {selectedTab === 'work' &&
                 !currentCycle &&
-                (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) !==
-                    POND_TYPES.READY && (
+                (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) ===
+                    POND_TYPES.NURSERY && (
                     <View style={styles.footer}>
                         <TouchableOpacity
                             style={styles.startButton}
