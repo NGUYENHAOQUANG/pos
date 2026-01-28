@@ -22,14 +22,17 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export interface MaterialItem {
     id: string;
+    materialId?: string;
     materialName: string;
     quantity: string;
     price: string;
+    availableQuantity?: number;
+    unit?: string;
 }
 
 interface AddWarehouseMaterialProps {
     materials: MaterialItem[];
-    onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
+    onUpdateMaterial: (id: string, field: keyof MaterialItem, value: any) => void;
     onAddMaterial: () => void;
     materialOptions?: { label: string; value: string; unit: string }[];
     onDropdownOpen?: (itemIndex: number) => void;
@@ -59,8 +62,6 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
         );
     };
 
-    const materialNames = materialOptions.map(opt => opt.label);
-
     // Store refs for each material item to measure position
     const itemRefs = React.useRef<{ [key: string]: View | null }>({});
 
@@ -89,6 +90,12 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                 : 'Vui lòng nhập số lượng và đơn giá';
                         const isDropdownOpen = activeDropdownId === item.id;
 
+                        // Calculate diff or check validation?
+                        const quantityNum = parseFloat(item.quantity) || 0;
+                        const isOverStock =
+                            item.availableQuantity !== undefined &&
+                            quantityNum > item.availableQuantity;
+
                         return (
                             <View
                                 key={item.id}
@@ -112,19 +119,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             <DropdownMaterial
                                                 label="Tên vật tư"
                                                 required
-                                                value={item.materialName}
-                                                options={
-                                                    materialNames.length > 0
-                                                        ? materialNames
-                                                        : [
-                                                              'CP 09 – Thức ăn tôm giai đoạn 2',
-                                                              'Biozeus Probiotics',
-                                                              'Vôi',
-                                                              'Khoáng',
-                                                          ]
-                                                }
+                                                value={item.materialId} // Use ID
+                                                options={materialOptions} // { label, value: ID }
                                                 onChange={val =>
-                                                    onUpdateMaterial(item.id, 'materialName', val)
+                                                    onUpdateMaterial(item.id, 'materialId', val)
                                                 }
                                                 placeholder="Chọn vật tư"
                                                 showAllOption={false}
@@ -134,6 +132,34 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 }
                                                 inline={true}
                                             />
+                                            {/* Show Available Quantity */}
+                                            {item.materialId &&
+                                                item.availableQuantity !== undefined && (
+                                                    <View
+                                                        style={{
+                                                            marginTop: 4,
+                                                            flexDirection: 'row',
+                                                            alignItems: 'center',
+                                                        }}
+                                                    >
+                                                        <Text
+                                                            style={{
+                                                                fontSize: 13,
+                                                                color: colors.textSecondary,
+                                                            }}
+                                                        >
+                                                            Tồn kho:{' '}
+                                                            <Text
+                                                                style={{
+                                                                    color: colors.blue[600],
+                                                                    fontWeight: '500',
+                                                                }}
+                                                            >
+                                                                {item.availableQuantity} {item.unit}
+                                                            </Text>
+                                                        </Text>
+                                                    </View>
+                                                )}
                                         </View>
 
                                         <View style={[styles.row, styles.zIndexNormal]}>
@@ -155,6 +181,17 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     keyboardType="numeric"
                                                     containerStyle={{ marginBottom: 0 }}
                                                 />
+                                                {isOverStock && (
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 12,
+                                                            color: colors.error,
+                                                            marginTop: 4,
+                                                        }}
+                                                    >
+                                                        Vượt quá tồn kho ({item.availableQuantity})
+                                                    </Text>
+                                                )}
                                             </View>
 
                                             <View style={styles.halfWidth}>

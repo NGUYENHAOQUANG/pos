@@ -28,11 +28,13 @@ export interface ExportReceipt {
 export interface ExportReceiptItemRequest {
     materialId: string;
     quantity: number;
+    price?: number;
 }
 
 export interface CreateExportReceiptRequest {
     warehouseId: string;
     pondId?: string;
+    date?: string; // Added date field
     note?: string;
     documentIds?: string[];
     items: ExportReceiptItemRequest[];

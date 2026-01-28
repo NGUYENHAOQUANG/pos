@@ -13,15 +13,18 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
-import { IMaterial } from '@/features/material/types/material.types';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
+import { useAddExportWarehouseReceipt } from '@/features/material/hooks';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 // New Imports
 import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { Input } from '@/shared/components/forms/Input';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 
@@ -29,11 +32,52 @@ interface AddExportWarehouseScreenProps {}
 
 export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const route = useRoute<RouteProp<MaterialStackParamList, 'AddExportWarehouse'>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
-    // Use React Query for materials data
-    const { data: materialsData = [] } = useMaterials();
+    // Get selected zone from farmStore (for initial value only)
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+
+    // Data State - for UI (selectedZone is controlled by dropdown)
+    const [date, setDate] = useState(new Date());
+    const [selectedZone, setSelectedZone] = useState(selectedZoneId || '');
+    const [selectedPond, setSelectedPond] = useState('');
+    const [note, setNote] = useState('');
+
+    // Sync selectedZone when farmStore changes (initial load or external change)
+    useEffect(() => {
+        if (selectedZoneId && !selectedZone) {
+            setSelectedZone(selectedZoneId);
+        }
+    }, [selectedZoneId, selectedZone]);
+
+    // Get warehouse for the selected zone - use LOCAL state so it reacts to dropdown changes
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZone || undefined });
+    const warehouseId = warehouses?.[0]?.id;
+
+    // Fetch warehouse items using the warehouse ID
+    const { data: warehouseData } = useWarehouseItems(warehouseId, undefined, {
+        enabled: !!warehouseId,
+    });
+    const warehouseItems = React.useMemo(() => warehouseData?.items || [], [warehouseData]);
+
+    const materialOptions =
+        warehouseItems.length > 0
+            ? warehouseItems.map((m: any) => ({
+                  label: m.materialName || '',
+                  value: String(m.materialId || ''),
+                  unit: m.unitName || '',
+                  quantity: m.quantity || 0, // Stock
+              }))
+            : [
+                  {
+                      label: 'Hiện tại không có vật tư',
+                      value: '__no_materials__',
+                      unit: '',
+                      quantity: 0,
+                      disabled: true,
+                  },
+              ];
+
     const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
     const { submitWithFiles, isUploading } = useFileSubmit();
 
@@ -42,40 +86,42 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const params = route.params as
-        | {
-              availableMaterials?: IMaterial[];
-          }
-        | undefined;
-    const availableMaterials = params?.availableMaterials || materialsData;
-    // Combine mock materials with passed available materials
-    const materialOptions = availableMaterials.map((m: IMaterial) => ({
-        label: m.name,
-        value: m.name,
-        unit: typeof m.unit === 'number' ? String(m.unit) : m.unitName || String(m.unit || ''),
-    }));
-
-    const [date, setDate] = useState(new Date());
-    const [selectedZone, setSelectedZone] = useState('');
-    const [selectedPond, setSelectedPond] = useState('');
     const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
-    const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
-        { id: '1', materialName: '', quantity: '', price: '' },
+    const [formMaterials, setFormMaterials] = useState<MaterialItem[]>([
+        { id: '1', materialId: '', materialName: '', quantity: '', price: '' },
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleAddMaterial = () => {
-        setWarehouseItems([
-            ...warehouseItems,
-            { id: Date.now().toString(), materialName: '', quantity: '', price: '' },
+        setFormMaterials([
+            ...formMaterials,
+            {
+                id: Date.now().toString(),
+                materialId: '',
+                materialName: '',
+                quantity: '',
+                price: '',
+            },
         ]);
     };
 
-    const handleUpdateMaterial = (id: string, field: keyof MaterialItem, value: string) => {
-        setWarehouseItems(
-            warehouseItems.map(item => {
+    const handleUpdateMaterial = (id: string, field: keyof MaterialItem, value: any) => {
+        setFormMaterials(
+            formMaterials.map(item => {
                 if (item.id === id) {
+                    if (field === 'materialId') {
+                        const selectedMaterial = warehouseItems.find(
+                            (m: any) => String(m.materialId || '') === String(value)
+                        );
+                        return {
+                            ...item,
+                            materialId: value,
+                            materialName: selectedMaterial?.materialName || '',
+                            availableQuantity: selectedMaterial?.quantity || 0,
+                            unit: selectedMaterial?.unitName || '',
+                        };
+                    }
                     const updatedItem = { ...item, [field]: value };
                     return updatedItem;
                 }
@@ -85,7 +131,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     };
 
     const calculateTotal = () => {
-        return warehouseItems.reduce((sum, item) => {
+        return formMaterials.reduce((sum, item) => {
             const qty = parseFloat(item.quantity) || 0;
             const price = parseFloat(item.price) || 0;
             return sum + qty * price;
@@ -148,6 +194,17 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 selectedPond={selectedPond}
                                 onPondChange={setSelectedPond}
                             >
+                                <Input
+                                    label="Ghi chú"
+                                    placeholder="Nhập ghi chú xuất kho"
+                                    value={note}
+                                    onChangeText={setNote}
+                                    multiline={true}
+                                    numberOfLines={3}
+                                    inputContainerStyle={{ height: 100, alignItems: 'flex-start' }}
+                                    inputStyle={{ textAlignVertical: 'top', paddingTop: 8 }}
+                                />
+
                                 <FileUploader
                                     files={files}
                                     onFilesSelected={setFiles}
@@ -156,7 +213,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                             </ExportWarehouseInformation>
 
                             <AddWarehouseMaterial
-                                materials={warehouseItems}
+                                materials={formMaterials}
                                 onUpdateMaterial={handleUpdateMaterial}
                                 onAddMaterial={handleAddMaterial}
                                 materialOptions={materialOptions}
@@ -180,12 +237,12 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 showValidationError('Vui lòng chọn ao nuôi');
                                 return;
                             }
-                            if (warehouseItems.length === 0) {
+                            if (formMaterials.length === 0) {
                                 showValidationError('Vui lòng thêm ít nhất một vật tư');
                                 return;
                             }
                             // Check detailed items
-                            const invalidItemIndex = warehouseItems.findIndex(
+                            const invalidItemIndex = formMaterials.findIndex(
                                 m => !m.materialName || !m.quantity || !m.price
                             );
                             if (invalidItemIndex !== -1) {
@@ -210,14 +267,16 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 setIsSubmitting(true);
                                 addExportWarehouseReceipt(
                                     {
-                                        warehouseId: selectedZone || 'DEFAULT', // Needs backend logic for warehouseId
+                                        warehouseId: warehouseId || '',
                                         pondId: selectedPond,
                                         documentIds: documentIds,
-                                        items: warehouseItems.map(m => ({
-                                            materialId: m.id, // Ensure this maps to actual material ID
-                                            quantity: parseFloat(m.quantity),
+                                        items: formMaterials.map(item => ({
+                                            materialId: item.materialId || '',
+                                            quantity: parseFloat(item.quantity) || 0,
+                                            price: parseFloat(item.price) || 0,
                                         })),
-                                        note: '',
+                                        note: note,
+                                        date: date.toISOString(),
                                         autoSubmit: true,
                                     },
                                     {
