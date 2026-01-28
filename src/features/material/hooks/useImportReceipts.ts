@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { importReceiptApi } from '@/features/material/api/importReceiptApi';
 import { useImportReceiptStore } from '@/features/material/store/importReceiptStore';
+import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 export const importReceiptKeys = {
     all: ['importReceipts'] as const,
@@ -31,5 +33,21 @@ export const useImportReceipts = (warehouseParams?: {
             return response.data || { items: [], totalCount: 0 };
         },
         staleTime: STALE_TIME_SHORT,
+    });
+};
+
+export const useCreateImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: importReceiptApi.create,
+        onSuccess: () => {
+            showSuccessToast('Tạo phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+        },
+        onError: (error: any) => {
+            const errorMessage = getErrorMessage(error, 'Tạo phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
     });
 };

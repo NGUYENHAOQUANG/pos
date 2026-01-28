@@ -106,10 +106,14 @@ export const API_ENDPOINTS = {
     },
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',
+        CREATE: '/importreceipt',
     },
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',
         CREATE: '/exportreceipt',
+    },
+    SUPPLIER: {
+        LIST: '/supplier',
     },
     DOCUMENT: {
         UPLOAD: '/document',

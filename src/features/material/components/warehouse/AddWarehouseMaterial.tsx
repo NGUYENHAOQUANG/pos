@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { CollapseHead } from '../CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
@@ -22,6 +22,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export interface MaterialItem {
     id: string;
+    materialId?: string;
     materialName: string;
     quantity: string;
     price: string;
@@ -31,7 +32,7 @@ interface AddWarehouseMaterialProps {
     materials: MaterialItem[];
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
     onAddMaterial: () => void;
-    materialOptions?: { label: string; value: string; unit: string }[];
+    materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
 }
 
@@ -58,8 +59,6 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
             </>
         );
     };
-
-    const materialNames = materialOptions.map(opt => opt.label);
 
     // Store refs for each material item to measure position
     const itemRefs = React.useRef<{ [key: string]: View | null }>({});
@@ -112,19 +111,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             <DropdownMaterial
                                                 label="Tên vật tư"
                                                 required
-                                                value={item.materialName}
-                                                options={
-                                                    materialNames.length > 0
-                                                        ? materialNames
-                                                        : [
-                                                              'CP 09 – Thức ăn tôm giai đoạn 2',
-                                                              'Biozeus Probiotics',
-                                                              'Vôi',
-                                                              'Khoáng',
-                                                          ]
-                                                }
+                                                value={item.materialId}
+                                                options={materialOptions}
                                                 onChange={val =>
-                                                    onUpdateMaterial(item.id, 'materialName', val)
+                                                    onUpdateMaterial(item.id, 'materialId', val)
                                                 }
                                                 placeholder="Chọn vật tư"
                                                 showAllOption={false}
