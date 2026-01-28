@@ -77,7 +77,7 @@ export const pondApi = {
         }
 
         return {
-            items: items.map(p => ({ ...p, zoneId: Number(zoneId) })),
+            items: items.map(p => ({ ...p, zoneId: zoneId })),
             total,
         };
     },

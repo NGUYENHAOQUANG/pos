@@ -73,7 +73,7 @@ export interface PondData {
     lastActivity?: string;
     size?: string; // Kích thước (m) - ví dụ: "50×28"
     zone?: string; // Khu vực - ví dụ: "KV-A"
-    zoneId?: number; // Added for filtering
+    zoneId?: number | string; // Added for filtering
     status?: string; // Trạng thái - ví dụ: "Đang hoạt động", "Chuẩn bị"
     farmCode?: string; // Mã trại - ví dụ: "KG-01"
     shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
