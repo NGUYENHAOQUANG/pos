@@ -272,8 +272,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                         documentIds: documentIds,
                                         items: formMaterials.map(item => ({
                                             materialId: item.materialId || '',
-                                            quantity: parseFloat(item.quantity) || 0,
-                                            price: parseFloat(item.price) || 0,
+                                            quantity: parseFloat(item.quantity),
                                         })),
                                         note: note,
                                         date: date.toISOString(),

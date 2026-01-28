@@ -28,7 +28,6 @@ export interface ExportReceipt {
 export interface ExportReceiptItemRequest {
     materialId: string;
     quantity: number;
-    price?: number;
 }
 
 export interface CreateExportReceiptRequest {
