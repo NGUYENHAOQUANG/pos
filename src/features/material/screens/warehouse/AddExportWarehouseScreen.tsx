@@ -21,7 +21,7 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
 
 // New Imports
-import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 
@@ -64,6 +64,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileUploaderRef = React.useRef<FileUploaderRef>(null);
 
     const handleAddMaterial = () => {
         setWarehouseItems([
@@ -94,14 +95,14 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     const scrollViewRef = React.useRef<ScrollView>(null);
 
-    // Smooth scroll based on item index - more stable than measuring position
-    const HEADER_HEIGHT = 280; // Approximate height of ExportWarehouseInformation + header
-    const ITEM_HEIGHT = 280; // Approximate height of each material item
+    const HEADER_HEIGHT = 280;
+    const FILE_ROW_HEIGHT = 40;
+    const ITEM_HEIGHT = 280;
 
     const handleDropdownOpen = (itemIndex: number) => {
         setTimeout(() => {
-            // Calculate scroll position based on index
-            const scrollY = HEADER_HEIGHT + itemIndex * ITEM_HEIGHT;
+            const fileSectionHeight = files.length * FILE_ROW_HEIGHT;
+            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
             scrollViewRef.current?.scrollTo({
                 y: Math.max(0, scrollY - 50), // Small offset to show context
                 animated: true,
@@ -149,6 +150,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 onPondChange={setSelectedPond}
                             >
                                 <FileUploader
+                                    ref={fileUploaderRef}
                                     files={files}
                                     onFilesSelected={setFiles}
                                     maxFiles={5}
@@ -222,6 +224,8 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                     },
                                     {
                                         onSuccess: () => {
+                                            // Mark files as saved so they aren't deleted on unmount
+                                            fileUploaderRef.current?.markAsSaved();
                                             setIsSubmitting(false);
                                             navigation.goBack();
                                         },
