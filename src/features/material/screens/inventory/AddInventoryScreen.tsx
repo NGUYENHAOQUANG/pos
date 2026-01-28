@@ -206,7 +206,12 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],
                         }}
-                        secondaryButtonStyle={{ flex: 1, minWidth: 0 }}
+                        secondaryButtonStyle={{
+                            flex: 1,
+                            minWidth: 0,
+                            borderColor: colors.blue[600],
+                        }}
+                        secondaryButtonTextStyle={{ color: colors.blue[600] }}
                         primaryButtonStyle={{ flex: 1 }}
                     />
                     {/* Modal Chọn Ngày */}
