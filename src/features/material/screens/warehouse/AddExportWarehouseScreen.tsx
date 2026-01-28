@@ -21,7 +21,7 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
 
 // New Imports
-import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 
@@ -64,6 +64,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileUploaderRef = React.useRef<FileUploaderRef>(null);
 
     const handleAddMaterial = () => {
         setWarehouseItems([
@@ -149,6 +150,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 onPondChange={setSelectedPond}
                             >
                                 <FileUploader
+                                    ref={fileUploaderRef}
                                     files={files}
                                     onFilesSelected={setFiles}
                                     maxFiles={5}
@@ -222,6 +224,8 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                     },
                                     {
                                         onSuccess: () => {
+                                            // Mark files as saved so they aren't deleted on unmount
+                                            fileUploaderRef.current?.markAsSaved();
                                             setIsSubmitting(false);
                                             navigation.goBack();
                                         },

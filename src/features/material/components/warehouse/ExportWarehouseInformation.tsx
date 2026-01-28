@@ -71,6 +71,7 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     }, [zones]);
 
     // Filter Ponds based on selected Zone
+    // Filter Ponds based on selected Zone
     const pondOptions: DropdownOption[] = useMemo(() => {
         if (!selectedZone) return [];
 
@@ -78,7 +79,7 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
 
         return filteredPonds.map(p => ({
             label: p.name,
-            value: p.name,
+            value: p.id,
         }));
     }, [ponds, selectedZone]);
 

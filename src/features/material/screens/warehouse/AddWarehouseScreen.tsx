@@ -20,7 +20,7 @@ import { MaterialStackParamList } from '@/features/material/navigation/MaterialN
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterials, useAddWarehouseReceipt } from '@/features/material/hooks';
 
-import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 
@@ -62,6 +62,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileUploaderRef = React.useRef<FileUploaderRef>(null);
 
     const handleAddMaterial = () => {
         setWarehouseItems([
@@ -154,6 +155,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                                 onSupplierChange={setSupplier}
                             >
                                 <FileUploader
+                                    ref={fileUploaderRef}
                                     files={files}
                                     onFilesSelected={setFiles}
                                     maxFiles={5}
@@ -213,24 +215,36 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                             setIsConfirmModalVisible(false);
                             await submitWithFiles(files, async documentIds => {
                                 setIsSubmitting(true);
-                                addWarehouseReceipt({
-                                    date,
-                                    supplier,
-                                    materials: warehouseItems.map(m => ({
-                                        id: m.id,
-                                        materialName: m.materialName,
-                                        quantity: m.quantity,
-                                        price: m.price,
-                                        total: parseFloat(m.quantity) * parseFloat(m.price),
-                                    })),
-                                    totalAmount,
-                                    documentIds,
-                                });
-                                // Delay to show loading before navigating back
-                                setTimeout(() => {
-                                    setIsSubmitting(false);
-                                    navigation.goBack();
-                                }, 500);
+                                addWarehouseReceipt(
+                                    {
+                                        date,
+                                        supplier,
+                                        materials: warehouseItems.map(m => ({
+                                            id: m.id,
+                                            materialName: m.materialName,
+                                            quantity: m.quantity,
+                                            price: m.price,
+                                            total: parseFloat(m.quantity) * parseFloat(m.price),
+                                        })),
+                                        totalAmount,
+                                        documentIds,
+                                    },
+                                    {
+                                        onSuccess: () => {
+                                            // Mark files as saved so they aren't deleted on unmount
+                                            fileUploaderRef.current?.markAsSaved();
+
+                                            // Delay to show loading before navigating back
+                                            setTimeout(() => {
+                                                setIsSubmitting(false);
+                                                navigation.goBack();
+                                            }, 500);
+                                        },
+                                        onError: () => {
+                                            setIsSubmitting(false);
+                                        },
+                                    }
+                                );
                             });
                         }}
                     />
