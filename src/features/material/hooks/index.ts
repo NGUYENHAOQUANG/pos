@@ -16,7 +16,10 @@ export {
     useExportWarehouse,
     useAddExportWarehouseReceipt,
 } from '@/features/material/hooks/useExportWarehouse';
-export { useInventoryTickets, useAddInventoryTicket } from '@/features/material/hooks/useInventory';
+export {
+    useInventoryTickets,
+    useAddInventoryTicket,
+} from '@/features/material/hooks/inventory/useInventory';
 export {
     useWarehouseReceipts,
     useAddWarehouseReceipt,

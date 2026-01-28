@@ -323,7 +323,7 @@ export const MeterialScreen = () => {
                 {selectedTab === 'inventory' && (
                     <InventoryScreen
                         data={inventoryList}
-                        isLoading={isLoadingInventory}
+                        isLoading={isLoadingInventory || isRefetchingInventory}
                         refreshing={!!isRefetchingInventory}
                         onRefresh={handleRefresh}
                         onPressCreate={handleCreateInventory}

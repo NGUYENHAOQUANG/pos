@@ -58,7 +58,11 @@ export const useCreateInventoryCheck = () => {
         },
         onSuccess: () => {
             showSuccessToast('Tạo phiếu kiểm kê thành công');
-            queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'inventory'] });
+            // Invalidate all inventory-related queries
+            queryClient.invalidateQueries({
+                queryKey: materialKeys.all,
+                refetchType: 'all',
+            });
         },
         onError: (error: any) => {
             const validationErrors =
