@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView, Text } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    StatusBar,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    Platform,
+} from 'react-native';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -8,7 +16,7 @@ import {
     AddWarehouseMaterial,
     MaterialItem,
 } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
@@ -141,28 +149,11 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     const scrollViewRef = React.useRef<ScrollView>(null);
 
-    const HEADER_HEIGHT = 280;
-    const FILE_ROW_HEIGHT = 40;
-    const ITEM_HEIGHT = 280;
-
-    const handleDropdownOpen = (itemIndex: number) => {
+    const handleDropdownOpen = (_itemIndex: number) => {
         setTimeout(() => {
-            const fileSectionHeight = files.length * FILE_ROW_HEIGHT;
-            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
-            scrollViewRef.current?.scrollTo({
-                y: Math.max(0, scrollY - 50), // Small offset to show context
-                animated: true,
-            });
-        }, 100);
-    };
-
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
+            // Scroll to end like inventory screen to show dropdown fully
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 200);
     };
 
     const totalAmount = calculateTotal();
@@ -224,41 +215,99 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                         </ScrollView>
                     </SafeInputLayout>
 
-                    <ButtonBarMaterial
-                        mode="total"
-                        totalLabel="Tổng tiền:"
-                        totalValue={formatCurrency(totalAmount)}
-                        primaryTitle="Gửi Phiếu"
-                        containerStyle={{
-                            borderTopWidth: 1,
-                            borderTopColor: colors.border,
-                        }}
-                        onPrimaryPress={() => {
-                            // Validation
-                            if (!selectedPond) {
-                                showValidationError('Vui lòng chọn ao nuôi');
-                                return;
-                            }
-                            if (formMaterials.length === 0) {
-                                showValidationError('Vui lòng thêm ít nhất một vật tư');
-                                return;
-                            }
-                            // Check detailed items
-                            const invalidItemIndex = formMaterials.findIndex(
-                                m => !m.materialName || !m.quantity || !m.price
-                            );
-                            if (invalidItemIndex !== -1) {
-                                showValidationError(
-                                    `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
-                                        invalidItemIndex + 1
-                                    })`
-                                );
-                                return;
-                            }
+                    {/* Custom Footer with Total + 2 Buttons */}
+                    <View style={styles.footer}>
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>Tổng tiền:</Text>
+                            <Text style={styles.totalValue}>
+                                {formatCurrencyValue(totalAmount)}{' '}
+                                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                            </Text>
+                        </View>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={styles.draftButton}
+                                onPress={async () => {
+                                    // Validation for Save Draft - more lenient
+                                    if (!selectedPond) {
+                                        showValidationError('Vui lòng chọn ao nuôi');
+                                        return;
+                                    }
+                                    if (
+                                        formMaterials.length === 0 ||
+                                        !formMaterials[0].materialId
+                                    ) {
+                                        showValidationError('Vui lòng chọn ít nhất một vật tư');
+                                        return;
+                                    }
 
-                            setIsConfirmModalVisible(true);
-                        }}
-                    />
+                                    // Submit as draft (autoSubmit = false)
+                                    await submitWithFiles(files, async documentIds => {
+                                        setIsSubmitting(true);
+                                        addExportWarehouseReceipt(
+                                            {
+                                                warehouseId: warehouseId || '',
+                                                pondId: selectedPond,
+                                                documentIds: documentIds,
+                                                items: formMaterials
+                                                    .filter(item => item.materialId)
+                                                    .map(item => ({
+                                                        materialId: item.materialId || '',
+                                                        quantity: parseFloat(item.quantity) || 0,
+                                                    })),
+                                                note: note,
+                                                date: date.toISOString(),
+                                                autoSubmit: false, // Save as draft
+                                            },
+                                            {
+                                                onSuccess: () => {
+                                                    fileUploaderRef.current?.markAsSaved();
+                                                    setIsSubmitting(false);
+                                                    navigation.goBack();
+                                                },
+                                                onError: () => {
+                                                    setIsSubmitting(false);
+                                                },
+                                            }
+                                        );
+                                    });
+                                }}
+                            >
+                                <Text style={styles.draftButtonText}>Lưu Nháp</Text>
+                            </TouchableOpacity>
+                            <View style={{ width: spacing.md }} />
+                            <TouchableOpacity
+                                style={styles.submitButton}
+                                onPress={() => {
+                                    // Validation
+                                    if (!selectedPond) {
+                                        showValidationError('Vui lòng chọn ao nuôi');
+                                        return;
+                                    }
+                                    if (formMaterials.length === 0) {
+                                        showValidationError('Vui lòng thêm ít nhất một vật tư');
+                                        return;
+                                    }
+                                    // Check detailed items
+                                    const invalidItemIndex = formMaterials.findIndex(
+                                        m => !m.materialName || !m.quantity || !m.price
+                                    );
+                                    if (invalidItemIndex !== -1) {
+                                        showValidationError(
+                                            `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
+                                                invalidItemIndex + 1
+                                            })`
+                                        );
+                                        return;
+                                    }
+
+                                    setIsConfirmModalVisible(true);
+                                }}
+                            >
+                                <Text style={styles.submitButtonText}>Gửi Phiếu</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
@@ -312,5 +361,60 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingVertical: spacing.md,
         paddingBottom: 100,
+    },
+    footer: {
+        backgroundColor: colors.white,
+        paddingTop: 16,
+        paddingHorizontal: spacing.md,
+        paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    totalRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
+    totalLabel: {
+        fontSize: 14,
+        color: colors.text,
+    },
+    totalValue: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.error,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    draftButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.blue[600],
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    draftButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.blue[600],
+    },
+    submitButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        backgroundColor: colors.blue[600],
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.white,
     },
 });

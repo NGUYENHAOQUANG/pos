@@ -56,8 +56,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     const formatCurrency = (value: number) => {
         return (
             <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                {formatCurrencyValue(value)} <Text style={styles.currencyUnderline}>đ</Text>
             </>
         );
     };
@@ -130,31 +129,15 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 onToggle={() =>
                                                     handleToggleDropdown(item.id, index)
                                                 }
-                                                inline={false}
+                                                inline={true}
                                             />
                                             {/* Show Available Quantity */}
                                             {item.materialId &&
                                                 item.availableQuantity !== undefined && (
-                                                    <View
-                                                        style={{
-                                                            marginTop: 4,
-                                                            flexDirection: 'row',
-                                                            alignItems: 'center',
-                                                        }}
-                                                    >
-                                                        <Text
-                                                            style={{
-                                                                fontSize: 13,
-                                                                color: colors.textSecondary,
-                                                            }}
-                                                        >
+                                                    <View style={styles.stockInfoRow}>
+                                                        <Text style={styles.stockInfoText}>
                                                             Tồn kho:{' '}
-                                                            <Text
-                                                                style={{
-                                                                    color: colors.blue[600],
-                                                                    fontWeight: '500',
-                                                                }}
-                                                            >
+                                                            <Text style={styles.stockQuantity}>
                                                                 {item.availableQuantity} {item.unit}
                                                             </Text>
                                                         </Text>
@@ -179,16 +162,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         }
                                                     }}
                                                     keyboardType="numeric"
-                                                    containerStyle={{ marginBottom: 0 }}
+                                                    containerStyle={styles.noMarginBottom}
                                                 />
                                                 {isOverStock && (
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 12,
-                                                            color: colors.error,
-                                                            marginTop: 4,
-                                                        }}
-                                                    >
+                                                    <Text style={styles.overStockText}>
                                                         Vượt quá tồn kho ({item.availableQuantity})
                                                     </Text>
                                                 )}
@@ -199,11 +176,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     label={
                                                         <Text>
                                                             Đơn giá (
-                                                            <Text
-                                                                style={{
-                                                                    textDecorationLine: 'underline',
-                                                                }}
-                                                            >
+                                                            <Text style={styles.currencyUnderline}>
                                                                 đ
                                                             </Text>
                                                             )
@@ -230,7 +203,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         }
                                                     }}
                                                     keyboardType="numeric"
-                                                    containerStyle={{ marginBottom: 0 }}
+                                                    containerStyle={styles.noMarginBottom}
                                                 />
                                             </View>
                                         </View>
@@ -409,6 +382,34 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginLeft: spacing.xs,
         fontWeight: '500',
+    },
+    // Styles for stock info
+    stockInfoRow: {
+        marginTop: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    stockInfoText: {
+        fontSize: 13,
+        color: colors.textSecondary,
+    },
+    stockQuantity: {
+        color: colors.blue[600],
+        fontWeight: '500',
+    },
+    // Styles for overstock warning
+    overStockText: {
+        fontSize: 12,
+        color: colors.error,
+        marginTop: 4,
+    },
+    // Currency underline
+    currencyUnderline: {
+        textDecorationLine: 'underline',
+    },
+    // No margin bottom for inputs
+    noMarginBottom: {
+        marginBottom: 0,
     },
     zIndexHigh: {
         zIndex: 100,
