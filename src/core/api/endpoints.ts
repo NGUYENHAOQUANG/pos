@@ -18,17 +18,14 @@ export const API_ENDPOINTS = {
         DELETE_ACCOUNT: '/auth/delete-account',
         COMPLETE_PROFILE: '/auth/complete-profile',
         PROFILE: '/auth/me',
+        UPDATE_PROFILE: '/auth/profile',
     },
     POND_TYPES: {
         LIST: '/pondcategory',
     },
-    OPERATION_TYPES: {
-        LIST: '/operation-types',
-        DETAIL: (id: number) => `/operation-types/${id}`,
-    },
-    POND_TYPE_OPERATIONS: {
-        LIST: '/pond-type-operations',
-        BY_POND_TYPE: (pondTypeId: string | number) => `/pond-type-operations/${pondTypeId}`,
+    POND_OPERATION: {
+        LIST: '/pondoperation',
+        DETAIL: (id: string) => `/pondoperation/${id}`,
     },
     // Zones / Farms
     ZONE: {
@@ -105,6 +102,7 @@ export const API_ENDPOINTS = {
         CREATE: '/warehouses',
         UPDATE: (id: string) => `/warehouses/${id}`,
         DELETE: (id: string) => `/warehouses/${id}`,
+        ITEMS: (id: string) => `/warehouses/${id}/items`,
     },
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',

@@ -34,15 +34,20 @@ export interface OperationType {
 // PondTypeOperation - mapping between PondType and OperationType
 // Defines which operations are available for each pond type
 export interface PondTypeOperation {
-    id: number;
-    pondTypeId: string;
-    operationTypeId: number;
-    operationTypeName: string;
-    isMandatory: boolean;
+    id: string;
+    pondCategoryId: string;
+    operationId: string;
+    operationName: string;
+    pondName?: string;
+    no?: number;
+    // Old fields for backward compatibility if needed, or remove if unused
+    isMandatory?: boolean;
     defaultScheduleDay?: number;
     priority?: number;
     createdAt?: string;
     lastModifiedAt?: string;
+    // Map old usage to new
+    operationTypeName?: string; // We might need to map operationName to this or update usage
 }
 
 import { IMaterial } from '@/features/material/types/material.types';
@@ -78,7 +83,7 @@ export interface PondData {
     farmCode?: string; // Mã trại - ví dụ: "KG-01"
     shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
     depth?: string | number; // Legacy
-    maxDepthCm?: number; // From API
+    maxDepth?: number;
 }
 
 export interface CycleData {

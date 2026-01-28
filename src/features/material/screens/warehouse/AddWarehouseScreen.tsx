@@ -20,6 +20,10 @@ import { MaterialStackParamList } from '@/features/material/navigation/MaterialN
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { useMaterials, useAddWarehouseReceipt } from '@/features/material/hooks';
 
+import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+
 interface AddWarehouseScreenProps {}
 
 export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
@@ -30,6 +34,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     // Use React Query for materials data
     const { data: materialsData = [] } = useMaterials();
     const { mutate: addWarehouseReceipt } = useAddWarehouseReceipt();
+    const { submitWithFiles, isUploading } = useFileSubmit();
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -51,6 +56,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
 
     const [date, setDate] = useState(new Date());
     const [supplier, setSupplier] = useState('');
+    const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
     const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
         { id: '1', materialName: '', quantity: '', price: '' },
     ]);
@@ -124,7 +130,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isSubmitting}>
+            <Loading isLoading={isSubmitting || isUploading}>
                 <View style={styles.container}>
                     <HeaderMeterial
                         title="Tạo Phiếu Nhập Kho"
@@ -146,7 +152,13 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                                 onDateChange={setDate}
                                 supplier={supplier}
                                 onSupplierChange={setSupplier}
-                            />
+                            >
+                                <FileUploader
+                                    files={files}
+                                    onFilesSelected={setFiles}
+                                    maxFiles={5}
+                                />
+                            </WarehouseInformation>
 
                             <AddWarehouseMaterial
                                 materials={warehouseItems}
@@ -197,26 +209,29 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
                         onClose={() => setIsConfirmModalVisible(false)}
-                        onConfirm={() => {
+                        onConfirm={async () => {
                             setIsConfirmModalVisible(false);
-                            setIsSubmitting(true);
-                            addWarehouseReceipt({
-                                date,
-                                supplier,
-                                materials: warehouseItems.map(m => ({
-                                    id: m.id,
-                                    materialName: m.materialName,
-                                    quantity: m.quantity,
-                                    price: m.price,
-                                    total: parseFloat(m.quantity) * parseFloat(m.price),
-                                })),
-                                totalAmount,
+                            await submitWithFiles(files, async documentIds => {
+                                setIsSubmitting(true);
+                                addWarehouseReceipt({
+                                    date,
+                                    supplier,
+                                    materials: warehouseItems.map(m => ({
+                                        id: m.id,
+                                        materialName: m.materialName,
+                                        quantity: m.quantity,
+                                        price: m.price,
+                                        total: parseFloat(m.quantity) * parseFloat(m.price),
+                                    })),
+                                    totalAmount,
+                                    documentIds,
+                                });
+                                // Delay to show loading before navigating back
+                                setTimeout(() => {
+                                    setIsSubmitting(false);
+                                    navigation.goBack();
+                                }, 500);
                             });
-                            // Delay to show loading before navigating back
-                            setTimeout(() => {
-                                setIsSubmitting(false);
-                                navigation.goBack();
-                            }, 500);
                         }}
                     />
                 </View>

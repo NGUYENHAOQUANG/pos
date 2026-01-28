@@ -29,8 +29,13 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
     const farmInfo = {
         name: farm?.name || '{ten trai nuoi tom}',
         code: farm?.code || '{mã trại}',
-        area: farm?.area || '{}',
-        address: farm?.address || 'Kiên Giang',
+        area:
+            typeof farm?.area === 'number'
+                ? (farm.area as number).toLocaleString('vi-VN')
+                : farm?.area
+                ? Number(farm.area).toLocaleString('vi-VN')
+                : '',
+        address: farm?.address || '',
     };
 
     return (

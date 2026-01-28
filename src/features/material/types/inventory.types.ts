@@ -58,6 +58,14 @@ export type GetInventoryCheckDetailResponse = IApiResponse<IInventoryCheckDetail
 export interface CreateInventoryCheckRequest {
     warehouseId: string;
     note?: string;
+    items?:
+        | {
+              materialId: string;
+              actualQty: number;
+              expectedQty?: number;
+          }[]
+        | null;
+    autoSubmit?: boolean;
 }
 
 export interface InventoryCheckItemDto {

@@ -54,6 +54,7 @@ export interface IWarehouseReceipt {
     supplier?: string;
     materials: IWarehouseMaterialItem[];
     totalAmount: number;
+    documentIds?: string[];
 }
 
 export interface IExportWarehouseMaterialItem {

@@ -96,6 +96,7 @@ export interface GetMaterialsV2Params {
     materialTypeId?: string;
     Page?: number;
     PageSize?: number;
+    warehouseId?: string;
 }
 
 export interface UpdateMaterialResponseData {

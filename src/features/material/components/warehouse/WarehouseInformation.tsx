@@ -14,6 +14,7 @@ interface WarehouseInformationProps {
     onDateChange: (date: Date) => void;
     supplier: string;
     onSupplierChange: (text: string) => void;
+    children?: React.ReactNode;
 }
 
 export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
@@ -21,6 +22,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
     onDateChange,
     supplier,
     onSupplierChange,
+    children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
@@ -56,7 +58,10 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                         placeholder="Nhập nhà cung cấp"
                         value={supplier}
                         onChangeText={onSupplierChange}
+                        containerStyle={{ marginBottom: 0 }}
                     />
+
+                    {children}
                 </View>
             )}
         </View>

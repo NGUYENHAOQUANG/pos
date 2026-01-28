@@ -8,26 +8,30 @@ import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { Input } from '@/shared/components/forms/Input';
 import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
-
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
+import { authApi } from '@/features/auth/api/authApi';
 
 export const EditPersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Global User Data from Hook
-    const { userData } = useUserProfile();
+    const { userData, refetch } = useUserProfile();
 
     // Local Form State (initialized empty, then synced)
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+    const [address, setAddress] = useState('');
     const [role, setRole] = useState('');
     const [level, setLevel] = useState('');
     const [avatarUri, setAvatarUri] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // ... (rest of local state)
 
     // Sync local state when userData changes
     useEffect(() => {
@@ -35,6 +39,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
             setName(userData.name);
             setPhone(userData.phone);
             setEmail(userData.email);
+            setAddress(userData.address || '');
             setRole(userData.role);
             setLevel(userData.level);
             setAvatarUri(userData.avatarUri);
@@ -102,14 +107,37 @@ export const EditPersonalInformationScreens: React.FC = () => {
         }
     };
 
-    const handleSave = () => {
-        // TODO: Call API to update profile here
-        Toast.show({
-            type: 'success',
-            text1: 'Cập nhật thông tin thành công',
-            position: 'top',
-        });
-        navigation.goBack();
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            const payload = {
+                fullName: name,
+                email: email,
+                address: address,
+                avatarUrl: avatarUri || '', // Send current or new avatar URI
+            };
+
+            await authApi.updateProfile(payload);
+
+            Toast.show({
+                type: 'success',
+                text1: 'Cập nhật thông tin thành công',
+                position: 'top',
+            });
+
+            await refetch(); // Refresh profile data
+            navigation.goBack();
+        } catch (error) {
+            console.error('Update profile error:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Cập nhật thất bại',
+                text2: 'Vui lòng thử lại sau',
+                position: 'top',
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -150,6 +178,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
                         placeholder="Nhập số điện thoại"
                         keyboardType="phone-pad"
                         containerStyle={styles.inputContainer}
+                        disabled
                     />
                     <Input
                         label="Email:"
@@ -157,6 +186,13 @@ export const EditPersonalInformationScreens: React.FC = () => {
                         onChangeText={setEmail}
                         placeholder="Nhập email"
                         keyboardType="email-address"
+                        containerStyle={styles.inputContainer}
+                    />
+                    <Input
+                        label="Địa chỉ:"
+                        value={address}
+                        onChangeText={setAddress}
+                        placeholder="Nhập địa chỉ"
                         containerStyle={styles.inputContainer}
                     />
                     <Input
@@ -195,6 +231,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
+                primaryDisabled={isSaving}
             />
         </View>
     );
@@ -252,7 +289,7 @@ const styles = StyleSheet.create({
     },
     changePhotoText: {
         fontSize: 14,
-        color: colors.primary, // Blue color
+        color: colors.primary,
         fontWeight: '400',
     },
     inputContainer: {

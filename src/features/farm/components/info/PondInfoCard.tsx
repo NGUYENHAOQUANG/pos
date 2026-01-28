@@ -33,7 +33,7 @@ export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
             : pond?.area
             ? `${parseInt(pond.area.toString().replace(/[^0-9.]/g, ''), 10)} m²`
             : '{diện tích}',
-        depth: pond?.maxDepthCm ? `${pond.maxDepthCm} cm` : pond?.depth?.toString() || '{độ sâu}',
+        depth: pond?.maxDepth ? `${pond.maxDepth} m` : pond?.depth?.toString() || '{độ sâu}',
     };
 
     return (
