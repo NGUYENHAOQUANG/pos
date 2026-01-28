@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingVertical: spacing.md,
+        marginTop: spacing.sm,
         paddingBottom: 100,
     },
 });
