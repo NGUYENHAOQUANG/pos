@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -14,6 +15,9 @@ import { GetInventoryChecksParams } from '@/features/material/types/inventory.ty
  * Hook to fetch inventory tickets (Mock Data)
  */
 export const useInventoryTickets = (params?: GetInventoryParams) => {
+    const { userData } = useUserProfile();
+    const currentUserName = userData.name || 'N/A';
+
     return useQuery({
         queryKey: materialKeys.inventory(params),
         queryFn: async () => {
@@ -30,7 +34,9 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
                 // Map API response to IInventoryTicket for UI compatibility
                 return response.data.items.map(item => ({
                     id: item.id,
-                    checkerName: item.creator?.fullName || item.creator?.userName || 'N/A',
+                    // Use creator info from API if available, otherwise use current user
+                    checkerName:
+                        item.creator?.fullName || item.creator?.userName || currentUserName,
                     date: item.createdAt
                         ? new Date(item.createdAt).toLocaleDateString('vi-VN')
                         : '',
