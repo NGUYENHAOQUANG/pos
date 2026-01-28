@@ -64,15 +64,17 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 setIsLoading(true);
                 try {
                     const response = await inventoryApi.getDetail(data.id);
-                    if (response.success && response.data?.items) {
-                        const mappedItems: IInventoryTicketItem[] = response.data.items.map(
-                            item => ({
-                                id: item.inventoryCheckItemId,
-                                materialName: item.materialName || item.materialCode || 'N/A',
-                                beforeQuantity: item.expectedQty,
-                                afterQuantity: item.actualQty,
-                            })
-                        );
+                    // @ts-ignore - API change adaptation
+                    const itemsData = response.data?.items?.items || response.data?.items;
+
+                    if (response.success && itemsData) {
+                        // @ts-ignore
+                        const mappedItems: IInventoryTicketItem[] = itemsData.map((item: any) => ({
+                            id: item.inventoryCheckItemId || item.id,
+                            materialName: item.materialName || item.materialCode || 'N/A',
+                            beforeQuantity: item.expectedQty,
+                            afterQuantity: item.actualQty,
+                        }));
                         setItems(mappedItems);
                     }
                 } catch (error) {

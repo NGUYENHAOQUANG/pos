@@ -81,13 +81,32 @@ export const useInventorySubmit = ({
     }, [navigation]);
 
     const handleSaveDraft = useCallback(() => {
-        if (isEditMode) return;
         if (!validateForm()) return;
 
         const selectedItem = warehouseItems.find(
             (m: IWarehouseItem) => m.materialId === selectedMaterialId
         )!;
 
+        // EDIT MODE: Update existing draft
+        if (isEditMode && inventoryId && itemId) {
+            const payload = {
+                inventoryCheckId: inventoryId,
+                items: [
+                    {
+                        itemId: itemId,
+                        actualQty: Number(newStock),
+                    },
+                ],
+                shouldSubmit: false, // Keep as draft
+            };
+
+            updateInventoryCheck(payload, {
+                onSuccess: navigateToInventoryList,
+            });
+            return;
+        }
+
+        // CREATE MODE: Create new draft
         const payload = {
             header: {
                 warehouseId: warehouseId!,
@@ -108,6 +127,8 @@ export const useInventorySubmit = ({
         });
     }, [
         isEditMode,
+        inventoryId,
+        itemId,
         validateForm,
         warehouseItems,
         selectedMaterialId,
@@ -115,6 +136,7 @@ export const useInventorySubmit = ({
         note,
         newStock,
         createInventoryCheck,
+        updateInventoryCheck,
         navigateToInventoryList,
     ]);
 
