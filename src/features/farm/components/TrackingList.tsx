@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { CollapseHead } from './CollapseHead';
+import { CollapseHead } from '../../../shared/components/layout/CollapseHead';
 import { TimelineEntry } from './Timeline';
 import { ActivityData } from './ActivityCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';

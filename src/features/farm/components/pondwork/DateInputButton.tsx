@@ -129,10 +129,14 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
         <>
             <View style={styles.inputGroup}>
                 {label && (
-                    <Text style={styles.label}>
-                        {required && <Text style={styles.required}>* </Text>}
-                        {label}
-                    </Text>
+                    <View style={styles.labelWrapper}>
+                        {required && (
+                            <View style={styles.requiredWrapper}>
+                                <Text style={styles.required}>*</Text>
+                            </View>
+                        )}
+                        <Text style={styles.label}>{label}</Text>
+                    </View>
                 )}
                 <TouchableOpacity
                     style={[styles.dateInput, { height }]}
@@ -159,6 +163,14 @@ const styles = StyleSheet.create({
     inputGroup: {
         gap: spacing.sm,
     },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    requiredWrapper: {
+        width: 7,
+        marginRight: 4,
+    },
     label: {
         fontSize: 14,
         fontWeight: '400',
@@ -172,7 +184,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
