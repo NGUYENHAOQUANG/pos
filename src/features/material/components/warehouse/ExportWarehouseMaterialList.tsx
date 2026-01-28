@@ -10,12 +10,16 @@ import {
     UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ExportWarehouseReceiptItems } from './ExportWarehouseReceiptItems';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-import { IExportWarehouseReceipt } from '@/features/material/types/material.types';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+    IExportWarehouseReceipt,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
+import { ExportWarehouseReceiptItems } from '@/features/material/components/warehouse/ExportWarehouseReceiptItems';
+
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -23,12 +27,21 @@ if (Platform.OS === 'android') {
     }
 }
 
+import { RefreshControl } from 'react-native';
+import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
+
 interface ExportWarehouseMaterialListProps {
     receipts: IExportWarehouseReceipt[];
+    isLoading?: boolean;
+    refreshing?: boolean;
+    onRefresh?: () => void;
 }
 
 export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListProps> = ({
     receipts,
+    isLoading,
+    refreshing,
+    onRefresh,
 }) => {
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
@@ -41,22 +54,35 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
         }
     };
 
-    const formatCurrency = (value: number) => {
-        if (value >= 1000000) {
-            const millions = parseFloat((value / 1000000).toFixed(6));
-            return (
-                <>
-                    {formatCurrencyValue(millions)} Triệu{' '}
-                    <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-                </>
-            );
-        }
+    if (isLoading) {
         return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
+            <View style={styles.container}>
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <ImportReceiptSkeleton />}
+                    keyExtractor={item => item.toString()}
+                    contentContainerStyle={styles.listContainer}
+                    showsVerticalScrollIndicator={false}
+                />
+            </View>
         );
+    }
+
+    const getStatusLabel = (status?: string): MaterialGroupType => {
+        // Map API status to MaterialGroup display/color keys
+        switch (status) {
+            case 'Draft':
+                return MaterialGroupType.DRAFT;
+            case 'Pending':
+                return MaterialGroupType.PENDING;
+            case 'Approved':
+                return MaterialGroupType.COMPLETED;
+            case 'Rejected':
+                return MaterialGroupType.REJECTED;
+            default:
+                // Return raw status if unknown, so we don't hide new API statuses as 'Draft'
+                return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
+        }
     };
 
     const renderItem = ({ item }: { item: IExportWarehouseReceipt }) => {
@@ -66,6 +92,10 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
             <View style={styles.card}>
                 <View style={styles.cardContent}>
                     {/* Header Info */}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Trạng thái:</Text>
+                        <MaterialGroup group={getStatusLabel(item.status)} />
+                    </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Xuất kho:</Text>
                         <Text style={styles.value}>{formatMaterialDateTime(item.date)}</Text>
@@ -80,23 +110,42 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                     {/* Summary Info */}
                     <View style={styles.row}>
                         <Text style={styles.label}>Tổng hàng hoá:</Text>
-                        <Text style={styles.value}>{item.materials.length}</Text>
+                        <Text style={styles.value}>
+                            {item.totalItems ?? item.materials?.length ?? 0}
+                        </Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Tổng giá trị:</Text>
-                        <Text style={styles.value}>{formatCurrency(item.totalAmount)}</Text>
+                        <Text style={styles.value}>
+                            {formatCurrencyValue(item.totalAmount)}{' '}
+                            <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                        </Text>
                     </View>
+
+                    {/* Farm Info - Visible when Expanded */}
+                    {isExpanded && (
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Ao yêu cầu:</Text>
+                            <Text style={styles.value}>{item.farm || '---'}</Text>
+                        </View>
+                    )}
+
+                    {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
+                    {(item.status === 'Draft' || !item.status) && (
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            onPress={() => {
+                                // Handle edit logic
+                            }}
+                        >
+                            <Text style={styles.editButtonText}>Sửa thông tin</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Expanded Details */}
                 {isExpanded && (
                     <View style={styles.detailsContainer}>
-                        {/* Farm Info */}
-                        <View style={styles.customerRow}>
-                            <Text style={styles.label}>Ao yêu cầu:</Text>
-                            <Text style={styles.value}>{item.farm || '---'}</Text>
-                        </View>
-
                         <ExportWarehouseReceiptItems materials={item.materials} />
                     </View>
                 )}
@@ -115,17 +164,27 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
     };
 
     return (
-        <FlatList
-            data={receipts}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-        />
+        <View style={styles.container}>
+            <FlatList
+                data={receipts}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.listContainer}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    onRefresh ? (
+                        <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+                    ) : undefined
+                }
+            />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     listContainer: {
         paddingBottom: 100,
     },
@@ -193,5 +252,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
         marginBottom: spacing.md,
+    },
+    editButton: {
+        marginTop: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.white,
+    },
+    editButtonText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
     },
 });

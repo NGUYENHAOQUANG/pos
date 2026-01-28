@@ -1,10 +1,16 @@
-export type MaterialGroupType =
-    | 'Nuôi'
-    | 'Vật tư nội bộ'
-    | 'CCDC'
-    | 'Thiết bị điện'
-    | 'Chi phí khác'
-    | string;
+export enum MaterialGroupType {
+    FARMING = 'Nuôi',
+    INTERNAL = 'Vật tư nội bộ',
+    CCDC = 'CCDC',
+    ELECTRIC = 'Thiết bị điện',
+    OTHER = 'Chi phí khác',
+    FEED = 'Thức ăn',
+    TOOLS = 'Công cụ',
+    DRAFT = 'Bản nháp',
+    PENDING = 'Chờ duyệt',
+    COMPLETED = 'Hoàn thành',
+    REJECTED = 'Từ chối',
+}
 
 export interface IMaterial {
     id: string;
@@ -65,6 +71,8 @@ export interface IExportWarehouseReceipt {
     farm?: string; // Trường trại thay vì supplier
     materials: IExportWarehouseMaterialItem[];
     totalAmount: number;
+    totalItems?: number;
+    status?: string;
 }
 
 export interface IInventoryTicketItem {
@@ -81,6 +89,7 @@ export interface IInventoryTicket {
     note: string;
     totalDifference: number;
     items: IInventoryTicketItem[];
+    status: string;
 }
 
 export interface IInventoryFormItem {
@@ -235,3 +244,32 @@ export interface GetInventoryParams {
     Page?: number;
     PageSize?: number;
 }
+// ============ Warehouse Types (Real API) ============
+export interface IWarehouse {
+    id: string;
+    name: string;
+    code: string;
+    zoneId?: string;
+    description?: string;
+    address?: string;
+}
+
+export interface GetWarehousesParams {
+    ZoneId?: string;
+    Search?: string;
+    Page?: number;
+    PageSize?: number;
+}
+
+export interface IWarehouseItem {
+    id: string; // The warehouse item ID (used for transactions)
+    materialId: string;
+    materialName?: string;
+    quantity: number;
+    unitId: string;
+    unitName?: string;
+    alertQty?: number;
+    materialCode?: string;
+}
+
+export type GetWarehouseItemsResponse = IAppResponse<IPaginate<IWarehouseItem>>;

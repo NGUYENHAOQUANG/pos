@@ -1,6 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { IInventoryTicket } from '@/features/material/types/material.types';
-import { mockInventoryList } from '@/features/material/data/materialData';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
@@ -8,7 +6,9 @@ import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
 
-import { GetInventoryParams } from '@/features/material/types/material.types';
+import { GetInventoryParams, IInventoryTicket } from '@/features/material/types/material.types';
+import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { GetInventoryChecksParams } from '@/features/material/types/inventory.types';
 
 /**
  * Hook to fetch inventory tickets (Mock Data)
@@ -17,26 +17,31 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
     return useQuery({
         queryKey: materialKeys.inventory(params),
         queryFn: async () => {
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
+            const apiParams: GetInventoryChecksParams = {
+                Page: params?.Page || 1,
+                PageSize: params?.PageSize || 100,
+                CheckCode: params?.Search, // Map Search to CheckCode
+                OrderBy: 'CreatedAt desc',
+            };
 
-            let data = [...mockInventoryList];
+            const response = await inventoryApi.getList(apiParams);
 
-            if (params) {
-                if (params.Search) {
-                    const searchLower = params.Search.toLowerCase();
-                    data = data.filter(item =>
-                        item.checkerName.toLowerCase().includes(searchLower)
-                    );
-                }
-
-                if (params.Page && params.PageSize) {
-                    const start = (params.Page - 1) * params.PageSize;
-                    const end = start + params.PageSize;
-                    data = data.slice(start, end);
-                }
+            if (response.success && response.data?.items) {
+                // Map API response to IInventoryTicket for UI compatibility
+                return response.data.items.map(item => ({
+                    id: item.id,
+                    checkerName: item.creator?.fullName || item.creator?.userName || 'N/A',
+                    date: item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString('vi-VN')
+                        : '',
+                    note: item.note || '',
+                    totalDifference: 0, // Not available in list API
+                    items: [], // Details not available in list API
+                    status: item.status || 'Draft',
+                })) as IInventoryTicket[];
             }
 
-            return data;
+            return [];
         },
         staleTime: STALE_TIME_SHORT,
     });

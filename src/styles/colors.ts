@@ -90,6 +90,7 @@ export const colors = {
     red: {
         50: '#FFF0F6',
         300: '#FFADD2',
+        500: '#F5222D',
         600: '#eb2f2fff',
         900: '#FF4D4F',
     },

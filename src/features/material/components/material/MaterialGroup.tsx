@@ -10,38 +10,62 @@ interface MaterialGroupProps {
 export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
     const getStyle = (type: MaterialGroupType) => {
         switch (type) {
-            case 'Nuôi':
-            case 'Thức ăn':
+            case MaterialGroupType.FARMING:
+            case MaterialGroupType.FEED:
                 return {
                     backgroundColor: colors.volcano[200],
                     color: colors.volcano[900],
                     borderColor: colors.volcano[300],
                 };
-            case 'Vật tư nội bộ':
+            case MaterialGroupType.INTERNAL:
                 return {
                     backgroundColor: colors.geekblue[100],
                     color: colors.geekblue[900],
                     borderColor: colors.geekblue[300],
                 };
-            case 'Công cụ':
-
-            case 'CCDC':
+            case MaterialGroupType.TOOLS:
+            case MaterialGroupType.CCDC:
                 return {
                     backgroundColor: colors.green[50],
                     color: colors.green[600],
                     borderColor: colors.green[300],
                 };
-            case 'Thiết bị điện':
+            case MaterialGroupType.ELECTRIC:
                 return {
                     backgroundColor: colors.magenta[100],
                     color: colors.magenta[900],
                     borderColor: colors.magenta[300],
                 };
-            case 'Chi phí khác':
+            case MaterialGroupType.OTHER:
                 return {
                     backgroundColor: colors.purple[50],
                     color: colors.purple[600],
                     borderColor: colors.purple[300],
+                };
+            // --- STATUS TAGS ---
+            case MaterialGroupType.DRAFT:
+                return {
+                    backgroundColor: colors.neutral,
+                    color: colors.text,
+                    borderColor: colors.defaultBorder,
+                };
+            case MaterialGroupType.PENDING:
+                return {
+                    backgroundColor: colors.yellow[50],
+                    color: colors.status.warningHighlightText,
+                    borderColor: colors.yellow[300],
+                };
+            case MaterialGroupType.COMPLETED:
+                return {
+                    backgroundColor: colors.green[50],
+                    color: colors.green[600],
+                    borderColor: colors.green[300],
+                };
+            case MaterialGroupType.REJECTED:
+                return {
+                    backgroundColor: colors.errorBackground,
+                    color: colors.red[500],
+                    borderColor: colors.volcano[400],
                 };
             default:
                 return {

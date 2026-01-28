@@ -1,7 +1,7 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { IMaterialType } from '@/features/material/types/material.types';
-import { IAppResponseV2, IPaginateV2 } from '@/features/material/types/materialGroup.types';
+import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
 // Keep legacy params for backward compatibility
 export interface GetMaterialTypesParams {
@@ -10,7 +10,7 @@ export interface GetMaterialTypesParams {
     MaterialGroupId?: string;
 }
 
-export type GetMaterialTypesResponse = IAppResponseV2<IPaginateV2<IMaterialType>>;
+export type GetMaterialTypesResponse = IApiResponse<IPaginate<IMaterialType>>;
 
 export const materialTypeApi = {
     getList: async (params?: GetMaterialTypesParams): Promise<GetMaterialTypesResponse> => {

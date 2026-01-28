@@ -7,46 +7,96 @@ import {
     LayoutAnimation,
     Platform,
     UIManager,
+    ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import {
+    IInventoryTicket,
+    IInventoryTicketItem,
+    MaterialGroupType,
+} from '@/features/material/types/material.types';
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
+import { inventoryApi } from '@/features/material/api/inventoryApi';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export interface InventoryDetailItem {
-    id: string;
-    materialName: string;
-    beforeQuantity: number;
-    afterQuantity: number;
-}
-
-export interface InventoryTicket {
-    id: string;
-    checkerName: string;
-    date: string;
-    note: string;
-    totalDifference: number;
-    items: InventoryDetailItem[];
-}
-
 interface InventoryCardProps {
-    data: InventoryTicket;
+    data: IInventoryTicket;
 }
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
+    const [items, setItems] = useState<IInventoryTicketItem[]>(data.items || []);
+    const [isLoading, setIsLoading] = useState(false);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
     };
 
+    const [hasFetched, setHasFetched] = useState(false);
+
+    React.useEffect(() => {
+        if (!hasFetched && data.id) {
+            const fetchDetails = async () => {
+                setIsLoading(true);
+                try {
+                    const response = await inventoryApi.getDetail(data.id);
+                    if (response.success && response.data?.items) {
+                        const mappedItems: IInventoryTicketItem[] = response.data.items.map(
+                            item => ({
+                                id: item.inventoryCheckItemId,
+                                materialName: item.materialName || item.materialCode || 'N/A',
+                                beforeQuantity: item.expectedQty,
+                                afterQuantity: item.actualQty,
+                            })
+                        );
+                        setItems(mappedItems);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch inventory details:', error);
+                } finally {
+                    setIsLoading(false);
+                    setHasFetched(true);
+                }
+            };
+            fetchDetails();
+        }
+    }, [hasFetched, data.id]);
+
+    const totalDifference = React.useMemo(() => {
+        if (items.length > 0) {
+            return items.reduce((sum, item) => sum + (item.afterQuantity - item.beforeQuantity), 0);
+        }
+        return data.totalDifference;
+    }, [items, data.totalDifference]);
+
+    const getStatusLabel = (status: string): MaterialGroupType => {
+        switch (status) {
+            case 'Draft':
+                return MaterialGroupType.DRAFT;
+            case 'Pending':
+                return MaterialGroupType.PENDING;
+            case 'Approved':
+                return MaterialGroupType.COMPLETED;
+            case 'Rejected':
+                return MaterialGroupType.REJECTED;
+            default:
+                return MaterialGroupType.DRAFT;
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.col}>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Trạng thái:</Text>
+                    <MaterialGroup group={getStatusLabel(data.status)} />
+                </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Người kiểm:</Text>
                     <Text style={styles.value}>{data.checkerName}</Text>
@@ -83,29 +133,57 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
                 <View style={[styles.row, styles.alignRight]}>
                     <Text style={styles.label}>Tổng chênh lệch:</Text>
-                    <Text style={styles.value}>{data.totalDifference}</Text>
+                    <Text style={styles.value}>{totalDifference}</Text>
                 </View>
             </View>
 
+            {/* Edit Button (Only for Draft) */}
+            {data.status === 'Draft' && (
+                <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => {
+                        /* Handle Edit */
+                    }}
+                >
+                    <Text style={styles.editButtonText}>Sửa thông tin</Text>
+                </TouchableOpacity>
+            )}
+
             {isExpanded && (
                 <View style={styles.expandedContainer}>
-                    {data.items.map(item => (
-                        <View key={item.id} style={styles.detailItemContainer}>
-                            <Text style={styles.materialName}>{item.materialName}</Text>
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                    ) : items.length > 0 ? (
+                        items.map(item => (
+                            <View key={item.id} style={styles.detailItemContainer}>
+                                <Text style={styles.materialName}>{item.materialName}</Text>
 
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>
-                                    Tồn kho trước khi điều chỉnh:
-                                </Text>
-                                <Text style={styles.detailValue}>{item.beforeQuantity}</Text>
-                            </View>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>
+                                        Tồn kho trước khi điều chỉnh:
+                                    </Text>
+                                    <Text style={styles.detailValue}>{item.beforeQuantity}</Text>
+                                </View>
 
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Tồn kho sau khi điều chỉnh:</Text>
-                                <Text style={styles.detailValue}>{item.afterQuantity}</Text>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>
+                                        Tồn kho sau khi điều chỉnh:
+                                    </Text>
+                                    <Text style={styles.detailValue}>{item.afterQuantity}</Text>
+                                </View>
                             </View>
-                        </View>
-                    ))}
+                        ))
+                    ) : (
+                        <Text
+                            style={{
+                                textAlign: 'center',
+                                color: colors.textSecondary,
+                                marginBottom: spacing.sm,
+                            }}
+                        >
+                            Không có chi tiết
+                        </Text>
+                    )}
                 </View>
             )}
 
@@ -148,6 +226,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: spacing.xs,
+        alignItems: 'center',
     },
     col: {
         paddingBottom: 0,
@@ -163,6 +242,7 @@ const styles = StyleSheet.create({
     value: {
         fontSize: 14,
         color: colors.text,
+        textAlign: 'right',
     },
     noteRow: {
         flexDirection: 'row',
@@ -194,12 +274,37 @@ const styles = StyleSheet.create({
         fontSize: 14,
         width: '70%',
     },
+    separator: {
+        marginTop: spacing.sm,
+        height: 1,
+        backgroundColor: colors.borderLight,
+        marginHorizontal: -spacing.md,
+    },
+    colWithMargin: {
+        marginTop: spacing.sm,
+    },
+    editButton: {
+        marginTop: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
+        paddingVertical: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.white,
+    },
+    editButtonText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
+    },
     toggleButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: spacing.sm,
         gap: 4,
+        marginTop: spacing.xs,
     },
     toggleText: {
         fontSize: 14,
@@ -208,9 +313,8 @@ const styles = StyleSheet.create({
     },
     expandedContainer: {
         marginTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: colors.borderLight,
-        paddingTop: spacing.md,
+        borderTopWidth: 0,
+        paddingTop: spacing.xs,
     },
     detailItemContainer: {
         borderRadius: borderRadius.sm,
@@ -226,6 +330,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
         marginBottom: spacing.sm,
+        fontWeight: '600',
     },
     detailRow: {
         flexDirection: 'row',
@@ -235,20 +340,11 @@ const styles = StyleSheet.create({
     },
     detailLabel: {
         fontSize: 14,
-        color: colors.text,
-        fontWeight: '700',
+        color: colors.textSecondary,
     },
     detailValue: {
-        fontSize: 13,
+        fontSize: 14,
         color: colors.text,
-    },
-    separator: {
-        marginTop: spacing.sm,
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
-    colWithMargin: {
-        marginTop: spacing.sm,
+        fontWeight: '500',
     },
 });
