@@ -222,7 +222,7 @@ const INPUT_HEIGHT = 40;
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.lg,
+        marginBottom: 12,
     },
     label: {
         fontSize: 14,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: colors.white,
         height: INPUT_HEIGHT,
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: 12,
     },
     inputContainerFocused: {
         // Focus styles removed to match default border design

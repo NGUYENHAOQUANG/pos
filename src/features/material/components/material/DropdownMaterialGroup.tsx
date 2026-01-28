@@ -289,15 +289,15 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 
 const styles = StyleSheet.create({
     container: { flex: 1, zIndex: 10 },
-    labelContainer: { flexDirection: 'row', marginBottom: spacing.xs },
+    labelContainer: { flexDirection: 'row', marginBottom: spacing.sm },
     label: { fontSize: 14, color: colors.text, fontWeight: '400' },
     required: { fontSize: 14, color: colors.error || '#FF4D4F' },
     button: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 44,
-        paddingHorizontal: spacing.md,
+        height: 40,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         color: colors.text,
-        lineHeight: 44,
+        lineHeight: 40,
         textAlignVertical: 'center',
     },
     placeholderText: { color: colors.textSecondary || '#999' },
