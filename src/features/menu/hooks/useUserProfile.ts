@@ -6,6 +6,7 @@ export interface UserProfileData {
     name: string;
     phone: string;
     email: string;
+    address?: string;
     role: string;
     level: string;
     avatarUri: string | null;
@@ -16,6 +17,7 @@ export const useUserProfile = () => {
         name: '',
         phone: '',
         email: '',
+        address: '',
         role: 'Quản lý',
         level: 'Quản lý trại',
         avatarUri: null,
@@ -32,6 +34,7 @@ export const useUserProfile = () => {
                     name: data.fullName || '',
                     phone: data.phoneNumber || '',
                     email: data.email || '',
+                    address: data.address || '',
                     role: data.roleName || data.roleCode || 'Quản lý',
                     level: 'Quản lý trại',
                     avatarUri: data.avatar || data.avatarUrl || null,
