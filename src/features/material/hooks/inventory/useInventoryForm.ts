@@ -31,9 +31,14 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
                         if (detail.createdAt) {
                             setDate(new Date(detail.createdAt));
                         }
-                        if (detail.items && detail.items.length > 0) {
-                            const firstItem = detail.items[0];
-                            setItemId(firstItem.inventoryCheckItemId); // Save item ID for updates
+
+                        // Handle PaginatedList or Array
+                        // @ts-ignore - API change adaptation
+                        const itemsList = detail.items?.items || detail.items || [];
+
+                        if (itemsList && itemsList.length > 0) {
+                            const firstItem = itemsList[0];
+                            setItemId(firstItem.inventoryCheckItemId || firstItem.id); // Save item ID for updates
                             setSelectedMaterialId(firstItem.materialId);
                             setMaterialName(firstItem.materialName || firstItem.materialCode || '');
                             setOldStock(firstItem.expectedQty);
