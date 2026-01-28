@@ -33,6 +33,12 @@ export const AutoScrollText: React.FC<AutoScrollTextProps> = ({
     // We only scroll if text is wider than container
     const shouldScroll = textWidth > containerWidth && containerWidth > 0;
 
+    // Reset when text changes to ensure we start from scroll 0 and re-measure
+    useEffect(() => {
+        scrollX.setValue(0);
+        setTextWidth(0);
+    }, [text, scrollX]);
+
     useEffect(() => {
         if (!shouldScroll) {
             scrollX.setValue(0);

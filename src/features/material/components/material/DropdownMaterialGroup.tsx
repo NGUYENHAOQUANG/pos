@@ -210,7 +210,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
             return value ? (
                 <AutoScrollText
                     text={currentLabel || ''}
-                    key={String(value)}
+                    key={`${String(value)}-${currentLabel}`}
                     style={{
                         ...StyleSheet.flatten(styles.text),
                         flex: undefined,
