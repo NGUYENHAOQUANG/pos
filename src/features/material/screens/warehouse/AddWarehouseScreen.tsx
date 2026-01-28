@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView, Text } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    StatusBar,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    Platform,
+} from 'react-native';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -8,7 +16,6 @@ import {
     AddWarehouseMaterial,
     MaterialItem,
 } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
@@ -24,7 +31,10 @@ import { useSuppliers } from '@/features/material/hooks/useSuppliers';
 import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 import { useMaterialOptions } from '@/features/material/hooks/inventory';
 import { useCreateImportReceipt } from '@/features/material/hooks/useImportReceipts';
-import { ImportSourceEnum } from '@/features/material/types/importReceipt.types';
+import {
+    ImportSourceEnum,
+    ImportReceiptStatus,
+} from '@/features/material/types/importReceipt.types';
 
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
@@ -156,9 +166,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         setIsConfirmModalVisible(true);
     };
 
-    const handleConfirmSubmit = async () => {
-        setIsConfirmModalVisible(false);
-
+    const processSubmit = async (isDraft: boolean) => {
         const selectedSupplier = suppliers.find(s => s.name === supplier);
         if (!selectedSupplier) {
             showValidationError('Vui lòng chọn nhà cung cấp hợp lệ');
@@ -176,9 +184,10 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                         unitPrice: parseFloat(m.price) || 0,
                     })),
                     notes: '',
-                    autoSubmit: true,
+                    autoSubmit: !isDraft,
                     importSourceEnum: ImportSourceEnum.Supplier,
                     documentIds,
+                    status: isDraft ? ImportReceiptStatus.Draft : ImportReceiptStatus.Pending,
                 },
                 {
                     onSuccess: () => {
@@ -188,6 +197,15 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                 }
             );
         });
+    };
+
+    const handleConfirmSubmit = async () => {
+        setIsConfirmModalVisible(false);
+        await processSubmit(false);
+    };
+
+    const handleSaveDraft = async () => {
+        await processSubmit(true);
     };
 
     return (
@@ -235,17 +253,21 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                         </ScrollView>
                     </SafeInputLayout>
 
-                    <ButtonBarMaterial
-                        mode="total"
-                        totalLabel="Tổng tiền:"
-                        totalValue={formatCurrency(totalAmount)}
-                        primaryTitle="Gửi Phiếu"
-                        containerStyle={{
-                            borderTopWidth: 1,
-                            borderTopColor: colors.border,
-                        }}
-                        onPrimaryPress={handleSubmit}
-                    />
+                    <View style={styles.footer}>
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>Tổng tiền:</Text>
+                            <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
+                        </View>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity style={styles.draftButton} onPress={handleSaveDraft}>
+                                <Text style={styles.draftButtonText}>Lưu Nháp</Text>
+                            </TouchableOpacity>
+                            <View style={{ width: spacing.md }} />
+                            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                                <Text style={styles.submitButtonText}>Gửi Phiếu</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
@@ -269,5 +291,60 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingVertical: spacing.md,
         paddingBottom: 100,
+    },
+    footer: {
+        backgroundColor: colors.white,
+        paddingTop: 16,
+        paddingHorizontal: spacing.md,
+        paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    totalRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
+    totalLabel: {
+        fontSize: 14,
+        color: colors.text,
+    },
+    totalValue: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.error,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    draftButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.blue[600],
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    draftButtonText: {
+        fontSize: 16,
+        fontWeight: '400',
+        color: colors.blue[600],
+    },
+    submitButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        backgroundColor: colors.blue[600],
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.white,
     },
 });
