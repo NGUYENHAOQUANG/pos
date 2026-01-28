@@ -68,23 +68,33 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     });
     const warehouseItems = React.useMemo(() => warehouseData?.items || [], [warehouseData]);
 
-    const materialOptions =
-        warehouseItems.length > 0
-            ? warehouseItems.map((m: any) => ({
-                  label: m.materialName || '',
-                  value: String(m.materialId || ''),
-                  unit: m.unitName || '',
-                  quantity: m.quantity || 0, // Stock
-              }))
-            : [
-                  {
-                      label: 'Hiện tại không có vật tư',
-                      value: '__no_materials__',
-                      unit: '',
-                      quantity: 0,
-                      disabled: true,
-                  },
-              ];
+    // Material options with stock info (using useMemo like AddWarehouseScreen)
+    const materialOptions = React.useMemo(() => {
+        if (warehouseItems.length > 0) {
+            return warehouseItems.map(
+                (m: {
+                    materialName?: string;
+                    materialId?: string;
+                    unitName?: string;
+                    quantity?: number;
+                }) => ({
+                    label: m.materialName || '',
+                    value: String(m.materialId || ''),
+                    unit: m.unitName || '',
+                    quantity: m.quantity || 0, // Stock
+                })
+            );
+        }
+        return [
+            {
+                label: 'Hiện tại không có vật tư',
+                value: '__no_materials__',
+                unit: '',
+                quantity: 0,
+                disabled: true,
+            },
+        ];
+    }, [warehouseItems]);
 
     const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
     const { submitWithFiles, isUploading } = useFileSubmit();
