@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
-import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { colors, spacing, borderRadius } from '@/styles';
 import { numericStringSchema } from '@/shared/utils/validation';
+
 interface InventoryMaterialInputProps {
-    materialName: string;
+    materialName: string; // This is actually the ID or formatted value, but we might need label for display
+    selectedMaterialId?: string; // Add explicit ID prop
     oldStock: number;
     newStock: string;
     onMaterialSelect: (val: string) => void;
     onNewStockChange: (val: string) => void;
-    materialOptions?: string[];
+    materialOptions?: DropdownOption[];
     onDropdownOpen?: () => void;
 }
 
 export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
-    materialName,
+    materialName, // ID or Value
+    selectedMaterialId,
     oldStock,
     newStock,
     onMaterialSelect,
@@ -25,17 +28,18 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const diff = newStock ? Number(newStock) - oldStock : 0;
-    const hasSelectedMaterial = !!materialName;
+    // Check if we have a selection (either by name prop being used as value, or explicit ID)
+    const hasSelectedMaterial = !!materialName || !!selectedMaterialId;
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Vật tư điều chỉnh</Text>
             <View style={styles.divider} />
             <View style={hasSelectedMaterial ? styles.dropdownWithMargin : styles.dropdownNoMargin}>
                 <DropdownMaterial
-                    value={materialName}
+                    value={selectedMaterialId || materialName} // Use ID preference
                     placeholder="Chọn vật tư"
-                    options={materialOptions}
-                    onChange={onMaterialSelect}
+                    options={materialOptions} // Now objects
+                    onChange={onMaterialSelect} // Returns ID (value)
                     showAllOption={false}
                     isOpen={isDropdownOpen}
                     onToggle={() => {
@@ -45,7 +49,7 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
                             onDropdownOpen?.();
                         }
                     }}
-                    inline={true}
+                    inline={false}
                 />
             </View>
 
