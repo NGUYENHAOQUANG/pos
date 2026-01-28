@@ -47,13 +47,19 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const [hasFetched, setHasFetched] = useState(false);
 
     // Reset hasFetched when data changes (e.g., after update)
+    // Reset hasFetched when data changes (e.g., after update)
     React.useEffect(() => {
-        setHasFetched(false);
-        setItems([]);
-    }, [data.id, data.status]);
+        if (data.items && data.items.length > 0) {
+            setItems(data.items);
+            setHasFetched(true);
+        } else {
+            setHasFetched(false);
+            setItems([]);
+        }
+    }, [data.id, data.status, data.items]);
 
     React.useEffect(() => {
-        if (!hasFetched && data.id) {
+        if (!hasFetched && data.id && (!data.items || data.items.length === 0)) {
             const fetchDetails = async () => {
                 setIsLoading(true);
                 try {
@@ -78,7 +84,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
             };
             fetchDetails();
         }
-    }, [hasFetched, data.id]);
+    }, [hasFetched, data.id, data.items]);
 
     const totalDifference = React.useMemo(() => {
         if (items.length > 0) {
