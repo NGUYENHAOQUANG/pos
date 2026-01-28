@@ -10,6 +10,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { colors, spacing, borderRadius } from '@/styles';
 import {
     IInventoryTicket,
@@ -18,6 +21,8 @@ import {
 } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
+
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -28,6 +33,7 @@ interface InventoryCardProps {
 }
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
+    const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
     const [items, setItems] = useState<IInventoryTicketItem[]>(data.items || []);
@@ -40,21 +46,35 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
     const [hasFetched, setHasFetched] = useState(false);
 
+    // Reset hasFetched when data changes (e.g., after update)
+    // Reset hasFetched when data changes (e.g., after update)
     React.useEffect(() => {
-        if (!hasFetched && data.id) {
+        if (data.items && data.items.length > 0) {
+            setItems(data.items);
+            setHasFetched(true);
+        } else {
+            setHasFetched(false);
+            setItems([]);
+        }
+    }, [data.id, data.status, data.items]);
+
+    React.useEffect(() => {
+        if (!hasFetched && data.id && (!data.items || data.items.length === 0)) {
             const fetchDetails = async () => {
                 setIsLoading(true);
                 try {
                     const response = await inventoryApi.getDetail(data.id);
-                    if (response.success && response.data?.items) {
-                        const mappedItems: IInventoryTicketItem[] = response.data.items.map(
-                            item => ({
-                                id: item.inventoryCheckItemId,
-                                materialName: item.materialName || item.materialCode || 'N/A',
-                                beforeQuantity: item.expectedQty,
-                                afterQuantity: item.actualQty,
-                            })
-                        );
+                    // @ts-ignore - API change adaptation
+                    const itemsData = response.data?.items?.items || response.data?.items;
+
+                    if (response.success && itemsData) {
+                        // @ts-ignore
+                        const mappedItems: IInventoryTicketItem[] = itemsData.map((item: any) => ({
+                            id: item.inventoryCheckItemId || item.id,
+                            materialName: item.materialName || item.materialCode || 'N/A',
+                            beforeQuantity: item.expectedQty,
+                            afterQuantity: item.actualQty,
+                        }));
                         setItems(mappedItems);
                     }
                 } catch (error) {
@@ -66,7 +86,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
             };
             fetchDetails();
         }
-    }, [hasFetched, data.id]);
+    }, [hasFetched, data.id, data.items]);
 
     const totalDifference = React.useMemo(() => {
         if (items.length > 0) {
@@ -142,7 +162,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => {
-                        /* Handle Edit */
+                        navigation.navigate('AddInventory', { inventoryId: data.id });
                     }}
                 >
                     <Text style={styles.editButtonText}>Sửa thông tin</Text>

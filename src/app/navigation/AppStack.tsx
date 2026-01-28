@@ -167,7 +167,11 @@ export type AppStackParamList = {
         availableMaterials: IMaterial[];
         onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
     };
-    AddInventory: { onSave?: (data: IInventoryTicket) => void; initialMaterialName?: string };
+    AddInventory: {
+        onSave?: (data: IInventoryTicket) => void;
+        initialMaterialName?: string;
+        inventoryId?: string;
+    };
 
     // ============== Control Screens (Tab Bar hidden) ==============
     ControlDetail: { pondName: string };

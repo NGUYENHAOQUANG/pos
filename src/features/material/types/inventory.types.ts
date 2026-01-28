@@ -79,3 +79,13 @@ export interface AddInventoryCheckItemsRequest {
     inventoryCheckId: string;
     items: InventoryCheckItemDto[];
 }
+
+export interface UpdateInventoryCheckItemDto {
+    itemId: string;
+    actualQty: number;
+}
+
+export interface UpdateInventoryCheckItemsRequest {
+    inventoryCheckId: string;
+    items: UpdateInventoryCheckItemDto[];
+}
