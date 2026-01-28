@@ -127,7 +127,7 @@ export type AppStackParamList = {
         onSave?: (data: EnvironmentParameter) => void;
     };
     EnvironmentLogScreen: { pond: PondData };
-    CreateCycle: { pondId: string; initialData?: CycleData | null };
+    CreateCycle: { pondId: string; zoneId?: string; initialData?: CycleData | null };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };

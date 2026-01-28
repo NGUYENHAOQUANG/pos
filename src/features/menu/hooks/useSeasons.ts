@@ -1,9 +1,37 @@
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useMemo, useCallback } from 'react';
 import { seasonApi } from '@/features/menu/api/seasonApi';
 import { SeasonData, SeasonStatus, getSeasonStatusName } from '@/features/farm/types/farm.types';
-import { farmKeys } from '../../farm/hooks/farmKeys';
-import { useZones } from '../../farm/hooks/useZones';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { useZones } from '@/features/farm/hooks/useZones';
+
+// Extracted fetch function for reuse
+const fetchSeasonsByZone = async (zoneId: number | string, zoneCode?: string) => {
+    // Ensure zoneId is string for API call
+    const zoneIdStr = String(zoneId);
+    const results = await seasonApi.getSeasons(zoneIdStr);
+    // Map API raw data to Domain SeasonData
+    return results.map((item: any) => ({
+        ...item,
+        name: item.seasonName || item.name,
+        // Inject farmCode from zone if missing, or use seasonCode as fallback
+        farmCode: zoneCode || item.seasonCode || '',
+        // Store zoneId for filtering
+        zoneId: zoneIdStr,
+        status: item.status as SeasonStatus,
+        statusName: getSeasonStatusName(item.status),
+        id: item.id.toString(), // Ensure string ID
+    }));
+};
+
+export const useSeasonsByZone = (zoneId: number | string | null | undefined, zoneCode?: string) => {
+    const zoneIdStr = zoneId ? String(zoneId) : '';
+    return useQuery({
+        queryKey: farmKeys.seasons(zoneIdStr),
+        queryFn: () => fetchSeasonsByZone(zoneIdStr, zoneCode),
+        enabled: !!zoneIdStr,
+    });
+};
 
 export const useSeasons = () => {
     // 1. Fetch Zones first
@@ -18,21 +46,7 @@ export const useSeasons = () => {
     const seasonQueries = useQueries({
         queries: zones.map(zone => ({
             queryKey: farmKeys.seasons(zone.id),
-            queryFn: async () => {
-                const results = await seasonApi.getSeasons(zone.id);
-                // Map API raw data to Domain SeasonData
-                return results.map((item: any) => ({
-                    ...item,
-                    name: item.seasonName || item.name,
-                    // Inject farmCode from zone if missing, or use seasonCode as fallback
-                    farmCode: zone.code || item.seasonCode || '',
-                    // Store zoneId for filtering
-                    zoneId: zone.id,
-                    status: item.status as SeasonStatus,
-                    statusName: getSeasonStatusName(item.status),
-                    id: item.id.toString(), // Ensure string ID
-                }));
-            },
+            queryFn: () => fetchSeasonsByZone(zone.id, zone.code),
             enabled: !!zone.id,
         })),
     });
