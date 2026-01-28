@@ -7,6 +7,7 @@ import {
     GetInventoryCheckDetailResponse,
     CreateInventoryCheckRequest,
     AddInventoryCheckItemsRequest,
+    UpdateInventoryCheckItemsRequest,
 } from '../types/inventory.types';
 
 export const inventoryApi = {
@@ -36,6 +37,16 @@ export const inventoryApi = {
     ): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.ITEMS(id),
+            body
+        );
+        return data;
+    },
+    updateItems: async (
+        id: string,
+        body: UpdateInventoryCheckItemsRequest
+    ): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.patch<IApiResponse<any>>(
+            API_ENDPOINTS.INVENTORY_CHECK.UPDATE_ITEMS(id),
             body
         );
         return data;
