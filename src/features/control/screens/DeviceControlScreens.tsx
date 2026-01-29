@@ -87,7 +87,7 @@ export const DeviceControlScreens = () => {
 
             if (!isValidZone) {
                 // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => String(z.id) === '71') || zones[0];
+                const targetZone = zones.find(z => z.id === '71') || zones[0];
                 if (targetZone) {
                     setSelectedZoneId(targetZone.id.toString());
                 }
@@ -208,7 +208,7 @@ export const DeviceControlScreens = () => {
                 <HeaderCamLocation
                     locations={farmLocations.length > 0 ? farmLocations : undefined}
                     selectedLocation={selectedFarm}
-                    onLocationSelect={loc => setSelectedZoneId(String(loc.id))}
+                    onLocationSelect={loc => setSelectedZoneId(loc.id)}
                     onHelpPress={handleHelpPress}
                 />
             )}
