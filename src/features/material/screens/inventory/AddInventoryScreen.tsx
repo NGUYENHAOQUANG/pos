@@ -81,7 +81,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     }, [setTabBarVisible]);
 
     // Custom hooks for form management
-    const { formState, setters } = useInventoryForm({ inventoryId, warehouseItems });
+    const { formState, setters } = useInventoryForm({ inventoryId });
     const {
         date,
         note,

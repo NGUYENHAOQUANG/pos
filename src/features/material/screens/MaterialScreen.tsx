@@ -169,8 +169,9 @@ export const MeterialScreen = () => {
     const inventoryParams = useMemo(
         () => ({
             Search: searchText,
+            WarehouseId: warehouseId,
         }),
-        [searchText]
+        [searchText, warehouseId]
     );
 
     const {
