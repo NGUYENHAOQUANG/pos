@@ -167,8 +167,7 @@ export const createPondListStore: StateCreator<
                 operationsByPondType,
                 isLoadingMasterData: false,
             });
-        } catch (error) {
-            console.error('❌ [fetchMasterData] FAILED:', error);
+        } catch (_error) {
             set({ isLoadingMasterData: false });
         }
     },

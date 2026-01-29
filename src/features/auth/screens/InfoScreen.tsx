@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { documentApi } from '@/features/material/api/documentApi';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -46,18 +47,30 @@ export default function InfoScreen() {
             return;
         }
 
-        // Debug logging
-        console.log('Complete Profile Payload:', {
-            userId: user?.id,
-            fullName,
-            email,
-            address,
-            avatarUrl: avatar,
-        });
-
         setIsLoading(true);
         try {
             if (!user?.id) throw new Error('Không tìm thấy thông tin người dùng');
+
+            let finalAvatarUrl = avatar;
+
+            // Handle avatar upload if it's a local URI
+            if (avatar && (avatar.startsWith('file://') || avatar.startsWith('content://'))) {
+                const fileToUpload = {
+                    uri: avatar,
+                    type: 'image/jpeg',
+                    name: `avatar_${Date.now()}.jpg`,
+                };
+
+                const uploadedDocs = await documentApi.upload([fileToUpload]);
+
+                if (uploadedDocs && uploadedDocs.length > 0) {
+                    const docId = uploadedDocs[0].id;
+                    const publicUrl = await documentApi.getUrl(docId);
+                    if (publicUrl) {
+                        finalAvatarUrl = publicUrl;
+                    }
+                }
+            }
 
             const payload: any = {
                 userId: user.id,
@@ -66,11 +79,12 @@ export default function InfoScreen() {
 
             if (email) payload.email = email;
             if (address) payload.address = address;
-            if (avatar) payload.avatarUrl = avatar;
+            if (finalAvatarUrl) payload.avatarUrl = finalAvatarUrl;
+
+            console.log('Final Complete Profile Payload:', payload);
 
             await completeProfile(payload);
 
-            // Success handler usually handled by store updating isAuthenticated
             Toast.show({
                 type: 'success',
                 text1: 'Cập nhật thông tin thành công',
@@ -90,14 +104,6 @@ export default function InfoScreen() {
 
             let displayMessage = message;
             if (validationErrors) {
-                // Format validation errors for display if needed, or just show main message
-                // For toast, usually main message is enough, or we line break?
-                // Toast text2 supports multiple lines.
-                // let details = '';
-                // Object.values(validationErrors).forEach((errs: any) => {
-                //    details += (details ? '\n' : '') + errs.join(', ');
-                // });
-                // if (details) displayMessage += '\n' + details;
                 displayMessage += '\n' + JSON.stringify(validationErrors);
             }
 

@@ -20,6 +20,15 @@ export const API_ENDPOINTS = {
         PROFILE: '/auth/me',
         UPDATE_PROFILE: '/auth/profile',
     },
+    POND: {
+        CYCLE: {
+            LIST: (pondId: string) => `/pond/${pondId}/cycle`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/cycle`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
+        },
+    },
     POND_TYPES: {
         LIST: '/pondcategory',
     },
@@ -117,6 +126,7 @@ export const API_ENDPOINTS = {
     },
     DOCUMENT: {
         UPLOAD: '/document',
+        GET_URL: (id: string) => `/document/get-url/${id}`,
         DELETE: (id: string) => `/document/${id}`,
     },
 } as const;
