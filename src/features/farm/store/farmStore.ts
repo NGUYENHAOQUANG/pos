@@ -7,28 +7,52 @@ import { JobExecution } from '@/features/farm/types/farm.types';
 import { formatDate, parseDate, compareTime } from '@/features/farm/utils/dateUtils';
 
 // Core Slices
-import { createPondListStore, PondListStore } from './core/pondListStore';
+import { createPondListStore, PondListStore } from '@/features/farm/store/core/pondListStore';
 import { createSeasonStore, SeasonStore } from '@/features/menu/store/seasonStore';
-import { createSettingStore, SettingStore } from './core/settingStore';
-import { createCycleStore, CycleStore } from './core/cycleStore';
-import { createZoneStore, ZoneStore } from './core/zoneStore';
+import { createSettingStore, SettingStore } from '@/features/farm/store/core/settingStore';
+import { createCycleStore, CycleStore } from '@/features/farm/store/core/cycleStore';
+import { createZoneStore, ZoneStore } from '@/features/farm/store/core/zoneStore';
 
 // Job Slices
-import { createFeedSlice, FeedSlice } from './pondwork/feedStore';
+import { createFeedSlice, FeedSlice } from '@/features/farm/store/pondwork/feedStore';
 import {
     createShrimpInspectionSlice,
     ShrimpInspectionSlice,
-} from './pondwork/shrimpInspectionStore';
-import { createMeasureSizeSlice, MeasureSizeSlice } from './pondwork/measureSizeStore';
-import { createEnvironmentSlice, EnvironmentSlice } from './pondwork/environmentStore';
-import { createWaterTreatmentSlice, WaterTreatmentSlice } from './pondwork/waterTreatmentStore';
-import { createWaterChangeSlice, WaterChangeSlice } from './pondwork/waterChangeStore';
-import { createSiphonSlice, SiphonSlice } from './pondwork/siphonStore';
-import { createTroubleshootingSlice, TroubleshootingSlice } from './pondwork/troubleshootingStore';
-import { createTransferPondSlice, TransferPondSlice } from './pondwork/transferPondStore';
-import { createCleanPondSlice, CleanPondSlice } from './pondwork/cleanPondStore';
-import { createSunDrySlice, SunDryStore as SunDrySlice } from './pondwork/sunDryStore';
-import { createHarvestSlice, HarvestSlice } from './pondwork/harvestStore';
+} from '@/features/farm/store/pondwork/shrimpInspectionStore';
+import {
+    createMeasureSizeSlice,
+    MeasureSizeSlice,
+} from '@/features/farm/store/pondwork/measureSizeStore';
+import {
+    createEnvironmentSlice,
+    EnvironmentSlice,
+} from '@/features/farm/store/pondwork/environmentStore';
+import {
+    createWaterTreatmentSlice,
+    WaterTreatmentSlice,
+} from '@/features/farm/store/pondwork/waterTreatmentStore';
+import {
+    createWaterChangeSlice,
+    WaterChangeSlice,
+} from '@/features/farm/store/pondwork/waterChangeStore';
+import { createSiphonSlice, SiphonSlice } from '@/features/farm/store/pondwork/siphonStore';
+import {
+    createTroubleshootingSlice,
+    TroubleshootingSlice,
+} from '@/features/farm/store/pondwork/troubleshootingStore';
+import {
+    createTransferPondSlice,
+    TransferPondSlice,
+} from '@/features/farm/store/pondwork/transferPondStore';
+import {
+    createCleanPondSlice,
+    CleanPondSlice,
+} from '@/features/farm/store/pondwork/cleanPondStore';
+import {
+    createSunDrySlice,
+    SunDryStore as SunDrySlice,
+} from '@/features/farm/store/pondwork/sunDryStore';
+import { createHarvestSlice, HarvestSlice } from '@/features/farm/store/pondwork/harvestStore';
 
 interface FarmProxyActions {
     updatePondJob: (pondId: string, jobType: JobType, items: JobExecution[]) => void;
@@ -104,9 +128,6 @@ export const useFarmStore = create<FarmState>()(
                     case 'SHRIMP_INSPECTION':
                         state.updateShrimpInspectionJob(pondId, items);
                         break;
-                    case 'MEASURE_SIZE':
-                        state.updateMeasureSizeJob(pondId, items);
-                        break;
                     case 'ENVIRONMENT':
                         state.updateEnvironmentJob(pondId, items);
                         break;
@@ -144,8 +165,6 @@ export const useFarmStore = create<FarmState>()(
                         return state.feedJobs[pondId] || [];
                     case 'SHRIMP_INSPECTION':
                         return state.shrimpInspectionJobs[pondId] || [];
-                    case 'MEASURE_SIZE':
-                        return state.measureSizeJobs[pondId] || [];
                     case 'ENVIRONMENT':
                         return state.environmentJobs[pondId] || [];
                     case 'WATER_TREATMENT':
@@ -201,10 +220,9 @@ export const useFarmStore = create<FarmState>()(
 
             getLatestPondActivity: pondId => {
                 const state = a[1]();
-                const allJobsRecords: Record<JobType, JobExecution[]> = {
+                const allJobsRecords: Record<Exclude<JobType, 'MEASURE_SIZE'>, JobExecution[]> = {
                     FEED: state.feedJobs[pondId] || [],
                     SHRIMP_INSPECTION: state.shrimpInspectionJobs[pondId] || [],
-                    MEASURE_SIZE: state.measureSizeJobs[pondId] || [],
                     ENVIRONMENT: state.environmentJobs[pondId] || [],
                     WATER_TREATMENT: state.waterTreatmentJobs[pondId] || [],
                     WATER_CHANGE: state.waterChangeJobs[pondId] || [],
