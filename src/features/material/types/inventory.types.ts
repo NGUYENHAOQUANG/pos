@@ -6,14 +6,16 @@ export interface IInventoryCheck {
     createdAt: string;
     editedAt: string;
     creator: {
-        id: number;
-        fullName?: string;
-        userName?: string;
+        id: string;
+        fullname: string;
+        email: string;
+        phoneNumber?: string;
+        avatar?: string;
     } | null;
     editor: {
-        id: number;
-        fullName?: string;
-        userName?: string;
+        id: string;
+        fullname: string;
+        email: string;
     } | null;
     checkCode: string;
     warehouseId: string;
@@ -81,11 +83,11 @@ export interface AddInventoryCheckItemsRequest {
 }
 
 export interface UpdateInventoryCheckItemDto {
-    itemId: string;
+    inventoryCheckItemId: string;
     actualQty: number;
 }
 
 export interface UpdateInventoryCheckItemsRequest {
-    inventoryCheckId: string;
+    // inventoryCheckId: string; // Removed from body as it's a path parameter
     items: UpdateInventoryCheckItemDto[];
 }
