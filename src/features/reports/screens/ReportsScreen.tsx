@@ -65,7 +65,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
     }, [farmOptions, selectedZoneId]);
 
     const handleSelectFarm = (item: DropDownItem) => {
-        setSelectedZoneId(Number(item.id));
+        setSelectedZoneId(String(item.id));
     };
 
     const [selectedPond, setSelectedPond] = useState<DropDownItem>({ id: '1', label: 'Chọn ao' });
