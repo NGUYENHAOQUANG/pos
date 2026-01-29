@@ -10,12 +10,14 @@ export const useUpdateInventoryCheck = () => {
 
     return useMutation({
         mutationFn: async (
-            payload: UpdateInventoryCheckItemsRequest & { shouldSubmit?: boolean }
+            payload: UpdateInventoryCheckItemsRequest & {
+                inventoryCheckId: string;
+                shouldSubmit?: boolean;
+            }
         ) => {
             try {
                 // 1. Update items using PATCH to avoid creating duplicates
                 const updatePayload: UpdateInventoryCheckItemsRequest = {
-                    inventoryCheckId: payload.inventoryCheckId,
                     items: payload.items,
                 };
 
