@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -49,14 +49,29 @@ export const AddEnvironmentScreen: React.FC = () => {
     const currentZone = useZoneResolution(pond, zones);
 
     // 2. Initialize Data (Fetch types, zones, settings)
-    const { isLoading, metricTypes } = useEnvironmentInit(currentZone?.id);
+    const { isLoading, metricTypes } = useEnvironmentInit(
+        currentZone ? String(currentZone.id) : undefined
+    );
 
     // 3. Compute Configuration (Limits, Visible IDs)
-    const { parameterLimits, visibleMetricIds } = useParameterConfiguration(
-        currentZone?.id,
+    const { parameterLimits } = useParameterConfiguration(
+        currentZone ? String(currentZone.id) : undefined,
         metricTypes,
         parameterSettings
     );
+
+    // Convert parameterLimits from UUID keys to code keys
+    const limitsWithCodes = useMemo(() => {
+        const limits: Record<string, string> = {};
+        Object.entries(parameterLimits).forEach(([uuid, limitStr]) => {
+            const metric = metricTypes.find(m => String(m.id) === uuid);
+            if (metric) {
+                limits[metric.code] = limitStr;
+            }
+        });
+
+        return limits;
+    }, [parameterLimits, metricTypes]);
 
     // 4. Use Add Environment Logic Hook
     const {
@@ -132,10 +147,6 @@ export const AddEnvironmentScreen: React.FC = () => {
         setDeleteModalVisible(false);
     };
 
-    if (isLoading) {
-        return <EnvSkeleton />;
-    }
-
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -152,89 +163,94 @@ export const AddEnvironmentScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <GeneralInfoBox
-                        type="default"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        disabledDate={true}
-                    />
+            {isLoading ? (
+                <EnvSkeleton />
+            ) : (
+                <>
+                    <SafeInputLayout>
+                        <ScrollView
+                            ref={scrollViewRef}
+                            style={styles.scrollView}
+                            contentContainerStyle={styles.scrollContent}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <GeneralInfoBox
+                                type="default"
+                                date={selectedDate}
+                                onDateChange={setSelectedDate}
+                                disabledDate={true}
+                            />
 
-                    <EnvironmentParametersBox
-                        pH={pH}
-                        onPHChange={value => {
-                            setPH(value);
-                            setShowParameterError(false);
-                        }}
-                        do={dissolvedOxygen}
-                        onDOChange={value => {
-                            setDissolvedOxygen(value);
-                            setShowParameterError(false);
-                        }}
-                        temperature={temperature}
-                        onTemperatureChange={value => {
-                            setTemperature(value);
-                            setShowParameterError(false);
-                        }}
-                        salinity={salinity}
-                        onSalinityChange={value => {
-                            setSalinity(value);
-                            setShowParameterError(false);
-                        }}
-                        alkalinity={alkalinity}
-                        onAlkalinityChange={value => {
-                            setAlkalinity(value);
-                            setShowParameterError(false);
-                        }}
-                        transparency={transparency}
-                        onTransparencyChange={value => {
-                            setTransparency(value);
-                            setShowParameterError(false);
-                        }}
-                        onSetupPress={() => {
-                            navigation.navigate('SettingEnvironment', {
-                                data: { advancedParameters },
-                                onSave: handleSaveAdvancedParams,
-                            });
-                        }}
-                        advancedParameters={advancedParameters}
-                        kali={kali}
-                        onKaliChange={setKali}
-                        tan={tan}
-                        onTanChange={setTan}
-                        magie={magie}
-                        onMagieChange={setMagie}
-                        no3={no3}
-                        onNo3Change={setNo3}
-                        showError={showParameterError}
-                        limits={parameterLimits}
-                        visibleMetricIds={visibleMetricIds}
-                    />
+                            <EnvironmentParametersBox
+                                pH={pH}
+                                onPHChange={value => {
+                                    setPH(value);
+                                    setShowParameterError(false);
+                                }}
+                                do={dissolvedOxygen}
+                                onDOChange={value => {
+                                    setDissolvedOxygen(value);
+                                    setShowParameterError(false);
+                                }}
+                                temperature={temperature}
+                                onTemperatureChange={value => {
+                                    setTemperature(value);
+                                    setShowParameterError(false);
+                                }}
+                                salinity={salinity}
+                                onSalinityChange={value => {
+                                    setSalinity(value);
+                                    setShowParameterError(false);
+                                }}
+                                alkalinity={alkalinity}
+                                onAlkalinityChange={value => {
+                                    setAlkalinity(value);
+                                    setShowParameterError(false);
+                                }}
+                                transparency={transparency}
+                                onTransparencyChange={value => {
+                                    setTransparency(value);
+                                    setShowParameterError(false);
+                                }}
+                                onSetupPress={() => {
+                                    navigation.navigate('SettingEnvironment', {
+                                        data: { advancedParameters },
+                                        onSave: handleSaveAdvancedParams,
+                                    });
+                                }}
+                                advancedParameters={advancedParameters}
+                                kali={kali}
+                                onKaliChange={setKali}
+                                tan={tan}
+                                onTanChange={setTan}
+                                magie={magie}
+                                onMagieChange={setMagie}
+                                no3={no3}
+                                onNo3Change={setNo3}
+                                showError={showParameterError}
+                                limits={limitsWithCodes}
+                            />
 
-                    <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
-            </SafeInputLayout>
+                            <SelectionNotesBox
+                                notes={notes}
+                                onNotesChange={setNotes}
+                                scrollViewRef={scrollViewRef}
+                            />
+                        </ScrollView>
+                    </SafeInputLayout>
 
-            {/* Footer Buttons */}
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={handleCancel}
-                    primaryDisabled={itemToEdit ? isButtonDisabled : false}
-                />
-            </View>
+                    {/* Footer Buttons */}
+                    <View style={styles.footer}>
+                        <ButtonBarFarm
+                            primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                            secondaryTitle="Huỷ"
+                            onPrimaryPress={handleSave}
+                            onSecondaryPress={handleCancel}
+                            primaryDisabled={itemToEdit ? isButtonDisabled : false}
+                        />
+                    </View>
+                </>
+            )}
 
             {/* Delete Confirmation Modal */}
             <ConfirmationDeleteModal

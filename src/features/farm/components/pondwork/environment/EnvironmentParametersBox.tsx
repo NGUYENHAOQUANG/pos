@@ -32,7 +32,6 @@ interface EnvironmentParametersBoxProps {
     no3?: string;
     onNo3Change?: (value: string) => void;
     limits?: Record<string, string>; // ID -> Limit string (e.g., "7.5 - 8.5")
-    visibleMetricIds?: string[];
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -60,7 +59,6 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     no3 = '',
     onNo3Change,
     limits = {},
-    visibleMetricIds = ['1', '2', '3', '4', '10', '15', '17', '18', '19', '20'], // Default to all if not provided
 }) => {
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
@@ -73,8 +71,6 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         // Default: Name (Unit) or just Name
         return unit ? `${baseName} (${unit})` : baseName;
     };
-
-    const isVisible = (id: string) => visibleMetricIds.includes(id);
 
     // Map advanced parameter IDs to render fields
     const getAdvancedParameterValue = (id: string): string => {
@@ -129,34 +125,26 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                             onChangeText={text => handleNumericInput(text, onPHChange)}
                         />
                     </View>
-                    {isVisible(ENVIRONMENT_METRIC_IDS.DO) && (
-                        <View style={styles.column}>
-                            <FarmInput
-                                label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
-                                value={doValue}
-                                keyboardType="default"
-                                onChangeText={text => handleNumericInput(text, onDOChange)}
-                            />
-                        </View>
-                    )}
+                    <View style={styles.column}>
+                        <FarmInput
+                            label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
+                            value={doValue}
+                            keyboardType="default"
+                            onChangeText={text => handleNumericInput(text, onDOChange)}
+                        />
+                    </View>
                 </View>
 
                 {/* Row 2 */}
                 <View style={styles.row}>
-                    {isVisible(ENVIRONMENT_METRIC_IDS.TEMPERATURE) && (
-                        <View style={styles.column}>
-                            <FarmInput
-                                label={getLabel(
-                                    'Nhiệt độ',
-                                    ENVIRONMENT_METRIC_IDS.TEMPERATURE,
-                                    '°C'
-                                )}
-                                value={temperature}
-                                keyboardType="default"
-                                onChangeText={text => handleNumericInput(text, onTemperatureChange)}
-                            />
-                        </View>
-                    )}
+                    <View style={styles.column}>
+                        <FarmInput
+                            label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
+                            value={temperature}
+                            keyboardType="default"
+                            onChangeText={text => handleNumericInput(text, onTemperatureChange)}
+                        />
+                    </View>
                     <View style={styles.column}>
                         <FarmInput
                             label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
@@ -177,22 +165,14 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                             onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                         />
                     </View>
-                    {isVisible(ENVIRONMENT_METRIC_IDS.TRANSPARENCY) && (
-                        <View style={styles.column}>
-                            <FarmInput
-                                label={getLabel(
-                                    'Độ trong',
-                                    ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
-                                    'cm'
-                                )}
-                                value={transparency}
-                                keyboardType="default"
-                                onChangeText={text =>
-                                    handleNumericInput(text, onTransparencyChange)
-                                }
-                            />
-                        </View>
-                    )}
+                    <View style={styles.column}>
+                        <FarmInput
+                            label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
+                            value={transparency}
+                            keyboardType="default"
+                            onChangeText={text => handleNumericInput(text, onTransparencyChange)}
+                        />
+                    </View>
                 </View>
 
                 {/* Advanced Parameters */}
