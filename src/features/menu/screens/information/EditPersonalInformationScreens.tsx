@@ -13,6 +13,8 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { pondApi } from '@/features/farm/api/pondApi';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { authApi } from '@/features/auth/api/authApi';
+import { documentApi } from '@/features/material/api/documentApi';
+import { Loading } from '@/shared/components/ui/Loading';
 
 export const EditPersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
@@ -31,7 +33,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
     const [avatarUri, setAvatarUri] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    // ... (rest of local state)
+    const [avatarAsset, setAvatarAsset] = useState<any>(null);
 
     // Sync local state when userData changes
     useEffect(() => {
@@ -43,6 +45,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
             setRole(userData.role);
             setLevel(userData.level);
             setAvatarUri(userData.avatarUri);
+            setAvatarAsset(null); // Reset asset on load
         }
     }, [userData]);
 
@@ -104,17 +107,40 @@ export const EditPersonalInformationScreens: React.FC = () => {
 
         if (result.assets && result.assets.length > 0) {
             setAvatarUri(result.assets[0].uri || null);
+            setAvatarAsset(result.assets[0]);
         }
     };
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
+            let finalAvatarUrl = avatarUri;
+
+            // If we have a new local asset, upload it first
+            if (avatarAsset && avatarAsset.uri) {
+                const fileToUpload = {
+                    uri: avatarAsset.uri,
+                    type: avatarAsset.type || 'image/jpeg',
+                    name: avatarAsset.fileName || `avatar_${Date.now()}.jpg`,
+                };
+
+                const uploadedDocs = await documentApi.upload([fileToUpload]);
+
+                if (uploadedDocs && uploadedDocs.length > 0) {
+                    const docId = uploadedDocs[0].id;
+                    // Get public URL from document ID
+                    const publicUrl = await documentApi.getUrl(docId);
+                    if (publicUrl) {
+                        finalAvatarUrl = publicUrl;
+                    }
+                }
+            }
+
             const payload = {
                 fullName: name,
                 email: email,
                 address: address,
-                avatarUrl: avatarUri || '', // Send current or new avatar URI
+                avatarUrl: finalAvatarUrl || '',
             };
 
             await authApi.updateProfile(payload);
@@ -141,99 +167,102 @@ export const EditPersonalInformationScreens: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <HeaderMenu title="Sửa thông tin cá nhân" onBack={() => navigation.goBack()} />
+        <Loading isLoading={isSaving}>
+            <View style={styles.container}>
+                <HeaderMenu title="Sửa thông tin cá nhân" onBack={() => navigation.goBack()} />
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.sectionContainer}>
-                    <Text style={styles.sectionTitle}>Thông tin chung</Text>
-                    <View style={styles.separator} />
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {/* ... (existing content) ... */}
+                    <View style={styles.sectionContainer}>
+                        <Text style={styles.sectionTitle}>Thông tin chung</Text>
+                        <View style={styles.separator} />
 
-                    {/* Avatar Section */}
-                    <View style={styles.avatarContainer}>
-                        <View style={styles.avatar}>
-                            {avatarUri ? (
-                                <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-                            ) : (
-                                <AvatarIcon width={80} height={80} />
-                            )}
+                        {/* Avatar Section */}
+                        <View style={styles.avatarContainer}>
+                            <View style={styles.avatar}>
+                                {avatarUri ? (
+                                    <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+                                ) : (
+                                    <AvatarIcon width={80} height={80} />
+                                )}
+                            </View>
+                            <TouchableOpacity onPress={handleChangePhoto}>
+                                <Text style={styles.changePhotoText}>Đổi ảnh</Text>
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity onPress={handleChangePhoto}>
-                            <Text style={styles.changePhotoText}>Đổi ảnh</Text>
-                        </TouchableOpacity>
+                        <View style={styles.separatortwo} />
+                        {/* Form Fields */}
+                        <Input
+                            label="Tên:"
+                            value={name}
+                            onChangeText={setName}
+                            placeholder="Nhập tên"
+                            containerStyle={styles.inputContainer}
+                        />
+                        <Input
+                            label="Số điện thoại:"
+                            value={phone}
+                            onChangeText={setPhone}
+                            placeholder="Nhập số điện thoại"
+                            keyboardType="phone-pad"
+                            containerStyle={styles.inputContainer}
+                            disabled
+                        />
+                        <Input
+                            label="Email:"
+                            value={email}
+                            onChangeText={setEmail}
+                            placeholder="Nhập email"
+                            keyboardType="email-address"
+                            containerStyle={styles.inputContainer}
+                        />
+                        <Input
+                            label="Địa chỉ:"
+                            value={address}
+                            onChangeText={setAddress}
+                            placeholder="Nhập địa chỉ"
+                            containerStyle={styles.inputContainer}
+                        />
+                        <Input
+                            label="Chức vụ"
+                            value={role}
+                            onChangeText={setRole}
+                            placeholder="Chức vụ"
+                            containerStyle={styles.inputContainer}
+                            disabled
+                        />
+                        <Input
+                            label="Cấp quản lý"
+                            value={level}
+                            onChangeText={setLevel}
+                            placeholder="Ví dụ: Quản lý trại, Quản lý ao"
+                            containerStyle={styles.inputContainer}
+                            disabled
+                        />
                     </View>
-                    <View style={styles.separatortwo} />
-                    {/* Form Fields */}
-                    <Input
-                        label="Tên:"
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Nhập tên"
-                        containerStyle={styles.inputContainer}
-                    />
-                    <Input
-                        label="Số điện thoại:"
-                        value={phone}
-                        onChangeText={setPhone}
-                        placeholder="Nhập số điện thoại"
-                        keyboardType="phone-pad"
-                        containerStyle={styles.inputContainer}
-                        disabled
-                    />
-                    <Input
-                        label="Email:"
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder="Nhập email"
-                        keyboardType="email-address"
-                        containerStyle={styles.inputContainer}
-                    />
-                    <Input
-                        label="Địa chỉ:"
-                        value={address}
-                        onChangeText={setAddress}
-                        placeholder="Nhập địa chỉ"
-                        containerStyle={styles.inputContainer}
-                    />
-                    <Input
-                        label="Chức vụ"
-                        value={role}
-                        onChangeText={setRole}
-                        placeholder="Chức vụ"
-                        containerStyle={styles.inputContainer}
-                        disabled
-                    />
-                    <Input
-                        label="Cấp quản lý"
-                        value={level}
-                        onChangeText={setLevel}
-                        placeholder="Ví dụ: Quản lý trại, Quản lý ao"
-                        containerStyle={styles.inputContainer}
-                        disabled
-                    />
-                </View>
 
-                {/* Connected Entity Footer */}
-                <View style={styles.footerContainer}>
-                    <Text style={styles.footerLabel}>
-                        {showFarms ? 'Trang trại đã kết nối' : 'Ao đã kết nối'}
-                    </Text>
-                    <Text style={styles.footerValue}>
-                        {totalCount} {showFarms ? 'trại' : 'ao'}
-                    </Text>
-                </View>
+                    {/* Connected Entity Footer */}
+                    <View style={styles.footerContainer}>
+                        <Text style={styles.footerLabel}>
+                            {showFarms ? 'Trang trại đã kết nối' : 'Ao đã kết nối'}
+                        </Text>
+                        <Text style={styles.footerValue}>
+                            {totalCount} {showFarms ? 'trại' : 'ao'}
+                        </Text>
+                    </View>
 
-                <View style={styles.bottomSpacer} />
-            </ScrollView>
+                    <View style={styles.bottomSpacer} />
+                </ScrollView>
 
-            <ButtonBarMenu
-                primaryTitle="Lưu thông tin"
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handleSave}
-                onSecondaryPress={() => navigation.goBack()}
-                primaryDisabled={isSaving}
-            />
-        </View>
+                <ButtonBarMenu
+                    primaryTitle={isSaving ? 'Đang lưu thông tin...' : 'Lưu thông tin'}
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={handleSave}
+                    onSecondaryPress={() => navigation.goBack()}
+                    primaryDisabled={isSaving}
+                />
+            </View>
+        </Loading>
     );
 };
 
