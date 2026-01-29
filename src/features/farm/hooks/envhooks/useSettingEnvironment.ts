@@ -6,9 +6,9 @@ import { EnvironmentParameter } from '@/features/farm/components/pondwork/enviro
 import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
 
 interface UseSettingEnvironmentProps {
-    selectedLocation: { id: string | number; name: string } | null;
+    selectedLocation: { id: string; name: string } | null;
     metricTypes: EnvMetricType[];
-    parameterSettings: Record<string | number, ParameterSetting[]>;
+    parameterSettings: Record<string, ParameterSetting[]>;
     uiParameters: {
         parameters: EnvironmentParameter[];
         advancedParameters: EnvironmentParameter[];
@@ -28,7 +28,7 @@ export const useSettingEnvironment = ({
     const [advancedParameters, setAdvancedParameters] = useState<EnvironmentParameter[]>([]);
 
     // Sync local state when UI parameters change (only if location changed or initial load)
-    const prevLocationIdRef = useRef<string | number | undefined>(undefined);
+    const prevLocationIdRef = useRef<string | undefined>(undefined);
 
     useEffect(() => {
         const isNewLocation = selectedLocation?.id !== prevLocationIdRef.current;
@@ -67,13 +67,13 @@ export const useSettingEnvironment = ({
         return parameters.length > 0 || advancedParameters.length > 0;
     }, [parameters, advancedParameters]);
 
-    const handleToggleParameter = (id: string | number) => {
+    const handleToggleParameter = (id: string) => {
         setParameters(prev =>
             prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
         );
     };
 
-    const handleToggleAdvancedParameter = (id: string | number) => {
+    const handleToggleAdvancedParameter = (id: string) => {
         setAdvancedParameters(prev =>
             prev.map(param => (param.id === id ? { ...param, isChecked: !param.isChecked } : param))
         );

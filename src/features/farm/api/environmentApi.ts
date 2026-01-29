@@ -97,7 +97,7 @@ export const environmentApi = {
     },
 
     // --- Parameter Settings ---
-    getParameterSettings: async (zoneId: number | string): Promise<ParameterSetting[]> => {
+    getParameterSettings: async (zoneId: string): Promise<ParameterSetting[]> => {
         try {
             const response = await apiClient.get(API_ENDPOINTS.PARAMETER_SETTING.LIST(zoneId));
 
@@ -121,7 +121,7 @@ export const environmentApi = {
     },
 
     createParameterSetting: async (
-        zoneId: number | string,
+        zoneId: string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
         const response = await apiClient.post(API_ENDPOINTS.PARAMETER_SETTING.CREATE(zoneId), data);
@@ -131,8 +131,8 @@ export const environmentApi = {
     },
 
     updateParameterSetting: async (
-        zoneId: number | string,
-        id: number | string,
+        zoneId: string,
+        id: string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
         const response = await apiClient.patch(
@@ -144,7 +144,7 @@ export const environmentApi = {
         }
     },
 
-    deleteParameterSetting: async (zoneId: number | string, id: number | string): Promise<void> => {
+    deleteParameterSetting: async (zoneId: string, id: string): Promise<void> => {
         await apiClient.delete(API_ENDPOINTS.PARAMETER_SETTING.DELETE(zoneId, id));
     },
 

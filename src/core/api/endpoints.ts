@@ -99,11 +99,11 @@ export const API_ENDPOINTS = {
         REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
     },
     PARAMETER_SETTING: {
-        LIST: (zoneId: number | string) => `/zone/${zoneId}/settings`,
-        DETAIL: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
-        CREATE: (zoneId: number | string) => `/zone/${zoneId}/settings`,
-        UPDATE: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
-        DELETE: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
+        LIST: (zoneId: string) => `/zone/${zoneId}/settings`,
+        DETAIL: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
+        CREATE: (zoneId: string) => `/zone/${zoneId}/settings`,
+        UPDATE: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
+        DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
     },
     WAREHOUSE: {
         LIST: '/warehouses',

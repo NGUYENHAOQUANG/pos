@@ -9,7 +9,7 @@ import { ENVIRONMENT_METRIC_IDS, PondData, Zone } from '@/features/farm/types/fa
  * Hook to initialize environment data (Metric Types, Zones)
  * Handles loading state and data fetching on focus.
  */
-export const useEnvironmentInit = (currentZoneId?: string | number) => {
+export const useEnvironmentInit = (currentZoneId?: string) => {
     const zones = useFarmStore(state => state.zones);
     const fetchZones = useFarmStore(state => state.fetchZones);
     const metricTypes = useFarmStore(state => state.metricTypes);
@@ -26,7 +26,7 @@ export const useEnvironmentInit = (currentZoneId?: string | number) => {
                 if (zones.length === 0) await fetchZones();
 
                 if (currentZoneId) {
-                    await fetchParameterSettings(currentZoneId);
+                    await fetchParameterSettings(String(currentZoneId));
                 }
                 setIsLoading(false);
             };
@@ -38,7 +38,7 @@ export const useEnvironmentInit = (currentZoneId?: string | number) => {
     useFocusEffect(
         useCallback(() => {
             if (currentZoneId) {
-                fetchParameterSettings(currentZoneId); // Fire and forget to update store
+                fetchParameterSettings(String(currentZoneId)); // Fire and forget to update store
             }
         }, [currentZoneId, fetchParameterSettings])
     );
@@ -82,7 +82,7 @@ export const useZoneResolution = (pond: PondData, zones: Zone[]) => {
  * Hook to compute parameter configurations (Limits, Visible IDs, UI Lists)
  */
 export const useParameterConfiguration = (
-    currentZoneId: string | number | undefined,
+    currentZoneId: string | undefined,
     metricTypes: EnvMetricType[],
     rawParameterSettings: Record<string, ParameterSetting[]>
 ) => {

@@ -23,17 +23,14 @@ export interface EnvironmentSlice {
 
     // Parameter Settings (Per Zone)
     parameterSettings: Record<string, ParameterSetting[]>;
-    fetchParameterSettings: (zoneId: string | number) => Promise<void>;
-    createParameterSetting: (
-        zoneId: string | number,
-        data: CreateParameterSettingRequest
-    ) => Promise<void>;
+    fetchParameterSettings: (zoneId: string) => Promise<void>;
+    createParameterSetting: (zoneId: string, data: CreateParameterSettingRequest) => Promise<void>;
     updateParameterSetting: (
-        zoneId: string | number,
-        id: number | string,
+        zoneId: string,
+        id: string,
         data: CreateParameterSettingRequest
     ) => Promise<void>;
-    deleteParameterSetting: (zoneId: string | number, id: number | string) => Promise<void>;
+    deleteParameterSetting: (zoneId: string, id: string) => Promise<void>;
 
     // Environment Parameters
     envParameters: Record<string, EnvironmentalParameter[]>; // Cache by pondId
@@ -102,21 +99,21 @@ export const createEnvironmentSlice: StateCreator<
             });
         }
     },
-    createParameterSetting: async (zoneId, data) => {
+    createParameterSetting: async (zoneId: string, data: any) => {
         await environmentApi.createParameterSetting(zoneId, data);
         const settings = await environmentApi.getParameterSettings(zoneId);
         set(state => {
             state.parameterSettings[String(zoneId)] = settings;
         });
     },
-    updateParameterSetting: async (zoneId, id, data) => {
+    updateParameterSetting: async (zoneId: string, id: string, data: any) => {
         await environmentApi.updateParameterSetting(zoneId, id, data);
         const settings = await environmentApi.getParameterSettings(zoneId);
         set(state => {
             state.parameterSettings[String(zoneId)] = settings;
         });
     },
-    deleteParameterSetting: async (zoneId, id) => {
+    deleteParameterSetting: async (zoneId: string, id: string) => {
         await environmentApi.deleteParameterSetting(zoneId, id);
         const settings = await environmentApi.getParameterSettings(zoneId);
         set(state => {

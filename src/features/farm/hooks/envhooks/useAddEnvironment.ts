@@ -21,7 +21,7 @@ interface UseAddEnvironmentProps {
     itemToEdit?: JobExecution;
     currentZone?: Zone | null;
     metricTypes: EnvMetricType[];
-    parameterSettings: Record<string | number, ParameterSetting[]>;
+    parameterSettings: Record<string, ParameterSetting[]>;
     environmentSettings: {
         advancedParameters: Array<{ id: string; name: string; isChecked: boolean }>;
     };

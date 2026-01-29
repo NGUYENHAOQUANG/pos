@@ -49,11 +49,13 @@ export const AddEnvironmentScreen: React.FC = () => {
     const currentZone = useZoneResolution(pond, zones);
 
     // 2. Initialize Data (Fetch types, zones, settings)
-    const { isLoading, metricTypes } = useEnvironmentInit(currentZone?.id);
+    const { isLoading, metricTypes } = useEnvironmentInit(
+        currentZone ? String(currentZone.id) : undefined
+    );
 
     // 3. Compute Configuration (Limits, Visible IDs)
     const { parameterLimits } = useParameterConfiguration(
-        currentZone?.id,
+        currentZone ? String(currentZone.id) : undefined,
         metricTypes,
         parameterSettings
     );
