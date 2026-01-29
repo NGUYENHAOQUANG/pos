@@ -20,7 +20,7 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
     const { data, isLoading, error } = useSiphonRecords(pondId, params);
 
-    const jobs: JobExecution[] = (data?.items || []).map((item: ISiphonRecord) => ({
+    const jobs: JobExecution[] = (data?.data?.items || []).map((item: ISiphonRecord) => ({
         id: item.id,
         label: `Lần ${item.no || 0}`,
         date: item.createdAt,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSizeMeasurementsAsJobs } from '@/features/farm/hooks/useSizeMeasurement';
+import { useSiphonRecordsAsJobs } from '@/features/farm/hooks/useSiphonRecords';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -141,6 +142,8 @@ export const ShrimpFarmScreens: React.FC = () => {
     }, [pond?.id, activeCycles, foundCycle]);
     // Fetch size measurements from API
     const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pond?.id || '');
+    // Fetch siphon records from API
+    const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -171,6 +174,11 @@ export const ShrimpFarmScreens: React.FC = () => {
                     // Override with API data for MEASURE_SIZE
                     if (jobType === JOB_TYPES.MEASURE_SIZE) {
                         items = apiMeasureSizeJobs;
+                    }
+
+                    // Override with API data for SIPHON
+                    if (jobType === JOB_TYPES.SIPHON) {
+                        items = apiSiphonJobs;
                     }
 
                     jobTypes.push({
@@ -215,6 +223,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         shrimpInspectionJobs,
         measureSizeJobs,
         apiMeasureSizeJobs,
+        apiSiphonJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,
