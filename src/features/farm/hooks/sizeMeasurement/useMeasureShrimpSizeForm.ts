@@ -106,7 +106,6 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
                         navigation.goBack();
                     },
                     onError: (error: any) => {
-                        console.log(error);
                         Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
                     },
                 }
@@ -126,7 +125,6 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
                         navigation.goBack();
                     },
                     onError: (error: any) => {
-                        console.log(error);
                         Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
                     },
                 }
@@ -146,7 +144,6 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
                     navigation.goBack();
                 },
                 onError: (error: any) => {
-                    console.log(error);
                     Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
                 },
             }
