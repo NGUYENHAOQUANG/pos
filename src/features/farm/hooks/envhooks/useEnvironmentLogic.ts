@@ -34,6 +34,15 @@ export const useEnvironmentInit = (currentZoneId?: string | number) => {
         }, [currentZoneId, fetchMetricTypes, fetchZones, fetchParameterSettings, zones.length])
     );
 
+    // Force re-fetch settings on focus separately to ensure latest data
+    useFocusEffect(
+        useCallback(() => {
+            if (currentZoneId) {
+                fetchParameterSettings(currentZoneId); // Fire and forget to update store
+            }
+        }, [currentZoneId, fetchParameterSettings])
+    );
+
     return { isLoading, metricTypes, zones };
 };
 
@@ -80,15 +89,22 @@ export const useParameterConfiguration = (
     const currentSettings = currentZoneId ? rawParameterSettings[currentZoneId] : undefined;
 
     // 1. Compute Limits Map (ID -> "min - max")
+    // Show limits for all parameters with valid min/max, regardless of enabled status
     const parameterLimits = useMemo(() => {
         const limits: Record<string, string> = {};
         if (!currentSettings || !Array.isArray(currentSettings)) return limits;
 
         currentSettings.forEach(setting => {
-            const metric = metricTypes.find(m => m.metricCode === setting.parameterCode);
+            let metric: EnvMetricType | undefined;
+
+            if (setting.metricId) {
+                metric = metricTypes.find(m => String(m.id) === setting.metricId);
+            } else if (setting.parameterCode) {
+                metric = metricTypes.find(m => m.code === setting.parameterCode);
+            }
+
             if (
                 metric &&
-                setting.enabled &&
                 setting.minValue !== undefined &&
                 setting.maxValue !== undefined &&
                 setting.minValue < setting.maxValue
@@ -99,30 +115,49 @@ export const useParameterConfiguration = (
         return limits;
     }, [currentSettings, metricTypes]);
 
-    // 2. Compute Visible Metric IDs (Defaults + Enabled in Settings)
+    // 2. Compute Visible Metric IDs
+    // - Basic metrics: Always visible
+    // - Advanced metrics: Only visible when enabled in settings
     const visibleMetricIds = useMemo(() => {
-        // Default IDs: pH, Salinity, Alkalinity, Temp, DO, Transparency
-        const ids: string[] = [
+        // Basic metric codes (always visible)
+        const basicMetricCodes: string[] = [
             ENVIRONMENT_METRIC_IDS.PH,
+            ENVIRONMENT_METRIC_IDS.DO,
+            ENVIRONMENT_METRIC_IDS.TEMPERATURE,
+            ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
             ENVIRONMENT_METRIC_IDS.SALINITY,
             ENVIRONMENT_METRIC_IDS.ALKALINITY,
-            ENVIRONMENT_METRIC_IDS.TEMPERATURE,
-            ENVIRONMENT_METRIC_IDS.DO,
-            ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
         ];
 
+        const ids: Set<string> = new Set();
+
+        // 1. Add ALL Basic Metrics IDs (always visible)
+        metricTypes.forEach(m => {
+            if (basicMetricCodes.includes(m.code)) {
+                ids.add(String(m.id));
+            }
+        });
+
+        // 2. Add ONLY Enabled Advanced Metrics from Settings
         if (currentSettings && Array.isArray(currentSettings)) {
             currentSettings.forEach(setting => {
                 if (setting.enabled) {
-                    const metric = metricTypes.find(m => m.metricCode === setting.parameterCode);
-                    if (metric) {
-                        const id = String(metric.id);
-                        if (!ids.includes(id)) ids.push(id);
+                    let metric: EnvMetricType | undefined;
+
+                    if (setting.metricId) {
+                        metric = metricTypes.find(m => String(m.id) === setting.metricId);
+                    } else if (setting.parameterCode) {
+                        metric = metricTypes.find(m => m.code === setting.parameterCode);
+                    }
+
+                    // Only add if it's NOT a basic metric (basic metrics already added)
+                    if (metric && !basicMetricCodes.includes(metric.code)) {
+                        ids.add(String(metric.id));
                     }
                 }
             });
         }
-        return ids;
+        return Array.from(ids);
     }, [currentSettings, metricTypes]);
 
     // 3. Compute UI Parameters List (for Edit Settings Screen)
@@ -132,26 +167,33 @@ export const useParameterConfiguration = (
         const settingsMap = new Map<string, ParameterSetting>();
         if (Array.isArray(currentSettings)) {
             currentSettings.forEach(s => {
-                if (s.parameterCode) settingsMap.set(s.parameterCode, s);
+                // Map by metricId
+                if (s.metricId) settingsMap.set(s.metricId, s);
+                // Fallback to parameterCode if metricId is missing (legacy support)
+                else if (s.parameterCode) {
+                    const metric = metricTypes.find(m => m.code === s.parameterCode);
+                    if (metric) settingsMap.set(String(metric.id), s);
+                }
             });
         }
 
         const params: EnvironmentParameter[] = [];
         const advancedParams: EnvironmentParameter[] = [];
 
+        const basicMetricCodes: string[] = [
+            ENVIRONMENT_METRIC_IDS.PH,
+            ENVIRONMENT_METRIC_IDS.DO,
+            ENVIRONMENT_METRIC_IDS.TEMPERATURE,
+            ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
+            ENVIRONMENT_METRIC_IDS.SALINITY,
+            ENVIRONMENT_METRIC_IDS.ALKALINITY,
+        ];
+
         metricTypes.forEach(metric => {
-            const setting = settingsMap.get(metric.metricCode);
-            // Default Group IDs
-            const isDefault = (
-                [
-                    ENVIRONMENT_METRIC_IDS.PH,
-                    ENVIRONMENT_METRIC_IDS.SALINITY,
-                    ENVIRONMENT_METRIC_IDS.ALKALINITY,
-                    ENVIRONMENT_METRIC_IDS.TEMPERATURE,
-                    ENVIRONMENT_METRIC_IDS.DO,
-                    ENVIRONMENT_METRIC_IDS.TRANSPARENCY,
-                ] as string[]
-            ).includes(String(metric.id));
+            // Find setting by metric ID (UUID)
+            const setting = settingsMap.get(String(metric.id));
+            // Default Group Checking by Code
+            const isDefault = basicMetricCodes.includes(metric.code);
 
             const minValue = setting?.minValue?.toString() ?? '';
             const maxValue = setting?.maxValue?.toString() ?? '';
@@ -159,17 +201,21 @@ export const useParameterConfiguration = (
 
             const param: EnvironmentParameter = {
                 id: String(metric.id),
-                name: metric.metricName,
+                name: metric.name,
                 min: minValue,
                 max: maxValue,
                 limit: limitStr,
                 isChecked: !!setting,
-                unit: metric.unitName,
+                unit: metric.unitMetric,
                 alertEnabled: setting?.alert === 'true',
             };
 
-            if (setting && setting.enabled !== undefined) {
-                param.isChecked = setting.enabled;
+            if (setting) {
+                if (setting.enabled !== undefined) {
+                    param.isChecked = setting.enabled;
+                } else if (setting.isActive !== undefined) {
+                    param.isChecked = setting.isActive;
+                }
             }
 
             if (isDefault) {

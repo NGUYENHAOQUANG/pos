@@ -44,6 +44,24 @@ export const useSettingEnvironment = ({
         }
     }, [uiParameters, selectedLocation?.id, parameters.length, advancedParameters.length]);
 
+    // Force re-sync when uiParameters content changes (e.g., when parameterSettings is fetched)
+    // This ensures limits are updated even if location hasn't changed
+    const uiParametersHash = useMemo(() => {
+        // Create a hash of the first parameter's limit to detect changes
+        const firstParam = uiParameters.parameters[0];
+        return firstParam ? `${firstParam.id}-${firstParam.limit}` : '';
+    }, [uiParameters]);
+
+    const prevHashRef = useRef<string>('');
+
+    useEffect(() => {
+        if (uiParametersHash && uiParametersHash !== prevHashRef.current && parameters.length > 0) {
+            setParameters(uiParameters.parameters);
+            setAdvancedParameters(uiParameters.advancedParameters);
+            prevHashRef.current = uiParametersHash;
+        }
+    }, [uiParametersHash, uiParameters, parameters.length]);
+
     // Calculate dirty state
     const isDirty = useMemo(() => {
         return parameters.length > 0 || advancedParameters.length > 0;
@@ -99,40 +117,63 @@ export const useSettingEnvironment = ({
             const promises: Promise<void>[] = [];
             const zoneId = selectedLocation.id;
             // Use store actions directly
-            const { createParameterSetting, updateParameterSetting, deleteParameterSetting } =
-                useFarmStore.getState();
+            const { createParameterSetting, updateParameterSetting } = useFarmStore.getState();
 
             for (const p of allUIParams) {
-                const metricId = Number(p.id); // Convert back to number for matching
+                const metricId = p.id; // UUID String
                 const isChecked = p.isChecked;
                 const minVal = p.min ? parseFloat(p.min) : undefined;
                 const maxVal = p.max ? parseFloat(p.max) : undefined;
 
-                // Find existing setting by CODE.
-                const metric = metricTypes.find(m => m.id === metricId);
-                const existingSetting = metric
-                    ? currentSettings.find(s => s.parameterCode === metric.metricCode)
-                    : undefined;
+                // Find existing setting by metricId (UUID)
+                let existingSetting = currentSettings.find(
+                    s => String(s.metricId) === String(metricId)
+                );
 
+                if (!existingSetting) {
+                    // If not found by metricId, try to find by parameterCode (backward compatibility)
+                    const metric = metricTypes.find(m => String(m.id) === metricId);
+                    if (metric) {
+                        const settingByCode = currentSettings.find(
+                            s => s.parameterCode === metric.code
+                        );
+                        if (settingByCode) {
+                            // Use this setting
+                            existingSetting = settingByCode;
+                        }
+                    }
+                }
+
+                const metric = metricTypes.find(m => String(m.id) === metricId);
                 if (!metric) continue;
 
                 if (isChecked) {
                     // Create or Update
-                    const parameterCode = metric.metricCode;
                     const payload = {
-                        parameterCode,
+                        metricId: metricId, // Send UUID directly
                         minValue: minVal ?? 0,
                         maxValue: maxVal ?? 0,
                         enabled: true,
-                        alert: p.alertEnabled ? 'true' : 'false', // Save alert warning state
+                        isActive: true, // Ensure backend sees it as active
+                        alert: p.alertEnabled ? 'true' : 'false',
                     };
 
                     if (existingSetting) {
                         // UPDATE if changed
-                        if (
-                            existingSetting.minValue !== minVal ||
-                            existingSetting.maxValue !== maxVal
-                        ) {
+                        const alertChanged = existingSetting.alert !== payload.alert;
+                        // Check both enabled and isActive for changes
+                        const currentEnabled =
+                            existingSetting.enabled !== undefined
+                                ? existingSetting.enabled
+                                : existingSetting.isActive !== undefined
+                                ? existingSetting.isActive
+                                : true;
+
+                        const enabledChanged = currentEnabled !== true;
+                        const minChanged = existingSetting.minValue !== minVal;
+                        const maxChanged = existingSetting.maxValue !== maxVal;
+
+                        if (minChanged || maxChanged || enabledChanged || alertChanged) {
                             promises.push(
                                 updateParameterSetting(zoneId, existingSetting.id, payload)
                             );
@@ -142,9 +183,31 @@ export const useSettingEnvironment = ({
                         promises.push(createParameterSetting(zoneId, payload));
                     }
                 } else {
-                    // DELETE if it exists
+                    // Disable (Update enabled=false) instead of DELETE
+                    // Backend prevents deletion for active farms, so we just disable it
                     if (existingSetting) {
-                        promises.push(deleteParameterSetting(zoneId, existingSetting.id));
+                        // Only update if currently enabled (or undefined which implies enabled)
+                        const currentEnabled =
+                            existingSetting.enabled !== undefined
+                                ? existingSetting.enabled
+                                : existingSetting.isActive !== undefined
+                                ? existingSetting.isActive
+                                : true;
+
+                        if (currentEnabled !== false) {
+                            const payload = {
+                                metricId: metricId,
+                                minValue: existingSetting.minValue,
+                                maxValue: existingSetting.maxValue,
+                                enabled: false,
+                                isActive: false, // Ensure backend sees it as inactive
+                                alert: existingSetting.alert,
+                            };
+
+                            promises.push(
+                                updateParameterSetting(zoneId, existingSetting.id, payload)
+                            );
+                        }
                     }
                 }
             }

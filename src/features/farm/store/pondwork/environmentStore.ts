@@ -96,6 +96,10 @@ export const createEnvironmentSlice: StateCreator<
             });
         } catch (error) {
             console.error('Failed to fetch parameter settings:', error);
+            // Set empty array to indicate fetch completed (but no data available)
+            set(state => {
+                state.parameterSettings[String(zoneId)] = [];
+            });
         }
     },
     createParameterSetting: async (zoneId, data) => {

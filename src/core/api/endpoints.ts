@@ -78,6 +78,9 @@ export const API_ENDPOINTS = {
         UPDATE: (id: number) => `/env-metric-types/${id}`,
         DELETE: (id: number) => `/env-metric-types/${id}`,
     },
+    METRIC: {
+        LIST: '/metric',
+    },
     ENVIRONMENTAL_PARAMETER: {
         LIST: (pondId: number | string) => `/pond/${pondId}/EnvironmentalParameter`,
     },
@@ -96,14 +99,11 @@ export const API_ENDPOINTS = {
         REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
     },
     PARAMETER_SETTING: {
-        LIST: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
-        DETAIL: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
-        CREATE: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
-        UPDATE: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
-        DELETE: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
+        LIST: (zoneId: number | string) => `/zone/${zoneId}/settings`,
+        DETAIL: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
+        CREATE: (zoneId: number | string) => `/zone/${zoneId}/settings`,
+        UPDATE: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
+        DELETE: (zoneId: number | string, id: number | string) => `/zone/${zoneId}/settings/${id}`,
     },
     WAREHOUSE: {
         LIST: '/warehouses',

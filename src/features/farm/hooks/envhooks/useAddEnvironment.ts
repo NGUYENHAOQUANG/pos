@@ -101,22 +101,39 @@ export const useAddEnvironment = ({
             if (currentZone && parameterSettings[currentZone.id]) {
                 const settings = parameterSettings[currentZone.id];
                 const validAdvanced: Array<{ id: string; name: string }> = [];
-                const advancedIds = [
-                    ENVIRONMENT_METRIC_IDS.KALI,
-                    ENVIRONMENT_METRIC_IDS.TAN,
-                    ENVIRONMENT_METRIC_IDS.MAGIE,
-                    ENVIRONMENT_METRIC_IDS.NO3,
-                ];
 
                 if (Array.isArray(settings) && metricTypes.length > 0) {
+                    // Get UUIDs for advanced parameters
+                    const advancedCodes = [
+                        ENVIRONMENT_METRIC_IDS.KALI,
+                        ENVIRONMENT_METRIC_IDS.TAN,
+                        ENVIRONMENT_METRIC_IDS.MAGIE,
+                        ENVIRONMENT_METRIC_IDS.NO3,
+                    ];
+                    const advancedIds = metricTypes
+                        .filter(m => (advancedCodes as readonly string[]).includes(m.code))
+                        .map(m => String(m.id));
+
                     settings.forEach((setting: ParameterSetting) => {
-                        const metric = metricTypes.find(
-                            (m: EnvMetricType) => m.metricCode === setting.parameterCode
-                        );
+                        let metric: EnvMetricType | undefined;
+
+                        // Find metric by metricId (UUID) first
+                        if (setting.metricId) {
+                            metric = metricTypes.find(
+                                (m: EnvMetricType) => String(m.id) === setting.metricId
+                            );
+                        }
+                        // Fallback to parameterCode for backward compatibility
+                        if (!metric && setting.parameterCode) {
+                            metric = metricTypes.find(
+                                (m: EnvMetricType) => m.code === setting.parameterCode
+                            );
+                        }
+
                         if (metric && setting.enabled) {
                             const id = String(metric.id);
                             if ((advancedIds as readonly string[]).includes(id)) {
-                                validAdvanced.push({ id, name: metric.metricName });
+                                validAdvanced.push({ id, name: metric.name });
                             }
                         }
                     });
@@ -141,6 +158,7 @@ export const useAddEnvironment = ({
         useState<Array<{ id: string; name: string }>>(initialAdvancedParams);
 
     // Effect to update advanced params on prop change
+    // Effect to update advanced params on prop change
     useEffect(() => {
         if (itemToEdit && meta) {
             const advancedParams: Array<{ id: string; name: string }> = [];
@@ -156,25 +174,56 @@ export const useAddEnvironment = ({
         } else if (currentZone && parameterSettings[currentZone.id]) {
             const settings = parameterSettings[currentZone.id];
             const validAdvanced: Array<{ id: string; name: string }> = [];
-            const advancedIds = [
-                ENVIRONMENT_METRIC_IDS.KALI,
-                ENVIRONMENT_METRIC_IDS.TAN,
-                ENVIRONMENT_METRIC_IDS.MAGIE,
-                ENVIRONMENT_METRIC_IDS.NO3,
-            ];
             if (Array.isArray(settings) && metricTypes.length > 0) {
+                // Get UUIDs for advanced parameters
+                const advancedCodes = [
+                    ENVIRONMENT_METRIC_IDS.KALI,
+                    ENVIRONMENT_METRIC_IDS.TAN,
+                    ENVIRONMENT_METRIC_IDS.MAGIE,
+                    ENVIRONMENT_METRIC_IDS.NO3,
+                ];
+                const advancedIds = metricTypes
+                    .filter(m => (advancedCodes as readonly string[]).includes(m.code))
+                    .map(m => String(m.id));
+
                 settings.forEach((setting: ParameterSetting) => {
-                    const metric = metricTypes.find(
-                        (m: EnvMetricType) => m.metricCode === setting.parameterCode
-                    );
-                    if (metric && setting.enabled) {
-                        const id = String(metric.id);
-                        if ((advancedIds as readonly string[]).includes(id)) {
-                            validAdvanced.push({ id, name: metric.metricName });
+                    let metric: EnvMetricType | undefined;
+
+                    // Find metric by metricId (UUID) first
+                    if (setting.metricId) {
+                        metric = metricTypes.find(
+                            (m: EnvMetricType) => String(m.id) === setting.metricId
+                        );
+                    }
+                    // Fallback to parameterCode for backward compatibility
+                    if (!metric && setting.parameterCode) {
+                        metric = metricTypes.find(
+                            (m: EnvMetricType) => m.code === setting.parameterCode
+                        );
+                    }
+
+                    if (metric) {
+                        const isEnabled =
+                            setting.enabled !== undefined
+                                ? setting.enabled
+                                : setting.isActive !== undefined
+                                ? setting.isActive
+                                : true;
+
+                        if (isEnabled !== false) {
+                            const id = String(metric.id);
+                            // Only add if it's in the advanced list (filtered by UUID)
+                            if ((advancedIds as readonly string[]).includes(id)) {
+                                // The UI component EnvironmentParametersBox expects IDs to match ENVIRONMENT_METRIC_IDS (codes)
+                                // So we must use metric.code as the ID for the UI item, NOT the UUID
+                                validAdvanced.push({ id: metric.code, name: metric.name });
+                            }
                         }
+                    } else {
+                        // Metric not found
                     }
                 });
-                validAdvanced.sort((a, b) => Number(a.id) - Number(b.id));
+
                 setAdvancedParameters(validAdvanced);
             }
         } else {
