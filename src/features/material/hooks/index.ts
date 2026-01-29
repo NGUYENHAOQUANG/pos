@@ -20,9 +20,5 @@ export {
     useInventoryTickets,
     useAddInventoryTicket,
 } from '@/features/material/hooks/inventory/useInventory';
-export {
-    useWarehouseReceipts,
-    useAddWarehouseReceipt,
-} from '@/features/material/hooks/useWarehouse';
 export { useImportReceipts } from '@/features/material/hooks/useImportReceipts';
 export { materialKeys } from '@/features/material/hooks/materialKeys';

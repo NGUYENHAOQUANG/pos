@@ -13,9 +13,11 @@ import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
-import { ImportReceipt } from '@/features/material/types/importReceipt.types';
+import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { IPaginate } from '@/shared/types/common.types';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 
 interface ImportReceiptListProps {
     data: IPaginate<ImportReceipt> | undefined;
@@ -60,6 +62,21 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
         }
     };
 
+    const getStatusLabel = (status?: ImportReceiptStatus | string): MaterialGroupType => {
+        switch (status) {
+            case ImportReceiptStatus.Draft:
+                return MaterialGroupType.DRAFT;
+            case ImportReceiptStatus.Pending:
+                return MaterialGroupType.PENDING;
+            case ImportReceiptStatus.Approved:
+                return MaterialGroupType.COMPLETED;
+            case ImportReceiptStatus.Rejected:
+                return MaterialGroupType.REJECTED;
+            default:
+                return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
+        }
+    };
+
     const renderItem = ({ item }: { item: ImportReceipt }) => {
         const isExpanded = expandedIds.includes(item.id);
 
@@ -67,6 +84,10 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
             <View style={styles.card}>
                 <View style={styles.cardContent}>
                     {/* Header Info */}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Trạng thái:</Text>
+                        <MaterialGroup group={getStatusLabel(item.status)} />
+                    </View>
                     <View style={styles.row}>
                         <Text style={styles.label}>Nhập kho:</Text>
                         <Text style={styles.value}>
