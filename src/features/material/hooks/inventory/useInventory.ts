@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
-import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
+// import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -15,8 +15,7 @@ import { GetInventoryChecksParams } from '@/features/material/types/inventory.ty
  * Hook to fetch inventory tickets (Mock Data)
  */
 export const useInventoryTickets = (params?: GetInventoryParams) => {
-    const { userData } = useUserProfile();
-    const currentUserName = userData.name || 'N/A';
+    // const { userData } = useUserProfile();
 
     return useQuery({
         queryKey: materialKeys.inventory(params),
@@ -36,18 +35,29 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
                     response.data.items.map(async item => {
                         let totalDifference = 0;
                         let detailItems: any[] = [];
+                        let creatorInfo: any = null;
 
                         try {
                             const detailRes = await inventoryApi.getDetail(item.id);
-                            if (detailRes.success && detailRes.data?.items) {
-                                detailItems = detailRes.data.items.map(d => ({
+
+                            // Extract creator info first
+                            if (detailRes.success && detailRes.data?.creator) {
+                                creatorInfo = detailRes.data.creator;
+                            }
+
+                            // Handle items (array or paginated object)
+                            // @ts-ignore
+                            const rawItems = detailRes.data?.items?.items || detailRes.data?.items;
+
+                            if (detailRes.success && Array.isArray(rawItems)) {
+                                detailItems = rawItems.map((d: any) => ({
                                     id: d.inventoryCheckItemId,
                                     materialName: d.materialName || d.materialCode || 'N/A',
                                     beforeQuantity: d.expectedQty,
                                     afterQuantity: d.actualQty,
                                 }));
-                                totalDifference = detailRes.data.items.reduce(
-                                    (sum, i) => sum + (i.actualQty - i.expectedQty),
+                                totalDifference = rawItems.reduce(
+                                    (sum: number, i: any) => sum + (i.actualQty - i.expectedQty),
                                     0
                                 );
                             }
@@ -57,9 +67,8 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
 
                         return {
                             id: item.id,
-                            // Use creator info from API if available, otherwise use current user
-                            checkerName:
-                                item.creator?.fullName || item.creator?.userName || currentUserName,
+                            // Use creator info from API only (prefer detail response as it might be more complete)
+                            checkerName: creatorInfo?.fullname || item.creator?.fullname || '---',
                             date: item.createdAt
                                 ? new Date(item.createdAt).toLocaleDateString('vi-VN')
                                 : '',
@@ -102,6 +111,33 @@ export const useAddInventoryTicket = () => {
         },
         onError: (error: unknown) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu điều chỉnh tồn kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+/**
+ * Hook to delete an inventory ticket
+ */
+export const useDeleteInventoryTicket = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await inventoryApi.delete(id);
+            if (!response.success) {
+                throw new Error(response.message || 'Xóa phiếu thất bại');
+            }
+            return response.data;
+        },
+        onSuccess: () => {
+            showSuccessToast('Xóa phiếu điều chỉnh tồn kho thành công');
+            queryClient.invalidateQueries({
+                queryKey: [...materialKeys.all, 'inventory'],
+            });
+        },
+        onError: (error: unknown) => {
+            const errorMessage = getErrorMessage(error, 'Xóa phiếu điều chỉnh tồn kho thất bại');
             showErrorToast(errorMessage);
         },
     });

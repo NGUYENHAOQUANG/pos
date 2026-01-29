@@ -4,7 +4,8 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { ZoneHeader } from '@/features/material/components/ZoneHeader';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import {
     ButtonMetaerial,
     MaterialMenuOverlay,
@@ -20,13 +21,16 @@ import { IMaterial } from '@/features/material/types/material.types';
 import {
     useExportWarehouse,
     useInventoryTickets,
-    useMaterials,
-    useMaterialTypes,
     useImportReceipts,
 } from '@/features/material/hooks';
+import { useZones } from '@/features/farm/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
+import { MaterialGroupType } from '@/features/material/types/material.types';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
@@ -35,8 +39,38 @@ export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute();
     const { setTabBarVisible } = useTabBarVisibility();
+    const selectedTab = useMaterialStore(state => state.selectedTab);
+    const setSelectedTab = useMaterialStore(state => state.setSelectedTab);
 
-    const [selectedTab, setSelectedTab] = useState<TabType>('list');
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
+    const { data: zonesData = [] } = useZones();
+
+    const dropdownData: DropDownItem[] = useMemo(() => {
+        return zonesData.map((z: any) => ({
+            id: z.id.toString(),
+            label: z.name,
+            value: z,
+        }));
+    }, [zonesData]);
+
+    const selectedDropdownItem = useMemo(() => {
+        if (!selectedZoneId) return dropdownData[0];
+        return dropdownData.find(d => d.id === selectedZoneId.toString()) || dropdownData[0];
+    }, [dropdownData, selectedZoneId]);
+
+    const handleDropdownSelect = useCallback(
+        (item: DropDownItem) => {
+            setSelectedZoneId(item.id.toString());
+        },
+        [setSelectedZoneId]
+    );
+
+    React.useEffect(() => {
+        if (!selectedZoneId && dropdownData.length > 0) {
+            setSelectedZoneId(dropdownData[0].id.toString());
+        }
+    }, [dropdownData, selectedZoneId, setSelectedZoneId]);
 
     // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
@@ -53,53 +87,67 @@ export const MeterialScreen = () => {
 
     // React Query hooks for materials
     const searchText = useMaterialStore(state => state.searchText);
-    const filterType = useMaterialStore(state => state.filterType);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
     const setSearchText = useMaterialStore(state => state.setSearchText);
     const setFilterType = useMaterialStore(state => state.setFilterType);
     const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
 
-    // Fetch material types to map filterType name to ID
-    const { data: materialTypes = [] } = useMaterialTypes();
-
     const materialParams = useMemo(() => {
         const params: {
             Page: number;
             PageSize: number;
-            materialTypeId?: string;
-            SearchText?: string;
+            search?: string;
+            Search?: string;
         } = {
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
         };
 
-        // Map filterType (type name) to MaterialTypeId
-        if (filterType && filterType !== '' && filterType !== 'Tất cả loại vật tư') {
-            const selectedType = materialTypes.find(t => t.name === filterType);
-            if (selectedType) {
-                params.materialTypeId = selectedType.id;
-            }
-        }
-
         // Add Search param if searchText is set
         if (searchText && searchText.trim()) {
-            params.SearchText = searchText.trim();
+            params.Search = searchText.trim();
         }
 
         return params;
-    }, [filterType, searchText, materialTypes]);
+    }, [searchText]);
 
-    // React Query hooks for materials
+    // Fetch warehouses for the selected zone
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
+    const warehouseId = warehouses?.[0]?.id;
+
+    // Fetch warehouse items (only for stock quantity)
+    // We don't filter warehouse items by search text here to ensure we have stock for all items if needed,
+    // or we can rely on the fact that both lists are filtered if we pass params.
+    // However, matching might be safer if we fetch all warehouse items or just rely on the API to filter both similarly.
+    // For now, let's pass the same params to both.
     const {
-        data: materials = [],
-        isLoading: isLoadingMaterials,
-        refetch: refetchMaterials,
-        isRefetching: isRefetchingMaterials,
-    } = useMaterials(materialParams);
+        data: warehouseItemsData,
+        isLoading: isLoadingWarehouseItems,
+        refetch: refetchWarehouseItems,
+        isRefetching: isRefetchingWarehouseItems,
+    } = useWarehouseItems(warehouseId, materialParams, { enabled: !!warehouseId });
+
+    // Map warehouse items to IMaterial
+    const materials: IMaterial[] = useMemo(() => {
+        if (!warehouseItemsData?.items) return [];
+        return warehouseItemsData.items.map(item => ({
+            id: item.materialId,
+            name: item.materialName || '',
+            group: MaterialGroupType.FARMING, // Default group
+            unit: item.unitId,
+            unitName: item.unitName,
+            remaining: item.quantity,
+            isActive: true,
+            // Details will be fetched in MaterialList component
+            manufacturer: undefined,
+            type: undefined,
+            usage: undefined,
+        }));
+    }, [warehouseItemsData]);
 
     const { isConnected } = useNetInfo();
 
-    const showSkeleton = isLoadingMaterials || (!!isConnected && isRefetchingMaterials);
+    const showSkeleton = isLoadingWarehouseItems || (!!isConnected && isRefetchingWarehouseItems);
 
     const warehouseParams = useMemo(
         () => ({
@@ -163,7 +211,7 @@ export const MeterialScreen = () => {
             setSelectedTab(params.selectedTab);
             navigation.setParams({ selectedTab: undefined } as any);
         }
-    }, [route.params, navigation]);
+    }, [route.params, navigation, setSelectedTab]);
 
     useLayoutEffect(() => {
         // Always show tab bar on list screen
@@ -171,37 +219,25 @@ export const MeterialScreen = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const handleCreateImport = useCallback(() => {
-        navigation.navigate('AddWarehouse', {
-            availableMaterials: materials,
-        });
-    }, [navigation, materials]);
-    const handleCreateExport = useCallback(() => {
-        navigation.navigate('AddExportWarehouse', {
-            availableMaterials: materials,
-        });
-    }, [navigation, materials]);
-
-    const handleCreateInventory = useCallback(() => {
-        navigation.navigate('AddInventory', {});
-    }, [navigation]);
-
-    const handleCreateMaterial = useCallback(() => {
-        navigation.navigate('AddMaterial', {});
-    }, [navigation]);
-
-    const handleEditMaterial = useCallback(
-        (item: IMaterial) => {
-            navigation.navigate('EditMaterial', {
-                material: item,
-            });
-        },
-        [navigation]
+    const actions = useMemo(
+        () => ({
+            createImport: () =>
+                navigation.navigate('AddWarehouse', {
+                    availableMaterials: materials,
+                }),
+            createExport: () =>
+                navigation.navigate('AddExportWarehouse', {
+                    availableMaterials: materials,
+                }),
+            createInventory: () => navigation.navigate('AddInventory', {}),
+            createMaterial: () => navigation.navigate('AddMaterial', {}),
+            editMaterial: (item: IMaterial) =>
+                navigation.navigate('EditMaterial', {
+                    material: item,
+                }),
+        }),
+        [navigation, materials]
     );
-
-    const handleAddMaterial = useCallback(() => {
-        handleCreateMaterial();
-    }, [handleCreateMaterial]);
 
     const handleSearch = useCallback(
         (text: string) => {
@@ -230,7 +266,7 @@ export const MeterialScreen = () => {
                 setFilterMaterialName(null);
             }
         },
-        [filterMaterialName, setFilterMaterialName]
+        [filterMaterialName, setFilterMaterialName, setSelectedTab]
     );
 
     const handleHistoryPress = useCallback(
@@ -238,7 +274,7 @@ export const MeterialScreen = () => {
             setFilterMaterialName(item.name);
             setSelectedTab('history');
         },
-        [setFilterMaterialName]
+        [setFilterMaterialName, setSelectedTab]
     );
 
     const mappedExportReceipts = useMemo(() => {
@@ -263,17 +299,20 @@ export const MeterialScreen = () => {
     );
 
     const handleRefresh = useCallback(() => {
-        refetchMaterials();
+        refetchWarehouseItems();
         refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchMaterials, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
+    }, [refetchWarehouseItems, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
 
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
-                <HeaderMeterial
-                    showBackButton={false}
+                <ZoneHeader
+                    dropdownData={dropdownData}
+                    dropdownValue={selectedDropdownItem}
+                    onDropdownSelect={handleDropdownSelect}
+                    dropdownPlaceholder="Chọn kho"
                     rightComponent={
                         <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
                     }
@@ -291,13 +330,13 @@ export const MeterialScreen = () => {
                 {selectedTab === 'list' && (
                     <MaterialListScreen
                         materials={materials}
-                        onEdit={handleEditMaterial}
+                        onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
                         onAdjustmentPress={handleAdjustmentPress}
                         isLoading={showSkeleton}
-                        refreshing={!!isRefetchingMaterials}
+                        refreshing={!!isRefetchingWarehouseItems}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleAddMaterial}
+                        onPressCreate={actions.createMaterial}
                     />
                 )}
                 {selectedTab === 'history' && (
@@ -306,7 +345,7 @@ export const MeterialScreen = () => {
                         isLoading={isLoadingImportReceipts}
                         refreshing={!!isRefetchingImportReceipts}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleCreateImport}
+                        onPressCreate={actions.createImport}
                     />
                 )}
                 {selectedTab === 'export' &&
@@ -319,7 +358,7 @@ export const MeterialScreen = () => {
                             onRefresh={handleRefresh}
                         />
                     ) : (
-                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                        <MaterialEmptyState tab="history" onPress={actions.createImport} />
                     ))}
                 {selectedTab === 'inventory' && (
                     <InventoryScreen
@@ -327,7 +366,7 @@ export const MeterialScreen = () => {
                         isLoading={isLoadingInventory || isRefetchingInventory}
                         refreshing={!!isRefetchingInventory}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleCreateInventory}
+                        onPressCreate={actions.createInventory}
                     />
                 )}
             </View>
@@ -336,10 +375,10 @@ export const MeterialScreen = () => {
                 isOpen={menuOpen}
                 buttonPosition={menuPosition}
                 onClose={handleCloseMenu}
-                onPressCreateImport={handleCreateImport}
-                onPressCreateExport={handleCreateExport}
-                onPressCreateAdjustment={handleCreateInventory}
-                onPressCreateMaterial={handleCreateMaterial}
+                onPressCreateImport={actions.createImport}
+                onPressCreateExport={actions.createExport}
+                onPressCreateAdjustment={actions.createInventory}
+                onPressCreateMaterial={actions.createMaterial}
             />
         </View>
     );
