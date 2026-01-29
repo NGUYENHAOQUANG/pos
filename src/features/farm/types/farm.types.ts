@@ -197,6 +197,8 @@ export interface ShrimpInspectionMeta {
     stoolColor?: string;
     liver?: string;
     images?: string[];
+    // Keep associated document IDs so edits can preserve existing images
+    documentIds?: string[];
 }
 
 export interface EnvironmentMeta {

@@ -53,7 +53,7 @@ export interface IApiResponse<T> {
     data: T;
     message?: string | null;
     errorCode?: string | null;
-    validationErrors?: any;
+    validationErrors?: Record<string, string[]> | null;
     details?: string | null;
-    timestamp?: string;
+    timestamp: string;
 }

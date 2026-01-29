@@ -9,8 +9,6 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
         queryKey: farmKeys.siphon.list(pondId, params),
         queryFn: async () => {
             const response = await siphonApi.getAll(pondId, params);
-            // eslint-disable-next-line no-console
-            console.log('Siphon Records Response:', JSON.stringify(response, null, 2));
             return response;
         },
         enabled: !!pondId,
@@ -43,7 +41,7 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
         })),
         images: item.documentIds || [],
         meta: {
-            lossAmount: item.siphonDetail?.shrimplossKg?.toString(),
+            lossAmount: item.siphonDetail?.shrimpLossKg?.toString(),
             images: item.documentIds || [],
         },
     }));

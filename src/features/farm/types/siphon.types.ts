@@ -12,7 +12,7 @@ export interface ISiphonRecord {
     documentIds?: string[];
     value?: number;
     siphonDetail?: {
-        shrimplossKg?: number;
+        shrimpLossKg?: number;
         notes?: string;
         materials?: Array<{
             warehouseItemId: string;
@@ -39,7 +39,7 @@ export interface CreateSiphonCommand {
     value: number;
     documentIds: string[];
     siphonDetail: {
-        shrimplossKg: number;
+        shrimpLossKg: number;
         notes: string;
         materials: Array<{
             warehouseItemId: string;

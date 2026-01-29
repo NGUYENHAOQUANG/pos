@@ -26,6 +26,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { documentApi } from '@/features/material/api/documentApi';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -126,6 +127,98 @@ export const AddSiphonScreen: React.FC = () => {
     useEffect(() => {
         setTabBarVisible(false);
     }, [setTabBarVisible]);
+
+    // Fetch detail when editing
+    useEffect(() => {
+        const fetchDetail = async () => {
+            if (pond?.id && itemToEdit?.id) {
+                try {
+                    const response = await siphonApi.getDetail(pond.id, itemToEdit.id);
+                    if (response && response.data) {
+                        const detail = response.data;
+
+                        // Update Date
+                        if (detail.createdAt) {
+                            setSelectedDate(new Date(detail.createdAt));
+                        }
+
+                        // Update Siphon Detail
+                        if (detail.siphonDetail) {
+                            setLossAmount(detail.siphonDetail.shrimpLossKg?.toString() || '');
+                            setNotes(detail.siphonDetail.notes || '');
+
+                            // Update Materials
+                            if (detail.siphonDetail.materials && warehouseItems.length > 0) {
+                                const mappedMaterials: SelectedMaterialItem[] =
+                                    detail.siphonDetail.materials
+                                        .map((m: any) => {
+                                            // Find material in warehouseItems
+                                            const foundItem = warehouseItems.find(
+                                                wi => wi.id === m.warehouseItemId
+                                            );
+                                            if (foundItem) {
+                                                // Find definition for unit name fallback
+                                                const def = allMaterials.find(
+                                                    amd => amd.id === foundItem.materialId
+                                                );
+                                                return {
+                                                    material: {
+                                                        id: foundItem.id,
+                                                        name:
+                                                            foundItem.materialName ||
+                                                            def?.name ||
+                                                            '',
+                                                        unitName:
+                                                            foundItem.unitName ||
+                                                            def?.unitName ||
+                                                            '',
+                                                        remaining: foundItem.quantity,
+                                                    } as any,
+                                                    quantity: m.quantity,
+                                                    unit: foundItem.unitName || def?.unitName || '',
+                                                };
+                                            }
+                                            return null;
+                                        })
+                                        .filter((m: any) => m !== null);
+
+                                if (mappedMaterials.length > 0) {
+                                    setSelectedMaterials(mappedMaterials);
+                                }
+                            }
+                        }
+
+                        // Update Images
+                        if (detail.documentIds && detail.documentIds.length > 0) {
+                            try {
+                                // Fetch URLs for document IDs
+                                const urls = await Promise.all(
+                                    detail.documentIds.map(async (id: string) => {
+                                        try {
+                                            return await documentApi.getUrl(id);
+                                        } catch (e) {
+                                            console.error('Error fetching image URL:', e);
+                                            return null;
+                                        }
+                                    })
+                                );
+                                const validUrls = urls.filter((u): u is string => !!u);
+                                setImageUris(validUrls);
+                            } catch (e) {
+                                console.error('Error fetching image URLs:', e);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fetch siphon detail error:', error);
+                }
+            }
+        };
+
+        if (itemToEdit) {
+            fetchDetail();
+        }
+    }, [pond?.id, itemToEdit, warehouseItems, allMaterials]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -245,7 +338,7 @@ export const AddSiphonScreen: React.FC = () => {
                     value: 0, // Default value as not specified in UI
                     documentIds,
                     siphonDetail: {
-                        shrimplossKg: parseFloat(lossAmount) || 0,
+                        shrimpLossKg: parseFloat(lossAmount) || 0,
                         notes: notes,
                         materials: selectedMaterials.map(m => ({
                             warehouseItemId: m.material.id,
