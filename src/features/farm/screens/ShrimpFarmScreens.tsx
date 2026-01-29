@@ -19,7 +19,7 @@ import { parseDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
-import { useShrimpHealthCheckData } from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { useShrimpHealthChecksAsJobs } from '@/features/farm/hooks/useShrimpHealthCheckData';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -118,9 +118,6 @@ export const ShrimpFarmScreens: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondFromParams, getPondById, ponds]);
 
-    // Ensure shrimp inspection jobs are synced from API for this pond
-    useShrimpHealthCheckData(pond?.id);
-
     // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {
         if (!pond?.id) return null;
@@ -145,7 +142,7 @@ export const ShrimpFarmScreens: React.FC = () => {
     }, [pond?.id, activeCycles, foundCycle]);
     // Fetch size measurements from API
     const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pond?.id || '');
-
+    const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pond?.id || '');
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
         // Get pondTypeId from pond
@@ -175,6 +172,11 @@ export const ShrimpFarmScreens: React.FC = () => {
                     // Override with API data for MEASURE_SIZE
                     if (jobType === JOB_TYPES.MEASURE_SIZE) {
                         items = apiMeasureSizeJobs;
+                    }
+
+                    // Override with API data for SHRIMP_INSPECTION
+                    if (jobType === JOB_TYPES.SHRIMP_INSPECTION) {
+                        items = apiShrimpInspectionJobs;
                     }
 
                     jobTypes.push({
@@ -219,6 +221,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         shrimpInspectionJobs,
         measureSizeJobs,
         apiMeasureSizeJobs,
+        apiShrimpInspectionJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,
