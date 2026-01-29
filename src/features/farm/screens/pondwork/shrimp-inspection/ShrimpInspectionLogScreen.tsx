@@ -1,4 +1,3 @@
-import React from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';

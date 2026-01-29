@@ -90,6 +90,8 @@ interface GeneralInfoBox {
     onDateChange?: (date: Date) => void; // Callback when date changes
     imageUris?: string[]; // Initial images (for edit mode) - used for 'withImage' and 'harvest' types
     onImagesChange?: (images: string[]) => void; // Callback when images change
+    // Optional initial mapping from document IDs to image URIs (index-based)
+    documentIds?: string[];
     activityLabel?: string; // Label for activity selection (e.g., "Chọn loại thu hoạch")
     activityOptions?: string[]; // Options for activity selection (radio buttons)
     selectedActivity?: string; // Currently selected activity option
@@ -105,6 +107,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             onDateChange,
             imageUris: initialImageUris,
             onImagesChange,
+            documentIds: initialDocumentIds,
             activityLabel = 'Chọn loại hoạt động',
             activityOptions,
             selectedActivity,
@@ -188,7 +191,23 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             if (initialImageUris !== undefined) {
                 setImageUris(initialImageUris);
             }
-        }, [initialImageUris]);
+
+            // Pre-fill uploadedFilesMap for existing images when document IDs are provided.
+            if (
+                initialImageUris &&
+                initialDocumentIds &&
+                initialImageUris.length === initialDocumentIds.length
+            ) {
+                const map: Record<string, string> = { ...uploadedFilesMap.current };
+                initialImageUris.forEach((uri, index) => {
+                    const id = initialDocumentIds[index];
+                    if (uri && id) {
+                        map[uri] = id;
+                    }
+                });
+                uploadedFilesMap.current = map;
+            }
+        }, [initialImageUris, initialDocumentIds]);
 
         // Notify parent when date changes
         useEffect(() => {

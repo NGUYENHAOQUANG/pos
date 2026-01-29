@@ -19,6 +19,7 @@ import { parseDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
+import { useShrimpHealthCheckData } from '@/features/farm/hooks/useShrimpHealthCheckData';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -116,6 +117,9 @@ export const ShrimpFarmScreens: React.FC = () => {
         return pondFromParams;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondFromParams, getPondById, ponds]);
+
+    // Ensure shrimp inspection jobs are synced from API for this pond
+    useShrimpHealthCheckData(pond?.id);
 
     // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {
