@@ -10,15 +10,19 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxRef,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
+import { siphonApi } from '@/features/farm/api/siphonApi';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { SiphonLossBox } from '@/features/farm/components/pondwork/xyphon/SiphonLossBox';
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { IMaterial } from '@/features/material/types/material.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -39,6 +43,7 @@ export const AddSiphonScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
+    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
@@ -76,13 +81,13 @@ export const AddSiphonScreen: React.FC = () => {
         };
     }, [itemToEdit, meta]);
 
-    // Mock materials (replace with real data or API later)
-    const MOCK_MATERIALS: IMaterial[] = [
-        { id: '1', name: 'Thức ăn tôm thẻ', group: 'Nuôi', unit: 'kg', remaining: 100 },
-        { id: '2', name: 'Khoáng tạt', group: 'Nuôi', unit: 'kg', remaining: 50 },
-        { id: '3', name: 'Vôi nóng', group: 'Nuôi', unit: 'kg', remaining: 200 },
-        { id: '4', name: 'Khoáng tạc', group: 'Nuôi', unit: 'kg', remaining: 0 },
-    ];
+    // Fetch materials (tools only)
+    const { data: materialsData = [] } = useMaterials();
+
+    // Filter specifically for "Công cụ" (TOOLS) as requested
+    const materials = useMemo(() => {
+        return materialsData.filter(m => m.group === MaterialGroupType.TOOLS);
+    }, [materialsData]);
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -142,7 +147,7 @@ export const AddSiphonScreen: React.FC = () => {
 
     const isButtonDisabled = itemToEdit && !hasChanges;
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!lossAmount.trim()) {
             Toast.show({
                 type: 'error',
@@ -191,36 +196,80 @@ export const AddSiphonScreen: React.FC = () => {
         };
 
         if (itemToEdit) {
-            // Update existing SIPHON job
+            // Update existing SIPHON job - Keep local logic for now as only POST was requested
             const updatedItems = currentItems.map(item =>
                 item.id === itemToEdit.id ? { ...item, ...baseData } : item
             );
             updatePondJob(pondId, 'SIPHON', updatedItems);
             showEditJobSuccessToast('SIPHON');
+            navigation.goBack();
         } else {
-            // Create new SIPHON job with proper next index
-            let maxIndex = 0;
-            currentItems.forEach(item => {
-                const match = item.label.match(/Lần (\d+)/);
-                if (match) {
-                    const index = parseInt(match[1], 10);
-                    if (index > maxIndex) maxIndex = index;
+            // Create new SIPHON job via API
+            try {
+                const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
+
+                const success = await siphonApi.create(pondId, {
+                    value: 0, // Default value as not specified in UI
+                    documentIds,
+                    siphonDetail: {
+                        shrimplossKg: parseFloat(lossAmount) || 0,
+                        notes: notes,
+                        materials: selectedMaterials.map(m => ({
+                            warehouseItemId: m.material.id,
+                            quantity: m.quantity,
+                        })),
+                    },
+                });
+
+                if (success) {
+                    // Mark files as saved to prevent auto-cleanup
+                    generalInfoBoxRef.current?.markAsSaved();
+
+                    // Optimistically update store or fetch new data?
+                    // For now, ensuring UI feedback
+                    showAddJobSuccessToast('SIPHON');
+
+                    // Also update local store to maintain "old logic" behavior of immediate update
+                    // Note: This creates a temporary ID. Ideally we should refetch.
+                    // But to "ensure old functional logic works normally" (which was immediate list update),
+                    // we keep the local update as well, OR we assume list screen auto-refetches.
+                    // Given previous conversations about "Migrate Farm API", auto-refetch might be in place.
+                    // I will ADD the local update as a fallback/optimistic update to be safe and consistent with "old logic".
+                    let maxIndex = 0;
+                    currentItems.forEach(item => {
+                        const match = item.label.match(/Lần (\d+)/);
+                        if (match) {
+                            const index = parseInt(match[1], 10);
+                            if (index > maxIndex) maxIndex = index;
+                        }
+                    });
+                    const nextIndex = maxIndex + 1;
+
+                    const newItem = {
+                        id: Date.now().toString(), // Helper ID, real one comes from server
+                        ...baseData,
+                        label: `Lần ${nextIndex}`,
+                        pondId: pondId,
+                    };
+                    updatePondJob(pondId, 'SIPHON', [...currentItems, newItem]);
+
+                    navigation.goBack();
+                } else {
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Lưu thất bại',
+                        text2: 'Vui lòng thử lại sau',
+                    });
                 }
-            });
-            const nextIndex = maxIndex + 1;
-
-            const newItem = {
-                id: Date.now().toString(),
-                ...baseData,
-                label: `Lần ${nextIndex}`,
-                pondId: pondId,
-            };
-
-            updatePondJob(pondId, 'SIPHON', [...currentItems, newItem]);
-            showAddJobSuccessToast('SIPHON');
+            } catch (error) {
+                console.error('Save siphon error:', error);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Lưu thất bại',
+                    text2: 'Có lỗi xảy ra khi gọi API',
+                });
+            }
         }
-
-        navigation.goBack();
     };
 
     return (
@@ -247,6 +296,7 @@ export const AddSiphonScreen: React.FC = () => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <GeneralInfoBox
+                        ref={generalInfoBoxRef}
                         type="withImage"
                         date={selectedDate}
                         onDateChange={setSelectedDate}
@@ -260,7 +310,7 @@ export const AddSiphonScreen: React.FC = () => {
                     <MaterialSelectionBox
                         selectedMaterials={selectedMaterials}
                         onMaterialsChange={setSelectedMaterials}
-                        materials={MOCK_MATERIALS}
+                        materials={materials}
                     />
 
                     <SelectionNotesBox

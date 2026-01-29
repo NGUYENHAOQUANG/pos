@@ -129,8 +129,10 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
                                                     isOutOfStock && styles.textDisabled,
                                                 ]}
                                             >
-                                                Kho: {item.remaining ?? 0}
-                                                {item.unit ? String(item.unit).toLowerCase() : ''}
+                                                Kho: {item.remaining ?? 0}{' '}
+                                                {item.unitName
+                                                    ? String(item.unitName).toLowerCase()
+                                                    : ''}
                                             </Text>
                                             {isOutOfStock && (
                                                 <TouchableOpacity
