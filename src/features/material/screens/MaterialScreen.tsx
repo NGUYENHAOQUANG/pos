@@ -20,13 +20,15 @@ import { IMaterial } from '@/features/material/types/material.types';
 import {
     useExportWarehouse,
     useInventoryTickets,
-    useMaterials,
-    useMaterialTypes,
     useImportReceipts,
 } from '@/features/material/hooks';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
+import { MaterialGroupType } from '@/features/material/types/material.types';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
@@ -53,53 +55,70 @@ export const MeterialScreen = () => {
 
     // React Query hooks for materials
     const searchText = useMaterialStore(state => state.searchText);
-    const filterType = useMaterialStore(state => state.filterType);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
     const setSearchText = useMaterialStore(state => state.setSearchText);
     const setFilterType = useMaterialStore(state => state.setFilterType);
     const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
 
-    // Fetch material types to map filterType name to ID
-    const { data: materialTypes = [] } = useMaterialTypes();
+    // Get selected zone from farm store
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
     const materialParams = useMemo(() => {
         const params: {
             Page: number;
             PageSize: number;
-            materialTypeId?: string;
-            SearchText?: string;
+            search?: string;
+            Search?: string;
         } = {
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
         };
 
-        // Map filterType (type name) to MaterialTypeId
-        if (filterType && filterType !== '' && filterType !== 'Tất cả loại vật tư') {
-            const selectedType = materialTypes.find(t => t.name === filterType);
-            if (selectedType) {
-                params.materialTypeId = selectedType.id;
-            }
-        }
-
         // Add Search param if searchText is set
         if (searchText && searchText.trim()) {
-            params.SearchText = searchText.trim();
+            params.Search = searchText.trim();
         }
 
         return params;
-    }, [filterType, searchText, materialTypes]);
+    }, [searchText]);
 
-    // React Query hooks for materials
+    // Fetch warehouses for the selected zone
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
+    const warehouseId = warehouses?.[0]?.id;
+
+    // Fetch warehouse items (only for stock quantity)
+    // We don't filter warehouse items by search text here to ensure we have stock for all items if needed,
+    // or we can rely on the fact that both lists are filtered if we pass params.
+    // However, matching might be safer if we fetch all warehouse items or just rely on the API to filter both similarly.
+    // For now, let's pass the same params to both.
     const {
-        data: materials = [],
-        isLoading: isLoadingMaterials,
-        refetch: refetchMaterials,
-        isRefetching: isRefetchingMaterials,
-    } = useMaterials(materialParams);
+        data: warehouseItemsData,
+        isLoading: isLoadingWarehouseItems,
+        refetch: refetchWarehouseItems,
+        isRefetching: isRefetchingWarehouseItems,
+    } = useWarehouseItems(warehouseId, materialParams, { enabled: !!warehouseId });
+
+    // Map warehouse items to IMaterial
+    const materials: IMaterial[] = useMemo(() => {
+        if (!warehouseItemsData?.items) return [];
+        return warehouseItemsData.items.map(item => ({
+            id: item.materialId,
+            name: item.materialName || '',
+            group: MaterialGroupType.FARMING, // Default group
+            unit: item.unitId,
+            unitName: item.unitName,
+            remaining: item.quantity,
+            isActive: true,
+            // Details will be fetched in MaterialList component
+            manufacturer: undefined,
+            type: undefined,
+            usage: undefined,
+        }));
+    }, [warehouseItemsData]);
 
     const { isConnected } = useNetInfo();
 
-    const showSkeleton = isLoadingMaterials || (!!isConnected && isRefetchingMaterials);
+    const showSkeleton = isLoadingWarehouseItems || (!!isConnected && isRefetchingWarehouseItems);
 
     const warehouseParams = useMemo(
         () => ({
@@ -263,11 +282,11 @@ export const MeterialScreen = () => {
     );
 
     const handleRefresh = useCallback(() => {
-        refetchMaterials();
+        refetchWarehouseItems();
         refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchMaterials, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
+    }, [refetchWarehouseItems, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
 
     return (
         <View style={styles.container}>
@@ -295,7 +314,7 @@ export const MeterialScreen = () => {
                         onHistoryPress={handleHistoryPress}
                         onAdjustmentPress={handleAdjustmentPress}
                         isLoading={showSkeleton}
-                        refreshing={!!isRefetchingMaterials}
+                        refreshing={!!isRefetchingWarehouseItems}
                         onRefresh={handleRefresh}
                         onPressCreate={handleAddMaterial}
                     />

@@ -13,6 +13,7 @@ import { MaterialGroup } from './MaterialGroup';
 import { ButtonMaterialList } from './ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '../../types/material.types';
+import { useMaterial } from '@/features/material/hooks/useMaterials';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -25,6 +26,8 @@ interface MaterialListProps {
     onAdjustmentPress?: (item: IMaterial) => void;
 }
 
+// ... (interface MaterialListProps)
+
 export const MaterialList: React.FC<MaterialListProps> = ({
     item,
     onEdit,
@@ -32,6 +35,9 @@ export const MaterialList: React.FC<MaterialListProps> = ({
     onAdjustmentPress,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // Fetch details for this material item using the hook
+    const { data: detail } = useMaterial(item.id);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -52,7 +58,7 @@ export const MaterialList: React.FC<MaterialListProps> = ({
             <View style={styles.infoRow}>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Đơn vị tính: </Text>
-                    {item.unitName || item.unit}
+                    {detail?.unitName || item.unitName || item.unit}
                 </Text>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Còn: </Text>
@@ -66,33 +72,34 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                     <View style={styles.separatorCenter} />
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                        <Text style={styles.detailValue}>{item.type || '---'}</Text>
+                        <Text style={styles.detailValue}>{detail?.type || item.type || '---'}</Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailValue}>
                             <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                            {item.manufacturer || '---'}
+                            {detail?.manufacturer || item.manufacturer || '---'}
                         </Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailValue}>
-                            <Text style={styles.detailLabel}>Mô tả:</Text> {item.usage || '---'}
+                            <Text style={styles.detailLabel}>Mô tả:</Text>{' '}
+                            {detail?.usage || item.usage || '---'}
                         </Text>
                     </View>
                     {/* Commented out - Đơn vị sử dụng và Liều dùng */}
                     {/* <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
-                        <Text style={styles.detailValue}>{item.unitOfUse || '---'}</Text>
+                        <Text style={styles.detailValue}>{detail?.unitOfUse || item.unitOfUse || '---'}</Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Liều dùng: </Text>
-                        <Text style={styles.detailValue}>{item.dosage || '---'}</Text>
+                        <Text style={styles.detailValue}>{detail?.dosage || item.dosage || '---'}</Text>
                     </View> */}
 
                     {/* Edit Button */}
                     <ButtonMaterialList
                         title="Sửa thông tin"
-                        onPress={() => onEdit?.(item)}
+                        onPress={() => onEdit?.(detail || item)}
                         style={styles.editButton}
                     />
                 </View>
