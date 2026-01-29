@@ -4,7 +4,6 @@ import {
     environmentApi,
     EnvMetricType,
     EnvironmentalParameter,
-    CreateEnvMetricTypeRequest,
     ParameterSetting,
     CreateParameterSettingRequest,
 } from '@/features/farm/api/environmentApi';
@@ -17,9 +16,6 @@ export interface EnvironmentSlice {
     // Metric Types
     metricTypes: EnvMetricType[];
     fetchMetricTypes: () => Promise<void>;
-    createEnvMetricType: (data: CreateEnvMetricTypeRequest) => Promise<void>;
-    updateEnvMetricType: (id: number, data: CreateEnvMetricTypeRequest) => Promise<void>;
-    deleteEnvMetricType: (id: number) => Promise<void>;
 
     // Parameter Settings (Per Zone)
     parameterSettings: Record<string, ParameterSetting[]>;
@@ -60,27 +56,6 @@ export const createEnvironmentSlice: StateCreator<
         } catch (error) {
             console.error('Failed to fetch metric types:', error);
         }
-    },
-    createEnvMetricType: async data => {
-        await environmentApi.createEnvMetricType(data);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
-    },
-    updateEnvMetricType: async (id, data) => {
-        await environmentApi.updateEnvMetricType(id, data);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
-    },
-    deleteEnvMetricType: async id => {
-        await environmentApi.deleteEnvMetricType(id);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
     },
 
     // Parameter Settings

@@ -33,14 +33,6 @@ export interface EnvMetricType {
     status: number;
 }
 
-export interface CreateEnvMetricTypeRequest {
-    metricCode: string;
-    metricName: string;
-    unitName: string;
-    description?: string;
-    status?: number;
-}
-
 export interface EnvMeasurement {
     id: number;
     envMetricTypeId: number;
@@ -77,23 +69,6 @@ export const environmentApi = {
         if (Array.isArray(response.data?.data)) return response.data.data;
 
         return response.data || [];
-    },
-
-    getEnvMetricType: async (id: number): Promise<EnvMetricType> => {
-        const response = await apiClient.get(API_ENDPOINTS.ENV_METRIC_TYPES.DETAIL(id));
-        return response.data;
-    },
-
-    createEnvMetricType: async (data: CreateEnvMetricTypeRequest): Promise<void> => {
-        await apiClient.post(API_ENDPOINTS.ENV_METRIC_TYPES.CREATE, data);
-    },
-
-    updateEnvMetricType: async (id: number, data: CreateEnvMetricTypeRequest): Promise<void> => {
-        await apiClient.put(API_ENDPOINTS.ENV_METRIC_TYPES.UPDATE(id), data);
-    },
-
-    deleteEnvMetricType: async (id: number): Promise<void> => {
-        await apiClient.delete(API_ENDPOINTS.ENV_METRIC_TYPES.DELETE(id));
     },
 
     // --- Parameter Settings ---

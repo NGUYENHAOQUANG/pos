@@ -71,13 +71,6 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/material/${id}`,
     },
 
-    ENV_METRIC_TYPES: {
-        LIST: '/env-metric-types',
-        DETAIL: (id: number) => `/env-metric-types/${id}`,
-        CREATE: '/env-metric-types',
-        UPDATE: (id: number) => `/env-metric-types/${id}`,
-        DELETE: (id: number) => `/env-metric-types/${id}`,
-    },
     METRIC: {
         LIST: '/metric',
     },
