@@ -23,10 +23,21 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
     });
     const [endDate, setEndDate] = React.useState(new Date());
 
-    const { jobs } = useSizeMeasurementsAsJobs(pond?.id, {
+    const [refreshing, setRefreshing] = React.useState(false);
+
+    const { jobs, isLoading, refetch } = useSizeMeasurementsAsJobs(pond?.id, {
         CreateAtFrom: startDate.toISOString(),
         CreateAtTo: endDate.toISOString(),
     });
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        setTimeout(async () => {
+            refetch();
+            await refetch();
+            setRefreshing(false);
+        }, 500);
+    }, [refetch]);
 
     const config: LogScreenConfig<MeasureSizeMeta> = {
         jobType: 'MEASURE_SIZE',
@@ -61,6 +72,9 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
             emptyMessage="Chưa có dữ liệu đo kích thước tôm"
             emptyButtonTitle="Bắt đầu đo kích thước tôm"
             onEmptyButtonPress={handleNavigateToCreate}
+            isLoading={isLoading || refreshing}
+            isRefreshing={refreshing}
+            onRefresh={onRefresh}
         />
     );
 };

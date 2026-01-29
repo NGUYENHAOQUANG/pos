@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxRef,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
@@ -17,7 +19,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { useCreateSizeMeasurement } from '@/features/farm/hooks/useSizeMeasurement';
+import { useMeasureShrimpSizeForm } from '@/features/farm/hooks/sizeMeasurement/useMeasureShrimpSizeForm';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -26,145 +28,63 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
-
     const { itemToEdit, pond: routePond } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
     const scrollViewRef = useRef<ScrollView>(null);
+    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
     const currentPond = routePond;
 
     // Get stocking quantity from cycle data
-    const stockingQuantity = useMemo(() => {
-        if (!currentPond?.id) return undefined;
-        const currentCycle = activeCycles[currentPond.id];
-        const cyclesForPond = getCyclesByPondId(currentPond.id);
+    // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
+    const stockingQuantity = useFarmStore(
+        useCallback(
+            state => {
+                if (!currentPond?.id) return undefined;
+                const currentCycle = state.activeCycles[currentPond.id];
+                const cyclesForPond = state.getCyclesByPondId(currentPond.id);
 
-        // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
-        const cycle =
-            currentCycle ||
-            cyclesForPond.find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
-            cyclesForPond[0];
+                // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
+                const cycle =
+                    currentCycle ||
+                    cyclesForPond.find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
+                    cyclesForPond[0];
 
-        return cycle?.stockingQuantity ? Number(cycle.stockingQuantity) : undefined;
-    }, [currentPond?.id, activeCycles, getCyclesByPondId]);
+                return cycle?.stockingQuantity ? Number(cycle.stockingQuantity) : undefined;
+            },
+            [currentPond?.id]
+        )
+    );
 
-    // --- State ---
-    const meta = itemToEdit?.meta as
-        | {
-              shrimpSize?: string;
-              remainingWeight?: string;
-              notes?: string;
-              images?: string[];
-              date?: string;
-          }
-        | undefined;
-
-    const [time, setTime] = useState(new Date());
-    const [imageUris, setImageUris] = useState<string[]>(meta?.images || []);
-    const [shrimpSize, setShrimpSize] = useState(meta?.shrimpSize || '');
-    const [remainingWeight, setRemainingWeight] = useState(meta?.remainingWeight || '');
-    const [notes, setNotes] = useState(meta?.notes || '');
-    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const {
+        time,
+        setTime,
+        shrimpSize,
+        setShrimpSize,
+        remainingWeight,
+        setRemainingWeight,
+        notes,
+        setNotes,
+        images,
+        isDeleteModalVisible,
+        setIsDeleteModalVisible,
+        handleSave,
+        handleDelete,
+    } = useMeasureShrimpSizeForm({
+        pondId: currentPond?.id,
+        itemToEdit,
+    });
+    // ...
 
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const createSizeMeasurement = useCreateSizeMeasurement();
-
-    const handleSave = () => {
-        if (!shrimpSize || !remainingWeight) {
-            Toast.show({ type: 'error', text1: 'Vui lòng nhập đủ thông tin bắt buộc' });
-            return;
-        }
-        if (!currentPond?.id) {
-            Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin ao' });
-            return;
-        }
-
-        const size = parseFloat(shrimpSize);
-        const weight = parseFloat(remainingWeight);
-        const totalShrimp = !isNaN(size) && !isNaN(weight) ? Math.round(size * weight) : null;
-
-        // Calculate survival rate: (Số con thu / Số con thả ban đầu) × 100
-        let survivalRate: number | null = null;
-        if (totalShrimp !== null && stockingQuantity && stockingQuantity > 0) {
-            survivalRate = Math.round((totalShrimp / stockingQuantity) * 100);
-        }
-
-        const timeString = time.toLocaleTimeString('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
-        const itemData = {
-            time: timeString,
-            meta: {
-                date: time.toISOString(),
-                shrimpSize,
-                remainingWeight,
-                totalShrimpCount: totalShrimp,
-                survivalRate,
-                notes,
-                images: imageUris,
-            },
-        };
-
-        const currentItems = getPondJobItems(currentPond.id, 'MEASURE_SIZE');
-
-        if (itemToEdit) {
-            const updatedItems = currentItems.map(item =>
-                item.id === itemToEdit.id ? { ...item, ...itemData } : item
-            );
-            updatePondJob(currentPond.id, 'MEASURE_SIZE', updatedItems);
-            Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
-            navigation.goBack();
-        } else {
-            createSizeMeasurement.mutate(
-                {
-                    pondId: 'ae9e1840-cad0-46cb-9648-7f8c3998235a', // currentPond.id,
-                    data: {
-                        documentIds: imageUris,
-                        sizeMeasurement: {
-                            shrimpSizePcsPerKg: size,
-                            estimatedRemainingStockKg: weight,
-                            notes: notes,
-                        },
-                    },
-                },
-                {
-                    onSuccess: () => {
-                        Toast.show({ type: 'success', text1: 'Đã đo kích thước tôm thành công' });
-                        navigation.goBack();
-                    },
-                    onError: (error: any) => {
-                        console.log(error);
-                        Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
-                    },
-                }
-            );
-        }
-    };
-
-    // Correct delete logic using the "get, filter, update" pattern
-    const handleDelete = () => {
-        if (!currentPond?.id || !itemToEdit?.id) return;
-
-        const currentItems = getPondJobItems(currentPond.id, 'MEASURE_SIZE');
-        const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
-
-        updatePondJob(currentPond.id, 'MEASURE_SIZE', updatedItems);
-
-        setIsDeleteModalVisible(false);
-        Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
-        navigation.goBack();
+    const onSavePress = () => {
+        const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
+        handleSave(documentIds);
     };
 
     return (
@@ -192,11 +112,11 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <GeneralInfoBox
+                        ref={generalInfoBoxRef}
                         type="withImage"
                         date={time}
                         onDateChange={setTime}
-                        imageUris={imageUris}
-                        onImagesChange={setImageUris}
+                        imageUris={images}
                         disabledDate={true}
                     />
                     <MeasurementDataBox
@@ -218,7 +138,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 <ButtonBarFarm
                     primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                     secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSave}
+                    onPrimaryPress={onSavePress}
                     onSecondaryPress={navigation.goBack}
                 />
             </View>

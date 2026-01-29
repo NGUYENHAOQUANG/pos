@@ -17,32 +17,61 @@ export const useSizeMeasurements = (pondId: string, params?: ISizeMeasurementPar
 };
 
 export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurementParams) => {
-    const { data, isLoading, error } = useSizeMeasurements(pondId, params);
+    const { data, isLoading, error, refetch } = useSizeMeasurements(pondId, params);
 
-    const jobs: JobExecution[] = (data?.data?.items || []).map(item => ({
-        id: item.id,
-        label: `Lần ${item.no || 0}`,
-        date: item.createdAt,
-        time: item.createdAt
-            ? new Date(item.createdAt).toLocaleTimeString('en-GB', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-              })
-            : '00:00',
-        note: item.sizeMeasurement?.notes || undefined,
-        pondId: item.pondId,
-        images: item.documentIds || [],
-        meta: {
-            shrimpSize: item.sizeMeasurement?.shrimpSizePcsPerKg?.toString(),
-            remainingWeight: item.sizeMeasurement?.estimatedRemainingStockKg?.toString(),
-            totalShrimpCount: item.sizeMeasurement?.totalShrimpCount || null,
-            survivalRate: item.sizeMeasurement?.survivalRatePercentage || null,
-            notes: item.sizeMeasurement?.notes,
-            images: item.documentIds || [],
-        },
-    }));
+    let jobs: JobExecution[] = [];
 
-    return { jobs, isLoading, error };
+    try {
+        const rawItems = data?.data?.items || [];
+
+        // Sort by createdAt ascending to ensure correct daily numbering
+        const sortedItems = [...rawItems].sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeA - timeB;
+        });
+
+        const dayCounts: Record<string, number> = {};
+
+        jobs = sortedItems.map(item => {
+            const dateObj = item.createdAt ? new Date(item.createdAt) : new Date();
+            // Use a key that represents the day clearly
+            const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
+
+            if (!dayCounts[dateKey]) {
+                dayCounts[dateKey] = 0;
+            }
+            dayCounts[dateKey]++;
+            const dailyIndex = dayCounts[dateKey];
+
+            return {
+                id: item.id,
+                label: `Lần ${dailyIndex}`,
+                date: item.createdAt,
+                time: item.createdAt
+                    ? new Date(item.createdAt).toLocaleTimeString('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                      })
+                    : '00:00',
+                note: item.sizeMeasurement?.notes || undefined,
+                pondId: item.pondId,
+                images: item.documentIds || [],
+                meta: {
+                    shrimpSize: item.sizeMeasurement?.shrimpSizePcsPerKg?.toString(),
+                    remainingWeight: item.sizeMeasurement?.estimatedRemainingStockKg?.toString(),
+                    totalShrimpCount: item.sizeMeasurement?.totalShrimpCount || null,
+                    survivalRate: item.sizeMeasurement?.survivalRatePercentage || null,
+                    notes: item.sizeMeasurement?.notes,
+                    images: item.documentIds || [],
+                },
+            };
+        });
+    } catch (_err) {
+        jobs = [];
+    }
+
+    return { jobs, isLoading, error, refetch };
 };
 
 export const useSizeMeasurement = (pondId: string, id: string) => {
