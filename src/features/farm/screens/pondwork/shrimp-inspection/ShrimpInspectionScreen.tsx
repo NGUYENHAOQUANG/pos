@@ -10,8 +10,10 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxRef,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
 import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -22,8 +24,15 @@ import {
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
 import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
-import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { mapToApiPayload } from '@/features/farm/utils/shrimpHealthCheckMapper';
+import {
+    useCreateShrimpHealthCheck,
+    useUpdateShrimpHealthCheck,
+    useDeleteShrimpHealthCheck,
+} from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { Loading } from '@/shared/components/ui/Loading';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -35,11 +44,9 @@ export const ShrimpInspectionScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
+    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-
     const meta = useMemo(
         () => (itemToEdit?.meta as ShrimpInspectionMeta) || ({} as ShrimpInspectionMeta),
         [itemToEdit?.meta]
@@ -54,6 +61,14 @@ export const ShrimpInspectionScreen: React.FC = () => {
     const [notes, setNotes] = useState(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    // React Query mutations
+    const createMutation = useCreateShrimpHealthCheck();
+    const updateMutation = useUpdateShrimpHealthCheck();
+    const deleteMutation = useDeleteShrimpHealthCheck();
+
+    const isSaving =
+        createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
@@ -92,7 +107,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!itemToEdit && foodAmount.trim().length === 0) {
             Toast.show({
                 type: 'error',
@@ -103,51 +118,100 @@ export const ShrimpInspectionScreen: React.FC = () => {
             return;
         }
 
-        if (pond?.id) {
-            const currentItems = getPondJobItems(pond.id, 'SHRIMP_INSPECTION');
-            const timeString = selectedDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
+        if (!pond?.id) {
+            Toast.show({
+                type: 'error',
+                text1: 'Không tìm thấy thông tin ao',
+                position: 'top',
+                visibilityTime: 3000,
             });
-
-            const itemData = {
-                label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
-                time: timeString,
-                date: formatDate(selectedDate),
-                note: notes || undefined,
-                meta: {
-                    foodAmount,
-                    leftoverFood,
-                    intestine,
-                    intestineColor,
-                    stoolColor,
-                    liver,
-                    images: imageUris,
-                },
-            };
-
-            if (itemToEdit) {
-                // Update existing item
-                const updatedItems = currentItems.map(item =>
-                    item.id === itemToEdit.id ? { ...item, ...itemData } : item
-                );
-                updatePondJob(pond.id, 'SHRIMP_INSPECTION', updatedItems);
-                showEditJobSuccessToast('SHRIMP_INSPECTION');
-            } else {
-                // Create new item
-                const nextIndex = currentItems.length + 1;
-                const newItem = {
-                    id: Date.now().toString(),
-                    ...itemData,
-                    label: `Lần ${nextIndex}`,
-                    pondId: pond.id,
-                };
-                updatePondJob(pond.id, 'SHRIMP_INSPECTION', [...currentItems, newItem]);
-                showAddJobSuccessToast('SHRIMP_INSPECTION');
-            }
+            return;
         }
 
-        navigation.goBack();
+        // Get uploaded document IDs from GeneralInfoBox
+        const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
+
+        // Map UI state to API payload
+        const payload = mapToApiPayload({
+            foodAmount,
+            leftoverFood,
+            intestine,
+            intestineColor,
+            stoolColor,
+            liver,
+            notes,
+            documentIds,
+        });
+
+        if (itemToEdit) {
+            // Update existing item using React Query mutation
+            updateMutation.mutate(
+                {
+                    pondId: pond.id,
+                    id: itemToEdit.id,
+                    payload,
+                },
+                {
+                    onSuccess: response => {
+                        console.log(
+                            '[ShrimpInspectionScreen] Update shrimp health check result:',
+                            response
+                        );
+
+                        // Mark as saved to prevent auto-cleanup
+                        generalInfoBoxRef.current?.markAsSaved();
+
+                        showEditJobSuccessToast('SHRIMP_INSPECTION');
+                        navigation.goBack();
+                    },
+                    onError: (error: any) => {
+                        console.error('[ShrimpInspectionScreen] Update failed:', error);
+
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Không thể cập nhật kiểm tra tôm',
+                            text2:
+                                error?.response?.data?.message ||
+                                error?.message ||
+                                'Vui lòng thử lại',
+                            position: 'top',
+                            visibilityTime: 3000,
+                        });
+                    },
+                }
+            );
+        } else {
+            // Create new item using React Query mutation
+            createMutation.mutate(
+                {
+                    pondId: pond.id,
+                    payload,
+                },
+                {
+                    onSuccess: () => {
+                        // Mark as saved to prevent auto-cleanup
+                        generalInfoBoxRef.current?.markAsSaved();
+
+                        showAddJobSuccessToast('SHRIMP_INSPECTION');
+                        navigation.goBack();
+                    },
+                    onError: (error: any) => {
+                        console.error('[ShrimpInspectionScreen] Create failed:', error);
+
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Không thể tạo kiểm tra tôm',
+                            text2:
+                                error?.response?.data?.message ||
+                                error?.message ||
+                                'Vui lòng thử lại',
+                            position: 'top',
+                            visibilityTime: 3000,
+                        });
+                    },
+                }
+            );
+        }
     };
 
     const handleCancel = () => {
@@ -159,13 +223,43 @@ export const ShrimpInspectionScreen: React.FC = () => {
     };
 
     const handleConfirmDelete = () => {
-        if (pond?.id && itemToEdit) {
-            const currentItems = getPondJobItems(pond.id, 'SHRIMP_INSPECTION');
-            const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
-            updatePondJob(pond.id, 'SHRIMP_INSPECTION', updatedItems);
-            setDeleteModalVisible(false);
-            navigation.goBack();
-        }
+        if (!pond?.id || !itemToEdit) return;
+
+        const pondId = pond.id;
+
+        deleteMutation.mutate(
+            { pondId, id: itemToEdit.id },
+            {
+                onSuccess: response => {
+                    console.log(
+                        '[ShrimpInspectionScreen] Delete success:',
+                        JSON.stringify(response, null, 2)
+                    );
+
+                    setDeleteModalVisible(false);
+                    navigation.goBack();
+
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Đã xoá kiểm tra tôm',
+                        position: 'top',
+                        visibilityTime: 3000,
+                    });
+                },
+                onError: (error: any) => {
+                    console.error('[ShrimpInspectionScreen] Delete failed:', error);
+
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Không thể xoá kiểm tra tôm',
+                        text2:
+                            error?.response?.data?.message || error?.message || 'Vui lòng thử lại',
+                        position: 'top',
+                        visibilityTime: 3000,
+                    });
+                },
+            }
+        );
     };
 
     const handleCancelDelete = () => {
@@ -216,85 +310,91 @@ export const ShrimpInspectionScreen: React.FC = () => {
     const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Kiểm tra tôm</Text>
-                {itemToEdit ? (
-                    <DeleteButton onPress={handleDeletePress} />
-                ) : (
-                    <View style={styles.headerSpacer} />
-                )}
-            </View>
+        <Loading isLoading={isSaving}>
+            <View style={styles.container}>
+                {/* Header */}
+                <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Kiểm tra tôm</Text>
+                    {itemToEdit ? (
+                        <DeleteButton onPress={handleDeletePress} />
+                    ) : (
+                        <View style={styles.headerSpacer} />
+                    )}
+                </View>
 
-            {/* Content */}
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={[styles.scrollContent]}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* Thông tin chung Box */}
-                    <GeneralInfoBox
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        type="withImage"
-                        imageUris={imageUris}
-                        onImagesChange={setImageUris}
-                        disabledDate={true}
+                {/* Content */}
+                <SafeInputLayout>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.scrollView}
+                        contentContainerStyle={[styles.scrollContent]}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* Thông tin chung Box */}
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            type="withImage"
+                            imageUris={imageUris}
+                            onImagesChange={setImageUris}
+                            documentIds={meta.documentIds}
+                            disabledDate={true}
+                        />
+
+                        {/* Kiểm tra thức ăn Box */}
+                        <ShrimpInspectionFoodCheckBox
+                            foodAmount={foodAmount}
+                            onFoodAmountChange={setFoodAmount}
+                            leftoverFood={leftoverFood}
+                            onLeftoverFoodChange={setLeftoverFood}
+                        />
+
+                        {/* Quan sát mẫu Box */}
+                        <ShrimpInspectionObservationBox
+                            intestine={intestine}
+                            onIntestineChange={setIntestine}
+                            intestineColor={intestineColor}
+                            onIntestineColorChange={setIntestineColor}
+                            stoolColor={stoolColor}
+                            onStoolColorChange={setStoolColor}
+                            liver={liver}
+                            onLiverChange={setLiver}
+                        />
+
+                        {/* Ghi chú Box */}
+                        <SelectionNotesBox
+                            notes={notes}
+                            onNotesChange={setNotes}
+                            scrollViewRef={scrollViewRef}
+                        />
+                    </ScrollView>
+                </SafeInputLayout>
+
+                {/* Footer Buttons */}
+                <View style={styles.footer}>
+                    <ButtonBarFarm
+                        primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                        secondaryTitle="Huỷ"
+                        onPrimaryPress={handleSave}
+                        onSecondaryPress={handleCancel}
+                        primaryDisabled={itemToEdit ? isButtonDisabled : false}
                     />
+                </View>
 
-                    {/* Kiểm tra thức ăn Box */}
-                    <ShrimpInspectionFoodCheckBox
-                        foodAmount={foodAmount}
-                        onFoodAmountChange={setFoodAmount}
-                        leftoverFood={leftoverFood}
-                        onLeftoverFoodChange={setLeftoverFood}
-                    />
-
-                    {/* Quan sát mẫu Box */}
-                    <ShrimpInspectionObservationBox
-                        intestine={intestine}
-                        onIntestineChange={setIntestine}
-                        intestineColor={intestineColor}
-                        onIntestineColorChange={setIntestineColor}
-                        stoolColor={stoolColor}
-                        onStoolColorChange={setStoolColor}
-                        liver={liver}
-                        onLiverChange={setLiver}
-                    />
-
-                    {/* Ghi chú Box */}
-                    <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
-            </SafeInputLayout>
-
-            {/* Footer Buttons */}
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                    secondaryTitle="Huỷ"
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={handleCancel}
-                    primaryDisabled={itemToEdit ? isButtonDisabled : false}
+                {/* Delete Confirmation Modal */}
+                <ConfirmationDeleteModal
+                    visible={deleteModalVisible}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
+                    successMessage="Đã xoá kiểm tra tôm"
+                    showSuccessToast={false}
                 />
             </View>
-
-            {/* Delete Confirmation Modal */}
-            <ConfirmationDeleteModal
-                visible={deleteModalVisible}
-                onConfirm={handleConfirmDelete}
-                onCancel={handleCancelDelete}
-            />
-        </View>
+        </Loading>
     );
 };
 

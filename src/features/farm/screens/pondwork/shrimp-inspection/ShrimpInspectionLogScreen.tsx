@@ -1,4 +1,3 @@
-import React from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
@@ -8,6 +7,9 @@ import { convertShrimpInspectionMetaToActivityData } from '@/features/farm/utils
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { useShrimpHealthCheckData } from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { colors } from '@/styles';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondworkLogScreen'>;
@@ -16,6 +18,9 @@ export const PondworkLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
+
+    // Fetch shrimp health check data from API using React Query
+    const { isLoading } = useShrimpHealthCheckData(pond?.id);
 
     const config: LogScreenConfig<ShrimpInspectionMeta> = {
         jobType: 'SHRIMP_INSPECTION',
@@ -34,6 +39,15 @@ export const PondworkLogScreen: React.FC = () => {
         }
     };
 
+    // Show loading indicator while fetching initial data
+    if (isLoading && groupedData.length === 0) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
     return (
         <BaseLogScreen
             title="Nhật ký kiểm tra tôm"
@@ -48,3 +62,12 @@ export const PondworkLogScreen: React.FC = () => {
         />
     );
 };
+
+const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.backgroundPrimary,
+    },
+});

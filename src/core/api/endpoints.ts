@@ -28,6 +28,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
         },
+        SHRIMP_HEALTH: {
+            LIST: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',
