@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView, Text } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    StatusBar,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    Platform,
+} from 'react-native';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -8,19 +16,22 @@ import {
     AddWarehouseMaterial,
     MaterialItem,
 } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
-import { IMaterial } from '@/features/material/types/material.types';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useMaterials, useAddExportWarehouseReceipt } from '@/features/material/hooks';
+import { useAddExportWarehouseReceipt } from '@/features/material/hooks';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 // New Imports
+import { Input } from '@/shared/components/forms/Input';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
@@ -29,11 +40,62 @@ interface AddExportWarehouseScreenProps {}
 
 export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
-    const route = useRoute<RouteProp<MaterialStackParamList, 'AddExportWarehouse'>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
-    // Use React Query for materials data
-    const { data: materialsData = [] } = useMaterials();
+    // Get selected zone from farmStore (for initial value only)
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+
+    // Data State - for UI (selectedZone is controlled by dropdown)
+    const [date, setDate] = useState(new Date());
+    const [selectedZone, setSelectedZone] = useState(selectedZoneId || '');
+    const [selectedPond, setSelectedPond] = useState('');
+    const [note, setNote] = useState('');
+
+    // Sync selectedZone when farmStore changes (initial load or external change)
+    useEffect(() => {
+        if (selectedZoneId && !selectedZone) {
+            setSelectedZone(selectedZoneId);
+        }
+    }, [selectedZoneId, selectedZone]);
+
+    // Get warehouse for the selected zone - use LOCAL state so it reacts to dropdown changes
+    const { data: warehouses } = useWarehouses({ ZoneId: selectedZone || undefined });
+    const warehouseId = warehouses?.[0]?.id;
+
+    // Fetch warehouse items using the warehouse ID
+    const { data: warehouseData } = useWarehouseItems(warehouseId, undefined, {
+        enabled: !!warehouseId,
+    });
+    const warehouseItems = React.useMemo(() => warehouseData?.items || [], [warehouseData]);
+
+    // Material options with stock info (using useMemo like AddWarehouseScreen)
+    const materialOptions = React.useMemo(() => {
+        if (warehouseItems.length > 0) {
+            return warehouseItems.map(
+                (m: {
+                    materialName?: string;
+                    materialId?: string;
+                    unitName?: string;
+                    quantity?: number;
+                }) => ({
+                    label: m.materialName || '',
+                    value: String(m.materialId || ''),
+                    unit: m.unitName || '',
+                    quantity: m.quantity || 0, // Stock
+                })
+            );
+        }
+        return [
+            {
+                label: 'Hiện tại không có vật tư',
+                value: '__no_materials__',
+                unit: '',
+                quantity: 0,
+                disabled: true,
+            },
+        ];
+    }, [warehouseItems]);
+
     const { mutate: addExportWarehouseReceipt } = useAddExportWarehouseReceipt();
     const { submitWithFiles, isUploading } = useFileSubmit();
 
@@ -42,41 +104,43 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const params = route.params as
-        | {
-              availableMaterials?: IMaterial[];
-          }
-        | undefined;
-    const availableMaterials = params?.availableMaterials || materialsData;
-    // Combine mock materials with passed available materials
-    const materialOptions = availableMaterials.map((m: IMaterial) => ({
-        label: m.name,
-        value: m.name,
-        unit: typeof m.unit === 'number' ? String(m.unit) : m.unitName || String(m.unit || ''),
-    }));
-
-    const [date, setDate] = useState(new Date());
-    const [selectedZone, setSelectedZone] = useState('');
-    const [selectedPond, setSelectedPond] = useState('');
     const [files, setFiles] = useState<DocumentPickerResponse[]>([]);
-    const [warehouseItems, setWarehouseItems] = useState<MaterialItem[]>([
-        { id: '1', materialName: '', quantity: '', price: '' },
+    const [formMaterials, setFormMaterials] = useState<MaterialItem[]>([
+        { id: '1', materialId: '', materialName: '', quantity: '', price: '' },
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileUploaderRef = React.useRef<FileUploaderRef>(null);
 
     const handleAddMaterial = () => {
-        setWarehouseItems([
-            ...warehouseItems,
-            { id: Date.now().toString(), materialName: '', quantity: '', price: '' },
+        setFormMaterials([
+            ...formMaterials,
+            {
+                id: Date.now().toString(),
+                materialId: '',
+                materialName: '',
+                quantity: '',
+                price: '',
+            },
         ]);
     };
 
-    const handleUpdateMaterial = (id: string, field: keyof MaterialItem, value: string) => {
-        setWarehouseItems(
-            warehouseItems.map(item => {
+    const handleUpdateMaterial = (id: string, field: keyof MaterialItem, value: any) => {
+        setFormMaterials(
+            formMaterials.map(item => {
                 if (item.id === id) {
+                    if (field === 'materialId') {
+                        const selectedMaterial = warehouseItems.find(
+                            (m: any) => String(m.materialId || '') === String(value)
+                        );
+                        return {
+                            ...item,
+                            materialId: value,
+                            materialName: selectedMaterial?.materialName || '',
+                            availableQuantity: selectedMaterial?.quantity || 0,
+                            unit: selectedMaterial?.unitName || '',
+                        };
+                    }
                     const updatedItem = { ...item, [field]: value };
                     return updatedItem;
                 }
@@ -86,7 +150,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     };
 
     const calculateTotal = () => {
-        return warehouseItems.reduce((sum, item) => {
+        return formMaterials.reduce((sum, item) => {
             const qty = parseFloat(item.quantity) || 0;
             const price = parseFloat(item.price) || 0;
             return sum + qty * price;
@@ -95,28 +159,11 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 
     const scrollViewRef = React.useRef<ScrollView>(null);
 
-    const HEADER_HEIGHT = 280;
-    const FILE_ROW_HEIGHT = 40;
-    const ITEM_HEIGHT = 280;
-
-    const handleDropdownOpen = (itemIndex: number) => {
+    const handleDropdownOpen = (_itemIndex: number) => {
         setTimeout(() => {
-            const fileSectionHeight = files.length * FILE_ROW_HEIGHT;
-            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
-            scrollViewRef.current?.scrollTo({
-                y: Math.max(0, scrollY - 50), // Small offset to show context
-                animated: true,
-            });
-        }, 100);
-    };
-
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
+            // Scroll to end like inventory screen to show dropdown fully
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 200);
     };
 
     const totalAmount = calculateTotal();
@@ -149,6 +196,17 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 selectedPond={selectedPond}
                                 onPondChange={setSelectedPond}
                             >
+                                <Input
+                                    label="Ghi chú"
+                                    placeholder="Nhập ghi chú xuất kho"
+                                    value={note}
+                                    onChangeText={setNote}
+                                    multiline={true}
+                                    numberOfLines={3}
+                                    inputContainerStyle={{ height: 100, alignItems: 'flex-start' }}
+                                    inputStyle={{ textAlignVertical: 'top', paddingTop: 8 }}
+                                />
+
                                 <FileUploader
                                     ref={fileUploaderRef}
                                     files={files}
@@ -158,7 +216,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                             </ExportWarehouseInformation>
 
                             <AddWarehouseMaterial
-                                materials={warehouseItems}
+                                materials={formMaterials}
                                 onUpdateMaterial={handleUpdateMaterial}
                                 onAddMaterial={handleAddMaterial}
                                 materialOptions={materialOptions}
@@ -167,41 +225,99 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                         </ScrollView>
                     </SafeInputLayout>
 
-                    <ButtonBarMaterial
-                        mode="total"
-                        totalLabel="Tổng tiền:"
-                        totalValue={formatCurrency(totalAmount)}
-                        primaryTitle="Gửi Phiếu"
-                        containerStyle={{
-                            borderTopWidth: 1,
-                            borderTopColor: colors.border,
-                        }}
-                        onPrimaryPress={() => {
-                            // Validation
-                            if (!selectedPond) {
-                                showValidationError('Vui lòng chọn ao nuôi');
-                                return;
-                            }
-                            if (warehouseItems.length === 0) {
-                                showValidationError('Vui lòng thêm ít nhất một vật tư');
-                                return;
-                            }
-                            // Check detailed items
-                            const invalidItemIndex = warehouseItems.findIndex(
-                                m => !m.materialName || !m.quantity || !m.price
-                            );
-                            if (invalidItemIndex !== -1) {
-                                showValidationError(
-                                    `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
-                                        invalidItemIndex + 1
-                                    })`
-                                );
-                                return;
-                            }
+                    {/* Custom Footer with Total + 2 Buttons */}
+                    <View style={styles.footer}>
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>Tổng tiền:</Text>
+                            <Text style={styles.totalValue}>
+                                {formatCurrencyValue(totalAmount)}{' '}
+                                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                            </Text>
+                        </View>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={styles.draftButton}
+                                onPress={async () => {
+                                    // Validation for Save Draft - more lenient
+                                    if (!selectedPond) {
+                                        showValidationError('Vui lòng chọn ao nuôi');
+                                        return;
+                                    }
+                                    if (
+                                        formMaterials.length === 0 ||
+                                        !formMaterials[0].materialId
+                                    ) {
+                                        showValidationError('Vui lòng chọn ít nhất một vật tư');
+                                        return;
+                                    }
 
-                            setIsConfirmModalVisible(true);
-                        }}
-                    />
+                                    // Submit as draft (autoSubmit = false)
+                                    await submitWithFiles(files, async documentIds => {
+                                        setIsSubmitting(true);
+                                        addExportWarehouseReceipt(
+                                            {
+                                                warehouseId: warehouseId || '',
+                                                pondId: selectedPond,
+                                                documentIds: documentIds,
+                                                items: formMaterials
+                                                    .filter(item => item.materialId)
+                                                    .map(item => ({
+                                                        materialId: item.materialId || '',
+                                                        quantity: parseFloat(item.quantity) || 0,
+                                                    })),
+                                                note: note,
+                                                date: date.toISOString(),
+                                                autoSubmit: false, // Save as draft
+                                            },
+                                            {
+                                                onSuccess: () => {
+                                                    fileUploaderRef.current?.markAsSaved();
+                                                    setIsSubmitting(false);
+                                                    navigation.goBack();
+                                                },
+                                                onError: () => {
+                                                    setIsSubmitting(false);
+                                                },
+                                            }
+                                        );
+                                    });
+                                }}
+                            >
+                                <Text style={styles.draftButtonText}>Lưu Nháp</Text>
+                            </TouchableOpacity>
+                            <View style={{ width: spacing.md }} />
+                            <TouchableOpacity
+                                style={styles.submitButton}
+                                onPress={() => {
+                                    // Validation
+                                    if (!selectedPond) {
+                                        showValidationError('Vui lòng chọn ao nuôi');
+                                        return;
+                                    }
+                                    if (formMaterials.length === 0) {
+                                        showValidationError('Vui lòng thêm ít nhất một vật tư');
+                                        return;
+                                    }
+                                    // Check detailed items
+                                    const invalidItemIndex = formMaterials.findIndex(
+                                        m => !m.materialName || !m.quantity || !m.price
+                                    );
+                                    if (invalidItemIndex !== -1) {
+                                        showValidationError(
+                                            `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${
+                                                invalidItemIndex + 1
+                                            })`
+                                        );
+                                        return;
+                                    }
+
+                                    setIsConfirmModalVisible(true);
+                                }}
+                            >
+                                <Text style={styles.submitButtonText}>Gửi Phiếu</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
 
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
@@ -212,14 +328,15 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                                 setIsSubmitting(true);
                                 addExportWarehouseReceipt(
                                     {
-                                        warehouseId: selectedZone || 'DEFAULT', // Needs backend logic for warehouseId
+                                        warehouseId: warehouseId || '',
                                         pondId: selectedPond,
                                         documentIds: documentIds,
-                                        items: warehouseItems.map(m => ({
-                                            materialId: m.id, // Ensure this maps to actual material ID
-                                            quantity: parseFloat(m.quantity),
+                                        items: formMaterials.map(item => ({
+                                            materialId: item.materialId || '',
+                                            quantity: parseFloat(item.quantity),
                                         })),
-                                        note: '',
+                                        note: note,
+                                        date: date.toISOString(),
                                         autoSubmit: true,
                                     },
                                     {
@@ -246,7 +363,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.backgroundPrimary,
     },
     content: {
         flex: 1,
@@ -254,5 +371,60 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingVertical: spacing.sm,
         paddingBottom: 100,
+    },
+    footer: {
+        backgroundColor: colors.white,
+        paddingTop: 16,
+        paddingHorizontal: spacing.md,
+        paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+    },
+    totalRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
+    totalLabel: {
+        fontSize: 14,
+        color: colors.text,
+    },
+    totalValue: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.error,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    draftButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.blue[600],
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    draftButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.blue[600],
+    },
+    submitButton: {
+        flex: 1,
+        height: 40,
+        borderRadius: 8,
+        backgroundColor: colors.blue[600],
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.white,
     },
 });

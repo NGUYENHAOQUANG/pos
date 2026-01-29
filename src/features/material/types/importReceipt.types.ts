@@ -1,9 +1,16 @@
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
+export enum ImportReceiptStatus {
+    Pending = 'Pending',
+    Draft = 'Draft',
+    Approved = 'Approved',
+    Rejected = 'Rejected',
+}
+
 export interface ImportReceipt {
     id: string;
     receiptCode?: string;
-    status?: string;
+    status?: ImportReceiptStatus;
     supplierId?: string;
     supplierName?: string;
     warehouseId?: string;
@@ -24,7 +31,7 @@ export interface ImportReceipt {
 
 export interface GetImportReceiptsParams {
     ReceiptCode?: string;
-    Status?: string;
+    Status?: ImportReceiptStatus;
     SupplierId?: string;
     WarehouseId?: string;
     Id?: string;
@@ -37,3 +44,27 @@ export interface GetImportReceiptsParams {
 }
 
 export type GetImportReceiptsResponse = IApiResponse<IPaginate<ImportReceipt>>;
+
+export interface ImportReceiptItem {
+    materialId: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export enum ImportSourceEnum {
+    Supplier = 'Supplier',
+    InternalOperation = 'InternalOperation',
+}
+
+export interface CreateImportReceiptRequest {
+    supplierId: string;
+    warehouseId: string;
+    notes?: string;
+    autoSubmit: boolean;
+    items: ImportReceiptItem[];
+    importSourceEnum: ImportSourceEnum;
+    documentIds: string[];
+    status?: ImportReceiptStatus;
+}
+
+export type CreateImportReceiptResponse = IApiResponse<string>;
