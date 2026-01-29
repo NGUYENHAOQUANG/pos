@@ -103,16 +103,17 @@ export const MeterialScreen = () => {
 
     const warehouseParams = useMemo(
         () => ({
-            Search: searchText,
-            MaterialName: filterMaterialName || undefined,
+            ReceiptCode: searchText || undefined,
         }),
-        [searchText, filterMaterialName]
+        [searchText]
     );
 
     const exportWarehouseParams = useMemo(
         () => ({
             Search: searchText,
             MaterialName: filterMaterialName || undefined,
+            Page: DEFAULT_PAGE,
+            PageSize: DEFAULT_PAGE_SIZE,
         }),
         [searchText, filterMaterialName]
     );

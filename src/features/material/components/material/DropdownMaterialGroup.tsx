@@ -9,6 +9,7 @@ import {
     FlatList,
     Modal,
     TouchableWithoutFeedback,
+    ScrollView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -173,32 +174,44 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 inline ? styles.dropdownInline : [dropdownStyle, dynamicDropdownStyle],
             ]}
         >
-            <FlatList
-                ref={flatListRef}
-                data={displayOptions}
-                keyExtractor={(item, index) => String(item.value) + index}
-                renderItem={renderItem}
-                nestedScrollEnabled={true}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={true}
-                indicatorStyle="black"
-                onScrollToIndexFailed={(info: {
-                    index: number;
-                    highestMeasuredFrameIndex: number;
-                    averageItemLength: number;
-                }) => {
-                    // Handle scroll to index failure by scrolling to offset
-                    const wait = new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-                    wait.then(() => {
-                        flatListRef.current?.scrollToIndex({
-                            index: info.index,
-                            animated: true,
-                            viewPosition: 0.5,
+            {inline ? (
+                <ScrollView
+                    nestedScrollEnabled={true}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    {displayOptions.map((item, index) => (
+                        <View key={String(item.value) + index}>{renderItem({ item })}</View>
+                    ))}
+                </ScrollView>
+            ) : (
+                <FlatList
+                    ref={flatListRef}
+                    data={displayOptions}
+                    keyExtractor={(item, index) => String(item.value) + index}
+                    renderItem={renderItem}
+                    nestedScrollEnabled={true}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={true}
+                    indicatorStyle="black"
+                    onScrollToIndexFailed={(info: {
+                        index: number;
+                        highestMeasuredFrameIndex: number;
+                        averageItemLength: number;
+                    }) => {
+                        // Handle scroll to index failure by scrolling to offset
+                        const wait = new Promise<void>(resolve => setTimeout(() => resolve(), 500));
+                        wait.then(() => {
+                            flatListRef.current?.scrollToIndex({
+                                index: info.index,
+                                animated: true,
+                                viewPosition: 0.5,
+                            });
                         });
-                    });
-                }}
-            />
+                    }}
+                />
+            )}
         </View>
     );
 

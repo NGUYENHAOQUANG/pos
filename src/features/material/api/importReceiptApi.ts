@@ -3,6 +3,8 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
     GetImportReceiptsParams,
     GetImportReceiptsResponse,
+    CreateImportReceiptRequest,
+    CreateImportReceiptResponse,
 } from '@/features/material/types/importReceipt.types';
 
 export const importReceiptApi = {
@@ -14,5 +16,14 @@ export const importReceiptApi = {
             }
         );
         return data;
+    },
+
+    create: async (data: CreateImportReceiptRequest): Promise<CreateImportReceiptResponse> => {
+        const response = await apiClient.post<CreateImportReceiptResponse>(
+            API_ENDPOINTS.IMPORT_RECEIPT.CREATE,
+            data
+        );
+        console.log(data.documentIds);
+        return response.data;
     },
 };
