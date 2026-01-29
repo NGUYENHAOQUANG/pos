@@ -160,10 +160,11 @@ export const MeterialScreen = () => {
         () => ({
             Search: searchText,
             MaterialName: filterMaterialName || undefined,
+            WarehouseId: warehouseId || undefined,
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
         }),
-        [searchText, filterMaterialName]
+        [searchText, filterMaterialName, warehouseId]
     );
 
     const inventoryParams = useMemo(

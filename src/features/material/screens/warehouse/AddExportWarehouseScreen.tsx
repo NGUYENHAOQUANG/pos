@@ -170,19 +170,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                             materialId: matId,
                             materialName: matName,
                             quantity: String(qty),
-                            price: '', // Price might be missing in detail or not editable here? export usually doesn't need price input unless tracking value
-                            // Current UI asks for price?
-                            // Check lines 108: { price: '' } is in state.
-                            // Check calculateTotal: uses item.price.
-                            // Does API detail return price? ExportReceipt types has totalAmount. Items request has quantity.
-                            // Items in CreateExportReceiptRequest only has materialId and quantity.
-                            // So Price in UI is purely local or derived?
-                            // Looking at AddWarehouseMaterial, it probably allows inputting price?
-                            // CreateExportReceiptRequest triggers:
-                            // items: { materialId, quantity }
-                            // It does NOT send price.
-                            // So Price in UI is likely for "Total Amount" display only and not saved to backend?
-                            // If backend doesn't take price, then we don't need to load it, or just 0.
+                            price: '',
                         };
                     }
                 );
