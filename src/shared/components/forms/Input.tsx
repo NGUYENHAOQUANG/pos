@@ -114,10 +114,12 @@ export function Input({
         <View style={[styles.container, containerStyle]}>
             {/* Label */}
             {label && (
-                <Text style={styles.label}>
-                    {required && <Text style={styles.required}>* </Text>}
-                    {label}
-                </Text>
+                <View style={styles.labelWrapper}>
+                    <View style={styles.requiredWrapper}>
+                        {required && <Text style={styles.required}>*</Text>}
+                    </View>
+                    <Text style={styles.label}>{label}</Text>
+                </View>
             )}
             {/* Input Container */}
             <View
@@ -175,6 +177,7 @@ export function Input({
                             container: {
                                 borderBottomWidth: 0,
                                 marginLeft: 0,
+                                paddingLeft: 0,
                                 paddingRight: 0,
                                 minHeight: 0,
                                 height: '100%',
@@ -184,6 +187,8 @@ export function Input({
                                 color: colors.text,
                                 height: '100%',
                                 paddingVertical: 0,
+                                paddingLeft: 0,
+                                marginLeft: 0,
                             },
                         }}
                         {...(restProps as any)}
@@ -224,12 +229,20 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: 12,
     },
+    requiredWrapper: {
+        width: 7,
+        marginRight: 4,
+    },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
     label: {
         fontSize: 14,
         fontWeight: '400',
         color: colors.text,
-        lineHeight: 22,
-        marginBottom: spacing.sm,
+        lineHeight: 24,
     },
     required: {
         color: colors.error,

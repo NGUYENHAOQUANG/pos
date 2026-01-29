@@ -98,7 +98,21 @@ export const ShrimpFarmScreens: React.FC = () => {
     // Get fresh pond data from context instead of stale params
     const pond = useMemo(() => {
         if (!pondFromParams?.id) return pondFromParams;
-        return getPondById(pondFromParams.id) || pondFromParams;
+        const storePond = getPondById(pondFromParams.id);
+
+        // If store pond exists but has no type/invalid type, while params pond has it,
+        // we should prioritize params pond or merge them via fallback
+        if (storePond) {
+            const hasValidStoreType =
+                storePond.type && (typeof storePond.type !== 'string' || storePond.type.length > 0);
+            if (!hasValidStoreType && pondFromParams.type) {
+                // If store is missing type data but params has it, use store pond but patch the type from params
+                return { ...storePond, type: pondFromParams.type };
+            }
+            return storePond;
+        }
+
+        return pondFromParams;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondFromParams, getPondById, ponds]);
 
@@ -127,7 +141,14 @@ export const ShrimpFarmScreens: React.FC = () => {
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
         // Get pondTypeId from pond
-        const pondTypeId = typeof pond?.type === 'object' ? pond.type.id : null;
+        let pondTypeId: string | null = null;
+        if (pond?.type) {
+            if (typeof pond.type === 'object') {
+                pondTypeId = pond.type.id;
+            } else if (typeof pond.type === 'string') {
+                pondTypeId = pond.type;
+            }
+        }
 
         // Get operations from API data
         if (pondTypeId && operationsByPondType[pondTypeId]?.length > 0) {
@@ -213,7 +234,10 @@ export const ShrimpFarmScreens: React.FC = () => {
 
     const handleStartCycle = () => {
         if (pond?.id) {
-            navigation.navigate('CreateCycle', { pondId: pond.id });
+            navigation.navigate('CreateCycle', {
+                pondId: pond.id,
+                zoneId: pond.zoneId?.toString(), // Pass zoneId for season fetching
+            });
         }
     };
 

@@ -10,7 +10,8 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import Toast from 'react-native-toast-message';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData, CreateCycleCommand } from '@/features/farm/types/farm.types';
+import { useCreateCycle } from '@/features/farm/hooks/useCycle';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 
@@ -26,7 +27,9 @@ export const CreateCycleScreen: React.FC = () => {
     const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
     const deleteCycle = useFarmStore(state => state.deleteCycle);
 
-    const { pondId, initialData } = route.params;
+    const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
+
+    const { pondId, initialData, zoneId } = route.params;
     const isEdit = !!initialData;
 
     // State quản lý ẩn/hiện Modal xác nhận xóa
@@ -65,7 +68,7 @@ export const CreateCycleScreen: React.FC = () => {
         );
     };
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         if (!checkFields() || !pondId) {
             return Toast.show({
                 type: 'error',
@@ -74,34 +77,59 @@ export const CreateCycleScreen: React.FC = () => {
             });
         }
 
-        // Convert Partial<CycleData> to CycleData đầy đủ
-        const fullCycleData: CycleData = {
-            id: initialData?.id || `${pondId}-${Date.now()}`,
-            cycleName: cycleData.cycleName!,
-            breedSource: cycleData.breedSource!,
-            season: cycleData.season!,
-            stockingDate: cycleData.stockingDate!,
-            stockingQuantity: cycleData.stockingQuantity!,
-            age: cycleData.age!,
-            density: cycleData.density || 0,
-            estimatedCost: cycleData.estimatedCost || 0,
+        const command: CreateCycleCommand = {
+            seasonId: cycleData.season!,
+            warehouseItemId: cycleData.breedSource!,
+            name: cycleData.cycleName!,
+            totalStocking: cycleData.stockingQuantity!,
+            ageDays: cycleData.age!,
             notes: cycleData.notes,
-            endDate: cycleData.endDate,
-            sourcePonds: cycleData.sourcePonds || [pondId],
-            receivingPonds: cycleData.receivingPonds,
-            status: cycleData.status,
-            doc: cycleData.doc,
         };
 
-        // Lưu vào FarmContext
-        saveActiveCycle(pondId, fullCycleData);
+        createCycle(
+            { pondId, data: command },
+            {
+                onSuccess: result => {
+                    // Convert result/input to CycleData for store
+                    // Note: usage of saveActiveCycle might need review if API returns different structure
+                    // but for now we map what we have to keep UI working until refactor
+                    const fullCycleData: CycleData = {
+                        ...cycleData,
+                        id: result.id || `${pondId}-${Date.now()}`,
+                        cycleName: command.name,
+                        breedSource: command.warehouseItemId,
+                        season: command.seasonId,
+                        stockingDate: cycleData.stockingDate || formatDateWithTime(new Date()),
+                        stockingQuantity: command.totalStocking,
+                        age: command.ageDays,
+                        density: cycleData.density || 0, // Should be calculated or returned by API
+                        estimatedCost: cycleData.estimatedCost || 0,
+                        sourcePonds: [pondId],
+                    } as CycleData;
 
-        Toast.show({
-            type: 'success',
-            text1: isEdit ? 'Đã cập nhật chu kỳ thành công' : 'Đã tạo chu kỳ nuôi thành công',
-            topOffset: 0,
-        });
-        navigation.goBack();
+                    // Lưu vào FarmContext
+                    saveActiveCycle(pondId, fullCycleData);
+
+                    Toast.show({
+                        type: 'success',
+                        text1: isEdit
+                            ? 'Đã cập nhật chu kỳ thành công'
+                            : 'Đã tạo chu kỳ nuôi thành công',
+                        topOffset: 0,
+                    });
+                    navigation.goBack();
+                },
+                onError: error => {
+                    console.error('Create cycle error:', error);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Có lỗi xảy ra',
+                        text2: (error as any)?.message || 'Vui lòng thử lại',
+                        position: 'top',
+                    });
+                },
+            }
+        );
     };
 
     const onConfirmDelete = () => {
@@ -146,6 +174,7 @@ export const CreateCycleScreen: React.FC = () => {
                         formData={cycleData}
                         setFormData={setCycleData}
                         pondId={pondId}
+                        zoneId={zoneId}
                         isEdit={isEdit}
                     />
                 </ScrollView>
@@ -157,9 +186,10 @@ export const CreateCycleScreen: React.FC = () => {
                 onPrimaryPress={handleCreate}
                 onSecondaryPress={() => navigation.goBack()}
                 primaryDisabled={
-                    isEdit &&
-                    JSON.stringify(cycleData) ===
-                        JSON.stringify(initialData ? getInitialFormData(initialData) : {})
+                    (isEdit &&
+                        JSON.stringify(cycleData) ===
+                            JSON.stringify(initialData ? getInitialFormData(initialData) : {})) ||
+                    isCreating
                 }
             />
 

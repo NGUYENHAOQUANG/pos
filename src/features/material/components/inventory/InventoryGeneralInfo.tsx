@@ -10,7 +10,7 @@ import {
     UIManager,
 } from 'react-native';
 import CalenderIcon from '@/assets/Icon/Calender.svg';
-import { CollapseHead } from '../../components/CollapseHead';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -51,7 +51,6 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                 title="Chi tiết"
                 isExpanded={isExpanded}
                 onToggle={toggleExpand}
-                style={styles.header}
                 showIcon={true}
             />
 
@@ -121,11 +120,6 @@ const styles = StyleSheet.create({
             android: { elevation: 1 },
         }),
         marginBottom: spacing.md,
-    },
-    header: {
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        borderBottomWidth: 0,
     },
     body: {
         padding: spacing.md,

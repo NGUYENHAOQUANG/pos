@@ -13,17 +13,31 @@ import { CycleData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { Input } from '@/shared/components/forms/Input';
+import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
     pondId?: string;
+    zoneId?: string;
     isEdit?: boolean;
 }
 
-const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdit = false }) => {
+const CreateCycleForm: React.FC<Props> = ({
+    formData,
+    setFormData,
+    pondId,
+    zoneId,
+    isEdit = false,
+}) => {
     // Lấy danh mục từ useFarmStore với selectors
     const breedOptions = useFarmStore(state => state.breedOptions);
-    const seasons = useFarmStore(state => state.seasons);
+    const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
+
+    // Prefer passed zoneId, fallback to pond from store
+    const effectiveZoneId = zoneId || pond?.zoneId?.toString();
+
+    const { data: seasons = [] } = useSeasonsByZone(effectiveZoneId, (pond as any)?.zone?.code);
+
     const seasonOptions = useMemo(
         () =>
             seasons.map(s => ({
@@ -32,7 +46,6 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
             })),
         [seasons]
     );
-    const getPondById = useFarmStore(state => state.getPondById);
 
     const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
@@ -66,8 +79,6 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
         if (!formData.stockingQuantity || !pondId) {
             return 0;
         }
-
-        const pond = getPondById(pondId);
         if (!pond?.area) {
             return 0;
         }
@@ -90,7 +101,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
         }
 
         return quantity / parsedArea;
-    }, [formData.stockingQuantity, pondId, getPondById]);
+    }, [formData.stockingQuantity, pondId, pond]);
 
     return (
         <View style={styles.container}>
@@ -136,10 +147,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                             }
                         />
                     )}
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.col}>
+                    <View style={styles.inputGroupNoMargin}>
                         <Text style={styles.label}>
                             <Text style={styles.required}>* </Text>Chọn vụ nuôi
                         </Text>
@@ -162,7 +170,7 @@ const CreateCycleForm: React.FC<Props> = ({ formData, setFormData, pondId, isEdi
                             borderRadius={6}
                         />
                     </View>
-                    <View style={styles.col}>
+                    <View style={styles.inputGroupNoMargin}>
                         <Text style={styles.label}>
                             <Text style={styles.required}>* </Text>Tên chu kỳ
                         </Text>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input, InputProps } from '@/shared/components/forms/Input';
 
@@ -60,13 +60,9 @@ export const FarmInput: React.FC<FarmInputProps> = ({
 }) => {
     return (
         <View style={styles.container}>
-            {showLabel && label && (
-                <Text style={styles.label}>
-                    {required && <Text style={styles.required}>* </Text>}
-                    {label}
-                </Text>
-            )}
             <Input
+                label={showLabel ? label : undefined}
+                required={required}
                 inputContainerStyle={{
                     ...styles.textInput,
                     height,

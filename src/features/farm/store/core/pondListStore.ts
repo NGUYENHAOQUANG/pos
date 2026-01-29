@@ -87,14 +87,19 @@ export const createPondListStore: StateCreator<
 
             // Map pondTypeId to type object
             const mappedPonds = ponds.map(pond => {
-                // @ts-ignore - API returns pondCategoryId for mapping
-                // We should probably add pondCategoryId to PondData interface too, but for now access property directly
+                // @ts-ignore
                 const typeId = (pond as unknown as { pondCategoryId: string }).pondCategoryId;
                 const matchedType = currentTypes.find(t => t.id === typeId);
+
+                // console.log(`Pond ${pond.name} (ID: ${pond.id}) - Raw Category ID: ${typeId}`);
 
                 // If matched, assign it. If not, keeping undefined/partial is better than crashing.
                 if (matchedType) {
                     pond.type = matchedType;
+                } else {
+                    if (typeId) {
+                        pond.type = typeId;
+                    }
                 }
                 return pond;
             });
@@ -167,8 +172,7 @@ export const createPondListStore: StateCreator<
                 operationsByPondType,
                 isLoadingMasterData: false,
             });
-        } catch (error) {
-            console.error('❌ [fetchMasterData] FAILED:', error);
+        } catch (_error) {
             set({ isLoadingMasterData: false });
         }
     },

@@ -34,6 +34,8 @@ export const CycleDetailScreen: React.FC = () => {
         [seasons]
     );
     const calculateDOC = useFarmStore(state => state.calculateDOC);
+    const getPondById = useFarmStore(state => state.getPondById);
+    const pond = getPondById(pondId);
 
     const breedLabel =
         breedOptions.find(b => b.value === typedCycleData?.breedSource)?.label || 'N/A';
@@ -86,6 +88,7 @@ export const CycleDetailScreen: React.FC = () => {
                                     navigation.navigate('CreateCycle', {
                                         pondId,
                                         initialData: typedCycleData,
+                                        zoneId: pond?.zoneId?.toString(),
                                     })
                                 }
                             >
