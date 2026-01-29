@@ -28,6 +28,10 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
         },
+        SIPHON_RECORDS: {
+            LIST: (pondId: string) => `/pond/${pondId}/siphon-records`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
+        },
         SHRIMP_HEALTH: {
             LIST: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { farmKeys } from './farmKeys';
 import { shrimpHealthCheckApi } from '@/features/farm/api/shrimpHealthCheckApi';
 import type {
     ShrimpHealthCheckDto,
@@ -106,7 +107,7 @@ const convertToJobExecutions = async (
  */
 export const useShrimpHealthChecksAsJobs = (pondId: string) => {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: ['shrimpHealthChecks', pondId],
+        queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
         queryFn: async () => {
             if (!pondId) {
                 throw new Error('No pondId provided');
@@ -149,6 +150,8 @@ export const useShrimpHealthCheckData = (pondId: string | undefined) => {
     const updatePondJob = useFarmStore(state => state.updatePondJob);
     const queryClient = useQueryClient();
 
+    const pondIdStr = pondId ? String(pondId) : '';
+
     // React Query for data fetching
     const {
         data: response,
@@ -157,15 +160,15 @@ export const useShrimpHealthCheckData = (pondId: string | undefined) => {
         refetch,
         isSuccess,
     } = useQuery({
-        queryKey: ['shrimpHealthChecks', pondId],
+        queryKey: farmKeys.shrimpHealthChecks.byPond(pondIdStr),
         queryFn: async () => {
-            if (!pondId) {
+            if (!pondIdStr) {
                 throw new Error('No pondId provided');
             }
 
-            return await shrimpHealthCheckApi.list(pondId);
+            return await shrimpHealthCheckApi.list(pondIdStr);
         },
-        enabled: !!pondId,
+        enabled: !!pondIdStr,
         staleTime: 30000,
         gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (formerly cacheTime)
     });
@@ -190,7 +193,11 @@ export const useShrimpHealthCheckData = (pondId: string | undefined) => {
         error: error as Error | null,
         refetch,
         invalidate: () =>
-            queryClient.invalidateQueries({ queryKey: ['shrimpHealthChecks', pondId] }),
+            pondIdStr
+                ? queryClient.invalidateQueries({
+                      queryKey: farmKeys.shrimpHealthChecks.byPond(pondIdStr),
+                  })
+                : undefined,
     };
 };
 
@@ -213,7 +220,7 @@ export const useCreateShrimpHealthCheck = () => {
         onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
-                queryKey: ['shrimpHealthChecks', variables.pondId],
+                queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
         },
         onError: () => {},
@@ -241,7 +248,7 @@ export const useUpdateShrimpHealthCheck = () => {
         onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
-                queryKey: ['shrimpHealthChecks', variables.pondId],
+                queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
         },
         onError: () => {},
@@ -261,7 +268,7 @@ export const useDeleteShrimpHealthCheck = () => {
         onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
-                queryKey: ['shrimpHealthChecks', variables.pondId],
+                queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
         },
         onError: () => {},
