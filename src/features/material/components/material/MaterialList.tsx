@@ -49,7 +49,7 @@ export const MaterialList: React.FC<MaterialListProps> = ({
             {/* Header Row */}
             <View style={styles.headerRow}>
                 <Text style={styles.name}>{item.name}</Text>
-                <MaterialGroup group={item.group} />
+                <MaterialGroup group={detail?.group || item.group} />
             </View>
 
             <View style={styles.separator} />
