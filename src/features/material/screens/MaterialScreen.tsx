@@ -4,7 +4,8 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import { ZoneHeader } from '@/features/material/components/ZoneHeader';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import {
     ButtonMetaerial,
     MaterialMenuOverlay,
@@ -24,6 +25,8 @@ import {
     useMaterialTypes,
     useImportReceipts,
 } from '@/features/material/hooks';
+import { useZones } from '@/features/farm/hooks';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
@@ -35,8 +38,38 @@ export const MeterialScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute();
     const { setTabBarVisible } = useTabBarVisibility();
+    const selectedTab = useMaterialStore(state => state.selectedTab);
+    const setSelectedTab = useMaterialStore(state => state.setSelectedTab);
 
-    const [selectedTab, setSelectedTab] = useState<TabType>('list');
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
+    const { data: zonesData = [] } = useZones();
+
+    const dropdownData: DropDownItem[] = useMemo(() => {
+        return zonesData.map((z: any) => ({
+            id: z.id.toString(),
+            label: z.name,
+            value: z,
+        }));
+    }, [zonesData]);
+
+    const selectedDropdownItem = useMemo(() => {
+        if (!selectedZoneId) return dropdownData[0];
+        return dropdownData.find(d => d.id === selectedZoneId.toString()) || dropdownData[0];
+    }, [dropdownData, selectedZoneId]);
+
+    const handleDropdownSelect = useCallback(
+        (item: DropDownItem) => {
+            setSelectedZoneId(item.id.toString());
+        },
+        [setSelectedZoneId]
+    );
+
+    React.useEffect(() => {
+        if (!selectedZoneId && dropdownData.length > 0) {
+            setSelectedZoneId(dropdownData[0].id.toString());
+        }
+    }, [dropdownData, selectedZoneId, setSelectedZoneId]);
 
     // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
@@ -163,7 +196,7 @@ export const MeterialScreen = () => {
             setSelectedTab(params.selectedTab);
             navigation.setParams({ selectedTab: undefined } as any);
         }
-    }, [route.params, navigation]);
+    }, [route.params, navigation, setSelectedTab]);
 
     useLayoutEffect(() => {
         // Always show tab bar on list screen
@@ -171,37 +204,25 @@ export const MeterialScreen = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    const handleCreateImport = useCallback(() => {
-        navigation.navigate('AddWarehouse', {
-            availableMaterials: materials,
-        });
-    }, [navigation, materials]);
-    const handleCreateExport = useCallback(() => {
-        navigation.navigate('AddExportWarehouse', {
-            availableMaterials: materials,
-        });
-    }, [navigation, materials]);
-
-    const handleCreateInventory = useCallback(() => {
-        navigation.navigate('AddInventory', {});
-    }, [navigation]);
-
-    const handleCreateMaterial = useCallback(() => {
-        navigation.navigate('AddMaterial', {});
-    }, [navigation]);
-
-    const handleEditMaterial = useCallback(
-        (item: IMaterial) => {
-            navigation.navigate('EditMaterial', {
-                material: item,
-            });
-        },
-        [navigation]
+    const actions = useMemo(
+        () => ({
+            createImport: () =>
+                navigation.navigate('AddWarehouse', {
+                    availableMaterials: materials,
+                }),
+            createExport: () =>
+                navigation.navigate('AddExportWarehouse', {
+                    availableMaterials: materials,
+                }),
+            createInventory: () => navigation.navigate('AddInventory', {}),
+            createMaterial: () => navigation.navigate('AddMaterial', {}),
+            editMaterial: (item: IMaterial) =>
+                navigation.navigate('EditMaterial', {
+                    material: item,
+                }),
+        }),
+        [navigation, materials]
     );
-
-    const handleAddMaterial = useCallback(() => {
-        handleCreateMaterial();
-    }, [handleCreateMaterial]);
 
     const handleSearch = useCallback(
         (text: string) => {
@@ -230,7 +251,7 @@ export const MeterialScreen = () => {
                 setFilterMaterialName(null);
             }
         },
-        [filterMaterialName, setFilterMaterialName]
+        [filterMaterialName, setFilterMaterialName, setSelectedTab]
     );
 
     const handleHistoryPress = useCallback(
@@ -238,7 +259,7 @@ export const MeterialScreen = () => {
             setFilterMaterialName(item.name);
             setSelectedTab('history');
         },
-        [setFilterMaterialName]
+        [setFilterMaterialName, setSelectedTab]
     );
 
     const mappedExportReceipts = useMemo(() => {
@@ -272,8 +293,11 @@ export const MeterialScreen = () => {
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
-                <HeaderMeterial
-                    showBackButton={false}
+                <ZoneHeader
+                    dropdownData={dropdownData}
+                    dropdownValue={selectedDropdownItem}
+                    onDropdownSelect={handleDropdownSelect}
+                    dropdownPlaceholder="Chọn kho"
                     rightComponent={
                         <ButtonMetaerial onShowMenu={handleShowMenu} isOpen={menuOpen} />
                     }
@@ -291,13 +315,13 @@ export const MeterialScreen = () => {
                 {selectedTab === 'list' && (
                     <MaterialListScreen
                         materials={materials}
-                        onEdit={handleEditMaterial}
+                        onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
                         onAdjustmentPress={handleAdjustmentPress}
                         isLoading={showSkeleton}
                         refreshing={!!isRefetchingMaterials}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleAddMaterial}
+                        onPressCreate={actions.createMaterial}
                     />
                 )}
                 {selectedTab === 'history' && (
@@ -306,7 +330,7 @@ export const MeterialScreen = () => {
                         isLoading={isLoadingImportReceipts}
                         refreshing={!!isRefetchingImportReceipts}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleCreateImport}
+                        onPressCreate={actions.createImport}
                     />
                 )}
                 {selectedTab === 'export' &&
@@ -319,7 +343,7 @@ export const MeterialScreen = () => {
                             onRefresh={handleRefresh}
                         />
                     ) : (
-                        <MaterialEmptyState tab="history" onPress={handleCreateImport} />
+                        <MaterialEmptyState tab="history" onPress={actions.createImport} />
                     ))}
                 {selectedTab === 'inventory' && (
                     <InventoryScreen
@@ -327,7 +351,7 @@ export const MeterialScreen = () => {
                         isLoading={isLoadingInventory || isRefetchingInventory}
                         refreshing={!!isRefetchingInventory}
                         onRefresh={handleRefresh}
-                        onPressCreate={handleCreateInventory}
+                        onPressCreate={actions.createInventory}
                     />
                 )}
             </View>
@@ -336,10 +360,10 @@ export const MeterialScreen = () => {
                 isOpen={menuOpen}
                 buttonPosition={menuPosition}
                 onClose={handleCloseMenu}
-                onPressCreateImport={handleCreateImport}
-                onPressCreateExport={handleCreateExport}
-                onPressCreateAdjustment={handleCreateInventory}
-                onPressCreateMaterial={handleCreateMaterial}
+                onPressCreateImport={actions.createImport}
+                onPressCreateExport={actions.createExport}
+                onPressCreateAdjustment={actions.createInventory}
+                onPressCreateMaterial={actions.createMaterial}
             />
         </View>
     );
