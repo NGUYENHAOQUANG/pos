@@ -16,6 +16,8 @@ export const OPERATION_TYPE_TO_JOB_TYPE: Record<string, JobType> = {
     StockTransfer: 'TRANSFER_POND',
     CleanPond: 'CLEAN_POND',
     SunDryPond: 'SUN_DRY_POND',
+    CleanRenovation: 'CLEAN_POND',
+    DryRenovation: 'SUN_DRY_POND',
     Harvest: 'HARVEST',
 };
 
