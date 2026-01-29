@@ -10,6 +10,7 @@ interface UseInventoryFormProps {
 export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFormProps) => {
     const [date, setDate] = useState(new Date());
     const [note, setNote] = useState('');
+    const [creatorName, setCreatorName] = useState<string>(''); // Store creator name from API
     const [materialName, setMaterialName] = useState('');
     const [oldStock, setOldStock] = useState(0);
     const [newStock, setNewStock] = useState('');
@@ -28,6 +29,9 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
                     if (response.success && response.data) {
                         const detail = response.data;
                         setNote(detail.note || '');
+                        if (detail.creator) {
+                            setCreatorName(detail.creator.fullname || '');
+                        }
                         if (detail.createdAt) {
                             setDate(new Date(detail.createdAt));
                         }
@@ -60,6 +64,7 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
         formState: {
             date,
             note,
+            creatorName,
             materialName,
             oldStock,
             newStock,

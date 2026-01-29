@@ -93,7 +93,7 @@ export const useInventorySubmit = ({
                 inventoryCheckId: inventoryId,
                 items: [
                     {
-                        itemId: itemId,
+                        inventoryCheckItemId: itemId,
                         actualQty: Number(newStock),
                     },
                 ],
@@ -153,7 +153,7 @@ export const useInventorySubmit = ({
                 inventoryCheckId: inventoryId,
                 items: [
                     {
-                        itemId: itemId, // Use existing item ID
+                        inventoryCheckItemId: itemId, // Use existing item ID
                         actualQty: Number(newStock),
                     },
                 ],
