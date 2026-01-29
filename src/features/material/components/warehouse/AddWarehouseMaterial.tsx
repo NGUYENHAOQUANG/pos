@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
@@ -22,16 +22,19 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 export interface MaterialItem {
     id: string;
+    materialId?: string;
     materialName: string;
     quantity: string;
     price: string;
+    availableQuantity?: number;
+    unit?: string;
 }
 
 interface AddWarehouseMaterialProps {
     materials: MaterialItem[];
-    onUpdateMaterial: (id: string, field: keyof MaterialItem, value: string) => void;
+    onUpdateMaterial: (id: string, field: keyof MaterialItem, value: any) => void;
     onAddMaterial: () => void;
-    materialOptions?: { label: string; value: string; unit: string }[];
+    materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
 }
 
@@ -53,13 +56,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     const formatCurrency = (value: number) => {
         return (
             <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
+                {formatCurrencyValue(value)} <Text style={styles.currencyUnderline}>đ</Text>
             </>
         );
     };
-
-    const materialNames = materialOptions.map(opt => opt.label);
 
     // Store refs for each material item to measure position
     const itemRefs = React.useRef<{ [key: string]: View | null }>({});
@@ -89,6 +89,12 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                 : 'Vui lòng nhập số lượng và đơn giá';
                         const isDropdownOpen = activeDropdownId === item.id;
 
+                        // Calculate diff or check validation?
+                        const quantityNum = parseFloat(item.quantity) || 0;
+                        const isOverStock =
+                            item.availableQuantity !== undefined &&
+                            quantityNum > item.availableQuantity;
+
                         return (
                             <View
                                 key={item.id}
@@ -112,19 +118,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             <DropdownMaterial
                                                 label="Tên vật tư"
                                                 required
-                                                value={item.materialName}
-                                                options={
-                                                    materialNames.length > 0
-                                                        ? materialNames
-                                                        : [
-                                                              'CP 09 – Thức ăn tôm giai đoạn 2',
-                                                              'Biozeus Probiotics',
-                                                              'Vôi',
-                                                              'Khoáng',
-                                                          ]
-                                                }
+                                                value={item.materialId} // Use ID
+                                                options={materialOptions} // { label, value: ID }
                                                 onChange={val =>
-                                                    onUpdateMaterial(item.id, 'materialName', val)
+                                                    onUpdateMaterial(item.id, 'materialId', val)
                                                 }
                                                 placeholder="Chọn vật tư"
                                                 showAllOption={false}
@@ -134,6 +131,18 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 }
                                                 inline={true}
                                             />
+                                            {/* Show Available Quantity */}
+                                            {item.materialId &&
+                                                item.availableQuantity !== undefined && (
+                                                    <View style={styles.stockInfoRow}>
+                                                        <Text style={styles.stockInfoText}>
+                                                            Tồn kho:{' '}
+                                                            <Text style={styles.stockQuantity}>
+                                                                {item.availableQuantity} {item.unit}
+                                                            </Text>
+                                                        </Text>
+                                                    </View>
+                                                )}
                                         </View>
 
                                         <View style={[styles.row, styles.zIndexNormal]}>
@@ -153,8 +162,13 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         }
                                                     }}
                                                     keyboardType="numeric"
-                                                    containerStyle={{ marginBottom: 0 }}
+                                                    containerStyle={styles.noMarginBottom}
                                                 />
+                                                {isOverStock && (
+                                                    <Text style={styles.overStockText}>
+                                                        Vượt quá tồn kho ({item.availableQuantity})
+                                                    </Text>
+                                                )}
                                             </View>
 
                                             <View style={styles.halfWidth}>
@@ -162,11 +176,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     label={
                                                         <Text>
                                                             Đơn giá (
-                                                            <Text
-                                                                style={{
-                                                                    textDecorationLine: 'underline',
-                                                                }}
-                                                            >
+                                                            <Text style={styles.currencyUnderline}>
                                                                 đ
                                                             </Text>
                                                             )
@@ -193,7 +203,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         }
                                                     }}
                                                     keyboardType="numeric"
-                                                    containerStyle={{ marginBottom: 0 }}
+                                                    containerStyle={styles.noMarginBottom}
                                                 />
                                             </View>
                                         </View>
@@ -373,6 +383,34 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginLeft: spacing.xs,
         fontWeight: '500',
+    },
+    // Styles for stock info
+    stockInfoRow: {
+        marginTop: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    stockInfoText: {
+        fontSize: 13,
+        color: colors.textSecondary,
+    },
+    stockQuantity: {
+        color: colors.blue[600],
+        fontWeight: '500',
+    },
+    // Styles for overstock warning
+    overStockText: {
+        fontSize: 12,
+        color: colors.error,
+        marginTop: 4,
+    },
+    // Currency underline
+    currencyUnderline: {
+        textDecorationLine: 'underline',
+    },
+    // No margin bottom for inputs
+    noMarginBottom: {
+        marginBottom: 0,
     },
     zIndexHigh: {
         zIndex: 100,

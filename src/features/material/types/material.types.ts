@@ -1,3 +1,5 @@
+import { IApiResponse as IAppResponse, IPaginate } from '@/shared/types/common.types';
+
 export enum MaterialGroupType {
     FARMING = 'Nuôi',
     INTERNAL = 'Vật tư nội bộ',
@@ -130,23 +132,6 @@ export interface UpdateMaterialGroupRequest {
     description?: string | null;
 }
 
-export interface IPaginate<T> {
-    size: number;
-    page: number;
-    total: number;
-    totalPages: number;
-    items: T[] | null;
-}
-
-export interface IAppResponse<T> {
-    result: boolean;
-    statusCode: number;
-    message?: string | null;
-    exception?: string | null;
-    traceId?: string | null;
-    data: T;
-}
-
 export type GetMaterialGroupsResponse = IAppResponse<IPaginate<IMaterialGroup>>;
 export type GetMaterialGroupByIdResponse = IAppResponse<IMaterialGroup>;
 
@@ -231,6 +216,14 @@ export interface GetWarehouseParams {
     MaterialName?: string;
     Page?: number;
     PageSize?: number;
+    ZoneId?: string;
+    Name?: string;
+    Location?: string;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    OrderBy?: string;
 }
 
 export interface GetExportWarehouseParams {
