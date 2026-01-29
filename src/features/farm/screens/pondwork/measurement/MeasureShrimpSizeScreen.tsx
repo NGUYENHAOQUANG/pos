@@ -17,6 +17,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { useCreateSizeMeasurement } from '@/features/farm/hooks/useSizeMeasurement';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -76,33 +77,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
-    // Real-time validation
-    useEffect(() => {
-        if (!stockingQuantity || !shrimpSize || !remainingWeight) return;
-
-        const size = parseFloat(shrimpSize);
-        const weight = parseFloat(remainingWeight);
-
-        if (isNaN(size) || isNaN(weight)) return;
-
-        const totalShrimp = Math.round(size * weight);
-
-        if (totalShrimp > stockingQuantity) {
-            Toast.show({
-                type: 'error',
-                text1: 'Vượt quá số lượng thả ban đầu',
-            });
-            return;
-        }
-
-        const calculatedSurvivalRate = Math.round((totalShrimp / stockingQuantity) * 100);
-        if (calculatedSurvivalRate > 100) {
-            Toast.show({
-                type: 'error',
-                text1: 'Tỉ lệ sống vượt quá 100%',
-            });
-        }
-    }, [shrimpSize, remainingWeight, stockingQuantity]);
+    const createSizeMeasurement = useCreateSizeMeasurement();
 
     const handleSave = () => {
         if (!shrimpSize || !remainingWeight) {
@@ -122,24 +97,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         let survivalRate: number | null = null;
         if (totalShrimp !== null && stockingQuantity && stockingQuantity > 0) {
             survivalRate = Math.round((totalShrimp / stockingQuantity) * 100);
-        }
-
-        // Validation: Tổng số tôm hiện tại không được lớn hơn số lượng thả ban đầu
-        if (totalShrimp !== null && stockingQuantity && totalShrimp > stockingQuantity) {
-            Toast.show({
-                type: 'error',
-                text1: 'Không thể lưu vui lòng kiểm tra lại',
-            });
-            return;
-        }
-
-        // Validation: Tỉ lệ sống không được vượt quá 100%
-        if (survivalRate !== null && survivalRate > 100) {
-            Toast.show({
-                type: 'error',
-                text1: 'Không thể lưu vui lòng kiểm tra lại',
-            });
-            return;
         }
 
         const timeString = time.toLocaleTimeString('en-GB', {
@@ -168,29 +125,32 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             );
             updatePondJob(currentPond.id, 'MEASURE_SIZE', updatedItems);
             Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
+            navigation.goBack();
         } else {
-            // Find the max index from existing "Lần X" labels
-            const maxIndex = currentItems.reduce((max, item) => {
-                const match = item.label.match(/Lần\s+(\d+)/);
-                if (match && match[1]) {
-                    const num = parseInt(match[1], 10);
-                    return num > max ? num : max;
+            createSizeMeasurement.mutate(
+                {
+                    pondId: 'ae9e1840-cad0-46cb-9648-7f8c3998235a', // currentPond.id,
+                    data: {
+                        documentIds: imageUris,
+                        sizeMeasurement: {
+                            shrimpSizePcsPerKg: size,
+                            estimatedRemainingStockKg: weight,
+                            notes: notes,
+                        },
+                    },
+                },
+                {
+                    onSuccess: () => {
+                        Toast.show({ type: 'success', text1: 'Đã đo kích thước tôm thành công' });
+                        navigation.goBack();
+                    },
+                    onError: (error: any) => {
+                        console.log(error);
+                        Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
+                    },
                 }
-                return max;
-            }, 0);
-
-            const nextIndex = maxIndex + 1;
-            const newItem = {
-                id: Date.now().toString(),
-                label: `Lần ${nextIndex}`,
-                ...itemData,
-                pondId: currentPond.id,
-            };
-            updatePondJob(currentPond.id, 'MEASURE_SIZE', [...currentItems, newItem]);
-            Toast.show({ type: 'success', text1: 'Đã đo kích thước tôm thành công' });
+            );
         }
-
-        navigation.goBack();
     };
 
     // Correct delete logic using the "get, filter, update" pattern
