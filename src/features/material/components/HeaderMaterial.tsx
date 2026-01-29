@@ -6,6 +6,7 @@ interface HeaderMeterialProps {
     onBackPress?: () => void;
     rightComponent?: React.ReactNode;
     showBackButton?: boolean;
+    includeSafeArea?: boolean;
 }
 
 export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
@@ -13,9 +14,11 @@ export const HeaderMeterial: React.FC<HeaderMeterialProps> = ({
     onBackPress,
     rightComponent,
     showBackButton = true,
+    includeSafeArea = true,
 }) => {
     return (
         <HeaderSection
+            includeSafeArea={includeSafeArea}
             title={title}
             onBack={onBackPress}
             rightComponent={rightComponent}
