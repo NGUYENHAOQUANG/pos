@@ -76,24 +76,12 @@ export const createEnvironmentSlice: StateCreator<
     },
     createParameterSetting: async (zoneId: string, data: any) => {
         await environmentApi.createParameterSetting(zoneId, data);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
     updateParameterSetting: async (zoneId: string, id: string, data: any) => {
         await environmentApi.updateParameterSetting(zoneId, id, data);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
     deleteParameterSetting: async (zoneId: string, id: string) => {
         await environmentApi.deleteParameterSetting(zoneId, id);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
 
     // Environment Parameters

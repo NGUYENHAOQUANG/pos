@@ -214,6 +214,9 @@ export const useSettingEnvironment = ({
 
             await Promise.all(promises);
 
+            // Refetch settings ONCE after all updates are complete
+            await useFarmStore.getState().fetchParameterSettings(zoneId);
+
             Toast.show({
                 type: 'success',
                 text1: 'Đã lưu thiết lập thành công',
