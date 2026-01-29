@@ -223,7 +223,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
             return value ? (
                 <AutoScrollText
                     text={currentLabel || ''}
-                    key={String(value)}
+                    key={`${String(value)}-${currentLabel}`}
                     style={{
                         ...StyleSheet.flatten(styles.text),
                         flex: undefined,
@@ -258,7 +258,9 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         <View style={styles.container}>
             {label && (
                 <View style={styles.labelContainer}>
-                    {required && <Text style={styles.required}>* </Text>}
+                    <View style={styles.requiredWrapper}>
+                        {required && <Text style={styles.required}>*</Text>}
+                    </View>
                     <Text style={styles.label}>{label}</Text>
                 </View>
             )}
@@ -302,9 +304,13 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 
 const styles = StyleSheet.create({
     container: { flex: 1, zIndex: 10 },
-    labelContainer: { flexDirection: 'row', marginBottom: spacing.sm },
-    label: { fontSize: 14, color: colors.text, fontWeight: '400' },
-    required: { fontSize: 14, color: colors.error || '#FF4D4F' },
+    labelContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+    requiredWrapper: {
+        width: 7,
+        marginRight: 4,
+    },
+    label: { fontSize: 14, color: colors.text, fontWeight: '400', lineHeight: 24 },
+    required: { color: colors.error },
     button: {
         flexDirection: 'row',
         alignItems: 'center',
