@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     contentContainer: {
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm,
         paddingBottom: 100,
     },
 });

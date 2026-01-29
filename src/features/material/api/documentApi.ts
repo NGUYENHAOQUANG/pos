@@ -65,8 +65,33 @@ export const documentApi = {
 
         return [];
     },
-    delete: async (id: string): Promise<any> => {
-        const { data } = await apiClient.delete(API_ENDPOINTS.DOCUMENT.DELETE(id));
-        return data;
+
+    getUrl: async (id: string): Promise<string> => {
+        const { data } = await apiClient.get<any>(API_ENDPOINTS.DOCUMENT.GET_URL(id));
+
+        // Handle various response structures
+        if (typeof data === 'string') return data;
+        if (data?.result && typeof data.result === 'string') return data.result;
+
+        // Handle nested data object with documentUrl (Current API format)
+        if (data?.data) {
+            if (typeof data.data === 'string') return data.data;
+            if (data.data.documentUrl && typeof data.data.documentUrl === 'string')
+                return data.data.documentUrl;
+        }
+
+        if (data?.url && typeof data.url === 'string') return data.url;
+        return '';
+    },
+
+    delete: async (id: string): Promise<boolean> => {
+        try {
+            const { data } = await apiClient.delete<any>(API_ENDPOINTS.DOCUMENT.DELETE(id));
+            if (data?.success || data?.result) return true;
+            return false;
+        } catch (error) {
+            console.error('Delete document error:', error);
+            return false;
+        }
     },
 };

@@ -78,7 +78,7 @@ export interface PondData {
     lastActivity?: string;
     size?: string; // Kích thước (m) - ví dụ: "50×28"
     zone?: string; // Khu vực - ví dụ: "KV-A"
-    zoneId?: number | string; // Added for filtering
+    zoneId?: string; // Added for filtering
     status?: string; // Trạng thái - ví dụ: "Đang hoạt động", "Chuẩn bị"
     farmCode?: string; // Mã trại - ví dụ: "KG-01"
     shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
@@ -105,6 +105,15 @@ export interface CycleData {
     doc?: number; // DOC (ngày) - ví dụ: 21
     // Thông tin sang ao (chỉ có khi chu kỳ này được tạo từ việc sang ao)
     transferInfo?: TransferInfo;
+}
+
+export interface CreateCycleCommand {
+    seasonId: string;
+    warehouseItemId: string;
+    name: string;
+    totalStocking: number;
+    ageDays: number;
+    notes?: string;
 }
 
 // Thông tin sang ao - lưu dữ liệu từ ao vèo khi chuyển sang ao nuôi

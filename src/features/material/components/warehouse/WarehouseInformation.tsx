@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
-import { CollapseHead } from '../CollapseHead';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
@@ -82,7 +82,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: colors.white,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
@@ -99,5 +99,7 @@ const styles = StyleSheet.create({
     content: {
         padding: spacing.md,
         gap: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.gray[100],
     },
 });

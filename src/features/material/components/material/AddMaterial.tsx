@@ -12,7 +12,7 @@ import {
     DropdownMaterial,
     DropdownOption,
 } from '@/features/material/components/material/DropdownMaterialGroup';
-import { CollapseHead } from '@/features/material/components/CollapseHead';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
@@ -229,19 +229,14 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                 />
                             </View>
 
-                            <View style={styles.inputGroup}>
-                                <View style={styles.labelContainer}>
-                                    <Text style={styles.required}>* </Text>
-                                    <Text style={styles.label}>Nhãn hiệu</Text>
-                                </View>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Nhập nhãn hiệu"
-                                    placeholderTextColor={colors.textSecondary}
-                                    value={manufacturer}
-                                    onChangeText={onManufacturerChange}
-                                />
-                            </View>
+                            <Input
+                                label="Nhãn hiệu"
+                                placeholder="Nhập nhãn hiệu"
+                                placeholderTextColor={colors.textSecondary}
+                                value={manufacturer}
+                                onChangeText={onManufacturerChange}
+                                required
+                            />
                         </View>
                     </>
                 )}
@@ -253,7 +248,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 const styles = StyleSheet.create({
     sectionContainer: {
         backgroundColor: colors.white,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         zIndex: 10,
         ...Platform.select({
             ios: {

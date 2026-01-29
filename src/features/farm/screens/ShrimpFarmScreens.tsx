@@ -213,7 +213,10 @@ export const ShrimpFarmScreens: React.FC = () => {
 
     const handleStartCycle = () => {
         if (pond?.id) {
-            navigation.navigate('CreateCycle', { pondId: pond.id });
+            navigation.navigate('CreateCycle', {
+                pondId: pond.id,
+                zoneId: pond.zoneId?.toString(), // Pass zoneId for season fetching
+            });
         }
     };
 
