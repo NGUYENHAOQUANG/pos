@@ -363,7 +363,7 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.backgroundPrimary,
     },
     content: {
         flex: 1,
