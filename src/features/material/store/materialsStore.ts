@@ -2,15 +2,18 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TabType } from '@/features/material/components/HeadingMaterial';
 
 interface MaterialsState {
     // UI State (for MaterialScreen)
+    selectedTab: TabType;
     searchText: string;
     filterGroup: string;
     filterType: string; // Material type name for filtering
     filterMaterialName: string | null;
 
     // Actions - Filters
+    setSelectedTab: (tab: TabType) => void;
     setSearchText: (text: string) => void;
     setFilterGroup: (group: string) => void;
     setFilterType: (type: string) => void;
@@ -22,12 +25,18 @@ export const useMaterialsStore = create<MaterialsState>()(
     persist(
         immer(set => ({
             // Initial state
+            selectedTab: 'list',
             searchText: '',
             filterGroup: '',
             filterType: '',
             filterMaterialName: null,
 
             // Filter actions
+            setSelectedTab: (tab: TabType) =>
+                set(state => {
+                    state.selectedTab = tab;
+                }),
+
             setSearchText: (text: string) =>
                 set(state => {
                     state.searchText = text;
@@ -67,6 +76,7 @@ export const useMaterialsStore = create<MaterialsState>()(
                 searchText: state.searchText,
                 filterGroup: state.filterGroup,
                 filterType: state.filterType,
+                selectedTab: state.selectedTab,
             }),
         }
     )
