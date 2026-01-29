@@ -29,6 +29,13 @@ export const API_ENDPOINTS = {
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
         },
         SIPHON_RECORDS: (pondId: string) => `/pond/${pondId}/siphon-records`,
+        SIZE_MEASUREMENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/sizemeasurement`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/sizemeasurement`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',

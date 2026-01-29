@@ -18,4 +18,21 @@ export const farmKeys = {
         byPond: (pondId: string) => [...farmKeys.cycles.all(), 'byPond', pondId] as const,
         detail: (id: string) => [...farmKeys.cycles.all(), 'detail', id] as const,
     },
+    sizeMeasurements: {
+        all: () => [...farmKeys.all, 'sizeMeasurements'] as const,
+        byPond: (pondId: string, params?: any) =>
+            [
+                ...farmKeys.sizeMeasurements.all(),
+                'byPond',
+                pondId,
+                ...(params ? [params] : []),
+            ] as const,
+        detail: (id: string) => [...farmKeys.sizeMeasurements.all(), 'detail', id] as const,
+    },
+    siphon: {
+        all: () => [...farmKeys.all, 'siphon'] as const,
+        list: (pondId: string, params?: any) =>
+            [...farmKeys.siphon.all(), 'list', pondId, ...(params ? [params] : [])] as const,
+        detail: (id: string) => [...farmKeys.siphon.all(), 'detail', id] as const,
+    },
 };

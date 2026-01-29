@@ -7,6 +7,7 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { MeasureSizeMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { convertMeasureSizeMetaToActivityData } from '@/features/farm/utils/metaConverters';
 import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
+import { useSizeMeasurementsAsJobs } from '@/features/farm/hooks/useSizeMeasurement';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeLogScreen'>;
@@ -16,16 +17,32 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
     const { params } = useRoute<ScreenRouteProp>();
     const { pond } = params || {};
 
+    const [startDate, setStartDate] = React.useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
+    const [endDate, setEndDate] = React.useState(new Date());
+
+    const { jobs } = useSizeMeasurementsAsJobs(pond?.id, {
+        CreateAtFrom: startDate.toISOString(),
+        CreateAtTo: endDate.toISOString(),
+    });
+
     const config: LogScreenConfig<MeasureSizeMeta> = {
         jobType: 'MEASURE_SIZE',
         pond,
+        externalData: jobs,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
         metaConverter: (item: JobExecution, meta: MeasureSizeMeta) =>
             convertMeasureSizeMetaToActivityData(item, meta),
         editRoute: 'MeasureShrimpSizeScreen',
         getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
     };
 
-    const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const { groupedData } = useLogScreenData(config);
 
     const handleNavigateToCreate = () => {
         if (pond) {

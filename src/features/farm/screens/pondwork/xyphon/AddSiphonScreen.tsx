@@ -21,8 +21,11 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -81,13 +84,43 @@ export const AddSiphonScreen: React.FC = () => {
         };
     }, [itemToEdit, meta]);
 
-    // Fetch materials (tools only)
-    const { data: materialsData = [] } = useMaterials();
+    // Fetch all materials definitions to check for groups (Tools)
+    const { data: allMaterials = [] } = useMaterials();
 
-    // Filter specifically for "Công cụ" (TOOLS) as requested
+    // Fetch warehouse for the current farm (Zone)
+    const { data: warehouses = [] } = useWarehouses({ ZoneId: pond?.zoneId });
+    const warehouseId = warehouses?.[0]?.id; // Assume first warehouse of the zone
+
+    // Fetch items in the warehouse
+    const { data: warehouseItemsData } = useWarehouseItems(warehouseId, undefined, {
+        enabled: !!warehouseId,
+    });
+    const warehouseItems = useMemo(() => warehouseItemsData?.items || [], [warehouseItemsData]);
+
+    // Filter and Map: Get "Tools" from the warehouse items
     const materials = useMemo(() => {
-        return materialsData.filter(m => m.group === MaterialGroupType.TOOLS);
-    }, [materialsData]);
+        if (!warehouseItems.length || !allMaterials.length) return [];
+
+        return warehouseItems
+            .map(item => {
+                // Find corresponding material definition to check Group
+                const materialDef = allMaterials.find(m => m.id === item.materialId);
+
+                if (materialDef && materialDef.group === MaterialGroupType.TOOLS) {
+                    // Return IMaterial-like object, KEY: id must be warehouseItemId
+                    return {
+                        id: item.id, // Use WarehouseItemId unique to this stock
+                        name: item.materialName || materialDef.name,
+                        group: MaterialGroupType.TOOLS,
+                        unit: item.unitId,
+                        unitName: item.unitName || materialDef.unitName,
+                        remaining: item.quantity,
+                    } as IMaterial;
+                }
+                return null;
+            })
+            .filter((item): item is IMaterial => item !== null);
+    }, [warehouseItems, allMaterials]);
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
