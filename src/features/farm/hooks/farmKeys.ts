@@ -13,4 +13,9 @@ export const farmKeys = {
     seasons: (zoneId?: number | string) =>
         [...farmKeys.all, 'seasons', ...(zoneId ? [zoneId] : [])] as const,
     detail: (zoneId: string, id: string) => [...farmKeys.seasons(zoneId), 'detail', id] as const,
+    cycles: {
+        all: () => [...farmKeys.all, 'cycles'] as const,
+        byPond: (pondId: string) => [...farmKeys.cycles.all(), 'byPond', pondId] as const,
+        detail: (id: string) => [...farmKeys.cycles.all(), 'detail', id] as const,
+    },
 };
