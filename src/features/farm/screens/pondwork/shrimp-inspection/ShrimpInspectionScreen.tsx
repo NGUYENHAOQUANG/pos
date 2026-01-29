@@ -152,12 +152,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                     payload,
                 },
                 {
-                    onSuccess: response => {
-                        console.log(
-                            '[ShrimpInspectionScreen] Update shrimp health check result:',
-                            response
-                        );
-
+                    onSuccess: () => {
                         // Mark as saved to prevent auto-cleanup
                         generalInfoBoxRef.current?.markAsSaved();
 
@@ -230,12 +225,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
         deleteMutation.mutate(
             { pondId, id: itemToEdit.id },
             {
-                onSuccess: response => {
-                    console.log(
-                        '[ShrimpInspectionScreen] Delete success:',
-                        JSON.stringify(response, null, 2)
-                    );
-
+                onSuccess: () => {
                     setDeleteModalVisible(false);
                     navigation.goBack();
 

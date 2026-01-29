@@ -147,19 +147,15 @@ export const useCreateShrimpHealthCheck = () => {
             pondId: string;
             payload: CreateShrimpHealthCheckPayload;
         }) => {
-            console.log('[useCreateShrimpHealthCheck] Creating for pond:', pondId);
             return await shrimpHealthCheckApi.create(pondId, payload);
         },
-        onSuccess: (data, variables) => {
-            console.log('[useCreateShrimpHealthCheck] Success:', data);
+        onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
                 queryKey: ['shrimpHealthChecks', variables.pondId],
             });
         },
-        onError: (error: any) => {
-            console.error('[useCreateShrimpHealthCheck] Error:', error);
-        },
+        onError: () => {},
     });
 };
 
@@ -179,19 +175,15 @@ export const useUpdateShrimpHealthCheck = () => {
             id: string;
             payload: UpdateShrimpHealthCheckPayload;
         }) => {
-            console.log('[useUpdateShrimpHealthCheck] Updating:', { pondId, id });
             return await shrimpHealthCheckApi.update(pondId, id, payload);
         },
-        onSuccess: (data, variables) => {
-            console.log('[useUpdateShrimpHealthCheck] Success:', data);
+        onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
                 queryKey: ['shrimpHealthChecks', variables.pondId],
             });
         },
-        onError: (error: any) => {
-            console.error('[useUpdateShrimpHealthCheck] Error:', error);
-        },
+        onError: () => {},
     });
 };
 
@@ -203,18 +195,14 @@ export const useDeleteShrimpHealthCheck = () => {
 
     return useMutation({
         mutationFn: async ({ pondId, id }: { pondId: string; id: string }) => {
-            console.log('[useDeleteShrimpHealthCheck] Deleting:', { pondId, id });
             return await shrimpHealthCheckApi.delete(pondId, id);
         },
-        onSuccess: (data, variables) => {
-            console.log('[useDeleteShrimpHealthCheck] Success:', data);
+        onSuccess: (_data, variables) => {
             // Invalidate and refetch
             queryClient.invalidateQueries({
                 queryKey: ['shrimpHealthChecks', variables.pondId],
             });
         },
-        onError: (error: any) => {
-            console.error('[useDeleteShrimpHealthCheck] Error:', error);
-        },
+        onError: () => {},
     });
 };
