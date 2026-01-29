@@ -8,6 +8,7 @@ import {
     Platform,
     PermissionsAndroid,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -15,7 +16,14 @@ import {
     launchImageLibrary,
     ImagePickerResponse,
     MediaType,
+    Asset,
 } from 'react-native-image-picker';
+import { documentApi } from '@/features/material/api/documentApi';
+
+export interface GeneralInfoBoxRef {
+    markAsSaved: () => void;
+    getUploadedIds: () => string[];
+}
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -89,293 +97,446 @@ interface GeneralInfoBox {
     disabledDate?: boolean;
 }
 
-export const GeneralInfoBox: React.FC<GeneralInfoBox> = ({
-    type = 'default',
-    date: initialDate,
-    onDateChange,
-    imageUris: initialImageUris,
-    onImagesChange,
-    activityLabel = 'Chọn loại hoạt động',
-    activityOptions,
-    selectedActivity,
-    onSelectActivity,
-    disabledDate = false,
-}) => {
-    // Internal state for date
-    const initialDateValue = useRef<Date>(initialDate || new Date());
-    const [selectedDate, setSelectedDate] = useState<Date>(initialDateValue.current);
+export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox>(
+    (
+        {
+            type = 'default',
+            date: initialDate,
+            onDateChange,
+            imageUris: initialImageUris,
+            onImagesChange,
+            activityLabel = 'Chọn loại hoạt động',
+            activityOptions,
+            selectedActivity,
+            onSelectActivity,
+            disabledDate = false,
+        },
+        ref
+    ) => {
+        // Internal state for date
+        const initialDateValue = useRef<Date>(initialDate || new Date());
+        const [selectedDate, setSelectedDate] = useState<Date>(initialDateValue.current);
 
-    // Track if date has been changed from initial value
-    const [hasDateChanged, setHasDateChanged] = useState(false);
+        // Track if date has been changed from initial value
+        const [hasDateChanged, setHasDateChanged] = useState(false);
 
-    // Internal state for images
-    const [imageUris, setImageUris] = useState<string[]>(initialImageUris || []);
-    const [actionSheetVisible, setActionSheetVisible] = useState(false);
-    const [previewUri, setPreviewUri] = useState<string | null>(null);
-    const [previewVisible, setPreviewVisible] = useState(false);
+        // Internal state for images
+        const [imageUris, setImageUris] = useState<string[]>(initialImageUris || []);
+        const [actionSheetVisible, setActionSheetVisible] = useState(false);
+        const [previewUri, setPreviewUri] = useState<string | null>(null);
+        const [previewVisible, setPreviewVisible] = useState(false);
 
-    // Sync with external date prop (for edit mode)
-    useEffect(() => {
-        if (initialDate) {
-            initialDateValue.current = initialDate;
-            setSelectedDate(initialDate);
-            setHasDateChanged(false);
-        }
-    }, [initialDate]);
+        // Loading states
+        const [uploadingUris, setUploadingUris] = useState<string[]>([]);
+        const [deletingUris, setDeletingUris] = useState<string[]>([]);
 
-    // Sync with external imageUris prop (for edit mode)
-    useEffect(() => {
-        if (initialImageUris !== undefined) {
-            setImageUris(initialImageUris);
-        }
-    }, [initialImageUris]);
+        // Track uploaded files
+        const sessionUploadedFileIds = useRef<string[]>([]);
+        const isSaved = useRef(false);
+        const isMounted = useRef(true);
+        // Keep a map of localUri -> serverId to handle removals and IDs lookup
+        const uploadedFilesMap = useRef<Record<string, string>>({});
 
-    // Notify parent when date changes
-    useEffect(() => {
-        onDateChange?.(selectedDate);
-    }, [selectedDate, onDateChange]);
+        React.useEffect(() => {
+            return () => {
+                isMounted.current = false;
+            };
+        }, []);
 
-    // Notify parent when images change
-    useEffect(() => {
-        onImagesChange?.(imageUris);
-    }, [imageUris, onImagesChange]);
+        React.useImperativeHandle(ref, () => ({
+            markAsSaved: () => {
+                isSaved.current = true;
+            },
+            getUploadedIds: () => {
+                // Return IDs corresponding to the current imageUris (in order)
+                return imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
+            },
+        }));
 
-    const requestCameraPermission = async (): Promise<boolean> => {
-        if (Platform.OS === 'android') {
+        // Cleanup on unmount
+        useEffect(() => {
+            return () => {
+                if (!isSaved.current && sessionUploadedFileIds.current.length > 0) {
+                    console.log(
+                        `[GeneralInfoBox] Auto-cleanup: Deleting ${sessionUploadedFileIds.current.length} unsaved files...`
+                    );
+                    sessionUploadedFileIds.current.forEach(id => {
+                        documentApi
+                            .delete(id)
+                            .catch(err =>
+                                console.error(
+                                    `[GeneralInfoBox] Delete failed (cleanup): ${id}`,
+                                    err
+                                )
+                            );
+                    });
+                }
+            };
+        }, []);
+
+        // Sync with external date prop (for edit mode)
+        useEffect(() => {
+            if (initialDate) {
+                initialDateValue.current = initialDate;
+                setSelectedDate(initialDate);
+                setHasDateChanged(false);
+            }
+        }, [initialDate]);
+
+        // Sync with external imageUris prop (for edit mode)
+        useEffect(() => {
+            if (initialImageUris !== undefined) {
+                setImageUris(initialImageUris);
+            }
+        }, [initialImageUris]);
+
+        // Notify parent when date changes
+        useEffect(() => {
+            onDateChange?.(selectedDate);
+        }, [selectedDate, onDateChange]);
+
+        // Notify parent when images change
+        useEffect(() => {
+            onImagesChange?.(imageUris);
+        }, [imageUris, onImagesChange]);
+
+        const requestCameraPermission = async (): Promise<boolean> => {
+            if (Platform.OS === 'android') {
+                try {
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.CAMERA,
+                        {
+                            title: 'Quyền truy cập camera',
+                            message: 'Ứng dụng cần quyền truy cập camera để chụp ảnh',
+                            buttonNeutral: 'Để sau',
+                            buttonNegative: 'Hủy',
+                            buttonPositive: 'OK',
+                        }
+                    );
+                    return granted === PermissionsAndroid.RESULTS.GRANTED;
+                } catch (err) {
+                    console.warn(err);
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        const uploadFile = async (asset: Asset) => {
+            if (!asset.uri) return;
+
             try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.CAMERA,
-                    {
-                        title: 'Quyền truy cập camera',
-                        message: 'Ứng dụng cần quyền truy cập camera để chụp ảnh',
-                        buttonNeutral: 'Để sau',
-                        buttonNegative: 'Hủy',
-                        buttonPositive: 'OK',
+                // Optimistically update UI
+                const uri = asset.uri;
+                setImageUris(prev => [...prev, uri]);
+                setUploadingUris(prev => [...prev, uri]); // Start loading
+
+                // Formatted file for upload
+                const fileToUpload = {
+                    uri: asset.uri,
+                    type: asset.type,
+                    name: asset.fileName,
+                };
+
+                const uploadedDocs = await documentApi.upload([fileToUpload]);
+
+                if (!isMounted.current) {
+                    // Cleanup if unmounted during upload
+                    if (uploadedDocs && uploadedDocs.length > 0) {
+                        uploadedDocs.forEach(doc => {
+                            if (doc.id) documentApi.delete(doc.id).catch(() => {});
+                        });
                     }
-                );
-                return granted === PermissionsAndroid.RESULTS.GRANTED;
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        }
-        return true;
-    };
-
-    const handleTakePhoto = async () => {
-        const hasPermission = await requestCameraPermission();
-        if (!hasPermission) {
-            Alert.alert('Thông báo', 'Cần quyền truy cập camera để chụp ảnh');
-            return;
-        }
-
-        launchCamera(
-            {
-                mediaType: 'photo' as MediaType,
-                quality: 0.8,
-                saveToPhotos: true,
-            },
-            (response: ImagePickerResponse) => {
-                if (response.didCancel) {
                     return;
                 }
-                if (response.errorMessage) {
-                    Alert.alert('Lỗi', response.errorMessage);
-                    return;
+
+                if (uploadedDocs && uploadedDocs.length > 0 && uploadedDocs[0].id) {
+                    const docId = uploadedDocs[0].id;
+                    sessionUploadedFileIds.current.push(docId);
+                    uploadedFilesMap.current[uri] = docId;
+                    console.log(`[GeneralInfoBox] Upload success: ${docId}`);
                 }
-                if (response.assets && response.assets[0]?.uri) {
-                    const uri = response.assets[0].uri;
-                    if (uri) {
-                        setImageUris(prev => [...prev, uri]);
-                    }
+            } catch (error) {
+                console.error('[GeneralInfoBox] Upload failed', error);
+                if (isMounted.current) {
+                    Alert.alert('Lỗi', 'Tải ảnh lên thất bại');
+                    // Remove the image from UI if upload failed
+                    setImageUris(prev => prev.filter(u => u !== asset.uri));
+                }
+            } finally {
+                if (isMounted.current && asset.uri) {
+                    setUploadingUris(prev => prev.filter(u => u !== asset.uri)); // Stop loading
                 }
             }
-        );
-    };
+        };
 
-    const handleChooseFromLibrary = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo' as MediaType,
-                quality: 0.8,
-            },
-            (response: ImagePickerResponse) => {
-                if (response.didCancel) {
-                    return;
-                }
-                if (response.errorMessage) {
-                    Alert.alert('Lỗi', response.errorMessage);
-                    return;
-                }
-                if (response.assets && response.assets[0]?.uri) {
-                    const uri = response.assets[0].uri;
-                    if (uri) {
-                        setImageUris(prev => [...prev, uri]);
+        const handleTakePhoto = async () => {
+            const hasPermission = await requestCameraPermission();
+            if (!hasPermission) {
+                Alert.alert('Thông báo', 'Cần quyền truy cập camera để chụp ảnh');
+                return;
+            }
+
+            launchCamera(
+                {
+                    mediaType: 'photo' as MediaType,
+                    quality: 0.8,
+                    saveToPhotos: true,
+                },
+                (response: ImagePickerResponse) => {
+                    if (response.didCancel) return;
+                    if (response.errorMessage) {
+                        Alert.alert('Lỗi', response.errorMessage);
+                        return;
+                    }
+                    if (response.assets && response.assets[0]) {
+                        uploadFile(response.assets[0]);
                     }
                 }
+            );
+        };
+
+        const handleChooseFromLibrary = () => {
+            launchImageLibrary(
+                {
+                    mediaType: 'photo' as MediaType,
+                    quality: 0.8,
+                },
+                (response: ImagePickerResponse) => {
+                    if (response.didCancel) return;
+                    if (response.errorMessage) {
+                        Alert.alert('Lỗi', response.errorMessage);
+                        return;
+                    }
+                    if (response.assets && response.assets[0]) {
+                        uploadFile(response.assets[0]);
+                    }
+                }
+            );
+        };
+
+        const handleImagePress = () => {
+            setActionSheetVisible(true);
+        };
+
+        const handleRemoveImage = async (index: number) => {
+            const uriToRemove = imageUris[index];
+            const idToRemove = uploadedFilesMap.current[uriToRemove];
+
+            // If currently uploading, prevent removal or handle gracefully (simplest is to block)
+            if (uploadingUris.includes(uriToRemove)) return;
+
+            if (idToRemove) {
+                setDeletingUris(prev => [...prev, uriToRemove]); // Start deleting loading
+                try {
+                    await documentApi.delete(idToRemove);
+                    // Remove from session tracking
+                    sessionUploadedFileIds.current = sessionUploadedFileIds.current.filter(
+                        id => id !== idToRemove
+                    );
+                    delete uploadedFilesMap.current[uriToRemove];
+                    console.log(`[GeneralInfoBox] Removed file: ${idToRemove}`);
+
+                    // Update UI after successful delete
+                    setImageUris(prev => prev.filter((_, i) => i !== index));
+                } catch (error) {
+                    console.error(`[GeneralInfoBox] Failed to remove file: ${idToRemove}`, error);
+                    Alert.alert('Lỗi', 'Không thể xóa ảnh. Vui lòng thử lại.');
+                } finally {
+                    setDeletingUris(prev => prev.filter(u => u !== uriToRemove)); // Stop deleting loading
+                }
+            } else {
+                // If no ID (local only or error), just remove from UI
+                setImageUris(prev => prev.filter((_, i) => i !== index));
             }
-        );
-    };
+        };
 
-    const handleImagePress = () => {
-        setActionSheetVisible(true);
-    };
+        const handlePreviewImage = (uri: string) => {
+            setPreviewUri(uri);
+            setPreviewVisible(true);
+        };
 
-    const handleRemoveImage = (index: number) => {
-        setImageUris(prev => prev.filter((_, i) => i !== index));
-    };
+        return (
+            <>
+                <SelectionInfoBox title="Thông tin chung">
+                    {/* Thời gian thực hiện */}
+                    <DateInputButton
+                        label="Thời gian thực hiện"
+                        date={selectedDate}
+                        onDateChange={date => {
+                            setSelectedDate(date);
+                            setHasDateChanged(true);
+                        }}
+                        formatOptions={{
+                            showCurrentLabel: hasDateChanged ? false : 'auto',
+                        }}
+                        disabled={disabledDate}
+                    />
 
-    const handlePreviewImage = (uri: string) => {
-        setPreviewUri(uri);
-        setPreviewVisible(true);
-    };
-
-    return (
-        <>
-            <SelectionInfoBox title="Thông tin chung">
-                {/* Thời gian thực hiện */}
-                <DateInputButton
-                    label="Thời gian thực hiện"
-                    date={selectedDate}
-                    onDateChange={date => {
-                        setSelectedDate(date);
-                        setHasDateChanged(true);
-                    }}
-                    formatOptions={{
-                        showCurrentLabel: hasDateChanged ? false : 'auto',
-                    }}
-                    disabled={disabledDate}
-                />
-
-                {/* Chọn loại hoạt động - dùng cho xử lý nước */}
-                {type === 'water_treatment' && activityOptions && onSelectActivity && (
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>
-                            {activityLabel}
-                        </Text>
-                        <View style={styles.radioGroup}>
-                            {activityOptions.map(option => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={styles.radioItem}
-                                    onPress={() => onSelectActivity(option)}
-                                    activeOpacity={0.8}
-                                >
-                                    <View
-                                        style={[
-                                            styles.radioOuter,
-                                            selectedActivity === option &&
-                                                styles.radioOuterSelected,
-                                        ]}
+                    {/* Chọn loại hoạt động - dùng cho xử lý nước */}
+                    {type === 'water_treatment' && activityOptions && onSelectActivity && (
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>
+                                <Text style={styles.required}>* </Text>
+                                {activityLabel}
+                            </Text>
+                            <View style={styles.radioGroup}>
+                                {activityOptions.map(option => (
+                                    <TouchableOpacity
+                                        key={option}
+                                        style={styles.radioItem}
+                                        onPress={() => onSelectActivity(option)}
+                                        activeOpacity={0.8}
                                     >
-                                        {selectedActivity === option && (
-                                            <View style={styles.radioInner} />
-                                        )}
-                                    </View>
-                                    <Text style={styles.radioLabel}>{option}</Text>
-                                </TouchableOpacity>
-                            ))}
+                                        <View
+                                            style={[
+                                                styles.radioOuter,
+                                                selectedActivity === option &&
+                                                    styles.radioOuterSelected,
+                                            ]}
+                                        >
+                                            {selectedActivity === option && (
+                                                <View style={styles.radioInner} />
+                                            )}
+                                        </View>
+                                        <Text style={styles.radioLabel}>{option}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
-                )}
+                    )}
 
-                {/* Chọn loại hoạt động - dùng cho thu hoạch */}
-                {type === 'harvest' && activityOptions && onSelectActivity && (
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>
-                            {activityLabel}
-                        </Text>
-                        <View style={styles.harvestRadioGroup}>
-                            {activityOptions.map(option => (
-                                <TouchableOpacity
-                                    key={option}
-                                    style={styles.harvestRadioItem}
-                                    onPress={() => onSelectActivity(option)}
-                                    activeOpacity={0.8}
-                                >
-                                    <View
-                                        style={[
-                                            styles.radioOuter,
-                                            selectedActivity === option &&
-                                                styles.radioOuterSelected,
-                                        ]}
+                    {/* Chọn loại hoạt động - dùng cho thu hoạch */}
+                    {type === 'harvest' && activityOptions && onSelectActivity && (
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>
+                                <Text style={styles.required}>* </Text>
+                                {activityLabel}
+                            </Text>
+                            <View style={styles.harvestRadioGroup}>
+                                {activityOptions.map(option => (
+                                    <TouchableOpacity
+                                        key={option}
+                                        style={styles.harvestRadioItem}
+                                        onPress={() => onSelectActivity(option)}
+                                        activeOpacity={0.8}
                                     >
-                                        {selectedActivity === option && (
-                                            <View style={styles.radioInner} />
-                                        )}
-                                    </View>
-                                    <Text style={styles.radioLabel}>{option}</Text>
-                                </TouchableOpacity>
-                            ))}
+                                        <View
+                                            style={[
+                                                styles.radioOuter,
+                                                selectedActivity === option &&
+                                                    styles.radioOuterSelected,
+                                            ]}
+                                        >
+                                            {selectedActivity === option && (
+                                                <View style={styles.radioInner} />
+                                            )}
+                                        </View>
+                                        <Text style={styles.radioLabel}>{option}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
-                )}
+                    )}
 
-                {/* Hình ảnh - chỉ dùng cho type withImage */}
+                    {/* Hình ảnh - chỉ dùng cho type withImage */}
+                    {type === 'withImage' && (
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Hình ảnh</Text>
+                            <View style={styles.imagesContainer}>
+                                {/* Selected Images */}
+                                {imageUris.map((uri, index) => {
+                                    const isUploading = uploadingUris.includes(uri);
+                                    const isDeleting = deletingUris.includes(uri);
+                                    return (
+                                        <View key={index} style={styles.imageItem}>
+                                            <TouchableOpacity
+                                                style={styles.imageInner}
+                                                activeOpacity={0.9}
+                                                onPress={() =>
+                                                    !isUploading &&
+                                                    !isDeleting &&
+                                                    handlePreviewImage(uri)
+                                                }
+                                                disabled={isUploading || isDeleting}
+                                            >
+                                                <Image
+                                                    source={{ uri }}
+                                                    style={[
+                                                        styles.image,
+                                                        (isUploading || isDeleting) &&
+                                                            styles.imageLoading,
+                                                    ]}
+                                                />
+                                                {isUploading && (
+                                                    <View style={styles.loadingOverlay}>
+                                                        <ActivityIndicator
+                                                            size="small"
+                                                            color={colors.white}
+                                                        />
+                                                    </View>
+                                                )}
+                                                {isDeleting && (
+                                                    <View style={styles.loadingOverlay}>
+                                                        <ActivityIndicator
+                                                            size="small"
+                                                            color={colors.error}
+                                                        />
+                                                    </View>
+                                                )}
+                                            </TouchableOpacity>
+                                            {!isUploading && !isDeleting && (
+                                                <TouchableOpacity
+                                                    style={styles.removeButton}
+                                                    onPress={() => handleRemoveImage(index)}
+                                                    activeOpacity={0.7}
+                                                >
+                                                    <IconCloseOutlined
+                                                        width={10}
+                                                        height={10}
+                                                        color={colors.textSecondary}
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    );
+                                })}
+
+                                {/* Add Button */}
+                                <TouchableOpacity
+                                    style={styles.imageUploadArea}
+                                    onPress={handleImagePress}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons name="add" size={16} color={colors.black} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                </SelectionInfoBox>
+
+                {/* Image Picker Action Sheet */}
                 {type === 'withImage' && (
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Hình ảnh</Text>
-                        <View style={styles.imagesContainer}>
-                            {/* Selected Images */}
-                            {imageUris.map((uri, index) => (
-                                <View key={index} style={styles.imageItem}>
-                                    <TouchableOpacity
-                                        style={styles.imageInner}
-                                        activeOpacity={0.9}
-                                        onPress={() => handlePreviewImage(uri)}
-                                    >
-                                        <Image source={{ uri }} style={styles.image} />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={styles.removeButton}
-                                        onPress={() => handleRemoveImage(index)}
-                                        activeOpacity={0.7}
-                                    >
-                                        <IconCloseOutlined
-                                            width={10}
-                                            height={10}
-                                            color={colors.textSecondary}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-
-                            {/* Add Button */}
-                            <TouchableOpacity
-                                style={styles.imageUploadArea}
-                                onPress={handleImagePress}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons name="add" size={16} color={colors.black} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    <ImagePickerActionSheet
+                        visible={actionSheetVisible}
+                        onClose={() => setActionSheetVisible(false)}
+                        onTakePhoto={handleTakePhoto}
+                        onChooseFromLibrary={handleChooseFromLibrary}
+                    />
                 )}
-            </SelectionInfoBox>
 
-            {/* Image Picker Action Sheet */}
-            {type === 'withImage' && (
-                <ImagePickerActionSheet
-                    visible={actionSheetVisible}
-                    onClose={() => setActionSheetVisible(false)}
-                    onTakePhoto={handleTakePhoto}
-                    onChooseFromLibrary={handleChooseFromLibrary}
-                />
-            )}
-
-            {/* Image Preview Modal */}
-            {type === 'withImage' && (
-                <ImagePreviewModal
-                    visible={previewVisible}
-                    imageUri={previewUri}
-                    onClose={() => setPreviewVisible(false)}
-                />
-            )}
-        </>
-    );
-};
+                {/* Image Preview Modal */}
+                {type === 'withImage' && (
+                    <ImagePreviewModal
+                        visible={previewVisible}
+                        imageUri={previewUri}
+                        onClose={() => setPreviewVisible(false)}
+                    />
+                )}
+            </>
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     inputGroup: {
@@ -420,6 +581,16 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
+    },
+    imageLoading: {
+        opacity: 0.7,
+    },
+    loadingOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 5,
     },
     removeButton: {
         position: 'absolute',
