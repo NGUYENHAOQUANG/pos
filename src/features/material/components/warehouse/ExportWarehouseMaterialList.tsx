@@ -13,6 +13,9 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import {
     IExportWarehouseReceipt,
     MaterialGroupType,
@@ -43,6 +46,7 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
     refreshing,
     onRefresh,
 }) => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
     const toggleExpand = (id: string) => {
@@ -135,7 +139,10 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                         <TouchableOpacity
                             style={styles.editButton}
                             onPress={() => {
-                                // Handle edit logic
+                                navigation.navigate('AddExportWarehouse', {
+                                    exportReceiptId: item.id,
+                                    availableMaterials: [], // Param required by type, though maybe unused in edit mode
+                                });
                             }}
                         >
                             <Text style={styles.editButtonText}>Sửa thông tin</Text>

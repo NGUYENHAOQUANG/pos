@@ -166,6 +166,7 @@ export type AppStackParamList = {
     AddExportWarehouse: {
         availableMaterials: IMaterial[];
         onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
+        exportReceiptId?: string;
     };
     AddInventory: {
         onSave?: (data: IInventoryTicket) => void;
