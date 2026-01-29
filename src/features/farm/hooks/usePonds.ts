@@ -68,7 +68,12 @@ export const usePondsByZone = (zoneId: number | string | null) => {
                     const typeId = (pond as any).pondCategoryId;
                     if (typeId) {
                         const matchedType = masterData.types.find(t => t.id === typeId);
-                        if (matchedType) mappedPond.type = matchedType;
+                        if (matchedType) {
+                            mappedPond.type = matchedType;
+                        } else {
+                            // Fallback if type not found in master data but ID exists
+                            mappedPond.type = typeId;
+                        }
                     }
                 }
                 return mappedPond as PondData;
