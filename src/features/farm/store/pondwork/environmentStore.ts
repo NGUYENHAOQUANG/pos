@@ -4,7 +4,6 @@ import {
     environmentApi,
     EnvMetricType,
     EnvironmentalParameter,
-    CreateEnvMetricTypeRequest,
     ParameterSetting,
     CreateParameterSettingRequest,
 } from '@/features/farm/api/environmentApi';
@@ -17,23 +16,17 @@ export interface EnvironmentSlice {
     // Metric Types
     metricTypes: EnvMetricType[];
     fetchMetricTypes: () => Promise<void>;
-    createEnvMetricType: (data: CreateEnvMetricTypeRequest) => Promise<void>;
-    updateEnvMetricType: (id: number, data: CreateEnvMetricTypeRequest) => Promise<void>;
-    deleteEnvMetricType: (id: number) => Promise<void>;
 
     // Parameter Settings (Per Zone)
     parameterSettings: Record<string, ParameterSetting[]>;
-    fetchParameterSettings: (zoneId: string | number) => Promise<void>;
-    createParameterSetting: (
-        zoneId: string | number,
-        data: CreateParameterSettingRequest
-    ) => Promise<void>;
+    fetchParameterSettings: (zoneId: string) => Promise<void>;
+    createParameterSetting: (zoneId: string, data: CreateParameterSettingRequest) => Promise<void>;
     updateParameterSetting: (
-        zoneId: string | number,
-        id: number | string,
+        zoneId: string,
+        id: string,
         data: CreateParameterSettingRequest
     ) => Promise<void>;
-    deleteParameterSetting: (zoneId: string | number, id: number | string) => Promise<void>;
+    deleteParameterSetting: (zoneId: string, id: string) => Promise<void>;
 
     // Environment Parameters
     envParameters: Record<string, EnvironmentalParameter[]>; // Cache by pondId
@@ -64,27 +57,6 @@ export const createEnvironmentSlice: StateCreator<
             console.error('Failed to fetch metric types:', error);
         }
     },
-    createEnvMetricType: async data => {
-        await environmentApi.createEnvMetricType(data);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
-    },
-    updateEnvMetricType: async (id, data) => {
-        await environmentApi.updateEnvMetricType(id, data);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
-    },
-    deleteEnvMetricType: async id => {
-        await environmentApi.deleteEnvMetricType(id);
-        const types = await environmentApi.getEnvMetricTypes();
-        set(state => {
-            state.metricTypes = types;
-        });
-    },
 
     // Parameter Settings
     parameterSettings: {},
@@ -96,28 +68,20 @@ export const createEnvironmentSlice: StateCreator<
             });
         } catch (error) {
             console.error('Failed to fetch parameter settings:', error);
+            // Set empty array to indicate fetch completed (but no data available)
+            set(state => {
+                state.parameterSettings[String(zoneId)] = [];
+            });
         }
     },
-    createParameterSetting: async (zoneId, data) => {
+    createParameterSetting: async (zoneId: string, data: any) => {
         await environmentApi.createParameterSetting(zoneId, data);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
-    updateParameterSetting: async (zoneId, id, data) => {
+    updateParameterSetting: async (zoneId: string, id: string, data: any) => {
         await environmentApi.updateParameterSetting(zoneId, id, data);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
-    deleteParameterSetting: async (zoneId, id) => {
+    deleteParameterSetting: async (zoneId: string, id: string) => {
         await environmentApi.deleteParameterSetting(zoneId, id);
-        const settings = await environmentApi.getParameterSettings(zoneId);
-        set(state => {
-            state.parameterSettings[String(zoneId)] = settings;
-        });
     },
 
     // Environment Parameters

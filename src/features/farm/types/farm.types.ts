@@ -300,14 +300,14 @@ export interface ShrimpInspectionData {
 }
 
 export const ENVIRONMENT_METRIC_IDS = {
-    PH: '1',
-    DO: '10',
-    TEMPERATURE: '4',
-    SALINITY: '2',
-    ALKALINITY: '3',
-    TRANSPARENCY: '15',
-    KALI: '17',
-    TAN: '18',
-    MAGIE: '19',
-    NO3: '20',
+    PH: 'MT-001',
+    TEMPERATURE: 'MT-002',
+    DO: 'MT-003',
+    TAN: 'MT-004',
+    ALKALINITY: 'MT-005',
+    KALI: 'MT-006',
+    MAGIE: 'MT-007',
+    NO3: 'MT-008',
+    TRANSPARENCY: 'MT-009',
+    SALINITY: 'MT-010',
 } as const;
