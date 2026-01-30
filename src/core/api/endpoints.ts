@@ -31,6 +31,9 @@ export const API_ENDPOINTS = {
         SIPHON_RECORDS: {
             LIST: (pondId: string) => `/pond/${pondId}/siphon-records`,
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/siphon-records`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
         },
         INCIDENT: {
             LIST: (pondId: string) => `/pond/${pondId}/incident`,

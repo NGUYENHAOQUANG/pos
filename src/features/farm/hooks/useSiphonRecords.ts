@@ -1,7 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { siphonApi } from '@/features/farm/api/siphonApi';
 import { farmKeys } from './farmKeys';
-import { ISiphonParams, ISiphonRecord } from '@/features/farm/types/siphon.types';
+import {
+    ISiphonParams,
+    ISiphonRecord,
+    CreateSiphonCommand,
+} from '@/features/farm/types/siphon.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 
 export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
@@ -16,7 +20,7 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
 };
 
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
-    const { data, isLoading, error } = useSiphonRecords(pondId, params);
+    const { data, isLoading, error, refetch } = useSiphonRecords(pondId, params);
 
     const rawItems = data?.data?.items || [];
     const sortedItems = [...rawItems].sort((a, b) => {
@@ -33,6 +37,7 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
             ? new Date(item.createdAt).toLocaleTimeString('en-GB', {
                   hour: '2-digit',
                   minute: '2-digit',
+                  hour12: false,
               })
             : '00:00',
         note: item.siphonDetail?.notes || undefined,
@@ -53,5 +58,45 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
         },
     }));
 
-    return { jobs, isLoading, error };
+    return { jobs, isLoading, error, refetch };
+};
+
+export const useCreateSiphonRecord = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ pondId, data }: { pondId: string; data: CreateSiphonCommand }) =>
+            siphonApi.create(pondId, data),
+        onSuccess: (_, { pondId }) => {
+            queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+        },
+    });
+};
+
+export const useUpdateSiphonRecord = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({
+            pondId,
+            id,
+            data,
+        }: {
+            pondId: string;
+            id: string;
+            data: CreateSiphonCommand;
+        }) => siphonApi.update(pondId, id, data),
+        onSuccess: (_, { pondId }) => {
+            queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+        },
+    });
+};
+
+export const useDeleteSiphonRecord = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ pondId, id }: { pondId: string; id: string }) =>
+            siphonApi.delete(pondId, id),
+        onSuccess: (_, { pondId }) => {
+            queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+        },
+    });
 };
