@@ -4,38 +4,33 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 // --- Interfaces ---
 
 export interface ParameterSetting {
-    id: number;
-    parameterCode: string; // Corresponds to EnvMetricType.metricCode
-    zoneId: number;
+    id: string;
+    metricId: string; // Updated from parameterCode
+    zoneId: string;
     minValue?: number;
     maxValue?: number;
     enabled?: boolean;
     alert?: string;
+    isActive?: boolean;
+    parameterCode?: string; // Keep optional for backward compatibility if needed, or remove. Response shows metricId.
 }
 
 export interface CreateParameterSettingRequest {
-    parameterCode: string;
+    metricId: string; // Changed from parameterCode to match backend requirements
     minValue?: number;
     maxValue?: number;
     enabled?: boolean;
     alert?: string;
+    isActive?: boolean;
 }
 
 export interface EnvMetricType {
-    id: number;
-    metricCode: string;
-    metricName: string;
-    unitName: string;
+    id: string;
+    code: string;
+    name: string;
+    unitMetric: string;
     description?: string;
     status: number;
-}
-
-export interface CreateEnvMetricTypeRequest {
-    metricCode: string;
-    metricName: string;
-    unitName: string;
-    description?: string;
-    status?: number;
 }
 
 export interface EnvMeasurement {
@@ -64,7 +59,7 @@ export interface PaginationParams {
 export const environmentApi = {
     // --- Metric Types ---
     getEnvMetricTypes: async (): Promise<EnvMetricType[]> => {
-        const response = await apiClient.get(API_ENDPOINTS.ENV_METRIC_TYPES.LIST);
+        const response = await apiClient.get(API_ENDPOINTS.METRIC.LIST);
 
         // Handle potential array wrapper variations
         if (Array.isArray(response.data)) return response.data;
@@ -76,25 +71,8 @@ export const environmentApi = {
         return response.data || [];
     },
 
-    getEnvMetricType: async (id: number): Promise<EnvMetricType> => {
-        const response = await apiClient.get(API_ENDPOINTS.ENV_METRIC_TYPES.DETAIL(id));
-        return response.data;
-    },
-
-    createEnvMetricType: async (data: CreateEnvMetricTypeRequest): Promise<void> => {
-        await apiClient.post(API_ENDPOINTS.ENV_METRIC_TYPES.CREATE, data);
-    },
-
-    updateEnvMetricType: async (id: number, data: CreateEnvMetricTypeRequest): Promise<void> => {
-        await apiClient.put(API_ENDPOINTS.ENV_METRIC_TYPES.UPDATE(id), data);
-    },
-
-    deleteEnvMetricType: async (id: number): Promise<void> => {
-        await apiClient.delete(API_ENDPOINTS.ENV_METRIC_TYPES.DELETE(id));
-    },
-
     // --- Parameter Settings ---
-    getParameterSettings: async (zoneId: number | string): Promise<ParameterSetting[]> => {
+    getParameterSettings: async (zoneId: string): Promise<ParameterSetting[]> => {
         try {
             const response = await apiClient.get(API_ENDPOINTS.PARAMETER_SETTING.LIST(zoneId));
 
@@ -118,7 +96,7 @@ export const environmentApi = {
     },
 
     createParameterSetting: async (
-        zoneId: number | string,
+        zoneId: string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
         const response = await apiClient.post(API_ENDPOINTS.PARAMETER_SETTING.CREATE(zoneId), data);
@@ -128,11 +106,11 @@ export const environmentApi = {
     },
 
     updateParameterSetting: async (
-        zoneId: number | string,
-        id: number | string,
+        zoneId: string,
+        id: string,
         data: CreateParameterSettingRequest
     ): Promise<void> => {
-        const response = await apiClient.put(
+        const response = await apiClient.patch(
             API_ENDPOINTS.PARAMETER_SETTING.UPDATE(zoneId, id),
             data
         );
@@ -141,7 +119,7 @@ export const environmentApi = {
         }
     },
 
-    deleteParameterSetting: async (zoneId: number | string, id: number | string): Promise<void> => {
+    deleteParameterSetting: async (zoneId: string, id: string): Promise<void> => {
         await apiClient.delete(API_ENDPOINTS.PARAMETER_SETTING.DELETE(zoneId, id));
     },
 

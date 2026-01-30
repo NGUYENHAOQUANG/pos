@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -29,6 +29,7 @@ import {
     useParameterConfiguration,
 } from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
 import { useSettingEnvironment } from '@/features/farm/hooks/envhooks/useSettingEnvironment';
+import { SettingEnvSkeleton } from '@/features/farm/components/skeleton/SettingEnvSkeleton';
 
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
@@ -44,29 +45,52 @@ export const SettingEnvironmentScreens: React.FC = () => {
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const parameterSettings = useFarmStore(state => state.parameterSettings);
+    // Access zones directly to calculate activeLocation before passing to hook
+    const zones = useFarmStore(state => state.zones);
 
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-    const [selectedLocation, setSelectedLocation] = useState<FarmLocation | null>(null);
+    // Use overrideLocation only when user manually selects
+    const [overrideLocation, setOverrideLocation] = useState<FarmLocation | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownButtonRef = useRef<View>(null);
 
-    // 1. Init Data
-    const { metricTypes, zones } = useEnvironmentInit(selectedLocation?.id);
-
-    // 2. Set initial location when zones are loaded
-    useEffect(() => {
-        if (zones && zones.length > 0 && !selectedLocation) {
-            // Priority: selectedZoneId from store -> First Zone
-            const current = selectedZoneId ? zones.find(z => z.id === selectedZoneId) : zones[0];
-            const target = current || zones[0];
-
-            setSelectedLocation({ id: String(target.id), name: target.name });
+    // Calculate Active Location (Derived State)
+    const activeLocation = React.useMemo(() => {
+        if (overrideLocation) {
+            return overrideLocation;
         }
-    }, [zones, selectedLocation, selectedZoneId]);
+
+        if (zones && zones.length > 0) {
+            let storeZone = null;
+
+            if (selectedZoneId) {
+                // Try to find zone by ID (as string)
+                storeZone = zones.find(z => String(z.id) === String(selectedZoneId));
+            }
+
+            // Fallback: use first zone
+            const target = storeZone || zones[0];
+
+            const result = {
+                id: String(target.id),
+                name: target.name,
+            };
+
+            return result;
+        }
+
+        return null;
+    }, [zones, selectedZoneId, overrideLocation]);
+
+    // 1. Init Data (Fetch settings for the calculated active location)
+    // We already accessed zones from store, but the hook handles fetching if empty
+    const { isLoading, metricTypes } = useEnvironmentInit(activeLocation?.id);
+
+    // 2. Removed sync useEffect - no longer needed with derived state
 
     // 3. Compute UI Parameters
     const { uiParameters } = useParameterConfiguration(
-        selectedLocation?.id,
+        activeLocation?.id,
         metricTypes,
         parameterSettings
     );
@@ -82,7 +106,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
         handleReset,
         handleSave,
     } = useSettingEnvironment({
-        selectedLocation,
+        selectedLocation: activeLocation,
         metricTypes,
         parameterSettings,
         uiParameters,
@@ -104,7 +128,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
     };
 
     const handleSelectLocation = (location: FarmLocation) => {
-        setSelectedLocation(location);
+        setOverrideLocation(location);
         setIsDropdownVisible(false);
     };
 
@@ -120,6 +144,16 @@ export const SettingEnvironmentScreens: React.FC = () => {
         });
     };
 
+    // Show skeleton while:
+    // 1. Still loading (fetching metricTypes, zones, parameterSettings), OR
+    // 2. ParameterSettings haven't been fetched yet for current zone
+    // Once parameterSettings is fetched (even if empty), hide skeleton and show the form
+    const hasParameterSettings = activeLocation?.id
+        ? parameterSettings[activeLocation.id] !== undefined
+        : true; // If no activeLocation, don't block on parameterSettings
+
+    const showSkeleton = isLoading || !hasParameterSettings;
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -132,41 +166,48 @@ export const SettingEnvironmentScreens: React.FC = () => {
             </View>
 
             {/* Content */}
-            <View style={styles.content}>
-                {/* Location Dropdown */}
-                <View style={styles.dropdownContainer}>
-                    <Text style={styles.label}>Ao nuôi / Khu nuôi</Text>
-                    <TouchableOpacity
-                        ref={dropdownButtonRef}
-                        style={styles.dropdownButton}
-                        onPress={handleDropdownPress}
-                        disabled={true}
+            {showSkeleton ? (
+                <SettingEnvSkeleton />
+            ) : (
+                <View style={styles.content}>
+                    {/* Location Dropdown */}
+                    <View style={styles.dropdownContainer}>
+                        <Text style={styles.label}>Ao nuôi / Khu nuôi</Text>
+                        <TouchableOpacity
+                            ref={dropdownButtonRef}
+                            style={styles.dropdownButton}
+                            onPress={handleDropdownPress}
+                            disabled={true}
+                        >
+                            <Text style={styles.dropdownText}>
+                                {activeLocation ? activeLocation.name : 'Chọn khu nuôi'}
+                            </Text>
+                            <Ionicons name="chevron-down" size={20} color={colors.gray[600]} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
                     >
-                        <Text style={styles.dropdownText}>
-                            {selectedLocation ? selectedLocation.name : 'Chọn khu nuôi'}
-                        </Text>
-                        <Ionicons name="chevron-down" size={20} color={colors.gray[600]} />
-                    </TouchableOpacity>
+                        <EnvironmentParameterSection
+                            title="Nhóm cơ bản"
+                            subtitle="Bộ thông số phổ biến để theo dõi."
+                            parameters={parameters}
+                            onToggleParameter={handleToggleParameter}
+                            onEdit={handleEdit}
+                        />
+
+                        <EnvironmentParameterSection
+                            title="Nhóm nâng cao"
+                            subtitle="Bộ thông số mở rộng để theo dõi."
+                            parameters={advancedParameters}
+                            onToggleParameter={handleToggleAdvancedParameter}
+                            onEdit={handleEdit}
+                        />
+                    </ScrollView>
                 </View>
-
-                <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-                    <EnvironmentParameterSection
-                        title="Nhóm cơ bản"
-                        subtitle="Bộ thông số phổ biến để theo dõi."
-                        parameters={parameters}
-                        onToggleParameter={handleToggleParameter}
-                        onEdit={handleEdit}
-                    />
-
-                    <EnvironmentParameterSection
-                        title="Nhóm nâng cao"
-                        subtitle="Bộ thông số mở rộng để theo dõi."
-                        parameters={advancedParameters}
-                        onToggleParameter={handleToggleAdvancedParameter}
-                        onEdit={handleEdit}
-                    />
-                </ScrollView>
-            </View>
+            )}
 
             {/* Footer */}
             <ButtonBarFarm
@@ -198,8 +239,8 @@ export const SettingEnvironmentScreens: React.FC = () => {
                                 data={zones.map(z => ({ id: String(z.id), name: z.name }))}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item }) => {
-                                    const isSelected = selectedLocation
-                                        ? item.id === selectedLocation.id
+                                    const isSelected = activeLocation
+                                        ? item.id === activeLocation.id
                                         : false;
                                     return (
                                         <TouchableOpacity

@@ -15,6 +15,7 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
     const filterGroup = useMaterialsStore(state => state.filterGroup);
     const filterType = useMaterialsStore(state => state.filterType);
     const filterMaterialName = useMaterialsStore(state => state.filterMaterialName);
+    const selectedTab = useMaterialsStore(state => state.selectedTab);
 
     // Get filter actions
     const setSearchText = useMaterialsStore(state => state.setSearchText);
@@ -22,6 +23,7 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
     const setFilterType = useMaterialsStore(state => state.setFilterType);
     const setFilterMaterialName = useMaterialsStore(state => state.setFilterMaterialName);
     const resetFilters = useMaterialsStore(state => state.resetFilters);
+    const setSelectedTab = useMaterialsStore(state => state.setSelectedTab);
 
     // Get actions from each store
 
@@ -31,12 +33,14 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
         filterGroup,
         filterType,
         filterMaterialName,
+        selectedTab,
         // Actions - Filters
         setSearchText,
         setFilterGroup,
         setFilterType,
         setFilterMaterialName,
         resetFilters,
+        setSelectedTab,
     };
 
     if (selector) {

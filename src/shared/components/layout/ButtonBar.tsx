@@ -18,6 +18,7 @@ export interface ButtonBarProps {
     primaryButtonTextStyle?: TextStyle;
     secondaryButtonStyle?: ViewStyle;
     secondaryButtonTextStyle?: TextStyle;
+    secondaryButtonDisabled?: boolean;
     containerStyle?: ViewStyle;
 }
 
@@ -34,6 +35,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     primaryButtonTextStyle,
     secondaryButtonStyle,
     secondaryButtonTextStyle,
+    secondaryButtonDisabled = false,
     containerStyle,
 }) => {
     // Consistent bottom spacing logic
@@ -76,6 +78,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                                 { color: colors.text },
                                 secondaryButtonTextStyle,
                             ])}
+                            disabled={secondaryButtonDisabled}
                         />
                         <View style={styles.spacer} />
                         <Button

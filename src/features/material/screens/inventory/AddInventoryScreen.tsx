@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Platform, StatusBar } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
-import { colors, spacing } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
@@ -20,11 +20,14 @@ import {
     useMaterialSelection,
     useMaterialOptions,
     useInventorySubmit,
+    useDeleteInventoryTicket,
 } from '@/features/material/hooks/inventory';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
+import { IconTrashOutlined } from '@/assets/icons';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 interface AddInventoryScreenProps {}
 
@@ -49,7 +52,6 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     // Get current user
     const { userData } = useUserProfile();
-    const creatorName = userData.name || '---';
 
     // Get warehouse data
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
@@ -68,7 +70,8 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     // API Hooks
     const { mutate: createInventoryCheck, isPending: isCreating } = useCreateInventoryCheck();
     const { mutate: updateInventoryCheck, isPending: isUpdating } = useUpdateInventoryCheck();
-    const isSubmitting = isCreating || isUpdating;
+    const { mutate: deleteInventoryCheck, isPending: isDeleting } = useDeleteInventoryTicket();
+    const isSubmitting = isCreating || isUpdating || isDeleting;
 
     // Tab bar visibility
     const { setTabBarVisible } = useTabBarVisibility();
@@ -78,7 +81,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     }, [setTabBarVisible]);
 
     // Custom hooks for form management
-    const { formState, setters } = useInventoryForm({ inventoryId, warehouseItems });
+    const { formState, setters } = useInventoryForm({ inventoryId });
     const {
         date,
         note,
@@ -89,6 +92,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         selectedMaterialId,
         isLoadingDetail,
     } = formState;
+
+    // Use creator name from API if available (in edit mode), otherwise use current user name
+    const creatorName = formState.creatorName || userData.name || '---';
 
     // Material options
     const materialOptions = useMaterialOptions(warehouseItems);
@@ -116,6 +122,28 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         createInventoryCheck,
         updateInventoryCheck,
     });
+
+    // Delete Logic
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    const handleDeletePress = () => {
+        setDeleteModalVisible(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!inventoryId) return;
+
+        deleteInventoryCheck(inventoryId, {
+            onSuccess: () => {
+                setDeleteModalVisible(false);
+                navigation.goBack();
+            },
+        });
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteModalVisible(false);
+    };
 
     // UI state
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -145,6 +173,17 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         setDatePickerVisible(false);
     };
 
+    // Custom Delete Button
+    const deleteButton = (
+        <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeletePress}
+            activeOpacity={0.7}
+        >
+            <IconTrashOutlined width={20} height={20} />
+        </TouchableOpacity>
+    );
+
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
@@ -157,6 +196,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                                 : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
                         }
                         onBackPress={() => navigation.goBack()}
+                        rightComponent={isEditMode ? deleteButton : undefined}
                     />
 
                     <SafeInputLayout>
@@ -221,6 +261,15 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                         date={date}
                         onSelectDate={handleDateConfirm}
                     />
+                    {/* Confirmation Delete Modal */}
+                    <ConfirmationDeleteModal
+                        visible={deleteModalVisible}
+                        onConfirm={handleConfirmDelete}
+                        onCancel={handleCancelDelete}
+                        title="Xóa phiếu kiểm kho"
+                        message="Bạn có chắc chắn muốn xóa phiếu kiểm kho này không?"
+                        showSuccessToast={false}
+                    />
                 </View>
             </Loading>
         </>
@@ -245,5 +294,15 @@ const styles = StyleSheet.create({
             android: { elevation: 5 },
             ios: { zIndex: 100 },
         }),
+    },
+    deleteButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.error,
     },
 });

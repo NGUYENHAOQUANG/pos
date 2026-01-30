@@ -1,5 +1,13 @@
 import React, { useEffect, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ViewStyle } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    ViewStyle,
+    RefreshControl,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,6 +18,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { TrackingGroup, TrackingDayCard } from '@/features/farm/components/TrackingList';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
+import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
@@ -38,6 +47,12 @@ export interface BaseLogScreenProps {
     cardStyle?: ViewStyle;
     /** Use flat card style (no border radius, no shadow) */
     useFlatCardStyle?: boolean;
+    /** Loading state for initial fetch */
+    isLoading?: boolean;
+    /** Refreshing state for pull-to-refresh */
+    isRefreshing?: boolean;
+    /** Callback for pull-to-refresh */
+    onRefresh?: () => void;
 }
 
 /**
@@ -78,6 +93,9 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     customEmptyState,
     cardStyle,
     useFlatCardStyle = false,
+    isLoading = false,
+    isRefreshing = false,
+    onRefresh,
 }) => {
     const navigation = useNavigation<NavigationProp>();
     const insets = useSafeAreaInsets();
@@ -136,8 +154,15 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
                     paddingTop: spacing.sm,
                     paddingBottom: insets.bottom + spacing.lg,
                 }}
+                refreshControl={
+                    onRefresh ? (
+                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+                    ) : undefined
+                }
             >
-                {groupedData.length === 0 ? (
+                {isLoading ? (
+                    <PondJobSkeleton />
+                ) : groupedData.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         {customEmptyState || (
                             <EmptyStateCard

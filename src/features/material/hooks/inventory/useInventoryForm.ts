@@ -4,12 +4,12 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 
 interface UseInventoryFormProps {
     inventoryId?: string;
-    warehouseItems: any[];
 }
 
-export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFormProps) => {
+export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
     const [date, setDate] = useState(new Date());
     const [note, setNote] = useState('');
+    const [creatorName, setCreatorName] = useState<string>(''); // Store creator name from API
     const [materialName, setMaterialName] = useState('');
     const [oldStock, setOldStock] = useState(0);
     const [newStock, setNewStock] = useState('');
@@ -20,7 +20,7 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
 
     // Fetch inventory detail when in edit mode
     useEffect(() => {
-        if (inventoryId && warehouseItems.length > 0) {
+        if (inventoryId) {
             const fetchInventoryDetail = async () => {
                 setIsLoadingDetail(true);
                 try {
@@ -28,6 +28,10 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
                     if (response.success && response.data) {
                         const detail = response.data;
                         setNote(detail.note || '');
+                        // ...
+                        if (detail.creator) {
+                            setCreatorName(detail.creator.fullname || '');
+                        }
                         if (detail.createdAt) {
                             setDate(new Date(detail.createdAt));
                         }
@@ -54,12 +58,13 @@ export const useInventoryForm = ({ inventoryId, warehouseItems }: UseInventoryFo
             };
             fetchInventoryDetail();
         }
-    }, [inventoryId, warehouseItems]);
+    }, [inventoryId]);
 
     return {
         formState: {
             date,
             note,
+            creatorName,
             materialName,
             oldStock,
             newStock,

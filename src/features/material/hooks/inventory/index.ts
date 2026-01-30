@@ -1,5 +1,9 @@
 // Inventory hooks
-export { useInventoryTickets, useAddInventoryTicket } from './useInventory';
+export {
+    useInventoryTickets,
+    useAddInventoryTicket,
+    useDeleteInventoryTicket,
+} from './useInventory';
 export { useCreateInventoryCheck } from './useCreateInventoryCheck';
 export { useUpdateInventoryCheck } from './useUpdateInventoryCheck';
 export { useInventoryForm } from './useInventoryForm';
