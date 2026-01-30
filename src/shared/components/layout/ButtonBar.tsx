@@ -48,8 +48,12 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                 return (
                     <View style={styles.row}>
                         <View style={styles.totalContainer}>
-                            <Text style={styles.totalLabel}>{totalLabel}</Text>
-                            <Text style={styles.totalValue}>{totalValue}</Text>
+                            <Text style={styles.totalLabel} maxFontSizeMultiplier={1.1}>
+                                {totalLabel}
+                            </Text>
+                            <Text style={styles.totalValue} maxFontSizeMultiplier={1.1}>
+                                {totalValue}
+                            </Text>
                         </View>
                         <Button
                             title={primaryTitle}

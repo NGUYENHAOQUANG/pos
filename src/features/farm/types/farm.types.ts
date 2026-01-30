@@ -110,6 +110,7 @@ export interface CycleData {
     status?: string; // 'InProgress', 'Active', 'Completed'
     doc?: number;
     transferInfo?: TransferInfo;
+    warehouseItemId?: string;
     pond?: any; // API returns pond object
 }
 

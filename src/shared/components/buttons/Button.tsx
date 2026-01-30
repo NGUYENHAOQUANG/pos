@@ -10,14 +10,14 @@
 import { borderRadius, colors, sizes, spacing, typography } from '@/styles';
 import React from 'react';
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-  TextStyle,
-  StyleProp,
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    ViewStyle,
+    TextStyle,
+    StyleProp,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -25,28 +25,28 @@ export type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'text';
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 export interface ButtonProps {
-  /** Text to display on the button */
-  title: string;
-  /** Callback when button is pressed */
-  onPress: () => void;
-  /** Button variant style */
-  variant?: ButtonVariant;
-  /** Button size */
-  size?: ButtonSize;
-  /** Show loading indicator */
-  loading?: boolean;
-  /** Disable button interaction */
-  disabled?: boolean;
-  /** Button takes full width */
-  fullWidth?: boolean;
-  /** Icon name from Ionicons (left side) */
-  iconLeft?: string;
-  /** Icon name from Ionicons (right side) */
-  iconRight?: string;
-  /** Custom styles */
-  style?: StyleProp<ViewStyle>;
-  /** Custom text styles */
-  textStyle?: TextStyle;
+    /** Text to display on the button */
+    title: string;
+    /** Callback when button is pressed */
+    onPress: () => void;
+    /** Button variant style */
+    variant?: ButtonVariant;
+    /** Button size */
+    size?: ButtonSize;
+    /** Show loading indicator */
+    loading?: boolean;
+    /** Disable button interaction */
+    disabled?: boolean;
+    /** Button takes full width */
+    fullWidth?: boolean;
+    /** Icon name from Ionicons (left side) */
+    iconLeft?: string;
+    /** Icon name from Ionicons (right side) */
+    iconRight?: string;
+    /** Custom styles */
+    style?: StyleProp<ViewStyle>;
+    /** Custom text styles */
+    textStyle?: TextStyle;
 }
 
 /**
@@ -54,215 +54,222 @@ export interface ButtonProps {
  * Supports multiple variants, sizes, icons, and states
  */
 export function Button({
-  title,
-  onPress,
-  variant = 'primary',
-  size = 'medium',
-  loading = false,
-  disabled = false,
-  fullWidth = false,
-  iconLeft,
-  iconRight,
-  style,
-  textStyle,
-}: ButtonProps) {
-  const isDisabled = disabled || loading;
-
-  // Get button styles based on variant and size
-  const buttonStyles = [
-    styles.button,
-    styles[variant],
-    styles[`${size}Size`],
-    fullWidth && styles.fullWidth,
-    isDisabled && styles.disabled,
+    title,
+    onPress,
+    variant = 'primary',
+    size = 'medium',
+    loading = false,
+    disabled = false,
+    fullWidth = false,
+    iconLeft,
+    iconRight,
     style,
-  ];
-
-  // Get text styles based on variant and size
-  const textStyles = [
-    styles.buttonText,
-    styles[`${variant}Text`],
-    styles[`${size}Text`],
-    isDisabled && styles.disabledText,
     textStyle,
-  ];
+}: ButtonProps) {
+    const isDisabled = disabled || loading;
 
-  // Get icon color based on variant
-  const getIconColor = (): string => {
-    if (isDisabled) {
-      return variant === 'primary' || variant === 'outline'
-        ? colors.textTertiary
-        : colors.textTertiary;
-    }
-    switch (variant) {
-      case 'primary':
-        return colors.white;
-      case 'outline':
-      case 'ghost':
-        return colors.primary;
-      case 'text':
-        return colors.primary;
-      default:
-        return colors.white;
-    }
-  };
+    // Get button styles based on variant and size
+    const buttonStyles = [
+        styles.button,
+        styles[variant],
+        styles[`${size}Size`],
+        fullWidth && styles.fullWidth,
+        isDisabled && styles.disabled,
+        style,
+    ];
 
-  // Get icon size based on button size
-  const getIconSize = (): number => {
-    switch (size) {
-      case 'small':
-        return sizes.icon.sm;
-      case 'medium':
-        return sizes.icon.md;
-      case 'large':
-        return sizes.icon.lg;
-      default:
-        return sizes.icon.md;
-    }
-  };
+    // Get text styles based on variant and size
+    const textStyles = [
+        styles.buttonText,
+        styles[`${variant}Text`],
+        styles[`${size}Text`],
+        isDisabled && styles.disabledText,
+        textStyle,
+    ];
 
-  const iconColor = getIconColor();
-  const iconSize = getIconSize();
+    // Get icon color based on variant
+    const getIconColor = (): string => {
+        if (isDisabled) {
+            return variant === 'primary' || variant === 'outline'
+                ? colors.textTertiary
+                : colors.textTertiary;
+        }
+        switch (variant) {
+            case 'primary':
+                return colors.white;
+            case 'outline':
+            case 'ghost':
+                return colors.primary;
+            case 'text':
+                return colors.primary;
+            default:
+                return colors.white;
+        }
+    };
 
-  return (
-    <TouchableOpacity
-      style={buttonStyles}
-      onPress={onPress}
-      disabled={isDisabled}
-      activeOpacity={0.7}
-    >
-      {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === 'primary' ? colors.white : colors.primary}
-        />
-      ) : (
-        <View style={styles.content}>
-          {iconLeft && (
-            <Ionicons
-              name={iconLeft as any}
-              size={iconSize}
-              color={iconColor}
-              style={styles.iconLeft}
-            />
-          )}
-          <Text style={textStyles}>{title}</Text>
-          {iconRight && (
-            <Ionicons
-              name={iconRight as any}
-              size={iconSize}
-              color={iconColor}
-              style={styles.iconRight}
-            />
-          )}
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+    // Get icon size based on button size
+    const getIconSize = (): number => {
+        switch (size) {
+            case 'small':
+                return sizes.icon.sm;
+            case 'medium':
+                return sizes.icon.md;
+            case 'large':
+                return sizes.icon.lg;
+            default:
+                return sizes.icon.md;
+        }
+    };
+
+    const iconColor = getIconColor();
+    const iconSize = getIconSize();
+
+    return (
+        <TouchableOpacity
+            style={buttonStyles}
+            onPress={onPress}
+            disabled={isDisabled}
+            activeOpacity={0.7}
+        >
+            {loading ? (
+                <ActivityIndicator
+                    size="small"
+                    color={variant === 'primary' ? colors.white : colors.primary}
+                />
+            ) : (
+                <View style={styles.content}>
+                    {iconLeft && (
+                        <Ionicons
+                            name={iconLeft as any}
+                            size={iconSize}
+                            color={iconColor}
+                            style={styles.iconLeft}
+                        />
+                    )}
+                    <Text
+                        style={textStyles}
+                        maxFontSizeMultiplier={1.1}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                    >
+                        {title}
+                    </Text>
+                    {iconRight && (
+                        <Ionicons
+                            name={iconRight as any}
+                            size={iconSize}
+                            color={iconColor}
+                            style={styles.iconRight}
+                        />
+                    )}
+                </View>
+            )}
+        </TouchableOpacity>
+    );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
 
-  // Variant styles
-  primary: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  outline: {
-    backgroundColor: colors.white,
-    borderColor: colors.primary,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-    borderColor: colors.primary,
-  },
-  text: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    borderWidth: 0,
-  },
+    // Variant styles
+    primary: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    outline: {
+        backgroundColor: colors.white,
+        borderColor: colors.primary,
+    },
+    ghost: {
+        backgroundColor: 'transparent',
+        borderColor: colors.primary,
+    },
+    text: {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        borderWidth: 0,
+    },
 
-  // Size styles
-  smallSize: {
-    minHeight: sizes.button.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  mediumSize: {
-    minHeight: sizes.button.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  largeSize: {
-    minHeight: sizes.button.lg,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
+    // Size styles
+    smallSize: {
+        minHeight: sizes.button.sm,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
+    },
+    mediumSize: {
+        minHeight: sizes.button.md,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+    },
+    largeSize: {
+        minHeight: sizes.button.lg,
+        paddingHorizontal: spacing.xl,
+        paddingVertical: spacing.md,
+    },
 
-  // Text styles
-  buttonText: {
-    fontFamily: typography.fontFamily.regular,
-    fontWeight: typography.fontWeight.medium,
-    textAlign: 'center',
-  },
-  primaryText: {
-    color: colors.white,
-  },
-  outlineText: {
-    color: colors.primary,
-  },
-  ghostText: {
-    color: colors.primary,
-  },
-  textText: {
-    color: colors.primary,
-  },
+    // Text styles
+    buttonText: {
+        fontFamily: typography.fontFamily.regular,
+        fontWeight: typography.fontWeight.medium,
+        textAlign: 'center',
+    },
+    primaryText: {
+        color: colors.white,
+    },
+    outlineText: {
+        color: colors.primary,
+    },
+    ghostText: {
+        color: colors.primary,
+    },
+    textText: {
+        color: colors.primary,
+    },
 
-  // Size text styles
-  smallText: {
-    fontSize: typography.fontSize.sm,
-    lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
-  },
-  mediumText: {
-    fontSize: typography.fontSize.base,
-    lineHeight: typography.fontSize.base * typography.lineHeight.normal,
-  },
-  largeText: {
-    fontSize: typography.fontSize.lg,
-    lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
-  },
+    // Size text styles
+    smallText: {
+        fontSize: typography.fontSize.sm,
+        lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
+    },
+    mediumText: {
+        fontSize: typography.fontSize.base,
+        lineHeight: typography.fontSize.base * typography.lineHeight.normal,
+    },
+    largeText: {
+        fontSize: typography.fontSize.lg,
+        lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
+    },
 
-  // Content layout
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconLeft: {
-    marginRight: spacing.xs,
-  },
-  iconRight: {
-    marginLeft: spacing.xs,
-  },
+    // Content layout
+    content: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    iconLeft: {
+        marginRight: spacing.xs,
+    },
+    iconRight: {
+        marginLeft: spacing.xs,
+    },
 
-  // States
-  disabled: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
+    // States
+    disabled: {
+        opacity: 0.5,
+    },
+    disabledText: {
+        opacity: 0.7,
+    },
 
-  // Full width
-  fullWidth: {
-    width: '100%',
-  },
+    // Full width
+    fullWidth: {
+        width: '100%',
+    },
 });

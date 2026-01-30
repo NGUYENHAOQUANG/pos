@@ -118,7 +118,9 @@ export function Input({
                     <View style={styles.requiredWrapper}>
                         {required && <Text style={styles.required}>*</Text>}
                     </View>
-                    <Text style={styles.label}>{label}</Text>
+                    <Text style={styles.label} maxFontSizeMultiplier={1.1}>
+                        {label}
+                    </Text>
                 </View>
             )}
             {/* Input Container */}
@@ -192,6 +194,7 @@ export function Input({
                             },
                         }}
                         {...(restProps as any)}
+                        maxFontSizeMultiplier={1.1}
                     />
                 </View>
 
@@ -218,7 +221,11 @@ export function Input({
                 )}
             </View>
             {/* Error Message */}
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error && (
+                <Text style={styles.errorText} maxFontSizeMultiplier={1.1}>
+                    {error}
+                </Text>
+            )}
         </View>
     );
 }

@@ -63,8 +63,30 @@ export const DeviceControlScreens = () => {
 
     // Flatten pagination data and ensure valid array
     const farmPonds = useMemo(() => {
-        if (!pondsData?.pages) return [];
-        return pondsData.pages.reduce((acc, page) => [...acc, ...page.items], [] as any[]);
+        if (!pondsData?.pages) {
+            // Even if no API data, show Mock Demo Ponds
+            return [
+                { id: 'N001', name: 'Ao N001', status: 'Framing' },
+                { id: 'N002', name: 'Ao N002', status: 'Framing' },
+                { id: 'N003', name: 'Ao N003', status: 'Framing' },
+            ];
+        }
+
+        const apiPonds = pondsData.pages.reduce(
+            (acc, page) => [...acc, ...page.items],
+            [] as any[]
+        );
+
+        // Demo: Inject N001, N002, N003 if they don't exist
+        const demoPonds = [
+            { id: 'N001', name: 'Ao N001', status: 'Framing' },
+            { id: 'N002', name: 'Ao N002', status: 'Framing' },
+            { id: 'N003', name: 'Ao N003', status: 'Framing' },
+        ];
+
+        const missingDemoPonds = demoPonds.filter(dp => !apiPonds.some(ap => ap.name === dp.name));
+
+        return [...missingDemoPonds, ...apiPonds];
     }, [pondsData]);
 
     // Device Data from Control Store (Local State)
