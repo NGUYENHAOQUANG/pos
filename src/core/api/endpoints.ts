@@ -35,6 +35,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
         },
+        INCIDENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/incident`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/incident/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/incident`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/incident/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/incident/${id}`,
+        },
         SHRIMP_HEALTH: {
             LIST: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
@@ -48,6 +55,13 @@ export const API_ENDPOINTS = {
             CREATE: (pondId: string) => `/pond/${pondId}/sizemeasurement`,
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+        },
+        ENV_MEASUREMENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/envmeasurement`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/envmeasurement`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
         },
     },
     POND_TYPES: {

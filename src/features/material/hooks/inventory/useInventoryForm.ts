@@ -16,6 +16,7 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
     const [materialGroup, setMaterialGroup] = useState('');
     const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
     const [itemId, setItemId] = useState<string>(''); // Store existing item ID for updates
+    const [status, setStatus] = useState<string>('');
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     // Fetch inventory detail when in edit mode
@@ -28,6 +29,7 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
                     if (response.success && response.data) {
                         const detail = response.data;
                         setNote(detail.note || '');
+                        setStatus(detail.status || '');
                         // ...
                         if (detail.creator) {
                             setCreatorName(detail.creator.fullname || '');
@@ -71,6 +73,7 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
             materialGroup,
             selectedMaterialId,
             itemId,
+            status,
             isLoadingDetail,
         },
         setters: {

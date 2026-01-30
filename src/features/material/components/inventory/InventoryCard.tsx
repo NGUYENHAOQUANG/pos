@@ -157,8 +157,8 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 </View>
             </View>
 
-            {/* Edit Button (Only for Draft) */}
-            {data.status === 'Draft' && (
+            {/* Edit Button (Only for Draft and Rejected) */}
+            {['Draft', 'Rejected'].includes(data.status) && (
                 <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => {

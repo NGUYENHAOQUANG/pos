@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 import {
     useCreateShrimpHealthCheck,
@@ -115,6 +116,31 @@ export const useShrimpHealthCheckForm = ({
 
     const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
 
+    const handleError = (err: unknown) => {
+        const error = err as NormalizedError;
+
+        if (error.type === 'VALIDATION_ERROR') {
+            const firstFieldKey = Object.keys(error.fields)[0];
+            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
+                Toast.show({
+                    type: 'error',
+                    text1: error.fields[firstFieldKey][0],
+                    visibilityTime: 4000,
+                });
+                return;
+            }
+        }
+        if (error.type === 'NOT_FOUND_ERROR') {
+            Toast.show({
+                type: 'error',
+                text1: error.message,
+                visibilityTime: 4000,
+            });
+            return;
+        }
+        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
+    };
+
     const handleSave = (documentIds: string[], onSaved?: () => void) => {
         if (!itemToEdit && foodAmount.trim().length === 0) {
             Toast.show({
@@ -165,18 +191,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: (error: any) => {
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Không thể cập nhật kiểm tra tôm',
-                            text2:
-                                error?.response?.data?.message ||
-                                error?.message ||
-                                'Vui lòng thử lại',
-                            position: 'top',
-                            visibilityTime: 3000,
-                        });
-                    },
+                    onError: handleError,
                 }
             );
         } else {
@@ -196,18 +211,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: (error: any) => {
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Không thể tạo kiểm tra tôm',
-                            text2:
-                                error?.response?.data?.message ||
-                                error?.message ||
-                                'Vui lòng thử lại',
-                            position: 'top',
-                            visibilityTime: 3000,
-                        });
-                    },
+                    onError: handleError,
                 }
             );
         }
