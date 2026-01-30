@@ -40,6 +40,16 @@ export interface CreateExportReceiptRequest {
     autoSubmit?: boolean;
 }
 
+export interface UpdateExportReceiptRequest {
+    receiptId: string;
+    warehouseId?: string;
+    pondId?: string;
+    date?: string;
+    note?: string;
+    items?: ExportReceiptItemRequest[];
+    documentIds?: string[];
+}
+
 export interface GetExportReceiptsParams {
     ReceiptCode?: string;
     Status?: string;

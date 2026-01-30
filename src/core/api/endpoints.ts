@@ -89,12 +89,8 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/material/${id}`,
     },
 
-    ENV_METRIC_TYPES: {
-        LIST: '/env-metric-types',
-        DETAIL: (id: number) => `/env-metric-types/${id}`,
-        CREATE: '/env-metric-types',
-        UPDATE: (id: number) => `/env-metric-types/${id}`,
-        DELETE: (id: number) => `/env-metric-types/${id}`,
+    METRIC: {
+        LIST: '/metric',
     },
     ENVIRONMENTAL_PARAMETER: {
         LIST: (pondId: number | string) => `/pond/${pondId}/EnvironmentalParameter`,
@@ -114,14 +110,11 @@ export const API_ENDPOINTS = {
         REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
     },
     PARAMETER_SETTING: {
-        LIST: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
-        DETAIL: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
-        CREATE: (zoneId: number | string) => `/zones/${zoneId}/parameter-setting`,
-        UPDATE: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
-        DELETE: (zoneId: number | string, id: number | string) =>
-            `/zones/${zoneId}/parameter-setting/${id}`,
+        LIST: (zoneId: string) => `/zone/${zoneId}/settings`,
+        DETAIL: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
+        CREATE: (zoneId: string) => `/zone/${zoneId}/settings`,
+        UPDATE: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
+        DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/settings/${id}`,
     },
     WAREHOUSE: {
         LIST: '/warehouses',
@@ -138,6 +131,11 @@ export const API_ENDPOINTS = {
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',
         CREATE: '/exportreceipt',
+        DETAIL: (id: string) => `/exportreceipt/${id}`,
+        UPDATE: (id: string) => `/exportreceipt/${id}`,
+        DELETE: (id: string) => `/exportreceipt/${id}`,
+        ITEMS: (id: string) => `/exportreceipt/${id}/items`,
+        UPDATE_ITEMS: (id: string) => `/exportreceipt/${id}/items`,
     },
     SUPPLIER: {
         LIST: '/supplier',
