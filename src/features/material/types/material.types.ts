@@ -202,8 +202,8 @@ export interface UpdateMaterialRequest {
 }
 
 export interface GetMaterialsParams {
-    Search?: string;
-    MaterialTypeId?: number;
+    SearchText?: string;
+    MaterialTypeId?: string;
     Page?: number;
     PageSize?: number;
 }
@@ -252,6 +252,7 @@ export interface IWarehouse {
 export interface GetWarehousesParams {
     ZoneId?: string;
     Search?: string;
+    MaterialTypeId?: string;
     Page?: number;
     PageSize?: number;
 }

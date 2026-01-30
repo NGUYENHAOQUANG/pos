@@ -9,13 +9,16 @@ import { MaterialEmptyState } from '@/features/material/components/EmptyStateCar
 
 interface MaterialListScreenProps {
     materials: IMaterial[];
-    onEdit: (item: IMaterial) => void;
+    onEdit?: (item: IMaterial) => void;
     onHistoryPress?: (item: IMaterial) => void;
     onAdjustmentPress?: (item: IMaterial) => void;
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
     onPressCreate?: () => void;
+    hideRemaining?: boolean;
+    alwaysExpanded?: boolean;
+    showStatus?: boolean;
 }
 
 export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
@@ -27,6 +30,9 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
     refreshing,
     onRefresh,
     onPressCreate,
+    hideRemaining,
+    alwaysExpanded,
+    showStatus,
 }) => {
     if (isLoading) {
         return (
@@ -53,6 +59,9 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
                         onEdit={onEdit}
                         onHistoryPress={onHistoryPress}
                         onAdjustmentPress={onAdjustmentPress}
+                        hideRemaining={hideRemaining}
+                        alwaysExpanded={alwaysExpanded}
+                        showStatus={showStatus}
                     />
                 )}
                 contentContainerStyle={[

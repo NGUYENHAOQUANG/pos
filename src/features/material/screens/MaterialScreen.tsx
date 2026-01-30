@@ -16,6 +16,7 @@ import { MaterialEmptyState } from '@/features/material/components/EmptyStateCar
 import { ImportReceiptList } from '@/features/material/components/warehouse/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
+import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
 import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
 import { IMaterial } from '@/features/material/types/material.types';
 import {
@@ -29,8 +30,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useMaterialStore } from '@/features/material/store';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 100;
@@ -72,11 +72,9 @@ export const MeterialScreen = () => {
         }
     }, [dropdownData, selectedZoneId, setSelectedZoneId]);
 
-    // Menu state management
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-    // Auto-close menu when navigating away
     useFocusEffect(
         useCallback(() => {
             return () => {
@@ -89,6 +87,7 @@ export const MeterialScreen = () => {
     const searchText = useMaterialStore(state => state.searchText);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
     const setSearchText = useMaterialStore(state => state.setSearchText);
+    const filterType = useMaterialStore(state => state.filterType);
     const setFilterType = useMaterialStore(state => state.setFilterType);
     const setFilterMaterialName = useMaterialStore(state => state.setFilterMaterialName);
 
@@ -96,30 +95,24 @@ export const MeterialScreen = () => {
         const params: {
             Page: number;
             PageSize: number;
-            search?: string;
             Search?: string;
+            MaterialTypeId?: string;
         } = {
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
+            MaterialTypeId: filterType || undefined,
         };
 
-        // Add Search param if searchText is set
         if (searchText && searchText.trim()) {
             params.Search = searchText.trim();
         }
 
         return params;
-    }, [searchText]);
+    }, [searchText, filterType]);
 
-    // Fetch warehouses for the selected zone
     const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
     const warehouseId = warehouses?.[0]?.id;
 
-    // Fetch warehouse items (only for stock quantity)
-    // We don't filter warehouse items by search text here to ensure we have stock for all items if needed,
-    // or we can rely on the fact that both lists are filtered if we pass params.
-    // However, matching might be safer if we fetch all warehouse items or just rely on the API to filter both similarly.
-    // For now, let's pass the same params to both.
     const {
         data: warehouseItemsData,
         isLoading: isLoadingWarehouseItems,
@@ -127,18 +120,16 @@ export const MeterialScreen = () => {
         isRefetching: isRefetchingWarehouseItems,
     } = useWarehouseItems(warehouseId, materialParams, { enabled: !!warehouseId });
 
-    // Map warehouse items to IMaterial
     const materials: IMaterial[] = useMemo(() => {
         if (!warehouseItemsData?.items) return [];
         return warehouseItemsData.items.map(item => ({
             id: item.materialId,
             name: item.materialName || '',
-            group: MaterialGroupType.FARMING, // Default group
+            group: MaterialGroupType.FARMING,
             unit: item.unitId,
             unitName: item.unitName,
             remaining: item.quantity,
             isActive: true,
-            // Details will be fetched in MaterialList component
             manufacturer: undefined,
             type: undefined,
             usage: undefined,
@@ -206,7 +197,6 @@ export const MeterialScreen = () => {
         setMenuOpen(false);
     }, []);
 
-    // Handle tab navigation from other screens
     React.useEffect(() => {
         const params = route.params as { selectedTab?: TabType } | undefined;
         if (params?.selectedTab) {
@@ -216,7 +206,6 @@ export const MeterialScreen = () => {
     }, [route.params, navigation, setSelectedTab]);
 
     useLayoutEffect(() => {
-        // Always show tab bar on list screen
         setTabBarVisible(true);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
@@ -329,6 +318,14 @@ export const MeterialScreen = () => {
             />
 
             <View style={styles.content}>
+                {selectedTab === 'material' && (
+                    <MaterialMasterListTab
+                        onPressCreate={actions.createMaterial}
+                        onEdit={actions.editMaterial}
+                        onHistoryPress={handleHistoryPress}
+                        onAdjustmentPress={handleAdjustmentPress}
+                    />
+                )}
                 {selectedTab === 'list' && (
                     <MaterialListScreen
                         materials={materials}

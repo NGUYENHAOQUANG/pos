@@ -24,8 +24,7 @@ import {
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { documentApi } from '@/features/material/api/documentApi';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
