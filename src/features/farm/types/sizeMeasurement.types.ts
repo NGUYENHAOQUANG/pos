@@ -1,4 +1,4 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, IDocument } from '@/shared/types/common.types';
 export interface ISizeMeasurementDetail {
     shrimpSizePcsPerKg: number;
     estimatedRemainingStockKg: number;
@@ -19,12 +19,7 @@ export interface ISizeMeasurement {
     operationId?: string;
     value?: number;
     documentIds?: string[];
-    documents?: Array<{
-        id: string;
-        fileName: string;
-        filePath: string;
-        publicUrl?: string;
-    }>;
+    documents?: IDocument[];
     sizeMeasurement?: ISizeMeasurementDetail | null;
 }
 
