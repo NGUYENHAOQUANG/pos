@@ -24,6 +24,9 @@ interface MaterialListProps {
     onEdit?: (item: IMaterial) => void;
     onHistoryPress?: (item: IMaterial) => void;
     onAdjustmentPress?: (item: IMaterial) => void;
+    hideRemaining?: boolean;
+    alwaysExpanded?: boolean;
+    showStatus?: boolean;
 }
 
 // ... (interface MaterialListProps)
@@ -33,8 +36,11 @@ export const MaterialList: React.FC<MaterialListProps> = ({
     onEdit,
     onHistoryPress,
     onAdjustmentPress,
+    hideRemaining,
+    alwaysExpanded,
+    showStatus,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
 
     // Fetch details for this material item using the hook
     const { data: detail } = useMaterial(item.id);
@@ -54,22 +60,39 @@ export const MaterialList: React.FC<MaterialListProps> = ({
 
             <View style={styles.separator} />
 
+            {/* Status Field */}
+            {showStatus && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Trạng thái: </Text>
+                    <Text
+                        style={[
+                            styles.detailValue,
+                            { color: item.isActive ? colors.green[600] : colors.red[500] },
+                        ]}
+                    >
+                        {item.isActive ? 'Hoạt động' : 'Ngưng'}
+                    </Text>
+                </View>
+            )}
+
             {/* Basic Info Row */}
             <View style={styles.infoRow}>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Đơn vị tính: </Text>
                     {detail?.unitName || item.unitName || item.unit}
                 </Text>
-                <Text style={styles.infoText}>
-                    <Text style={styles.label}>Còn: </Text>
-                    {item.remaining}
-                </Text>
+                {!hideRemaining && (
+                    <Text style={styles.infoText}>
+                        <Text style={styles.label}>Còn: </Text>
+                        {item.remaining}
+                    </Text>
+                )}
             </View>
 
             {/* Expanded Content */}
             {isExpanded && (
                 <View>
-                    <View style={styles.separatorCenter} />
+                    {!alwaysExpanded && <View style={styles.separatorCenter} />}
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Loại vật tư: </Text>
                         <Text style={styles.detailValue}>{detail?.type || item.type || '---'}</Text>
@@ -97,44 +120,61 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                     </View> */}
 
                     {/* Edit Button */}
-                    <ButtonMaterialList
-                        title="Sửa thông tin"
-                        onPress={() => onEdit?.(detail || item)}
-                        style={styles.editButton}
-                    />
+                    {onEdit && (
+                        <ButtonMaterialList
+                            title="Sửa thông tin"
+                            onPress={() => onEdit(detail || item)}
+                            style={styles.editButton}
+                        />
+                    )}
                 </View>
             )}
 
             {/* Expand Toggle */}
-            <TouchableOpacity
-                style={styles.expandToggle}
-                onPress={toggleExpand}
-                activeOpacity={0.7}
-            >
-                <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color={colors.primary}
-                />
-            </TouchableOpacity>
+            {!alwaysExpanded && (
+                <TouchableOpacity
+                    style={styles.expandToggle}
+                    onPress={toggleExpand}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+                    <Ionicons
+                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={16}
+                        color={colors.primary}
+                    />
+                </TouchableOpacity>
+            )}
 
-            <View style={styles.separator} />
+            {!alwaysExpanded && <View style={styles.separator} />}
 
             {/* Action Buttons */}
-            <View style={styles.actionRow}>
-                <ButtonMaterialList
-                    title="Lịch sử nhập kho"
-                    onPress={() => onHistoryPress?.(item)}
-                    style={styles.actionButton}
-                />
-                <View style={styles.spacer} />
-                <ButtonMaterialList
-                    title="Điều chỉnh tồn kho"
-                    onPress={() => onAdjustmentPress?.(item)}
-                    style={styles.actionButton}
-                />
-            </View>
+            {/* Action Buttons */}
+            {(onHistoryPress || onAdjustmentPress) && (
+                <View style={styles.actionRow}>
+                    {onHistoryPress && (
+                        <ButtonMaterialList
+                            title="Lịch sử nhập kho"
+                            onPress={() => onHistoryPress(item)}
+                            style={[
+                                styles.actionButton,
+                                !onAdjustmentPress ? { flex: 0, minWidth: '48%' } : undefined,
+                            ]}
+                        />
+                    )}
+                    {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
+                    {onAdjustmentPress && (
+                        <ButtonMaterialList
+                            title="Điều chỉnh tồn kho"
+                            onPress={() => onAdjustmentPress(item)}
+                            style={[
+                                styles.actionButton,
+                                !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
+                            ]}
+                        />
+                    )}
+                </View>
+            )}
         </View>
     );
 };

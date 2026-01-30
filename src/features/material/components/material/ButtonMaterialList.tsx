@@ -1,11 +1,19 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
+import {
+    TouchableOpacity,
+    Text,
+    StyleSheet,
+    StyleProp,
+    ViewStyle,
+    TextStyle,
+    View,
+} from 'react-native';
 import { colors, borderRadius, spacing } from '@/styles';
 
 interface ButtonMaterialListProps {
     title: string;
     onPress?: () => void;
-    style?: ViewStyle;
+    style?: StyleProp<ViewStyle>;
     textStyle?: TextStyle;
     icon?: React.ReactNode;
 }

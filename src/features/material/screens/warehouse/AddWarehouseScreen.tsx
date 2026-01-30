@@ -25,10 +25,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useSuppliers } from '@/features/material/hooks/useSuppliers';
-import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
 import { useMaterialOptions } from '@/features/material/hooks/inventory';
 import { useCreateImportReceipt } from '@/features/material/hooks/useImportReceipts';
 import {

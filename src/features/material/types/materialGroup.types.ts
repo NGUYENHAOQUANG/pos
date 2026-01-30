@@ -93,7 +93,7 @@ export interface UpdateMaterialV2Request {
 
 export interface GetMaterialsV2Params {
     SearchText?: string;
-    materialTypeId?: string;
+    MaterialTypeId?: string;
     Page?: number;
     PageSize?: number;
     warehouseId?: string;
