@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSizeMeasurementsAsJobs } from '@/features/farm/hooks/useSizeMeasurement';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -138,6 +139,9 @@ export const ShrimpFarmScreens: React.FC = () => {
         const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
         return currentCycleData || foundCycle;
     }, [pond?.id, activeCycles, foundCycle]);
+    // Fetch size measurements from API
+    const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pond?.id || '');
+
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
         // Get pondTypeId from pond
@@ -162,9 +166,16 @@ export const ShrimpFarmScreens: React.FC = () => {
                 const jobType = mapOperationTypeToJobType(opName);
 
                 if (jobType) {
+                    let items = pond?.id ? getPondJobItems(pond.id, jobType) : [];
+
+                    // Override with API data for MEASURE_SIZE
+                    if (jobType === JOB_TYPES.MEASURE_SIZE) {
+                        items = apiMeasureSizeJobs;
+                    }
+
                     jobTypes.push({
                         type: jobType,
-                        items: pond?.id ? getPondJobItems(pond.id, jobType) : [],
+                        items,
                     });
                 }
             }
@@ -203,6 +214,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         feedJobs,
         shrimpInspectionJobs,
         measureSizeJobs,
+        apiMeasureSizeJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,
@@ -281,7 +293,7 @@ export const ShrimpFarmScreens: React.FC = () => {
 
         if (type === JOB_TYPES.TRANSFER_POND) {
             // Get latest shrimp size from MEASURE_SIZE jobs
-            const measureSizeItems = getPondJobItems(pond.id, 'MEASURE_SIZE');
+            const measureSizeItems = apiMeasureSizeJobs;
 
             // Check if there is no measure size data, show warning modal
             if (measureSizeItems.length === 0) {
