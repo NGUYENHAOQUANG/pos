@@ -152,7 +152,10 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             },
             getUploadedIds: () => {
                 // Return IDs corresponding to the current imageUris (in order)
-                return imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
+                // Filter out any undefineds, but maintain order integrity as much as possible for debugging
+                const ids = imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
+                // console.log('[GeneralInfoBox] getUploadedIds:', ids, 'from uris:', imageUris, 'map:', uploadedFilesMap.current);
+                return ids;
             },
         }));
 
