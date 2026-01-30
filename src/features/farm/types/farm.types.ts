@@ -288,6 +288,8 @@ export interface JobExecution {
         unit: string;
     }[];
     images?: string[];
+    documentIds?: string[];
+    createdAt?: string;
     waterTreatmentType?: string;
     meta?: JobMeta;
 }

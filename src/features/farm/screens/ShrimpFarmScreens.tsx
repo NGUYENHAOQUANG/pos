@@ -21,6 +21,7 @@ import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 import { useShrimpHealthChecksAsJobs } from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -146,6 +147,7 @@ export const ShrimpFarmScreens: React.FC = () => {
     const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pond?.id || '');
     // Fetch siphon records from API
     const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pond?.id || '');
+    const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -186,6 +188,11 @@ export const ShrimpFarmScreens: React.FC = () => {
                     // Override with API data for SIPHON
                     if (jobType === JOB_TYPES.SIPHON) {
                         items = apiSiphonJobs;
+                    }
+
+                    // Override with API data for TROUBLESHOOTING (Xử lý sự cố)
+                    if (jobType === JOB_TYPES.TROUBLESHOOTING) {
+                        items = apiIncidentJobs;
                     }
 
                     jobTypes.push({
@@ -232,6 +239,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         apiMeasureSizeJobs,
         apiShrimpInspectionJobs,
         apiSiphonJobs,
+        apiIncidentJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,
