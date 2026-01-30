@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -22,23 +22,21 @@ export const SiphonLogScreen: React.FC = () => {
     });
     const [endDate, setEndDate] = useState(new Date());
 
-    const { jobs } = useSiphonRecordsAsJobs(pond?.id, {
-        // Assuming params match size measurement pattern (API documentation usually consistent)
-        // If API expects different params, we adjust.
-        // User text implied "CreateAtFrom/To" used in other screens so we follow suit.
-        // Wait, "MeasureShrimpSizeLogScreen" uses CreateAtFrom/To.
-        // We added ISiphonParams with generic struct. We pass raw strings or adjust typing?
-        // ISiphonParams was user defined to match params. We can just cast or update ISiphonParams if needed.
-        // For now pass as any or extend ISiphonParams if I can't edit it again easily.
-        // Actually ISiphonParams I defined had Page/PageSize. I should add date filters there ideally.
-        // But for now casting to any or passing extra props is standard if type allows index signature or I update type.
-        // I will just cast/pass it, assuming API supports it.
-        // Actually, looking at image 1 (which I can't see but assume), params are:
-        // PondId, Id, CreatedAt, CreateAtFrom, CreateAtTo, Page, PageSize, OrderBy.
-        // So CreateAtFrom/CreateAtTo are correct.
+    const [refreshing, setRefreshing] = useState(false);
+
+    const { jobs, isLoading, refetch } = useSiphonRecordsAsJobs(pond?.id, {
         CreateAtFrom: startDate.toISOString(),
         CreateAtTo: endDate.toISOString(),
     } as any);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        setTimeout(async () => {
+            // Refetch data
+            await refetch();
+            setRefreshing(false);
+        }, 500);
+    }, [refetch]);
 
     const config: LogScreenConfig<SiphonMeta> = {
         jobType: 'SIPHON',
@@ -77,6 +75,9 @@ export const SiphonLogScreen: React.FC = () => {
             emptyMessage="Chưa có dữ liệu xi-phông"
             emptyButtonTitle="Bắt đầu xi-phông"
             onEmptyButtonPress={handleStartSiphon}
+            isLoading={isLoading || refreshing}
+            isRefreshing={refreshing}
+            onRefresh={onRefresh}
         />
     );
 };

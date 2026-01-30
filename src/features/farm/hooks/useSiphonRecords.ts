@@ -20,7 +20,7 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
 };
 
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
-    const { data, isLoading, error } = useSiphonRecords(pondId, params);
+    const { data, isLoading, error, refetch } = useSiphonRecords(pondId, params);
 
     const rawItems = data?.data?.items || [];
     const sortedItems = [...rawItems].sort((a, b) => {
@@ -58,7 +58,7 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
         },
     }));
 
-    return { jobs, isLoading, error };
+    return { jobs, isLoading, error, refetch };
 };
 
 export const useCreateSiphonRecord = () => {
