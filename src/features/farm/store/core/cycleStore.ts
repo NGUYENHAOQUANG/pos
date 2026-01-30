@@ -37,6 +37,7 @@ export interface CycleStore {
     deleteActiveCycle: (pondId: string) => void;
     updateCycle: (cycleId: string, data: Partial<CycleData>) => void;
     createCycle: (data: CycleData) => void;
+    setCycles: (cycles: CycleData[]) => void;
     deleteCycle: (cycleId: string) => void;
 
     // Complex Actions
@@ -70,7 +71,9 @@ export const createCycleStore: StateCreator<
     cycles: DUMMY_CYCLE_DATA,
 
     getCyclesByPondId: pondId => {
-        return get().cycles.filter(
+        const state = get();
+        const cycles = Array.isArray(state.cycles) ? state.cycles : [];
+        return cycles.filter(
             cycle => cycle.sourcePonds?.includes(pondId) || cycle.receivingPonds?.includes(pondId)
         );
     },
@@ -107,10 +110,17 @@ export const createCycleStore: StateCreator<
 
     updateCycle: (cycleId, data) => {
         set(state => {
+            if (!state.cycles) state.cycles = []; // Safeguard
             const cycle = state.cycles.find(c => c.id === cycleId);
             if (cycle) {
                 Object.assign(cycle, data);
             }
+        });
+    },
+
+    setCycles: cycles => {
+        set(state => {
+            state.cycles = Array.isArray(cycles) ? cycles : []; // Safeguard
         });
     },
 

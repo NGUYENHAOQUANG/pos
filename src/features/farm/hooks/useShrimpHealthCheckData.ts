@@ -30,29 +30,15 @@ const convertToJobExecutions = async (
     // Đếm số lượt theo từng ngày: Lần 1, Lần 2, ... / mỗi ngày
     const dayCounts: Record<string, number> = {};
 
-    // Resolve image URLs for each shrimp health check (from documents or documentIds)
     return Promise.all(
         sortedChecks.map(async check => {
             let imageUrls: string[] = [];
-
-            // Prefer documents with publicUrl if available
-            if (check.documents && check.documents.length > 0) {
+            if (check.documentIds && check.documentIds.length > 0) {
+                imageUrls = await documentApi.getUrls(check.documentIds);
+            } else if (check.documents && check.documents.length > 0) {
                 imageUrls = check.documents
                     .map(doc => doc.publicUrl)
                     .filter((url): url is string => !!url);
-            } else if (check.documentIds && check.documentIds.length > 0) {
-                // Fallback: resolve URLs from documentIds via documentApi.getUrl
-                const urls = await Promise.all(
-                    check.documentIds.map(async id => {
-                        try {
-                            const url = await documentApi.getUrl(id);
-                            return url || '';
-                        } catch {
-                            return '';
-                        }
-                    })
-                );
-                imageUrls = urls.filter((url): url is string => !!url);
             }
 
             // Map API response to UI state (including resolved image URLs)

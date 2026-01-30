@@ -12,6 +12,7 @@ import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution, CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
+import { useCyclesByPond } from '@/features/farm/hooks/useCycle.ts';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -21,6 +22,11 @@ import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 import { useShrimpHealthChecksAsJobs } from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { useEnvMeasurementsAsJobs } from '@/features/farm/hooks/useEnvMeasurement';
+import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
+
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -119,6 +125,21 @@ export const ShrimpFarmScreens: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondFromParams, getPondById, ponds]);
 
+    // --- Dynamic Breed Name Fetching ---
+    // 1. Get Zone ID
+    const effectiveZoneId = pond?.zoneId?.toString();
+
+    // 2. Fetch Warehouses for this Zone
+    const { data: warehouses } = useWarehouses({
+        PageSize: 100,
+        ZoneId: effectiveZoneId,
+    });
+    const defaultWarehouseId = warehouses?.[0]?.id;
+
+    // 3. Fetch Shrimp Seeds
+    const { data: shrimpSeeds } = useShrimpSeeds(defaultWarehouseId);
+    // -----------------------------------
+
     // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {
         if (!pond?.id) return null;
@@ -146,6 +167,9 @@ export const ShrimpFarmScreens: React.FC = () => {
     const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pond?.id || '');
     // Fetch siphon records from API
     const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pond?.id || '');
+    // Fetch environment measurements
+    const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pond?.id || '', new Date());
+    const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -186,6 +210,15 @@ export const ShrimpFarmScreens: React.FC = () => {
                     // Override with API data for SIPHON
                     if (jobType === JOB_TYPES.SIPHON) {
                         items = apiSiphonJobs;
+                    }
+
+                    // Override with API data for ENVIRONMENT
+                    if (jobType === JOB_TYPES.ENVIRONMENT) {
+                        items = apiEnvJobs;
+                    }
+                    // Override with API data for TROUBLESHOOTING (Xử lý sự cố)
+                    if (jobType === JOB_TYPES.TROUBLESHOOTING) {
+                        items = apiIncidentJobs;
                     }
 
                     jobTypes.push({
@@ -232,6 +265,8 @@ export const ShrimpFarmScreens: React.FC = () => {
         apiMeasureSizeJobs,
         apiShrimpInspectionJobs,
         apiSiphonJobs,
+        apiEnvJobs,
+        apiIncidentJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,
@@ -536,16 +571,29 @@ export const ShrimpFarmScreens: React.FC = () => {
     // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo" -> REMOVED
     const headerDisplayType = undefined;
 
+    const {
+        data: cyclesData,
+        refetch: refetchCycles,
+        isRefetching: isRefetchingCycles,
+    } = useCyclesByPond(pond?.id || '');
+    const setCycles = useFarmStore(state => state.setCycles);
+
+    useEffect(() => {
+        if (cyclesData) {
+            setCycles(cyclesData);
+        }
+    }, [cyclesData, setCycles]);
+
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         try {
-            await fetchMasterData();
+            await Promise.all([fetchMasterData(), refetchCycles()]);
         } catch (error) {
             console.error('Refresh master data failed:', error);
         } finally {
             setRefreshing(false);
         }
-    }, [fetchMasterData]);
+    }, [fetchMasterData, refetchCycles]);
 
     return (
         <View style={styles.container}>
@@ -579,76 +627,90 @@ export const ShrimpFarmScreens: React.FC = () => {
                 >
                     {selectedTab === 'work' ? (
                         <>
-                            {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
-                            {currentCycle ? (
-                                <View style={styles.cycleCardWrapper}>
-                                    {/* Main cycle card */}
-                                    <CycleCard
-                                        cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                                        startDate={currentCycle?.stockingDate ?? ''}
-                                        doc={calculateDOC(currentCycle?.stockingDate ?? '')}
-                                        stockingQuantity={currentCycle?.stockingQuantity || 0}
-                                        breed={
-                                            breedOptions.find(
-                                                b => b.value === currentCycle.breedSource
-                                            )?.label || 'N/A'
-                                        }
-                                        // Cho phép bấm vào thẻ để sửa
-                                        onPress={() =>
-                                            navigation.navigate('CycleDetail', {
-                                                pondId: pond.id,
-                                                cycleData: currentCycle,
-                                            })
-                                        }
-                                    />
-
-                                    {/* Transferred cycle card - show if pond received shrimp from nursery */}
-                                    {currentCycle.transferInfo && (
-                                        <CycleCard
-                                            cycleName={
-                                                currentCycle.transferInfo.originalCycle.cycleName ||
-                                                'Chu kỳ ao vèo'
-                                            }
-                                            startDate={
-                                                currentCycle.transferInfo.originalCycle.stockingDate
-                                            }
-                                            endDate={currentCycle.transferInfo.transferDate}
-                                            doc={currentCycle.transferInfo.originalCycle.doc || 0}
-                                            stockingQuantity={
-                                                currentCycle.transferInfo.originalCycle
-                                                    .stockingQuantity || 0
-                                            }
-                                            breed={
-                                                breedOptions.find(
-                                                    b =>
-                                                        b.value ===
-                                                        currentCycle.transferInfo?.originalCycle
-                                                            .breedSource
-                                                )?.label || 'N/A'
-                                            }
-                                            status="Hoàn thành"
-                                            onPress={() =>
-                                                navigation.navigate('CycleDetail', {
-                                                    pondId: pond.id,
-                                                    cycleData: currentCycle,
-                                                })
-                                            }
-                                        />
-                                    )}
-                                </View>
-                            ) : (
-                                <PondCycleEmptyState />
-                            )}
-
-                            {isLoading ? (
+                            {isLoading || isRefetchingCycles ? (
                                 <PondJobSkeleton />
                             ) : (
-                                <JobListCard
-                                    jobs={jobs}
-                                    onPressJob={handleJobPress}
-                                    onPressAddJob={handleAddJobItem}
-                                    onEditJobItem={handleEditJobItem}
-                                />
+                                <>
+                                    {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
+                                    {currentCycle ? (
+                                        <View style={styles.cycleCardWrapper}>
+                                            {/* Main cycle card */}
+                                            <CycleCard
+                                                cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
+                                                startDate={currentCycle?.stockingDate ?? ''}
+                                                doc={calculateDOC(currentCycle?.stockingDate ?? '')}
+                                                stockingQuantity={
+                                                    currentCycle?.stockingQuantity || 0
+                                                }
+                                                breed={
+                                                    currentCycle.breedName ||
+                                                    shrimpSeeds?.find(
+                                                        (s: any) =>
+                                                            s.id === currentCycle.breedSource
+                                                    )?.materialName ||
+                                                    breedOptions.find(
+                                                        b => b.value === currentCycle.breedSource
+                                                    )?.label ||
+                                                    'N/A'
+                                                }
+                                                // Cho phép bấm vào thẻ để sửa
+                                                onPress={() =>
+                                                    navigation.navigate('CycleDetail', {
+                                                        pondId: pond.id,
+                                                        cycleData: currentCycle,
+                                                    })
+                                                }
+                                            />
+
+                                            {/* Transferred cycle card - show if pond received shrimp from nursery */}
+                                            {currentCycle.transferInfo && (
+                                                <CycleCard
+                                                    cycleName={
+                                                        currentCycle.transferInfo.originalCycle
+                                                            .cycleName || 'Chu kỳ ao vèo'
+                                                    }
+                                                    startDate={
+                                                        currentCycle.transferInfo.originalCycle
+                                                            .stockingDate
+                                                    }
+                                                    endDate={currentCycle.transferInfo.transferDate}
+                                                    doc={
+                                                        currentCycle.transferInfo.originalCycle
+                                                            .doc || 0
+                                                    }
+                                                    stockingQuantity={
+                                                        currentCycle.transferInfo.originalCycle
+                                                            .stockingQuantity || 0
+                                                    }
+                                                    breed={
+                                                        breedOptions.find(
+                                                            b =>
+                                                                b.value ===
+                                                                currentCycle.transferInfo
+                                                                    ?.originalCycle.breedSource
+                                                        )?.label || 'N/A'
+                                                    }
+                                                    status="Hoàn thành"
+                                                    onPress={() =>
+                                                        navigation.navigate('CycleDetail', {
+                                                            pondId: pond.id,
+                                                            cycleData: currentCycle,
+                                                        })
+                                                    }
+                                                />
+                                            )}
+                                        </View>
+                                    ) : (
+                                        <PondCycleEmptyState />
+                                    )}
+
+                                    <JobListCard
+                                        jobs={jobs}
+                                        onPressJob={handleJobPress}
+                                        onPressAddJob={handleAddJobItem}
+                                        onEditJobItem={handleEditJobItem}
+                                    />
+                                </>
                             )}
                         </>
                     ) : selectedTab === 'log' ? (

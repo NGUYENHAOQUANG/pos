@@ -90,6 +90,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         materialGroup,
         selectedMaterialId,
         isLoadingDetail,
+        status,
     } = formState;
 
     // Use creator name from API if available (in edit mode), otherwise use current user name
@@ -195,7 +196,11 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                                 : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
                         }
                         onBackPress={() => navigation.goBack()}
-                        rightComponent={isEditMode ? deleteButton : undefined}
+                        rightComponent={
+                            isEditMode && ['Draft', 'Rejected'].includes(status)
+                                ? deleteButton
+                                : undefined
+                        }
                     />
 
                     <SafeInputLayout>

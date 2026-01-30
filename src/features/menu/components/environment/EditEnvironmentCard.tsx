@@ -1,29 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
-import WarningIcon from '@/assets/Icon/IconFarm/Warning.svg';
+// import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
+// import WarningIcon from '@/assets/Icon/IconFarm/Warning.svg';
 
 interface EditEnvironmentCardProps {
     name: string;
     lowerLimit: string;
     upperLimit: string;
-    isAlertEnabled: boolean;
+    // isAlertEnabled: boolean;
     onNameChange: (text: string) => void;
     onLowerLimitChange: (text: string) => void;
     onUpperLimitChange: (text: string) => void;
-    onAlertToggle: (enabled: boolean) => void;
+    // onAlertToggle: (enabled: boolean) => void;
 }
 
 export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     name,
     lowerLimit,
     upperLimit,
-    isAlertEnabled,
+    // isAlertEnabled,
     onNameChange,
     onLowerLimitChange,
     onUpperLimitChange,
-    onAlertToggle,
+    // onAlertToggle,
 }) => {
     return (
         <View style={styles.container}>
@@ -73,8 +73,8 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 </View>
             </View>
 
-            {/* Alert Config Card */}
-            <View style={styles.alertCard}>
+            {/* Alert Config Card - Hidden per user request */}
+            {/* <View style={styles.alertCard}>
                 <View style={styles.alertHeader}>
                     <View style={styles.alertTitleWrapper}>
                         <View style={styles.iconWrapper}>
@@ -90,7 +90,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 <Text style={styles.alertDescription}>
                     Hệ thống sẽ cảnh báo khi kết quả đo nằm ngoài khoảng giới hạn đã thiết lập.
                 </Text>
-            </View>
+            </View> */}
         </View>
     );
 };
@@ -130,44 +130,45 @@ const styles = StyleSheet.create({
         color: colors.text,
         backgroundColor: colors.white,
     },
-    alertCard: {
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-    },
-    alertHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: spacing.md,
-    },
-    alertTitleWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    iconWrapper: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: colors.yellow[50], // Light yellow background for warning
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.sm,
-    },
-    alertTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-    },
-    alertDescription: {
-        padding: spacing.md,
-        fontSize: 14,
-        color: colors.textSecondary,
-        lineHeight: 20,
-    },
+    // Alert styles - Hidden per user request
+    // alertCard: {
+    //     borderWidth: 1,
+    //     borderColor: colors.border,
+    //     borderRadius: borderRadius.md,
+    //     overflow: 'hidden',
+    // },
+    // alertHeader: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    //     justifyContent: 'space-between',
+    //     padding: spacing.md,
+    // },
+    // alertTitleWrapper: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    // },
+    // iconWrapper: {
+    //     width: 32,
+    //     height: 32,
+    //     borderRadius: 16,
+    //     backgroundColor: colors.yellow[50],
+    //     justifyContent: 'center',
+    //     alignItems: 'center',
+    //     marginRight: spacing.sm,
+    // },
+    // alertTitle: {
+    //     fontSize: 14,
+    //     fontWeight: '600',
+    //     color: colors.text,
+    // },
+    // divider: {
+    //     height: 1,
+    //     backgroundColor: colors.borderLight,
+    // },
+    // alertDescription: {
+    //     padding: spacing.md,
+    //     fontSize: 14,
+    //     color: colors.textSecondary,
+    //     lineHeight: 20,
+    // },
 });

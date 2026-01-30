@@ -89,11 +89,11 @@ export const EditEnvironmentScreens: React.FC = () => {
                     name={name}
                     lowerLimit={lowerLimit}
                     upperLimit={upperLimit}
-                    isAlertEnabled={isAlertEnabled}
+                    // isAlertEnabled={isAlertEnabled}
                     onNameChange={setName}
                     onLowerLimitChange={setLowerLimit}
                     onUpperLimitChange={setUpperLimit}
-                    onAlertToggle={setIsAlertEnabled}
+                    // onAlertToggle={setIsAlertEnabled}
                 />
             </ScrollView>
 

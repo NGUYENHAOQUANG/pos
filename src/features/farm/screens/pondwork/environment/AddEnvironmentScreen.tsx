@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,6 +27,7 @@ import {
     useParameterConfiguration,
 } from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
 import { useAddEnvironment } from '@/features/farm/hooks/envhooks/useAddEnvironment';
+import { documentApi } from '@/features/material/api/documentApi';
 
 // ... (keep imports)
 
@@ -38,11 +39,14 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Decomposed useFarm() selectors
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
     const environmentSettings = useFarmStore(state => state.environmentSettings);
     const parameterSettings = useFarmStore(state => state.parameterSettings);
     const scrollViewRef = useRef<ScrollView>(null);
+    const generalInfoBoxRef = useRef<any>(null);
+
+    // State for images when editing
+    const [imageUris, setImageUris] = useState<string[]>([]);
+    const [documentIds, setDocumentIds] = useState<string[]>([]);
 
     // 1. Resolve Zone
     const zones = useFarmStore(state => state.zones); // Needed for resolution
@@ -108,6 +112,8 @@ export const AddEnvironmentScreen: React.FC = () => {
         handleSave,
         handleDelete,
         handleSaveAdvancedParams,
+        isSubmitting,
+        detail, // Get detail for accessing documentIds
     } = useAddEnvironment({
         pond,
         itemToEdit,
@@ -115,10 +121,26 @@ export const AddEnvironmentScreen: React.FC = () => {
         metricTypes,
         parameterSettings,
         environmentSettings,
-        updatePondJob,
-        getPondJobItems,
-        parameterLimits,
     });
+
+    // Fetch image URLs from documentIds when editing
+    useEffect(() => {
+        const fetchImageUrls = async () => {
+            if (itemToEdit && detail?.documentIds && detail.documentIds.length > 0) {
+                try {
+                    const urls = await Promise.all(
+                        detail.documentIds.map((id: string) => documentApi.getUrl(id))
+                    );
+                    setImageUris(urls);
+                    setDocumentIds(detail.documentIds);
+                } catch (error) {
+                    console.error('[AddEnvironmentScreen] Failed to fetch image URLs:', error);
+                }
+            }
+        };
+        fetchImageUrls();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemToEdit, detail]);
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -145,6 +167,12 @@ export const AddEnvironmentScreen: React.FC = () => {
 
     const handleCancelDelete = () => {
         setDeleteModalVisible(false);
+    };
+
+    const handleSavePress = () => {
+        const documentIds = generalInfoBoxRef.current?.getUploadedIds?.() || [];
+        const markAsSaved = () => generalInfoBoxRef.current?.markAsSaved?.();
+        handleSave(documentIds, markAsSaved);
     };
 
     return (
@@ -175,10 +203,13 @@ export const AddEnvironmentScreen: React.FC = () => {
                             keyboardShouldPersistTaps="handled"
                         >
                             <GeneralInfoBox
-                                type="default"
+                                ref={generalInfoBoxRef}
+                                type="withImage"
                                 date={selectedDate}
                                 onDateChange={setSelectedDate}
-                                disabledDate={true}
+                                disabledDate={!!itemToEdit}
+                                imageUris={itemToEdit ? imageUris : undefined}
+                                documentIds={itemToEdit ? documentIds : undefined}
                             />
 
                             <EnvironmentParametersBox
@@ -244,9 +275,9 @@ export const AddEnvironmentScreen: React.FC = () => {
                         <ButtonBarFarm
                             primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                             secondaryTitle="Huỷ"
-                            onPrimaryPress={handleSave}
+                            onPrimaryPress={handleSavePress}
                             onSecondaryPress={handleCancel}
-                            primaryDisabled={itemToEdit ? isButtonDisabled : false}
+                            primaryDisabled={itemToEdit ? isButtonDisabled : false || isSubmitting}
                         />
                     </View>
                 </>

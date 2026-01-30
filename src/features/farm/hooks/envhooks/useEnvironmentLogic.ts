@@ -207,7 +207,7 @@ export const useParameterConfiguration = (
                 limit: limitStr,
                 isChecked: !!setting,
                 unit: metric.unitMetric,
-                alertEnabled: setting?.alert === 'true',
+                alertEnabled: setting?.alert === true || setting?.alert === 'true',
             };
 
             if (setting) {
