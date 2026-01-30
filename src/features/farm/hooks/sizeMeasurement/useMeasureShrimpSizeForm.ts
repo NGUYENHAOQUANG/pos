@@ -110,6 +110,17 @@ export const useMeasureShrimpSizeForm = ({
         populateData();
     }, [detail, itemToEdit]);
 
+    const handleError = (error: any) => {
+        let message = error?.message || 'Có lỗi xảy ra';
+        if (error?.fields) {
+            const firstFieldKey = Object.keys(error.fields)[0];
+            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
+                message = error.fields[firstFieldKey][0];
+            }
+        }
+        Toast.show({ type: 'error', text1: message });
+    };
+
     const handleSave = (documentIds: string[]) => {
         if (!shrimpSize || !remainingWeight) {
             Toast.show({ type: 'error', text1: 'Vui lòng nhập đủ thông tin bắt buộc' });
@@ -145,9 +156,7 @@ export const useMeasureShrimpSizeForm = ({
                         Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
                         navigation.goBack();
                     },
-                    onError: (error: any) => {
-                        Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
-                    },
+                    onError: handleError,
                 }
             );
         } else {
@@ -165,9 +174,7 @@ export const useMeasureShrimpSizeForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: (error: any) => {
-                        Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
-                    },
+                    onError: handleError,
                 }
             );
         }
@@ -184,9 +191,7 @@ export const useMeasureShrimpSizeForm = ({
                     Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
                     navigation.goBack();
                 },
-                onError: (error: any) => {
-                    Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
-                },
+                onError: handleError,
             }
         );
     };
