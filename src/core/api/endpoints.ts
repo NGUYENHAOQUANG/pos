@@ -131,6 +131,11 @@ export const API_ENDPOINTS = {
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',
         CREATE: '/exportreceipt',
+        DETAIL: (id: string) => `/exportreceipt/${id}`,
+        UPDATE: (id: string) => `/exportreceipt/${id}`,
+        DELETE: (id: string) => `/exportreceipt/${id}`,
+        ITEMS: (id: string) => `/exportreceipt/${id}/items`,
+        UPDATE_ITEMS: (id: string) => `/exportreceipt/${id}/items`,
     },
     SUPPLIER: {
         LIST: '/supplier',
