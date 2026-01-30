@@ -37,7 +37,7 @@ export const Tag: React.FC<TagProps> = ({ status, operation, label, style }) => 
 
     const getLabel = () => {
         if (label) return label;
-        if (operation) return operation.name;
+        if (operation) return operation.operationName;
 
         switch (status) {
             case 'active':

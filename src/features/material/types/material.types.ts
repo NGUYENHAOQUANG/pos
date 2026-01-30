@@ -268,3 +268,18 @@ export interface IWarehouseItem {
 }
 
 export type GetWarehouseItemsResponse = IAppResponse<IPaginate<IWarehouseItem>>;
+
+export interface IShrimpSeed {
+    materialId: string;
+    materialName: string;
+    materialCode: string; // e.g., "VT26012617235547"
+    quantity: number;
+    averagePrice: number;
+    alertQty: number;
+    id: string; // warehouse item id
+    no: number;
+    supplier?: string;
+    manufacturer?: string;
+}
+
+export type GetShrimpSeedsResponse = IAppResponse<IPaginate<IShrimpSeed>>;

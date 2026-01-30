@@ -80,15 +80,11 @@ export const AquacultureManagementScreens: React.FC = () => {
             filtered = filtered.filter(i => i.status === SeasonStatus.Closed);
         }
 
-        // Sort by ID descending (newest created first)
+        // Sort by NO descending (newest created first)
         return [...filtered].sort((a, b) => {
-            const idA = Number(a.id);
-            const idB = Number(b.id);
-            if (!isNaN(idA) && !isNaN(idB)) {
-                return idB - idA;
-            }
-            // Fallback for non-numeric IDs
-            return String(b.id).localeCompare(String(a.id));
+            const noA = a.no || 0;
+            const noB = b.no || 0;
+            return noB - noA;
         });
     }, [seasons, selectedTab, selectedZoneId]);
 
