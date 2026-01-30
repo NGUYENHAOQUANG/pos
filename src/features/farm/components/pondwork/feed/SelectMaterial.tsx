@@ -140,6 +140,7 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                     <View style={styles.quantityContainer}>
                                         <FarmInput
                                             label="Đơn vị"
+                                            placeholder="Đơn vị"
                                             value={selectedUnit}
                                             onChangeText={() => {}}
                                             editable={false}

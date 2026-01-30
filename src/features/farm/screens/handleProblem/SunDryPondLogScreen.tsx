@@ -1,94 +1,84 @@
-import React, { useState, useMemo } from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import React, { useState, useCallback } from 'react';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
 
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { parseDate, compareTime } from '@/features/farm/utils/dateUtils';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
-
-// Components Tracking
-import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
+import { JobExecution } from '@/features/farm/types/farm.types';
+import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
+import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
 
-export const SunDryPondLogScreen = () => {
+export const SunDryPondLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
-    const route = useRoute<ScreenRouteProp>();
-    const { pond } = route.params || {};
-    const getPondJobItemsGroupedByDate = useFarmStore(state => state.getPondJobItemsGroupedByDate);
+    const { params } = useRoute<ScreenRouteProp>();
+    const { pond } = params || {};
 
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
     const [endDate, setEndDate] = useState(new Date());
 
-    const handleCreateNew = () => {
-        if (pond) navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+    const [refreshing, setRefreshing] = useState(false);
+
+    const { jobs, isLoading, refetch } = useDryRenovationsAsJobs(pond?.id || '', {
+        createAtFrom: startDate.toISOString(),
+        createAtTo: endDate.toISOString(),
+        page: 1,
+        limit: 1000,
+    });
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        setTimeout(async () => {
+            refetch();
+            await refetch();
+            setRefreshing(false);
+        }, 500);
+    }, [refetch]);
+
+    const config: LogScreenConfig<any> = {
+        jobType: 'SUN_DRY_POND',
+        pond,
+        externalData: jobs,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
+        metaConverter: (item: JobExecution) => {
+            const data: ActivityData[] = [];
+            if (item.materials && item.materials.length > 0) {
+                item.materials.forEach(m => {
+                    data.push({
+                        label: m.material.name,
+                        value: m.quantity.toString(),
+                        unit: m.unit,
+                    });
+                });
+            }
+            if (item.note) {
+                data.push({
+                    label: 'Ghi chú',
+                    value: item.note,
+                });
+            }
+            return data;
+        },
+        editRoute: 'HandleProblem',
+        getEditParams: (pondData, item) => ({ pond: pondData, item, jobType: 'SUN_DRY_POND' }),
     };
 
-    // Logic Grouping Data
-    const groupedData: TrackingGroup[] = useMemo(() => {
-        if (!pond?.id) return [];
+    const { groupedData } = useLogScreenData(config);
 
-        const itemsByDate = getPondJobItemsGroupedByDate(
-            pond.id,
-            'SUN_DRY_POND',
-            startDate,
-            endDate
-        );
-
-        if (itemsByDate.size === 0) return [];
-
-        const groups: TrackingGroup[] = [];
-
-        itemsByDate.forEach((dateItems, dateKey) => {
-            const activities: TimelineActivity[] = dateItems.map(job => {
-                const displayData: ActivityData[] = [];
-
-                if (job.materials && job.materials.length > 0) {
-                    job.materials.forEach(m => {
-                        displayData.push({
-                            label: m.material.name,
-                            value: m.quantity.toString(),
-                            unit: m.unit,
-                        });
-                    });
-                }
-
-                return {
-                    id: job.id,
-                    time: job.time,
-                    title: job.label,
-                    data: displayData,
-                    note: job.note,
-                    onEdit: () => {
-                        if (pond) {
-                            navigation.navigate('HandleProblem', {
-                                pond,
-                                item: job,
-                                jobType: 'SUN_DRY_POND',
-                            });
-                        }
-                    },
-                };
-            });
-
-            groups.push({
-                id: dateKey,
-                date: dateKey,
-                activities: activities.sort((a, b) => compareTime(b.time, a.time)),
-            });
-        });
-
-        // Sort groups by date (oldest first)
-        return groups.sort((a, b) => {
-            const dateA = parseDate(a.date);
-            const dateB = parseDate(b.date);
-            return dateA.getTime() - dateB.getTime();
-        });
-    }, [pond, navigation, getPondJobItemsGroupedByDate, startDate, endDate]);
+    const handleNavigateToCreate = () => {
+        if (pond) {
+            navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+        }
+    };
 
     return (
         <BaseLogScreen
@@ -100,8 +90,10 @@ export const SunDryPondLogScreen = () => {
             groupedData={groupedData}
             emptyMessage="Chưa có dữ liệu phơi ao"
             emptyButtonTitle="Bắt đầu phơi ao"
-            onEmptyButtonPress={handleCreateNew}
-            useFlatCardStyle={true}
+            onEmptyButtonPress={handleNavigateToCreate}
+            isLoading={isLoading || refreshing}
+            isRefreshing={refreshing}
+            onRefresh={onRefresh}
         />
     );
 };

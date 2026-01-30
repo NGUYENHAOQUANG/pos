@@ -1,0 +1,388 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import { NormalizedError } from '@/core/api/errorHandler';
+
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
+import { formatDate } from '@/features/farm/utils/dateUtils';
+import {
+    showAddJobSuccessToast,
+    showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
+
+import {
+    useCreateCleanRenovation,
+    useUpdateCleanRenovation,
+    useDeleteCleanRenovation,
+} from '@/features/farm/hooks/useCleanRenovation';
+import {
+    useCreateDryRenovation,
+    useUpdateDryRenovation,
+    useDeleteDryRenovation,
+} from '@/features/farm/hooks/useDryRenovation';
+import { ICleanRenovationDetail } from '@/features/farm/types/cleanRenovation.types';
+import { IDryRenovationDetail } from '@/features/farm/types/dryRenovation.types';
+import { IMaterial } from '@/features/material/types/material.types';
+
+interface UseHandleProblemFormProps {
+    pond: any;
+    item?: any;
+    jobType?: string;
+    onSaveSuccess?: () => void;
+}
+
+export const useHandleProblemForm = ({
+    pond,
+    item,
+    jobType = 'CLEAN_POND',
+    onSaveSuccess,
+}: UseHandleProblemFormProps) => {
+    const navigation = useNavigation();
+
+    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+
+    const currentJobType = jobType as JobType;
+
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+
+    const { data: allMaterials = [] } = useMaterials();
+
+    const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
+    const defaultWarehouseId = warehouses?.[0]?.id;
+
+    const { data: warehouseItemsData } = useWarehouseItems(
+        defaultWarehouseId,
+        {
+            PageSize: 1000,
+        },
+        { enabled: !!defaultWarehouseId }
+    );
+
+    const materials: IMaterial[] = useMemo(() => {
+        return (warehouseItemsData?.items || []).map((item: any) => {
+            const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+
+            return {
+                id: item.id,
+                name: item.materialName || item.material?.name || materialDef?.name || 'Unknown',
+                group: item.material?.materialGroup?.name || '',
+                unit: item.unitId || materialDef?.unit || '',
+                unitName: item.unitName || item.material?.unit?.name || materialDef?.unitName || '',
+                remaining: item.quantity || 0,
+            };
+        });
+    }, [warehouseItemsData, allMaterials]);
+
+    const createCleanMutation = useCreateCleanRenovation();
+    const updateCleanMutation = useUpdateCleanRenovation();
+    const deleteCleanMutation = useDeleteCleanRenovation();
+
+    const createDryMutation = useCreateDryRenovation();
+    const updateDryMutation = useUpdateDryRenovation();
+    const deleteDryMutation = useDeleteDryRenovation();
+
+    const isSaving =
+        createCleanMutation.isPending ||
+        updateCleanMutation.isPending ||
+        createDryMutation.isPending ||
+        updateDryMutation.isPending;
+
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedMaterials, setSelectedMaterials] = useState<
+        Array<{ material: IMaterial; quantity: number; unit: string }>
+    >([]);
+    const [note, setNote] = useState('');
+    const [imageUris, setImageUris] = useState<string[]>([]);
+    const [initialDocumentIds, setInitialDocumentIds] = useState<string[]>([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    useEffect(() => {
+        if (item) {
+            setNote(item.note || '');
+            if (item.materials) {
+                const enrichedMaterials = item.materials.map((m: any) => {
+                    const warehouseItem = materials.find(wm => wm.id === m.material.id);
+                    if (warehouseItem) {
+                        return {
+                            material: warehouseItem,
+                            quantity: m.quantity,
+                            unit: warehouseItem.unitName || '',
+                        };
+                    }
+                    return m;
+                });
+                setSelectedMaterials(enrichedMaterials);
+            }
+            if (item.images) {
+                setImageUris(item.images);
+            }
+            if (item.meta && item.meta.documentIds) {
+                setInitialDocumentIds(item.meta.documentIds);
+            }
+            if (item.date) {
+            }
+        }
+    }, [item, materials]);
+
+    const getTitle = () => {
+        switch (currentJobType) {
+            case 'CLEAN_POND':
+                return 'Rửa ao';
+            case 'SUN_DRY_POND':
+                return 'Phơi ao';
+            case 'TROUBLESHOOTING':
+                return 'Xử lý sự cố';
+            default:
+                return 'Xử lý sự cố';
+        }
+    };
+
+    const handleError = (err: unknown) => {
+        const error = err as NormalizedError;
+        console.log(error);
+
+        if (error.type === 'VALIDATION_ERROR') {
+            const firstFieldKey = Object.keys(error.fields)[0];
+            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
+                Toast.show({
+                    type: 'error',
+                    text1: error.fields[firstFieldKey][0],
+                    visibilityTime: 4000,
+                });
+                return;
+            }
+        }
+
+        if (error.type === 'NOT_FOUND_ERROR') {
+            Toast.show({
+                type: 'error',
+                text1: error.message,
+                visibilityTime: 4000,
+            });
+            return;
+        }
+
+        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
+    };
+
+    const handleSave = (documentIds: string[]) => {
+        if (selectedMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
+
+        if (!pond?.id) return;
+
+        const apiMaterials = selectedMaterials.map(m => ({
+            warehouseItemId: m.material.id,
+            quantity: m.quantity,
+        }));
+
+        const commonPayload = {
+            notes: note,
+            materials: apiMaterials,
+        };
+
+        if (currentJobType === 'CLEAN_POND') {
+            const detail: ICleanRenovationDetail = commonPayload;
+            if (item) {
+                // Update
+                updateCleanMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        id: item.id,
+                        detail,
+                        documentIds,
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showEditJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            } else {
+                // Create
+                createCleanMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        detail,
+                        documentIds,
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showAddJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            }
+            return;
+        }
+
+        if (currentJobType === 'SUN_DRY_POND') {
+            const detail: IDryRenovationDetail = commonPayload;
+            if (item) {
+                // Update
+                updateDryMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        id: item.id,
+                        detail,
+                        documentIds,
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showEditJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            } else {
+                // Create
+                createDryMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        detail,
+                        documentIds,
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showAddJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            }
+            return;
+        }
+
+        // Fallback for TROUBLESHOOTING or others (Mock/Local Store)
+        const currentItems = getPondJobItems(pond.id, currentJobType);
+        const timeString = selectedDate.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+        const dateString = formatDate(selectedDate);
+
+        const jobData = {
+            materials: selectedMaterials,
+            note: note || undefined,
+            images: imageUris.length > 0 ? imageUris : undefined,
+            meta: {
+                ...item?.meta,
+                documentIds,
+            },
+        };
+
+        if (item) {
+            const updatedItems = currentItems.map((i: any) =>
+                i.id === item.id ? { ...i, time: timeString, date: dateString, ...jobData } : i
+            );
+            updatePondJob(pond.id, currentJobType, updatedItems);
+            showEditJobSuccessToast(currentJobType);
+        } else {
+            let maxIndex = 0;
+            currentItems.forEach((i: any) => {
+                const match = i.label.match(/Lần (\d+)/);
+                if (match) {
+                    const idx = parseInt(match[1], 10);
+                    if (idx > maxIndex) maxIndex = idx;
+                }
+            });
+            const nextIndex = maxIndex + 1;
+
+            const newItem = {
+                id: Date.now().toString(),
+                label: `Lần ${nextIndex}`,
+                time: timeString,
+                date: dateString,
+                pondId: pond.id,
+                ...jobData,
+            };
+            updatePondJob(pond.id, currentJobType, [...currentItems, newItem]);
+            showAddJobSuccessToast(currentJobType);
+        }
+        navigation.goBack();
+    };
+
+    const handleDelete = () => setShowDeleteModal(true);
+
+    const confirmDelete = () => {
+        if (!pond?.id || !item?.id) return;
+
+        if (currentJobType === 'CLEAN_POND') {
+            deleteCleanMutation.mutate(
+                { pondId: pond.id, id: item.id },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
+                    onError: handleError,
+                }
+            );
+            setShowDeleteModal(false);
+            return;
+        }
+
+        if (currentJobType === 'SUN_DRY_POND') {
+            deleteDryMutation.mutate(
+                { pondId: pond.id, id: item.id },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
+                    onError: handleError,
+                }
+            );
+            setShowDeleteModal(false);
+            return;
+        }
+
+        // Fallback
+        const currentItems = getPondJobItems(pond.id, currentJobType);
+        const updatedItems = currentItems.filter((i: any) => i.id !== item.id);
+        updatePondJob(pond.id, currentJobType, updatedItems);
+        navigation.goBack();
+        setShowDeleteModal(false);
+    };
+
+    const cancelDelete = () => setShowDeleteModal(false);
+
+    return {
+        selectedDate,
+        setSelectedDate,
+        selectedMaterials,
+        setSelectedMaterials,
+        note,
+        setNote,
+        imageUris,
+        setImageUris,
+        showDeleteModal,
+        handleSave,
+        handleDelete,
+        confirmDelete,
+        cancelDelete,
+        getTitle,
+        materials,
+        isSaving,
+        initialDocumentIds,
+    };
+};

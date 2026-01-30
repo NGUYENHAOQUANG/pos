@@ -63,6 +63,20 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
         },
+        CLEAN_RENOVATION: {
+            LIST: (pondId: string) => `/pond/${pondId}/clean-renovation`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/clean-renovation/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/clean-renovation`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/clean-renovation/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/clean-renovation/${id}`,
+        },
+        DRY_RENOVATION: {
+            LIST: (pondId: string) => `/pond/${pondId}/dry-renovation`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/dry-renovation/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/dry-renovation`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/dry-renovation/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/dry-renovation/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',
