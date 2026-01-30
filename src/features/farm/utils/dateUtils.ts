@@ -30,17 +30,31 @@ export const formatDateWithTime = (date: Date): string => {
  * @returns Date object
  */
 export const parseDate = (dateStr: string): Date => {
+    // Handle standard ISO strings or other parseable formats first if they don't match our custom format structure
+    if (dateStr.includes('T') || dateStr.includes('-')) {
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) return d;
+    }
+
     // Handle dd/mm/yyyy HH:mm
-    if (dateStr.includes(':')) {
+    if (dateStr.includes(' ') && dateStr.includes(':')) {
         const [datePart, timePart] = dateStr.split(' ');
-        const [day, month, year] = datePart.split('/').map(Number);
-        const [hours, minutes] = timePart.split(':').map(Number);
-        return new Date(year, month - 1, day, hours, minutes);
+        if (datePart && timePart) {
+            const [day, month, year] = datePart.split('/').map(Number);
+            const [hours, minutes] = timePart.split(':').map(Number);
+            return new Date(year, month - 1, day, hours, minutes);
+        }
     }
 
     // Handle dd/mm/yyyy
-    const [day, month, year] = dateStr.split('/').map(Number);
-    return new Date(year, month - 1, day);
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        const [day, month, year] = parts.map(Number);
+        return new Date(year, month - 1, day);
+    }
+
+    // Fallback
+    return new Date(dateStr);
 };
 
 /**
