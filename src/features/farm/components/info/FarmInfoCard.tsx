@@ -127,6 +127,9 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 22,
         color: colors.text,
+        flex: 1,
+        marginLeft: 80,
+        textAlign: 'right',
     },
     mapControls: {
         position: 'absolute',

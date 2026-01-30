@@ -18,9 +18,16 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
     const { data, isLoading, error } = useSiphonRecords(pondId, params);
 
-    const jobs: JobExecution[] = (data?.data?.items || []).map((item: ISiphonRecord) => ({
+    const rawItems = data?.data?.items || [];
+    const sortedItems = [...rawItems].sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeA - timeB;
+    });
+
+    const jobs: JobExecution[] = sortedItems.map((item: ISiphonRecord, index: number) => ({
         id: item.id,
-        label: `Lần ${item.no || 0}`,
+        label: `Lần ${index + 1}`,
         date: item.createdAt,
         time: item.createdAt
             ? new Date(item.createdAt).toLocaleTimeString('en-GB', {
