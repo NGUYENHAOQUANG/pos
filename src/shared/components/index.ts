@@ -17,6 +17,7 @@ export * from './forms/ImageUpload';
 export * from './forms/Input';
 export * from './forms/RadioButton';
 export * from './forms/SegmentedControl';
+export * from './forms/DropdownHeaderButton';
 
 // Layout
 export * from './layout/Container';

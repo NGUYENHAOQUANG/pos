@@ -160,9 +160,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         useEffect(() => {
             return () => {
                 if (!isSaved.current && sessionUploadedFileIds.current.length > 0) {
-                    console.log(
-                        `[GeneralInfoBox] Auto-cleanup: Deleting ${sessionUploadedFileIds.current.length} unsaved files...`
-                    );
                     sessionUploadedFileIds.current.forEach(id => {
                         documentApi
                             .delete(id)
