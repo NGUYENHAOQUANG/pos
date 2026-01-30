@@ -5,11 +5,33 @@ import { CreateSiphonCommand } from '@/features/farm/types/siphon.types';
 export const siphonApi = {
     create: async (pondId: string, data: CreateSiphonCommand): Promise<boolean> => {
         try {
-            const url = API_ENDPOINTS.POND.SIPHON_RECORDS.LIST(pondId);
+            const url = API_ENDPOINTS.POND.SIPHON_RECORDS.CREATE(pondId);
             const response = await apiClient.post(url, data);
             return response.data?.success || false;
         } catch (error) {
             console.error('Create siphon error:', error);
+            throw error;
+        }
+    },
+
+    update: async (pondId: string, id: string, data: CreateSiphonCommand): Promise<boolean> => {
+        try {
+            const url = API_ENDPOINTS.POND.SIPHON_RECORDS.UPDATE(pondId, id);
+            const response = await apiClient.patch(url, data);
+            return response.data?.success || false;
+        } catch (error) {
+            console.error('Update siphon error:', error);
+            throw error;
+        }
+    },
+
+    delete: async (pondId: string, id: string): Promise<boolean> => {
+        try {
+            const url = API_ENDPOINTS.POND.SIPHON_RECORDS.DELETE(pondId, id);
+            const response = await apiClient.delete(url);
+            return response.data?.success || false;
+        } catch (error) {
+            console.error('Delete siphon error:', error);
             throw error;
         }
     },

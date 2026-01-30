@@ -2,29 +2,33 @@ import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
-import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import {
+    DropdownHeaderButton,
+    DropDownHeaderItem,
+} from '@/shared/components/forms/DropdownHeaderButton';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
-import { FarmActionMenu } from './FarmActionMenu';
+import { FarmActionMenu } from '@/features/reports/components/FarmActionMenu';
+import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
 
 interface HeadingReportsProps {
     // Header Props
-    farmData?: DropDownItem[];
-    selectedFarm?: DropDownItem;
-    onSelectFarm?: (item: DropDownItem) => void;
+    farmData?: DropDownHeaderItem[];
+    selectedFarm?: DropDownHeaderItem;
+    onSelectFarm?: (item: DropDownHeaderItem) => void;
     onRightPress?: () => void;
 
     // DropDownReports Props
-    pondTypeData?: DropDownItem[];
-    selectedPondType?: DropDownItem;
-    onSelectPondType?: (item: DropDownItem) => void;
+    pondTypeData?: DropDownHeaderItem[];
+    selectedPondType?: DropDownHeaderItem;
+    onSelectPondType?: (item: DropDownHeaderItem) => void;
 
-    pondData?: DropDownItem[];
-    selectedPond?: DropDownItem;
-    onSelectPond?: (item: DropDownItem) => void;
+    pondData?: DropDownHeaderItem[];
+    selectedPond?: DropDownHeaderItem;
+    onSelectPond?: (item: DropDownHeaderItem) => void;
 
-    seasonData?: DropDownItem[];
-    selectedSeason?: DropDownItem;
-    onSelectSeason?: (item: DropDownItem) => void;
+    seasonData?: DropDownHeaderItem[];
+    selectedSeason?: DropDownHeaderItem;
+    onSelectSeason?: (item: DropDownHeaderItem) => void;
     seasonDisabled?: boolean;
 }
 
@@ -63,7 +67,7 @@ export const HeadingReports = ({
             <View style={styles.headerRow}>
                 <View style={styles.leftContainer}>
                     {onSelectFarm && (
-                        <DropDownButtonBasic
+                        <DropdownHeaderButton
                             data={farmData}
                             value={selectedFarm}
                             onSelect={onSelectFarm}
@@ -141,7 +145,6 @@ const styles = StyleSheet.create({
     },
     leftContainer: {
         flex: 1,
-        marginRight: 16,
         alignItems: 'flex-start',
     },
     rightContainer: {

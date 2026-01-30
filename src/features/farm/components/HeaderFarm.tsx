@@ -10,7 +10,10 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import {
+    DropdownHeaderButton,
+    DropDownHeaderItem,
+} from '@/shared/components/forms/DropdownHeaderButton';
 import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
 import { IconPond } from '@/assets/icons'; // Import new SVG
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
@@ -28,9 +31,9 @@ interface HeaderFarmProps {
     titleAlign?: 'center' | 'left'; // Thêm prop căn lề
 
     // Specific to 'list' mode
-    data?: DropDownItem[];
-    value?: DropDownItem;
-    onSelect?: (item: DropDownItem) => void;
+    data?: DropDownHeaderItem[];
+    value?: DropDownHeaderItem;
+    onSelect?: (item: DropDownHeaderItem) => void;
 
     // Specific to 'detail' mode
     title?: string | React.ReactNode; // e.g. Pond Name or custom ReactNode
@@ -186,7 +189,7 @@ export const HeaderFarm = ({
      */
     const listLeft = onSelect ? (
         <View style={styles.listLeftContainer}>
-            <DropDownButtonBasic data={data} value={value} onSelect={onSelect} />
+            <DropdownHeaderButton data={data} value={value} onSelect={onSelect} />
         </View>
     ) : undefined;
 
@@ -198,8 +201,7 @@ export const HeaderFarm = ({
 const styles = StyleSheet.create({
     // --- List Mode Styles ---
     listLeftContainer: {
-        flexDirection: 'row', // Ensure it takes necessary width
-        marginRight: 16,
+        flexDirection: 'row',
     },
 
     // --- Detail Mode Styles ---

@@ -1,11 +1,14 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
-import { useFarmStore } from '../../store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { CycleData } from '../../types/farm.types';
-import { FarmStackParamList } from '../../navigation/FarmNavigator';
+import { CycleData } from '@/features/farm/types/farm.types';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { useQuery } from '@tanstack/react-query';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 
 // Sử dụng HeaderFarm có sẵn
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -19,35 +22,91 @@ export const CycleDetailScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
 
     // Lấy dữ liệu từ params truyền sang
-    const { cycleData, pondId } = route.params || {};
-    const typedCycleData = cycleData as CycleData | undefined;
+    const { cycleData: initialCycleData, pondId } = route.params || {};
+
+    // Use React Query to fetch fresh detail data
+    const {
+        data: fetchedCycleData,
+        refetch,
+        isLoading,
+        isRefetching,
+    } = useQuery({
+        queryKey: ['cycleDetail', pondId, initialCycleData?.id],
+        queryFn: async () => {
+            if (!pondId || !initialCycleData?.id) return null;
+            const rawData = await cycleApi.getCycleDetail(pondId, initialCycleData.id);
+            // Map raw API data to CycleData interface
+            if (rawData) {
+                return {
+                    ...rawData,
+                    cycleName: rawData.name || (rawData as any).cycleName,
+                    breedSource: rawData.breedSource || (rawData as any).warehouseItemId,
+                    stockingDate: (rawData as any).createdAt || rawData.stockingDate,
+                    season: rawData.season,
+                } as CycleData;
+            }
+            return null;
+        },
+        enabled: !!pondId && !!initialCycleData?.id,
+        initialData: initialCycleData,
+    });
+
+    const activeCycleData = (fetchedCycleData || initialCycleData) as CycleData | undefined;
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
     const breedOptions = useFarmStore(state => state.breedOptions);
-    const seasons = useFarmStore(state => state.seasons);
-    const seasonOptions = useMemo(
-        () =>
-            seasons.map(s => ({
-                label: s.name,
-                value: s.id.toString(),
-            })),
-        [seasons]
-    );
+    // Remove season store dependency, verify API season object directly first
+
     const calculateDOC = useFarmStore(state => state.calculateDOC);
     const getPondById = useFarmStore(state => state.getPondById);
     const pond = getPondById(pondId);
 
-    const breedLabel =
-        breedOptions.find(b => b.value === typedCycleData?.breedSource)?.label || 'N/A';
-    const seasonLabel = seasonOptions.find(s => s.value === typedCycleData?.season)?.label || 'N/A';
+    const breedLabel = useMemo(() => {
+        if (!activeCycleData?.breedSource) return 'N/A';
+        // 1. Prefer saved name
+        if (activeCycleData.breedName) return activeCycleData.breedName;
+        // 2. Fallback to options
+        return breedOptions.find(b => b.value === activeCycleData.breedSource)?.label || 'N/A';
+    }, [activeCycleData, breedOptions]);
+
+    const seasonLabel = useMemo(() => {
+        // API returns season as object with name
+        if (activeCycleData?.season && typeof activeCycleData.season === 'object') {
+            return activeCycleData.season.name || 'N/A';
+        }
+        // Legacy: ID lookup (should usually be object now)
+        return 'N/A';
+    }, [activeCycleData]);
 
     // Calculate DOC (Days of Culture)
     const doc = useMemo(() => {
-        return calculateDOC(typedCycleData?.stockingDate);
-    }, [typedCycleData?.stockingDate, calculateDOC]);
+        return calculateDOC(activeCycleData?.stockingDate);
+    }, [activeCycleData?.stockingDate, calculateDOC]);
 
     // Get transfer info if exists
-    const transferInfo = typedCycleData?.transferInfo;
+    const transferInfo = activeCycleData?.transferInfo;
+
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            await refetch();
+        } finally {
+            setRefreshing(false);
+        }
+    }, [refetch]);
+
+    // Formatting date
+    const displayStockingDate = useMemo(() => {
+        if (!activeCycleData?.stockingDate) return '---';
+        if (
+            typeof activeCycleData.stockingDate === 'string' &&
+            activeCycleData.stockingDate.includes('/')
+        ) {
+            return activeCycleData.stockingDate;
+        }
+        return formatDate(new Date(activeCycleData.stockingDate));
+    }, [activeCycleData?.stockingDate]);
 
     return (
         <View style={styles.container}>
@@ -58,10 +117,10 @@ export const CycleDetailScreen: React.FC = () => {
                 title={
                     <View style={styles.leftTitleContainer}>
                         <Text style={styles.headerTitle} numberOfLines={1}>
-                            {typedCycleData?.cycleName}
+                            {activeCycleData?.cycleName}
                         </Text>
                         <Text style={styles.headerSubtitle} numberOfLines={1}>
-                            {typedCycleData?.stockingDate ?? '---'} - nay
+                            {displayStockingDate} - nay
                         </Text>
                     </View>
                 }
@@ -69,14 +128,28 @@ export const CycleDetailScreen: React.FC = () => {
                     <View style={styles.badgeWrapper}>
                         <View style={styles.statusBadge}>
                             <Text style={styles.statusText} numberOfLines={1}>
-                                Chưa hoàn thành
+                                {activeCycleData?.status === 'InProgress'
+                                    ? 'Chưa hoàn thành'
+                                    : activeCycleData?.status === 'Completed'
+                                    ? 'Hoàn thành'
+                                    : activeCycleData?.status || 'Active'}
                             </Text>
                         </View>
                     </View>
                 }
             />
 
-            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing || (isLoading && !initialCycleData) || isRefetching}
+                        onRefresh={onRefresh}
+                        colors={[colors.black]}
+                    />
+                }
+            >
                 {/* Thông tin thả giống - Chu kỳ gốc của ao nhận */}
                 <View style={styles.card}>
                     <View style={styles.cardHeaderWithBorder}>
@@ -87,14 +160,14 @@ export const CycleDetailScreen: React.FC = () => {
                                 onPress={() =>
                                     navigation.navigate('CreateCycle', {
                                         pondId,
-                                        initialData: typedCycleData,
+                                        initialData: activeCycleData,
                                         zoneId: pond?.zoneId?.toString(),
                                     })
                                 }
                             >
                                 <EditIcon />
                             </TouchableOpacity>
-                            <Ionicons name="chevron-up" size={20} color="#374151" />
+                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
                         </View>
                     </View>
 
@@ -106,7 +179,7 @@ export const CycleDetailScreen: React.FC = () => {
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Tên chu kỳ:</Text>
-                            <Text style={styles.value}>{typedCycleData?.cycleName || '---'}</Text>
+                            <Text style={styles.value}>{activeCycleData?.cycleName || '---'}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Tôm giống:</Text>
@@ -117,9 +190,7 @@ export const CycleDetailScreen: React.FC = () => {
 
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Ngày thả:</Text>
-                            <Text style={styles.value}>
-                                {typedCycleData?.stockingDate ?? '---'}
-                            </Text>
+                            <Text style={styles.value}>{displayStockingDate}</Text>
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
@@ -128,7 +199,9 @@ export const CycleDetailScreen: React.FC = () => {
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Số lượng thả (Pls):</Text>
                             <Text style={styles.value}>
-                                {typedCycleData?.stockingQuantity?.toLocaleString() || 0}
+                                {activeCycleData?.stockingQuantity?.toLocaleString() ||
+                                    activeCycleData?.totalStocking?.toLocaleString() ||
+                                    0}
                             </Text>
                         </View>
                     </View>
@@ -139,13 +212,15 @@ export const CycleDetailScreen: React.FC = () => {
                     <View style={[styles.card, styles.transferCard]}>
                         <View style={styles.cardHeaderWithBorder}>
                             <Text style={styles.cardTitle}>Thông tin sang ao</Text>
-                            <Ionicons name="chevron-up" size={20} color="#374151" />
+                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
                         </View>
 
                         <View style={styles.infoContainer}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.label}>Ngày sang ao:</Text>
-                                <Text style={styles.value}>{transferInfo.transferDate}</Text>
+                                <Text style={styles.value}>
+                                    {formatDate(new Date(transferInfo.transferDate))}
+                                </Text>
                             </View>
                             <View style={styles.infoRow}>
                                 <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
@@ -200,16 +275,16 @@ const styles = StyleSheet.create({
     },
     // ... statusBadge style kept ...
     statusBadge: {
-        backgroundColor: '#FFFBEB',
+        backgroundColor: colors.yellow[50],
         paddingHorizontal: spacing.sm,
         paddingVertical: 4,
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#FFE58F',
+        borderColor: colors.yellow[300],
     },
     statusText: {
         fontSize: typography.fontSize.xs,
-        color: '#D48806',
+        color: colors.orange[500],
         fontWeight: typography.fontWeight.regular,
         lineHeight: 20,
     },
@@ -217,11 +292,11 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
     },
     card: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.white,
         width: '100%',
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
     },
     cardHeaderWithBorder: {
         flexDirection: 'row',
@@ -230,12 +305,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomColor: colors.borderLight,
     },
     cardTitle: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#111827',
+        color: colors.gray[900],
     },
     headerActions: {
         flexDirection: 'row',
@@ -248,14 +323,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.gray[50],
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
     },
     line: {
         height: 1,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.borderLight,
     },
     infoRow: {
         flexDirection: 'row',

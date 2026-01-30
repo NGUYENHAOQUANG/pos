@@ -120,7 +120,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     <View style={[styles.col, { paddingRight: spacing.sm }]}>
                         <Input
                             label="Số lượng (cái)"
-                            placeholder="Input"
+                            placeholder="Nhập"
                             value={quantity}
                             onChangeText={text => setQuantity(handleIntegerInput(text))}
                             required

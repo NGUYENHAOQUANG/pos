@@ -52,7 +52,7 @@ export const FarmInput: React.FC<FarmInputProps> = ({
     required = false,
     height = 40,
     showLabel = true,
-    placeholder = 'Input',
+    placeholder = 'Nhập',
     placeholderTextColor = colors.borderSubtle,
     keyboardType = 'numeric',
     style,

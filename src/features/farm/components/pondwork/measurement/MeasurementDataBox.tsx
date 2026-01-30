@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 import { spacing } from '@/styles';
+import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;
@@ -85,24 +86,6 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         return items;
     }, [totalShrimp, survivalRate, shrimpWeight, stockingQuantity]);
 
-    const handleNumericInput = (text: string, callback: (val: string) => void) => {
-        // 1. Remove any character that is not 0-9 or .
-        let cleaned = text.replace(/[^0-9.]/g, '');
-
-        // 2. Prevent . at the beginning
-        if (cleaned.startsWith('.')) {
-            cleaned = cleaned.substring(1);
-        }
-
-        // 3. Ensure only one . exists
-        const parts = cleaned.split('.');
-        if (parts.length > 2) {
-            cleaned = parts[0] + '.' + parts.slice(1).join('');
-        }
-
-        callback(cleaned);
-    };
-
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>
             <View style={styles.inputRow}>
@@ -110,7 +93,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     <FarmInput
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
-                        onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
+                        onChangeText={text => onShrimpSizeChange(formatNumericInput(text))}
                         keyboardType="numeric"
                         required
                     />
@@ -119,7 +102,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     <FarmInput
                         label="Sản lượng còn lại (kg)"
                         value={remainingWeight}
-                        onChangeText={text => handleNumericInput(text, onRemainingWeightChange)}
+                        onChangeText={text => onRemainingWeightChange(formatDecimalInput(text))}
                         keyboardType="numeric"
                         required
                     />

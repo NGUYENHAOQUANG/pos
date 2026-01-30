@@ -41,4 +41,9 @@ export const farmKeys = {
             [...farmKeys.siphon.all(), 'list', pondId, ...(params ? [params] : [])] as const,
         detail: (id: string) => [...farmKeys.siphon.all(), 'detail', id] as const,
     },
+    incident: {
+        all: () => [...farmKeys.all, 'incident'] as const,
+        byPond: (pondId: string) => [...farmKeys.incident.all(), 'byPond', pondId] as const,
+        detail: (id: string) => [...farmKeys.incident.all(), 'detail', id] as const,
+    },
 };

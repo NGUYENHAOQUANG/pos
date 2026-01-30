@@ -13,6 +13,8 @@ import { FarmData, POND_TYPES, PondData } from '@/features/farm/types/farm.types
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { PondListSkeleton } from '@/features/farm/components/pond/PondListSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
+import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 
 interface ShrimpPondListScreensProps {}
 
@@ -33,8 +35,6 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const navigation = useNavigation<NavigationProp>();
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
 
@@ -115,27 +115,18 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         navigation.navigate('FarmInfo', { farm: farmData });
     };
 
-    const checkHasCycle = useCallback(
-        (pondId: string) => {
-            const currentCycle = activeCycles[pondId];
-            if (currentCycle) return true;
-            // Relaxed check: ANY cycle implies Active
-            const cycles = getCyclesByPondId(pondId);
-            return cycles.length > 0;
-        },
-        [activeCycles, getCyclesByPondId]
-    );
+    const getComputedStatus = useCallback((pond: PondData) => {
+        // Strict mapping based on Backend PondStatusEnum
+        // Available = 0 (Chuẩn bị)
+        // Framing = 1 (Đang nuôi/Active)
+        // Null = 2 (Không có trạng thái)
 
-    const getComputedStatus = useCallback(
-        (pond: PondData) => {
-            const hasCycle = checkHasCycle(pond.id);
-            if (hasCycle) {
-                return 'active';
-            }
-            return 'preparing';
-        },
-        [checkHasCycle]
-    );
+        if (pond.status === 'Framing') return 'active';
+        if (pond.status === 'Available') return 'preparing';
+
+        // "Cái ao nào Null là không hiện cái tag đó" -> return undefined
+        return undefined;
+    }, []);
 
     // Calculate counts
     const counts = useMemo(() => {
@@ -173,9 +164,95 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const handleRefresh = useCallback(() => {
-        refetch();
-    }, [refetch]);
+    const setCycles = useFarmStore(state => state.setCycles);
+    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
+
+    const handleRefresh = useCallback(async () => {
+        const { data: newPondsData } = await refetch();
+        const allItems = newPondsData?.pages
+            ? newPondsData.pages.reduce((acc: PondData[], page: any) => [...acc, ...page.items], [])
+            : [];
+
+        if (allItems.length > 0) {
+            try {
+                // 2. Fetch summary list for all ponds
+                const cyclePromises = allItems.map((p: PondData) => cycleApi.getCyclesByPond(p.id));
+                const cyclesResults = await Promise.all(cyclePromises);
+                const allCyclesGenerics = cyclesResults.reduce(
+                    (acc: any[], val: any[]) => acc.concat(val),
+                    []
+                );
+
+                // 3. Fetch DETAILS for each cycle found (N+1 problem but necessary per API design)
+                const detailPromises = allCyclesGenerics.map(async (c: any) => {
+                    if (c.id && c.pondId) {
+                        try {
+                            const detail = await cycleApi.getCycleDetail(c.pondId, c.id);
+                            // Merge detail with summary if needed, but detail should be source of truth
+                            return { ...c, ...detail };
+                        } catch (e) {
+                            console.warn(`Failed to fetch detail for cycle ${c.id}`, e);
+                            return c; // Fallback to summary
+                        }
+                    }
+                    return c;
+                });
+
+                const allCyclesDetailed = await Promise.all(detailPromises);
+
+                // Map API response to internal CycleData structure
+                const mappedCycles = allCyclesDetailed.map((c: any) => ({
+                    ...c,
+                    // Map API 'name' to 'cycleName'
+                    cycleName: c.name || c.cycleName,
+                    // Map API 'pondId' to 'sourcePonds' for store lookup
+                    sourcePonds: c.sourcePonds || (c.pondId ? [c.pondId] : []),
+                    // Ensure receivingPonds exists
+                    receivingPonds: c.receivingPonds || [],
+                    // Map totalStocking
+                    stockingQuantity: c.stockingQuantity || c.totalStocking || 0,
+                    // Map stockingDate from createdAt or stockingDate
+                    // User wants "dd/MM/yyyy", ignoring time part from UTC field "createdAt"
+                    stockingDate: formatDate(new Date(c.createdAt || c.stockingDate || new Date())),
+                    // Ensure status matches if needed, or keep as is
+                    status:
+                        c.status === 'InProgress'
+                            ? 'Chưa hoàn thành'
+                            : c.status === 'Completed'
+                            ? 'Hoàn thành'
+                            : c.status,
+                }));
+
+                // 4. Sync to store
+                setCycles(mappedCycles);
+
+                // 5. Update activeCycles to ensure UI reflects server data immediately
+                // effectively overwriting any stale local optimistic state
+                // 5. Sync ActiveCycles: Update existing, remove missing
+                const deleteActiveCycle = useFarmStore.getState().deleteActiveCycle;
+
+                allItems.forEach(pond => {
+                    // Find active cycle for this pond in the new data
+                    const activeForPond = mappedCycles.find(
+                        c =>
+                            (c.pondId === pond.id || c.sourcePonds?.includes(pond.id)) &&
+                            c.status !== 'Completed' &&
+                            c.status !== 'Canceled' &&
+                            c.status !== 'Hoàn thành'
+                    );
+
+                    if (activeForPond) {
+                        saveActiveCycle(pond.id, activeForPond);
+                    } else {
+                        // If no active cycle found in fresh data (e.g. was deleted), remove from store active list
+                        deleteActiveCycle(pond.id);
+                    }
+                });
+            } catch (err) {
+                console.error('REFRESH: Failed to fetch cycles', err);
+            }
+        }
+    }, [refetch, setCycles, saveActiveCycle]);
 
     const { isConnected } = useNetInfo();
 

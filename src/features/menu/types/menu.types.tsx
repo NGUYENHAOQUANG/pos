@@ -12,6 +12,7 @@ export interface Aquaculture {
     status: TagStatus;
     note?: string;
     createdAt: Date;
+    no?: number;
 }
 
 export interface Member {

@@ -53,7 +53,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 initialValues?.status === 'ended' ||
                 initialValues?.status === 'preparing'
                 ? initialValues.status
-                : 'active'
+                : 'preparing'
         );
         const [note, setNote] = useState(initialValues?.note || '');
 
@@ -150,7 +150,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                             required
                             value={cycleName}
                             onChangeText={setCycleName}
-                            placeholder="Input"
+                            placeholder="Nhập"
                             containerStyle={styles.noMarginBottom}
                         />
                     </View>
@@ -201,7 +201,11 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     <Text style={styles.label}>Chọn trạng thái</Text>
                     <RadioButton
                         options={[
-                            { label: 'Chuẩn bị', value: 'preparing' },
+                            {
+                                label: 'Chuẩn bị',
+                                value: 'preparing',
+                                disabled: isEdit && initialValues?.status === 'active',
+                            },
                             { label: 'Đang nuôi', value: 'active' },
                             ...(initialValues?.status === 'ended'
                                 ? [{ label: 'Đã kết thúc', value: 'ended' }]
