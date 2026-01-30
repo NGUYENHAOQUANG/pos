@@ -45,136 +45,141 @@ export const EnvironmentLogScreen: React.FC = () => {
         if (!envMeasurementsData?.data?.items || metricTypes.length === 0) return [];
 
         const measurements = envMeasurementsData.data.items;
-        const grouped = new Map<string, TimelineActivity[]>();
 
-        // Sort measurements by createdAt ascending for consistent ordering
-        const sortedMeasurements = [...measurements].sort((a: any, b: any) => {
-            const timeA = new Date(a.createdAt).getTime();
-            const timeB = new Date(b.createdAt).getTime();
-            return timeA - timeB;
+        // 1. Group raw measurements by date
+        const rawGrouped = new Map<string, any[]>();
+        measurements.forEach((m: any) => {
+            const date = new Date(m.createdAt);
+            const dateKey = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+
+            if (!rawGrouped.has(dateKey)) {
+                rawGrouped.set(dateKey, []);
+            }
+            rawGrouped.get(dateKey)!.push(m);
         });
 
-        sortedMeasurements.forEach((measurement: any) => {
-            const date = new Date(measurement.createdAt);
-            const dateKey = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+        const groups: TrackingGroup[] = [];
 
-            // Convert measurements array to activity data format
-            const activityData: ActivityData[] = [];
+        // 2. Process each day
+        rawGrouped.forEach((dayMeasurements, dateKey) => {
+            // Sort ASC by creation time to assign sequential numbers (1, 2, 3...)
+            dayMeasurements.sort(
+                (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
 
-            measurement.measurements.forEach((m: any) => {
-                const metric = metricTypes.find((mt: any) => mt.id === m.metricId);
-                if (!metric) return;
+            // Map to Activity Data with calculated index
+            const activities: TimelineActivity[] = dayMeasurements.map((measurement, index) => {
+                const entryNumber = index + 1; // Local numbering: 1, 2, 3...
+                const date = new Date(measurement.createdAt);
 
-                let label = '';
-                let unit = '';
+                // Convert measurements array to activity data format
+                const activityData: ActivityData[] = [];
 
-                switch (metric.code) {
-                    case ENVIRONMENT_METRIC_IDS.PH:
-                        label = 'pH';
-                        unit = '';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.DO:
-                        label = 'Oxy hòa tan';
-                        unit = 'mg/L';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.TEMPERATURE:
-                        label = 'Nhiệt độ';
-                        unit = '°C';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.SALINITY:
-                        label = 'Độ mặn';
-                        unit = 'ppt';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.ALKALINITY:
-                        label = 'Độ kiềm';
-                        unit = 'mg/L';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.TRANSPARENCY:
-                        label = 'Độ trong';
-                        unit = 'cm';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.KALI:
-                        label = 'Kali';
-                        unit = 'mg/L';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.TAN:
-                        label = 'TAN';
-                        unit = 'mg/L';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.MAGIE:
-                        label = 'Magie';
-                        unit = 'mg/L';
-                        break;
-                    case ENVIRONMENT_METRIC_IDS.NO3:
-                        label = 'NO3';
-                        unit = 'mg/L';
-                        break;
-                    default:
-                        label = metric.name;
-                        unit = '';
-                }
+                measurement.measurements.forEach((m: any) => {
+                    const metric = metricTypes.find((mt: any) => mt.id === m.metricId);
+                    if (!metric) return;
 
-                activityData.push({
-                    label,
-                    value: m.value.toString(),
-                    unit,
-                    isWarning: m.isAlerted || false,
+                    let label = '';
+                    let unit = '';
+
+                    switch (metric.code) {
+                        case ENVIRONMENT_METRIC_IDS.PH:
+                            label = 'pH';
+                            unit = '';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.DO:
+                            label = 'Oxy hòa tan';
+                            unit = 'mg/L';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.TEMPERATURE:
+                            label = 'Nhiệt độ';
+                            unit = '°C';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.SALINITY:
+                            label = 'Độ mặn';
+                            unit = 'ppt';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.ALKALINITY:
+                            label = 'Độ kiềm';
+                            unit = 'mg/L';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.TRANSPARENCY:
+                            label = 'Độ trong';
+                            unit = 'cm';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.KALI:
+                            label = 'Kali';
+                            unit = 'mg/L';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.TAN:
+                            label = 'TAN';
+                            unit = 'mg/L';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.MAGIE:
+                            label = 'Magie';
+                            unit = 'mg/L';
+                            break;
+                        case ENVIRONMENT_METRIC_IDS.NO3:
+                            label = 'NO3';
+                            unit = 'mg/L';
+                            break;
+                        default:
+                            label = metric.name;
+                            unit = '';
+                    }
+
+                    activityData.push({
+                        label,
+                        value: m.value.toString(),
+                        unit,
+                        isWarning: m.isAlerted || false,
+                    });
                 });
+
+                return {
+                    id: measurement.id,
+                    time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                    title: `Lần ${entryNumber}`,
+                    data: activityData,
+                    onEdit: () => {
+                        if (pond) {
+                            const itemToEdit = {
+                                id: measurement.id,
+                                label: `Lần ${entryNumber}`,
+                                time: date.toLocaleTimeString('en-GB', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                }),
+                                date: dateKey,
+                                pondId: measurement.pondId,
+                            };
+
+                            navigation.navigate('AddEnvironmentScreen', {
+                                pond,
+                                itemToEdit,
+                            });
+                        }
+                    },
+                };
             });
 
-            // Use the 'no' field from API instead of calculating daily index
-            const entryNumber = measurement.no || 1;
+            // Sort activities DESC by time for display (Newest "Lần 3" on top)
+            activities.sort((a, b) => {
+                const timeA = a.time.split(':').map(Number);
+                const timeB = b.time.split(':').map(Number);
+                const minutesA = timeA[0] * 60 + timeA[1];
+                const minutesB = timeB[0] * 60 + timeB[1];
+                return minutesB - minutesA;
+            });
 
-            const activity: TimelineActivity = {
-                id: measurement.id,
-                time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                title: `Lần ${entryNumber}`,
-                data: activityData,
-                onEdit: () => {
-                    if (pond) {
-                        // Create a JobExecution object for itemToEdit
-                        const itemToEdit = {
-                            id: measurement.id,
-                            label: `Lần ${entryNumber}`,
-                            time: date.toLocaleTimeString('en-GB', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            }),
-                            date: dateKey,
-                            pondId: measurement.pondId,
-                        };
-
-                        navigation.navigate('AddEnvironmentScreen', {
-                            pond,
-                            itemToEdit,
-                        });
-                    }
-                },
-            };
-
-            if (!grouped.has(dateKey)) {
-                grouped.set(dateKey, []);
-            }
-            grouped.get(dateKey)!.push(activity);
-        });
-
-        // Convert Map to TrackingGroup[] and sort
-        const groups: TrackingGroup[] = Array.from(grouped.entries()).map(
-            ([dateKey, activities]) => ({
+            groups.push({
                 id: dateKey,
                 date: dateKey,
-                activities: activities.sort((a, b) => {
-                    // Sort by time descending (newest first)
-                    const timeA = a.time.split(':').map(Number);
-                    const timeB = b.time.split(':').map(Number);
-                    const minutesA = timeA[0] * 60 + timeA[1];
-                    const minutesB = timeB[0] * 60 + timeB[1];
-                    return minutesB - minutesA;
-                }),
-            })
-        );
+                activities,
+            });
+        });
 
-        // Sort groups by date descending (newest first)
+        // Sort groups by date DESC (Newest date on top)
         return groups.sort((a, b) => {
             const dateA = new Date(a.date);
             const dateB = new Date(b.date);

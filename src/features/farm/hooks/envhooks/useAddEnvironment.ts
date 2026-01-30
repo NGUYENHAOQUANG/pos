@@ -34,7 +34,6 @@ export const useAddEnvironment = ({
     currentZone,
     metricTypes,
     parameterSettings,
-    environmentSettings,
 }: UseAddEnvironmentProps) => {
     const navigation = useNavigation();
 
@@ -59,13 +58,6 @@ export const useAddEnvironment = ({
         // Priority 2: History in store (find open or first)
         const pondCycles = getCyclesByPondId(pond.id);
         const found = pondCycles.find(c => c.status !== 'Hoàn thành') || pondCycles[0];
-
-        console.log('[useAddEnvironment] Cycle Detection Debug:', {
-            activeCycle: directCycle,
-            pondCyclesLength: pondCycles.length,
-            pondCyclesStatuses: pondCycles.map(c => c.status),
-            foundCycleId: found?.id,
-        });
 
         return found;
     }, [pond?.id, activeCycles, getCyclesByPondId]);
@@ -121,165 +113,67 @@ export const useAddEnvironment = ({
     }, [detail, metricTypes]);
 
     // Advanced Params Initialization
+    // Always use parameterSettings to determine which advanced parameters to show
+    // This ensures consistency between Add and Edit modes
     const initialAdvancedParams = useMemo(() => {
-        if (itemToEdit && detail?.measurements) {
-            const advancedParams: Array<{ id: string; name: string }> = [];
-            const advancedCodes = [
+        const zoneId = currentZone?.id ? String(currentZone.id) : '';
+        const settings = parameterSettings[zoneId];
+
+        if (settings && Array.isArray(settings) && metricTypes.length > 0) {
+            const validAdvanced: Array<{ id: string; name: string }> = [];
+
+            // Order matching user's expected display (based on Create screen)
+            const advancedCodesSequence = [
+                ENVIRONMENT_METRIC_IDS.NO3,
+                ENVIRONMENT_METRIC_IDS.MAGIE,
                 ENVIRONMENT_METRIC_IDS.KALI,
                 ENVIRONMENT_METRIC_IDS.TAN,
-                ENVIRONMENT_METRIC_IDS.MAGIE,
-                ENVIRONMENT_METRIC_IDS.NO3,
             ];
 
-            advancedCodes.forEach(code => {
+            advancedCodesSequence.forEach(code => {
                 const metric = metricTypes.find(m => m.code === code);
-                if (metric) {
-                    const hasMeasurement = detail.measurements.some(m => m.metricId === metric.id);
-                    if (hasMeasurement) {
-                        advancedParams.push({ id: code, name: metric.name });
+                if (!metric) return;
+
+                // Find setting for this metric
+                const setting = settings.find(
+                    s => String(s.metricId) === String(metric.id) || s.parameterCode === code
+                );
+
+                if (setting) {
+                    const isEnabled =
+                        setting.enabled !== undefined
+                            ? setting.enabled
+                            : setting.isActive !== undefined
+                            ? setting.isActive
+                            : false;
+
+                    if (isEnabled) {
+                        validAdvanced.push({ id: metric.code, name: metric.name });
                     }
                 }
             });
-            return advancedParams;
-        } else {
-            if (currentZone && parameterSettings[currentZone.id]) {
-                const settings = parameterSettings[currentZone.id];
-                const validAdvanced: Array<{ id: string; name: string }> = [];
 
-                if (Array.isArray(settings) && metricTypes.length > 0) {
-                    const advancedCodes = [
-                        ENVIRONMENT_METRIC_IDS.KALI,
-                        ENVIRONMENT_METRIC_IDS.TAN,
-                        ENVIRONMENT_METRIC_IDS.MAGIE,
-                        ENVIRONMENT_METRIC_IDS.NO3,
-                    ];
-                    const advancedIds = metricTypes
-                        .filter(m => (advancedCodes as readonly string[]).includes(m.code))
-                        .map(m => String(m.id));
-
-                    settings.forEach((setting: ParameterSetting) => {
-                        let metric: EnvMetricType | undefined;
-
-                        if (setting.metricId) {
-                            metric = metricTypes.find(
-                                (m: EnvMetricType) => String(m.id) === setting.metricId
-                            );
-                        }
-                        if (!metric && setting.parameterCode) {
-                            metric = metricTypes.find(
-                                (m: EnvMetricType) => m.code === setting.parameterCode
-                            );
-                        }
-
-                        if (metric && setting.enabled) {
-                            const id = String(metric.id);
-                            if ((advancedIds as readonly string[]).includes(id)) {
-                                validAdvanced.push({ id: metric.code, name: metric.name });
-                            }
-                        }
-                    });
-                    validAdvanced.sort((a, b) => Number(a.id) - Number(b.id));
-                    return validAdvanced;
-                }
-            }
-            return environmentSettings.advancedParameters
-                .filter(p => p.isChecked)
-                .map(p => ({ id: p.id, name: p.name }));
+            return validAdvanced;
         }
-    }, [
-        itemToEdit,
-        detail,
-        environmentSettings.advancedParameters,
-        currentZone,
-        parameterSettings,
-        metricTypes,
-    ]);
+
+        return [];
+    }, [currentZone, parameterSettings, metricTypes]);
 
     const [advancedParameters, setAdvancedParameters] =
         useState<Array<{ id: string; name: string }>>(initialAdvancedParams);
 
-    // Effect to update advanced params on prop change
+    // Effect to update advanced params when settings or metric types change
     useEffect(() => {
-        if (itemToEdit && detail?.measurements) {
-            const advancedParams: Array<{ id: string; name: string }> = [];
-            const advancedCodes = [
-                ENVIRONMENT_METRIC_IDS.KALI,
-                ENVIRONMENT_METRIC_IDS.TAN,
-                ENVIRONMENT_METRIC_IDS.MAGIE,
-                ENVIRONMENT_METRIC_IDS.NO3,
-            ];
-
-            advancedCodes.forEach(code => {
-                const metric = metricTypes.find(m => m.code === code);
-                if (metric) {
-                    const hasMeasurement = detail.measurements.some(m => m.metricId === metric.id);
-                    if (hasMeasurement) {
-                        advancedParams.push({ id: code, name: metric.name });
-                    }
-                }
-            });
-            setAdvancedParameters(advancedParams);
-        } else if (currentZone && parameterSettings[currentZone.id]) {
-            const settings = parameterSettings[currentZone.id];
-            const validAdvanced: Array<{ id: string; name: string }> = [];
-            if (Array.isArray(settings) && metricTypes.length > 0) {
-                const advancedCodes = [
-                    ENVIRONMENT_METRIC_IDS.KALI,
-                    ENVIRONMENT_METRIC_IDS.TAN,
-                    ENVIRONMENT_METRIC_IDS.MAGIE,
-                    ENVIRONMENT_METRIC_IDS.NO3,
-                ];
-                const advancedIds = metricTypes
-                    .filter(m => (advancedCodes as readonly string[]).includes(m.code))
-                    .map(m => String(m.id));
-
-                settings.forEach((setting: ParameterSetting) => {
-                    let metric: EnvMetricType | undefined;
-
-                    if (setting.metricId) {
-                        metric = metricTypes.find(
-                            (m: EnvMetricType) => String(m.id) === setting.metricId
-                        );
-                    }
-                    if (!metric && setting.parameterCode) {
-                        metric = metricTypes.find(
-                            (m: EnvMetricType) => m.code === setting.parameterCode
-                        );
-                    }
-
-                    if (metric) {
-                        const isEnabled =
-                            setting.enabled !== undefined
-                                ? setting.enabled
-                                : setting.isActive !== undefined
-                                ? setting.isActive
-                                : true;
-
-                        if (isEnabled !== false) {
-                            const id = String(metric.id);
-                            if ((advancedIds as readonly string[]).includes(id)) {
-                                validAdvanced.push({ id: metric.code, name: metric.name });
-                            }
-                        }
-                    }
-                });
-
-                setAdvancedParameters(validAdvanced);
-            }
-        } else {
-            const checkedParams = environmentSettings.advancedParameters
-                .filter(p => p.isChecked)
-                .map(p => ({ id: p.id, name: p.name }));
-            setAdvancedParameters(checkedParams);
+        // Always sync if we have valid ones, even if they changed from 3 to 2 etc.
+        // We only don't sync if initialAdvancedParams is empty but we're in EDIT mode
+        // and might have existing data? No, visibility should strictly follow settings.
+        if (
+            initialAdvancedParams.length > 0 ||
+            (currentZone && parameterSettings[String(currentZone.id)])
+        ) {
+            setAdvancedParameters(initialAdvancedParams);
         }
-    }, [
-        itemToEdit,
-        detail,
-        environmentSettings.advancedParameters,
-        currentZone,
-        parameterSettings,
-        metricTypes,
-    ]);
+    }, [initialAdvancedParams, currentZone, parameterSettings]);
 
     const hasAtLeastOneParameter = useMemo(() => {
         return (
@@ -449,14 +343,6 @@ export const useAddEnvironment = ({
             recordValue: 1,
         };
 
-        console.log('[useAddEnvironment] FINAL PAYLOAD:', JSON.stringify(commonData, null, 2));
-
-        console.log('[useAddEnvironment] handleSave called', {
-            pondId: pond.id,
-            currentCycleId: currentCycle?.id,
-            measurements_0_val: measurements[0]?.value, // Debug value 0
-        });
-
         if (itemToEdit) {
             updateEnvMeasurement.mutate(
                 {
@@ -471,11 +357,6 @@ export const useAddEnvironment = ({
                         navigation.goBack();
                     },
                     onError: (error: any) => {
-                        console.error('[useAddEnvironment] Update Error Detailed:', {
-                            status: error?.response?.status,
-                            data: error?.response?.data,
-                            message: error?.message,
-                        });
                         Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
                     },
                 }
@@ -496,17 +377,6 @@ export const useAddEnvironment = ({
                         navigation.goBack();
                     },
                     onError: (error: any) => {
-                        const errorObj = JSON.parse(
-                            JSON.stringify(error, Object.getOwnPropertyNames(error))
-                        );
-                        console.error('[useAddEnvironment] Create Error Detailed:', {
-                            url: error?.config?.url,
-                            status: error?.response?.status,
-                            data: error?.response?.data,
-                            validationErrors: error?.response?.data?.validationErrors,
-                            message: error?.message,
-                            fullError: errorObj,
-                        });
                         Toast.show({ type: 'error', text1: error?.message || 'Có lỗi xảy ra' });
                     },
                 }
