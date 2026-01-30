@@ -211,7 +211,6 @@ export const useMeasureShrimpSizeForm = ({
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
-        // Expose loading states if needed, maybe isSubmitting?
         isSubmitting:
             createSizeMeasurement.isPending ||
             updateSizeMeasurement.isPending ||
