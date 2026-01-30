@@ -155,12 +155,16 @@ export const useSettingEnvironment = ({
                         maxValue: maxVal ?? 0,
                         enabled: true,
                         isActive: true, // Ensure backend sees it as active
-                        alert: p.alertEnabled ? 'true' : 'false',
+                        alert: p.alertEnabled ?? true, // Send boolean (default true)
                     };
 
                     if (existingSetting) {
                         // UPDATE if changed
-                        const alertChanged = existingSetting.alert !== payload.alert;
+                        // Check alert change handling both string and boolean from existing
+                        const existingAlert =
+                            existingSetting.alert === 'true' || existingSetting.alert === true;
+                        const alertChanged = existingAlert !== (p.alertEnabled ?? true);
+
                         // Check both enabled and isActive for changes
                         const currentEnabled =
                             existingSetting.enabled !== undefined

@@ -17,7 +17,7 @@ export interface ParameterSetting {
     minValue?: number;
     maxValue?: number;
     enabled?: boolean;
-    alert?: string;
+    alert?: string | boolean;
     isActive?: boolean;
     parameterCode?: string; // Keep optional for backward compatibility if needed, or remove. Response shows metricId.
 }
@@ -27,7 +27,7 @@ export interface CreateParameterSettingRequest {
     minValue?: number;
     maxValue?: number;
     enabled?: boolean;
-    alert?: string;
+    alert?: string | boolean;
     isActive?: boolean;
 }
 

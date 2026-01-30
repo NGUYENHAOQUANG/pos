@@ -47,7 +47,14 @@ export const EnvironmentLogScreen: React.FC = () => {
         const measurements = envMeasurementsData.data.items;
         const grouped = new Map<string, TimelineActivity[]>();
 
-        measurements.forEach((measurement: any) => {
+        // Sort measurements by createdAt ascending for consistent ordering
+        const sortedMeasurements = [...measurements].sort((a: any, b: any) => {
+            const timeA = new Date(a.createdAt).getTime();
+            const timeB = new Date(b.createdAt).getTime();
+            return timeA - timeB;
+        });
+
+        sortedMeasurements.forEach((measurement: any) => {
             const date = new Date(measurement.createdAt);
             const dateKey = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
 
@@ -115,17 +122,20 @@ export const EnvironmentLogScreen: React.FC = () => {
                 });
             });
 
+            // Use the 'no' field from API instead of calculating daily index
+            const entryNumber = measurement.no || 1;
+
             const activity: TimelineActivity = {
                 id: measurement.id,
                 time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-                title: `Lần ${measurement.no || 1}`,
+                title: `Lần ${entryNumber}`,
                 data: activityData,
                 onEdit: () => {
                     if (pond) {
                         // Create a JobExecution object for itemToEdit
                         const itemToEdit = {
                             id: measurement.id,
-                            label: `Lần ${measurement.no || 1}`,
+                            label: `Lần ${entryNumber}`,
                             time: date.toLocaleTimeString('en-GB', {
                                 hour: '2-digit',
                                 minute: '2-digit',

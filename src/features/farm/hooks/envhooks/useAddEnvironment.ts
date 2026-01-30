@@ -320,12 +320,21 @@ export const useAddEnvironment = ({
             tan: getMetricValue(ENVIRONMENT_METRIC_IDS.TAN),
             magie: getMetricValue(ENVIRONMENT_METRIC_IDS.MAGIE),
             no3: getMetricValue(ENVIRONMENT_METRIC_IDS.NO3),
+            date: detail.createdAt ? new Date(detail.createdAt).getTime() : 0,
+            notes: '', // Notes not currently supported by API detail response
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemToEdit, detail, metricTypes]);
 
     const hasChanges = useMemo(() => {
         if (!itemToEdit || !initialData) return true;
+
+        // Check Date Change
+        if (selectedDate.getTime() !== initialData.date) return true;
+
+        // Check Notes Change
+        if (notes !== initialData.notes) return true;
+
         if (pH !== initialData.pH) return true;
         if (dissolvedOxygen !== initialData.do) return true;
         if (temperature !== initialData.temperature) return true;
@@ -340,6 +349,8 @@ export const useAddEnvironment = ({
     }, [
         itemToEdit,
         initialData,
+        selectedDate,
+        notes,
         pH,
         dissolvedOxygen,
         temperature,
@@ -560,5 +571,6 @@ export const useAddEnvironment = ({
             createEnvMeasurement.isPending ||
             updateEnvMeasurement.isPending ||
             deleteEnvMeasurement.isPending,
+        detail, // Export detail for accessing documentIds
     };
 };

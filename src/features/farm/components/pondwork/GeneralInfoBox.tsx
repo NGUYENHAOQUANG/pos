@@ -97,7 +97,6 @@ interface GeneralInfoBox {
     selectedActivity?: string; // Currently selected activity option
     onSelectActivity?: (val: string) => void; // Callback when activity is selected
     disabledDate?: boolean;
-    onDocumentIdsChange?: (ids: string[]) => void;
 }
 
 export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox>(
@@ -114,7 +113,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             selectedActivity,
             onSelectActivity,
             disabledDate = false,
-            onDocumentIdsChange,
         },
         ref
     ) => {
@@ -148,19 +146,15 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             };
         }, []);
 
-        React.useImperativeHandle(
-            ref,
-            () => ({
-                markAsSaved: () => {
-                    isSaved.current = true;
-                },
-                getUploadedIds: () => {
-                    // Return IDs corresponding to the current imageUris (in order)
-                    return imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
-                },
-            }),
-            [imageUris]
-        );
+        React.useImperativeHandle(ref, () => ({
+            markAsSaved: () => {
+                isSaved.current = true;
+            },
+            getUploadedIds: () => {
+                // Return IDs corresponding to the current imageUris (in order)
+                return imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
+            },
+        }));
 
         // Cleanup on unmount
         useEffect(() => {
@@ -279,15 +273,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     const docId = uploadedDocs[0].id;
                     sessionUploadedFileIds.current.push(docId);
                     uploadedFilesMap.current[uri] = docId;
-
-                    // Trigger callback
-                    if (onDocumentIdsChange) {
-                        const currentIds = imageUris
-                            .concat(uri)
-                            .map(u => uploadedFilesMap.current[u])
-                            .filter(id => !!id);
-                        onDocumentIdsChange(currentIds);
-                    }
                     console.log(`[GeneralInfoBox] Upload success: ${docId}`);
                 }
             } catch (error) {
