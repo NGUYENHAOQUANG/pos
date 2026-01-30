@@ -35,8 +35,6 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const navigation = useNavigation<NavigationProp>();
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
 
@@ -117,27 +115,18 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         navigation.navigate('FarmInfo', { farm: farmData });
     };
 
-    const checkHasCycle = useCallback(
-        (pondId: string) => {
-            const currentCycle = activeCycles[pondId];
-            if (currentCycle) return true;
-            // Relaxed check: ANY cycle implies Active
-            const cycles = getCyclesByPondId(pondId);
-            return cycles.length > 0;
-        },
-        [activeCycles, getCyclesByPondId]
-    );
+    const getComputedStatus = useCallback((pond: PondData) => {
+        // Strict mapping based on Backend PondStatusEnum
+        // Available = 0 (Chuẩn bị)
+        // Framing = 1 (Đang nuôi/Active)
+        // Null = 2 (Không có trạng thái)
 
-    const getComputedStatus = useCallback(
-        (pond: PondData) => {
-            const hasCycle = checkHasCycle(pond.id);
-            if (hasCycle) {
-                return 'active';
-            }
-            return 'preparing';
-        },
-        [checkHasCycle]
-    );
+        if (pond.status === 'Framing') return 'active';
+        if (pond.status === 'Available') return 'preparing';
+
+        // "Cái ao nào Null là không hiện cái tag đó" -> return undefined
+        return undefined;
+    }, []);
 
     // Calculate counts
     const counts = useMemo(() => {

@@ -201,7 +201,11 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                     <Text style={styles.label}>Chọn trạng thái</Text>
                     <RadioButton
                         options={[
-                            { label: 'Chuẩn bị', value: 'preparing' },
+                            {
+                                label: 'Chuẩn bị',
+                                value: 'preparing',
+                                disabled: isEdit && initialValues?.status === 'active',
+                            },
                             { label: 'Đang nuôi', value: 'active' },
                             ...(initialValues?.status === 'ended'
                                 ? [{ label: 'Đã kết thúc', value: 'ended' }]
