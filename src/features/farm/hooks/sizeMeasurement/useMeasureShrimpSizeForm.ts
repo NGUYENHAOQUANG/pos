@@ -1,20 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { documentApi } from '@/features/material/api/documentApi';
 import {
     useSizeMeasurement,
     useCreateSizeMeasurement,
     useUpdateSizeMeasurement,
     useDeleteSizeMeasurement,
-} from '../useSizeMeasurement';
+} from '@/features/farm/hooks/useSizeMeasurement';
 import { JobExecution } from '@/features/farm/types/farm.types';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
     itemToEdit?: JobExecution;
+    onSaveSuccess?: () => void;
 }
 
-export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrimpSizeFormProps) => {
+export const useMeasureShrimpSizeForm = ({
+    pondId,
+    itemToEdit,
+    onSaveSuccess,
+}: UseMeasureShrimpSizeFormProps) => {
     const navigation = useNavigation();
 
     // API Hooks
@@ -31,44 +37,77 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
     const [remainingWeight, setRemainingWeight] = useState('');
     const [notes, setNotes] = useState('');
     const [images, setImages] = useState<string[]>([]);
+    const [initialDocumentIds, setInitialDocumentIds] = useState<string[]>([]);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
     // Populate state
     useEffect(() => {
-        if (detail) {
-            if (detail.createdAt) {
-                setTime(new Date(detail.createdAt));
-            }
-            if (detail.sizeMeasurement) {
-                const {
-                    shrimpSizePcsPerKg,
-                    estimatedRemainingStockKg,
-                    notes: noteValue,
-                } = detail.sizeMeasurement;
+        const populateData = async () => {
+            if (detail) {
+                if (detail.createdAt) {
+                    setTime(new Date(detail.createdAt));
+                }
+                if (detail.sizeMeasurement) {
+                    const {
+                        shrimpSizePcsPerKg,
+                        estimatedRemainingStockKg,
+                        notes: noteValue,
+                    } = detail.sizeMeasurement;
 
-                setShrimpSize(
-                    shrimpSizePcsPerKg !== undefined && shrimpSizePcsPerKg !== null
-                        ? shrimpSizePcsPerKg.toString()
-                        : ''
-                );
-                setRemainingWeight(
-                    estimatedRemainingStockKg !== undefined && estimatedRemainingStockKg !== null
-                        ? estimatedRemainingStockKg.toString()
-                        : ''
-                );
-                setNotes(noteValue || '');
+                    setShrimpSize(
+                        shrimpSizePcsPerKg !== undefined && shrimpSizePcsPerKg !== null
+                            ? shrimpSizePcsPerKg.toString()
+                            : ''
+                    );
+                    setRemainingWeight(
+                        estimatedRemainingStockKg !== undefined &&
+                            estimatedRemainingStockKg !== null
+                            ? estimatedRemainingStockKg.toString()
+                            : ''
+                    );
+                    setNotes(noteValue || '');
+                }
+                if (detail.documentIds && detail.documentIds.length > 0) {
+                    const results = await Promise.all(
+                        detail.documentIds.map(async id => {
+                            try {
+                                const url = await documentApi.getUrl(id);
+                                return { id, url };
+                            } catch {
+                                return { id, url: '' };
+                            }
+                        })
+                    );
+                    const validResults = results.filter(
+                        (r): r is { id: string; url: string } => !!r.url
+                    );
+                    const newImages = validResults.map(r => r.url);
+                    const newDocIds = validResults.map(r => r.id);
+
+                    setImages(prev =>
+                        JSON.stringify(prev) === JSON.stringify(newImages) ? prev : newImages
+                    );
+                    setInitialDocumentIds(prev =>
+                        JSON.stringify(prev) === JSON.stringify(newDocIds) ? prev : newDocIds
+                    );
+                } else {
+                    setImages([]);
+                    setInitialDocumentIds([]);
+                }
+            } else if (itemToEdit && itemToEdit.meta) {
+                const meta = itemToEdit.meta as any;
+                if (meta.date) setTime(new Date(meta.date));
+                if (meta.shrimpSize) setShrimpSize(meta.shrimpSize);
+                if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight);
+                if (meta.notes) setNotes(meta.notes);
+                if (meta.images) {
+                    setImages(meta.images);
+                    setInitialDocumentIds(meta.documentIds || []);
+                }
             }
-            if (detail.documentIds) {
-                setImages(detail.documentIds);
-            }
-        } else if (itemToEdit && itemToEdit.meta) {
-            const meta = itemToEdit.meta as any;
-            if (meta.date) setTime(new Date(meta.date));
-            if (meta.shrimpSize) setShrimpSize(meta.shrimpSize);
-            if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight);
-            if (meta.notes) setNotes(meta.notes);
-            if (meta.images) setImages(meta.images);
-        }
+        };
+
+        populateData();
     }, [detail, itemToEdit]);
 
     const handleSave = (documentIds: string[]) => {
@@ -102,6 +141,7 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
                 },
                 {
                     onSuccess: () => {
+                        onSaveSuccess?.();
                         Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
                         navigation.goBack();
                     },
@@ -118,6 +158,7 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
                 },
                 {
                     onSuccess: () => {
+                        onSaveSuccess?.();
                         Toast.show({
                             type: 'success',
                             text1: 'Đã đo kích thước tôm thành công',
@@ -160,6 +201,7 @@ export const useMeasureShrimpSizeForm = ({ pondId, itemToEdit }: UseMeasureShrim
         notes,
         setNotes,
         images,
+        initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         handleSave,

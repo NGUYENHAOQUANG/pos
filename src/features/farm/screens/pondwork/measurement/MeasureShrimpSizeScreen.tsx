@@ -67,6 +67,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         notes,
         setNotes,
         images,
+        initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         handleSave,
@@ -74,6 +75,9 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
         itemToEdit,
+        onSaveSuccess: () => {
+            generalInfoBoxRef.current?.markAsSaved();
+        },
     });
     // ...
 
@@ -117,6 +121,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                         date={time}
                         onDateChange={setTime}
                         imageUris={images}
+                        documentIds={initialDocumentIds}
                         disabledDate={true}
                     />
                     <MeasurementDataBox

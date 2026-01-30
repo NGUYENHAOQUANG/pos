@@ -150,7 +150,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                             required
                             value={cycleName}
                             onChangeText={setCycleName}
-                            placeholder="Input"
+                            placeholder="Nhập"
                             containerStyle={styles.noMarginBottom}
                         />
                     </View>

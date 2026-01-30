@@ -18,7 +18,13 @@ export interface ISizeMeasurement {
     pondId?: string;
     operationId?: string;
     value?: number;
-    documentIds?: string[] | null;
+    documentIds?: string[];
+    documents?: Array<{
+        id: string;
+        fileName: string;
+        filePath: string;
+        publicUrl?: string;
+    }>;
     sizeMeasurement?: ISizeMeasurementDetail | null;
 }
 
