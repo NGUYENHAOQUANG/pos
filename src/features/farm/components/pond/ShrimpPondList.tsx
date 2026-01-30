@@ -32,30 +32,17 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
         },
         ref
     ) => {
+        const getStatus = (item: PondData): TagStatus | undefined => {
+            // Strict mapping based on Backend PondStatusEnum
+            if (item.status === 'Framing') return 'active';
+            if (item.status === 'Available') return 'preparing';
+
+            // Null or other values -> no tag
+            return undefined;
+        };
+
         // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
         const getLatestPondActivity = useFarmStore(state => state.getLatestPondActivity);
-        const activeCycles = useFarmStore(state => state.activeCycles);
-        const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
-
-        const checkHasCycle = (pondId: string) => {
-            const currentCycle = activeCycles[pondId];
-            if (currentCycle) return true;
-            const cycles = getCyclesByPondId(pondId);
-            // If there are any cycles associated, consider it valid (Active)
-            // This matches ShrimpPond.tsx logic which falls back to cycles[0]
-            return cycles.length > 0;
-        };
-
-        const getStatus = (item: PondData): TagStatus | undefined => {
-            const hasCycle = checkHasCycle(item.id);
-
-            if (hasCycle) {
-                return 'active';
-            }
-
-            // Everything else is 'preparing' (Chuẩn bị) as per request
-            return 'preparing';
-        };
 
         const renderItem: ListRenderItem<PondData> = ({ item }) => {
             const latestActivity = getLatestPondActivity(item.id);

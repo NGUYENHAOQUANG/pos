@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -9,43 +9,36 @@ import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData, BreedOption } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { Input } from '@/shared/components/forms/Input';
-import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
+// import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
+
 interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
     pondId?: string;
     zoneId?: string;
     isEdit?: boolean;
+    breedOptions: BreedOption[];
+    seasonOptions: { label: string; value: string }[];
 }
 
 const CreateCycleForm: React.FC<Props> = ({
     formData,
     setFormData,
     pondId,
-    zoneId,
     isEdit = false,
+    breedOptions,
+    seasonOptions,
 }) => {
-    // Lấy danh mục từ useFarmStore với selectors
-    const breedOptions = useFarmStore(state => state.breedOptions);
-    const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
+    // Use hooks to fetch seasons - REMOVED -> Lifted to screen
+    const storePond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
 
-    // Prefer passed zoneId, fallback to pond from store
-    const effectiveZoneId = zoneId || pond?.zoneId?.toString();
+    // ...
 
-    const { data: seasons = [] } = useSeasonsByZone(effectiveZoneId, (pond as any)?.zone?.code);
-
-    const seasonOptions = useMemo(
-        () =>
-            seasons.map(s => ({
-                label: s.name,
-                value: s.id.toString(),
-            })),
-        [seasons]
-    );
+    const pond = storePond;
 
     const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
@@ -102,6 +95,28 @@ const CreateCycleForm: React.FC<Props> = ({
 
         return quantity / parsedArea;
     }, [formData.stockingQuantity, pondId, pond]);
+
+    useEffect(() => {
+        if (isEdit) return;
+
+        const updateTime = () => {
+            setFormData(prev => ({
+                ...prev,
+                stockingDate: formatDateWithTime(new Date()),
+            }));
+        };
+
+        const now = new Date();
+        const delay = (60 - now.getSeconds()) * 1000;
+
+        const initialTimer = setTimeout(() => {
+            updateTime();
+            const timer = setInterval(updateTime, 60000);
+            return () => clearInterval(timer);
+        }, delay);
+
+        return () => clearTimeout(initialTimer);
+    }, [isEdit, setFormData]);
 
     return (
         <View style={styles.container}>
@@ -167,6 +182,7 @@ const CreateCycleForm: React.FC<Props> = ({
                             style={styles.dropdown}
                             showIcon={false}
                             height={40}
+                            disabled={isEdit}
                             borderRadius={6}
                         />
                     </View>
@@ -207,7 +223,12 @@ const CreateCycleForm: React.FC<Props> = ({
                             : null
                     }
                     onDateChange={date => updateField('stockingDate', formatDateWithTime(date))}
-                    disabled={isEdit}
+                    disabled={true}
+                    dateText={
+                        !isEdit && formData.stockingDate
+                            ? `${formData.stockingDate} (hiện tại)`
+                            : undefined
+                    }
                     formatOptions={{
                         showCurrentLabel: 'auto',
                     }}

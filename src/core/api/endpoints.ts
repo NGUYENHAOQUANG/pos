@@ -133,6 +133,7 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/warehouses/${id}`,
         DELETE: (id: string) => `/warehouses/${id}`,
         ITEMS: (id: string) => `/warehouses/${id}/items`,
+        SHRIMP_SEEDS: (id: string) => `/warehouses/${id}/shrimp-seeds`,
     },
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',
