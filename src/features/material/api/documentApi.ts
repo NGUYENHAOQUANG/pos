@@ -72,8 +72,6 @@ export const documentApi = {
         // Handle various response structures
         if (typeof data === 'string') return data;
         if (data?.result && typeof data.result === 'string') return data.result;
-
-        // Handle nested data object with documentUrl (Current API format)
         if (data?.data) {
             if (typeof data.data === 'string') return data.data;
             if (data.data.documentUrl && typeof data.data.documentUrl === 'string')
@@ -84,13 +82,27 @@ export const documentApi = {
         return '';
     },
 
+    getUrls: async (documentIds: string[]): Promise<string[]> => {
+        if (!documentIds?.length) return [];
+        const urls = await Promise.all(
+            documentIds.map(async id => {
+                try {
+                    const url = await documentApi.getUrl(id);
+                    return url || '';
+                } catch {
+                    return '';
+                }
+            })
+        );
+        return urls.filter((u): u is string => !!u);
+    },
+
     delete: async (id: string): Promise<boolean> => {
         try {
             const { data } = await apiClient.delete<any>(API_ENDPOINTS.DOCUMENT.DELETE(id));
             if (data?.success || data?.result) return true;
             return false;
-        } catch (error) {
-            console.error('Delete document error:', error);
+        } catch (_error) {
             return false;
         }
     },

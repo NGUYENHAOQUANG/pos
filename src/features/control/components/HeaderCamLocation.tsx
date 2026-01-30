@@ -4,7 +4,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import {
+    DropdownHeaderButton,
+    DropDownHeaderItem,
+} from '@/shared/components/forms/DropdownHeaderButton';
 
 export interface FarmLocation {
     id: string;
@@ -36,18 +39,18 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
     const insets = useSafeAreaInsets();
     const buttonRef = React.useRef<View>(null);
 
-    // Adapt FarmLocation to DropDownItem
-    const dropdownData: DropDownItem[] = locations.map(loc => ({
+    // Adapt FarmLocation to DropDownHeaderItem
+    const dropdownData: DropDownHeaderItem[] = locations.map(loc => ({
         id: loc.id,
         label: loc.name,
         value: loc,
     }));
 
-    const selectedDropdownItem: DropDownItem | undefined = selectedLocation
+    const selectedDropdownItem: DropDownHeaderItem | undefined = selectedLocation
         ? { id: selectedLocation.id, label: selectedLocation.name, value: selectedLocation }
         : dropdownData[0];
 
-    const handleSelect = (item: DropDownItem) => {
+    const handleSelect = (item: DropDownHeaderItem) => {
         if (onLocationSelect && item.value) {
             onLocationSelect(item.value);
         }
@@ -70,7 +73,7 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
         <View style={[styles.container, { paddingTop: insets.top + 12 }, style]}>
             {/* Location Picker Reuse */}
             <View style={styles.locationContainer}>
-                <DropDownButtonBasic
+                <DropdownHeaderButton
                     data={dropdownData}
                     value={selectedDropdownItem}
                     onSelect={handleSelect}
@@ -78,7 +81,6 @@ export const HeaderCamLocation: React.FC<HeaderCamLocationProps> = ({
                     height={40}
                 />
             </View>
-
             {/* Help Button */}
             <TouchableOpacity
                 ref={buttonRef}
@@ -108,7 +110,6 @@ const styles = StyleSheet.create({
     },
     locationContainer: {
         flex: 1,
-        marginRight: 16,
         alignItems: 'flex-start',
     },
     menuButton: {

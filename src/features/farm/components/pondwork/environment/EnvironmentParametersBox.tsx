@@ -58,15 +58,15 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onMagieChange,
     no3 = '',
     onNo3Change,
-    limits = {},
+    // limits = {}, // eslint-disable-line @typescript-eslint/no-unused-vars
 }) => {
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
-        const limit = limits[id];
+        // const limit = limits[id];
 
-        if (limit) {
-            return `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
-        }
+        // if (limit) {
+        //     return `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
+        // }
 
         // Default: Name (Unit) or just Name
         return unit ? `${baseName} (${unit})` : baseName;
@@ -184,17 +184,16 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
 
                         // Advanced params usually come as "Name (Unit)" (e.g. "Kali (mg/L)")
                         // If limit exists using same logic:
-                        const limit = limits[param.id];
+                        // const limit = limits[param.id];
                         let label = param.name;
 
-                        if (limit) {
-                            // Extract unit if present in (...)
-                            const match = param.name.match(/\((.*?)\)/);
-                            const unit = match ? match[1] : '';
-                            const baseName = param.name.split(' (')[0];
-
-                            label = `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
-                        }
+                        // if (limit) {
+                        //     // Extract unit if present in (...)
+                        //     const match = param.name.match(/\((.*?)\)/);
+                        //     const unit = match ? match[1] : '';
+                        //     const baseName = param.name.split(' (')[0];
+                        //     label = `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
+                        // }
 
                         return (
                             <View key={param.id} style={styles.fullWidthRow}>
