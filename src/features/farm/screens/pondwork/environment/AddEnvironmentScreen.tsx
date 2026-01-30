@@ -38,11 +38,10 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Decomposed useFarm() selectors
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
     const environmentSettings = useFarmStore(state => state.environmentSettings);
     const parameterSettings = useFarmStore(state => state.parameterSettings);
     const scrollViewRef = useRef<ScrollView>(null);
+    const generalInfoBoxRef = useRef<any>(null);
 
     // 1. Resolve Zone
     const zones = useFarmStore(state => state.zones); // Needed for resolution
@@ -108,6 +107,7 @@ export const AddEnvironmentScreen: React.FC = () => {
         handleSave,
         handleDelete,
         handleSaveAdvancedParams,
+        isSubmitting,
     } = useAddEnvironment({
         pond,
         itemToEdit,
@@ -115,9 +115,6 @@ export const AddEnvironmentScreen: React.FC = () => {
         metricTypes,
         parameterSettings,
         environmentSettings,
-        updatePondJob,
-        getPondJobItems,
-        parameterLimits,
     });
 
     // Hide tab bar when this screen is mounted
@@ -145,6 +142,12 @@ export const AddEnvironmentScreen: React.FC = () => {
 
     const handleCancelDelete = () => {
         setDeleteModalVisible(false);
+    };
+
+    const handleSavePress = () => {
+        const documentIds = generalInfoBoxRef.current?.getDocumentIds?.() || [];
+        const markAsSaved = () => generalInfoBoxRef.current?.markAsSaved?.();
+        handleSave(documentIds, markAsSaved);
     };
 
     return (
@@ -175,10 +178,11 @@ export const AddEnvironmentScreen: React.FC = () => {
                             keyboardShouldPersistTaps="handled"
                         >
                             <GeneralInfoBox
-                                type="default"
+                                ref={generalInfoBoxRef}
+                                type="withImage"
                                 date={selectedDate}
                                 onDateChange={setSelectedDate}
-                                disabledDate={true}
+                                disabledDate={!!itemToEdit}
                             />
 
                             <EnvironmentParametersBox
@@ -244,9 +248,9 @@ export const AddEnvironmentScreen: React.FC = () => {
                         <ButtonBarFarm
                             primaryTitle={itemToEdit ? 'Cập nhật thông tin' : 'Lưu thông tin'}
                             secondaryTitle="Huỷ"
-                            onPrimaryPress={handleSave}
+                            onPrimaryPress={handleSavePress}
                             onSecondaryPress={handleCancel}
-                            primaryDisabled={itemToEdit ? isButtonDisabled : false}
+                            primaryDisabled={itemToEdit ? isButtonDisabled : false || isSubmitting}
                         />
                     </View>
                 </>

@@ -46,6 +46,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
         },
+        ENV_MEASUREMENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/envmeasurement`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/envmeasurement`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/envmeasurement/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',
