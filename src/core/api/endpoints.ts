@@ -28,6 +28,24 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/cycle/${id}`,
         },
+        SIPHON_RECORDS: {
+            LIST: (pondId: string) => `/pond/${pondId}/siphon-records`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
+        },
+        SHRIMP_HEALTH: {
+            LIST: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/shrimp-healths`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/shrimp-healths/${id}`,
+        },
+        SIZE_MEASUREMENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/sizemeasurement`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/sizemeasurement`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/sizemeasurement/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',
@@ -113,6 +131,11 @@ export const API_ENDPOINTS = {
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',
         CREATE: '/exportreceipt',
+        DETAIL: (id: string) => `/exportreceipt/${id}`,
+        UPDATE: (id: string) => `/exportreceipt/${id}`,
+        DELETE: (id: string) => `/exportreceipt/${id}`,
+        ITEMS: (id: string) => `/exportreceipt/${id}/items`,
+        UPDATE_ITEMS: (id: string) => `/exportreceipt/${id}/items`,
     },
     SUPPLIER: {
         LIST: '/supplier',

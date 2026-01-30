@@ -26,4 +26,45 @@ export const exportReceiptApi = {
         );
         return data;
     },
+
+    /**
+     * Get export receipt detail
+     * @param id - Receipt ID
+     */
+    getDetail: async (id: string): Promise<any> => {
+        const { data } = await apiClient.get(API_ENDPOINTS.EXPORT_RECEIPT.DETAIL(id));
+        return data;
+    },
+
+    /**
+     * Update export receipt
+     * @param id - Receipt ID
+     * @param payload - Update payload
+     */
+    update: async (id: string, payload: any): Promise<any> => {
+        const { data } = await apiClient.patch(API_ENDPOINTS.EXPORT_RECEIPT.UPDATE(id), payload);
+        return data;
+    },
+
+    /**
+     * Delete export receipt
+     * @param id - Receipt ID
+     */
+    delete: async (id: string): Promise<any> => {
+        const { data } = await apiClient.delete(API_ENDPOINTS.EXPORT_RECEIPT.DELETE(id));
+        return data;
+    },
+
+    /**
+     * Update export receipt items
+     * @param id - Receipt ID
+     * @param payload - Items payload
+     */
+    updateItems: async (id: string, payload: any): Promise<any> => {
+        const { data } = await apiClient.patch(
+            API_ENDPOINTS.EXPORT_RECEIPT.UPDATE_ITEMS(id),
+            payload
+        );
+        return data;
+    },
 };
