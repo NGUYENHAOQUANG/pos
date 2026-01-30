@@ -9,6 +9,7 @@ import {
     useDeleteSizeMeasurement,
 } from '@/features/farm/hooks/useSizeMeasurement';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
@@ -110,15 +111,31 @@ export const useMeasureShrimpSizeForm = ({
         populateData();
     }, [detail, itemToEdit]);
 
-    const handleError = (error: any) => {
-        let message = error?.message || 'Có lỗi xảy ra';
-        if (error?.fields) {
+    const handleError = (err: unknown) => {
+        const error = err as NormalizedError;
+
+        if (error.type === 'VALIDATION_ERROR') {
             const firstFieldKey = Object.keys(error.fields)[0];
             if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
-                message = error.fields[firstFieldKey][0];
+                Toast.show({
+                    type: 'error',
+                    text1: error.fields[firstFieldKey][0],
+                    visibilityTime: 4000,
+                });
+                return;
             }
         }
-        Toast.show({ type: 'error', text1: message });
+
+        if (error.type === 'NOT_FOUND_ERROR') {
+            Toast.show({
+                type: 'error',
+                text1: error.message,
+                visibilityTime: 4000,
+            });
+            return;
+        }
+
+        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
     };
 
     const handleSave = (documentIds: string[]) => {
