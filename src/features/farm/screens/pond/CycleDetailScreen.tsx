@@ -1,10 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
-import { useFarmStore } from '../../store/farmStore';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { CycleData } from '../../types/farm.types';
-import { FarmStackParamList } from '../../navigation/FarmNavigator';
+import { CycleData } from '@/features/farm/types/farm.types';
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { useQuery } from '@tanstack/react-query';
@@ -146,7 +146,7 @@ export const CycleDetailScreen: React.FC = () => {
                     <RefreshControl
                         refreshing={refreshing || (isLoading && !initialCycleData) || isRefetching}
                         onRefresh={onRefresh}
-                        colors={['black']}
+                        colors={[colors.black]}
                     />
                 }
             >
@@ -167,7 +167,7 @@ export const CycleDetailScreen: React.FC = () => {
                             >
                                 <EditIcon />
                             </TouchableOpacity>
-                            <Ionicons name="chevron-up" size={20} color="#374151" />
+                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
                         </View>
                     </View>
 
@@ -212,7 +212,7 @@ export const CycleDetailScreen: React.FC = () => {
                     <View style={[styles.card, styles.transferCard]}>
                         <View style={styles.cardHeaderWithBorder}>
                             <Text style={styles.cardTitle}>Thông tin sang ao</Text>
-                            <Ionicons name="chevron-up" size={20} color="#374151" />
+                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
                         </View>
 
                         <View style={styles.infoContainer}>
@@ -275,16 +275,16 @@ const styles = StyleSheet.create({
     },
     // ... statusBadge style kept ...
     statusBadge: {
-        backgroundColor: '#FFFBEB',
+        backgroundColor: colors.yellow[50],
         paddingHorizontal: spacing.sm,
         paddingVertical: 4,
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#FFE58F',
+        borderColor: colors.yellow[300],
     },
     statusText: {
         fontSize: typography.fontSize.xs,
-        color: '#D48806',
+        color: colors.orange[500],
         fontWeight: typography.fontWeight.regular,
         lineHeight: 20,
     },
@@ -292,11 +292,11 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
     },
     card: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors.white,
         width: '100%',
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
     },
     cardHeaderWithBorder: {
         flexDirection: 'row',
@@ -305,12 +305,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomColor: colors.borderLight,
     },
     cardTitle: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#111827',
+        color: colors.gray[900],
     },
     headerActions: {
         flexDirection: 'row',
@@ -323,14 +323,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.gray[50],
         borderRadius: 4,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
     },
     line: {
         height: 1,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.borderLight,
     },
     infoRow: {
         flexDirection: 'row',
