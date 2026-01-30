@@ -46,6 +46,7 @@ export interface PondTypeOperation {
     priority?: number;
     createdAt?: string;
     lastModifiedAt?: string;
+    code?: string; // Added to support Tag mapping
     // Map old usage to new
     operationTypeName?: string; // We might need to map operationName to this or update usage
 }
@@ -87,24 +88,29 @@ export interface PondData {
 }
 
 export interface CycleData {
-    id: string; // Mã chu kỳ - ví dụ: "VH2025-A-VEO1"
-    breedSource: string; // Chọn tôm giống - ví dụ: "A" (SIS PL12)
-    season: string; // Chọn vụ nuôi - ví dụ: "VH2025-A"
-    cycleName: string;
-    stockingDate: string; // Ngày bắt đầu - ví dụ: "12/1/2025"
-    endDate?: string; // Ngày kết thúc - ví dụ: "12/22/2025"
-    stockingQuantity: number; // Tổng số lượng thả (PLs) - ví dụ: 870000
-    age: number; // Ngày tuổi (PLS) - ví dụ: 12
-    density: number; // Mật độ (con/m²) - ví dụ: 1109.693878
-    estimatedCost: number; // Chi phí giống (VNĐ) - ví dụ: 130500000
-    notes?: string; // Ghi chú
-    pondId?: string; // Ao chính (deprecated, dùng sourcePonds/receivingPonds)
-    sourcePonds?: string[]; // Ao nguồn - ví dụ: ["V01", "V02"]
-    receivingPonds?: string[]; // Ao nhận - ví dụ: ["N01", "N02"]
-    status?: 'Hoàn thành' | 'Chưa hoàn thành'; // Trạng thái
-    doc?: number; // DOC (ngày) - ví dụ: 21
-    // Thông tin sang ao (chỉ có khi chu kỳ này được tạo từ việc sang ao)
+    id: string; // Mã chu kỳ
+    breedSource: string;
+    breedName?: string;
+    season: string | any; // API returns object sometimes
+    cycleName: string; // Mapped from 'name'? Check response
+    name?: string; // Real API field
+    stockingDate: string; // Date?
+    startDate?: string; // Real API field maybe?
+    endDate?: string;
+    stockingQuantity: number;
+    totalStocking?: number; // Real API field
+    age: number;
+    ageDays?: number; // Real API field
+    density: number;
+    estimatedCost: number;
+    notes?: string;
+    pondId?: string;
+    sourcePonds?: string[];
+    receivingPonds?: string[];
+    status?: string; // 'InProgress', 'Active', 'Completed'
+    doc?: number;
     transferInfo?: TransferInfo;
+    pond?: any; // API returns pond object
 }
 
 export interface CreateCycleCommand {
@@ -115,6 +121,8 @@ export interface CreateCycleCommand {
     ageDays: number;
     notes?: string;
 }
+
+export type UpdateCycleCommand = Partial<CreateCycleCommand>;
 
 // Thông tin sang ao - lưu dữ liệu từ ao vèo khi chuyển sang ao nuôi
 export interface TransferInfo {

@@ -4,6 +4,7 @@ import {
     GetWarehouseItemsResponse,
     GetWarehousesParams,
     IWarehouse,
+    GetShrimpSeedsResponse,
 } from '@/features/material/types/material.types';
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
@@ -23,6 +24,19 @@ export const warehouseApi = {
     ): Promise<GetWarehouseItemsResponse> => {
         const { data } = await apiClient.get<GetWarehouseItemsResponse>(
             API_ENDPOINTS.WAREHOUSE.ITEMS(warehouseId),
+            {
+                params,
+            }
+        );
+        return data;
+    },
+
+    getShrimpSeeds: async (
+        warehouseId: string,
+        params?: GetWarehousesParams
+    ): Promise<GetShrimpSeedsResponse> => {
+        const { data } = await apiClient.get<GetShrimpSeedsResponse>(
+            API_ENDPOINTS.WAREHOUSE.SHRIMP_SEEDS(warehouseId),
             {
                 params,
             }

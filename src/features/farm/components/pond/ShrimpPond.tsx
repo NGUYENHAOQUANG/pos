@@ -36,6 +36,9 @@ interface ShrimpPondProps {
     pondId?: string;
 }
 
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     name,
     area,
@@ -66,6 +69,26 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
     const breedOptions = useFarmStore(state => state.breedOptions);
     const calculateDOC = useFarmStore(state => state.calculateDOC);
+    const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
+
+    // --- Dynamic Breed Name Fetching ---
+    // 1. Get Zone ID
+    const effectiveZoneId = pond?.zoneId?.toString();
+
+    // 2. Fetch Warehouses for this Zone
+    const { data: warehouses } = useWarehouses({
+        PageSize: 100,
+        ZoneId: effectiveZoneId,
+    });
+    const defaultWarehouseId = warehouses?.[0]?.id;
+
+    // 3. Fetch Shrimp Seeds
+    const { data: shrimpSeeds } = useShrimpSeeds(defaultWarehouseId);
+    // -----------------------------------
+
+    // --- Dynamic Breed Name Fetching ---
+    // 1. Get Zone ID
+    // ... (keep this part)
 
     // Get cycle data for this pond
     const cycleData = useMemo(() => {
@@ -87,9 +110,21 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         return calculateDOC(cycleData?.stockingDate);
     }, [cycleData?.stockingDate, calculateDOC]);
 
-    const breedLabel = cycleData?.breedSource
-        ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
-        : undefined;
+    const breedLabel = useMemo(() => {
+        if (!cycleData?.breedSource) return undefined;
+
+        // 1. Prefer saved name
+        if (cycleData.breedName) return cycleData.breedName;
+
+        // 2. Try dynamic API data
+        if (shrimpSeeds?.length) {
+            const seed = shrimpSeeds.find((s: any) => s.id === cycleData.breedSource);
+            if (seed?.materialName) return seed.materialName;
+        }
+
+        // 3. Fallback to static/store options
+        return breedOptions.find(b => b.value === cycleData.breedSource)?.label;
+    }, [cycleData, shrimpSeeds, breedOptions]);
 
     // Display Logic Override: REMOVED as per request.
     const displayType = type;
@@ -158,17 +193,20 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
             {/* Info Section */}
             <View style={styles.body}>
-                {status && (
-                    <>
-                        <Tag status={status} style={styles.statusTag} />
-                        <View
-                            style={[
-                                styles.divider,
-                                { marginHorizontal: -spacing.md, marginBottom: spacing.sm },
-                            ]}
-                        />
-                    </>
-                )}
+                {status &&
+                    (typeValue === POND_TYPES.NURSERY ||
+                        typeValue === POND_TYPES.CULTIVATION ||
+                        typeValue === POND_TYPES.READY) && (
+                        <>
+                            <Tag status={status} style={styles.statusTag} />
+                            <View
+                                style={[
+                                    styles.divider,
+                                    { marginHorizontal: -spacing.md, marginBottom: spacing.sm },
+                                ]}
+                            />
+                        </>
+                    )}
                 {hasData ? (
                     <>
                         <Text style={styles.bodyText}>

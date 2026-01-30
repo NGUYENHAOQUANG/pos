@@ -53,7 +53,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 initialValues?.status === 'ended' ||
                 initialValues?.status === 'preparing'
                 ? initialValues.status
-                : 'active'
+                : 'preparing'
         );
         const [note, setNote] = useState(initialValues?.note || '');
 
