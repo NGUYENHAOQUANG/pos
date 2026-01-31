@@ -27,6 +27,8 @@ import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
+import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -170,6 +172,10 @@ export const ShrimpFarmScreens: React.FC = () => {
     // Fetch environment measurements
     const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pond?.id || '', new Date());
     const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pond?.id || '');
+    // Fetch clean renovation records from API
+    const { jobs: apiCleanRenovationJobs } = useCleanRenovationsAsJobs(pond?.id || '');
+    // Fetch dry renovation records from API
+    const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -221,6 +227,16 @@ export const ShrimpFarmScreens: React.FC = () => {
                         items = apiIncidentJobs;
                     }
 
+                    // Override with API data for CLEAN_POND
+                    if (jobType === JOB_TYPES.CLEAN_POND) {
+                        items = apiCleanRenovationJobs;
+                    }
+
+                    // Override with API data for SUN_DRY_POND
+                    if (jobType === JOB_TYPES.SUN_DRY_POND) {
+                        items = apiDryRenovationJobs;
+                    }
+
                     jobTypes.push({
                         type: jobType,
                         items,
@@ -267,6 +283,8 @@ export const ShrimpFarmScreens: React.FC = () => {
         apiSiphonJobs,
         apiEnvJobs,
         apiIncidentJobs,
+        apiCleanRenovationJobs,
+        apiDryRenovationJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,

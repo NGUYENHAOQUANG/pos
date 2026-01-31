@@ -46,4 +46,26 @@ export const farmKeys = {
         byPond: (pondId: string) => [...farmKeys.incident.all(), 'byPond', pondId] as const,
         detail: (id: string) => [...farmKeys.incident.all(), 'detail', id] as const,
     },
+    cleanRenovations: {
+        all: () => [...farmKeys.all, 'cleanRenovations'] as const,
+        byPond: (pondId: string, params?: any) =>
+            [
+                ...farmKeys.cleanRenovations.all(),
+                'byPond',
+                pondId,
+                ...(params ? [params] : []),
+            ] as const,
+        detail: (id: string) => [...farmKeys.cleanRenovations.all(), 'detail', id] as const,
+    },
+    dryRenovations: {
+        all: () => [...farmKeys.all, 'dryRenovations'] as const,
+        byPond: (pondId: string, params?: any) =>
+            [
+                ...farmKeys.dryRenovations.all(),
+                'byPond',
+                pondId,
+                ...(params ? [params] : []),
+            ] as const,
+        detail: (id: string) => [...farmKeys.dryRenovations.all(), 'detail', id] as const,
+    },
 };

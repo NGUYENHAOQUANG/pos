@@ -57,3 +57,10 @@ export interface IApiResponse<T> {
     details?: string | null;
     timestamp: string;
 }
+
+export interface IDocument {
+    id: string;
+    fileName?: string;
+    filePath?: string;
+    publicUrl?: string;
+}

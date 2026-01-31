@@ -128,11 +128,12 @@ export const CycleDetailScreen: React.FC = () => {
                     <View style={styles.badgeWrapper}>
                         <View style={styles.statusBadge}>
                             <Text style={styles.statusText} numberOfLines={1}>
-                                {activeCycleData?.status === 'InProgress'
+                                {activeCycleData?.status === 'InProgress' ||
+                                activeCycleData?.status === 'Active'
                                     ? 'Chưa hoàn thành'
                                     : activeCycleData?.status === 'Completed'
                                     ? 'Hoàn thành'
-                                    : activeCycleData?.status || 'Active'}
+                                    : activeCycleData?.status || 'Chưa hoàn thành'}
                             </Text>
                         </View>
                     </View>

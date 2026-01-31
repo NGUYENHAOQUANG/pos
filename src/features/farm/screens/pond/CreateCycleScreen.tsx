@@ -24,6 +24,8 @@ import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 import { IShrimpSeed } from '@/features/material/types/material.types';
+import { useQuery } from '@tanstack/react-query';
+import { cycleApi } from '@/features/farm/api/cycleAPI';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -38,7 +40,7 @@ export const CreateCycleScreen: React.FC = () => {
     const deleteCycle = useFarmStore(state => state.deleteCycle);
     const updateCycleStore = useFarmStore(state => state.updateCycle);
     const ponds = useFarmStore(state => state.ponds);
-    const storeBreedOptions = useFarmStore(state => state.breedOptions);
+
     const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
 
     const { pondId, initialData, zoneId } = route.params;
@@ -47,8 +49,12 @@ export const CreateCycleScreen: React.FC = () => {
     // --- Data Fetching Logic (Lifted from CreateCycleForm) ---
     // 1. Determine Context
     const pond = ponds.find(p => p.id === pondId);
-    // Prefer passed zoneId, fallback to pond from store
-    const effectiveZoneId = zoneId || pond?.zoneId?.toString();
+    // Prefer passed zoneId, fallback to pond from store, then initialData
+    const effectiveZoneId =
+        zoneId ||
+        pond?.zoneId?.toString() ||
+        (initialData?.pond as any)?.zoneId ||
+        (initialData?.season as any)?.zoneId;
 
     // 2. Fetch Warehouses filtered by the current Zone
     const { data: warehouses } = useWarehouses({
@@ -110,17 +116,22 @@ export const CreateCycleScreen: React.FC = () => {
                 supplier: seed.manufacturer || seed.supplier || 'N/A',
             }));
         } else {
-            options = [...storeBreedOptions];
+            // options = [...storeBreedOptions]; // DISABLED MOCK DATA
+            options = [];
         }
 
         // --- Fallback for Edit Mode ---
-        if (initialData?.breedSource) {
-            const exists = options.some(o => o.value === initialData.breedSource);
+        // Check both breedSource and warehouseItemId (depending on API response structure)
+        const currentBreedId = initialData?.breedSource || (initialData as any)?.warehouseItemId;
+
+        if (currentBreedId) {
+            const exists = options.some(o => o.value === currentBreedId);
+
             if (!exists) {
                 options = [
                     {
-                        label: initialData.breedName || 'Giống hiện tại',
-                        value: initialData.breedSource,
+                        label: initialData?.breedName || 'Giống hiện tại',
+                        value: currentBreedId,
                         materialCode: '', // Unknown if not in list
                         price: 0, // Unknown
                         supplier: '',
@@ -131,8 +142,7 @@ export const CreateCycleScreen: React.FC = () => {
         }
 
         return options;
-    }, [shrimpSeeds, storeBreedOptions, initialData]);
-    // ---------------------------------------------------------
+    }, [shrimpSeeds, initialData]);
 
     // State quản lý ẩn/hiện Modal xác nhận xóa
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -184,6 +194,39 @@ export const CreateCycleScreen: React.FC = () => {
         );
     };
 
+    // Auto-select first breed REMOVED per user request
+    // Instead, try to fetch detail if ID exists (to handle missing fields in summary)
+    const { data: detailData } = useQuery({
+        queryKey: ['cycleDetail', pondId, initialData?.id],
+        queryFn: async () => {
+            if (!pondId || !initialData?.id) return null;
+            try {
+                return await cycleApi.getCycleDetail(pondId, initialData.id);
+            } catch (e) {
+                console.warn('EditScreen: Failed to fetch detail', e);
+                return null;
+            }
+        },
+        enabled: !!pondId && !!initialData?.id,
+    });
+
+    // Update form when detail data arrives (if meaningful)
+    React.useEffect(() => {
+        if (detailData) {
+            setCycleData(prev => {
+                const newData = { ...prev };
+                const backendBreed = detailData.breedSource || detailData.warehouseItemId;
+                if (backendBreed && backendBreed !== prev.breedSource) {
+                    newData.breedSource = backendBreed;
+                    // Try to find name in options or use backend name
+                    const opt = breedOptions.find(b => b.value === backendBreed);
+                    newData.breedName = opt?.label || detailData.breedName || prev.breedName;
+                }
+                return newData;
+            });
+        }
+    }, [detailData, breedOptions]);
+
     const handleCreate = async () => {
         if (!checkFields() || !pondId) {
             return Toast.show({
@@ -204,20 +247,13 @@ export const CreateCycleScreen: React.FC = () => {
 
         if (isEdit && initialData?.id) {
             const updateCommand: UpdateCycleCommand = {
-                seasonId: cycleData.season!,
+                // seasonId: cycleData.season!, // REMOVED for Edit per user request
                 warehouseItemId: cycleData.breedSource!,
                 name: cycleData.cycleName!,
                 totalStocking: cycleData.stockingQuantity!,
                 ageDays: cycleData.age!,
                 notes: cycleData.notes,
             };
-
-            console.log('DEBUG UPDATE CYCLE:', {
-                pondId,
-                cycleId: initialData.id,
-                data: updateCommand,
-                url: `/pond/${pondId}/cycle/${initialData.id}`,
-            });
 
             updateCycle(
                 { pondId, cycleId: initialData.id, data: updateCommand },

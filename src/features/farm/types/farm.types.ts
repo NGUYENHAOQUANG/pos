@@ -110,6 +110,7 @@ export interface CycleData {
     status?: string; // 'InProgress', 'Active', 'Completed'
     doc?: number;
     transferInfo?: TransferInfo;
+    warehouseItemId?: string;
     pond?: any; // API returns pond object
 }
 
@@ -281,7 +282,30 @@ export type JobMeta =
     | TransferMeta
     | HarvestMeta
     | WaterSupplyMeta
-    | MeasureSizeMeta;
+    | WaterSupplyMeta
+    | MeasureSizeMeta
+    | CleanRenovationMeta
+    | DryRenovationMeta;
+
+export interface CleanRenovationMeta {
+    notes?: string;
+    materials?: {
+        warehouseItemId: string;
+        quantity: number;
+    }[];
+    images?: string[];
+    documentIds?: string[];
+}
+
+export interface DryRenovationMeta {
+    notes?: string;
+    materials?: {
+        warehouseItemId: string;
+        quantity: number;
+    }[];
+    images?: string[];
+    documentIds?: string[];
+}
 
 export interface JobExecution {
     id: string;

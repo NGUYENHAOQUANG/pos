@@ -191,7 +191,7 @@ export const useControlStore = create<ControlStore>()(
             },
         })),
         {
-            name: 'control-storage',
+            name: 'control-storage-v2', // Bump version to force reload initial data
             storage: createJSONStorage(() => AsyncStorage),
         }
     )
