@@ -78,6 +78,15 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.mebisoft.mebieco"
+
+    // Support 16 KB page sizes for Android 15+
+    // https://developer.android.com/guide/practices/page-sizes
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+
     defaultConfig {
         applicationId "com.mebisoft.mebieco"
         minSdkVersion rootProject.ext.minSdkVersion
