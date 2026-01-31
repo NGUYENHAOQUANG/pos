@@ -3624,316 +3624,6 @@
                 }
             }
         },
-        "/api/v1/incident": {
-            "post": {
-                "tags": ["Incident"],
-                "parameters": [
-                    {
-                        "name": "pondId",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "text/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "application/*+json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too Many Requests",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "501": {
-                        "description": "Not Implemented"
-                    }
-                }
-            }
-        },
-        "/api/v1/incident/{id}": {
-            "put": {
-                "tags": ["Incident"],
-                "parameters": [
-                    {
-                        "name": "pondId",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "text/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "application/*+json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too Many Requests",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "501": {
-                        "description": "Not Implemented"
-                    }
-                }
-            },
-            "delete": {
-                "tags": ["Incident"],
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "429": {
-                        "description": "Too Many Requests",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
-                                }
-                            }
-                        }
-                    },
-                    "501": {
-                        "description": "Not Implemented"
-                    }
-                }
-            }
-        },
         "/api/v1/inventorycheck": {
             "get": {
                 "tags": ["InventoryCheck"],
@@ -3958,6 +3648,29 @@
                         "schema": {
                             "type": "string",
                             "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "ApprovedAtFrom",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "ApprovedAtTo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreatorName",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -4163,6 +3876,31 @@
                         "schema": {
                             "type": "string",
                             "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "pageSize",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -9424,6 +9162,1621 @@
                         "description": "Internal Server Error"
                     }
                 }
+            },
+            "patch": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/incident": {
+            "post": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "PondId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "CreatedAt",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtFrom",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtTo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "OrderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/incident/{id}": {
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/clean-renovation": {
+            "post": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "PondId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "CreatedAt",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtFrom",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtTo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "OrderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/clean-renovation/{id}": {
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/waterchange-record": {
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "cycleId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Collections.Generic.List`1[[Mebieco.Application.Features.WaterChangeRecord.Queries.GetAllWaterChange.WaterChangeDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/v1/pond/{pondId}/waterchange-record/{id}": {
+            "get": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.WaterChangeRecord.Queries.GetWaterChangeById.WaterChangeDetailResponseDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeRecordCommand"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Pond"],
+                "parameters": [
+                    {
+                        "name": "pondId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
             }
         },
         "/api/v1/pondcategory": {
@@ -11500,6 +12853,21 @@
                         }
                     },
                     {
+                        "name": "Search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "MaterialGroupId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
                         "name": "Id",
                         "in": "query",
                         "schema": {
@@ -11598,6 +12966,137 @@
                     },
                     "501": {
                         "description": "Not Implemented"
+                    }
+                }
+            }
+        },
+        "/api/v1/warehouses/{id}/shrimp-seeds": {
+            "get": {
+                "tags": ["Warehouses"],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "WarehouseId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "CreatedAt",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtFrom",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtTo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "OrderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -11703,57 +13202,107 @@
                 }
             }
         },
-        "/api/v1/waterchangerecord": {
-            "post": {
-                "tags": ["WaterChangeRecord"],
+        "/api/v1/warehouses/{id}/material/{materialId}/import-receipts": {
+            "get": {
+                "tags": ["Warehouses"],
                 "parameters": [
                     {
-                        "name": "pondId",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "materialId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "WarehouseId",
                         "in": "query",
                         "schema": {
                             "type": "string",
                             "format": "uuid"
                         }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "text/json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
-                                    }
-                                ]
-                            }
-                        },
-                        "application/*+json": {
-                            "schema": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand"
-                                    }
-                                ]
-                            }
+                    },
+                    {
+                        "name": "MaterialId",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "Id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "CreatedAt",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtFrom",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "CreateAtTo",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "Page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "PageSize",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "OrderBy",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                                    "$ref": "#/components/schemas/Mebieco.Application.Common.Models.ApiResponse`1[[System.Object, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
                                 }
                             }
                         }
@@ -11808,8 +13357,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Internal Server Error"
+                    "501": {
+                        "description": "Not Implemented"
                     }
                 }
             }
@@ -15245,6 +16794,49 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.EnvMeasurement.Queries.GetEnvMeasurement.EnvMeasurementDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -15341,6 +16933,49 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.ExportReceipt.Queries.GetExportReceipts.ExportReceiptDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                             }
                         ],
                         "nullable": true
@@ -15632,6 +17267,49 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -15642,6 +17320,92 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                             }
                         ],
                         "nullable": true
@@ -15857,6 +17621,92 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/Mebieco.Application.Features.Auth.Queries.GetCurrentUser.CurrentUserResult"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationResult"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto"
                             }
                         ],
                         "nullable": true
@@ -16879,6 +18729,49 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.InventoryCheck.Commands.ApproveInventoryCheck.ApproveInventoryCheckResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -17782,6 +19675,49 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.SiphonRecord.Queries.GetSiphonRecord.SiphonRecordDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -18083,7 +20019,7 @@
                 },
                 "additionalProperties": false
             },
-            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.WaterChangeRecord.Queries.GetWaterChangeById.WaterChangeDetailResponseDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
                     "success": {
@@ -18092,7 +20028,7 @@
                     "data": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto"
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Queries.GetWaterChangeById.WaterChangeDetailResponseDto"
                             }
                         ],
                         "nullable": true
@@ -18126,7 +20062,7 @@
                 },
                 "additionalProperties": false
             },
-            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+            "Mebieco.Application.Common.Models.ApiResponse`1[[Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
                     "success": {
@@ -18135,7 +20071,7 @@
                     "data": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult"
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto"
                             }
                         ],
                         "nullable": true
@@ -19057,6 +20993,48 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[System.Collections.Generic.List`1[[Mebieco.Application.Features.WaterChangeRecord.Queries.GetAllWaterChange.WaterChangeDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Queries.GetAllWaterChange.WaterChangeDto"
+                        },
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.ApiResponse`1[[System.Collections.Generic.List`1[[Mebieco.Application.Features.Zone.Queries.GetZones.ZonesDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
                 "type": "object",
                 "properties": {
@@ -19133,6 +21111,84 @@
                     "timestamp": {
                         "type": "string",
                         "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.ApiResponse`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "data": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "errorCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "validationErrors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    },
+                    "details": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
                     }
                 },
                 "additionalProperties": false
@@ -19254,6 +21310,45 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.InventoryCheck.Commands.CreateInventoryCheckItem.InventoryCheckItemDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -19261,6 +21356,45 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Mebieco.Application.Features.InventoryCheck.Commands.CreateInventoryCheckItem.InventoryCheckItemDto"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.InventoryCheck.Queries.GetInventoryCheckDetail.InventoryCheckItemDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.InventoryCheck.Queries.GetInventoryCheckDetail.InventoryCheckItemDto"
                         },
                         "nullable": true
                     },
@@ -19488,6 +21622,45 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
                 "type": "object",
                 "properties": {
@@ -19495,6 +21668,84 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Mebieco.Application.Features.ZoneMetricSetting.Queries.GetZoneMetricSetting.ZoneMetricSettingDto"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult"
+                        },
+                        "nullable": true
+                    },
+                    "pageNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "totalCount": {
+                        "type": "integer",
+                        "format": "int32",
+                        "readOnly": true
+                    },
+                    "pageSize": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "hasPreviousPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "hasNextPage": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentResult"
                         },
                         "nullable": true
                     },
@@ -19842,6 +22093,199 @@
                     },
                     "emailConfirmed": {
                         "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.CleanRenovationDetailDto": {
+                "type": "object",
+                "properties": {
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.CleanRenovationMaterialDto"
+                        },
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.CleanRenovationMaterialDto": {
+                "type": "object",
+                "properties": {
+                    "warehouseItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationCommand": {
+                "type": "object",
+                "properties": {
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
+                    "cleanRenovationDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.CleanRenovationDetailDto"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Commands.UpdateCleanRenovation.UpdateCleanRenovationResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "recordId": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDetailDto": {
+                "type": "object",
+                "properties": {
+                    "notes": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationMaterialDto"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "pondId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "operationId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "value": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "detail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationDetailDto"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.CleanRenovation.Queries.GetCleanRenovation.CleanRenovationMaterialDto": {
+                "type": "object",
+                "properties": {
+                    "warehouseItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
                     }
                 },
                 "additionalProperties": false
@@ -20692,6 +23136,14 @@
                         "type": "string",
                         "nullable": true
                     },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
                     "items": {
                         "type": "array",
                         "items": {
@@ -20965,6 +23417,15 @@
                         "nullable": true
                     },
                     "materialCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unitId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "unitName": {
                         "type": "string",
                         "nullable": true
                     },
@@ -21783,19 +24244,15 @@
             "Mebieco.Application.Features.Incident.Commands.UpdateIncident.IncidentDetailDto": {
                 "type": "object",
                 "properties": {
-                    "executionTime": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "notes": {
-                        "type": "string",
-                        "nullable": true
-                    },
                     "materials": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Commands.UpdateIncident.IncidentMaterialDto"
                         },
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
                         "nullable": true
                     }
                 },
@@ -21804,17 +24261,13 @@
             "Mebieco.Application.Features.Incident.Commands.UpdateIncident.IncidentMaterialDto": {
                 "type": "object",
                 "properties": {
-                    "materialId": {
+                    "warehouseItemId": {
                         "type": "string",
                         "format": "uuid"
                     },
                     "quantity": {
                         "type": "number",
                         "format": "double"
-                    },
-                    "unitId": {
-                        "type": "string",
-                        "format": "uuid"
                     }
                 },
                 "additionalProperties": false
@@ -21822,33 +24275,6 @@
             "Mebieco.Application.Features.Incident.Commands.UpdateIncident.UpdateIncidentCommand": {
                 "type": "object",
                 "properties": {
-                    "recordId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "pondId": {
-                        "type": "string",
-                        "format": "uuid",
-                        "nullable": true
-                    },
-                    "operationId": {
-                        "type": "string",
-                        "format": "uuid",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "number",
-                        "format": "double",
-                        "nullable": true
-                    },
-                    "status": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Mebieco.Domain.Enums.StatusRecordEnum"
-                            }
-                        ],
-                        "nullable": true
-                    },
                     "documentIds": {
                         "type": "array",
                         "items": {
@@ -21906,6 +24332,61 @@
                     "recordId": {
                         "type": "string",
                         "format": "uuid"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDetailDto": {
+                "type": "object",
+                "properties": {
+                    "notes": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentMaterialDto"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
                     },
                     "pondId": {
                         "type": "string",
@@ -21915,12 +24396,40 @@
                         "type": "string",
                         "format": "uuid"
                     },
-                    "status": {
+                    "value": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "detail": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/Mebieco.Domain.Enums.StatusRecordEnum"
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentDetailDto"
                             }
-                        ]
+                        ],
+                        "nullable": true
+                    },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.Incident.Queries.GetIncident.IncidentMaterialDto": {
+                "type": "object",
+                "properties": {
+                    "warehouseItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
                     }
                 },
                 "additionalProperties": false
@@ -21980,6 +24489,14 @@
                     },
                     "note": {
                         "type": "string",
+                        "nullable": true
+                    },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
                         "nullable": true
                     },
                     "items": {
@@ -22272,6 +24789,14 @@
                         "type": "string",
                         "nullable": true
                     },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
                     "items": {
                         "type": "array",
                         "items": {
@@ -22334,10 +24859,6 @@
                         ],
                         "nullable": true
                     },
-                    "inventoryCheckId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
                     "checkCode": {
                         "type": "string",
                         "nullable": true
@@ -22356,10 +24877,6 @@
             "Mebieco.Application.Features.InventoryCheck.Commands.UpdateInventoryCheckItem.UpdateInventoryCheckItemCommand": {
                 "type": "object",
                 "properties": {
-                    "inventoryCheckId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
                     "items": {
                         "type": "array",
                         "items": {
@@ -22373,7 +24890,7 @@
             "Mebieco.Application.Features.InventoryCheck.Commands.UpdateInventoryCheckItem.UpdateInventoryCheckItemDto": {
                 "type": "object",
                 "properties": {
-                    "itemId": {
+                    "inventoryCheckItemId": {
                         "type": "string",
                         "format": "uuid"
                     },
@@ -22503,11 +25020,20 @@
                     "isRejected": {
                         "type": "boolean"
                     },
-                    "items": {
+                    "documentIds": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/Mebieco.Application.Features.InventoryCheck.Queries.GetInventoryCheckDetail.InventoryCheckItemDto"
+                            "type": "string",
+                            "format": "uuid"
                         },
+                        "nullable": true
+                    },
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Common.Models.PaginatedList`1[[Mebieco.Application.Features.InventoryCheck.Queries.GetInventoryCheckDetail.InventoryCheckItemDto, Mebieco.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                            }
+                        ],
                         "nullable": true
                     }
                 },
@@ -22529,6 +25055,14 @@
                         "nullable": true
                     },
                     "materialCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "unitId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "unitName": {
                         "type": "string",
                         "nullable": true
                     },
@@ -22599,6 +25133,10 @@
                         "nullable": true
                     },
                     "totalItems": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "varianceTotalItems": {
                         "type": "integer",
                         "format": "int32"
                     },
@@ -22706,10 +25244,6 @@
                         "type": "string",
                         "nullable": true
                     },
-                    "code": {
-                        "type": "string",
-                        "nullable": true
-                    },
                     "description": {
                         "type": "string",
                         "nullable": true
@@ -22763,10 +25297,6 @@
                 "type": "object",
                 "properties": {
                     "name": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "code": {
                         "type": "string",
                         "nullable": true
                     },
@@ -23758,6 +26288,69 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.SiphonDetailDetail": {
+                "type": "object",
+                "properties": {
+                    "shrimpLossKg": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.SiphonMaterialDto"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.SiphonMaterialDto": {
+                "type": "object",
+                "properties": {
+                    "warehouseItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.UpdateSiphonRecordCommand": {
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "type": "number",
+                        "format": "double",
+                        "nullable": true
+                    },
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
+                    "siphonDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.SiphonRecord.Commands.UpdateSiphonRecord.SiphonDetailDetail"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Features.SiphonRecord.Queries.GetSiphonRecord.SiphonDetailDto": {
                 "type": "object",
                 "properties": {
@@ -24245,6 +26838,68 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Features.Warehouse.Queries.GetWarehouseItem.GetWarehouseItemQueryDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "materialId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "materialName": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "materialCode": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "averagePrice": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "alertQty": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.CreateWaterChangeRecordCommand": {
                 "type": "object",
                 "properties": {
@@ -24308,6 +26963,10 @@
                         },
                         "nullable": true
                     },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
                     "targetWaterLevel": {
                         "type": "number",
                         "format": "double"
@@ -24352,6 +27011,179 @@
                     "quantity": {
                         "type": "number",
                         "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeDetailDto": {
+                "type": "object",
+                "properties": {
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "targetWaterLevel": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "waterAdded": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "waterRemoved": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "previousVolume": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "finalVolume": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "addedVolume": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.WaterChangeMaterialDto"
+                        },
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeRecordCommand": {
+                "type": "object",
+                "properties": {
+                    "waterChangeDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.UpdateWaterChangeRecord.UpdateWaterChangeDetailDto"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.WaterChangeRecord.Queries.GetAllWaterChange.WaterChangeDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "pondId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "cycleId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "waterChangeDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.WaterChangeDetailDto"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Features.WaterChangeRecord.Queries.GetWaterChangeById.WaterChangeDetailResponseDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "pondId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "cycleId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "waterChangeDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Features.WaterChangeRecord.Commands.CreateWaterChangeRecord.WaterChangeDetailDto"
+                            }
+                        ],
+                        "nullable": true
                     }
                 },
                 "additionalProperties": false
@@ -24478,21 +27310,104 @@
                 },
                 "additionalProperties": false
             },
+            "Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CleanRenovationDetailDto": {
+                "type": "object",
+                "properties": {
+                    "materials": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CleanRenovationMaterialDto"
+                        },
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CleanRenovationMaterialDto": {
+                "type": "object",
+                "properties": {
+                    "warehouseItemId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationCommand": {
+                "type": "object",
+                "properties": {
+                    "documentIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "nullable": true
+                    },
+                    "cleanRenovationDetail": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CleanRenovationDetailDto"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false
+            },
+            "Mebieco.Application.Handlers.CleanRenovation.Commands.CreateCleanRenovation.CreateCleanRenovationResult": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "no": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "editedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "creator": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "editor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Mebieco.Domain.Models.AccountCreator"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "recordId": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "additionalProperties": false
+            },
             "Mebieco.Application.Handlers.Incident.Commands.CreateIncident.CreateIncidentCommand": {
                 "type": "object",
                 "properties": {
-                    "pondId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "operationId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "value": {
-                        "type": "number",
-                        "format": "double"
-                    },
                     "documentIds": {
                         "type": "array",
                         "items": {
@@ -24550,18 +27465,6 @@
                     "recordId": {
                         "type": "string",
                         "format": "uuid"
-                    },
-                    "pondId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "operationId": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "value": {
-                        "type": "number",
-                        "format": "double"
                     }
                 },
                 "additionalProperties": false
@@ -24569,19 +27472,15 @@
             "Mebieco.Application.Handlers.Incident.Commands.CreateIncident.IncidentDetailDto": {
                 "type": "object",
                 "properties": {
-                    "executionTime": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "notes": {
-                        "type": "string",
-                        "nullable": true
-                    },
                     "materials": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Mebieco.Application.Handlers.Incident.Commands.CreateIncident.IncidentMaterialDto"
                         },
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
                         "nullable": true
                     }
                 },
@@ -24590,17 +27489,13 @@
             "Mebieco.Application.Handlers.Incident.Commands.CreateIncident.IncidentMaterialDto": {
                 "type": "object",
                 "properties": {
-                    "materialId": {
+                    "warehouseItemId": {
                         "type": "string",
                         "format": "uuid"
                     },
                     "quantity": {
                         "type": "number",
                         "format": "double"
-                    },
-                    "unitId": {
-                        "type": "string",
-                        "format": "uuid"
                     }
                 },
                 "additionalProperties": false
@@ -25336,10 +28231,6 @@
             },
             "Mebieco.Domain.Enums.SeasonStatusEnum": {
                 "enum": ["Preparation", "Active", "Closed"],
-                "type": "string"
-            },
-            "Mebieco.Domain.Enums.StatusRecordEnum": {
-                "enum": ["Success", "Error", "Pending", "Cancel"],
                 "type": "string"
             },
             "Mebieco.Domain.Enums.StorageTypeEnum": {

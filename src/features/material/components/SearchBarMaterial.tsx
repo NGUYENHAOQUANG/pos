@@ -49,10 +49,22 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
 
     // Get dropdown options from material types
-    const materialTypeOptions = [
-        'Tất cả loại vật tư',
-        ...materialTypes.map(t => t.name || '').filter(n => n),
-    ];
+    const materialTypeOptions = React.useMemo(() => {
+        const uniqueTypes = new Map();
+        materialTypes.forEach(t => {
+            // Deduplicate by Name to avoid visual duplicates in UI
+            if (t.name && !uniqueTypes.has(t.name)) {
+                uniqueTypes.set(t.name, t);
+            }
+        });
+
+        const options = Array.from(uniqueTypes.values()).map(t => ({
+            label: t.name || '',
+            value: t.id,
+        }));
+
+        return [{ label: 'Tất cả loại vật tư', value: '' }, ...options];
+    }, [materialTypes]);
 
     // Sync materialGroup with filterType from store
     useEffect(() => {

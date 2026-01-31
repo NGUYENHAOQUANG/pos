@@ -12,7 +12,7 @@ import { InventoryMaterialInput } from '@/features/material/components/inventory
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import {
     useCreateInventoryCheck,
     useUpdateInventoryCheck,
@@ -22,7 +22,6 @@ import {
     useInventorySubmit,
     useDeleteInventoryTicket,
 } from '@/features/material/hooks/inventory';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';

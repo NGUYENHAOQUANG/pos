@@ -5,8 +5,7 @@ import Toast from 'react-native-toast-message';
 import { NormalizedError } from '@/core/api/errorHandler';
 
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useWarehouseItems } from '@/features/material/hooks/useWarehouseItems';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { documentApi } from '@/features/material/api/documentApi';
 
