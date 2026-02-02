@@ -6,13 +6,13 @@ import {
     IMaterialType,
     MaterialGroupType,
 } from '@/features/material/types/material.types';
+import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import {
-    IMaterialGroupV2,
     CreateMaterialV2Request,
     UpdateMaterialV2Request,
-    GetMaterialsV2Params,
+    GetMaterialsParams,
     MaterialResponseV2,
-} from '@/features/material/types/materialGroup.types';
+} from '@/features/material/types/material.types';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
@@ -57,7 +57,7 @@ const mapMaterialResponse = (
 /**
  * Hook to fetch materials with filters
  */
-export const useMaterials = (params?: GetMaterialsV2Params, options?: { enabled?: boolean }) => {
+export const useMaterials = (params?: GetMaterialsParams, options?: { enabled?: boolean }) => {
     const { data: groups = [], isLoading: isLoadingGroups } = useMaterialGroups();
     const { data: types = [], isLoading: isLoadingTypes } = useMaterialTypes();
 

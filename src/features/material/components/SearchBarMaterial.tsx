@@ -12,7 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
-import { useMaterialTypes } from '@/features/material/hooks';
+import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { useMaterialsStore } from '@/features/material/store/materialsStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -47,12 +47,23 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     // Get material types from React Query
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
+    const { data: materialGroups = [], isLoading: isLoadingMaterialGroups } = useMaterialGroups();
 
-    // Get dropdown options from material types
-    const materialTypeOptions = React.useMemo(() => {
+    // Get dropdown options based on selectedTab
+    const dropdownOptions = React.useMemo(() => {
+        if (selectedTab === 'list') {
+            // Use Material Groups for 'list' tab
+            return [
+                { label: 'Tất cả nhóm vật tư', value: '' },
+                ...materialGroups.map(g => ({
+                    label: g.name || '',
+                    value: g.id,
+                })),
+            ];
+        }
+
         const uniqueTypes = new Map();
         materialTypes.forEach(t => {
-            // Deduplicate by Name to avoid visual duplicates in UI
             if (t.name && !uniqueTypes.has(t.name)) {
                 uniqueTypes.set(t.name, t);
             }
@@ -64,7 +75,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         }));
 
         return [{ label: 'Tất cả loại vật tư', value: '' }, ...options];
-    }, [materialTypes]);
+    }, [selectedTab, materialTypes, materialGroups]);
 
     // Sync materialGroup with filterType from store
     useEffect(() => {
@@ -149,11 +160,15 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                                 setMaterialGroup(value);
                                 onGroupChange?.(value);
                             }}
-                            options={materialTypeOptions}
+                            options={dropdownOptions}
                             isOpen={isGroupDropdownOpen}
                             onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
                             useAutoScroll={selectedTab === 'history'}
-                            disabled={isLoadingMaterialTypes}
+                            disabled={
+                                selectedTab === 'list'
+                                    ? isLoadingMaterialGroups
+                                    : isLoadingMaterialTypes
+                            }
                         />
                     </View>
                 </View>

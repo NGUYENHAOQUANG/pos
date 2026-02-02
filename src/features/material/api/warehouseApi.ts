@@ -5,6 +5,7 @@ import {
     GetWarehousesParams,
     IWarehouse,
     GetShrimpSeedsResponse,
+    GetWarehouseItemsQueryParams,
 } from '@/features/material/types/warehouse.types';
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
@@ -20,7 +21,7 @@ export const warehouseApi = {
 
     getItems: async (
         warehouseId: string,
-        params?: GetWarehousesParams
+        params?: GetWarehouseItemsQueryParams
     ): Promise<GetWarehouseItemsResponse> => {
         const { data } = await apiClient.get<GetWarehouseItemsResponse>(
             API_ENDPOINTS.WAREHOUSE.ITEMS(warehouseId),
