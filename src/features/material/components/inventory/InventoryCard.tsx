@@ -63,17 +63,27 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
             const fetchDetails = async () => {
                 setIsLoading(true);
                 try {
-                    const response = await inventoryApi.getDetail(data.id);
-                    // @ts-ignore - API change adaptation
-                    const itemsData = response.data?.items?.items || response.data?.items;
+                    const response = await inventoryApi.getItems(data.id);
+                    const itemsData = response.data;
+                    // Handle PaginatedList or Array
+                    // @ts-ignore
+                    const itemsList = itemsData?.items || itemsData || [];
 
-                    if (response.success && itemsData) {
-                        // @ts-ignore
-                        const mappedItems: IInventoryTicketItem[] = itemsData.map((item: any) => ({
-                            id: item.inventoryCheckItemId || item.id,
-                            materialName: item.materialName || item.materialCode || 'N/A',
-                            beforeQuantity: item.expectedQty,
-                            afterQuantity: item.actualQty,
+                    if (response.success && Array.isArray(itemsList)) {
+                        const mappedItems: IInventoryTicketItem[] = itemsList.map((item: any) => ({
+                            id:
+                                item.inventoryCheckItemId ||
+                                item.InventoryCheckItemId ||
+                                item.id ||
+                                item.Id,
+                            materialName:
+                                item.materialName ||
+                                item.MaterialName ||
+                                item.materialCode ||
+                                item.MaterialCode ||
+                                'N/A',
+                            beforeQuantity: item.expectedQty ?? item.ExpectedQty ?? 0,
+                            afterQuantity: item.actualQty ?? item.ActualQty ?? 0,
                         }));
                         setItems(mappedItems);
                     }

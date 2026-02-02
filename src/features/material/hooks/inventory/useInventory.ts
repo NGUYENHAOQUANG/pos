@@ -31,57 +31,20 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
             const response = await inventoryApi.getList(apiParams);
 
             if (response.success && response.data?.items) {
-                // Fetch details for all items in parallel to get totalDifference
-                const itemsWithDetails = await Promise.all(
-                    response.data.items.map(async item => {
-                        let totalDifference = 0;
-                        let detailItems: any[] = [];
-                        let creatorInfo: any = null;
-
-                        try {
-                            const detailRes = await inventoryApi.getDetail(item.id);
-
-                            // Extract creator info first
-                            if (detailRes.success && detailRes.data?.creator) {
-                                creatorInfo = detailRes.data.creator;
-                            }
-
-                            // Handle items (array or paginated object)
-                            // @ts-ignore
-                            const rawItems = detailRes.data?.items?.items || detailRes.data?.items;
-
-                            if (detailRes.success && Array.isArray(rawItems)) {
-                                detailItems = rawItems.map((d: any) => ({
-                                    id: d.inventoryCheckItemId,
-                                    materialName: d.materialName || d.materialCode || 'N/A',
-                                    beforeQuantity: d.expectedQty,
-                                    afterQuantity: d.actualQty,
-                                }));
-                                totalDifference = rawItems.reduce(
-                                    (sum: number, i: any) => sum + (i.actualQty - i.expectedQty),
-                                    0
-                                );
-                            }
-                        } catch (err) {
-                            console.warn(`Failed to fetch detail for ${item.id}`, err);
-                        }
-
-                        return {
+                return response.data.items.map(
+                    item =>
+                        ({
                             id: item.id,
-                            // Use creator info from API only (prefer detail response as it might be more complete)
-                            checkerName: creatorInfo?.fullname || item.creator?.fullname || '---',
+                            checkerName: item.creator?.fullname || '---',
                             date: item.createdAt
                                 ? new Date(item.createdAt).toLocaleDateString('vi-VN')
                                 : '',
                             note: item.note || '',
-                            totalDifference: totalDifference,
-                            items: detailItems,
+                            totalDifference: item.varianceTotalItems || 0,
+                            items: [], // Details fetched on demand by InventoryCard
                             status: item.status || 'Draft',
-                        } as IInventoryTicket;
-                    })
+                        } as IInventoryTicket)
                 );
-
-                return itemsWithDetails;
             }
 
             return [];
