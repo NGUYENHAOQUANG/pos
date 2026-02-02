@@ -15,6 +15,15 @@ export const exportReceiptApi = {
         const { data } = await apiClient.post(API_ENDPOINTS.EXPORT_RECEIPT.CREATE, payload);
         return data;
     },
+
+    /**
+     * Get export receipt items
+     * @param id - Receipt ID
+     */
+    getItems: async (id: string): Promise<any> => {
+        const { data } = await apiClient.get(API_ENDPOINTS.EXPORT_RECEIPT.ITEMS(id));
+        return data;
+    },
     /**
      * Get all export receipts with pagination
      * @param params - Query params (Page, PageSize, Search, etc.)
@@ -65,6 +74,33 @@ export const exportReceiptApi = {
             API_ENDPOINTS.EXPORT_RECEIPT.UPDATE_ITEMS(id),
             payload
         );
+        return data;
+    },
+
+    /**
+     * Submit export receipt
+     * @param id - Receipt ID
+     */
+    submit: async (id: string): Promise<any> => {
+        const { data } = await apiClient.post(API_ENDPOINTS.EXPORT_RECEIPT.SUBMISSION(id));
+        return data;
+    },
+
+    /**
+     * Approve export receipt
+     * @param id - Receipt ID
+     */
+    approve: async (id: string): Promise<any> => {
+        const { data } = await apiClient.post(API_ENDPOINTS.EXPORT_RECEIPT.APPROVAL(id));
+        return data;
+    },
+
+    /**
+     * Reject export receipt
+     * @param id - Receipt ID
+     */
+    reject: async (id: string): Promise<any> => {
+        const { data } = await apiClient.post(API_ENDPOINTS.EXPORT_RECEIPT.REJECTION(id));
         return data;
     },
 };

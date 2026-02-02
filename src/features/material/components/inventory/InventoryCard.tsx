@@ -17,8 +17,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import {
     IInventoryTicket,
     IInventoryTicketItem,
-    MaterialGroupType,
-} from '@/features/material/types/material.types';
+} from '@/features/material/types/inventoryTicket.types';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { useInventoryItems } from '@/features/material/hooks/inventory';
 

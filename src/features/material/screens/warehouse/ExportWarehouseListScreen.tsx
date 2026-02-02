@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ExportWarehouseMaterialList } from '@/features/material/components/warehouse/ExportWarehouseMaterialList';
 import { spacing } from '@/styles';
-import { IExportWarehouseReceipt } from '@/features/material/types/material.types';
+import { IExportWarehouseReceipt } from '@/features/material/types/warehouse.types';
 
 interface ExportWarehouseListScreenProps {
     receipts: IExportWarehouseReceipt[];

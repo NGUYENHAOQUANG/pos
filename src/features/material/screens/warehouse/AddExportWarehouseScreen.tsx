@@ -32,6 +32,7 @@ import {
     useDeleteExportReceipt,
     useExportReceipt,
 } from '@/features/material/hooks/exportReceipt/useExportReceipt';
+import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Input } from '@/shared/components/forms/Input';
@@ -122,6 +123,9 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     const { data: exportReceiptDetail, isLoading: isLoadingDetail } = useExportReceipt(
         exportReceiptId || ''
     );
+    const { data: exportReceiptItems } = useExportReceiptItems(
+        isEditMode ? exportReceiptId : undefined
+    );
 
     const { submitWithFiles, isUploading } = useFileSubmit();
     const isSubmitting = isAdding || isUpdating || isDeleting || isUploading;
@@ -129,54 +133,49 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
     const fileUploaderRef = React.useRef<FileUploaderRef>(null);
     const scrollViewRef = React.useRef<ScrollView>(null);
 
-    // Initial Load for Edit Mode
+    const isDataLoaded = React.useRef(false);
+
+    // Initial Load for Edit Mode - Header info
     useEffect(() => {
-        if (isEditMode && exportReceiptDetail && warehouseItems.length > 0) {
+        if (isEditMode && exportReceiptDetail && !isDataLoaded.current) {
             if (exportReceiptDetail.createdAt) {
                 setDate(new Date(exportReceiptDetail.createdAt));
             }
             if (exportReceiptDetail.note) {
-                setNote(exportReceiptDetail.note); // Fix: setNote instead of setDate
+                setNote(exportReceiptDetail.note);
             }
-            // Temporarily not setting zone/pond from detail as API might not return them directly or structure matches differently
-            // But if detail has them we should:
-            // if (exportReceiptDetail.pondId) setSelectedPond(exportReceiptDetail.pondId);
-            // Wait, exportReceiptDetail might just return items. need to check response structure.
-            // Assuming detail matches specific structure.
+
             if (exportReceiptDetail.creator) {
                 setCreatorName(exportReceiptDetail.creator.fullname || '');
             }
             if (exportReceiptDetail.pondId) {
                 setSelectedPond(exportReceiptDetail.pondId);
             }
-
-            // Map items
-            // Need to check exact structure of items in detail
-            // @ts-ignore
-            const detailItems = exportReceiptDetail.items?.items || exportReceiptDetail.items || [];
-            if (Array.isArray(detailItems) && detailItems.length > 0) {
-                const mappedMaterials: MaterialItem[] = detailItems.map(
-                    (item: any, index: number) => {
-                        // Check if item has materialId or similar
-                        const matId = item.materialId;
-                        const matName = item.materialName || '';
-                        const qty = item.quantity || item.actualQty || 0;
-                        // Find in warehouse items to get unit/price if needed?
-                        // Current MaterialItem needs: id, materialId, materialName, quantity, price
-                        // Price might not be returned by detail?
-                        return {
-                            id: String(index + 1),
-                            materialId: matId,
-                            materialName: matName,
-                            quantity: String(qty),
-                            price: '',
-                        };
-                    }
-                );
-                setFormMaterials(mappedMaterials);
-            }
+            isDataLoaded.current = true;
         }
-    }, [isEditMode, exportReceiptDetail, warehouseItems]);
+    }, [isEditMode, exportReceiptDetail]);
+
+    // Load items separately (API does not include items in detail response)
+    useEffect(() => {
+        if (
+            isEditMode &&
+            exportReceiptItems &&
+            exportReceiptItems.length > 0 &&
+            formMaterials.length <= 1
+        ) {
+            const mappedMaterials: MaterialItem[] = exportReceiptItems.map((item, index) => {
+                return {
+                    id: Date.now().toString() + index, // Generate unique UI ID
+                    materialId: item.materialId,
+                    materialName: item.materialName || '',
+                    quantity: item.quantity ? String(item.quantity) : '0',
+                    price: item.costPrice ? String(item.costPrice) : '',
+                    unit: item.unitName || '',
+                };
+            });
+            setFormMaterials(mappedMaterials);
+        }
+    }, [isEditMode, exportReceiptItems, formMaterials.length]);
 
     useEffect(() => {
         setTabBarVisible(false);

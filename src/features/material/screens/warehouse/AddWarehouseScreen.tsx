@@ -20,7 +20,6 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
-import { IWarehouseItem } from '@/features/material/types/material.types';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
@@ -38,6 +37,7 @@ import {
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 interface AddWarehouseScreenProps {}
 
