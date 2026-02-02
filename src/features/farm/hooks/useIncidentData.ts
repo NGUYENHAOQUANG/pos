@@ -20,10 +20,7 @@ export const useCreateIncident = () => {
         }: {
             pondId: string;
             payload: CreateIncidentPayload;
-        }) => {
-            console.log('[useCreateIncident] POST incident – pondId:', pondId, 'payload:', payload);
-            return incidentApi.create(pondId, payload);
-        },
+        }) => incidentApi.create(pondId, payload),
         onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.incident.byPond(variables.pondId),
