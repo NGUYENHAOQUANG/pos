@@ -20,7 +20,7 @@ import {
     MaterialGroupType,
 } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
-import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { useInventoryItems } from '@/features/material/hooks/inventory';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -36,74 +36,42 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLongNote, setIsLongNote] = useState(false);
-    const [items, setItems] = useState<IInventoryTicketItem[]>(data.items || []);
-    const [isLoading, setIsLoading] = useState(false);
+
+    // Fetch items only if expanded and no items in props
+    const shouldFetch = isExpanded && (!data.items || data.items.length === 0);
+    const { data: fetchedItems, isLoading: isFetchingItems } = useInventoryItems(
+        shouldFetch ? data.id : undefined
+    );
+
+    const displayItems: IInventoryTicketItem[] = React.useMemo(() => {
+        if (data.items && data.items.length > 0) {
+            return data.items;
+        }
+        if (fetchedItems) {
+            return fetchedItems.map(item => ({
+                id: item.inventoryCheckItemId || item.id,
+                materialName: item.materialName,
+                beforeQuantity: item.oldStock,
+                afterQuantity: Number(item.newStock),
+            }));
+        }
+        return [];
+    }, [data.items, fetchedItems]);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
     };
 
-    const [hasFetched, setHasFetched] = useState(false);
-
-    // Reset hasFetched when data changes (e.g., after update)
-    // Reset hasFetched when data changes (e.g., after update)
-    React.useEffect(() => {
-        if (data.items && data.items.length > 0) {
-            setItems(data.items);
-            setHasFetched(true);
-        } else {
-            setHasFetched(false);
-            setItems([]);
-        }
-    }, [data.id, data.status, data.items]);
-
-    React.useEffect(() => {
-        if (!hasFetched && data.id && (!data.items || data.items.length === 0)) {
-            const fetchDetails = async () => {
-                setIsLoading(true);
-                try {
-                    const response = await inventoryApi.getItems(data.id);
-                    const itemsData = response.data;
-                    // Handle PaginatedList or Array
-                    // @ts-ignore
-                    const itemsList = itemsData?.items || itemsData || [];
-
-                    if (response.success && Array.isArray(itemsList)) {
-                        const mappedItems: IInventoryTicketItem[] = itemsList.map((item: any) => ({
-                            id:
-                                item.inventoryCheckItemId ||
-                                item.InventoryCheckItemId ||
-                                item.id ||
-                                item.Id,
-                            materialName:
-                                item.materialName ||
-                                item.MaterialName ||
-                                item.materialCode ||
-                                item.MaterialCode ||
-                                'N/A',
-                            beforeQuantity: item.expectedQty ?? item.ExpectedQty ?? 0,
-                            afterQuantity: item.actualQty ?? item.ActualQty ?? 0,
-                        }));
-                        setItems(mappedItems);
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch inventory details:', error);
-                } finally {
-                    setIsLoading(false);
-                    setHasFetched(true);
-                }
-            };
-            fetchDetails();
-        }
-    }, [hasFetched, data.id, data.items]);
-
     const totalDifference = React.useMemo(() => {
-        if (items.length > 0) {
-            return items.reduce((sum, item) => sum + (item.afterQuantity - item.beforeQuantity), 0);
+        if (displayItems.length > 0) {
+            return displayItems.reduce(
+                (sum, item) => sum + (item.afterQuantity - item.beforeQuantity),
+                0
+            );
         }
         return data.totalDifference;
-    }, [items, data.totalDifference]);
+    }, [displayItems, data.totalDifference]);
 
     const getStatusLabel = (status: string): MaterialGroupType => {
         switch (status) {
@@ -181,10 +149,10 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
 
             {isExpanded && (
                 <View style={styles.expandedContainer}>
-                    {isLoading ? (
+                    {isFetchingItems ? (
                         <ActivityIndicator size="small" color={colors.primary} />
-                    ) : items.length > 0 ? (
-                        items.map(item => (
+                    ) : displayItems.length > 0 ? (
+                        displayItems.map(item => (
                             <View key={item.id} style={styles.detailItemContainer}>
                                 <Text style={styles.materialName}>{item.materialName}</Text>
 
