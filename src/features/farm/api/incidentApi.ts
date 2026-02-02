@@ -18,20 +18,28 @@ export const incidentApi = {
         pondId: string,
         payload: CreateIncidentPayload
     ): Promise<IncidentCreateResponse> => {
-        const response = await apiClient.post<IncidentCreateResponse>(
-            API_ENDPOINTS.POND.INCIDENT.CREATE(pondId),
-            payload
+        const url = API_ENDPOINTS.POND.INCIDENT.CREATE(pondId);
+        console.log('[incidentApi] POST incident – URL:', url);
+        console.log('[incidentApi] POST incident – pondId:', pondId);
+        console.log('[incidentApi] POST incident – payload:', JSON.stringify(payload, null, 2));
+        const response = await apiClient.post<IncidentCreateResponse>(url, payload);
+        console.log(
+            '[incidentApi] POST incident – response:',
+            JSON.stringify(response.data, null, 2)
         );
         return response.data;
     },
 
     /**
-     * GET /pond/{pondId}/incident – list incidents with optional query params
+     * GET /pond/{pondId}/incident – list incidents with optional query params.
+     * Map PaginationParams (page, limit) → Page, PageSize cho backend.
      */
     list: async (pondId: string, params?: GetIncidentListParams): Promise<IncidentListResponse> => {
+        const { page = 1, limit = 100, ...rest } = params || {};
+        const query = { ...rest, Page: page, PageSize: limit };
         const response = await apiClient.get<IncidentListResponse>(
             API_ENDPOINTS.POND.INCIDENT.LIST(pondId),
-            { params }
+            { params: query }
         );
         return response.data;
     },

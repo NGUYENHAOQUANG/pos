@@ -64,3 +64,14 @@ export interface IDocument {
     filePath?: string;
     publicUrl?: string;
 }
+
+/** Creator/Editor info from API  */
+export interface ICreatorEditor {
+    id: string;
+    fullname: string;
+    email?: string | null;
+    phoneNumber?: string | null;
+    avatar?: string | null;
+    createdAt: string;
+    editedAt: string;
+}
