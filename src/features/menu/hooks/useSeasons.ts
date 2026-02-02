@@ -1,9 +1,11 @@
 import { useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useMemo, useCallback } from 'react';
+import Toast from 'react-native-toast-message';
 import { seasonApi } from '@/features/menu/api/seasonApi';
 import { SeasonData, SeasonStatus, getSeasonStatusName } from '@/features/farm/types/farm.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { useZones } from '@/features/farm/hooks/useZones';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 // Extracted fetch function for reuse
 const fetchSeasonsByZone = async (zoneId: number | string, zoneCode?: string) => {
@@ -88,4 +90,51 @@ export const useSeasons = () => {
         isError,
         refresh,
     };
+};
+
+export const useSeasonDetail = (
+    zoneId: number | string | null | undefined,
+    seasonId: number | string | null | undefined,
+    initialData?: SeasonData
+) => {
+    const zoneIdStr = zoneId != null ? String(zoneId) : '';
+    const seasonIdStr = seasonId != null ? String(seasonId) : '';
+
+    return useQuery<SeasonData | undefined>({
+        queryKey: farmKeys.detail(zoneIdStr, seasonIdStr),
+        queryFn: () => seasonApi.getSeasonDetail(zoneIdStr, seasonIdStr),
+        enabled: !!zoneIdStr && !!seasonIdStr,
+        initialData,
+    });
+};
+
+export const useSeasonErrorHandler = () => {
+    const handleError = (err: unknown) => {
+        const error = err as NormalizedError;
+
+        if (error.type === 'VALIDATION_ERROR') {
+            const firstFieldKey = Object.keys(error.fields)[0];
+            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
+                Toast.show({
+                    type: 'error',
+                    text1: error.fields[firstFieldKey][0],
+                    visibilityTime: 4000,
+                });
+                return;
+            }
+        }
+
+        if (error.type === 'NOT_FOUND_ERROR') {
+            Toast.show({
+                type: 'error',
+                text1: error.message,
+                visibilityTime: 4000,
+            });
+            return;
+        }
+
+        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
+    };
+
+    return { handleError };
 };
