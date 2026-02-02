@@ -163,22 +163,45 @@ export type GetMaterialTypesResponse = IAppResponse<IPaginate<IMaterialType>>;
 export type GetMaterialTypeByIdResponse = IAppResponse<IMaterialType>;
 
 // ============ Material API Types ============
+
+// User info object returned in material response
+export interface IMaterialUser {
+    id: string;
+    fullname: string;
+    email: string;
+    phoneNumber: string;
+    avatar: string;
+    roleName: string;
+    createdAt: string;
+    editedAt: string;
+}
+
 export interface MaterialResponse {
-    id: number;
-    creatorId?: number | null;
+    id: string; // UUID
+    no: number; // Sequence number
+    creatorId?: string | null;
+    userCreatorId?: string | null; // User creator ID
+    editorId?: string | null; // Editor ID
+    userEditorId?: string | null; // User editor ID
     createdAt?: string | null;
-    lastModifierId?: number | null;
+    editedAt?: string | null; // Edit timestamp
+    creator?: IMaterialUser | null; // Creator user info
+    editor?: IMaterialUser | null; // Editor user info
+    materialId?: string | null; // Material ID (returned after create)
+    // Legacy fields for backward compatibility
+    lastModifierId?: string | null;
     lastModifiedAt?: string | null;
     isDeleted?: boolean;
-    deleterId?: number | null;
+    deleterId?: string | null;
     deletedAt?: string | null;
     code?: string | null;
     name?: string | null;
     manufacturer?: string | null;
-    unitId: number;
+    unitId: string; // UUID
     unitName?: string | null;
-    materialGroupId?: number;
-    materialTypeId?: number;
+    materialGroupId?: string; // UUID
+    materialTypeId?: string; // UUID
+    materialTypeName?: string | null; // Material type name for display
     description?: string | null; // Map to usage field
     isActive?: boolean; // Material status (active/inactive)
 }
