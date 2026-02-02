@@ -22,6 +22,7 @@ export interface IInventoryCheck {
     warehouseName: string;
     status: string;
     totalItems: number;
+    varianceTotalItems?: number;
     note: string;
     approverId?: string;
     approvedAt?: string;

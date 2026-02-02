@@ -139,7 +139,7 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
                                                 : undefined
                                         }
                                         onChange={onGroupChange}
-                                        placeholder="Chọn nhóm vật tư"
+                                        placeholder="Chọn nhóm"
                                         dropdownStyle={styles.dropdownNegativeMargin}
                                         showAllOption={false}
                                         isOpen={activeDropdown === 'group'}
