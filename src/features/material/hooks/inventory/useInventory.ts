@@ -2,15 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
-// import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
-// Constants for staleTime
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-
-import { GetInventoryParams, IInventoryTicket } from '@/features/material/types/material.types';
+import {
+    GetInventoryParams,
+    IInventoryTicket,
+} from '@/features/material/types/inventoryTicket.types';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 import { GetInventoryChecksParams } from '@/features/material/types/inventory.types';
 
+const STALE_TIME_SHORT = 2 * 60 * 1000;
 /**
  * Hook to fetch inventory tickets (Mock Data)
  */

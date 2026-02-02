@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { materialTypeApi } from '@/features/material/api/materialTypeApi';
 import { useMaterialGroups } from './useMaterialGroups';
-import { materialKeys } from './materialKeys';
+import { materialKeys } from '@/features/material/hooks/materialKeys';
 
 // Constants for pagination
 const DEFAULT_PAGE = 1;

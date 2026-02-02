@@ -1,9 +1,7 @@
-import {
-    GetMaterialsParams,
-    GetExportWarehouseParams,
-    GetInventoryParams,
-    GetWarehouseParams,
-} from '@/features/material/types/material.types';
+import { GetMaterialsParams } from '@/features/material/types/material.types';
+import { GetInventoryParams } from '@/features/material/types/inventoryTicket.types';
+import { GetExportWarehouseParams } from '@/features/material/types/exportReceipt.types';
+import { GetWarehouseParams } from '@/features/material/types/warehouse.types';
 
 // Query Keys
 export const materialKeys = {

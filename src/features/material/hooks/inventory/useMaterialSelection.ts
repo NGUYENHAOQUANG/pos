@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { IWarehouseItem } from '@/features/material/types/material.types';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 interface UseMaterialSelectionProps {
     warehouseItems: IWarehouseItem[];
