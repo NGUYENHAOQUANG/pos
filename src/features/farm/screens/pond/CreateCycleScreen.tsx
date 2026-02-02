@@ -424,7 +424,7 @@ export const CreateCycleScreen: React.FC = () => {
                 deleteActiveCycle(pondId);
                 deleteCycle(initialData.id);
                 setShowDeleteModal(false);
-                navigation.navigate('PondDetail', { pondId } as any);
+                navigation.navigate('MainTabs', { screen: 'Farm' } as any);
             } catch (error: any) {
                 const normalizedError = normalizeApiError(error);
                 Toast.show({
