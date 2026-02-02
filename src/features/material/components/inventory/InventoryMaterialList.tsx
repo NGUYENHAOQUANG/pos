@@ -142,7 +142,7 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                                             <View style={styles.col}>
                                                 <Text style={styles.label}>Tồn kho cũ:</Text>
                                                 <Text style={styles.oldStockValue}>
-                                                    {item.oldStock} {item.unit || 'Kg'}
+                                                    {item.oldStock} {item.unit || ''}
                                                 </Text>
                                             </View>
 
@@ -187,7 +187,7 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                                                         : styles.footerValuePositive,
                                                 ]}
                                             >
-                                                {diff > 0 ? `+${diff}` : diff} {item.unit || 'Kg'}
+                                                {diff > 0 ? `+${diff}` : diff} {item.unit || ''}
                                             </Text>
                                         </View>
                                     </View>

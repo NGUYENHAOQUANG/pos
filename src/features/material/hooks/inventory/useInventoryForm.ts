@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { materialApi } from '@/features/material/api/materialApi';
 import { showValidationError } from '@/features/material/utils/validationToast';
 
 interface UseInventoryFormProps {
@@ -44,24 +45,48 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
                 console.log(`Fetched ${itemsList.length} items for InventoryCheck ${inventoryId}`);
 
                 if (itemsList && itemsList.length > 0) {
-                    const mappedItems = itemsList.map((item: any) => ({
-                        id: Date.now().toString() + Math.random(), // Temporary UI ID
-                        inventoryCheckItemId:
-                            item.inventoryCheckItemId ||
-                            item.InventoryCheckItemId ||
-                            item.id ||
-                            item.Id,
-                        materialId: item.materialId || item.MaterialId,
-                        materialName:
-                            item.materialName ||
-                            item.MaterialName ||
-                            item.materialCode ||
-                            item.MaterialCode ||
-                            '',
-                        oldStock: item.expectedQty ?? item.ExpectedQty ?? 0,
-                        newStock: String(item.actualQty ?? item.ActualQty ?? 0),
-                        difference: (item.actualQty ?? 0) - (item.expectedQty ?? 0),
-                    }));
+                    const mappedItems = await Promise.all(
+                        itemsList.map(async (item: any) => {
+                            let unit = item.unitName || item.UnitName || item.unit || item.Unit;
+
+                            // Fetch fresh material detail to ensure correct unit
+                            const mId = item.materialId || item.MaterialId;
+                            if (mId) {
+                                try {
+                                    const mRes = await materialApi.getById(mId);
+                                    if (mRes.success && mRes.data) {
+                                        // Prioritize Fresh Unit Name
+                                        unit =
+                                            mRes.data.unitName ||
+                                            (mRes.data as any).UnitName ||
+                                            unit;
+                                    }
+                                } catch (error) {
+                                    console.warn('Failed to fetch material detail', error);
+                                }
+                            }
+
+                            return {
+                                id: Date.now().toString() + Math.random(), // Temporary UI ID
+                                inventoryCheckItemId:
+                                    item.inventoryCheckItemId ||
+                                    item.InventoryCheckItemId ||
+                                    item.id ||
+                                    item.Id,
+                                materialId: mId,
+                                materialName:
+                                    item.materialName ||
+                                    item.MaterialName ||
+                                    item.materialCode ||
+                                    item.MaterialCode ||
+                                    '',
+                                oldStock: item.expectedQty ?? item.ExpectedQty ?? 0,
+                                newStock: String(item.actualQty ?? item.ActualQty ?? 0),
+                                difference: (item.actualQty ?? 0) - (item.expectedQty ?? 0),
+                                unit: unit,
+                            };
+                        })
+                    );
                     setItems(mappedItems);
                 } else {
                     // If no items are returned for an existing inventory, initialize with one empty item

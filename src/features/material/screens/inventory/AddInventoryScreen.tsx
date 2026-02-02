@@ -25,6 +25,7 @@ import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { materialApi } from '@/features/material/api/materialApi';
 
 interface AddInventoryScreenProps {}
 
@@ -224,30 +225,62 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                             <View style={styles.dropdownSection}>
                                 <InventoryMaterialList
                                     items={formState.items}
-                                    onUpdateItem={(id, field, value) => {
-                                        setters.setItems(prev =>
-                                            prev.map(item => {
-                                                if (item.id === id) {
-                                                    const updated = { ...item, [field]: value };
-                                                    if (field === 'materialId') {
-                                                        const selectedMat = warehouseItems.find(
-                                                            m => m.materialId === value
-                                                        );
+                                    onUpdateItem={async (id, field, value) => {
+                                        if (field === 'materialId') {
+                                            const selectedMat = warehouseItems.find(
+                                                m => m.materialId === value
+                                            );
+
+                                            let unitName =
+                                                selectedMat?.unitName ||
+                                                (selectedMat as any)?.UnitName ||
+                                                '';
+
+                                            // If unit name is missing from warehouse item, fetch it from detail API
+                                            if (!unitName && value) {
+                                                try {
+                                                    const res = await materialApi.getById(value);
+                                                    if (res.success && res.data) {
+                                                        unitName =
+                                                            res.data.unitName ||
+                                                            (res.data as any).UnitName ||
+                                                            '';
+                                                    }
+                                                } catch (err) {
+                                                    console.warn(
+                                                        'Failed to fetch material unit',
+                                                        err
+                                                    );
+                                                }
+                                            }
+
+                                            setters.setItems(prev =>
+                                                prev.map(item => {
+                                                    if (item.id === id) {
+                                                        const updated = { ...item, [field]: value };
                                                         if (selectedMat) {
                                                             updated.materialName =
                                                                 selectedMat.materialName;
                                                             updated.oldStock =
                                                                 selectedMat.quantity || 0;
-                                                            updated.unit = selectedMat.unitName;
+                                                            updated.unit = unitName;
                                                         }
                                                         // Clear ID to force Add (and Delete old via diff)
                                                         updated.inventoryCheckItemId = undefined;
+                                                        return updated;
                                                     }
-                                                    return updated;
-                                                }
-                                                return item;
-                                            })
-                                        );
+                                                    return item;
+                                                })
+                                            );
+                                        } else {
+                                            setters.setItems(prev =>
+                                                prev.map(item =>
+                                                    item.id === id
+                                                        ? { ...item, [field]: value }
+                                                        : item
+                                                )
+                                            );
+                                        }
                                     }}
                                     onAddItem={() => {
                                         setters.setItems(prev => [
@@ -259,6 +292,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                                                 oldStock: 0,
                                                 newStock: '',
                                                 difference: 0,
+                                                unit: '',
                                             },
                                         ]);
                                     }}
