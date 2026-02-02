@@ -94,7 +94,7 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                 {/* Device Name */}
                 <Input
                     label="Tên thiết bị"
-                    placeholder="Input"
+                    placeholder="Nhập"
                     value={deviceName}
                     onChangeText={setDeviceName}
                     required
