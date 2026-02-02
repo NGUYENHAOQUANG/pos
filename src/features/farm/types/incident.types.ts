@@ -1,12 +1,10 @@
-import type { IApiResponse, IPaginate } from '@/shared/types/common.types';
-
-/** Document item in API response (for resolving image URLs) */
-export interface IncidentDocument {
-    id: string;
-    fileName?: string;
-    filePath?: string;
-    publicUrl?: string;
-}
+import type {
+    IApiResponse,
+    IPaginate,
+    IDocument,
+    PaginationParams,
+    ICreatorEditor,
+} from '@/shared/types/common.types';
 
 /** Material line in incident detail (API) */
 export interface IncidentDetailMaterial {
@@ -32,16 +30,8 @@ export interface UpdateIncidentPayload {
     incidentDetail?: IncidentDetail;
 }
 
-/** Creator/Editor in API response */
-export interface IncidentCreator {
-    id: string;
-    fullname: string;
-    email?: string;
-    phoneNumber?: string;
-    avatar?: string;
-    createdAt: string;
-    editedAt: string;
-}
+/** @deprecated Use ICreatorEditor from common.types */
+export type IncidentCreator = ICreatorEditor;
 
 /** Single item in create/list response */
 export interface IncidentCreateResult {
@@ -49,8 +39,8 @@ export interface IncidentCreateResult {
     no: number;
     createdAt: string;
     editedAt: string;
-    creator?: IncidentCreator;
-    editor?: IncidentCreator;
+    creator?: ICreatorEditor;
+    editor?: ICreatorEditor;
     recordId: string;
 }
 
@@ -60,18 +50,16 @@ export interface IncidentDto {
     editedAt?: string;
     pondId: string;
     documentIds?: string[];
-    documents?: IncidentDocument[];
+    documents?: IDocument[];
 }
 
-/** Query params for GET /pond/{pondId}/incident */
-export interface GetIncidentListParams {
+/** Query params for GET /pond/{pondId}/incident – dùng PaginationParams (page, limit) từ common.types */
+export interface GetIncidentListParams extends PaginationParams {
     PondId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
     CreateAtTo?: string;
-    Page?: number;
-    PageSize?: number;
     OrderBy?: string;
 }
 
@@ -81,8 +69,8 @@ export interface IncidentListItem {
     no: number;
     createdAt: string;
     editedAt: string;
-    creator?: IncidentCreator;
-    editor?: IncidentCreator;
+    creator?: ICreatorEditor;
+    editor?: ICreatorEditor;
     pondId: string;
     operationId?: string;
     value?: number;
