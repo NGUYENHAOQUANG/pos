@@ -79,9 +79,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
 
                     {/* Input: Ghi chú */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Ghi chú lý do điều chỉnh
-                        </Text>
+                        <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
                         <TextInput
                             style={styles.textArea}
                             placeholder="Nhập ghi chú"
