@@ -16,6 +16,7 @@ interface ShrimpPondListProps {
     ListFooterComponent?: React.ComponentType | React.ReactElement | null;
     refreshing?: boolean;
     onRefresh?: () => void;
+    zoneId?: string; // Add prop to pass selected zone
 }
 
 export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
@@ -29,6 +30,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
             ListFooterComponent,
             refreshing,
             onRefresh,
+            zoneId,
         },
         ref
     ) => {
@@ -64,6 +66,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                     onInfoPress={() => onInfoPress?.(item)}
                     onCyclePress={() => {}}
                     onDetailPress={() => onPondPress?.(item)}
+                    effectiveZoneId={zoneId}
                 />
             );
         };
