@@ -167,32 +167,29 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
     const setCycles = useFarmStore(state => state.setCycles);
     const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
 
-    const handleRefresh = useCallback(async () => {
-        const { data: newPondsData } = await refetch();
-        const allItems = newPondsData?.pages
-            ? newPondsData.pages.reduce((acc: PondData[], page: any) => [...acc, ...page.items], [])
-            : [];
+    const fetchAndSyncCycles = useCallback(
+        async (pondsToFetch: PondData[]) => {
+            if (pondsToFetch.length === 0) return;
 
-        if (allItems.length > 0) {
             try {
-                // 2. Fetch summary list for all ponds
-                const cyclePromises = allItems.map((p: PondData) => cycleApi.getCyclesByPond(p.id));
+                // 1. Fetch summary list for all ponds
+                const cyclePromises = pondsToFetch.map(p => cycleApi.getCyclesByPond(p.id));
                 const cyclesResults = await Promise.all(cyclePromises);
-                const allCyclesGenerics = cyclesResults.reduce(
+                const allCyclesFlat = cyclesResults.reduce(
                     (acc: any[], val: any[]) => acc.concat(val),
                     []
                 );
 
-                // 3. Fetch DETAILS for each cycle found (N+1 problem but necessary per API design)
-                const detailPromises = allCyclesGenerics.map(async (c: any) => {
-                    if (c.id && c.pondId) {
+                // 2. Fetch DETAILS only for ACTIVE cycles to avoid N+1 for history
+                const detailPromises = allCyclesFlat.map(async (c: any) => {
+                    // OPTIMIZATION: Only fetch detail for InProgress cycles
+                    if (c.id && c.pondId && c.status === 'InProgress') {
                         try {
                             const detail = await cycleApi.getCycleDetail(c.pondId, c.id);
-                            // Merge detail with summary if needed, but detail should be source of truth
                             return { ...c, ...detail };
                         } catch (e) {
                             console.warn(`Failed to fetch detail for cycle ${c.id}`, e);
-                            return c; // Fallback to summary
+                            return c;
                         }
                     }
                     return c;
@@ -200,21 +197,14 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
 
                 const allCyclesDetailed = await Promise.all(detailPromises);
 
-                // Map API response to internal CycleData structure
+                // 3. Map API response to internal CycleData structure
                 const mappedCycles = allCyclesDetailed.map((c: any) => ({
                     ...c,
-                    // Map API 'name' to 'cycleName'
                     cycleName: c.name || c.cycleName,
-                    // Map API 'pondId' to 'sourcePonds' for store lookup
                     sourcePonds: c.sourcePonds || (c.pondId ? [c.pondId] : []),
-                    // Ensure receivingPonds exists
                     receivingPonds: c.receivingPonds || [],
-                    // Map totalStocking
                     stockingQuantity: c.stockingQuantity || c.totalStocking || 0,
-                    // Map stockingDate from createdAt or stockingDate
-                    // User wants "dd/MM/yyyy", ignoring time part from UTC field "createdAt"
                     stockingDate: formatDate(new Date(c.createdAt || c.stockingDate || new Date())),
-                    // Ensure status matches if needed, or keep as is
                     status:
                         c.status === 'InProgress'
                             ? 'Chưa hoàn thành'
@@ -226,13 +216,10 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                 // 4. Sync to store
                 setCycles(mappedCycles);
 
-                // 5. Update activeCycles to ensure UI reflects server data immediately
-                // effectively overwriting any stale local optimistic state
-                // 5. Sync ActiveCycles: Update existing, remove missing
+                // 5. Update activeCycles
                 const deleteActiveCycle = useFarmStore.getState().deleteActiveCycle;
 
-                allItems.forEach(pond => {
-                    // Find active cycle for this pond in the new data
+                pondsToFetch.forEach(pond => {
                     const activeForPond = mappedCycles.find(
                         c =>
                             (c.pondId === pond.id || c.sourcePonds?.includes(pond.id)) &&
@@ -244,15 +231,38 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                     if (activeForPond) {
                         saveActiveCycle(pond.id, activeForPond);
                     } else {
-                        // If no active cycle found in fresh data (e.g. was deleted), remove from store active list
                         deleteActiveCycle(pond.id);
                     }
                 });
             } catch (err) {
-                console.error('REFRESH: Failed to fetch cycles', err);
+                console.error('Failed to sync cycles', err);
             }
+        },
+        [setCycles, saveActiveCycle]
+    );
+
+    const handleRefresh = useCallback(async () => {
+        const { data: newPondsData } = await refetch();
+        const allItems = newPondsData?.pages
+            ? newPondsData.pages.reduce((acc: PondData[], page: any) => [...acc, ...page.items], [])
+            : [];
+        await fetchAndSyncCycles(allItems);
+    }, [refetch, fetchAndSyncCycles]);
+
+    // Track if we've done the initial fetch
+    const hasFetchedCycles = useRef(false);
+
+    // Refetch cycle details when screen gains focus (optional, but good for data freshness)
+    // Refetch cycle details when screen gains focus is removed to prevent N+1 loop causing lag
+    // Data is already synced via mutation onSuccess or initial load
+
+    useEffect(() => {
+        // Only run once when ponds are loaded for the first time
+        if (ponds.length > 0 && !hasFetchedCycles.current && !isLoadingPonds) {
+            hasFetchedCycles.current = true;
+            fetchAndSyncCycles(ponds);
         }
-    }, [refetch, setCycles, saveActiveCycle]);
+    }, [ponds, isLoadingPonds, fetchAndSyncCycles]);
 
     const { isConnected } = useNetInfo();
 
@@ -294,6 +304,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                     ListFooterComponent={renderFooter}
                     refreshing={isRefetching}
                     onRefresh={handleRefresh}
+                    zoneId={selectedZoneId ? String(selectedZoneId) : undefined}
                 />
             )}
         </View>
