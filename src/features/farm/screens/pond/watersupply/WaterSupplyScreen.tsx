@@ -307,10 +307,10 @@ export const WaterSupplyScreen = () => {
                 documentIds: currentDocumentIds, // Array string
                 targetWaterLevel: parseFloat(targetLevel),
                 waterAdded: parseFloat(supplyLevel),
-                waterRemoved: 0, // Default 0
-                previousVolume: 0, // Default 0
-                finalVolume: 0, // Default 0
-                addedVolume: 0, // Default 0
+                waterRemoved: parseFloat(calculateInfo.drainLevel) || 0,
+                previousVolume: parseFloat(calculateInfo.volumeAfterDrain) || 0,
+                finalVolume: parseFloat(calculateInfo.volumeAfterSupply) || 0,
+                addedVolume: parseFloat(calculateInfo.volumeSupply) || 0,
                 note: note, // "note" (số ít)
                 materials: selectedMaterials.map(m => ({
                     materialId: (m.material as any).materialDefId || m.material.id,

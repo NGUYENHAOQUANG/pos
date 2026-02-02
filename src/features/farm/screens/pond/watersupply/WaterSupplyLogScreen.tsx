@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -24,7 +24,16 @@ export const WaterSupplyLogScreen = () => {
     const pondId = pond?.id || '';
 
     // Fetch data using the hook
-    const { jobs, isLoading } = useWaterSupplyRecordsAsJobs(pondId);
+    const { jobs, isLoading, refetch } = useWaterSupplyRecordsAsJobs(pondId);
+
+    // Auto refetch when screen is focused (e.g. back from Edit)
+    useFocusEffect(
+        React.useCallback(() => {
+            if (pondId) {
+                refetch();
+            }
+        }, [pondId, refetch])
+    );
 
     const config: LogScreenConfig<WaterSupplyMeta> = {
         jobType: 'WATER_CHANGE',

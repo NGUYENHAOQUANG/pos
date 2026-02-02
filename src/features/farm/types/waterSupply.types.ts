@@ -14,7 +14,11 @@ export interface IWaterSupplyRecord {
         documentIds?: string[]; // Added
         targetWaterLevel?: number; // Updated
         waterAdded?: number; // Updated
-        notes?: string;
+        waterRemoved?: number; // Added
+        previousVolume?: number; // Added
+        finalVolume?: number; // Added
+        addedVolume?: number; // Added
+        note?: string; // Corrected from 'notes' to 'note'
         materials?: Array<{
             materialId: string; // Updated
             quantity: number;

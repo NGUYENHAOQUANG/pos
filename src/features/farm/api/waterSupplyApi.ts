@@ -5,13 +5,11 @@ import { CreateWaterSupplyCommand } from '@/features/farm/types/waterSupply.type
 export const waterSupplyApi = {
     create: async (pondId: string, data: CreateWaterSupplyCommand): Promise<boolean> => {
         try {
-            console.log('🔵 [API CREATE REQUEST]:', JSON.stringify(data, null, 2));
             const url = API_ENDPOINTS.POND.WATER_CHANGE_RECORD.CREATE(pondId);
             const response = await apiClient.post(url, data);
-            console.log('🟢 [API CREATE RESPONSE]:', JSON.stringify(response.data, null, 2));
+
             return !!response.data;
         } catch (error) {
-            console.error('🔴 [API CREATE ERROR]:', error);
             throw error;
         }
     },
@@ -22,13 +20,11 @@ export const waterSupplyApi = {
         data: CreateWaterSupplyCommand
     ): Promise<boolean> => {
         try {
-            console.log('🔵 [API UPDATE REQUEST]:', JSON.stringify(data, null, 2));
             const url = API_ENDPOINTS.POND.WATER_CHANGE_RECORD.UPDATE(pondId, id);
             const response = await apiClient.put(url, data);
-            console.log('🟢 [API UPDATE RESPONSE]:', JSON.stringify(response.data, null, 2));
+
             return !!response.data;
         } catch (error) {
-            console.error('🔴 [API UPDATE ERROR]:', error);
             throw error;
         }
     },
@@ -48,7 +44,6 @@ export const waterSupplyApi = {
         try {
             const url = API_ENDPOINTS.POND.WATER_CHANGE_RECORD.LIST(pondId);
             const response = await apiClient.get(url, { params });
-            // console.log('API GetAll WaterSupply - Response:', response.data); // Removed noisy log
             return response.data;
         } catch (error) {
             console.error('Get all water supply error:', error);

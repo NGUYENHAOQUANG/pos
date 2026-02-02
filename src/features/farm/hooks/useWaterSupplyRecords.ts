@@ -7,6 +7,7 @@ import {
     CreateWaterSupplyCommand,
 } from '@/features/farm/types/waterSupply.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
 
 export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParams) => {
     return useQuery({
@@ -20,16 +21,62 @@ export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParam
 };
 
 export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSupplyParams) => {
-    const { data, isLoading, error, refetch } = useWaterSupplyRecords(pondId, params);
+    // 1. Fetch List keys
+    const {
+        data: listData,
+        isLoading: isListLoading,
+        error: listError,
+        refetch: refetchList,
+    } = useWaterSupplyRecords(pondId, params);
 
-    // Fix: API returns { success: true, data: [...] } instead of { data: { items: [...] } }
-    const responseData = data?.data;
-    const rawItems = Array.isArray(responseData) ? responseData : responseData?.items || [];
+    // 2. Determine IDs to fetch details for
+    const responseData = listData?.data;
+    const rawItems: IWaterSupplyRecord[] = Array.isArray(responseData)
+        ? responseData
+        : responseData?.items || [];
 
-    const sortedItems = [...rawItems].sort((a, b) => {
+    // Fetch Material Definitions for name lookup
+    const { data: materialsData } = useMaterials();
+
+    // 3. Fetch details for ALL items because List API returns empty/zero fields
+    const {
+        data: detailedItems,
+        isLoading: isDetailsLoading,
+        error: detailsError,
+        refetch: refetchDetails,
+    } = useQuery({
+        queryKey: ['waterSupplyDetails', pondId, rawItems.map(i => i.id).join(',')],
+        queryFn: async () => {
+            if (rawItems.length === 0) return [];
+            const detailPromises = rawItems.map(item =>
+                waterSupplyApi
+                    .getDetail(pondId, item.id)
+                    .then(res => res.data)
+                    .catch(err => {
+                        // If item is not found (404), it means it was deleted. Return null to filter it out.
+                        if (err?.response?.status === 404 || err?.statusCode === 404) {
+                            return null;
+                        }
+                        console.error(`Failed to fetch detail for ${item.id}`, err);
+                        return item; // Fallback to list item if other error
+                    })
+            );
+            const results = await Promise.all(detailPromises);
+            return results.filter(item => item !== null);
+        },
+        enabled: rawItems.length > 0,
+    });
+
+    const isLoading = isListLoading || (rawItems.length > 0 && isDetailsLoading);
+    const error = listError || detailsError;
+
+    // Use detailed items if available, otherwise raw items (while loading or if empty)
+    const itemsToRender = detailedItems && detailedItems.length > 0 ? detailedItems : rawItems;
+
+    const sortedItems = [...itemsToRender].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeA - timeB;
+        return timeA - timeB; // Sort ascending by time (Lần 1, Lần 2...)
     });
 
     const jobs: JobExecution[] = sortedItems.map((item: IWaterSupplyRecord, index: number) => ({
@@ -43,29 +90,38 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
                   hour12: false,
               })
             : '00:00',
-        note: item.waterChangeDetail?.notes || undefined,
+        note: item.waterChangeDetail?.note || undefined,
         pondId: item.pondId,
-        materials: item.waterChangeDetail?.materials?.map(m => ({
-            material: {
-                id: m.materialId,
-                name: m.warehouseItemName || 'Vật tư',
-                unitName: m.unitName || '',
-            } as any,
-            quantity: m.quantity,
-            unit: m.unitName || '',
-        })),
-        images: item.documentIds || [],
+        materials: item.waterChangeDetail?.materials?.map(m => {
+            const matDef = materialsData?.find(d => d.id === m.materialId);
+            return {
+                material: {
+                    id: m.materialId,
+                    name: m.warehouseItemName || matDef?.name || 'Vật tư',
+                    unitName: m.unitName || matDef?.unitName || '',
+                } as any,
+                quantity: m.quantity,
+                unit: m.unitName || matDef?.unitName || '',
+            };
+        }),
+        images: item.waterChangeDetail?.documentIds || item.documentIds || [],
         meta: {
             targetLevel: item.waterChangeDetail?.targetWaterLevel,
             supplyLevel: item.waterChangeDetail?.waterAdded,
-            // drainLevel/volumes are potentially calculated client-side if not returned
-            // but if the user wants them stored, they should be in the API result.
-            // For now map what we have.
-            images: item.documentIds || [],
+            drainLevel: item.waterChangeDetail?.waterRemoved?.toString(),
+            volumeAfterDrain: item.waterChangeDetail?.previousVolume?.toString(),
+            volumeSupply: item.waterChangeDetail?.addedVolume?.toString(),
+            volumeAfterSupply: item.waterChangeDetail?.finalVolume?.toString(),
+            images: item.waterChangeDetail?.documentIds || item.documentIds || [],
         },
     }));
 
-    console.log('useWaterSupplyRecordsAsJobs - Processed jobs length:', jobs.length);
+    const refetch = async () => {
+        await refetchList();
+        if (rawItems.length > 0) {
+            await refetchDetails();
+        }
+    };
 
     return { jobs, isLoading, error, refetch };
 };
