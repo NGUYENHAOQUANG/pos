@@ -1,9 +1,12 @@
 import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query'; // Add useQueryClient
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import { showValidationError } from '@/features/material/utils/validationToast';
-import { IWarehouseItem } from '@/features/material/types/material.types';
+import { showValidationError, showSuccessToast } from '@/features/material/utils/validationToast'; // Add showSuccessToast
+import { materialKeys } from '@/features/material/hooks/materialKeys'; // Add materialKeys
+
+import { inventoryApi } from '@/features/material/api/inventoryApi';
 
 type MainTabParams = {
     screen: 'Material';
@@ -19,57 +22,50 @@ type LocalNavigationProp = NativeStackNavigationProp<
 interface UseInventorySubmitProps {
     isEditMode: boolean;
     inventoryId?: string;
-    itemId?: string; // Existing item ID for updates
     warehouseId?: string;
     note: string;
-    selectedMaterialId: string;
-    newStock: string;
-    warehouseItems: IWarehouseItem[];
+    items: any[];
     createInventoryCheck: any;
-    updateInventoryCheck: any;
 }
 
 export const useInventorySubmit = ({
     isEditMode,
     inventoryId,
-    itemId,
     warehouseId,
     note,
-    selectedMaterialId,
-    newStock,
-    warehouseItems,
+    items,
     createInventoryCheck,
-    updateInventoryCheck,
 }: UseInventorySubmitProps) => {
     const navigation = useNavigation<LocalNavigationProp>();
+    const queryClient = useQueryClient();
 
     const validateForm = useCallback(() => {
         if (!note.trim()) {
             showValidationError('Vui lòng nhập ghi chú lý do điều chỉnh');
             return false;
         }
-        if (!selectedMaterialId) {
-            showValidationError('Vui lòng chọn vật tư');
-            return false;
-        }
-        if (!newStock.trim()) {
-            showValidationError('Vui lòng nhập tồn kho mới');
-            return false;
-        }
         if (!warehouseId) {
             showValidationError('Không tìm thấy kho cho trang trại hiện tại');
             return false;
         }
-
-        const selectedItem = warehouseItems.find(
-            (m: IWarehouseItem) => m.materialId === selectedMaterialId
-        );
-        if (!selectedItem) {
-            showValidationError('Vật tư không hợp lệ hoặc không tìm thấy');
+        if (items.length === 0) {
+            showValidationError('Vui lòng thêm ít nhất một vật tư');
             return false;
         }
+
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (!item.materialId) {
+                showValidationError(`Vui lòng chọn vật tư (Dòng ${i + 1})`);
+                return false;
+            }
+            if (!String(item.newStock).trim()) {
+                showValidationError(`Vui lòng nhập tồn kho mới (Dòng ${i + 1})`);
+                return false;
+            }
+        }
         return true;
-    }, [note, selectedMaterialId, newStock, warehouseId, warehouseItems]);
+    }, [note, items, warehouseId]);
 
     const navigateToInventoryList = useCallback(() => {
         setTimeout(() => {
@@ -80,126 +76,127 @@ export const useInventorySubmit = ({
         }, 500);
     }, [navigation]);
 
-    const handleSaveDraft = useCallback(() => {
-        if (!validateForm()) return;
+    const processEditMode = useCallback(
+        async (shouldSubmit: boolean) => {
+            if (!inventoryId) return;
 
-        const selectedItem = warehouseItems.find(
-            (m: IWarehouseItem) => m.materialId === selectedMaterialId
-        )!;
+            try {
+                // 0. Update Header (Note)
+                await inventoryApi.update(inventoryId, { note });
 
-        // EDIT MODE: Update existing draft
-        if (isEditMode && inventoryId && itemId) {
-            const payload = {
-                inventoryCheckId: inventoryId,
-                items: [
-                    {
-                        inventoryCheckItemId: itemId,
-                        actualQty: Number(newStock),
+                // 1. Fetch current items to diff
+                const remoteParams = { InventoryCheckId: inventoryId, PageSize: 100 };
+                const remoteRes = await inventoryApi.getItems(inventoryId, remoteParams);
+                const remoteItems = remoteRes.data?.items || remoteRes.data || [];
+
+                // A. Identify deletions (In Remote but NOT in Form)
+                const formItemIds = new Set(items.map(i => i.inventoryCheckItemId).filter(Boolean));
+                const itemsToDelete = remoteItems.filter((r: any) => {
+                    const rId = r.inventoryCheckItemId || r.InventoryCheckItemId || r.id || r.Id;
+                    return rId && !formItemIds.has(rId);
+                });
+
+                for (const item of itemsToDelete) {
+                    const rId =
+                        item.inventoryCheckItemId ||
+                        item.InventoryCheckItemId ||
+                        item.id ||
+                        item.Id;
+                    await inventoryApi.deleteItem(inventoryId, rId);
+                }
+
+                // B. Identify Updates (In both) & Creates (In Form but NO ID)
+                const itemsToUpdate = items.filter(i => i.inventoryCheckItemId);
+                const itemsToAdd = items.filter(i => !i.inventoryCheckItemId);
+
+                if (itemsToUpdate.length > 0) {
+                    const payload = {
+                        inventoryCheckId: inventoryId,
+                        items: itemsToUpdate.map(i => ({
+                            inventoryCheckItemId: i.inventoryCheckItemId,
+                            actualQty: Number(i.newStock),
+                        })),
+                    };
+                    await inventoryApi.updateItems(inventoryId, { items: payload.items });
+                }
+
+                if (itemsToAdd.length > 0) {
+                    const payload = {
+                        inventoryCheckId: inventoryId,
+                        items: itemsToAdd.map(i => ({
+                            materialId: i.materialId,
+                            actualQty: Number(i.newStock),
+                            expectedQty: i.oldStock,
+                            reason: 'Added via Edit',
+                        })),
+                    };
+                    await inventoryApi.addItems(inventoryId, payload);
+                }
+
+                // C. Submit if needed
+                if (shouldSubmit) {
+                    await inventoryApi.submit(inventoryId);
+                }
+
+                showSuccessToast('Cập nhật phiếu kiểm kê thành công');
+                await queryClient.invalidateQueries({
+                    queryKey: materialKeys.all,
+                    refetchType: 'all',
+                });
+
+                navigateToInventoryList();
+            } catch (error) {
+                console.error('Edit Process Failed', error);
+                showValidationError('Có lỗi xảy ra khi cập nhật phiếu');
+            }
+        },
+        [inventoryId, items, navigateToInventoryList, note, queryClient]
+    );
+
+    const handleSaveProcess = useCallback(
+        async (shouldSubmit: boolean) => {
+            if (!validateForm()) return;
+
+            if (isEditMode && inventoryId) {
+                await processEditMode(shouldSubmit);
+            } else {
+                // CREATE MODE
+                const payload = {
+                    header: {
+                        warehouseId: warehouseId!,
+                        note: note || 'Phiếu mới',
                     },
-                ],
-                shouldSubmit: false, // Keep as draft
-            };
+                    items: items.map(item => {
+                        // Find info in warehouseItems if needed, but item state should have it
+                        return {
+                            materialId: item.materialId,
+                            expectedQty: item.oldStock || 0,
+                            actualQty: Number(item.newStock),
+                        };
+                    }),
+                    shouldSubmit: shouldSubmit,
+                };
 
-            updateInventoryCheck(payload, {
-                onSuccess: navigateToInventoryList,
-            });
-            return;
-        }
-
-        // CREATE MODE: Create new draft
-        const payload = {
-            header: {
-                warehouseId: warehouseId!,
-                note: note || 'Phiếu mới',
-            },
-            items: [
-                {
-                    materialId: selectedItem.materialId,
-                    expectedQty: selectedItem.quantity || 0,
-                    actualQty: Number(newStock),
-                },
-            ],
-            shouldSubmit: false,
-        };
-
-        createInventoryCheck(payload, {
-            onSuccess: navigateToInventoryList,
-        });
-    }, [
-        isEditMode,
-        inventoryId,
-        itemId,
-        validateForm,
-        warehouseItems,
-        selectedMaterialId,
-        warehouseId,
-        note,
-        newStock,
-        createInventoryCheck,
-        updateInventoryCheck,
-        navigateToInventoryList,
-    ]);
-
-    const handleSubmit = useCallback(() => {
-        if (!validateForm()) return;
-
-        const selectedItem = warehouseItems.find(
-            (m: IWarehouseItem) => m.materialId === selectedMaterialId
-        )!;
-
-        if (isEditMode && inventoryId && itemId) {
-            // Update existing draft using PATCH with itemId
-            const payload = {
-                inventoryCheckId: inventoryId,
-                items: [
-                    {
-                        inventoryCheckItemId: itemId, // Use existing item ID
-                        actualQty: Number(newStock),
-                    },
-                ],
-                shouldSubmit: true,
-            };
-
-            updateInventoryCheck(payload, {
-                onSuccess: navigateToInventoryList,
-            });
-        } else {
-            const payload = {
-                header: {
-                    warehouseId: warehouseId!,
-                    note: note || 'Phiếu mới',
-                },
-                items: [
-                    {
-                        materialId: selectedItem.materialId,
-                        expectedQty: selectedItem.quantity || 0,
-                        actualQty: Number(newStock),
-                    },
-                ],
-                shouldSubmit: true,
-            };
-
-            createInventoryCheck(payload, {
-                onSuccess: navigateToInventoryList,
-            });
-        }
-    }, [
-        validateForm,
-        warehouseItems,
-        selectedMaterialId,
-        isEditMode,
-        inventoryId,
-        itemId,
-        warehouseId,
-        note,
-        newStock,
-        updateInventoryCheck,
-        createInventoryCheck,
-        navigateToInventoryList,
-    ]);
+                createInventoryCheck(payload, {
+                    onSuccess: navigateToInventoryList,
+                });
+            }
+        },
+        [
+            isEditMode,
+            inventoryId,
+            items,
+            validateForm,
+            warehouseId,
+            note,
+            createInventoryCheck,
+            navigateToInventoryList,
+            processEditMode,
+        ]
+    );
 
     return {
-        handleSaveDraft,
-        handleSubmit,
+        handleSaveDraft: () => handleSaveProcess(false),
+        handleSubmit: () => handleSaveProcess(true),
     };
 };

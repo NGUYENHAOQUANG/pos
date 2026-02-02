@@ -8,16 +8,14 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
-import { InventoryMaterialInput } from '@/features/material/components/inventory/InventoryMaterialInput';
+import { InventoryMaterialList } from '@/features/material/components/inventory/InventoryMaterialList';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import {
     useCreateInventoryCheck,
-    useUpdateInventoryCheck,
     useInventoryForm,
-    useMaterialSelection,
     useMaterialOptions,
     useInventorySubmit,
     useDeleteInventoryTicket,
@@ -68,9 +66,9 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
     // API Hooks
     const { mutate: createInventoryCheck, isPending: isCreating } = useCreateInventoryCheck();
-    const { mutate: updateInventoryCheck, isPending: isUpdating } = useUpdateInventoryCheck();
+
     const { mutate: deleteInventoryCheck, isPending: isDeleting } = useDeleteInventoryTicket();
-    const isSubmitting = isCreating || isUpdating || isDeleting;
+    const isSubmitting = isCreating || isDeleting;
 
     // Tab bar visibility
     const { setTabBarVisible } = useTabBarVisibility();
@@ -84,11 +82,7 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const {
         date,
         note,
-        materialName,
-        oldStock,
-        newStock,
-        materialGroup,
-        selectedMaterialId,
+
         isLoadingDetail,
         status,
     } = formState;
@@ -99,28 +93,14 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     // Material options
     const materialOptions = useMaterialOptions(warehouseItems);
 
-    // Material selection handler
-    const { handleMaterialSelect } = useMaterialSelection({
-        warehouseItems,
-        setSelectedMaterialId: setters.setSelectedMaterialId,
-        setMaterialName: setters.setMaterialName,
-        setOldStock: setters.setOldStock,
-        setMaterialGroup: setters.setMaterialGroup,
-        setNewStock: setters.setNewStock,
-    });
-
     // Form submission handlers
     const { handleSaveDraft, handleSubmit } = useInventorySubmit({
         isEditMode,
         inventoryId,
-        itemId: formState.itemId,
         warehouseId,
         note: formState.note,
-        selectedMaterialId: formState.selectedMaterialId,
-        newStock: formState.newStock,
-        warehouseItems,
+        items: formState.items,
         createInventoryCheck,
-        updateInventoryCheck,
     });
 
     // Delete Logic
@@ -156,16 +136,34 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                 m => m.materialName === initialMaterialName
             );
             if (materialToSelect) {
-                handleMaterialSelect(materialToSelect.materialId);
+                setters.setItems([
+                    {
+                        id: Date.now().toString(),
+                        materialId: materialToSelect.materialId,
+                        materialName: materialToSelect.materialName,
+                        oldStock: materialToSelect.quantity || 0,
+                        newStock: '',
+                        difference: 0,
+                        unit: materialToSelect.unitName,
+                    },
+                ]);
             }
         }
-    }, [initialMaterialName, warehouseItems, handleMaterialSelect]);
+    }, [initialMaterialName, warehouseItems, setters]);
 
     // Handlers
-    const handleDropdownOpen = () => {
+    // Scroll handling constants
+    const HEADER_HEIGHT = 280; // Estimated height of InventoryInformation
+    const ITEM_HEIGHT = 280; // Estimated height of each item card
+
+    const handleDropdownOpen = (itemIndex: number) => {
         setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 200);
+            const scrollY = HEADER_HEIGHT + itemIndex * ITEM_HEIGHT;
+            scrollViewRef.current?.scrollTo({
+                y: Math.max(0, scrollY - 50),
+                animated: true,
+            });
+        }, 100);
     };
 
     const handleDateConfirm = (selectedDate: Date) => {
@@ -215,7 +213,6 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
                             <InventoryGeneralInfo
                                 date={formatMaterialDate(date)}
                                 createdDate={formatMaterialDateTime(date)}
-                                materialGroup={materialGroup}
                                 note={note}
                                 onDatePress={() => setDatePickerVisible(true)}
                                 onNoteChange={setters.setNote}
@@ -225,13 +222,51 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
 
                             {/* Nhập liệu vật tư */}
                             <View style={styles.dropdownSection}>
-                                <InventoryMaterialInput
-                                    materialName={materialName}
-                                    selectedMaterialId={selectedMaterialId}
-                                    oldStock={oldStock}
-                                    newStock={newStock}
-                                    onMaterialSelect={handleMaterialSelect}
-                                    onNewStockChange={setters.setNewStock}
+                                <InventoryMaterialList
+                                    items={formState.items}
+                                    onUpdateItem={(id, field, value) => {
+                                        setters.setItems(prev =>
+                                            prev.map(item => {
+                                                if (item.id === id) {
+                                                    const updated = { ...item, [field]: value };
+                                                    if (field === 'materialId') {
+                                                        const selectedMat = warehouseItems.find(
+                                                            m => m.materialId === value
+                                                        );
+                                                        if (selectedMat) {
+                                                            updated.materialName =
+                                                                selectedMat.materialName;
+                                                            updated.oldStock =
+                                                                selectedMat.quantity || 0;
+                                                            updated.unit = selectedMat.unitName;
+                                                        }
+                                                        // Clear ID to force Add (and Delete old via diff)
+                                                        updated.inventoryCheckItemId = undefined;
+                                                    }
+                                                    return updated;
+                                                }
+                                                return item;
+                                            })
+                                        );
+                                    }}
+                                    onAddItem={() => {
+                                        setters.setItems(prev => [
+                                            ...prev,
+                                            {
+                                                id: Date.now().toString(),
+                                                materialId: '',
+                                                materialName: '',
+                                                oldStock: 0,
+                                                newStock: '',
+                                                difference: 0,
+                                            },
+                                        ]);
+                                    }}
+                                    onRemoveItem={id => {
+                                        setters.setItems(prev =>
+                                            prev.filter(item => item.id !== id)
+                                        );
+                                    }}
                                     materialOptions={materialOptions}
                                     onDropdownOpen={handleDropdownOpen}
                                 />
