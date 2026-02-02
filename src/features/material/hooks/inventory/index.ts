@@ -10,3 +10,4 @@ export { useInventoryForm } from './useInventoryForm';
 export { useInventorySubmit } from './useInventorySubmit';
 export { useMaterialSelection } from './useMaterialSelection';
 export { useMaterialOptions } from './useMaterialOptions';
+export { useInventoryDetail, useInventoryItems } from './useInventoryDetails';

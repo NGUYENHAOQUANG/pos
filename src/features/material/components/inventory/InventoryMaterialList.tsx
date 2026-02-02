@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         ...Platform.select({
             ios: {
-                shadowColor: '#000',
+                shadowColor: colors.black,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.1,
                 shadowRadius: 4,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.gray[200],
     },
     materialHeader: {
         flexDirection: 'row',
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-        backgroundColor: '#F9FAFB',
+        borderBottomColor: colors.gray[240],
+        backgroundColor: colors.backgroundSecondary,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
     },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.md,
         backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.border,
         borderStyle: 'dashed',
         borderRadius: borderRadius.md,
         marginTop: spacing.xs,
