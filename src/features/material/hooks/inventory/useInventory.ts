@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { normalizeApiError } from '@/core/api/errorHandler';
+import { handleError } from '@/shared/utils/errorHandler';
 // import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
 // Constants for staleTime
@@ -74,8 +75,7 @@ export const useAddInventoryTicket = () => {
             );
         },
         onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu điều chỉnh tồn kho thất bại');
-            showErrorToast(errorMessage);
+            handleError(normalizeApiError(error));
         },
     });
 };
@@ -101,8 +101,7 @@ export const useDeleteInventoryTicket = () => {
             });
         },
         onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Xóa phiếu điều chỉnh tồn kho thất bại');
-            showErrorToast(errorMessage);
+            handleError(normalizeApiError(error));
         },
     });
 };

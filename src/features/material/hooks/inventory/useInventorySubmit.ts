@@ -3,10 +3,11 @@ import { useQueryClient } from '@tanstack/react-query'; // Add useQueryClient
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
-import { showValidationError, showSuccessToast } from '@/features/material/utils/validationToast'; // Add showSuccessToast
-import { materialKeys } from '@/features/material/hooks/materialKeys'; // Add materialKeys
-
+import { showValidationError, showSuccessToast } from '@/features/material/utils/validationToast';
+import { materialKeys } from '@/features/material/hooks/materialKeys';
+import { normalizeApiError } from '@/core/api/errorHandler';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { handleError } from '@/shared/utils/errorHandler';
 
 type MainTabParams = {
     screen: 'Material';
@@ -147,7 +148,7 @@ export const useInventorySubmit = ({
                 navigateToInventoryList();
             } catch (error) {
                 console.error('Edit Process Failed', error);
-                showValidationError('Có lỗi xảy ra khi cập nhật phiếu');
+                handleError(normalizeApiError(error));
             }
         },
         [inventoryId, items, navigateToInventoryList, note, queryClient]

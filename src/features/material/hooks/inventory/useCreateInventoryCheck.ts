@@ -5,8 +5,9 @@ import {
     AddInventoryCheckItemsRequest,
 } from '@/features/material/types/inventory.types';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { normalizeApiError } from '@/core/api/errorHandler';
+import { handleError } from '@/shared/utils/errorHandler';
 
 export const useCreateInventoryCheck = () => {
     const queryClient = useQueryClient();
@@ -65,14 +66,7 @@ export const useCreateInventoryCheck = () => {
             });
         },
         onError: (error: any) => {
-            const validationErrors =
-                error?.response?.data?.data?.validationErrors || error?.response?.data?.errors;
-            let detailMsg = '';
-            if (validationErrors) {
-                detailMsg = '\n' + JSON.stringify(validationErrors, null, 2);
-            }
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu kiểm kê thất bại') + detailMsg;
-            showErrorToast(errorMessage);
+            handleError(normalizeApiError(error));
         },
     });
 };
