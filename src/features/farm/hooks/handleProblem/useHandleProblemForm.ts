@@ -107,6 +107,8 @@ export const useHandleProblemForm = ({
         updateDryMutation.isPending ||
         createIncidentMutation.isPending ||
         updateIncidentMutation.isPending ||
+        deleteCleanMutation.isPending ||
+        deleteDryMutation.isPending ||
         deleteIncidentMutation.isPending;
 
     const [selectedDate, setSelectedDate] = useState(new Date());
