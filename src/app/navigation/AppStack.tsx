@@ -76,14 +76,12 @@ import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/Delete
 
 // Types
 import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
-import {
-    IMaterial,
-    IWarehouseReceipt,
-    IExportWarehouseReceipt,
-    IInventoryTicket,
-} from '@/features/material/types/material.types';
+import { IMaterial } from '@/features/material/types/material.types';
+import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
+import { IExportWarehouseReceipt } from '@/features/material/types/warehouse.types';
+import { IImportReceipt } from '@/features/material/types/importReceipt.types';
 
 // Wrapped Menu screens - Now using components directly
 const PersonalInformationWithProvider = PersonalInformationScreens;
@@ -161,7 +159,7 @@ export type AppStackParamList = {
     EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
     AddWarehouse: {
         availableMaterials: IMaterial[];
-        onSave?: (data: Omit<IWarehouseReceipt, 'id'>) => void;
+        onSave?: (data: Omit<IImportReceipt, 'id'>) => void;
     };
     AddExportWarehouse: {
         availableMaterials: IMaterial[];

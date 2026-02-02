@@ -12,6 +12,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { Loading } from '@/shared/components/ui/Loading';
 
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -43,6 +44,7 @@ export const HandleProblemScreen = () => {
         getTitle,
         materials,
         initialDocumentIds,
+        isSaving,
     } = useHandleProblemForm({
         pond,
         item,
@@ -65,82 +67,87 @@ export const HandleProblemScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <HeaderFarm
-                type="simple"
-                title={screenTitle}
-                onBack={() => navigation.goBack()}
-                rightAction={
-                    item ? (
-                        <TouchableOpacity onPress={handleDelete} style={styles.headerDeleteButton}>
-                            <DeleteIcon width={20} height={20} color={colors.red[900]} />
-                        </TouchableOpacity>
-                    ) : null
-                }
-            />
+        <Loading isLoading={isSaving}>
+            <View style={styles.container}>
+                <HeaderFarm
+                    type="simple"
+                    title={screenTitle}
+                    onBack={() => navigation.goBack()}
+                    rightAction={
+                        item ? (
+                            <TouchableOpacity
+                                onPress={handleDelete}
+                                style={styles.headerDeleteButton}
+                            >
+                                <DeleteIcon width={20} height={20} color={colors.red[900]} />
+                            </TouchableOpacity>
+                        ) : null
+                    }
+                />
 
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* 1. Thông tin chung */}
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        type="withImage"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        imageUris={imageUris}
-                        onImagesChange={setImageUris}
-                        disabledDate={true}
-                        documentIds={initialDocumentIds}
-                    />
-                    {/* 2. Chọn vật tư */}
-                    <MaterialSelectionBox
-                        selectedMaterials={selectedMaterials}
-                        onMaterialsChange={setSelectedMaterials}
-                        materials={materials}
-                    />
+                <SafeInputLayout>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* 1. Thông tin chung */}
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            type="withImage"
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            imageUris={imageUris}
+                            onImagesChange={setImageUris}
+                            disabledDate={true}
+                            documentIds={initialDocumentIds}
+                        />
+                        {/* 2. Chọn vật tư */}
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            materials={materials}
+                        />
 
-                    {/* 3. Ghi chú (Mô tả sự cố) */}
-                    <SelectionNotesBox
-                        notes={note}
-                        onNotesChange={setNote}
-                        scrollViewRef={scrollViewRef}
-                    />
+                        {/* 3. Ghi chú (Mô tả sự cố) */}
+                        <SelectionNotesBox
+                            notes={note}
+                            onNotesChange={setNote}
+                            scrollViewRef={scrollViewRef}
+                        />
 
-                    <View style={styles.spacer} />
-                </ScrollView>
-            </SafeInputLayout>
+                        <View style={styles.spacer} />
+                    </ScrollView>
+                </SafeInputLayout>
 
-            <ButtonBarFarm
-                primaryTitle={item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handleSavePress}
-                onSecondaryPress={() => navigation.goBack()}
-                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
-            />
+                <ButtonBarFarm
+                    primaryTitle={item ? 'Cập nhật thông tin' : 'Lưu thông tin'}
+                    secondaryTitle="Huỷ"
+                    onPrimaryPress={handleSavePress}
+                    onSecondaryPress={() => navigation.goBack()}
+                    style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                />
 
-            <DatePickerModal
-                visible={showDatePicker}
-                onClose={() => setShowDatePicker(false)}
-                date={selectedDate}
-                onSelectDate={d => {
-                    const newDate = new Date(selectedDate);
-                    newDate.setFullYear(d.getFullYear());
-                    newDate.setMonth(d.getMonth());
-                    newDate.setDate(d.getDate());
-                    setSelectedDate(newDate);
-                }}
-            />
-            <ConfirmationDeleteModal
-                visible={showDeleteModal}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-            />
-        </View>
+                <DatePickerModal
+                    visible={showDatePicker}
+                    onClose={() => setShowDatePicker(false)}
+                    date={selectedDate}
+                    onSelectDate={d => {
+                        const newDate = new Date(selectedDate);
+                        newDate.setFullYear(d.getFullYear());
+                        newDate.setMonth(d.getMonth());
+                        newDate.setDate(d.getDate());
+                        setSelectedDate(newDate);
+                    }}
+                />
+                <ConfirmationDeleteModal
+                    visible={showDeleteModal}
+                    onConfirm={confirmDelete}
+                    onCancel={cancelDelete}
+                />
+            </View>
+        </Loading>
     );
 };
 

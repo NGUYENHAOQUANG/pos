@@ -11,18 +11,6 @@ export interface IMaterialGroupV2 {
     editor: string | null;
 }
 
-export interface CreateMaterialGroupV2Request {
-    name: string;
-    code: string;
-    description?: string;
-}
-
-export interface UpdateMaterialGroupV2Request {
-    name?: string;
-    code?: string;
-    description?: string;
-}
-
 export type GetMaterialGroupsV2Response = IApiResponse<IPaginate<IMaterialGroupV2>>;
 export type GetMaterialGroupByIdV2Response = IApiResponse<IMaterialGroupV2>;
 
@@ -30,19 +18,6 @@ export type GetMaterialGroupByIdV2Response = IApiResponse<IMaterialGroupV2>;
 export interface GetMaterialGroupsV2Params {
     SearchText?: string;
     Code?: string;
-    Id?: string;
-    CreatedAt?: string;
-    CreateAtFrom?: string;
-    CreateAtTo?: string;
-    Page?: number;
-    PageSize?: number;
-    OrderBy?: string;
-}
-
-export interface GetMaterialTypesV2Params {
-    SearchText?: string;
-    MaterialTypeId?: string;
-    IsActive?: boolean;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;

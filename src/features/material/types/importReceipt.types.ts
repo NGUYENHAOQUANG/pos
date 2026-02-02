@@ -67,4 +67,23 @@ export interface CreateImportReceiptRequest {
     status?: ImportReceiptStatus;
 }
 
+export interface IImportMaterialItem {
+    id: string;
+    materialName: string;
+    quantity: string;
+    price: string;
+    unit?: string;
+    // Helper for total calculation
+    total?: number;
+}
+
+export interface IImportReceipt {
+    id: string;
+    date: Date | string;
+    supplier?: string;
+    materials: IImportMaterialItem[];
+    totalAmount: number;
+    documentIds?: string[];
+}
+
 export type CreateImportReceiptResponse = IApiResponse<string>;

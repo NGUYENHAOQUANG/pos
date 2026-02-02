@@ -16,10 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import {
-    IExportWarehouseReceipt,
-    MaterialGroupType,
-} from '@/features/material/types/material.types';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 import { ExportWarehouseReceiptItems } from '@/features/material/components/warehouse/ExportWarehouseReceiptItems';
 
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
@@ -32,6 +29,7 @@ if (Platform.OS === 'android') {
 
 import { RefreshControl } from 'react-native';
 import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
+import { IExportWarehouseReceipt } from '../../types/warehouse.types';
 
 interface ExportWarehouseMaterialListProps {
     receipts: IExportWarehouseReceipt[];

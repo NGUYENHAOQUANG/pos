@@ -7,12 +7,12 @@ export interface ExportReceipt {
     warehouseName?: string;
     pondId?: string;
     pondName?: string;
-    receiverName?: string; // Tên người nhận (nếu có)
-    farm?: string; // Alias cho pondName/warehouseName trong UI
+    receiverName?: string;
+    farm?: string;
     status?: string;
     totalItems?: number;
     totalAmount?: number;
-    notes?: string; // Standardized to match ImportReceipt
+    notes?: string;
     approverId?: string | null;
     approvedAt?: string | null;
     isRejected?: boolean;
@@ -22,7 +22,7 @@ export interface ExportReceipt {
     editedAt?: string;
     creator?: any;
     editor?: any;
-    materials?: any[]; // To support UI compatibility (even if empty from List API)
+    materials?: any[];
 }
 
 export interface ExportReceiptItemRequest {
@@ -33,7 +33,7 @@ export interface ExportReceiptItemRequest {
 export interface CreateExportReceiptRequest {
     warehouseId: string;
     pondId?: string;
-    date?: string; // Added date field
+    date?: string;
     note?: string;
     documentIds?: string[];
     items: ExportReceiptItemRequest[];
@@ -62,10 +62,10 @@ export interface GetExportReceiptsParams {
     Page?: number;
     PageSize?: number;
     OrderBy?: string;
-    Search?: string; // Support universal search
+    Search?: string;
 }
 
 export type GetExportReceiptsResponse = IApiResponse<IPaginate<ExportReceipt>>;
 export type GetExportReceiptByIdResponse = IApiResponse<ExportReceipt>;
 
-export type { GetExportReceiptsParams as GetExportWarehouseParams }; // Alias for backward compatibility if needed
+export type { GetExportReceiptsParams as GetExportWarehouseParams };

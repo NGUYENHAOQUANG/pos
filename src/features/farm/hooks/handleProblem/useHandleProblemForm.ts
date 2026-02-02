@@ -12,6 +12,8 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { useWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { documentApi } from '@/features/material/api/documentApi';
+import { IDocument } from '@/shared/types/common.types';
 
 import {
     useCreateCleanRenovation,
@@ -23,8 +25,17 @@ import {
     useUpdateDryRenovation,
     useDeleteDryRenovation,
 } from '@/features/farm/hooks/useDryRenovation';
+import {
+    useCreateIncident,
+    useUpdateIncident,
+    useDeleteIncident,
+} from '@/features/farm/hooks/useIncidentData';
 import { ICleanRenovationDetail } from '@/features/farm/types/cleanRenovation.types';
 import { IDryRenovationDetail } from '@/features/farm/types/dryRenovation.types';
+import type {
+    CreateIncidentPayload,
+    IncidentDetailMaterial,
+} from '@/features/farm/types/incident.types';
 import { IMaterial } from '@/features/material/types/material.types';
 
 interface UseHandleProblemFormProps {
@@ -85,11 +96,20 @@ export const useHandleProblemForm = ({
     const updateDryMutation = useUpdateDryRenovation();
     const deleteDryMutation = useDeleteDryRenovation();
 
+    const createIncidentMutation = useCreateIncident();
+    const updateIncidentMutation = useUpdateIncident();
+    const deleteIncidentMutation = useDeleteIncident();
+
     const isSaving =
         createCleanMutation.isPending ||
         updateCleanMutation.isPending ||
         createDryMutation.isPending ||
-        updateDryMutation.isPending;
+        updateDryMutation.isPending ||
+        createIncidentMutation.isPending ||
+        updateIncidentMutation.isPending ||
+        deleteCleanMutation.isPending ||
+        deleteDryMutation.isPending ||
+        deleteIncidentMutation.isPending;
 
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedMaterials, setSelectedMaterials] = useState<
@@ -117,11 +137,15 @@ export const useHandleProblemForm = ({
                 });
                 setSelectedMaterials(enrichedMaterials);
             }
-            if (item.images) {
-                setImageUris(item.images);
-            }
-            if (item.meta && item.meta.documentIds) {
+            // Resolve image URLs: incident/API có documentIds → gọi documentApi.getUrls; fallback item.images (Rửa ao/Phơi ao)
+            if (item.documentIds?.length) {
+                setInitialDocumentIds(item.documentIds);
+                documentApi.getUrls(item.documentIds).then(setImageUris);
+            } else if (item.meta?.documentIds?.length) {
                 setInitialDocumentIds(item.meta.documentIds);
+                documentApi.getUrls(item.meta.documentIds).then(setImageUris);
+            } else if (item.images?.length) {
+                setImageUris(item.images);
             }
             if (item.date) {
             }
@@ -143,8 +167,6 @@ export const useHandleProblemForm = ({
 
     const handleError = (err: unknown) => {
         const error = err as NormalizedError;
-        console.log(error);
-
         if (error.type === 'VALIDATION_ERROR') {
             const firstFieldKey = Object.keys(error.fields)[0];
             if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
@@ -169,6 +191,9 @@ export const useHandleProblemForm = ({
         Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
     };
 
+    /** Map documentIds (from upload) to IDocument[] for create payload – dùng common.types.IDocument */
+    const mapDocumentIdsToDocuments = (ids: string[]): IDocument[] => ids.map(id => ({ id }));
+
     const handleSave = (documentIds: string[]) => {
         if (selectedMaterials.length === 0) {
             Toast.show({
@@ -182,10 +207,26 @@ export const useHandleProblemForm = ({
 
         if (!pond?.id) return;
 
-        const apiMaterials = selectedMaterials.map(m => ({
-            warehouseItemId: m.material.id,
-            quantity: m.quantity,
-        }));
+        const documents: IDocument[] = mapDocumentIdsToDocuments(documentIds);
+        const documentIdsForApi = documents.map(d => d.id);
+
+        // material.id từ danh sách warehouse items = warehouseItemId (API incident/clean/dry)
+        const apiMaterials = selectedMaterials
+            .filter(m => m.material?.id)
+            .map(m => ({
+                warehouseItemId: m.material.id,
+                quantity: Number(m.quantity) || 0,
+            }));
+
+        if (apiMaterials.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng chọn vật tư có id hợp lệ',
+                position: 'top',
+                visibilityTime: 3000,
+            });
+            return;
+        }
 
         const commonPayload = {
             notes: note,
@@ -201,7 +242,7 @@ export const useHandleProblemForm = ({
                         pondId: pond.id,
                         id: item.id,
                         detail,
-                        documentIds,
+                        documentIds: documentIdsForApi,
                     },
                     {
                         onSuccess: () => {
@@ -213,12 +254,11 @@ export const useHandleProblemForm = ({
                     }
                 );
             } else {
-                // Create
                 createCleanMutation.mutate(
                     {
                         pondId: pond.id,
                         detail,
-                        documentIds,
+                        documentIds: documentIdsForApi,
                     },
                     {
                         onSuccess: () => {
@@ -242,7 +282,7 @@ export const useHandleProblemForm = ({
                         pondId: pond.id,
                         id: item.id,
                         detail,
-                        documentIds,
+                        documentIds: documentIdsForApi,
                     },
                     {
                         onSuccess: () => {
@@ -254,12 +294,12 @@ export const useHandleProblemForm = ({
                     }
                 );
             } else {
-                // Create
+                // Create – payload dùng documentIds từ IDocument[] (map từ common.types)
                 createDryMutation.mutate(
                     {
                         pondId: pond.id,
                         detail,
-                        documentIds,
+                        documentIds: documentIdsForApi,
                     },
                     {
                         onSuccess: () => {
@@ -274,7 +314,55 @@ export const useHandleProblemForm = ({
             return;
         }
 
-        // Fallback for TROUBLESHOOTING or others (Mock/Local Store)
+        if (currentJobType === 'TROUBLESHOOTING') {
+            const incidentMaterials: IncidentDetailMaterial[] = apiMaterials;
+            const incidentDetail = {
+                materials: incidentMaterials,
+                notes: note || '',
+            };
+            const payload: CreateIncidentPayload = {
+                incidentDetail,
+                ...(documentIdsForApi.length > 0 && { documentIds: documentIdsForApi }),
+            };
+            if (item) {
+                updateIncidentMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        id: item.id,
+                        payload: {
+                            incidentDetail,
+                            ...(documentIdsForApi.length > 0 && { documentIds: documentIdsForApi }),
+                        },
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showEditJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            } else {
+                createIncidentMutation.mutate(
+                    {
+                        pondId: pond.id,
+                        payload,
+                    },
+                    {
+                        onSuccess: () => {
+                            onSaveSuccess?.();
+                            showAddJobSuccessToast(currentJobType);
+                            navigation.goBack();
+                        },
+                        onError: handleError,
+                    }
+                );
+            }
+            return;
+        }
+
+        // Fallback for others (Mock/Local Store)
         const currentItems = getPondJobItems(pond.id, currentJobType);
         const timeString = selectedDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',
@@ -344,6 +432,20 @@ export const useHandleProblemForm = ({
 
         if (currentJobType === 'SUN_DRY_POND') {
             deleteDryMutation.mutate(
+                { pondId: pond.id, id: item.id },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
+                    onError: handleError,
+                }
+            );
+            setShowDeleteModal(false);
+            return;
+        }
+
+        if (currentJobType === 'TROUBLESHOOTING') {
+            deleteIncidentMutation.mutate(
                 { pondId: pond.id, id: item.id },
                 {
                     onSuccess: () => {
