@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { warehouseApi } from '@/features/material/api/warehouseApi';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, borderRadius } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -20,7 +21,7 @@ import { useCreateCycle, useUpdateCycle, useDeleteCycle } from '@/features/farm/
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+// import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 import { IShrimpSeed } from '@/features/material/types/material.types';
@@ -62,11 +63,48 @@ export const CreateCycleScreen: React.FC = () => {
         ZoneId: effectiveZoneId,
     });
 
-    // Default to the first warehouse found for this zone
-    const defaultWarehouseId = warehouses?.[0]?.id;
+    // Default to the first warehouse found for this zone (unused, replaced by all warehouses fetch)
+    // const defaultWarehouseId = warehouses?.[0]?.id;
 
-    // 3. Fetch Shrimp Seeds using the matching warehouse ID
-    const { data: shrimpSeeds } = useShrimpSeeds(defaultWarehouseId);
+    // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
+    // (Cycle might use seed from a warehouse that isn't the first one)
+    const { data: shrimpSeeds } = useQuery({
+        queryKey: ['shrimp-seeds-all-warehouses', warehouses],
+        queryFn: async () => {
+            if (!warehouses || warehouses.length === 0) return [];
+
+            // Loop through all warehouses and fetch seeds
+            try {
+                // Determine which warehouses to check.
+                // If we have many, this might be slow, but typically there are few.
+                const promises = warehouses.map(w =>
+                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                );
+
+                const results = await Promise.all(promises);
+
+                // Flatten results using reduce for compatibility
+                const allItems = results.reduce<any[]>((acc, r: any) => {
+                    if (r?.data?.items) {
+                        return acc.concat(r.data.items);
+                    }
+                    return acc;
+                }, []);
+
+                // Deduplicate by ID just in case (though IDs should be unique)
+                const seen = new Set();
+                return allItems.filter((item: any) => {
+                    if (seen.has(item.id)) return false;
+                    seen.add(item.id);
+                    return true;
+                });
+            } catch (error) {
+                console.warn('Failed to fetch seeds from warehouses', error);
+                return [];
+            }
+        },
+        enabled: !!warehouses && warehouses.length > 0,
+    });
 
     // 3. Fetch Seasons (Lifted from Form)
     // Use effectiveZoneId and store logic to get code if needed
@@ -210,19 +248,39 @@ export const CreateCycleScreen: React.FC = () => {
         enabled: !!pondId && !!initialData?.id,
     });
 
-    // Update form when detail data arrives (if meaningful)
+    // Update form when detail data arrives
     React.useEffect(() => {
         if (detailData) {
             setCycleData(prev => {
                 const newData = { ...prev };
+                let hasChanges = false;
+
+                // Sync Breed/WarehouseItem
                 const backendBreed = detailData.breedSource || detailData.warehouseItemId;
                 if (backendBreed && backendBreed !== prev.breedSource) {
                     newData.breedSource = backendBreed;
                     // Try to find name in options or use backend name
                     const opt = breedOptions.find(b => b.value === backendBreed);
                     newData.breedName = opt?.label || detailData.breedName || prev.breedName;
+                    hasChanges = true; // Mark as changed
                 }
-                return newData;
+
+                // Sync Season
+                // detailData.season can be object { id, name } or string ID
+                let backendSeasonId: string | undefined;
+                if (detailData.season) {
+                    backendSeasonId =
+                        typeof detailData.season === 'object'
+                            ? detailData.season.id
+                            : detailData.season;
+                }
+
+                if (backendSeasonId && backendSeasonId !== prev.season) {
+                    newData.season = backendSeasonId;
+                    hasChanges = true;
+                }
+
+                return hasChanges ? newData : prev;
             });
         }
     }, [detailData, breedOptions]);
