@@ -10,7 +10,10 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
+import {
+    DropdownMaterial,
+    DropdownOption,
+} from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
 import { Input } from '@/shared/components/forms/Input';
