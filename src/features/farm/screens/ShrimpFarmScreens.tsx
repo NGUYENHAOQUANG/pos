@@ -29,6 +29,7 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
+import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
 
 const JOB_TYPES = {
     FEED: 'FEED' as const,
@@ -169,6 +170,9 @@ export const ShrimpFarmScreens: React.FC = () => {
     const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pond?.id || '');
     // Fetch siphon records from API
     const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pond?.id || '');
+    // Fetch water supply records from API
+    const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
+
     // Fetch environment measurements
     const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pond?.id || '', new Date());
     const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pond?.id || '');
@@ -216,6 +220,11 @@ export const ShrimpFarmScreens: React.FC = () => {
                     // Override with API data for SIPHON
                     if (jobType === JOB_TYPES.SIPHON) {
                         items = apiSiphonJobs;
+                    }
+
+                    // Override with API data for WATER_CHANGE
+                    if (jobType === JOB_TYPES.WATER_CHANGE) {
+                        items = apiWaterSupplyJobs;
                     }
 
                     // Override with API data for ENVIRONMENT
@@ -281,6 +290,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         apiMeasureSizeJobs,
         apiShrimpInspectionJobs,
         apiSiphonJobs,
+        apiWaterSupplyJobs,
         apiEnvJobs,
         apiIncidentJobs,
         apiCleanRenovationJobs,

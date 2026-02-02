@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
@@ -7,28 +7,42 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing, borderRadius } from '@/styles';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+// import { HeaderFarm } from '@/features/farm/components/HeaderFarm'; // Replaced with custom header like Siphon
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    GeneralInfoBox,
+    GeneralInfoBoxRef,
+} from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import {
+    MaterialSelectionBox,
+    SelectedMaterialItem,
+} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+// import { useFarmStore } from '@/features/farm/store/farmStore'; // Removed
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
-import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
+import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
-// Mock data vật tư
-const MOCK_MATERIALS: IMaterial[] = [
-    { id: '1', name: 'Zeolite', group: 'Khoáng', unit: 'kg', remaining: 50 },
-    { id: '2', name: 'Chlorine 70% Granules', group: 'Diệt khuẩn', unit: 'kg', remaining: 20 },
-    { id: '3', name: 'Vôi nóng', group: 'Xử lý', unit: 'kg', remaining: 100 },
-];
+// API & Hooks
+import { waterSupplyApi } from '@/features/farm/api/waterSupplyApi';
+import {
+    useCreateWaterSupplyRecord,
+    useUpdateWaterSupplyRecord,
+    useDeleteWaterSupplyRecord,
+} from '@/features/farm/hooks/useWaterSupplyRecords';
+import { CreateWaterSupplyCommand } from '@/features/farm/types/waterSupply.types';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { documentApi } from '@/features/material/api/documentApi';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupply'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -36,45 +50,177 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 export const WaterSupplyScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
+    const insets = useSafeAreaInsets();
+    const { setTabBarVisible } = useTabBarVisibility();
 
     const { pond, item } = route.params || {};
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    const createMutation = useCreateWaterSupplyRecord();
+    const updateMutation = useUpdateWaterSupplyRecord();
+    const deleteMutation = useDeleteWaterSupplyRecord();
+
+    const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    // Initial Data
+    const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
 
     const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Thông số nước
-    const [targetLevel, setTargetLevel] = useState(''); // H_target
-    const [supplyLevel, setSupplyLevel] = useState(''); // H_add
+    const [targetLevel, setTargetLevel] = useState(meta.targetLevel?.toString() || ''); // H_target
+    const [supplyLevel, setSupplyLevel] = useState(meta.supplyLevel?.toString() || ''); // H_add
 
     // Vật tư & Ghi chú
-    const [selectedMaterials, setSelectedMaterials] = useState<
-        Array<{ material: IMaterial; quantity: number; unit: string }>
-    >([]);
-    const [note, setNote] = useState('');
+    const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
+    const [note, setNote] = useState(item?.note || '');
+
+    // Images
     const [imageUris, setImageUris] = useState<string[]>([]);
+    const [documentIds, setDocumentIds] = useState<string[]>([]);
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const scrollViewRef = useRef<ScrollView>(null);
+
+    // --- Hide Tab Bar ---
+    useEffect(() => {
+        setTabBarVisible(false);
+    }, [setTabBarVisible]);
+
+    // --- Fetch Materials (Warehouse) ---
+    const { data: allMaterials = [] } = useMaterials();
+    const { data: warehouses = [] } = useWarehouses({ ZoneId: pond?.zoneId });
+    const warehouseId = warehouses?.[0]?.id; // Assume first warehouse
+    const { data: warehouseItemsData } = useWarehouseItems(warehouseId, undefined, {
+        enabled: !!warehouseId,
+    });
+    const warehouseItems = useMemo(() => warehouseItemsData?.items || [], [warehouseItemsData]);
+
+    // Filter appropriate materials (Logic from Siphon or generic?)
+    // User didn't specify material type restriction for Water Supply, but usually treatments use minerals/chemicals.
+    // I will list all available items from warehouse for flexibility unless specified.
+    // Siphon filtered for TOOLS, but Water Supply might need chemicals.
+    // Let's allow all non-feed items or just all items?
+    // Existing code used mock: Zeolite, Chlorine, Vôi nóng (Minerals/Chemicals).
+    // Let's enable all items for now, or filter by Group if needed.
+    // Usually 'Khoáng', 'Diệt khuẩn', 'Xử lý' are common.
+
+    const materials = useMemo(() => {
+        if (!warehouseItems.length || !allMaterials.length) return [];
+
+        return warehouseItems.map(item => {
+            const materialDef = allMaterials.find(m => m.id === item.materialId);
+            return {
+                id: item.id, // warehouseItemId (dùng làm key cho UI)
+                materialDefId: item.materialId, // ID định danh vật tư (dùng để gửi API)
+                name: item.materialName || materialDef?.name,
+                group: materialDef?.group,
+                unit: item.unitId,
+                unitName: item.unitName || materialDef?.unitName,
+                remaining: item.quantity,
+            } as IMaterial & { materialDefId: string }; // Mở rộng type tạm thời
+        });
+    }, [warehouseItems, allMaterials]);
 
     // --- Load Data khi Edit ---
     useEffect(() => {
-        if (item) {
-            // Do not setSelectedDate from item.date/time, keep as current time (new Date())
+        const fetchDetail = async () => {
+            if (pond?.id && item?.id) {
+                try {
+                    const response = await waterSupplyApi.getDetail(pond.id, item.id);
+                    if (response && response.data) {
+                        const detail = response.data; // IWaterSupplyRecord
+                        console.log('API Detail Response:', JSON.stringify(detail, null, 2));
 
-            const meta = (item.meta as WaterSupplyMeta) || ({} as WaterSupplyMeta);
-            setTargetLevel(meta?.targetLevel?.toString() || '');
-            setSupplyLevel(meta?.supplyLevel?.toString() || '');
-            setNote(item.note || '');
-            if (item.materials) {
-                setSelectedMaterials(item.materials);
+                        // Date
+                        if (detail.createdAt) {
+                            setSelectedDate(new Date(detail.createdAt));
+                        }
+
+                        // Detail fields
+                        if (detail.waterChangeDetail) {
+                            setTargetLevel(
+                                detail.waterChangeDetail.targetWaterLevel?.toString() ||
+                                    detail.waterChangeDetail.TargetWaterLevel?.toString() ||
+                                    ''
+                            );
+                            setSupplyLevel(
+                                detail.waterChangeDetail.waterAdded?.toString() ||
+                                    detail.waterChangeDetail.WaterAdded?.toString() ||
+                                    ''
+                            );
+
+                            // Check both 'note' and 'notes'
+                            setNote(
+                                detail.waterChangeDetail.note ||
+                                    detail.waterChangeDetail.notes ||
+                                    ''
+                            );
+
+                            // Load Images
+                            const docIds =
+                                detail.waterChangeDetail.documentIds || detail.documentIds;
+                            if (docIds && docIds.length > 0) {
+                                setDocumentIds(docIds);
+                                documentApi
+                                    .getUrls(docIds)
+                                    .then(urls => setImageUris(urls))
+                                    .catch(err => console.error('Fetch image URLs failed', err));
+                            }
+
+                            // Materials
+                            if (detail.waterChangeDetail.materials && warehouseItems.length > 0) {
+                                const mappedMaterials: SelectedMaterialItem[] =
+                                    detail.waterChangeDetail.materials
+                                        .map((m: any) => {
+                                            // API trả về materialId hoặc warehouseItemId
+                                            const foundItem = warehouseItems.find(
+                                                wi =>
+                                                    wi.materialId === m.materialId ||
+                                                    wi.id === m.warehouseItemId ||
+                                                    wi.id === m.materialId ||
+                                                    wi.materialId === m.MaterialId // PascalCase check (m.MaterialId)
+                                            );
+                                            const def = allMaterials.find(
+                                                amd => amd.id === foundItem?.materialId
+                                            );
+
+                                            if (foundItem) {
+                                                return {
+                                                    material: {
+                                                        id: foundItem.id,
+                                                        materialDefId: foundItem.materialId,
+                                                        name:
+                                                            foundItem.materialName ||
+                                                            def?.name ||
+                                                            '',
+                                                        unitName:
+                                                            foundItem.unitName ||
+                                                            def?.unitName ||
+                                                            '',
+                                                        remaining: foundItem.quantity,
+                                                    } as any,
+                                                    quantity: m.quantity,
+                                                    unit: foundItem.unitName || def?.unitName || '',
+                                                };
+                                            }
+                                            return null;
+                                        })
+                                        .filter((m: any) => m !== null);
+                                setSelectedMaterials(mappedMaterials);
+                            }
+                        }
+                        // ...
+                        // ...
+                    }
+                } catch (e) {
+                    console.error('Fetch detail error:', e);
+                }
             }
-        }
-    }, [item]);
+        };
 
+        fetchDetail();
+    }, [pond?.id, item?.id, warehouseItems, allMaterials]);
     // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
     const calculateInfo = useMemo(() => {
         // 1. Kiểm tra nếu chưa nhập liệu thì trả về '-'
@@ -129,15 +275,7 @@ export const WaterSupplyScreen = () => {
         };
     }, [targetLevel, supplyLevel, pond]);
 
-    // const handleDateSelect = (date: Date) => {
-    //   const newDate = new Date(selectedDate);
-    //   newDate.setFullYear(date.getFullYear());
-    //   newDate.setMonth(date.getMonth());
-    //   newDate.setDate(date.getDate());
-    //   setSelectedDate(newDate);
-    // };
-
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!targetLevel || !supplyLevel) {
             Toast.show({
                 type: 'error',
@@ -160,96 +298,97 @@ export const WaterSupplyScreen = () => {
 
         if (!pond?.id) return;
 
-        const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
-        const timeString = selectedDate.toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-        const dateString = selectedDate.toLocaleDateString('vi-VN'); // dd/mm/yyyy
+        const currentDocumentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
 
-        const itemData = {
-            time: timeString,
-            date: dateString,
-            note: note || undefined,
-            materials: selectedMaterials,
-            meta: {
-                targetLevel: targetLevel || undefined,
-                supplyLevel: supplyLevel || undefined,
-                drainLevel: calculateInfo.drainLevel !== '-' ? calculateInfo.drainLevel : undefined,
-                volumeAfterDrain:
-                    calculateInfo.volumeAfterDrain !== '-'
-                        ? calculateInfo.volumeAfterDrain
-                        : undefined,
-                volumeSupply:
-                    calculateInfo.volumeSupply !== '-' ? calculateInfo.volumeSupply : undefined,
-                volumeAfterSupply:
-                    calculateInfo.volumeAfterSupply !== '-'
-                        ? calculateInfo.volumeAfterSupply
-                        : undefined,
+        // Payload
+        // Payload chuẩn theo Swagger
+        const payload: CreateWaterSupplyCommand = {
+            waterChangeDetail: {
+                documentIds: currentDocumentIds, // Array string
+                targetWaterLevel: parseFloat(targetLevel),
+                waterAdded: parseFloat(supplyLevel),
+                waterRemoved: 0, // Default 0
+                previousVolume: 0, // Default 0
+                finalVolume: 0, // Default 0
+                addedVolume: 0, // Default 0
+                note: note, // "note" (số ít)
+                materials: selectedMaterials.map(m => ({
+                    materialId: (m.material as any).materialDefId || m.material.id,
+                    quantity: m.quantity,
+                })),
             },
         };
 
-        if (item) {
-            // UPDATE
-            const updatedItems = currentItems.map(i =>
-                i.id === item.id ? { ...i, ...itemData } : i
-            );
-            updatePondJob(pond.id, 'WATER_CHANGE', updatedItems);
-            showEditJobSuccessToast('WATER_CHANGE');
-        } else {
-            // CREATE
-            let maxIndex = 0;
-            currentItems.forEach(i => {
-                const match = i.label.match(/Lần (\d+)/);
-                if (match) {
-                    const idx = parseInt(match[1], 10);
-                    if (idx > maxIndex) maxIndex = idx;
-                }
+        // console.log('HandleSave WaterSupply - Payload:', payload); // Cleaned up to avoid noise, API will log request body
+
+        try {
+            if (item) {
+                // UPDATE
+                await updateMutation.mutateAsync({
+                    pondId: pond.id,
+                    id: item.id,
+                    data: payload,
+                });
+                generalInfoBoxRef.current?.markAsSaved();
+                showEditJobSuccessToast('WATER_CHANGE');
+            } else {
+                // CREATE
+                await createMutation.mutateAsync({
+                    pondId: pond.id,
+                    data: payload,
+                });
+                generalInfoBoxRef.current?.markAsSaved();
+                showAddJobSuccessToast('WATER_CHANGE');
+            }
+            navigation.goBack();
+        } catch (error) {
+            console.error('Save error', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Lưu thất bại',
+                text2: 'Vui lòng thử lại',
             });
-            const nextIndex = maxIndex + 1;
-
-            const newItem = {
-                id: Date.now().toString(),
-                label: `Lần ${nextIndex}`,
-                ...itemData,
-                pondId: pond.id,
-            };
-            updatePondJob(pond.id, 'WATER_CHANGE', [...currentItems, newItem]);
-            showAddJobSuccessToast('WATER_CHANGE');
         }
-
-        navigation.goBack();
     };
 
     const handleDelete = () => {
         setShowDeleteModal(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (pond?.id && item?.id) {
-            const currentItems = getPondJobItems(pond.id, 'WATER_CHANGE');
-            const updatedItems = currentItems.filter(i => i.id !== item.id);
-            updatePondJob(pond.id, 'WATER_CHANGE', updatedItems);
-            navigation.goBack();
+            try {
+                await deleteMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                setShowDeleteModal(false);
+                navigation.goBack();
+                Toast.show({ type: 'success', text1: 'Xóa thành công' });
+            } catch (error) {
+                console.error('Delete error', error);
+                Toast.show({ type: 'error', text1: 'Xóa thất bại' });
+            }
         }
-        setShowDeleteModal(false);
     };
 
-    const renderHeaderRight = () =>
-        item ? (
-            <TouchableOpacity onPress={handleDelete} style={styles.headerDeleteButton}>
-                <DeleteIcon width={20} height={20} color={colors.red[900]} />
-            </TouchableOpacity>
-        ) : null;
+    const handleBack = () => {
+        if (navigation.canGoBack()) navigation.goBack();
+    };
 
     return (
         <View style={styles.container}>
-            <HeaderFarm
-                type="simple"
-                title={item ? 'Chỉnh sửa Thay/Cấp nước' : 'Thay/Cấp nước'}
-                onBack={() => navigation.goBack()}
-                rightAction={renderHeaderRight()}
-            />
+            {/* Header */}
+            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>
+                    {item ? 'Chỉnh sửa Thay/Cấp nước' : 'Thay/Cấp nước'}
+                </Text>
+                {item ? (
+                    <DeleteButton onPress={handleDelete} />
+                ) : (
+                    <View style={styles.headerSpacer} />
+                )}
+            </View>
 
             <View style={styles.contentContainer}>
                 <SafeInputLayout>
@@ -261,11 +400,13 @@ export const WaterSupplyScreen = () => {
                     >
                         {/* 1. Thông tin chung */}
                         <GeneralInfoBox
+                            ref={generalInfoBoxRef}
                             type="withImage"
                             date={selectedDate}
                             onDateChange={setSelectedDate}
                             imageUris={imageUris}
                             onImagesChange={setImageUris}
+                            documentIds={documentIds}
                             disabledDate={true}
                         />
 
@@ -286,7 +427,7 @@ export const WaterSupplyScreen = () => {
                         <MaterialSelectionBox
                             selectedMaterials={selectedMaterials}
                             onMaterialsChange={setSelectedMaterials}
-                            materials={MOCK_MATERIALS}
+                            materials={materials}
                         />
 
                         {/* 4. Ghi chú */}
@@ -324,62 +465,41 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: 12,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    headerTitle: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.text,
+        textAlign: 'center',
+    },
+    headerSpacer: {
+        width: 40,
+    },
     contentContainer: {
         flex: 1,
     },
     scrollContent: {
         paddingBottom: 100,
-    },
-    section: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginTop: spacing.sm,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-            },
-            android: {
-                elevation: 1,
-            },
-        }),
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: spacing.xs,
-        fontWeight: '500',
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: spacing.sm,
-    },
-    required: {
-        color: colors.error,
-    },
-    noteInput: {
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: borderRadius.sm,
-        padding: spacing.md,
-        minHeight: 100,
-        fontSize: 14,
-        color: colors.text,
-    },
-
-    headerDeleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.red[900],
-        backgroundColor: colors.white,
     },
     spacer: {
         height: 80,
