@@ -26,7 +26,8 @@ export const incidentApi = {
     },
 
     /**
-     * GET /pond/{pondId}/incident – list incidents with optional query params
+     * GET /pond/{pondId}/incident – list incidents with optional query params.
+     * Map PaginationParams (page, limit) → Page, PageSize cho backend.
      */
     list: async (pondId: string, params?: GetIncidentListParams): Promise<IncidentListResponse> => {
         const response = await apiClient.get<IncidentListResponse>(

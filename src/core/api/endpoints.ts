@@ -175,6 +175,9 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/exportreceipt/${id}`,
         ITEMS: (id: string) => `/exportreceipt/${id}/items`,
         UPDATE_ITEMS: (id: string) => `/exportreceipt/${id}/items`,
+        SUBMISSION: (id: string) => `/exportreceipt/${id}/submission`,
+        APPROVAL: (id: string) => `/exportreceipt/${id}/approval`,
+        REJECTION: (id: string) => `/exportreceipt/${id}/rejection`,
     },
     SUPPLIER: {
         LIST: '/supplier',

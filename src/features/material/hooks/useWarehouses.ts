@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
-import { GetWarehousesParams } from '@/features/material/types/material.types';
-import { materialKeys } from './materialKeys';
+import { GetWarehousesParams } from '@/features/material/types/warehouse.types';
+import { materialKeys } from '@/features/material/hooks/materialKeys';
 
 export const useWarehouses = (params?: GetWarehousesParams) => {
     return useQuery({

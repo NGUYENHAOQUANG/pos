@@ -24,6 +24,26 @@ export const inventoryApi = {
         );
         return data;
     },
+    update: async (id: string, body: { note?: string }): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.patch<IApiResponse<any>>(
+            `${API_ENDPOINTS.INVENTORY_CHECK.LIST}/${id}`,
+            body
+        );
+        return data;
+    },
+    getItems: async (checkId: string, params?: any): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.get<IApiResponse<any>>(
+            API_ENDPOINTS.INVENTORY_CHECK.ITEMS(checkId),
+            {
+                params: {
+                    ...params,
+                    InventoryCheckId: checkId, // Add explicit query param as per Swagger
+                    PageSize: 100, // Ensure we get all items
+                },
+            }
+        );
+        return data;
+    },
     create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<{ id: string }>> => {
         const { data } = await apiClient.post<IApiResponse<{ id: string }>>(
             API_ENDPOINTS.INVENTORY_CHECK.CREATE,
@@ -72,6 +92,12 @@ export const inventoryApi = {
     reject: async (id: string): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.REJECTION(id)
+        );
+        return data;
+    },
+    deleteItem: async (checkId: string, itemId: string): Promise<IApiResponse<any>> => {
+        const { data } = await apiClient.delete<IApiResponse<any>>(
+            API_ENDPOINTS.INVENTORY_CHECK.DELETE_ITEM(checkId, itemId)
         );
         return data;
     },

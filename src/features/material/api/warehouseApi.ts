@@ -5,7 +5,7 @@ import {
     GetWarehousesParams,
     IWarehouse,
     GetShrimpSeedsResponse,
-} from '@/features/material/types/material.types';
+} from '@/features/material/types/warehouse.types';
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
 
 export type GetWarehousesResponse = IApiResponse<IPaginate<IWarehouse>>;

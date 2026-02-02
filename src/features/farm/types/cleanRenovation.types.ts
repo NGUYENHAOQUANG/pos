@@ -1,4 +1,10 @@
-import { IApiResponse, IPaginate, PaginationParams, IDocument } from '@/shared/types/common.types';
+import {
+    IApiResponse,
+    IPaginate,
+    PaginationParams,
+    IDocument,
+    ICreatorEditor,
+} from '@/shared/types/common.types';
 
 export interface ICleanRenovationMaterial {
     warehouseItemId: string;
@@ -15,8 +21,8 @@ export interface ICleanRenovation {
     no: number;
     createdAt: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor;
+    editor?: ICreatorEditor;
     pondId: string;
     detail?: ICleanRenovationDetail;
     documentIds?: string[];

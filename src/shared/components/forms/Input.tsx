@@ -20,7 +20,7 @@ import {
     ViewStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { InputItem } from '@ant-design/react-native';
+import { Input as AntdInput } from '@ant-design/react-native';
 
 export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 'value'> {
     /** Label text displayed above the input */
@@ -146,9 +146,9 @@ export function Input({
 
                 {/* Input Field using Ant Design InputItem */}
                 <View style={{ flex: 1 }}>
-                    <InputItem
+                    <AntdInput
                         value={value}
-                        onChange={onChangeText} // InputItem passes string directly in onChange
+                        onChangeText={onChangeText}
                         placeholder={placeholder}
                         placeholderTextColor={colors.textTertiary}
                         editable={!disabled}

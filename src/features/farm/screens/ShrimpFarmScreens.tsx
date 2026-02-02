@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useSizeMeasurementsAsJobs } from '@/features/farm/hooks/useSizeMeasurement';
-import { useSiphonRecordsAsJobs } from '@/features/farm/hooks/useSiphonRecords';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePondJobHandlers } from '@/features/farm/hooks/usePondJobHandlers';
+import { useAllPondJobs } from '@/features/farm/hooks/useAllPondJobs';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -8,46 +8,21 @@ import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
-import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { JobExecution, CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
+import { CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useCyclesByPond } from '@/features/farm/hooks/useCycle.ts';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
-import { parseDate } from '@/features/farm/utils/dateUtils';
+import { parseDate, formatDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
-import { useShrimpHealthChecksAsJobs } from '@/features/farm/hooks/useShrimpHealthCheckData';
-import { useEnvMeasurementsAsJobs } from '@/features/farm/hooks/useEnvMeasurement';
-import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
-
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
-import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
-import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
-import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
-
-const JOB_TYPES = {
-    FEED: 'FEED' as const,
-    SHRIMP_INSPECTION: 'SHRIMP_INSPECTION' as const,
-    MEASURE_SIZE: 'MEASURE_SIZE' as const,
-    ENVIRONMENT: 'ENVIRONMENT' as const,
-    WATER_TREATMENT: 'WATER_TREATMENT' as const,
-    WATER_CHANGE: 'WATER_CHANGE' as const,
-    SIPHON: 'SIPHON' as const,
-    TRANSFER_POND: 'TRANSFER_POND' as const,
-    CLEAN_POND: 'CLEAN_POND' as const,
-    SUN_DRY_POND: 'SUN_DRY_POND' as const,
-    HARVEST: 'HARVEST' as const,
-    TROUBLESHOOTING: 'TROUBLESHOOTING' as const,
-};
-
-// JOB_TYPES constant - used for mapping API operation types to job types
-// Note: Hardcoded job templates have been removed. Jobs are now fetched from API.
+import { warehouseApi } from '@/features/material/api/warehouseApi';
+import { useQuery } from '@tanstack/react-query';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
@@ -62,8 +37,6 @@ export const ShrimpFarmScreens: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
     const activeCycles = useFarmStore(state => state.activeCycles);
     const breedOptions = useFarmStore(state => state.breedOptions);
     const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
@@ -77,21 +50,6 @@ export const ShrimpFarmScreens: React.FC = () => {
     );
     const fetchMasterData = useFarmStore(state => state.fetchMasterData);
     const isLoadingMasterData = useFarmStore(state => state.isLoadingMasterData);
-
-    // Job maps for dependency tracking
-    const feedJobs = useFarmStore(state => state.feedJobs);
-    const shrimpInspectionJobs = useFarmStore(state => state.shrimpInspectionJobs);
-    const measureSizeJobs = useFarmStore(state => state.measureSizeJobs);
-    const environmentJobs = useFarmStore(state => state.environmentJobs);
-    const waterTreatmentJobs = useFarmStore(state => state.waterTreatmentJobs);
-    const waterChangeJobs = useFarmStore(state => state.waterChangeJobs);
-    const siphonJobs = useFarmStore(state => state.siphonJobs);
-    const troubleshootingJobs = useFarmStore(state => state.troubleshootingJobs);
-    const transferPondJobs = useFarmStore(state => state.transferPondJobs);
-    const cleanPondJobs = useFarmStore(state => state.cleanPondJobs);
-    const sunDryJobs = useFarmStore(state => state.sunDryJobs);
-    const harvestJobs = useFarmStore(state => state.harvestJobs);
-
     // Fallback loading state if fetchMasterData is triggered but not reflected in store yet
     const [localLoading, setLocalLoading] = useState(false);
 
@@ -128,7 +86,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pondFromParams, getPondById, ponds]);
 
-    // --- Dynamic Breed Name Fetching ---
+    const { jobs, apiMeasureSizeJobs } = useAllPondJobs(pond);
     // 1. Get Zone ID
     const effectiveZoneId = pond?.zoneId?.toString();
 
@@ -137,174 +95,51 @@ export const ShrimpFarmScreens: React.FC = () => {
         PageSize: 100,
         ZoneId: effectiveZoneId,
     });
-    const defaultWarehouseId = warehouses?.[0]?.id;
+    const { data: shrimpSeeds } = useQuery({
+        queryKey: ['shrimp-seeds-all-warehouses-farm-screen', warehouses],
+        queryFn: async () => {
+            if (!warehouses || warehouses.length === 0) return [];
 
-    // 3. Fetch Shrimp Seeds
-    const { data: shrimpSeeds } = useShrimpSeeds(defaultWarehouseId);
-    // -----------------------------------
+            try {
+                const promises = warehouses.map(w =>
+                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                );
+                const results = await Promise.all(promises);
+                const allItems = results.reduce<any[]>((acc, r: any) => {
+                    if (r?.data?.items) {
+                        return acc.concat(r.data.items);
+                    }
+                    return acc;
+                }, []);
+                const seen = new Set();
+                return allItems.filter((item: any) => {
+                    if (seen.has(item.id)) return false;
+                    seen.add(item.id);
+                    return true;
+                });
+            } catch (error) {
+                console.warn('Failed to fetch seeds from warehouses', error);
+                return [];
+            }
+        },
+        enabled: !!warehouses && warehouses.length > 0,
+    });
 
-    // Tìm chu kỳ từ context dựa vào ID ao (ưu tiên receivingPonds, sau đó sourcePonds)
     const foundCycle = useMemo(() => {
         if (!pond?.id) return null;
         const cyclesForPond = getCyclesByPondId(pond.id);
         if (cyclesForPond.length === 0) return null;
-
-        // Tìm chu kỳ có ao này trong receivingPonds trước (ao nhận = ao chính)
         const cycleInReceiving = cyclesForPond.find(cycle =>
             cycle.receivingPonds?.includes(pond.id)
         );
         if (cycleInReceiving) return cycleInReceiving;
-
-        // Nếu không có, lấy chu kỳ đầu tiên (ao nguồn)
         return cyclesForPond[0] || null;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pond?.id, getCyclesByPondId, cycles]);
-
-    // Ưu tiên chu kỳ từ activeCycles, nếu không có thì dùng từ cycles
     const currentCycle: CycleData | null = useMemo(() => {
         const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
         return currentCycleData || foundCycle;
     }, [pond?.id, activeCycles, foundCycle]);
-    // Fetch size measurements from API
-    const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pond?.id || '');
-    const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pond?.id || '');
-    // Fetch siphon records from API
-    const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pond?.id || '');
-    // Fetch water supply records from API
-    const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
-
-    // Fetch environment measurements
-    const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pond?.id || '', new Date());
-    const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pond?.id || '');
-    // Fetch clean renovation records from API
-    const { jobs: apiCleanRenovationJobs } = useCleanRenovationsAsJobs(pond?.id || '');
-    // Fetch dry renovation records from API
-    const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pond?.id || '');
-
-    // Get job types from API only (no fallback)
-    const jobs = useMemo(() => {
-        // Get pondTypeId from pond
-        let pondTypeId: string | null = null;
-        if (pond?.type) {
-            if (typeof pond.type === 'object') {
-                pondTypeId = pond.type.id;
-            } else if (typeof pond.type === 'string') {
-                pondTypeId = pond.type;
-            }
-        }
-
-        // Get operations from API data
-        if (pondTypeId && operationsByPondType[pondTypeId]?.length > 0) {
-            const apiOperations = operationsByPondType[pondTypeId];
-
-            // Convert API operations to JobType format
-            const jobTypes: { type: JobType; items: JobExecution[] }[] = [];
-            for (const operation of apiOperations) {
-                // Use new field operationName, fallback to old if missing
-                const opName = operation.operationName || operation.operationTypeName || '';
-                const jobType = mapOperationTypeToJobType(opName);
-
-                if (jobType) {
-                    let items = pond?.id ? getPondJobItems(pond.id, jobType) : [];
-
-                    // Override with API data for MEASURE_SIZE
-                    if (jobType === JOB_TYPES.MEASURE_SIZE) {
-                        items = apiMeasureSizeJobs;
-                    }
-
-                    // Override with API data for SHRIMP_INSPECTION
-                    if (jobType === JOB_TYPES.SHRIMP_INSPECTION) {
-                        items = apiShrimpInspectionJobs;
-                    }
-
-                    // Override with API data for SIPHON
-                    if (jobType === JOB_TYPES.SIPHON) {
-                        items = apiSiphonJobs;
-                    }
-
-                    // Override with API data for WATER_CHANGE
-                    if (jobType === JOB_TYPES.WATER_CHANGE) {
-                        items = apiWaterSupplyJobs;
-                    }
-
-                    // Override with API data for ENVIRONMENT
-                    if (jobType === JOB_TYPES.ENVIRONMENT) {
-                        items = apiEnvJobs;
-                    }
-                    // Override with API data for TROUBLESHOOTING (Xử lý sự cố)
-                    if (jobType === JOB_TYPES.TROUBLESHOOTING) {
-                        items = apiIncidentJobs;
-                    }
-
-                    // Override with API data for CLEAN_POND
-                    if (jobType === JOB_TYPES.CLEAN_POND) {
-                        items = apiCleanRenovationJobs;
-                    }
-
-                    // Override with API data for SUN_DRY_POND
-                    if (jobType === JOB_TYPES.SUN_DRY_POND) {
-                        items = apiDryRenovationJobs;
-                    }
-
-                    jobTypes.push({
-                        type: jobType,
-                        items,
-                    });
-                }
-            }
-
-            const JOB_PRIORITY: Record<string, number> = {
-                [JOB_TYPES.FEED]: 1,
-                [JOB_TYPES.SHRIMP_INSPECTION]: 2,
-                [JOB_TYPES.MEASURE_SIZE]: 3,
-                [JOB_TYPES.ENVIRONMENT]: 4,
-                [JOB_TYPES.WATER_TREATMENT]: 5,
-                [JOB_TYPES.WATER_CHANGE]: 6,
-                [JOB_TYPES.SIPHON]: 7,
-                [JOB_TYPES.TROUBLESHOOTING]: 8,
-                [JOB_TYPES.TRANSFER_POND]: 9,
-                [JOB_TYPES.HARVEST]: 10,
-                [JOB_TYPES.CLEAN_POND]: 11,
-                [JOB_TYPES.SUN_DRY_POND]: 12,
-            };
-            return jobTypes.sort((a, b) => {
-                const priorityA = JOB_PRIORITY[a.type] || 99;
-                const priorityB = JOB_PRIORITY[b.type] || 99;
-                return priorityA - priorityB;
-            });
-        }
-
-        // No API data available - return empty array
-        return [];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        pond?.type,
-        pond?.id,
-        getPondJobItems,
-        currentCycle,
-        operationsByPondType,
-        // Add all job maps as dependencies
-        feedJobs,
-        shrimpInspectionJobs,
-        measureSizeJobs,
-        apiMeasureSizeJobs,
-        apiShrimpInspectionJobs,
-        apiSiphonJobs,
-        apiWaterSupplyJobs,
-        apiEnvJobs,
-        apiIncidentJobs,
-        apiCleanRenovationJobs,
-        apiDryRenovationJobs,
-        environmentJobs,
-        waterTreatmentJobs,
-        waterChangeJobs,
-        siphonJobs,
-        troubleshootingJobs,
-        transferPondJobs,
-        cleanPondJobs,
-        sunDryJobs,
-        harvestJobs,
-    ]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -333,270 +168,13 @@ export const ShrimpFarmScreens: React.FC = () => {
         }
     };
 
-    const handleAddJobItem = (type: JobType) => {
-        if (!pond?.id) return;
-
-        if (type === JOB_TYPES.FEED) {
-            navigation.navigate('FeedTheShrimp', { pondId: pond.id });
-            return;
-        }
-
-        if (type === JOB_TYPES.SHRIMP_INSPECTION) {
-            navigation.navigate('ShrimpInspectionScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.MEASURE_SIZE) {
-            navigation.navigate('MeasureShrimpSizeScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.ENVIRONMENT) {
-            navigation.navigate('AddEnvironmentScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.SIPHON) {
-            navigation.navigate('AddSiphonScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.WATER_TREATMENT) {
-            navigation.navigate('AddWaterTreatmentScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.WATER_CHANGE) {
-            navigation.navigate('WaterSupply', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.TRANSFER_POND) {
-            // Get latest shrimp size from MEASURE_SIZE jobs
-            const measureSizeItems = apiMeasureSizeJobs;
-
-            // Check if there is no measure size data, show warning modal
-            if (measureSizeItems.length === 0) {
-                setIsMeasureSizeModalVisible(true);
-                return;
-            }
-
-            let latestShrimpSize: string | undefined;
-
-            // Sort by date (newest first), then by time (newest first)
-            const sorted = [...measureSizeItems].sort((a, b) => {
-                const dateA = a.date ? parseDate(a.date) : new Date(0);
-                const dateB = b.date ? parseDate(b.date) : new Date(0);
-
-                if (dateA.getTime() !== dateB.getTime()) {
-                    return dateB.getTime() - dateA.getTime(); // Newest first
-                }
-
-                // If same date, sort by time (newest first)
-                const timeA = a.time || '00:00';
-                const timeB = b.time || '00:00';
-                const [hoursA, minutesA] = timeA.split(':').map(Number);
-                const [hoursB, minutesB] = timeB.split(':').map(Number);
-                const totalMinutesA = hoursA * 60 + minutesA;
-                const totalMinutesB = hoursB * 60 + minutesB;
-
-                return totalMinutesB - totalMinutesA; // Newest first
-            });
-
-            const latestItem = sorted[0];
-            const latestMeta = latestItem?.meta as { shrimpSize?: string } | undefined;
-            latestShrimpSize = latestMeta?.shrimpSize;
-
-            // Get cycle data for current pond
-            const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
-            const cyclesForPond = getCyclesByPondId(pond.id);
-            const cycleData =
-                currentCycleData ||
-                cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
-                cyclesForPond[0] ||
-                null;
-
-            navigation.navigate('AddTransferScreen', {
-                pond,
-                latestShrimpSize,
-                cycleData,
-            });
-            return;
-        }
-
-        if (type === JOB_TYPES.HARVEST) {
-            navigation.navigate('AddHarvestScreen', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.CLEAN_POND) {
-            navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
-            return;
-        }
-
-        if (type === JOB_TYPES.SUN_DRY_POND) {
-            navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
-            return;
-        }
-
-        if (type === JOB_TYPES.TROUBLESHOOTING) {
-            navigation.navigate('HandleProblem', { pond, jobType: 'TROUBLESHOOTING' as any });
-            return;
-        }
-
-        const currentItems = getPondJobItems(pond.id, type);
-
-        // Calculate next index based on max existing label
-        let maxIndex = 0;
-        currentItems.forEach(item => {
-            const match = item.label.match(/Lần (\d+)/);
-            if (match) {
-                const index = parseInt(match[1], 10);
-                if (index > maxIndex) maxIndex = index;
-            }
-        });
-        const nextIndex = maxIndex + 1;
-
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-        const newItem: JobExecution = {
-            id: Date.now().toString(),
-            label: `Lần ${nextIndex}`,
-            time: timeString,
-            pondId: pond.id,
-        };
-
-        updatePondJob(pond.id, type, [...currentItems, newItem]);
-    };
-
-    const handleEditJobItem = (type: JobType, item: JobExecution) => {
-        if (!pond?.id) return;
-
-        if (type === JOB_TYPES.FEED) {
-            navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
-            return;
-        }
-
-        if (type === JOB_TYPES.SHRIMP_INSPECTION) {
-            navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.MEASURE_SIZE) {
-            navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.ENVIRONMENT) {
-            navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.SIPHON) {
-            navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.WATER_TREATMENT) {
-            navigation.navigate('EditWaterTreatmentScreens', { pondId: pond.id, jobId: item.id });
-            return;
-        }
-
-        if (type === JOB_TYPES.WATER_CHANGE) {
-            navigation.navigate('WaterSupply', { pond, item });
-            return;
-        }
-
-        if (type === JOB_TYPES.TRANSFER_POND) {
-            navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.HARVEST) {
-            navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
-            return;
-        }
-
-        if (type === JOB_TYPES.CLEAN_POND) {
-            navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
-            return;
-        }
-
-        if (type === JOB_TYPES.SUN_DRY_POND) {
-            navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
-            return;
-        }
-
-        if (type === JOB_TYPES.TROUBLESHOOTING) {
-            navigation.navigate('HandleProblem', { pond, item, jobType: 'TROUBLESHOOTING' as any });
-            return;
-        }
-
-        const itemToEdit = item;
-        const currentItems = getPondJobItems(pond.id, type);
-        const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
-        updatePondJob(pond.id, type, newItems);
-    };
-
-    const handleJobPress = (type: JobType) => {
-        if (type === JOB_TYPES.FEED && pond?.id) {
-            navigation.navigate('FeedingLog', { pondId: pond.id });
-            return;
-        }
-        if (type === JOB_TYPES.WATER_TREATMENT && pond) {
-            navigation.navigate('WaterTreatmentLog', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.SHRIMP_INSPECTION && pond) {
-            navigation.navigate('PondworkLogScreen', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.MEASURE_SIZE && pond) {
-            navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.ENVIRONMENT && pond) {
-            navigation.navigate('EnvironmentLogScreen', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.SIPHON && pond) {
-            navigation.navigate('SiphonLog', { pond });
-            return;
-        }
-        if (type === JOB_TYPES.HARVEST && pond) {
-            navigation.navigate('HarvestLog', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.TRANSFER_POND && pond) {
-            navigation.navigate('TransferLog', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.WATER_CHANGE && pond) {
-            navigation.navigate('WaterSupplyLog', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.CLEAN_POND && pond) {
-            navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
-            return;
-        }
-
-        if (type === JOB_TYPES.SUN_DRY_POND && pond) {
-            navigation.navigate('SunDryPondLog', { pond });
-            return;
-        }
-
-        if (type === JOB_TYPES.TROUBLESHOOTING && pond) {
-            navigation.navigate('HandleProblemLog', { pond, jobType: 'TROUBLESHOOTING' as any });
-            return;
-        }
-    };
+    const { handleAddJobItem, handleEditJobItem, handleJobPress } = usePondJobHandlers(
+        pond,
+        setIsMeasureSizeModalVisible,
+        apiMeasureSizeJobs
+    );
 
     const [refreshing, setRefreshing] = useState(false);
-    // Logic: If "Ao sẵn sàng" has a cycle, display as "Ao vèo" -> REMOVED
     const headerDisplayType = undefined;
 
     const {
@@ -605,12 +183,76 @@ export const ShrimpFarmScreens: React.FC = () => {
         isRefetching: isRefetchingCycles,
     } = useCyclesByPond(pond?.id || '');
     const setCycles = useFarmStore(state => state.setCycles);
+    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
+    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
 
     useEffect(() => {
         if (cyclesData) {
             setCycles(cyclesData);
+
+            // Find and sync active cycle for this pond
+            if (pond?.id) {
+                const activeForPond = cyclesData.find(
+                    (c: any) =>
+                        (c.pondId === pond.id || c.sourcePonds?.includes(pond.id)) &&
+                        c.status !== 'Completed' &&
+                        c.status !== 'Canceled' &&
+                        c.status !== 'Hoàn thành'
+                );
+
+                if (activeForPond) {
+                    const syncCycleToStore = (data: any) => {
+                        const mappedCycle = {
+                            ...data,
+                            cycleName: data.name || data.cycleName,
+                            stockingQuantity:
+                                data.stockingQuantity || (data as any).totalStocking || 0,
+                            stockingDate: formatDate(
+                                new Date((data as any).createdAt || data.stockingDate || new Date())
+                            ),
+                            status:
+                                data.status === 'InProgress'
+                                    ? 'Chưa hoàn thành'
+                                    : data.status === 'Completed'
+                                    ? 'Hoàn thành'
+                                    : data.status,
+                        };
+                        saveActiveCycle(pond.id, mappedCycle);
+                    };
+
+                    if (activeForPond.id) {
+                        cycleApi
+                            .getCycleDetail(pond.id, activeForPond.id)
+                            .then(detail => {
+                                if (detail) {
+                                    syncCycleToStore(detail);
+                                } else {
+                                    syncCycleToStore(activeForPond);
+                                }
+                            })
+                            .catch(err => {
+                                console.warn(
+                                    'Failed to fetch cycle detail in screen, using list data',
+                                    err
+                                );
+                                syncCycleToStore(activeForPond);
+                            });
+                    } else {
+                        syncCycleToStore(activeForPond);
+                    }
+                } else {
+                    deleteActiveCycle(pond.id);
+                }
+            }
         }
-    }, [cyclesData, setCycles]);
+    }, [cyclesData, setCycles, saveActiveCycle, deleteActiveCycle, pond?.id]);
+
+    // Refetch cycles when screen gains focus (e.g., after editing)
+    useFocusEffect(
+        useCallback(() => {
+            refetchCycles();
+        }, [refetchCycles])
+    );
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -659,10 +301,8 @@ export const ShrimpFarmScreens: React.FC = () => {
                                 <PondJobSkeleton />
                             ) : (
                                 <>
-                                    {/* HIỂN THỊ CYCLE CARD NẾU CÓ DỮ LIỆU */}
                                     {currentCycle ? (
                                         <View style={styles.cycleCardWrapper}>
-                                            {/* Main cycle card */}
                                             <CycleCard
                                                 cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
                                                 startDate={currentCycle?.stockingDate ?? ''}
@@ -674,10 +314,17 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                     currentCycle.breedName ||
                                                     shrimpSeeds?.find(
                                                         (s: any) =>
-                                                            s.id === currentCycle.breedSource
+                                                            s.id === currentCycle.breedSource ||
+                                                            s.id ===
+                                                                (currentCycle as any)
+                                                                    .warehouseItemId
                                                     )?.materialName ||
                                                     breedOptions.find(
-                                                        b => b.value === currentCycle.breedSource
+                                                        b =>
+                                                            b.value === currentCycle.breedSource ||
+                                                            b.value ===
+                                                                (currentCycle as any)
+                                                                    .warehouseItemId
                                                     )?.label ||
                                                     'N/A'
                                                 }
@@ -689,8 +336,6 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                     })
                                                 }
                                             />
-
-                                            {/* Transferred cycle card - show if pond received shrimp from nursery */}
                                             {currentCycle.transferInfo && (
                                                 <CycleCard
                                                     cycleName={
@@ -756,10 +401,6 @@ export const ShrimpFarmScreens: React.FC = () => {
                     )}
                 </ScrollView>
             </View>
-
-            {/* CHỈ HIỆN NÚT KHI CHƯA CÓ CHU KỲ.
-                User yêu cầu "Ao sẵn sàng" KHÔNG có bắt đầu chu kỳ nuôi.
-            */}
             {selectedTab === 'work' &&
                 !currentCycle &&
                 (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) ===
@@ -804,7 +445,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingBottom: 100, // Space for footer
+        paddingBottom: 100,
         flexGrow: 1,
     },
     footer: {
@@ -846,7 +487,7 @@ const styles = StyleSheet.create({
 
     cycleCardWrapper: {
         marginTop: spacing.sm,
-        marginBottom: spacing.sm, // Khoảng hở nhỏ so với danh sách công việc bên dưới
-        gap: 8, // 8px spacing between cycle cards
+        marginBottom: spacing.sm,
+        gap: 8,
     },
 });

@@ -4,7 +4,7 @@ import { InventoryCard } from '@/features/material/components/inventory/Inventor
 import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { spacing } from '@/styles';
-import { IInventoryTicket } from '@/features/material/types/material.types';
+import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
 
 interface InventoryScreenProps {
     data: IInventoryTicket[];

@@ -1,16 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { normalizeApiError } from '@/core/api/errorHandler';
+import { handleError } from '@/shared/utils/errorHandler';
 // import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
-// Constants for staleTime
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
-
-import { GetInventoryParams, IInventoryTicket } from '@/features/material/types/material.types';
+import {
+    GetInventoryParams,
+    IInventoryTicket,
+} from '@/features/material/types/inventoryTicket.types';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 import { GetInventoryChecksParams } from '@/features/material/types/inventory.types';
 
+const STALE_TIME_SHORT = 2 * 60 * 1000;
 /**
  * Hook to fetch inventory tickets (Mock Data)
  */
@@ -31,57 +33,20 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
             const response = await inventoryApi.getList(apiParams);
 
             if (response.success && response.data?.items) {
-                // Fetch details for all items in parallel to get totalDifference
-                const itemsWithDetails = await Promise.all(
-                    response.data.items.map(async item => {
-                        let totalDifference = 0;
-                        let detailItems: any[] = [];
-                        let creatorInfo: any = null;
-
-                        try {
-                            const detailRes = await inventoryApi.getDetail(item.id);
-
-                            // Extract creator info first
-                            if (detailRes.success && detailRes.data?.creator) {
-                                creatorInfo = detailRes.data.creator;
-                            }
-
-                            // Handle items (array or paginated object)
-                            // @ts-ignore
-                            const rawItems = detailRes.data?.items?.items || detailRes.data?.items;
-
-                            if (detailRes.success && Array.isArray(rawItems)) {
-                                detailItems = rawItems.map((d: any) => ({
-                                    id: d.inventoryCheckItemId,
-                                    materialName: d.materialName || d.materialCode || 'N/A',
-                                    beforeQuantity: d.expectedQty,
-                                    afterQuantity: d.actualQty,
-                                }));
-                                totalDifference = rawItems.reduce(
-                                    (sum: number, i: any) => sum + (i.actualQty - i.expectedQty),
-                                    0
-                                );
-                            }
-                        } catch (err) {
-                            console.warn(`Failed to fetch detail for ${item.id}`, err);
-                        }
-
-                        return {
+                return response.data.items.map(
+                    item =>
+                        ({
                             id: item.id,
-                            // Use creator info from API only (prefer detail response as it might be more complete)
-                            checkerName: creatorInfo?.fullname || item.creator?.fullname || '---',
+                            checkerName: item.creator?.fullname || '---',
                             date: item.createdAt
                                 ? new Date(item.createdAt).toLocaleDateString('vi-VN')
                                 : '',
                             note: item.note || '',
-                            totalDifference: totalDifference,
-                            items: detailItems,
+                            totalDifference: item.varianceTotalItems || 0,
+                            items: [], // Details fetched on demand by InventoryCard
                             status: item.status || 'Draft',
-                        } as IInventoryTicket;
-                    })
+                        } as IInventoryTicket)
                 );
-
-                return itemsWithDetails;
             }
 
             return [];
@@ -111,8 +76,7 @@ export const useAddInventoryTicket = () => {
             );
         },
         onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu điều chỉnh tồn kho thất bại');
-            showErrorToast(errorMessage);
+            handleError(normalizeApiError(error));
         },
     });
 };
@@ -138,8 +102,7 @@ export const useDeleteInventoryTicket = () => {
             });
         },
         onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Xóa phiếu điều chỉnh tồn kho thất bại');
-            showErrorToast(errorMessage);
+            handleError(normalizeApiError(error));
         },
     });
 };

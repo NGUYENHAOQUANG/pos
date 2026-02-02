@@ -33,7 +33,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
     note,
     onDatePress,
     onNoteChange,
-    materialGroup = '---',
+    // materialGroup = '---',
     createdDate = '',
     warehouseName = '',
     creatorName = '---',
@@ -60,7 +60,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                     <InfoRow label="Kho" value={warehouseName || '---'} />
                     <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
                     <InfoRow label="Người tạo phiếu:" value={creatorName} />
-                    <InfoRow label="Nhóm vật tư" value={materialGroup} isLast />
+                    {/* <InfoRow label="Nhóm vật tư" value={materialGroup} isLast /> */}
 
                     {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
                     <View style={styles.inputGroup}>
@@ -79,9 +79,7 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
 
                     {/* Input: Ghi chú */}
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Ghi chú lý do điều chỉnh
-                        </Text>
+                        <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
                         <TextInput
                             style={styles.textArea}
                             placeholder="Nhập ghi chú"

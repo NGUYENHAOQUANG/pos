@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { inventoryApi } from '@/features/material/api/inventoryApi';
+import { useInventoryDetail, useInventoryItems } from './useInventoryDetails';
 import { showValidationError } from '@/features/material/utils/validationToast';
 
 interface UseInventoryFormProps {
@@ -7,58 +7,84 @@ interface UseInventoryFormProps {
 }
 
 export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
+    // Queries
+    const {
+        data: detailData,
+        isLoading: isLoadingDetailData,
+        error: detailError,
+    } = useInventoryDetail(inventoryId);
+    const {
+        data: itemsData,
+        isLoading: isLoadingItemsData,
+        error: itemsError,
+    } = useInventoryItems(inventoryId);
+
+    // Form State
     const [date, setDate] = useState(new Date());
     const [note, setNote] = useState('');
-    const [creatorName, setCreatorName] = useState<string>(''); // Store creator name from API
-    const [materialName, setMaterialName] = useState('');
-    const [oldStock, setOldStock] = useState(0);
-    const [newStock, setNewStock] = useState('');
-    const [materialGroup, setMaterialGroup] = useState('');
-    const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
-    const [itemId, setItemId] = useState<string>(''); // Store existing item ID for updates
+    const [creatorName, setCreatorName] = useState<string>('');
     const [status, setStatus] = useState<string>('');
-    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
-    // Fetch inventory detail when in edit mode
+    // Items State
+    const [items, setItems] = useState<any[]>([]);
+
+    // Loading State
+    const isLoadingDetail = isLoadingDetailData || isLoadingItemsData;
+
+    // Error Handling
     useEffect(() => {
-        if (inventoryId) {
-            const fetchInventoryDetail = async () => {
-                setIsLoadingDetail(true);
-                try {
-                    const response = await inventoryApi.getDetail(inventoryId);
-                    if (response.success && response.data) {
-                        const detail = response.data;
-                        setNote(detail.note || '');
-                        setStatus(detail.status || '');
-                        // ...
-                        if (detail.creator) {
-                            setCreatorName(detail.creator.fullname || '');
-                        }
-                        if (detail.createdAt) {
-                            setDate(new Date(detail.createdAt));
-                        }
+        if (detailError || itemsError) {
+            console.error('Failed to fetch inventory data:', detailError || itemsError);
+            showValidationError('Không thể tải thông tin phiếu kiểm kê');
+        }
+    }, [detailError, itemsError]);
 
-                        // Handle PaginatedList or Array
-                        // @ts-ignore - API change adaptation
-                        const itemsList = detail.items?.items || detail.items || [];
+    // Sync Detail
+    useEffect(() => {
+        if (detailData) {
+            setNote(detailData.note || '');
+            setStatus(detailData.status || '');
+            if (detailData.creator) {
+                setCreatorName(detailData.creator.fullname || '');
+            }
+            if (detailData.createdAt) {
+                setDate(new Date(detailData.createdAt));
+            }
+        }
+    }, [detailData]);
 
-                        if (itemsList && itemsList.length > 0) {
-                            const firstItem = itemsList[0];
-                            setItemId(firstItem.inventoryCheckItemId || firstItem.id); // Save item ID for updates
-                            setSelectedMaterialId(firstItem.materialId);
-                            setMaterialName(firstItem.materialName || firstItem.materialCode || '');
-                            setOldStock(firstItem.expectedQty);
-                            setNewStock(String(firstItem.actualQty));
-                        }
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch inventory detail:', error);
-                    showValidationError('Không thể tải thông tin phiếu kiểm kê');
-                } finally {
-                    setIsLoadingDetail(false);
-                }
-            };
-            fetchInventoryDetail();
+    // Sync Items
+    useEffect(() => {
+        if (itemsData && itemsData.length > 0) {
+            setItems(itemsData);
+        } else if (itemsData && itemsData.length === 0 && inventoryId) {
+            // If existing inventory returns empty, init with 1 empty item
+            setItems([
+                {
+                    id: Date.now().toString(),
+                    materialId: '',
+                    materialName: '',
+                    oldStock: 0,
+                    newStock: '',
+                    difference: 0,
+                },
+            ]);
+        }
+    }, [itemsData, inventoryId]);
+
+    // Initial item for create mode (no inventoryId)
+    useEffect(() => {
+        if (!inventoryId) {
+            setItems([
+                {
+                    id: Date.now().toString(),
+                    materialId: '',
+                    materialName: '',
+                    oldStock: 0,
+                    newStock: '',
+                    difference: 0,
+                },
+            ]);
         }
     }, [inventoryId]);
 
@@ -66,24 +92,15 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
         formState: {
             date,
             note,
-            creatorName,
-            materialName,
-            oldStock,
-            newStock,
-            materialGroup,
-            selectedMaterialId,
-            itemId,
-            status,
+            items,
             isLoadingDetail,
+            creatorName,
+            status,
         },
         setters: {
             setDate,
             setNote,
-            setMaterialName,
-            setOldStock,
-            setNewStock,
-            setMaterialGroup,
-            setSelectedMaterialId,
+            setItems,
         },
     };
 };

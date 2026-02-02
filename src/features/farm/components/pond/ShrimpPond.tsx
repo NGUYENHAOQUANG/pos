@@ -34,10 +34,13 @@ interface ShrimpPondProps {
     style?: StyleProp<ViewStyle>;
     status?: TagStatus;
     pondId?: string;
+    effectiveZoneId?: string; // Add prop to receive zoneId from parent
 }
 
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+// import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+import { useQuery } from '@tanstack/react-query';
+import { warehouseApi } from '@/features/material/api/warehouseApi';
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     name,
@@ -51,6 +54,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     style,
     status,
     pondId,
+    effectiveZoneId: propZoneId,
 }) => {
     // Logic hasData: Now includes almost all functional ponds
     // Exclude 'Ao lắng' (Settling) as it has no tasks, unless specific logic arises later.
@@ -70,60 +74,123 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     const breedOptions = useFarmStore(state => state.breedOptions);
     const calculateDOC = useFarmStore(state => state.calculateDOC);
     const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
+    // Store actions to sync local data
+    // Store actions removed as data syncing is handled by list screen
+
+    // Data syncing is now handled centrally by ShrimpPondListScreens
+    // We rely on useFarmStore (activeCycles) for data.
+    // -----------------------------
 
     // --- Dynamic Breed Name Fetching ---
-    // 1. Get Zone ID
-    const effectiveZoneId = pond?.zoneId?.toString();
+    // 1. Get Zone ID - Prefer prop if available (reliable), else try store (might be missing on list refresh)
+    const effectiveZoneId = propZoneId || pond?.zoneId?.toString();
 
     // 2. Fetch Warehouses for this Zone
     const { data: warehouses } = useWarehouses({
         PageSize: 100,
         ZoneId: effectiveZoneId,
     });
-    const defaultWarehouseId = warehouses?.[0]?.id;
+    // const defaultWarehouseId = warehouses?.[0]?.id;
 
-    // 3. Fetch Shrimp Seeds
-    const { data: shrimpSeeds } = useShrimpSeeds(defaultWarehouseId);
-    // -----------------------------------
+    // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
+    // (Cycle might use seed from a warehouse that isn't the first one)
+    // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
+    // (Cycle might use seed from a warehouse that isn't the first one)
+    const { data: shrimpSeeds } = useQuery({
+        queryKey: ['shrimp-seeds-all-warehouses-shrimp-pond', effectiveZoneId, warehouses?.length],
+        queryFn: async () => {
+            if (!warehouses || warehouses.length === 0) {
+                // console.log(`[ShrimpPond] No warehouses found for Zone ${effectiveZoneId}`);
+                return [];
+            }
+
+            try {
+                // Fetch seeds from all warehouses
+                const promises = warehouses.map(w =>
+                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                );
+
+                const results = await Promise.all(promises);
+
+                // Flatten results
+                const allItems = results.reduce<any[]>((acc, r: any) => {
+                    if (r?.data?.items) {
+                        return acc.concat(r.data.items);
+                    }
+                    return acc;
+                }, []);
+
+                // Deduplicate by ID
+                const seen = new Set();
+                const uniqueItems = allItems.filter((item: any) => {
+                    if (seen.has(item.id)) return false;
+                    seen.add(item.id);
+                    return true;
+                });
+
+                return uniqueItems;
+            } catch (error) {
+                console.warn('Failed to fetch seeds from warehouses', error);
+                return [];
+            }
+        },
+        enabled: !!warehouses && warehouses.length > 0,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
 
     // --- Dynamic Breed Name Fetching ---
     // 1. Get Zone ID
     // ... (keep this part)
 
-    // Get cycle data for this pond
+    // Get cycle data for this pond - prioritize STORE data (has full details from ShrimpPondListScreens)
+    // over fresh API data (which only has basic info from list endpoint)
     const cycleData = useMemo(() => {
         if (!pondId) return null;
+
+        // 1. FIRST - Try store data (has full details because ShrimpPondListScreens fetches detail for each cycle)
         const currentCycle = activeCycles[pondId];
         const cyclesForPond = getCyclesByPondId(pondId);
 
-        // Ưu tiên activeCycle, sau đó tìm cycle có pondId trong receivingPonds, cuối cùng lấy cycle đầu tiên
-        return (
+        const storeData =
             currentCycle ||
             cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pondId)) ||
-            cyclesForPond[0] ||
-            null
-        );
+            cyclesForPond.find(
+                cycle => cycle.pondId === pondId || cycle.sourcePonds?.includes(pondId)
+            ) ||
+            null;
+
+        return storeData;
     }, [pondId, activeCycles, getCyclesByPondId]);
 
-    // Calculate DOC
+    // Calculate DOC - check both possible field names
+    const effectiveStockingDate = cycleData?.stockingDate || cycleData?.startDate;
     const doc = useMemo(() => {
-        return calculateDOC(cycleData?.stockingDate);
-    }, [cycleData?.stockingDate, calculateDOC]);
+        return calculateDOC(effectiveStockingDate);
+    }, [effectiveStockingDate, calculateDOC]);
 
     const breedLabel = useMemo(() => {
-        if (!cycleData?.breedSource) return undefined;
+        const breedId = cycleData?.breedSource || cycleData?.warehouseItemId;
+        // console.log(`[ShrimpPond] resolving breed for ${name}: ID=${breedId}, seeds=${shrimpSeeds?.length}`);
 
-        // 1. Prefer saved name
-        if (cycleData.breedName) return cycleData.breedName;
+        if (!breedId) return undefined;
+
+        // 1. Prefer saved name if available
+        if (cycleData?.breedName) return cycleData.breedName;
 
         // 2. Try dynamic API data
         if (shrimpSeeds?.length) {
-            const seed = shrimpSeeds.find((s: any) => s.id === cycleData.breedSource);
-            if (seed?.materialName) return seed.materialName;
+            const seed = shrimpSeeds.find((s: any) => s.id === breedId);
+            if (seed?.materialName) {
+                // console.log(`[ShrimpPond] Found breed name from API: ${seed.materialName}`);
+                return seed.materialName;
+            }
         }
 
         // 3. Fallback to static/store options
-        return breedOptions.find(b => b.value === cycleData.breedSource)?.label;
+        const fallback = breedOptions.find(b => b.value === breedId)?.label;
+        if (!fallback) {
+        }
+        return fallback;
     }, [cycleData, shrimpSeeds, breedOptions]);
 
     // Display Logic Override: REMOVED as per request.
@@ -231,10 +298,12 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                     <View style={styles.cycleSection}>
                         <View style={styles.cycleHeader}>
                             <Text style={styles.cycleName}>
-                                {cycleData.cycleName || 'Chưa đặt tên'}
+                                {cycleData.name || cycleData.cycleName || 'Chưa đặt tên'}
                             </Text>
                             <Text style={styles.cycleDate}>
-                                {cycleData.stockingDate || '-'} - nay
+                                {cycleData.stockingDate || cycleData.startDate
+                                    ? `${cycleData.stockingDate || cycleData.startDate} - nay`
+                                    : '- - nay'}
                             </Text>
                         </View>
                         <View style={styles.cycleInfo}>
@@ -245,8 +314,10 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                             <View style={styles.cycleInfoRow}>
                                 <Text style={styles.cycleLabel}>Số lượng thả (Pls):</Text>
                                 <Text style={styles.cycleValue}>
-                                    {cycleData.stockingQuantity
-                                        ? cycleData.stockingQuantity.toLocaleString('vi-VN')
+                                    {cycleData.stockingQuantity || cycleData.totalStocking
+                                        ? (
+                                              cycleData.stockingQuantity ?? cycleData.totalStocking
+                                          )?.toLocaleString('vi-VN')
                                         : '-'}
                                 </Text>
                             </View>

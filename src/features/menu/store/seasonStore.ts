@@ -18,12 +18,12 @@ export interface SeasonStore {
         zoneId: string,
         seasonId: string,
         data: Partial<SeasonData>
-    ) => Promise<boolean>;
+    ) => Promise<{ success: boolean; message?: string }>;
     updateSeasonStatusApi: (
         zoneId: string,
         seasonId: string,
         status: SeasonStatus
-    ) => Promise<boolean>;
+    ) => Promise<{ success: boolean; message?: string }>;
     deleteSeasonApi: (zoneId: string, seasonId: string) => Promise<boolean>;
     getSeasonOptions: () => DropdownItem[];
 }
@@ -108,7 +108,7 @@ export const createSeasonStore: StateCreator<
                 }
             }
 
-            await seasonApi.updateSeason(zoneId.toString(), seasonId, data);
+            const resData = await seasonApi.updateSeason(zoneId.toString(), seasonId, data);
             // Update local state
             set(state => {
                 const season = state.seasons.find(s => s.id.toString() === seasonId);
@@ -116,7 +116,15 @@ export const createSeasonStore: StateCreator<
                     Object.assign(season, data);
                 }
             });
-            return true;
+
+            // Normalize backend success message for UI
+            const backendMessage = (resData as any)?.message as string | undefined;
+            let uiMessage: string | undefined = backendMessage;
+            if (backendMessage && backendMessage.toLowerCase() === 'success') {
+                uiMessage = `Cập nhật vụ nuôi thành công`;
+            }
+
+            return { success: true, message: uiMessage };
         } catch (error) {
             console.error('[SeasonStore] Failed to update season:', error);
             throw error;
@@ -125,7 +133,7 @@ export const createSeasonStore: StateCreator<
 
     updateSeasonStatusApi: async (zoneId, seasonId, status) => {
         try {
-            await seasonApi.updateSeasonStatus(zoneId.toString(), seasonId, status);
+            const res = await seasonApi.updateSeasonStatus(zoneId.toString(), seasonId, status);
             // Update local state
             set(state => {
                 const season = state.seasons.find(s => s.id.toString() === seasonId);
@@ -134,7 +142,13 @@ export const createSeasonStore: StateCreator<
                     season.statusName = getSeasonStatusName(status);
                 }
             });
-            return true;
+            // Chuẩn hoá message success từ backend cho UI
+            const backendMessage = (res as any)?.message as string | undefined;
+            let uiMessage: string | undefined = backendMessage;
+            if (backendMessage && backendMessage.toLowerCase() === 'success') {
+                uiMessage = 'Đóng vụ nuôi thành công';
+            }
+            return { success: res.success, message: uiMessage };
         } catch (error) {
             console.error('[SeasonStore] Failed to update season status:', error);
             throw error;
