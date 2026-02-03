@@ -9,6 +9,7 @@ import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
 import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
 import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
 import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
+import { colors } from '@/styles';
 
 interface PondCardProps {
     pondName: string;
@@ -85,19 +86,16 @@ const styles = StyleSheet.create({
         padding: 16,
         marginHorizontal: 16,
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 3,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16, // Add margin to space out from content below
+        marginBottom: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB', // Darker separator line
+        borderBottomColor: colors.defaultBorder,
         paddingBottom: 12,
         paddingHorizontal: 16,
         marginHorizontal: -16,
@@ -112,7 +110,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.defaultBorder,
         backgroundColor: 'white',
     },
     detailButtonText: {
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
     devicesContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: 8, // Using gap to space items
+        gap: 8,
     },
     deviceItem: {
         flex: 1,

@@ -69,11 +69,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 12,
         marginHorizontal: 16,
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 3,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     itemContainer: {
         flex: 1,

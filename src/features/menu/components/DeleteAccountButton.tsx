@@ -27,15 +27,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        // marginBottom: 16,
-        // Shadow for iOS
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        // Elevation for Android
-        elevation: 2,
+        borderColor: colors.defaultBorder,
     },
     itemContainer: {
         flexDirection: 'row',
