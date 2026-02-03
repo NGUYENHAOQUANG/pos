@@ -23,6 +23,7 @@ export const MeterialScreen = () => {
         selectedDropdownItem,
         menuOpen,
         menuPosition,
+        currentStatus,
         materials,
         importReceiptsData,
         mappedExportReceipts,
@@ -40,6 +41,7 @@ export const MeterialScreen = () => {
         handleCloseMenu,
         handleSearch,
         handleFilterType,
+        handleFilterStatus,
         handleFilterPress,
         handleTabSelect,
         handleHistoryPress,
@@ -66,7 +68,9 @@ export const MeterialScreen = () => {
                 onSearch={handleSearch}
                 onFilterPress={handleFilterPress}
                 onGroupChange={handleFilterType}
+                onStatusChange={handleFilterStatus}
                 selectedTab={selectedTab}
+                currentStatus={currentStatus}
             />
 
             <View style={styles.content}>

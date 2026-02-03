@@ -29,7 +29,7 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
             if (response.success && response.data?.items) {
                 return response.data;
             }
-            return response.data || { items: [], totalCount: 0 };
+            return response.data;
         },
         staleTime: STALE_TIME_SHORT,
     });

@@ -20,7 +20,7 @@ import { GetWarehouseItemsQueryParams } from '@/features/material/types/warehous
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 20;
 
 export const useMaterialScreenLogic = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -105,6 +105,18 @@ export const useMaterialScreenLogic = () => {
             setFilterType(type);
         },
         [setFilterType]
+    );
+
+    const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
+    const setImportReceiptStatusFilter = useMaterialStore(
+        state => state.setImportReceiptStatusFilter
+    );
+
+    const handleFilterStatus = useCallback(
+        (status: string) => {
+            setImportReceiptStatusFilter(status);
+        },
+        [setImportReceiptStatusFilter]
     );
 
     const handleFilterPress = useCallback(() => {
@@ -198,8 +210,10 @@ export const useMaterialScreenLogic = () => {
     const warehouseParams = useMemo(
         () => ({
             ReceiptCode: searchText || undefined,
+            WarehouseId: warehouseId || undefined,
+            Status: importReceiptStatusFilter || undefined,
         }),
-        [searchText]
+        [searchText, warehouseId, importReceiptStatusFilter]
     );
 
     const exportWarehouseParams = useMemo(
@@ -297,6 +311,7 @@ export const useMaterialScreenLogic = () => {
         selectedTab,
         dropdownData,
         selectedDropdownItem,
+        currentStatus: importReceiptStatusFilter,
         menuOpen,
         menuPosition,
         materials,
@@ -318,6 +333,7 @@ export const useMaterialScreenLogic = () => {
         handleCloseMenu,
         handleSearch,
         handleFilterType,
+        handleFilterStatus,
         handleFilterPress,
         handleTabSelect,
         handleHistoryPress,

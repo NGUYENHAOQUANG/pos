@@ -31,9 +31,10 @@ export interface ImportReceipt {
 
 export interface GetImportReceiptsParams {
     ReceiptCode?: string;
-    Status?: ImportReceiptStatus;
+    Status?: string;
     SupplierId?: string;
     WarehouseId?: string;
+    ApproverId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
