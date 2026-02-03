@@ -17,6 +17,7 @@ import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/im
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { useImportReceiptItems } from '@/features/material/hooks/useImportReceipts';
+import { useSuppliers } from '@/features/material/hooks/useSuppliers';
 import { ImportReceiptItems } from '@/features/material/components/importReceipt/ImportReceiptItems';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -39,6 +40,9 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
         { PageSize: 1000 }
     );
 
+    // Fetch suppliers to get supplier name from supplierId if not available
+    const { data: suppliers = [] } = useSuppliers();
+
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
@@ -60,6 +64,10 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
     };
 
     const displayItems = fetchedItems?.items || [];
+
+    // Get supplier name: use supplierName from API if available, otherwise lookup from suppliers list
+    const supplierName =
+        item.supplierName || suppliers.find(s => s.id === item.supplierId)?.name || '---';
 
     return (
         <View style={styles.card}>
@@ -101,7 +109,7 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
                 {isExpanded && (
                     <View style={styles.row}>
                         <Text style={styles.label}>Nhà cung cấp:</Text>
-                        <Text style={styles.value}>{item.supplierName || '---'}</Text>
+                        <Text style={styles.value}>{supplierName}</Text>
                     </View>
                 )}
 

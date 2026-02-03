@@ -34,6 +34,7 @@ interface AddWarehouseMaterialProps {
     materials: MaterialItem[];
     onUpdateMaterial: (id: string, field: keyof MaterialItem, value: any) => void;
     onAddMaterial: () => void;
+    onRemoveMaterial?: (id: string) => void;
     materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
     title?: string; // Optional title prop
@@ -43,6 +44,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     materials,
     onUpdateMaterial,
     onAddMaterial,
+    onRemoveMaterial,
     materialOptions = [],
     onDropdownOpen,
     title = 'Vật tư nhập kho', // Default value
@@ -113,6 +115,24 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                         <Text style={styles.materialHeaderTitle}>
                                             Vật tư {index + 1}
                                         </Text>
+                                        {onRemoveMaterial && (
+                                            <TouchableOpacity
+                                                style={styles.removeButton}
+                                                onPress={() => onRemoveMaterial(item.id)}
+                                                hitSlop={{
+                                                    top: 10,
+                                                    bottom: 10,
+                                                    left: 10,
+                                                    right: 10,
+                                                }}
+                                            >
+                                                <Ionicons
+                                                    name="close-circle-outline"
+                                                    size={24}
+                                                    color={colors.error}
+                                                />
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
 
                                     <View style={styles.content}>
@@ -273,6 +293,9 @@ const styles = StyleSheet.create({
         borderColor: '#E5E7EB',
     },
     materialHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         borderBottomWidth: 1,
@@ -285,6 +308,9 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '600',
         color: colors.text,
+    },
+    removeButton: {
+        padding: 4,
     },
     content: {
         padding: spacing.md,

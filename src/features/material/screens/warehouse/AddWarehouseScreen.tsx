@@ -49,6 +49,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         // Handlers
         handleAddMaterial,
         handleUpdateMaterial,
+        handleRemoveMaterial,
         handleSubmit,
         handleConfirmSubmit,
         handleSaveDraft,
@@ -136,6 +137,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                                 materials={warehouseItems}
                                 onUpdateMaterial={handleUpdateMaterial}
                                 onAddMaterial={handleAddMaterial}
+                                onRemoveMaterial={handleRemoveMaterial}
                                 materialOptions={materialOptions}
                                 onDropdownOpen={handleDropdownOpen}
                             />
