@@ -27,6 +27,7 @@ import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 import { IShrimpSeed } from '@/features/material/types/warehouse.types';
 import { useQuery } from '@tanstack/react-query';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { pondApi } from '@/features/farm/api/pondApi';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -59,13 +60,26 @@ export const CreateCycleScreen: React.FC = () => {
 
     // --- Data Fetching Logic (Lifted from CreateCycleForm) ---
     // 1. Determine Context
-    const pond = ponds.find(p => p.id === pondId);
+    // 1. Determine Context
+    // const ponds = useFarmStore(state => state.ponds); // Removed redeclaration
+    const storePond = ponds.find(p => p.id === pondId);
+
     // Prefer passed zoneId, fallback to pond from store, then initialData
     const effectiveZoneId =
         zoneId ||
-        pond?.zoneId?.toString() ||
+        storePond?.zoneId?.toString() ||
         (initialData?.pond as any)?.zoneId ||
         (initialData?.season as any)?.zoneId;
+
+    // Fallback: Fetch ponds if not in store and we have zoneId
+    const { data: fetchedPondsData } = useQuery({
+        queryKey: ['ponds', effectiveZoneId],
+        queryFn: () => pondApi.getPondsByZone(effectiveZoneId!, { PageSize: 100 }),
+        enabled: !storePond && !!effectiveZoneId,
+    });
+
+    const fetchedPond = fetchedPondsData?.items?.find((p: any) => p.id === pondId);
+    const pond = storePond || fetchedPond;
 
     // 2. Fetch Warehouses filtered by the current Zone
     const { data: warehouses } = useWarehouses({
@@ -465,6 +479,7 @@ export const CreateCycleScreen: React.FC = () => {
                         formData={cycleData}
                         setFormData={setCycleData}
                         pondId={pondId}
+                        pond={pond as any}
                         zoneId={zoneId}
                         isEdit={isEdit}
                         breedOptions={breedOptions}

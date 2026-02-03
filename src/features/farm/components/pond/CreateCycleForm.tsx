@@ -8,7 +8,6 @@ import { DateInputButton } from '@/features/farm/components/pondwork/DateInputBu
 import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CycleData, BreedOption } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
@@ -22,6 +21,7 @@ interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
     pondId?: string;
+    pond?: any; // Should be PondData but sticking to current loose types or import it
     zoneId?: string;
     isEdit?: boolean;
     breedOptions: BreedOption[];
@@ -32,14 +32,13 @@ const CreateCycleForm: React.FC<Props> = ({
     formData,
     setFormData,
     pondId,
+    pond,
     isEdit = false,
     breedOptions,
     seasonOptions,
 }) => {
     // Use hooks to fetch seasons - REMOVED -> Lifted to screen
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-    const storePond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
-    const pond = storePond;
 
     const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
@@ -65,21 +64,18 @@ const CreateCycleForm: React.FC<Props> = ({
 
         return selectedBreed.price * quantity;
     }, [formData.breedSource, formData.stockingQuantity, breedOptions]);
-
-    // Tính mật độ (con/m²) = Tổng số PL thả / Diện tích ao (m²)
     const density = useMemo(() => {
         if (!formData.stockingQuantity || !pondId) {
             return 0;
         }
-        if (!pond?.area) {
-            return 0;
+
+        let areaVal = (pond as any)?.areaSqm;
+        if (!areaVal && pond?.area) {
+            const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
+            areaVal = parseFloat(areaStr);
         }
 
-        // Parse area string (e.g., "2400 m²") to number
-        const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
-        const parsedArea = parseFloat(areaStr);
-
-        if (isNaN(parsedArea) || parsedArea <= 0) {
+        if (!areaVal || isNaN(areaVal) || areaVal <= 0) {
             return 0;
         }
 
@@ -92,8 +88,15 @@ const CreateCycleForm: React.FC<Props> = ({
             return 0;
         }
 
-        return quantity / parsedArea;
+        const result = Math.round(quantity / areaVal);
+        return result;
     }, [formData.stockingQuantity, pondId, pond]);
+
+    useEffect(() => {
+        if (formData.density !== density) {
+            setFormData(prev => ({ ...prev, density }));
+        }
+    }, [density, setFormData, formData.density]);
 
     useEffect(() => {
         if (isEdit) return;
@@ -203,7 +206,7 @@ const CreateCycleForm: React.FC<Props> = ({
                 resultItems={[
                     {
                         label: 'Mật độ (con/m²)',
-                        value: density > 0 ? density.toFixed(6) : '-',
+                        value: density > 0 ? formatNumber(density) : '-',
                     },
                     {
                         label: 'Tổng chi phí giống ước tính (VNĐ)',
