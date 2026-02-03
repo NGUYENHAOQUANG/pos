@@ -64,14 +64,14 @@ export const shrimpHealthCheckApi = {
 
     /**
      * Cập nhật kiểm tra tôm
-     * PATCH /api/v1/pond/{pondId}/shrimp-healths/{id}
+     * PUT /api/v1/pond/{pondId}/shrimp-healths/{id}
      */
     update: async (
         pondId: string,
         id: string,
         payload: UpdateShrimpHealthCheckPayload
     ): Promise<IApiResponse<ShrimpHealthCheckResult>> => {
-        const response = await apiClient.patch<IApiResponse<ShrimpHealthCheckResult>>(
+        const response = await apiClient.put<IApiResponse<ShrimpHealthCheckResult>>(
             API_ENDPOINTS.POND.SHRIMP_HEALTH.UPDATE(pondId, id),
             payload
         );
