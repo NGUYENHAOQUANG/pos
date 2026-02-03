@@ -87,11 +87,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         marginTop: 8,
         borderRadius: 0,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 1,
         marginBottom: spacing.md,
     },
     cardHeader: {

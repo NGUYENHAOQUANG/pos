@@ -74,17 +74,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
         paddingVertical: 16,
-        // paddingHorizontal: 16, // Removed to allow full width divider
-        // marginBottom: 16, // Removed to let parent handle gap
-        // Shadow for iOS
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        // Elevation for Android
-        elevation: 2,
     },
     headerTitle: {
         fontSize: 14,

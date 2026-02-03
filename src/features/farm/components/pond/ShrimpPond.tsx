@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         //...shadows.sm,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.defaultBorder,
         overflow: 'hidden',
     },
     header: {
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
     menuBtn: {
-        width: 32, // Smaller menu button in card? Image shows standard size but maybe compact
+        width: 32,
         height: 32,
         borderWidth: 1,
         borderColor: colors.border,
