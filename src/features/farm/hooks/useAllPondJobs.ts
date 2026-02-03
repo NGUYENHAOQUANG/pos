@@ -10,6 +10,7 @@ import { useEnvMeasurementsAsJobs } from '@/features/farm/hooks/useEnvMeasuremen
 import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
+import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
 
 export const useAllPondJobs = (pond: PondData | undefined) => {
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
@@ -46,6 +47,8 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
     const { jobs: apiCleanRenovationJobs } = useCleanRenovationsAsJobs(pond?.id || '');
     // Fetch dry renovation records from API
     const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pond?.id || '');
+    // Fetch water supply records from API
+    const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -107,6 +110,11 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
                         items = apiDryRenovationJobs;
                     }
 
+                    // Override with API data for WATER_CHANGE
+                    if (jobType === JOB_TYPES.WATER_CHANGE) {
+                        items = apiWaterSupplyJobs;
+                    }
+
                     jobTypes.push({
                         type: jobType,
                         items,
@@ -153,6 +161,7 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
         apiIncidentJobs,
         apiCleanRenovationJobs,
         apiDryRenovationJobs,
+        apiWaterSupplyJobs,
         environmentJobs,
         waterTreatmentJobs,
         waterChangeJobs,

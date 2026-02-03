@@ -68,4 +68,10 @@ export const farmKeys = {
             ] as const,
         detail: (id: string) => [...farmKeys.dryRenovations.all(), 'detail', id] as const,
     },
+    waterSupply: {
+        all: () => [...farmKeys.all, 'waterSupply'] as const,
+        list: (pondId: string, params?: any) =>
+            [...farmKeys.waterSupply.all(), 'list', pondId, ...(params ? [params] : [])] as const,
+        detail: (id: string) => [...farmKeys.waterSupply.all(), 'detail', id] as const,
+    },
 };
