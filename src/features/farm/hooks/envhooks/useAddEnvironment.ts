@@ -64,10 +64,10 @@ export const useAddEnvironment = ({
 
     // Helper: Get metric value from measurements array
     const getMetricValue = (metricCode: string): string => {
-        if (!detail?.measurements) return '';
+        if (!detail?.envMeasurementDetails) return '';
         const metric = metricTypes.find(m => m.code === metricCode);
         if (!metric) return '';
-        const measurement = detail.measurements.find(m => m.metricId === metric.id);
+        const measurement = detail.envMeasurementDetails.find(m => m.metricId === metric.id);
         return measurement ? measurement.value.toString() : '';
     };
 
@@ -337,7 +337,7 @@ export const useAddEnvironment = ({
         const measurements = buildMeasurements();
         const commonData = {
             operationId: currentCycle?.id,
-            measurements,
+            envMeasurementDetails: measurements,
             documentIds,
             createdAt: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
             recordValue: 1,
