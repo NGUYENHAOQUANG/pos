@@ -148,8 +148,8 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
 
             // Construct meta for warnings
             const meta: EnvironmentMeta = {};
-            if (item.measurements && metricTypes.length > 0) {
-                item.measurements.forEach((m: any) => {
+            if (item.envMeasurementDetails && metricTypes.length > 0) {
+                item.envMeasurementDetails.forEach((m: any) => {
                     const metric = metricTypes.find(mt => mt.id === m.metricId);
                     if (metric) {
                         // Map code to warning field

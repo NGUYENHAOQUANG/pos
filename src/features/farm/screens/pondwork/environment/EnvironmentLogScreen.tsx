@@ -75,7 +75,7 @@ export const EnvironmentLogScreen: React.FC = () => {
                 // Convert measurements array to activity data format
                 const activityData: ActivityData[] = [];
 
-                measurement.measurements.forEach((m: any) => {
+                measurement.envMeasurementDetails?.forEach((m: any) => {
                     const metric = metricTypes.find((mt: any) => mt.id === m.metricId);
                     if (!metric) return;
 

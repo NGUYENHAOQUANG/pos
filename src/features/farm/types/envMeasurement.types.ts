@@ -13,14 +13,14 @@ export interface IEnvMeasurementDetail {
 export interface ICreateEnvMeasurementReq {
     operationId?: string;
     recordValue?: number;
-    measurements: IEnvMeasurementDetail[];
+    envMeasurementDetails: IEnvMeasurementDetail[];
     documentIds?: string[];
 }
 
 export interface IUpdateEnvMeasurementReq {
     operationId?: string;
     recordValue?: number;
-    measurements: IEnvMeasurementDetail[];
+    envMeasurementDetails: IEnvMeasurementDetail[];
     documentIds?: string[];
 }
 
@@ -43,7 +43,7 @@ export interface EnvMeasurementResponse {
         pondId: string;
         operationId: string;
         recordValue: number;
-        measurements: IEnvMeasurementDetail[];
+        envMeasurementDetails: IEnvMeasurementDetail[];
         documentIds: string[];
     };
 }
