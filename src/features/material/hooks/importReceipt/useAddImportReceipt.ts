@@ -18,9 +18,12 @@ import {
     useImportReceiptDetail,
     useImportReceiptItems,
     useDeleteImportReceipt,
+    useDeleteImportReceiptItem,
+    importReceiptKeys,
 } from '@/features/material/hooks/useImportReceipts';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
-import { showValidationError } from '@/features/material/utils/validationToast';
+import { showValidationError, showErrorToast } from '@/features/material/utils/validationToast';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import {
     ImportSourceEnum,
     ImportReceiptStatus,
@@ -30,6 +33,10 @@ import { MaterialItem } from '@/features/material/components/warehouse/AddWareho
 import { FileUploaderRef } from '@/shared/components/forms/FileUploader';
 
 export const useAddImportReceipt = () => {
+    // Refs to track initial data load
+    const detailLoadedRef = useRef(false);
+    const itemsLoadedRef = useRef(false);
+
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'AddWarehouse'>>();
     const importReceiptId = route.params?.importReceiptId;
@@ -65,13 +72,14 @@ export const useAddImportReceipt = () => {
     const { mutate: createImportReceipt, isPending: isCreating } = useCreateImportReceipt();
     const { mutate: updateImportReceipt, isPending: isUpdating } = useUpdateImportReceipt();
     const { mutate: deleteImportReceipt, isPending: isDeleting } = useDeleteImportReceipt();
+    const { mutate: deleteReceiptItem, isPending: isDeletingItem } = useDeleteImportReceiptItem();
 
     // Delete Modal State
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-    // Check if delete is allowed (only for Draft or Rejected status)
+    // Check if delete is allowed (show button when in edit mode)
     const status = importReceiptDetail?.items?.[0]?.status || '';
-    const canDelete = isEditMode && ['Draft', 'Rejected'].includes(status);
+    const canDelete = isEditMode;
 
     const handleDeletePress = () => {
         setDeleteModalVisible(true);
@@ -124,9 +132,9 @@ export const useAddImportReceipt = () => {
     ]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
-    // Populate Form Data in Edit Mode
+    // Populate Form Data (Detail) in Edit Mode
     useEffect(() => {
-        if (isEditMode && importReceiptDetail && importReceiptItems) {
+        if (isEditMode && importReceiptDetail && !detailLoadedRef.current) {
             const detail = (importReceiptDetail as any).data || importReceiptDetail;
 
             if (detail.createdAt) {
@@ -144,27 +152,33 @@ export const useAddImportReceipt = () => {
                 setSupplier(detail.supplierName);
             }
 
-            // Populate Items
-            if (importReceiptItems) {
-                // Temporary type casting as IApiResponse structure requires verification
-                const itemsData =
-                    (importReceiptItems as any).items ||
-                    (importReceiptItems as any).data?.items ||
-                    [];
-
-                if (itemsData && itemsData.length > 0) {
-                    const mappedItems = itemsData.map((item: any) => ({
-                        id: item.id || Date.now().toString() + Math.random(),
-                        materialName: item.materialName || '',
-                        materialId: item.materialId,
-                        quantity: item.quantity?.toString() || '0',
-                        price: item.unitPrice?.toString() || '0',
-                    }));
-                    setWarehouseItems(mappedItems);
-                }
-            }
+            detailLoadedRef.current = true;
         }
-    }, [importReceiptDetail, importReceiptItems, isEditMode, suppliers]);
+    }, [importReceiptDetail, isEditMode, suppliers]);
+
+    // Populate Items in Edit Mode - Only run once to allow local edits (add/remove)
+    useEffect(() => {
+        if (isEditMode && importReceiptItems && !itemsLoadedRef.current) {
+            // Temporary type casting as IApiResponse structure requires verification
+            const itemsData =
+                (importReceiptItems as any).items || (importReceiptItems as any).data?.items || [];
+
+            if (itemsData && itemsData.length > 0) {
+                const mappedItems = itemsData.map((item: any) => ({
+                    id: item.id || Date.now().toString() + Math.random(),
+                    materialName: item.materialName || '',
+                    materialId: item.materialId,
+                    quantity: item.quantity?.toString() || '0',
+                    price: item.unitPrice?.toString() || '0',
+                }));
+                setWarehouseItems(mappedItems);
+            }
+
+            // Mark as loaded so subsequent refetches (e.g. after background sync)
+            // don't overwrite local changes (like deleted items)
+            itemsLoadedRef.current = true;
+        }
+    }, [importReceiptItems, isEditMode]);
 
     // Refs
     const fileUploaderRef = useRef<FileUploaderRef>(null);
@@ -191,6 +205,42 @@ export const useAddImportReceipt = () => {
                 return { ...item, ...updates };
             })
         );
+    };
+
+    const handleRemoveMaterial = (id: string) => {
+        const isTempId = !id.includes('-');
+
+        // Backup current state for rollback if needed
+        const previousItems = [...warehouseItems];
+
+        // OPTIMISTIC UPDATE: Remove immediately from UI
+        setWarehouseItems(prevItems => prevItems.filter(item => item.id !== id));
+
+        // In edit mode AND is a real server item (has GUID), call API to delete
+        if (isEditMode && importReceiptId && !isTempId) {
+            deleteReceiptItem(
+                { receiptId: importReceiptId, itemId: id },
+                {
+                    onSuccess: () => {
+                        // Success - do nothing, item already removed locally
+                        // Query invalidation will sync consistency later
+                    },
+                    onError: (error: any) => {
+                        const errorMessage = getErrorMessage(error, 'Lỗi xóa vật tư');
+
+                        // If error is NOT "not found", rollback the change
+                        // If it IS "not found", we consider it a success (item already gone)
+                        if (
+                            !errorMessage.toLowerCase().includes('không tồn tại') &&
+                            !errorMessage.toLowerCase().includes('not found')
+                        ) {
+                            showErrorToast(errorMessage);
+                            setWarehouseItems(previousItems);
+                        }
+                    },
+                }
+            );
+        }
     };
 
     const calculateTotal = () => {
@@ -261,8 +311,16 @@ export const useAddImportReceipt = () => {
                     {
                         onSuccess: () => {
                             fileUploaderRef.current?.markAsSaved();
-                            // Invalidate to update inventory list (correct key from useWarehouseItems)
+                            // Invalidate to update inventory list and receipt details
                             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+                            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+                            // Use raw key prefix to fuzzy match any params (e.g. { PageSize: 1000 })
+                            queryClient.invalidateQueries({
+                                queryKey: ['importReceipts', 'items', importReceiptId!],
+                            });
+                            queryClient.invalidateQueries({
+                                queryKey: importReceiptKeys.detail(importReceiptId!),
+                            });
                             navigation.goBack();
                         },
                     }
@@ -271,8 +329,9 @@ export const useAddImportReceipt = () => {
                 createImportReceipt(payload, {
                     onSuccess: () => {
                         fileUploaderRef.current?.markAsSaved();
-                        // Invalidate to update inventory list (correct key from useWarehouseItems)
+                        // Invalidate to update inventory list and receipt lists
                         queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+                        queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
                         navigation.goBack();
                     },
                 });
@@ -306,10 +365,12 @@ export const useAddImportReceipt = () => {
         totalAmount,
         isCreating,
         isUploading,
+        isDeletingItem,
 
         // Handlers
         handleAddMaterial,
         handleUpdateMaterial,
+        handleRemoveMaterial,
         handleSubmit,
         handleConfirmSubmit,
         handleSaveDraft,

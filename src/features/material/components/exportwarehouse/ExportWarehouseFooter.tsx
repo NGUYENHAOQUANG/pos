@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     draftButtonText: {
-        fontSize: 15,
-        fontWeight: '600',
+        fontSize: 14,
+        fontWeight: '400',
         color: colors.blue[600],
     },
     submitButton: {
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     submitButtonText: {
-        fontSize: 15,
-        fontWeight: '600',
+        fontSize: 16,
+        fontWeight: '400',
         color: colors.white,
     },
 });

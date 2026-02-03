@@ -89,7 +89,7 @@ export const importReceiptApi = {
         id: string,
         command: UpdateImportReceiptItemCommand
     ): Promise<UpdateImportReceiptItemResponse> => {
-        const { data } = await apiClient.put<UpdateImportReceiptItemResponse>(
+        const { data } = await apiClient.patch<UpdateImportReceiptItemResponse>(
             API_ENDPOINTS.IMPORT_RECEIPT.ITEMS(id),
             command
         );
