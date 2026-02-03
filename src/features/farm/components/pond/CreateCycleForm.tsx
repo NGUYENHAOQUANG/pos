@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
@@ -8,17 +8,20 @@ import { DateInputButton } from '@/features/farm/components/pondwork/DateInputBu
 import BreedInfoCard from '@/features/farm/components/BreedInfoCard';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CycleData, BreedOption } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate, formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { Input } from '@/shared/components/forms/Input';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 // import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 
 interface Props {
     formData: Partial<CycleData>;
     setFormData: React.Dispatch<React.SetStateAction<Partial<CycleData>>>;
     pondId?: string;
+    pond?: any; // Should be PondData but sticking to current loose types or import it
     zoneId?: string;
     isEdit?: boolean;
     breedOptions: BreedOption[];
@@ -29,22 +32,17 @@ const CreateCycleForm: React.FC<Props> = ({
     formData,
     setFormData,
     pondId,
+    pond,
     isEdit = false,
     breedOptions,
     seasonOptions,
 }) => {
     // Use hooks to fetch seasons - REMOVED -> Lifted to screen
-    const storePond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
-
-    // ...
-
-    const pond = storePond;
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
     const updateField = (key: keyof CycleData, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
-
-    // Tính tổng chi phí giống ước tính = breedOptions.price * tổng số lượng thả
     const estimatedCost = useMemo(() => {
         if (!formData.breedSource || !formData.stockingQuantity) {
             return 0;
@@ -66,21 +64,18 @@ const CreateCycleForm: React.FC<Props> = ({
 
         return selectedBreed.price * quantity;
     }, [formData.breedSource, formData.stockingQuantity, breedOptions]);
-
-    // Tính mật độ (con/m²) = Tổng số PL thả / Diện tích ao (m²)
     const density = useMemo(() => {
         if (!formData.stockingQuantity || !pondId) {
             return 0;
         }
-        if (!pond?.area) {
-            return 0;
+
+        let areaVal = (pond as any)?.areaSqm;
+        if (!areaVal && pond?.area) {
+            const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
+            areaVal = parseFloat(areaStr);
         }
 
-        // Parse area string (e.g., "2400 m²") to number
-        const areaStr = String(pond.area).replace(/[^0-9.]/g, '');
-        const parsedArea = parseFloat(areaStr);
-
-        if (isNaN(parsedArea) || parsedArea <= 0) {
+        if (!areaVal || isNaN(areaVal) || areaVal <= 0) {
             return 0;
         }
 
@@ -93,8 +88,15 @@ const CreateCycleForm: React.FC<Props> = ({
             return 0;
         }
 
-        return quantity / parsedArea;
+        const result = Math.round(quantity / areaVal);
+        return result;
     }, [formData.stockingQuantity, pondId, pond]);
+
+    useEffect(() => {
+        if (formData.density !== density) {
+            setFormData(prev => ({ ...prev, density }));
+        }
+    }, [density, setFormData, formData.density]);
 
     useEffect(() => {
         if (isEdit) return;
@@ -204,7 +206,7 @@ const CreateCycleForm: React.FC<Props> = ({
                 resultItems={[
                     {
                         label: 'Mật độ (con/m²)',
-                        value: density > 0 ? density.toFixed(6) : '-',
+                        value: density > 0 ? formatNumber(density) : '-',
                     },
                     {
                         label: 'Tổng chi phí giống ước tính (VNĐ)',
@@ -234,42 +236,51 @@ const CreateCycleForm: React.FC<Props> = ({
                     }}
                 />
 
-                <View style={styles.row}>
-                    <View style={styles.col65}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)
-                        </Text>
-                        <Input
-                            placeholder="Vd: 200.000"
-                            keyboardType="numeric"
-                            value={
-                                formData.stockingQuantity !== undefined
-                                    ? String(formData.stockingQuantity)
-                                    : ''
-                            }
-                            onChangeText={text => {
-                                const num = text ? parseFloat(text) : undefined;
-                                updateField(
-                                    'stockingQuantity',
-                                    isNaN(num as number) ? undefined : num
-                                );
-                            }}
-                        />
+                <View style={{ gap: 6 }}>
+                    <View style={styles.row}>
+                        <View style={styles.col65}>
+                            <Text style={styles.label}>
+                                <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs)
+                            </Text>
+                            <Input
+                                placeholder="Vd: 200.000"
+                                keyboardType="numeric"
+                                value={
+                                    formData.stockingQuantity !== undefined
+                                        ? String(formData.stockingQuantity)
+                                        : ''
+                                }
+                                onChangeText={text => {
+                                    const num = text ? parseFloat(text) : undefined;
+                                    updateField(
+                                        'stockingQuantity',
+                                        isNaN(num as number) ? undefined : num
+                                    );
+                                }}
+                            />
+                        </View>
+                        <View style={styles.col35}>
+                            <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit>
+                                <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
+                            </Text>
+                            <Input
+                                placeholder="Vd: 10"
+                                keyboardType="numeric"
+                                value={formData.age !== undefined ? String(formData.age) : ''}
+                                onChangeText={text => {
+                                    const num = text ? parseFloat(text) : undefined;
+                                    updateField('age', isNaN(num as number) ? undefined : num);
+                                }}
+                            />
+                        </View>
                     </View>
-                    <View style={styles.col35}>
-                        <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit>
-                            <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
-                        </Text>
-                        <Input
-                            placeholder="Vd: 10"
-                            keyboardType="numeric"
-                            value={formData.age !== undefined ? String(formData.age) : ''}
-                            onChangeText={text => {
-                                const num = text ? parseFloat(text) : undefined;
-                                updateField('age', isNaN(num as number) ? undefined : num);
-                            }}
-                        />
-                    </View>
+
+                    <TouchableOpacity
+                        style={styles.aiButton}
+                        onPress={() => navigation.navigate('CountingShrimp')}
+                    >
+                        <Text style={styles.aiButtonText}>Kiểm đếm tôm giống bằng AI</Text>
+                    </TouchableOpacity>
                 </View>
             </PondDataBox>
 
@@ -339,5 +350,19 @@ const styles = StyleSheet.create({
     },
     disabledInput: {
         backgroundColor: colors.gray[100],
+    },
+    aiButton: {
+        backgroundColor: colors.blue[50],
+        borderWidth: 1,
+        borderColor: colors.blue[200],
+        paddingVertical: 12,
+        borderRadius: borderRadius.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    aiButtonText: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: '400',
     },
 });

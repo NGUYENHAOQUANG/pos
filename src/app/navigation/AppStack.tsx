@@ -41,6 +41,7 @@ import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
+import CountingShrimpScreen from '@/features/farm/screens/pond/CountingShrimpScreens';
 
 // Material screens
 import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
@@ -125,7 +126,12 @@ export type AppStackParamList = {
         onSave?: (data: EnvironmentParameter) => void;
     };
     EnvironmentLogScreen: { pond: PondData };
-    CreateCycle: { pondId: string; zoneId?: string; initialData?: CycleData | null };
+    CreateCycle: {
+        pondId: string;
+        zoneId?: string;
+        initialData?: CycleData | null;
+        aiCount?: number;
+    };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
@@ -153,6 +159,7 @@ export type AppStackParamList = {
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
     SunDryPondLog: { pond: PondData };
+    CountingShrimp: undefined;
 
     // ============== Material Screens (Tab Bar hidden) ==============
     AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
@@ -267,6 +274,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
+            <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
 
             {/* ============== Material Screens ============== */}
             <Stack.Screen name="AddMaterial" component={AddMaterialScreen} />

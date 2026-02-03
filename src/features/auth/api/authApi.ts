@@ -70,9 +70,9 @@ export const authApi = {
         fullName: string;
         email: string;
         address: string;
-        avatarUrl: string;
+        avatarId?: string;
     }): Promise<AuthResponse> => {
-        const { data } = await apiClient.put<AuthResponse>(
+        const { data } = await apiClient.patch<AuthResponse>(
             API_ENDPOINTS.AUTH.UPDATE_PROFILE,
             profileData
         );
