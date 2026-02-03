@@ -21,11 +21,12 @@ export interface ISizeMeasurement {
     documentIds?: string[];
     documents?: IDocument[];
     sizeMeasurement?: ISizeMeasurementDetail | null;
+    sizeMeasurementDetail?: ISizeMeasurementDetail | null;
 }
 
 export interface ICreateSizeMeasurementReq {
     documentIds?: string[] | null;
-    sizeMeasurement: {
+    sizeMeasurementDetail: {
         shrimpSizePcsPerKg: number;
         estimatedRemainingStockKg: number;
         notes?: string | null;
@@ -33,9 +34,8 @@ export interface ICreateSizeMeasurementReq {
 }
 
 export interface IUpdateSizeMeasurementReq {
-    value?: number | null;
     documentIds?: string[] | null;
-    sizeMeasurement: {
+    sizeMeasurementDetail: {
         shrimpSizePcsPerKg: number;
         estimatedRemainingStockKg: number;
         notes?: string | null;

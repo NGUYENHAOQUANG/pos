@@ -89,14 +89,21 @@ export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParam
     const { data, isLoading, error, refetch, isRefetching } = useIncidentList(pondId, params);
 
     const rawItems: IncidentListItem[] = data?.data?.items ?? [];
+    // Sort by createdAt ascending so daily index is correct (Lần 1, 2, ... per day)
     const sortedItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return timeA - timeB;
     });
 
-    const jobs: JobExecution[] = sortedItems.map((item, index) => {
+    const dayCounts: Record<string, number> = {};
+    const jobs: JobExecution[] = sortedItems.map(item => {
         const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
+        const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
+        if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
+        dayCounts[dateKey]++;
+        const dailyIndex = dayCounts[dateKey];
+
         const timeStr = createdDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',
             minute: '2-digit',
@@ -104,7 +111,7 @@ export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParam
         const dateStr = formatDate(createdDate);
         return {
             id: item.id,
-            label: `Lần ${index + 1}`,
+            label: `Lần ${dailyIndex}`,
             time: timeStr,
             date: dateStr,
             note: item.detail?.notes ?? undefined,

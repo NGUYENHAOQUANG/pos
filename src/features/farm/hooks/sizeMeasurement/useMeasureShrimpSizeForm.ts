@@ -48,12 +48,13 @@ export const useMeasureShrimpSizeForm = ({
                 if (detail.createdAt) {
                     setTime(new Date(detail.createdAt));
                 }
-                if (detail.sizeMeasurement) {
+                const sizeDetail = detail.sizeMeasurementDetail ?? detail.sizeMeasurement;
+                if (sizeDetail) {
                     const {
                         shrimpSizePcsPerKg,
                         estimatedRemainingStockKg,
                         notes: noteValue,
-                    } = detail.sizeMeasurement;
+                    } = sizeDetail;
 
                     setShrimpSize(
                         shrimpSizePcsPerKg !== undefined && shrimpSizePcsPerKg !== null
@@ -153,7 +154,7 @@ export const useMeasureShrimpSizeForm = ({
 
         const commonData = {
             documentIds,
-            sizeMeasurement: {
+            sizeMeasurementDetail: {
                 shrimpSizePcsPerKg: size,
                 estimatedRemainingStockKg: weight,
                 notes,

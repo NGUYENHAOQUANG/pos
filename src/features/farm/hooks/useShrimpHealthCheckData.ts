@@ -10,7 +10,7 @@ import type {
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
-import { formatDate } from '@/features/farm/utils/dateUtils';
+import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 import { documentApi } from '@/features/material/api/documentApi';
 
 /**
@@ -20,14 +20,21 @@ const convertToJobExecutions = async (
     shrimpHealthChecks: ShrimpHealthCheckDto[],
     pondId: string
 ): Promise<JobExecution[]> => {
-    // Sắp xếp theo createdAt tăng dần giống logic useSizeMeasurementsAsJobs
+    // Đếm tổng số lượt mỗi ngày
+    const totalPerDay: Record<string, number> = {};
+    shrimpHealthChecks.forEach(check => {
+        const d = check.createdAt ? new Date(check.createdAt) : new Date();
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+    });
+
+    // Sắp xếp theo createdAt giảm dần (mới nhất trước), dùng total - dayCounts + 1 để mới nhất = Lần N
     const sortedChecks = [...shrimpHealthChecks].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeA - timeB;
+        return timeB - timeA;
     });
 
-    // Đếm số lượt theo từng ngày: Lần 1, Lần 2, ... / mỗi ngày
     const dayCounts: Record<string, number> = {};
 
     return Promise.all(
@@ -58,13 +65,12 @@ const convertToJobExecutions = async (
                 minute: '2-digit',
             });
 
-            // Per-day index: Lần 1 (cũ) -> Lần N (mới nhất) giống useSizeMeasurementsAsJobs
+            // Lần 1 = cũ nhất, Lần N = mới nhất. Sort giảm dần (mới trước) + công thức đảo để mới nhất = số lớn nhất.
             const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
-            if (!dayCounts[dateKey]) {
-                dayCounts[dateKey] = 0;
-            }
+            if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
             dayCounts[dateKey]++;
-            const dailyIndex = dayCounts[dateKey];
+            const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
+            const dailyIndex = total - dayCounts[dateKey] + 1;
 
             return {
                 id: check.id,
@@ -116,8 +122,26 @@ export const useShrimpHealthChecksAsJobs = (pondId: string) => {
                     return;
                 }
 
-                const jobExecutions = await convertToJobExecutions(rawItems, pondId);
-                setJobs(jobExecutions);
+                let jobExecutions = await convertToJobExecutions(rawItems, pondId);
+                // Card: slice(-3) = 3 mới nhất, hiển thị cũ→mới (mới nhất ở cuối). Sắp xếp tăng dần.
+                const getItemTime = (x: JobExecution) => {
+                    if (x.createdAt) return new Date(x.createdAt).getTime();
+                    try {
+                        const dateStr = x.date || '';
+                        const timeStr = x.time || '00:00';
+                        const combined = dateStr.includes(' ')
+                            ? dateStr
+                            : `${dateStr} ${timeStr}`.trim();
+                        if (!combined) return 0;
+                        return parseDate(combined).getTime();
+                    } catch {
+                        return 0;
+                    }
+                };
+                const sortedAsc = [...jobExecutions].sort(
+                    (a, b) => getItemTime(a) - getItemTime(b)
+                );
+                setJobs(sortedAsc);
             } catch {
                 setJobs([]);
             }
