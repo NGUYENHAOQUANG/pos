@@ -9,7 +9,7 @@ import {
     Dimensions,
 } from 'react-native';
 
-import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
+import { colors, spacing, borderRadius, typography } from '@/styles';
 import { IconPond } from '@/assets/icons'; // Import new SVG
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
@@ -360,9 +360,9 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.sm,
-        ...shadows.sm, // Assuming a small shadow for card look
+        //...shadows.sm,
         borderWidth: 1,
-        borderColor: colors.borderDark, // Or transparent if shadow is enough
+        borderColor: colors.borderDark,
         overflow: 'hidden',
     },
     header: {
