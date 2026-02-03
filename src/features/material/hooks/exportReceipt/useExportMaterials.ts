@@ -2,38 +2,11 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
-
-// Interface for material option in dropdown
-export interface MaterialOption {
-    label: string;
-    value: string;
-    unit: string;
-    quantity: number;
-    disabled?: boolean;
-}
-
-// Interface for warehouse item from API
-interface WarehouseItem {
-    materialName?: string;
-    materialId?: string;
-    unitName?: string;
-    quantity?: number;
-}
-
-// Interface for export receipt item from API
-interface ExportReceiptItem {
-    materialId: string;
-    materialName?: string;
-    quantity?: number;
-    costPrice?: number;
-    unitName?: string;
-}
-
-interface UseExportMaterialsParams {
-    selectedZone: string;
-    isEditMode: boolean;
-    exportReceiptItems?: ExportReceiptItem[];
-}
+import {
+    MaterialOption,
+    WarehouseItem,
+    UseExportMaterialsParams,
+} from '@/features/material/types/exportReceipt.types';
 
 /**
  * Hook to manage materials list for export warehouse form
