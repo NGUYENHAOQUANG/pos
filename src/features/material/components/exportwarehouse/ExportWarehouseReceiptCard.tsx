@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { MaterialGroupType } from '@/features/material/types/material.types';
-import { ExportWarehouseReceiptItems } from '@/features/material/components/warehouse/ExportWarehouseReceiptItems';
+import { ExportWarehouseReceiptItems } from '@/features/material/components/exportwarehouse/ExportWarehouseReceiptItems';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import {
     IExportWarehouseReceipt,
