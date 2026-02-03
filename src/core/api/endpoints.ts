@@ -166,6 +166,15 @@ export const API_ENDPOINTS = {
     IMPORT_RECEIPT: {
         LIST: '/importreceipt',
         CREATE: '/importreceipt',
+        DETAIL: (id: string) => `/importreceipt/${id}`,
+        UPDATE: (id: string) => `/importreceipt/${id}`,
+        DELETE: (id: string) => `/importreceipt/${id}`,
+        ITEMS: (id: string) => `/importreceipt/${id}/items`,
+        ITEM_DETAIL: (receiptId: string, itemId: string) =>
+            `/importreceipt/${receiptId}/items/${itemId}`,
+        SUBMISSION: (id: string) => `/importreceipt/${id}/submission`,
+        APPROVAL: (id: string) => `/importreceipt/${id}/approval`,
+        REJECTION: (id: string) => `/importreceipt/${id}/rejection`,
     },
     EXPORT_RECEIPT: {
         LIST: '/exportreceipt',

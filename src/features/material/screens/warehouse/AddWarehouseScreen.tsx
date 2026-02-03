@@ -15,10 +15,12 @@ import { WarehouseInformation } from '@/features/material/components/warehouse/W
 import { AddWarehouseMaterial } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
-import { colors, spacing } from '@/styles';
+import { colors, spacing, borderRadius } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
 import { useAddImportReceipt } from '@/features/material/hooks/importReceipt/useAddImportReceipt';
 import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { IconTrashOutlined } from '@/assets/icons';
+import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
 interface AddWarehouseScreenProps {}
 
@@ -60,7 +62,26 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         navigation,
         isEditMode,
         isUpdating,
+
+        // Delete (from hook)
+        isDeleting,
+        canDelete,
+        deleteModalVisible,
+        handleDeletePress,
+        handleConfirmDelete,
+        handleCancelDelete,
     } = useAddImportReceipt();
+
+    // Delete Button Component
+    const deleteButton = (
+        <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeletePress}
+            activeOpacity={0.7}
+        >
+            <IconTrashOutlined width={20} height={20} />
+        </TouchableOpacity>
+    );
 
     const formatCurrency = (value: number) => {
         return (
@@ -79,12 +100,12 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isCreating || isUploading || isUpdating}>
+            <Loading isLoading={isCreating || isUploading || isUpdating || isDeleting}>
                 <View style={styles.container}>
                     <HeaderMeterial
                         title={isEditMode ? 'Chỉnh sửa phiếu nhập kho' : 'Tạo Phiếu Nhập Kho'}
                         onBackPress={() => navigation.goBack()}
-                        rightComponent={null}
+                        rightComponent={canDelete ? deleteButton : undefined}
                     />
 
                     <SafeInputLayout>
@@ -146,6 +167,16 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                                 handleConfirmSubmit();
                             }, 500);
                         }}
+                    />
+
+                    {/* Confirmation Delete Modal */}
+                    <ConfirmationDeleteModal
+                        visible={deleteModalVisible}
+                        onConfirm={handleConfirmDelete}
+                        onCancel={handleCancelDelete}
+                        title="Xóa phiếu nhập kho"
+                        message="Bạn có chắc chắn muốn xóa phiếu nhập kho này không?"
+                        showSuccessToast={false}
                     />
                 </View>
             </Loading>
@@ -219,5 +250,15 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '600',
         color: colors.white,
+    },
+    deleteButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.sm,
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.error,
     },
 });

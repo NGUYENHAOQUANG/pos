@@ -35,7 +35,8 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: fetchedItems, isLoading: isFetchingItems } = useImportReceiptItems(
-        isExpanded ? item.id : ''
+        isExpanded ? item.id : '',
+        { PageSize: 1000 }
     );
 
     const toggleExpand = () => {

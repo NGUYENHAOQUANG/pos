@@ -4,17 +4,27 @@ import { useImportReceiptStore } from '@/features/material/store/importReceiptSt
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
-import { GetImportReceiptsParams } from '@/features/material/types/importReceipt.types';
+import {
+    GetImportReceiptsParams,
+    GetImportReceiptItemsParams,
+    CreateImportReceiptRequest,
+    CreateImportReceiptItemCommand,
+    UpdateImportReceiptItemCommand,
+    RejectImportReceiptCommand,
+} from '@/features/material/types/importReceipt.types';
 
 export const importReceiptKeys = {
     all: ['importReceipts'] as const,
     lists: () => [...importReceiptKeys.all, 'list'] as const,
     list: (params: GetImportReceiptsParams) => [...importReceiptKeys.lists(), params] as const,
-    items: (id: string, params?: any) => [...importReceiptKeys.all, 'items', id, params] as const,
+    detail: (id: string) => [...importReceiptKeys.all, 'detail', id] as const,
+    items: (id: string, params?: GetImportReceiptItemsParams) =>
+        [...importReceiptKeys.all, 'items', id, params] as const,
 };
 
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
 
+// ============ Query Hooks ============
 export const useImportReceipts = (params?: GetImportReceiptsParams) => {
     const storeParams = useImportReceiptStore(state => state.getQueryParams());
 
@@ -36,7 +46,18 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
     });
 };
 
-export const useImportReceiptItems = (id: string, params?: any) => {
+export const useImportReceiptDetail = (id: string) => {
+    return useQuery({
+        queryKey: importReceiptKeys.detail(id),
+        queryFn: async () => {
+            const response = await importReceiptApi.getDetail(id);
+            return response.data;
+        },
+        enabled: !!id,
+    });
+};
+
+export const useImportReceiptItems = (id: string, params?: GetImportReceiptItemsParams) => {
     return useQuery({
         queryKey: importReceiptKeys.items(id, params),
         queryFn: async () => {
@@ -47,6 +68,7 @@ export const useImportReceiptItems = (id: string, params?: any) => {
     });
 };
 
+// ============ Receipt Mutation Hooks ============
 export const useCreateImportReceipt = () => {
     const queryClient = useQueryClient();
 
@@ -56,7 +78,7 @@ export const useCreateImportReceipt = () => {
             showSuccessToast('Tạo phiếu nhập kho thành công');
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu nhập kho thất bại');
             showErrorToast(errorMessage);
         },
@@ -67,15 +89,140 @@ export const useUpdateImportReceipt = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: any }) => importReceiptApi.update(id, data),
+        mutationFn: ({ id, data }: { id: string; data: Partial<CreateImportReceiptRequest> }) =>
+            importReceiptApi.update(id, data),
         onSuccess: (_, { id }) => {
             showSuccessToast('Cập nhật phiếu nhập kho thành công');
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: ['importReceipt', id] });
-            queryClient.invalidateQueries({ queryKey: ['importReceiptItems', id] });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             const errorMessage = getErrorMessage(error, 'Cập nhật phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useDeleteImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => importReceiptApi.delete(id),
+        onSuccess: () => {
+            showSuccessToast('Xóa phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Xóa phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+// ============ Items Mutation Hooks ============
+export const useAddImportReceiptItems = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, command }: { id: string; command: CreateImportReceiptItemCommand }) =>
+            importReceiptApi.addItems(id, command),
+        onSuccess: (_, { id }) => {
+            showSuccessToast('Thêm vật tư thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Thêm vật tư thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useUpdateImportReceiptItems = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, command }: { id: string; command: UpdateImportReceiptItemCommand }) =>
+            importReceiptApi.updateItems(id, command),
+        onSuccess: (_, { id }) => {
+            showSuccessToast('Cập nhật vật tư thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Cập nhật vật tư thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useDeleteImportReceiptItem = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ receiptId, itemId }: { receiptId: string; itemId: string }) =>
+            importReceiptApi.deleteItem(receiptId, itemId),
+        onSuccess: (_, { receiptId }) => {
+            showSuccessToast('Xóa vật tư thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(receiptId) });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(receiptId) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Xóa vật tư thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+// ============ Workflow Mutation Hooks ============
+export const useSubmitImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => importReceiptApi.submit(id),
+        onSuccess: (_, id) => {
+            showSuccessToast('Gửi duyệt phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Gửi duyệt phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useApproveImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => importReceiptApi.approve(id),
+        onSuccess: (_, id) => {
+            showSuccessToast('Duyệt phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Duyệt phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useRejectImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, command }: { id: string; command?: RejectImportReceiptCommand }) =>
+            importReceiptApi.reject(id, command),
+        onSuccess: (_, { id }) => {
+            showSuccessToast('Từ chối phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
+        },
+        onError: (error: Error) => {
+            const errorMessage = getErrorMessage(error, 'Từ chối phiếu nhập kho thất bại');
             showErrorToast(errorMessage);
         },
     });

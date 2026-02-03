@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { ImportReceiptDetailItem } from '@/features/material/types/importReceipt.types';
@@ -20,11 +20,7 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                style={styles.scrollList}
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={true}
-            >
+            <View>
                 {materials.map((item, index) => {
                     return (
                         <View key={item.id || index} style={styles.materialCard}>
@@ -74,7 +70,7 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
                         </View>
                     );
                 })}
-            </ScrollView>
+            </View>
         </View>
     );
 };
@@ -83,9 +79,6 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xs,
-    },
-    scrollList: {
-        maxHeight: 500, // Approximately height of 3 items
     },
     materialCard: {
         backgroundColor: colors.white,

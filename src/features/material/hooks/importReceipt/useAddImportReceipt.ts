@@ -3,17 +3,21 @@ import { ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { useSuppliers } from '@/features/material/hooks/useSuppliers';
 import { useMaterialOptions } from '@/features/material/hooks/inventory';
 import {
     useCreateImportReceipt,
     useUpdateImportReceipt,
+    useImportReceiptDetail,
+    useImportReceiptItems,
+    useDeleteImportReceipt,
 } from '@/features/material/hooks/useImportReceipts';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { showValidationError } from '@/features/material/utils/validationToast';
@@ -24,7 +28,6 @@ import {
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { FileUploaderRef } from '@/shared/components/forms/FileUploader';
-import { importReceiptApi } from '@/features/material/api/importReceiptApi';
 
 export const useAddImportReceipt = () => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -37,30 +40,57 @@ export const useAddImportReceipt = () => {
     const { data: warehouses = [] } = useWarehouses({
         ZoneId: selectedZoneId || undefined,
     });
-    const { data: warehouseItemsData } = useWarehouseItems(
-        warehouses[0]?.id,
-        { PageSize: 1000 },
-        { enabled: !!warehouses.length }
-    );
-    const { data: suppliers = [] } = useSuppliers();
 
-    // Fetch Detail for Edit Mode
-    const { data: importReceiptDetail } = useQuery({
-        queryKey: ['importReceipt', importReceiptId],
-        queryFn: () => importReceiptApi.getDetail(importReceiptId!),
-        enabled: isEditMode,
+    // Get ALL materials for selection
+    const { data: materialsData = [] } = useMaterials({
+        PageSize: 1000,
+        OrderBy: 'CreatedAt desc',
     });
 
-    const { data: importReceiptItems } = useQuery({
-        queryKey: ['importReceiptItems', importReceiptId],
-        queryFn: () => importReceiptApi.getItems(importReceiptId!),
-        enabled: isEditMode,
+    const queryClient = useQueryClient();
+
+    const { data: suppliers = [] } = useSuppliers();
+
+    // Fetch Detail for Edit Mode - Using reusable hooks
+    const { data: importReceiptDetail } = useImportReceiptDetail(
+        isEditMode ? importReceiptId! : ''
+    );
+
+    const { data: importReceiptItems } = useImportReceiptItems(isEditMode ? importReceiptId! : '', {
+        PageSize: 1000,
     });
 
     // Mutations & Actions
     const { submitWithFiles, isUploading } = useFileSubmit();
     const { mutate: createImportReceipt, isPending: isCreating } = useCreateImportReceipt();
     const { mutate: updateImportReceipt, isPending: isUpdating } = useUpdateImportReceipt();
+    const { mutate: deleteImportReceipt, isPending: isDeleting } = useDeleteImportReceipt();
+
+    // Delete Modal State
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    // Check if delete is allowed (only for Draft or Rejected status)
+    const status = importReceiptDetail?.items?.[0]?.status || '';
+    const canDelete = isEditMode && ['Draft', 'Rejected'].includes(status);
+
+    const handleDeletePress = () => {
+        setDeleteModalVisible(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!importReceiptId) return;
+
+        deleteImportReceipt(importReceiptId, {
+            onSuccess: () => {
+                setDeleteModalVisible(false);
+                navigation.goBack();
+            },
+        });
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteModalVisible(false);
+    };
 
     // Derived Data
     const supplierOptions = useMemo(
@@ -73,13 +103,15 @@ export const useAddImportReceipt = () => {
     );
 
     const availableMaterials = useMemo(() => {
-        const rawMaterials = warehouseItemsData?.items || [];
-        return rawMaterials.map((m: any) => ({
-            ...m,
-            materialName: m.materialName || m.name || 'Unknown Material',
-            materialId: m.materialId || m.id,
-        })) as IWarehouseItem[];
-    }, [warehouseItemsData?.items]);
+        return materialsData.map((m: any) => ({
+            id: m.id,
+            materialId: m.id,
+            materialName: m.name,
+            unit: m.unitName,
+            // currentStock is not available in master data list, set to 0 or undefined
+            remaining: 0,
+        })) as unknown as IWarehouseItem[]; // Casting to IWarehouseItem to satisfy useMaterialOptions
+    }, [materialsData]);
 
     const materialOptions = useMaterialOptions(availableMaterials);
 
@@ -229,6 +261,8 @@ export const useAddImportReceipt = () => {
                     {
                         onSuccess: () => {
                             fileUploaderRef.current?.markAsSaved();
+                            // Invalidate to update inventory list (correct key from useWarehouseItems)
+                            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
                             navigation.goBack();
                         },
                     }
@@ -237,6 +271,8 @@ export const useAddImportReceipt = () => {
                 createImportReceipt(payload, {
                     onSuccess: () => {
                         fileUploaderRef.current?.markAsSaved();
+                        // Invalidate to update inventory list (correct key from useWarehouseItems)
+                        queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
                         navigation.goBack();
                     },
                 });
@@ -287,5 +323,16 @@ export const useAddImportReceipt = () => {
         navigation,
         isEditMode,
         isUpdating,
+        importReceiptId,
+        status,
+
+        // Delete
+        isDeleting,
+        canDelete,
+        deleteModalVisible,
+        setDeleteModalVisible,
+        handleDeletePress,
+        handleConfirmDelete,
+        handleCancelDelete,
     };
 };
