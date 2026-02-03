@@ -8,6 +8,7 @@ import {
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import {
@@ -61,6 +62,7 @@ export const HeaderFarm = ({
     leftComponent,
     rightAction,
 }: HeaderFarmProps) => {
+    const insets = useSafeAreaInsets();
     const [menuVisible, setMenuVisible] = useState(false);
     const [dropdownTop, setDropdownTop] = useState(0);
     const [dropdownRight, setDropdownRight] = useState(24);
@@ -121,33 +123,36 @@ export const HeaderFarm = ({
     /**
      * Render Detail Mode (Back, Icon, Info, Tag, Menu)
      */
+    /**
+     * Render Detail Mode (Back, Icon, Info, Tag, Menu)
+     * Using custom layout instead of HeaderSection to handle text truncation correctly
+     * Layout: [Left Part (flex: 1)] [Right Part (auto)]
+     */
     if (type === 'detail') {
-        const leftNode = (
-            <View style={styles.detailLeft}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
-                <View style={styles.infoContainer}>
-                    <Text style={styles.pondName}>{title || '---'}</Text>
-                    <Text style={styles.pondArea}>{subtitle || '---'}</Text>
-                </View>
-            </View>
-        );
-
-        const rightNode = (
-            <View style={styles.detailRight}>
-                {status && <Tag status={status} style={styles.tag} />}
-                {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
-                <View ref={buttonRef} collapsable={false}>
-                    <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
-                </View>
-            </View>
-        );
-
         return (
-            <>
-                <HeaderSection leftComponent={leftNode} rightComponent={rightNode} />
+            <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+                {/* Left Part: Back + Icon + Text */}
+                <View style={styles.detailLeftContainer}>
+                    <TouchableOpacity onPress={onBack} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.pondName} numberOfLines={1} ellipsizeMode="tail">
+                            {title || '---'}
+                        </Text>
+                        <Text style={styles.pondArea}>{subtitle || '---'}</Text>
+                    </View>
+                </View>
+
+                {/* Right Part: Tags + Menu */}
+                <View style={styles.detailRightContainer}>
+                    {status && <Tag status={status} style={styles.tag} />}
+                    {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
+                    <View ref={buttonRef} collapsable={false}>
+                        <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
+                    </View>
+                </View>
 
                 {menuOptions && menuOptions.length > 0 && (
                     <Modal
@@ -180,7 +185,7 @@ export const HeaderFarm = ({
                         </TouchableWithoutFeedback>
                     </Modal>
                 )}
-            </>
+            </View>
         );
     }
 
@@ -200,12 +205,30 @@ export const HeaderFarm = ({
 
 const styles = StyleSheet.create({
     // --- List Mode Styles ---
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingBottom: 12,
+        paddingHorizontal: 16,
+        backgroundColor: colors.white,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        zIndex: 1000,
+        overflow: 'visible',
+    },
     listLeftContainer: {
         flexDirection: 'row',
     },
 
     // --- Detail Mode Styles ---
-    detailLeft: {
+    detailLeftContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: spacing.sm,
+    },
+    detailRightContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -233,6 +256,7 @@ const styles = StyleSheet.create({
         height: 24,
     },
     infoContainer: {
+        flex: 1,
         justifyContent: 'center',
     },
     pondName: {
@@ -245,6 +269,7 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     detailRight: {
+        // Keep for backward compatibility if used anywhere else
         flexDirection: 'row',
         alignItems: 'center',
     },

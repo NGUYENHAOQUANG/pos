@@ -60,6 +60,20 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
         return [];
     }, [item.materials, fetchedItems]);
 
+    // Calculate total from items if main total is missing
+    const calculatedTotal = useMemo(() => {
+        if (!displayItems || displayItems.length === 0) return 0;
+        return displayItems.reduce((sum, curr) => {
+            const qty = parseFloat(curr.quantity.toString()) || 0;
+            const price = parseFloat(curr.price.toString().replace(/,/g, '')) || 0;
+            const itemTotal = curr.total || qty * price;
+            return sum + (itemTotal || 0);
+        }, 0);
+    }, [displayItems]);
+
+    const displayTotalAmount =
+        item.totalAmount && item.totalAmount > 0 ? item.totalAmount : calculatedTotal;
+
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
@@ -107,7 +121,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                 <View style={styles.row}>
                     <Text style={styles.label}>Tổng giá trị:</Text>
                     <Text style={styles.value}>
-                        {formatCurrencyValue(item.totalAmount)}{' '}
+                        {formatCurrencyValue(displayTotalAmount)}{' '}
                         <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
                     </Text>
                 </View>

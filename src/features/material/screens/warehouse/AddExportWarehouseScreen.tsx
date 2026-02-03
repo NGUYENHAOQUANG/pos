@@ -146,6 +146,7 @@ export const AddExportWarehouseScreen: React.FC = () => {
                                 onAddMaterial={handleAddMaterial}
                                 materialOptions={materialOptions}
                                 onDropdownOpen={handleDropdownOpen}
+                                title="Vật tư xuất kho"
                             />
                         </ScrollView>
                     </SafeInputLayout>
