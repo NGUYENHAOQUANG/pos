@@ -44,7 +44,20 @@ export const EditPersonalInformationScreens: React.FC = () => {
             setAddress(userData.address || '');
             setRole(userData.role);
             setLevel(userData.level);
-            setAvatarUri(userData.avatarUri);
+
+            // Safe guard for avatarUri being an object
+            if (userData.avatarUri && typeof userData.avatarUri === 'string') {
+                setAvatarUri(userData.avatarUri);
+            } else if (userData.avatarUri && typeof userData.avatarUri === 'object') {
+                const safeAvatar =
+                    (userData.avatarUri as any)?.url ||
+                    (userData.avatarUri as any)?.publicUrl ||
+                    null;
+                setAvatarUri(safeAvatar);
+            } else {
+                setAvatarUri(null);
+            }
+
             setAvatarAsset(null); // Reset asset on load
         }
     }, [userData]);
@@ -114,7 +127,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            let finalAvatarUrl = avatarUri;
+            let finalAvatarId = '';
 
             // If we have a new local asset, upload it first
             if (avatarAsset && avatarAsset.uri) {
@@ -127,20 +140,16 @@ export const EditPersonalInformationScreens: React.FC = () => {
                 const uploadedDocs = await documentApi.upload([fileToUpload]);
 
                 if (uploadedDocs && uploadedDocs.length > 0) {
-                    const docId = uploadedDocs[0].id;
-                    // Get public URL from document ID
-                    const publicUrl = await documentApi.getUrl(docId);
-                    if (publicUrl) {
-                        finalAvatarUrl = publicUrl;
-                    }
+                    finalAvatarId = uploadedDocs[0].id;
                 }
             }
 
+            // Construct payload with avatarId
             const payload = {
                 fullName: name,
                 email: email,
                 address: address,
-                avatarUrl: finalAvatarUrl || '',
+                avatarId: finalAvatarId || undefined,
             };
 
             await authApi.updateProfile(payload);
@@ -180,7 +189,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
                         {/* Avatar Section */}
                         <View style={styles.avatarContainer}>
                             <View style={styles.avatar}>
-                                {avatarUri ? (
+                                {avatarUri && typeof avatarUri === 'string' ? (
                                     <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
                                 ) : (
                                     <AvatarIcon width={80} height={80} />

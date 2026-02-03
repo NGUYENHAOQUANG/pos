@@ -24,9 +24,10 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 // import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
-import { IShrimpSeed } from '@/features/material/types/material.types';
+import { IShrimpSeed } from '@/features/material/types/warehouse.types';
 import { useQuery } from '@tanstack/react-query';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { pondApi } from '@/features/farm/api/pondApi';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
 type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
@@ -44,18 +45,41 @@ export const CreateCycleScreen: React.FC = () => {
 
     const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
 
-    const { pondId, initialData, zoneId } = route.params;
+    const { pondId, initialData, zoneId, aiCount } = route.params;
     const isEdit = !!initialData;
+
+    // Listen for AI Count from CountingShrimpScreen
+    React.useEffect(() => {
+        if (aiCount !== undefined) {
+            setCycleData(prev => ({
+                ...prev,
+                stockingQuantity: aiCount,
+            }));
+        }
+    }, [aiCount]);
 
     // --- Data Fetching Logic (Lifted from CreateCycleForm) ---
     // 1. Determine Context
-    const pond = ponds.find(p => p.id === pondId);
+    // 1. Determine Context
+    // const ponds = useFarmStore(state => state.ponds); // Removed redeclaration
+    const storePond = ponds.find(p => p.id === pondId);
+
     // Prefer passed zoneId, fallback to pond from store, then initialData
     const effectiveZoneId =
         zoneId ||
-        pond?.zoneId?.toString() ||
+        storePond?.zoneId?.toString() ||
         (initialData?.pond as any)?.zoneId ||
         (initialData?.season as any)?.zoneId;
+
+    // Fallback: Fetch ponds if not in store and we have zoneId
+    const { data: fetchedPondsData } = useQuery({
+        queryKey: ['ponds', effectiveZoneId],
+        queryFn: () => pondApi.getPondsByZone(effectiveZoneId!, { PageSize: 100 }),
+        enabled: !storePond && !!effectiveZoneId,
+    });
+
+    const fetchedPond = fetchedPondsData?.items?.find((p: any) => p.id === pondId);
+    const pond = storePond || fetchedPond;
 
     // 2. Fetch Warehouses filtered by the current Zone
     const { data: warehouses } = useWarehouses({
@@ -317,17 +341,10 @@ export const CreateCycleScreen: React.FC = () => {
                 { pondId, cycleId: initialData.id, data: updateCommand },
                 {
                     onSuccess: _result => {
-                        // Find breed name
                         const selectedBreed = breedOptions.find(
                             b => b.value === command.warehouseItemId
                         );
 
-                        // Update locally in store if needed, similar to create
-                        // API returns { success: true, data: CycleData } or just CycleData depending on interceptor.
-                        // Based on user JSON: result is { success: true, data: { ... } }
-                        // But cycleApi.updateCycle returns response.data.
-                        // If response.data is the wrapper, we access .data.
-                        // Let's assume _result has the data property or IS the data.
                         const updatedCycleData = (_result as any).data || _result;
 
                         const fullCycleData: CycleData = {
@@ -369,9 +386,6 @@ export const CreateCycleScreen: React.FC = () => {
                         b => b.value === command.warehouseItemId
                     );
 
-                    // Convert result/input to CycleData for store
-                    // Note: usage of saveActiveCycle might need review if API returns different structure
-                    // but for now we map what we have to keep UI working until refactor
                     const fullCycleData: CycleData = {
                         ...cycleData,
                         id: result.id || `${pondId}-${Date.now()}`,
@@ -387,7 +401,6 @@ export const CreateCycleScreen: React.FC = () => {
                         sourcePonds: [pondId],
                     } as CycleData;
 
-                    // Lưu vào FarmContext
                     saveActiveCycle(pondId, fullCycleData);
 
                     Toast.show({
@@ -466,6 +479,7 @@ export const CreateCycleScreen: React.FC = () => {
                         formData={cycleData}
                         setFormData={setCycleData}
                         pondId={pondId}
+                        pond={pond as any}
                         zoneId={zoneId}
                         isEdit={isEdit}
                         breedOptions={breedOptions}

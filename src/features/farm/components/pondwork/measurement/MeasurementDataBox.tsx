@@ -49,8 +49,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         if (!isNaN(size) && size > 0) {
             // Trọng lượng trung bình = 1000 / Cỡ tôm
             const weightPerShrimp = 1000 / size;
-            // Round to integer for display
-            setShrimpWeight(Math.round(weightPerShrimp));
+            // Keep precision for display
+            setShrimpWeight(weightPerShrimp);
         } else {
             setShrimpWeight(null);
         }
@@ -70,17 +70,23 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         items.push({
             label: 'Tổng số tôm hiện tại (con)',
-            value: totalShrimp !== null ? totalShrimp.toString() : '-',
+            value: totalShrimp !== null ? totalShrimp.toLocaleString('en-US') : '-',
         });
 
         items.push({
             label: 'Tỉ lệ sống dự kiến (%)',
-            value: survivalRate !== null ? `${survivalRate}` : '-',
+            value: survivalRate !== null ? survivalRate.toLocaleString('en-US') : '-',
         });
 
         items.push({
             label: 'Trọng lượng tôm (g/con)',
-            value: shrimpWeight !== null ? `${shrimpWeight}` : '-',
+            value:
+                shrimpWeight !== null
+                    ? shrimpWeight.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      })
+                    : '-',
         });
 
         return items;
