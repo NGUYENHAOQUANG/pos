@@ -78,7 +78,7 @@ const CountingShrimpScreen: React.FC = () => {
                 });
                 */
 
-                const mockData = getMockResponse(fileName, uri);
+                const mockData = getMockResponse(fileName, uri, asset.fileSize || 0);
                 const MOCK_WIDTH = 3072;
                 const MOCK_HEIGHT = 3072;
 
