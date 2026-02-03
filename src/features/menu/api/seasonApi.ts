@@ -60,7 +60,7 @@ export const seasonApi = {
         zoneId: string,
         id: string,
         status: SeasonStatus
-    ): Promise<boolean> => {
+    ): Promise<{ success: boolean; message?: string }> => {
         const payload = { status };
         const response = await apiClient.post(
             API_ENDPOINTS.ZONE.SEASONS.STATUS(zoneId, id),
@@ -75,7 +75,11 @@ export const seasonApi = {
             const message = resData?.message || 'Cập nhật trạng thái thất bại';
             throw new Error(message);
         }
-        return true;
+
+        return {
+            success: true,
+            message: resData?.message,
+        };
     },
 
     deleteSeason: async (zoneId: string, id: string): Promise<void> => {

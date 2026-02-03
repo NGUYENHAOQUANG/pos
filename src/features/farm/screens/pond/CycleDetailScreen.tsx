@@ -2,13 +2,15 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '@/features/farm/utils/dateUtils';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { warehouseApi } from '@/features/material/api/warehouseApi';
 
 // Sử dụng HeaderFarm có sẵn
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -49,7 +51,16 @@ export const CycleDetailScreen: React.FC = () => {
         },
         enabled: !!pondId && !!initialCycleData?.id,
         initialData: initialCycleData,
+        refetchOnMount: 'always', // Always refetch when screen mounts
+        staleTime: 0, // Data is always stale, will refetch on focus
     });
+
+    // Refetch data when screen gains focus (e.g., after editing)
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
 
     const activeCycleData = (fetchedCycleData || initialCycleData) as CycleData | undefined;
 
@@ -61,13 +72,76 @@ export const CycleDetailScreen: React.FC = () => {
     const getPondById = useFarmStore(state => state.getPondById);
     const pond = getPondById(pondId);
 
+    // --- Dynamic Breed Name Fetching (same as ShrimpPond) ---
+    const effectiveZoneId = pond?.zoneId?.toString();
+
+    // Fetch Warehouses for this Zone
+    const { data: warehouses } = useWarehouses({
+        PageSize: 100,
+        ZoneId: effectiveZoneId,
+    });
+
+    // Fetch Shrimp Seeds from ALL warehouses
+    const { data: shrimpSeeds } = useQuery({
+        queryKey: ['shrimp-seeds-cycle-detail', effectiveZoneId, warehouses?.length],
+        queryFn: async () => {
+            if (!warehouses || warehouses.length === 0) return [];
+            try {
+                const promises = warehouses.map(w =>
+                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                );
+                const results = await Promise.all(promises);
+                const allItems = results.reduce<any[]>((acc, r: any) => {
+                    if (r?.data?.items) {
+                        return acc.concat(r.data.items);
+                    }
+                    return acc;
+                }, []);
+                // Deduplicate by ID
+                const seen = new Set();
+                return allItems.filter((item: any) => {
+                    if (seen.has(item.id)) return false;
+                    seen.add(item.id);
+                    return true;
+                });
+            } catch {
+                return [];
+            }
+        },
+        enabled: !!warehouses && warehouses.length > 0,
+        staleTime: 5 * 60 * 1000,
+    });
+
     const breedLabel = useMemo(() => {
-        if (!activeCycleData?.breedSource) return 'N/A';
-        // 1. Prefer saved name
-        if (activeCycleData.breedName) return activeCycleData.breedName;
-        // 2. Fallback to options
-        return breedOptions.find(b => b.value === activeCycleData.breedSource)?.label || 'N/A';
-    }, [activeCycleData, breedOptions]);
+        // 1. Prefer saved breedName from activeCycleData
+        if (activeCycleData?.breedName) return activeCycleData.breedName;
+
+        // 2. Check warehouseItem object (if API returns it)
+        const warehouseItem = (activeCycleData as any)?.warehouseItem;
+        if (warehouseItem?.materialName) return warehouseItem.materialName;
+        if (warehouseItem?.name) return warehouseItem.name;
+
+        // 3. Check initialCycleData breedName
+        if (initialCycleData?.breedName) return initialCycleData.breedName;
+
+        // 4. Match from fetched shrimpSeeds using warehouseItemId
+        const warehouseItemId =
+            (activeCycleData as any)?.warehouseItemId || activeCycleData?.breedSource;
+        if (warehouseItemId && shrimpSeeds && shrimpSeeds.length > 0) {
+            const matchedSeed = shrimpSeeds.find((seed: any) => seed.id === warehouseItemId);
+            if (matchedSeed?.materialName) return matchedSeed.materialName;
+            if (matchedSeed?.name) return matchedSeed.name;
+        }
+
+        // 5. Fallback to breedOptions lookup
+        const breedId = activeCycleData?.breedSource || warehouseItemId;
+        if (breedId) {
+            const found = breedOptions.find(b => b.value === breedId)?.label;
+            if (found) return found;
+        }
+
+        return 'N/A';
+    }, [activeCycleData, initialCycleData, breedOptions, shrimpSeeds]);
 
     const seasonLabel = useMemo(() => {
         // API returns season as object with name
