@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { CompleteProfilePayload } from '@/features/auth/types/auth.types';
 import { documentApi } from '@/features/material/api/documentApi';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
@@ -51,7 +52,7 @@ export default function InfoScreen() {
         try {
             if (!user?.id) throw new Error('Không tìm thấy thông tin người dùng');
 
-            let finalAvatarUrl = avatar;
+            let finalAvatarId = '';
 
             // Handle avatar upload if it's a local URI
             if (avatar && (avatar.startsWith('file://') || avatar.startsWith('content://'))) {
@@ -64,38 +65,25 @@ export default function InfoScreen() {
                 const uploadedDocs = await documentApi.upload([fileToUpload]);
 
                 if (uploadedDocs && uploadedDocs.length > 0) {
-                    const docId = uploadedDocs[0].id;
-                    const publicUrl = await documentApi.getUrl(docId);
-                    if (publicUrl) {
-                        finalAvatarUrl = publicUrl;
-                    }
+                    finalAvatarId = uploadedDocs[0].id;
                 }
             }
 
-            const payload: any = {
+            const payload: CompleteProfilePayload = {
                 userId: user.id,
                 fullName,
             };
 
             if (email) payload.email = email;
             if (address) payload.address = address;
-            if (finalAvatarUrl) payload.avatarUrl = finalAvatarUrl;
-
-            console.log('Final Complete Profile Payload:', payload);
+            if (finalAvatarId) payload.avatarId = finalAvatarId;
 
             await completeProfile(payload);
-
             Toast.show({
                 type: 'success',
                 text1: 'Cập nhật thông tin thành công',
             });
         } catch (error: any) {
-            console.error('Complete Profile Error:', error);
-            if (error.response) {
-                console.log('Error Data:', error.response.data);
-                console.log('Error Status:', error.response.status);
-            }
-
             const normalizedError = error as NormalizedError;
             const message = normalizedError.message || 'Cập nhật thất bại';
 

@@ -48,6 +48,7 @@ export interface CompleteProfilePayload {
     fullName: string;
     email?: string;
     address?: string;
+    avatarId?: string;
     avatarUrl?: string;
 }
 
