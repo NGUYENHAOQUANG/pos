@@ -68,32 +68,68 @@ export interface IMaterialType {
 export type GetMaterialTypesResponse = IAppResponse<IPaginate<IMaterialType>>;
 export type GetMaterialTypeByIdResponse = IAppResponse<IMaterialType>;
 
-export interface MaterialResponse {
-    id: number;
-    creatorId?: number | null;
-    createdAt?: string | null;
-    lastModifierId?: number | null;
-    lastModifiedAt?: string | null;
-    isDeleted?: boolean;
-    deleterId?: number | null;
-    deletedAt?: string | null;
-    code?: string | null;
-    name?: string | null;
+// ============ Material API Types ============
+export interface MaterialResponseV2 {
+    id: string;
+    code: string;
+    name: string;
+    materialTypeId: string;
+    materialGroupId: string;
+    materialTypeName?: string;
+    unitId: string;
+    unitName?: string;
+    description?: string;
+    manufacturer?: string;
+    isActive: boolean;
+    no: number;
+    creatorId?: string | null;
+    userCreatorId?: string | null;
+    editorId?: string | null;
+    userEditorId?: string | null;
+    createdAt: string;
+    editedAt?: string;
+    creator?: any;
+    editor?: any;
+}
+
+export interface CreateMaterialV2Request {
+    name: string;
+    materialTypeId: string;
+    description: string;
+    unitId: string;
     manufacturer?: string | null;
-    unitId: number;
-    unitName?: string | null;
-    materialGroupId?: number;
-    materialTypeId?: number;
-    description?: string | null;
     isActive?: boolean;
+}
+
+export interface UpdateMaterialV2Request {
+    name?: string | null;
+    materialTypeId?: string | null;
+    description?: string | null;
+    unitId?: string | null;
+    manufacturer?: string | null;
+    isActive?: boolean | null;
 }
 
 export interface GetMaterialsParams {
     SearchText?: string;
     MaterialTypeId?: string;
+    IsActive?: boolean;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
     Page?: number;
     PageSize?: number;
+    OrderBy?: string;
 }
 
-export type GetMaterialsResponse = IAppResponse<IPaginate<MaterialResponse>>;
-export type GetMaterialByIdResponse = IAppResponse<MaterialResponse>;
+export interface UpdateMaterialResponseData {
+    materialId: string;
+    name: string;
+}
+
+export type GetMaterialsV2Response = IAppResponse<IPaginate<MaterialResponseV2>>;
+export type GetMaterialByIdV2Response = IAppResponse<MaterialResponseV2>;
+export type CreateMaterialResponse = IAppResponse<MaterialResponseV2>;
+export type UpdateMaterialResponse = IAppResponse<UpdateMaterialResponseData>;
+export type DeleteMaterialResponse = IAppResponse<string>;

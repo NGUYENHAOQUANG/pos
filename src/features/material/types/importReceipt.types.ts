@@ -1,4 +1,4 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 
 export enum ImportReceiptStatus {
     Pending = 'Pending',
@@ -25,15 +25,16 @@ export interface ImportReceipt {
     no?: number;
     createdAt?: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
 }
 
 export interface GetImportReceiptsParams {
     ReceiptCode?: string;
-    Status?: ImportReceiptStatus;
+    Status?: string;
     SupplierId?: string;
     WarehouseId?: string;
+    ApproverId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
@@ -67,23 +68,118 @@ export interface CreateImportReceiptRequest {
     status?: ImportReceiptStatus;
 }
 
-export interface IImportMaterialItem {
-    id: string;
-    materialName: string;
-    quantity: string;
-    price: string;
-    unit?: string;
-    // Helper for total calculation
-    total?: number;
-}
-
-export interface IImportReceipt {
-    id: string;
-    date: Date | string;
-    supplier?: string;
-    materials: IImportMaterialItem[];
-    totalAmount: number;
-    documentIds?: string[];
-}
-
 export type CreateImportReceiptResponse = IApiResponse<string>;
+
+export interface ImportReceiptDetailItem {
+    id: string;
+    importReceiptId: string;
+    materialId: string;
+    materialName: string;
+    materialCode: string;
+    quantity: number;
+    unitName?: string; // Optional - not always returned by API
+    unitPrice: number;
+    totalPrice: number;
+    no: number;
+    creatorId: string | null;
+    userCreatorId: string | null;
+    editorId: string | null;
+    userEditorId: string | null;
+    createdAt: string;
+    editedAt: string;
+    creator: ICreatorEditor | null;
+    editor: ICreatorEditor | null;
+}
+
+export interface GetImportReceiptItemsParams {
+    MaterialName?: string;
+    MaterialCode?: string;
+    MinQuantity?: number;
+    MaxQuantity?: number;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
+}
+
+export type GetImportReceiptItemsResponse = IApiResponse<IPaginate<ImportReceiptDetailItem>>;
+
+// ============ Add/Update Item Types ============
+export interface CreateImportReceiptItemDto {
+    materialId: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export interface CreateImportReceiptItemCommand {
+    items: CreateImportReceiptItemDto[];
+}
+
+export interface AddImportReceiptItemResponseDto {
+    importReceiptItemId: string;
+    materialId: string;
+    materialName: string;
+    materialCode: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+}
+
+export interface AddImportReceiptItemResult {
+    id: string;
+    no: number;
+    creatorId: string | null;
+    userCreatorId: string | null;
+    editorId: string | null;
+    userEditorId: string | null;
+    createdAt: string;
+    editedAt: string;
+    creator: ICreatorEditor | null;
+    editor: ICreatorEditor | null;
+    items: AddImportReceiptItemResponseDto[];
+}
+
+export type AddImportReceiptItemResponse = IApiResponse<AddImportReceiptItemResult>;
+
+export interface UpdateImportReceiptItemDto {
+    id?: string; // Optional for new items
+    materialId: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export interface UpdateImportReceiptItemCommand {
+    items: UpdateImportReceiptItemDto[];
+}
+
+export type UpdateImportReceiptItemResponse = IApiResponse<AddImportReceiptItemResult>;
+
+// ============ Submit/Approve/Reject Types ============
+export interface SubmitImportReceiptResult {
+    id: string;
+    no: number;
+    creatorId: string | null;
+    userCreatorId: string | null;
+    editorId: string | null;
+    userEditorId: string | null;
+    createdAt: string;
+    editedAt: string;
+    creator: ICreatorEditor | null;
+    editor: ICreatorEditor | null;
+}
+
+export type SubmitImportReceiptResponse = IApiResponse<SubmitImportReceiptResult>;
+export type ApproveImportReceiptResponse = IApiResponse<SubmitImportReceiptResult>;
+
+export interface RejectImportReceiptCommand {
+    reason?: string;
+}
+
+export type RejectImportReceiptResponse = IApiResponse<object>;
+
+// ============ Delete Types ============
+export type DeleteImportReceiptResponse = IApiResponse<object>;
+export type DeleteImportReceiptItemResponse = IApiResponse<object>;
