@@ -77,6 +77,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/dry-renovation/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/dry-renovation/${id}`,
         },
+        WATER_CHANGE_RECORD: {
+            LIST: (pondId: string) => `/pond/${pondId}/waterchange-record`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/waterchange-record`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',
