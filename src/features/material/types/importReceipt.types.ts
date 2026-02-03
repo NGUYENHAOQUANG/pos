@@ -1,4 +1,4 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 
 export enum ImportReceiptStatus {
     Pending = 'Pending',
@@ -25,15 +25,16 @@ export interface ImportReceipt {
     no?: number;
     createdAt?: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
 }
 
 export interface GetImportReceiptsParams {
     ReceiptCode?: string;
-    Status?: ImportReceiptStatus;
+    Status?: string;
     SupplierId?: string;
     WarehouseId?: string;
+    ApproverId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
@@ -87,3 +88,31 @@ export interface IImportReceipt {
 }
 
 export type CreateImportReceiptResponse = IApiResponse<string>;
+
+export interface ImportReceiptDetailItem {
+    id: string;
+    importReceiptId: string;
+    materialId: string;
+    materialName: string;
+    materialCode: string;
+    quantity: number;
+    unitName: string;
+    unitPrice: number;
+    totalPrice: number;
+    no: number;
+    creatorId: string | null;
+    userCreatorId: string | null;
+    editorId: string | null;
+    userEditorId: string | null;
+    createdAt: string;
+    editedAt: string;
+    creator: ICreatorEditor | null;
+    editor: ICreatorEditor | null;
+}
+
+export interface GetImportReceiptItemsParams {
+    Page?: number;
+    PageSize?: number;
+}
+
+export type GetImportReceiptItemsResponse = IApiResponse<IPaginate<ImportReceiptDetailItem>>;

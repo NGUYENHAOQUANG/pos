@@ -10,6 +10,7 @@ export const importReceiptKeys = {
     all: ['importReceipts'] as const,
     lists: () => [...importReceiptKeys.all, 'list'] as const,
     list: (params: GetImportReceiptsParams) => [...importReceiptKeys.lists(), params] as const,
+    items: (id: string, params?: any) => [...importReceiptKeys.all, 'items', id, params] as const,
 };
 
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -29,9 +30,20 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
             if (response.success && response.data?.items) {
                 return response.data;
             }
-            return response.data || { items: [], totalCount: 0 };
+            return response.data;
         },
         staleTime: STALE_TIME_SHORT,
+    });
+};
+
+export const useImportReceiptItems = (id: string, params?: any) => {
+    return useQuery({
+        queryKey: importReceiptKeys.items(id, params),
+        queryFn: async () => {
+            const response = await importReceiptApi.getItems(id, params);
+            return response.data;
+        },
+        enabled: !!id,
     });
 };
 
@@ -46,6 +58,24 @@ export const useCreateImportReceipt = () => {
         },
         onError: (error: any) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};
+
+export const useUpdateImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) => importReceiptApi.update(id, data),
+        onSuccess: (_, { id }) => {
+            showSuccessToast('Cập nhật phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: ['importReceipt', id] });
+            queryClient.invalidateQueries({ queryKey: ['importReceiptItems', id] });
+        },
+        onError: (error: any) => {
+            const errorMessage = getErrorMessage(error, 'Cập nhật phiếu nhập kho thất bại');
             showErrorToast(errorMessage);
         },
     });

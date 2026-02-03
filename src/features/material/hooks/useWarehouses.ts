@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
-import { GetWarehousesParams } from '@/features/material/types/warehouse.types';
+import {
+    GetWarehousesParams,
+    GetWarehouseItemsQueryParams,
+} from '@/features/material/types/warehouse.types';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 
 export const useWarehouses = (params?: GetWarehousesParams) => {
@@ -15,7 +18,7 @@ export const useWarehouses = (params?: GetWarehousesParams) => {
 
 export const useWarehouseItems = (
     warehouseId: string | undefined,
-    params?: GetWarehousesParams,
+    params?: GetWarehouseItemsQueryParams,
     options?: { enabled?: boolean }
 ) => {
     return useQuery({

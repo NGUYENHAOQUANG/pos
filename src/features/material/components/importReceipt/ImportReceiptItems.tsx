@@ -1,20 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { ImportReceiptDetailItem } from '@/features/material/types/importReceipt.types';
 
-export interface MaterialItem {
-    id: string;
-    materialName: string;
-    quantity: string;
-    price: string;
+interface ImportReceiptItemsProps {
+    materials: ImportReceiptDetailItem[];
 }
 
-interface WarehouseReceiptItemsProps {
-    materials: MaterialItem[];
-}
-
-export const WarehouseReceiptItems: React.FC<WarehouseReceiptItemsProps> = ({ materials }) => {
+export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ materials }) => {
     const formatCurrency = (value: number) => {
         return (
             <>
@@ -26,55 +20,61 @@ export const WarehouseReceiptItems: React.FC<WarehouseReceiptItemsProps> = ({ ma
 
     return (
         <View style={styles.container}>
-            {materials.map((item, index) => {
-                const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
-
-                return (
-                    <View key={item.id} style={styles.materialCard}>
-                        {/* Header */}
-                        <View style={styles.materialHeader}>
-                            <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
-                        </View>
-
-                        <View style={styles.content}>
-                            {/* Material Name - No Label */}
-                            <View style={styles.nameRow}>
-                                <Text style={styles.materialName}>{item.materialName}</Text>
+            <ScrollView
+                style={styles.scrollList}
+                nestedScrollEnabled
+                showsVerticalScrollIndicator={true}
+            >
+                {materials.map((item, index) => {
+                    return (
+                        <View key={item.id || index} style={styles.materialCard}>
+                            {/* Header */}
+                            <View style={styles.materialHeader}>
+                                <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
                             </View>
 
-                            <View style={styles.separatorFull} />
+                            <View style={styles.content}>
+                                {/* Material Name - No Label */}
+                                <View style={styles.nameRow}>
+                                    <Text style={styles.materialName}>{item.materialName}</Text>
+                                </View>
 
-                            {/* Quantity and Price */}
-                            <View style={styles.detailsRow}>
-                                <View style={styles.detailItem}>
-                                    <View style={styles.detailContent}>
-                                        <Text style={styles.label}>Số lượng: </Text>
-                                        <Text style={styles.value}>{item.quantity}</Text>
+                                <View style={styles.separatorFull} />
+
+                                {/* Quantity and Price */}
+                                <View style={styles.detailsRow}>
+                                    <View style={styles.detailItem}>
+                                        <View style={styles.detailContent}>
+                                            <Text style={styles.label}>Số lượng: </Text>
+                                            <Text style={styles.value}>{item.quantity}</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.detailItem}>
+                                        <View
+                                            style={[styles.detailContent, styles.detailContentEnd]}
+                                        >
+                                            <Text style={styles.priceLabel}>Đơn giá: </Text>
+                                            <Text style={styles.priceValue}>
+                                                {formatCurrency(item.unitPrice || 0)}
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
-                                <View style={styles.detailItem}>
-                                    <View style={[styles.detailContent, styles.detailContentEnd]}>
-                                        <Text style={styles.priceLabel}>Đơn giá: </Text>
-                                        <Text style={styles.priceValue}>
-                                            {formatCurrency(parseFloat(item.price) || 0)}
-                                        </Text>
-                                    </View>
+
+                                <View style={styles.separatorInset} />
+
+                                {/* Total Amount */}
+                                <View style={styles.footer}>
+                                    <Text style={styles.footerLabel}>Thành tiền:</Text>
+                                    <Text style={styles.footerValue}>
+                                        {formatCurrencyValue(item.totalPrice)}
+                                    </Text>
                                 </View>
                             </View>
-
-                            <View style={styles.separatorInset} />
-
-                            {/* Total Amount */}
-                            <View style={styles.footer}>
-                                <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                <Text style={styles.footerValue}>
-                                    {formatCurrencyValue(itemTotal)}
-                                </Text>
-                            </View>
                         </View>
-                    </View>
-                );
-            })}
+                    );
+                })}
+            </ScrollView>
         </View>
     );
 };
@@ -84,12 +84,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xs,
     },
+    scrollList: {
+        maxHeight: 500, // Approximately height of 3 items
+    },
     materialCard: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.border,
         marginBottom: spacing.md,
+        marginRight: spacing.xs, // Add some spacing for scrollbar
     },
     materialHeader: {
         paddingVertical: spacing.sm,

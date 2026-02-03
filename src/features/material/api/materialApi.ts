@@ -3,13 +3,13 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
     CreateMaterialV2Request,
     UpdateMaterialV2Request,
-    GetMaterialsV2Params,
+    GetMaterialsParams,
     GetMaterialsV2Response,
     GetMaterialByIdV2Response,
     DeleteMaterialResponse,
     CreateMaterialResponse,
     UpdateMaterialResponse,
-} from '@/features/material/types/materialGroup.types';
+} from '@/features/material/types/material.types';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 export const materialApi = {
@@ -17,7 +17,7 @@ export const materialApi = {
      * Get list of materials with pagination and filters
      * @param params - Query params (Search, MaterialTypeId, Page, PageSize)
      */
-    getAll: async (params?: GetMaterialsV2Params): Promise<GetMaterialsV2Response> => {
+    getAll: async (params?: GetMaterialsParams): Promise<GetMaterialsV2Response> => {
         const { data } = await apiClient.get<GetMaterialsV2Response>(API_ENDPOINTS.MATERIAL.LIST, {
             params,
         });

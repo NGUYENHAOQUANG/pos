@@ -12,8 +12,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
-import { useMaterialTypes } from '@/features/material/hooks';
+import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { useMaterialsStore } from '@/features/material/store/materialsStore';
+import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -24,6 +25,8 @@ interface SearchBarMeterialProps {
     onFilterPress?: () => void;
     selectedTab?: TabType;
     onGroupChange?: (group: string) => void;
+    onStatusChange?: (status: string) => void;
+    currentStatus?: string;
 }
 
 export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
@@ -31,6 +34,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     onFilterPress: _onFilterPress,
     selectedTab = 'list',
     onGroupChange,
+    onStatusChange,
+    currentStatus = '',
 }) => {
     const [searchText, setSearchText] = useState('');
     const [isExpanded, setIsExpanded] = useState(false);
@@ -39,7 +44,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
     const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
 
-    const [voteStatus, setVoteStatus] = useState('');
+    const [voteStatus, setVoteStatus] = useState(currentStatus);
+
+    useEffect(() => {
+        setVoteStatus(currentStatus);
+    }, [currentStatus]);
 
     // Get filterType from store to sync with selected value
     const filterType = useMaterialsStore(state => state.filterType);
@@ -47,12 +56,23 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     // Get material types from React Query
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
+    const { data: materialGroups = [], isLoading: isLoadingMaterialGroups } = useMaterialGroups();
 
-    // Get dropdown options from material types
-    const materialTypeOptions = React.useMemo(() => {
+    // Get dropdown options based on selectedTab
+    const dropdownOptions = React.useMemo(() => {
+        if (selectedTab === 'list') {
+            // Use Material Groups for 'list' tab
+            return [
+                { label: 'Tất cả nhóm vật tư', value: '' },
+                ...materialGroups.map(g => ({
+                    label: g.name || '',
+                    value: g.id,
+                })),
+            ];
+        }
+
         const uniqueTypes = new Map();
         materialTypes.forEach(t => {
-            // Deduplicate by Name to avoid visual duplicates in UI
             if (t.name && !uniqueTypes.has(t.name)) {
                 uniqueTypes.set(t.name, t);
             }
@@ -64,7 +84,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         }));
 
         return [{ label: 'Tất cả loại vật tư', value: '' }, ...options];
-    }, [materialTypes]);
+    }, [selectedTab, materialTypes, materialGroups]);
 
     // Sync materialGroup with filterType from store
     useEffect(() => {
@@ -82,6 +102,18 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         setSearchText('');
         onSearch?.('');
     };
+
+    // Status options for import receipts
+    const statusOptions = React.useMemo(
+        () => [
+            { label: 'Tất cả trạng thái', value: '' },
+            { label: 'Chờ duyệt', value: ImportReceiptStatus.Pending },
+            { label: 'Lưu nháp', value: ImportReceiptStatus.Draft },
+            { label: 'Hoàn thành', value: ImportReceiptStatus.Approved },
+            { label: 'Từ chối', value: ImportReceiptStatus.Rejected },
+        ],
+        []
+    );
 
     return (
         <View style={styles.container}>
@@ -128,12 +160,17 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    {selectedTab === 'history' && (
+                    {(selectedTab === 'history' ||
+                        selectedTab === 'export' ||
+                        selectedTab === 'inventory') && (
                         <View style={styles.dropdownWrapper}>
                             <DropdownMaterial
                                 value={voteStatus}
-                                onChange={setVoteStatus}
-                                options={['Hoàn thành', 'Lưu nháp']}
+                                onChange={status => {
+                                    setVoteStatus(status);
+                                    onStatusChange?.(status);
+                                }}
+                                options={statusOptions}
                                 placeholder="Trạng thái"
                                 isOpen={isStatusDropdownOpen}
                                 onToggle={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
@@ -142,20 +179,26 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                             />
                         </View>
                     )}
-                    <View style={styles.dropdownWrapper}>
-                        <DropdownMaterial
-                            value={materialGroup}
-                            onChange={value => {
-                                setMaterialGroup(value);
-                                onGroupChange?.(value);
-                            }}
-                            options={materialTypeOptions}
-                            isOpen={isGroupDropdownOpen}
-                            onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
-                            useAutoScroll={selectedTab === 'history'}
-                            disabled={isLoadingMaterialTypes}
-                        />
-                    </View>
+                    {(selectedTab === 'list' || selectedTab === 'material') && (
+                        <View style={styles.dropdownWrapper}>
+                            <DropdownMaterial
+                                value={materialGroup}
+                                onChange={value => {
+                                    setMaterialGroup(value);
+                                    onGroupChange?.(value);
+                                }}
+                                options={dropdownOptions}
+                                isOpen={isGroupDropdownOpen}
+                                onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
+                                useAutoScroll={true}
+                                disabled={
+                                    selectedTab === 'list'
+                                        ? isLoadingMaterialGroups
+                                        : isLoadingMaterialTypes
+                                }
+                            />
+                        </View>
+                    )}
                 </View>
             )}
         </View>

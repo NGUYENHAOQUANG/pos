@@ -11,6 +11,8 @@ interface MaterialsState {
     filterGroup: string;
     filterType: string; // Material type name for filtering
     filterMaterialName: string | null;
+    importReceiptStatusFilter: string;
+    exportReceiptStatusFilter: string;
 
     // Actions - Filters
     setSelectedTab: (tab: TabType) => void;
@@ -18,6 +20,8 @@ interface MaterialsState {
     setFilterGroup: (group: string) => void;
     setFilterType: (type: string) => void;
     setFilterMaterialName: (name: string | null) => void;
+    setImportReceiptStatusFilter: (status: string) => void;
+    setExportReceiptStatusFilter: (status: string) => void;
     resetFilters: () => void;
 }
 
@@ -30,6 +34,8 @@ export const useMaterialsStore = create<MaterialsState>()(
             filterGroup: '',
             filterType: '',
             filterMaterialName: null,
+            importReceiptStatusFilter: '',
+            exportReceiptStatusFilter: '',
 
             // Filter actions
             setSelectedTab: (tab: TabType) =>
@@ -57,12 +63,24 @@ export const useMaterialsStore = create<MaterialsState>()(
                     state.filterMaterialName = name;
                 }),
 
+            setImportReceiptStatusFilter: (status: string) =>
+                set(state => {
+                    state.importReceiptStatusFilter = status;
+                }),
+
+            setExportReceiptStatusFilter: (status: string) =>
+                set(state => {
+                    state.exportReceiptStatusFilter = status;
+                }),
+
             resetFilters: () =>
                 set(state => {
                     state.searchText = '';
                     state.filterGroup = '';
                     state.filterType = '';
                     state.filterMaterialName = null;
+                    state.importReceiptStatusFilter = '';
+                    state.exportReceiptStatusFilter = '';
                 }),
         })),
         {
@@ -77,6 +95,8 @@ export const useMaterialsStore = create<MaterialsState>()(
                 filterGroup: state.filterGroup,
                 filterType: state.filterType,
                 selectedTab: state.selectedTab,
+                importReceiptStatusFilter: state.importReceiptStatusFilter,
+                exportReceiptStatusFilter: state.exportReceiptStatusFilter,
             }),
         }
     )

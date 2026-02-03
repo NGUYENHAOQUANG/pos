@@ -24,6 +24,14 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
     const setFilterMaterialName = useMaterialsStore(state => state.setFilterMaterialName);
     const resetFilters = useMaterialsStore(state => state.resetFilters);
     const setSelectedTab = useMaterialsStore(state => state.setSelectedTab);
+    const setImportReceiptStatusFilter = useMaterialsStore(
+        state => state.setImportReceiptStatusFilter
+    );
+    const setExportReceiptStatusFilter = useMaterialsStore(
+        state => state.setExportReceiptStatusFilter
+    );
+    const importReceiptStatusFilter = useMaterialsStore(state => state.importReceiptStatusFilter);
+    const exportReceiptStatusFilter = useMaterialsStore(state => state.exportReceiptStatusFilter);
 
     // Get actions from each store
 
@@ -34,6 +42,8 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
         filterType,
         filterMaterialName,
         selectedTab,
+        importReceiptStatusFilter,
+        exportReceiptStatusFilter,
         // Actions - Filters
         setSearchText,
         setFilterGroup,
@@ -41,6 +51,8 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
         setFilterMaterialName,
         resetFilters,
         setSelectedTab,
+        setImportReceiptStatusFilter,
+        setExportReceiptStatusFilter,
     };
 
     if (selector) {

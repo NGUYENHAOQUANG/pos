@@ -162,7 +162,9 @@ export const AddExportWarehouseScreen: React.FC = () => {
                         onClose={closeConfirmModal}
                         onConfirm={() => {
                             closeConfirmModal();
-                            handleSubmitFlow(true);
+                            setTimeout(() => {
+                                handleSubmitFlow(true);
+                            }, 500);
                         }}
                     />
 
