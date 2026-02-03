@@ -89,3 +89,27 @@ export type GetExportReceiptByIdResponse = IApiResponse<ExportReceipt>;
 export type GetExportReceiptItemsResponse = IApiResponse<ExportReceiptItem[]>;
 
 export type { GetExportReceiptsParams as GetExportWarehouseParams };
+
+// Interface for material option in dropdown
+export interface MaterialOption {
+    label: string;
+    value: string;
+    unit: string;
+    quantity: number;
+    disabled?: boolean;
+}
+
+// Interface for warehouse item from API
+export interface WarehouseItem {
+    materialName?: string;
+    materialId?: string;
+    unitName?: string;
+    quantity?: number;
+}
+
+// Interface for useExportMaterials hook params
+export interface UseExportMaterialsParams {
+    selectedZone: string;
+    isEditMode: boolean;
+    exportReceiptItems?: ExportReceiptItem[];
+}

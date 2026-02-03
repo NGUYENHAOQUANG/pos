@@ -36,6 +36,7 @@ interface AddWarehouseMaterialProps {
     onAddMaterial: () => void;
     materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
+    title?: string; // Optional title prop
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -44,6 +45,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     onAddMaterial,
     materialOptions = [],
     onDropdownOpen,
+    title = 'Vật tư nhập kho', // Default value
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -76,7 +78,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
 
     return (
         <View style={styles.mainMaterialCard}>
-            <CollapseHead title="Vật tư nhập kho" isExpanded={isExpanded} onToggle={toggleExpand} />
+            <CollapseHead title={title} isExpanded={isExpanded} onToggle={toggleExpand} />
 
             {isExpanded && (
                 <View style={styles.mainContent}>
