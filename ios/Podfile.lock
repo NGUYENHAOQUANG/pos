@@ -88,6 +88,7 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+    - fast_float
   - PromisesObjC (2.4.0)
   - RCT-Folly (2024.11.18.00):
     - boost

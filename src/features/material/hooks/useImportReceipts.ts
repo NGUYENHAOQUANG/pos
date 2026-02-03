@@ -10,6 +10,7 @@ export const importReceiptKeys = {
     all: ['importReceipts'] as const,
     lists: () => [...importReceiptKeys.all, 'list'] as const,
     list: (params: GetImportReceiptsParams) => [...importReceiptKeys.lists(), params] as const,
+    items: (id: string, params?: any) => [...importReceiptKeys.all, 'items', id, params] as const,
 };
 
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -32,6 +33,17 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
             return response.data;
         },
         staleTime: STALE_TIME_SHORT,
+    });
+};
+
+export const useImportReceiptItems = (id: string, params?: any) => {
+    return useQuery({
+        queryKey: importReceiptKeys.items(id, params),
+        queryFn: async () => {
+            const response = await importReceiptApi.getItems(id, params);
+            return response.data;
+        },
+        enabled: !!id,
     });
 };
 

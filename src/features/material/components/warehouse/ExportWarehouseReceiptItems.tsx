@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IExportWarehouseMaterialItem } from '@/features/material/types/material.types';
 import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { IExportWarehouseMaterialItem } from '@/features/material/types/warehouse.types';
 
 interface ExportWarehouseReceiptItemsProps {
     materials: IExportWarehouseMaterialItem[];

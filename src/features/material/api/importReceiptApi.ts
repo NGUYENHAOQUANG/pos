@@ -5,6 +5,8 @@ import {
     GetImportReceiptsResponse,
     CreateImportReceiptRequest,
     CreateImportReceiptResponse,
+    GetImportReceiptItemsParams,
+    GetImportReceiptItemsResponse,
 } from '@/features/material/types/importReceipt.types';
 
 export const importReceiptApi = {
@@ -25,5 +27,18 @@ export const importReceiptApi = {
         );
         console.log(data.documentIds);
         return response.data;
+    },
+
+    getItems: async (
+        id: string,
+        params?: GetImportReceiptItemsParams
+    ): Promise<GetImportReceiptItemsResponse> => {
+        const { data } = await apiClient.get<GetImportReceiptItemsResponse>(
+            `${API_ENDPOINTS.IMPORT_RECEIPT.LIST}/${id}/items`,
+            {
+                params,
+            }
+        );
+        return data;
     },
 };

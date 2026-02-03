@@ -1,26 +1,31 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
-import { ImportReceiptSkeleton } from '@/features/material/components/importReceipt/ImportReceiptSkeleton';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { spacing } from '@/styles';
-import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
+import { ImportReceiptSkeleton } from '@/features/material/components/importReceipt/ImportReceiptSkeleton';
+import { ImportReceipt } from '@/features/material/types/importReceipt.types';
+import { IPaginate } from '@/shared/types/common.types';
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { ImportReceiptCard } from './ImportReceiptCard';
 
-interface InventoryScreenProps {
-    data: IInventoryTicket[];
-    isLoading?: boolean;
+interface ImportReceiptListProps {
+    data: IPaginate<ImportReceipt> | undefined;
+    onEndReached?: () => void;
     refreshing?: boolean;
     onRefresh?: () => void;
-    onPressCreate: () => void;
+    isLoading?: boolean;
+    onPressCreate?: () => void;
 }
 
-export const InventoryScreen: React.FC<InventoryScreenProps> = ({
+export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
     data,
-    isLoading = false,
+    onEndReached,
     refreshing,
     onRefresh,
+    isLoading,
     onPressCreate,
 }) => {
+    const receipts = data?.items || [];
+
     if (isLoading) {
         return (
             <View style={styles.container}>
@@ -28,27 +33,35 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({
                     data={[1, 2, 3, 4, 5]}
                     renderItem={() => <ImportReceiptSkeleton />}
                     keyExtractor={item => item.toString()}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={styles.listContainer}
                     showsVerticalScrollIndicator={false}
                 />
             </View>
         );
     }
 
+    const renderItem = ({ item }: { item: ImportReceipt }) => {
+        return <ImportReceiptCard item={item} />;
+    };
+
     return (
         <View style={styles.container}>
             <FlatList
-                data={data}
+                data={receipts}
+                renderItem={renderItem}
                 keyExtractor={item => item.id}
-                renderItem={({ item }) => <InventoryCard data={item} />}
-                ListEmptyComponent={<MaterialEmptyState tab="inventory" onPress={onPressCreate} />}
                 contentContainerStyle={[
-                    styles.listContent,
-                    (!data || data.length === 0) && styles.emptyContent,
+                    styles.listContainer,
+                    receipts.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
+                onEndReached={onEndReached}
+                onEndReachedThreshold={0.5}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
+                ListEmptyComponent={
+                    <MaterialEmptyState tab="history" onPress={onPressCreate || (() => {})} />
+                }
             />
         </View>
     );
@@ -57,10 +70,11 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingHorizontal: spacing.md,
     },
-    listContent: {
-        paddingBottom: spacing['3xl'],
-        flexGrow: 1, // Ensure RefreshControl works even with empty list
+    listContainer: {
+        paddingBottom: 100,
+        flexGrow: 1,
     },
     emptyContent: {
         flex: 1,

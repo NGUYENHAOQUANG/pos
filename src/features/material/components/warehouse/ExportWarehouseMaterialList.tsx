@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, FlatList, Platform, UIManager, RefreshControl } from 'react-native';
-import { ImportReceiptSkeleton } from '@/features/material/components/warehouse/ImportReceiptSkeleton';
+import { ImportReceiptSkeleton } from '@/features/material/components/importReceipt/ImportReceiptSkeleton';
 import { IExportWarehouseReceipt } from '../../types/warehouse.types';
 import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
 
