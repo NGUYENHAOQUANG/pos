@@ -41,4 +41,20 @@ export const importReceiptApi = {
         );
         return data;
     },
+
+    getDetail: async (id: string): Promise<any> => {
+        const { data } = await apiClient.get(`${API_ENDPOINTS.IMPORT_RECEIPT.LIST}/${id}`);
+        return data;
+    },
+
+    update: async (
+        id: string,
+        data: Partial<CreateImportReceiptRequest>
+    ): Promise<CreateImportReceiptResponse> => {
+        const response = await apiClient.patch<CreateImportReceiptResponse>(
+            `${API_ENDPOINTS.IMPORT_RECEIPT.LIST}/${id}`,
+            data
+        );
+        return response.data;
+    },
 };

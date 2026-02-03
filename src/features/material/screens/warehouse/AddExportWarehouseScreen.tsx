@@ -417,7 +417,9 @@ export const AddExportWarehouseScreen: React.FC<AddExportWarehouseScreenProps> =
                         onClose={() => setIsConfirmModalVisible(false)}
                         onConfirm={() => {
                             setIsConfirmModalVisible(false);
-                            handleSubmitFlow(true); // Submit
+                            setTimeout(() => {
+                                handleSubmitFlow(true);
+                            }, 500);
                         }}
                     />
 

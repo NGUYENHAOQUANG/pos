@@ -62,3 +62,21 @@ export const useCreateImportReceipt = () => {
         },
     });
 };
+
+export const useUpdateImportReceipt = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) => importReceiptApi.update(id, data),
+        onSuccess: (_, { id }) => {
+            showSuccessToast('Cập nhật phiếu nhập kho thành công');
+            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: ['importReceipt', id] });
+            queryClient.invalidateQueries({ queryKey: ['importReceiptItems', id] });
+        },
+        onError: (error: any) => {
+            const errorMessage = getErrorMessage(error, 'Cập nhật phiếu nhập kho thất bại');
+            showErrorToast(errorMessage);
+        },
+    });
+};

@@ -111,8 +111,7 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
                         onPress={() => {
                             navigation.navigate('AddWarehouse', {
                                 availableMaterials: [],
-                                // TODO: Pass id to edit when AddWarehouse supports it
-                                // importReceiptId: item.id
+                                importReceiptId: item.id,
                             });
                         }}
                     >
