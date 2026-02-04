@@ -15,7 +15,6 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
-import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 // Optional: Pass an icon component potentially
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
@@ -186,14 +185,16 @@ export const DropdownHeaderButton: React.FC<DropdownHeaderButtonProps> = ({
                 activeOpacity={0.7}
             >
                 <View style={styles.dropdownItemTextContainer}>
-                    <AutoScrollText
-                        text={item.label}
+                    <Text
                         style={[
                             styles.dropdownItemText,
                             isSelected && styles.dropdownItemTextSelected,
                         ]}
-                        speed={25}
-                    />
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                    >
+                        {item.label}
+                    </Text>
                 </View>
                 {isSelected && <Ionicons name="checkmark" size={18} color={colors.primary} />}
             </TouchableOpacity>

@@ -9,6 +9,7 @@ import {
     ISizeMeasurementParams,
 } from '@/features/farm/types/sizeMeasurement.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { parseDate } from '@/features/farm/utils/dateUtils';
 
 export const useSizeMeasurements = (pondId: string, params?: ISizeMeasurementParams) => {
     return useQuery({
@@ -33,11 +34,19 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
             try {
                 const rawItems = data.data.items;
 
-                // Sort by createdAt ascending to ensure correct daily numbering
+                // Đếm tổng số lượt mỗi ngày (giống kiểm tra tôm)
+                const totalPerDay: Record<string, number> = {};
+                rawItems.forEach((item: { createdAt?: string }) => {
+                    const d = item.createdAt ? new Date(item.createdAt) : new Date();
+                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+                });
+
+                // Sắp xếp giảm dần (mới nhất trước), Lần 1 = cũ nhất, Lần N = mới nhất
                 const sortedItems = [...rawItems].sort((a, b) => {
                     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                    return timeA - timeB;
+                    return timeB - timeA;
                 });
 
                 const dayCounts: Record<string, number> = {};
@@ -47,11 +56,10 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                         const dateObj = item.createdAt ? new Date(item.createdAt) : new Date();
                         const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
 
-                        if (!dayCounts[dateKey]) {
-                            dayCounts[dateKey] = 0;
-                        }
+                        if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
                         dayCounts[dateKey]++;
-                        const dailyIndex = dayCounts[dateKey];
+                        const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
+                        const dailyIndex = total - dayCounts[dateKey] + 1;
 
                         let imageUrls: string[] = [];
 
@@ -74,26 +82,27 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                             );
                             imageUrls = urls.filter((url): url is string => !!url);
                         }
+                        const sizeDetail = item.sizeMeasurementDetail ?? item.sizeMeasurement;
                         return {
                             id: item.id,
                             label: `Lần ${dailyIndex}`,
                             date: item.createdAt,
+                            createdAt: item.createdAt,
                             time: item.createdAt
                                 ? new Date(item.createdAt).toLocaleTimeString('en-GB', {
                                       hour: '2-digit',
                                       minute: '2-digit',
                                   })
                                 : '00:00',
-                            note: item.sizeMeasurement?.notes || undefined,
+                            note: sizeDetail?.notes || undefined,
                             pondId: item.pondId,
                             images: imageUrls,
                             meta: {
-                                shrimpSize: item.sizeMeasurement?.shrimpSizePcsPerKg?.toString(),
-                                remainingWeight:
-                                    item.sizeMeasurement?.estimatedRemainingStockKg?.toString(),
-                                totalShrimpCount: item.sizeMeasurement?.totalShrimpCount || null,
-                                survivalRate: item.sizeMeasurement?.survivalRatePercentage || null,
-                                notes: item.sizeMeasurement?.notes,
+                                shrimpSize: sizeDetail?.shrimpSizePcsPerKg?.toString(),
+                                remainingWeight: sizeDetail?.estimatedRemainingStockKg?.toString(),
+                                totalShrimpCount: sizeDetail?.totalShrimpCount || null,
+                                survivalRate: sizeDetail?.survivalRatePercentage || null,
+                                notes: sizeDetail?.notes,
                                 images: imageUrls,
                                 documentIds: item.documentIds || [],
                             },
@@ -101,7 +110,27 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                     })
                 );
 
-                setJobs(processedJobs);
+                // Card: slice(-3) = 3 mới nhất, hiển thị cũ→mới (mới nhất ở cuối). Sắp xếp tăng dần.
+                const getItemTime = (x: JobExecution) => {
+                    if (x.createdAt) return new Date(x.createdAt).getTime();
+                    try {
+                        const dateStr = (x as any).date || '';
+                        const timeStr = x.time || '00:00';
+                        const combined =
+                            typeof dateStr === 'string' && dateStr.includes(' ')
+                                ? dateStr
+                                : `${dateStr} ${timeStr}`.trim();
+                        if (!combined) return 0;
+                        return parseDate(combined).getTime();
+                    } catch {
+                        return 0;
+                    }
+                };
+                const sortedAsc = [...processedJobs].sort(
+                    (a, b) => getItemTime(a) - getItemTime(b)
+                );
+
+                setJobs(sortedAsc);
             } catch (_err) {
                 setJobs([]);
             } finally {

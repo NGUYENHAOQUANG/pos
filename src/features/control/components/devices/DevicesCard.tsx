@@ -97,16 +97,9 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
         padding: 16,
-        marginBottom: spacing.md, // Spacing between cards
-        // Shadow for the whole card
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+        marginBottom: spacing.md,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     header: {
         flexDirection: 'row',
@@ -122,7 +115,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#111827',
+        color: colors.text,
     },
     menuButton: {
         width: 32,
@@ -131,7 +124,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: colors.defaultBorder,
     },
     listContainer: {
         gap: 12,

@@ -129,11 +129,6 @@ const styles = StyleSheet.create({
         borderColor: colors.borderDark,
         borderRadius: 8,
         marginBottom: 16,
-        shadowColor: colors.borderDark,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
         overflow: 'hidden',
     },
     header: {
