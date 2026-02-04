@@ -11,6 +11,7 @@ import {
     useExportWarehouse,
     useInventoryTickets,
     useImportReceipts,
+    useMaterials,
 } from '@/features/material/hooks';
 import { useZones } from '@/features/farm/hooks';
 import { useMaterialStore } from '@/features/material/store';
@@ -257,6 +258,23 @@ export const useMaterialScreenLogic = () => {
         isRefetching: isRefetchingInventory,
     } = useInventoryTickets(inventoryParams);
 
+    const masterListParams = useMemo(
+        () => ({
+            SearchText: searchText || undefined,
+            MaterialTypeId: filterType || undefined,
+            Page: 1,
+            PageSize: 100,
+        }),
+        [searchText, filterType]
+    );
+
+    const {
+        data: masterMaterials = [],
+        isLoading: isLoadingMasterMaterials,
+        refetch: refetchMasterMaterials,
+        isRefetching: isRefetchingMasterMaterials,
+    } = useMaterials(masterListParams);
+
     const mappedExportReceipts = useMemo(() => {
         const items = exportWarehouseList?.items || [];
         return items.map((item: any) => ({
@@ -284,7 +302,14 @@ export const useMaterialScreenLogic = () => {
         refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchWarehouseItems, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
+        refetchMasterMaterials();
+    }, [
+        refetchWarehouseItems,
+        refetchImportReceipts,
+        refetchExportWarehouse,
+        refetchInventory,
+        refetchMasterMaterials,
+    ]);
 
     const actions = useMemo(
         () => ({
@@ -326,6 +351,11 @@ export const useMaterialScreenLogic = () => {
         isRefetchingImportReceipts,
         isRefetchingExportWarehouse,
         isRefetchingInventory,
+
+        // Master List
+        masterMaterials,
+        isLoadingMasterMaterials,
+        isRefetchingMasterMaterials,
 
         // Handlers
         handleDropdownSelect,

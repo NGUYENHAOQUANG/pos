@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -120,10 +120,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>
-                        {formatCurrencyValue(displayTotalAmount)}{' '}
-                        <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-                    </Text>
+                    <Text style={styles.value}>{formatCurrency(displayTotalAmount || 0)}</Text>
                 </View>
 
                 {/* Farm Info - Visible when Expanded */}

@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { MaterialList } from '@/features/material/components/material/MaterialList';
+import { WarehouseMaterialItem } from '../../components/warehouse/WarehouseMaterialItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 
-interface MaterialListScreenProps {
+interface WarehouseItemListScreenProps {
     materials: IMaterial[];
     onEdit?: (item: IMaterial) => void;
     onHistoryPress?: (item: IMaterial) => void;
@@ -21,7 +21,7 @@ interface MaterialListScreenProps {
     showStatus?: boolean;
 }
 
-export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
+export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = ({
     materials,
     onEdit,
     onHistoryPress,
@@ -54,7 +54,7 @@ export const MaterialListScreen: React.FC<MaterialListScreenProps> = ({
                 data={materials}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
-                    <MaterialList
+                    <WarehouseMaterialItem
                         item={item}
                         onEdit={onEdit}
                         onHistoryPress={onHistoryPress}

@@ -8,7 +8,7 @@ import {
     CreateInventoryCheckRequest,
     AddInventoryCheckItemsRequest,
     UpdateInventoryCheckItemsRequest,
-} from '../types/inventory.types';
+} from '@/features/material/types/inventory.types';
 
 export const inventoryApi = {
     getList: async (params?: GetInventoryChecksParams): Promise<GetInventoryChecksResponse> => {

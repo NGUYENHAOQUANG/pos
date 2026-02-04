@@ -5,8 +5,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { numericStringSchema } from '@/shared/utils/validation';
 
 interface InventoryMaterialInputProps {
-    materialName: string; // This is actually the ID or formatted value, but we might need label for display
-    selectedMaterialId?: string; // Add explicit ID prop
+    materialName: string;
+    selectedMaterialId?: string;
     oldStock: number;
     newStock: string;
     onMaterialSelect: (val: string) => void;
@@ -16,7 +16,7 @@ interface InventoryMaterialInputProps {
 }
 
 export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
-    materialName, // ID or Value
+    materialName,
     selectedMaterialId,
     oldStock,
     newStock,
@@ -28,7 +28,6 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const diff = newStock ? Number(newStock) - oldStock : 0;
-    // Check if we have a selection (either by name prop being used as value, or explicit ID)
     const hasSelectedMaterial = !!materialName || !!selectedMaterialId;
     return (
         <View style={styles.container}>
@@ -36,10 +35,10 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
             <View style={styles.divider} />
             <View style={hasSelectedMaterial ? styles.dropdownWithMargin : styles.dropdownNoMargin}>
                 <DropdownMaterial
-                    value={selectedMaterialId || materialName} // Use ID preference
+                    value={selectedMaterialId || materialName}
                     placeholder="Chọn vật tư"
-                    options={materialOptions} // Now objects
-                    onChange={onMaterialSelect} // Returns ID (value)
+                    options={materialOptions}
+                    onChange={onMaterialSelect}
                     showAllOption={false}
                     isOpen={isDropdownOpen}
                     onToggle={() => {

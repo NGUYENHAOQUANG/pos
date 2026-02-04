@@ -15,6 +15,7 @@ import { TabType } from '@/features/material/components/HeadingMaterial';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { useMaterialsStore } from '@/features/material/store/materialsStore';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -37,7 +38,14 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     onStatusChange,
     currentStatus = '',
 }) => {
-    const [searchText, setSearchText] = useState('');
+    const [localSearchText, setLocalSearchText] = useState('');
+    const debouncedSearchText = useDebounce(localSearchText, 500);
+
+    // Sync debounce value to parent/store
+    useEffect(() => {
+        onSearch?.(debouncedSearchText);
+    }, [debouncedSearchText, onSearch]);
+
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Dropdown states
@@ -99,8 +107,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     };
 
     const handleClearSearch = () => {
-        setSearchText('');
-        onSearch?.('');
+        setLocalSearchText('');
+        // onSearch will be called by effect when debounced value updates to empty
     };
 
     // Status options for import receipts
@@ -129,13 +137,10 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                         style={styles.input}
                         placeholder="Tìm kiếm tên vật tư"
                         placeholderTextColor={colors.textSecondary || '#999'}
-                        value={searchText}
-                        onChangeText={text => {
-                            setSearchText(text);
-                            onSearch?.(text);
-                        }}
+                        value={localSearchText}
+                        onChangeText={setLocalSearchText}
                     />
-                    {searchText.length > 0 && (
+                    {localSearchText.length > 0 && (
                         <TouchableOpacity onPress={handleClearSearch}>
                             <Ionicons
                                 name="close-circle"

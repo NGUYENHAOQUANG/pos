@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, FlatList, Platform, UIManager, RefreshControl } from 'react-native';
-import { ImportReceiptSkeleton } from '@/features/material/components/importReceipt/ImportReceiptSkeleton';
 import { IExportWarehouseReceipt } from '../../types/warehouse.types';
 import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -15,6 +16,7 @@ interface ExportWarehouseMaterialListProps {
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
+    onPressCreate?: () => void;
 }
 
 export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListProps> = ({
@@ -22,17 +24,12 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
     isLoading,
     refreshing,
     onRefresh,
+    onPressCreate,
 }) => {
     if (isLoading) {
         return (
             <View style={styles.container}>
-                <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    renderItem={() => <ImportReceiptSkeleton />}
-                    keyExtractor={item => item.toString()}
-                    contentContainerStyle={styles.listContainer}
-                    showsVerticalScrollIndicator={false}
-                />
+                <MaterialLoadingState />
             </View>
         );
     }
@@ -43,12 +40,18 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                 data={receipts}
                 renderItem={({ item }) => <ExportWarehouseReceiptCard item={item} />}
                 keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContainer}
+                contentContainerStyle={[
+                    styles.listContainer,
+                    receipts.length === 0 && styles.emptyContent,
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     onRefresh ? (
                         <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
                     ) : undefined
+                }
+                ListEmptyComponent={
+                    <MaterialEmptyState tab="export" onPress={onPressCreate || (() => {})} />
                 }
             />
         </View>
@@ -61,5 +64,9 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingBottom: 100,
+        flexGrow: 1,
+    },
+    emptyContent: {
+        flex: 1,
     },
 });
