@@ -159,18 +159,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 0.4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 1,
-            },
-            android: {
-                elevation: 1,
-            },
-        }),
         paddingBottom: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     cardContent: {
         padding: spacing.md,

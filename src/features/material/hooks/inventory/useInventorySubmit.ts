@@ -41,19 +41,6 @@ export const useInventorySubmit = ({
     const queryClient = useQueryClient();
 
     const validateForm = useCallback(() => {
-        if (!note.trim()) {
-            showValidationError('Vui lòng nhập ghi chú lý do điều chỉnh');
-            return false;
-        }
-        if (!warehouseId) {
-            showValidationError('Không tìm thấy kho cho trang trại hiện tại');
-            return false;
-        }
-        if (items.length === 0) {
-            showValidationError('Vui lòng thêm ít nhất một vật tư');
-            return false;
-        }
-
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             if (!item.materialId) {
@@ -66,7 +53,7 @@ export const useInventorySubmit = ({
             }
         }
         return true;
-    }, [note, items, warehouseId]);
+    }, [items]);
 
     const navigateToInventoryList = useCallback(() => {
         setTimeout(() => {
@@ -163,19 +150,14 @@ export const useInventorySubmit = ({
             } else {
                 // CREATE MODE
                 const payload = {
-                    header: {
-                        warehouseId: warehouseId!,
-                        note: note || 'Phiếu mới',
-                    },
-                    items: items.map(item => {
-                        // Find info in warehouseItems if needed, but item state should have it
-                        return {
-                            materialId: item.materialId,
-                            expectedQty: item.oldStock || 0,
-                            actualQty: Number(item.newStock),
-                        };
-                    }),
-                    shouldSubmit: shouldSubmit,
+                    warehouseId: warehouseId!,
+                    note: note || 'Phiếu mới',
+                    items: items.map(item => ({
+                        materialId: item.materialId,
+                        expectedQty: item.oldStock || 0,
+                        actualQty: Number(item.newStock),
+                    })),
+                    autoSubmit: shouldSubmit,
                 };
 
                 createInventoryCheck(payload, {

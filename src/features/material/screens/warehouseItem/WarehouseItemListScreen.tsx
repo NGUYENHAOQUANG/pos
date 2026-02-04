@@ -3,15 +3,16 @@ import { View, StyleSheet, FlatList } from 'react-native';
 import { WarehouseMaterialItem } from '../../components/warehouse/WarehouseMaterialItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { spacing } from '@/styles';
-import { IMaterial } from '@/features/material/types/material.types';
+
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 
 interface WarehouseItemListScreenProps {
-    materials: IMaterial[];
-    onEdit?: (item: IMaterial) => void;
-    onHistoryPress?: (item: IMaterial) => void;
-    onAdjustmentPress?: (item: IMaterial) => void;
+    materials: IWarehouseItem[];
+    onEdit?: (item: IWarehouseItem) => void;
+    onHistoryPress?: (item: IWarehouseItem) => void;
+    onAdjustmentPress?: (item: IWarehouseItem) => void;
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;

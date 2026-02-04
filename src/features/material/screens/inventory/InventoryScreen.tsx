@@ -4,10 +4,10 @@ import { InventoryCard } from '@/features/material/components/inventory/Inventor
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { spacing } from '@/styles';
-import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
+import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 
 interface InventoryScreenProps {
-    data: IInventoryTicket[];
+    data: IInventoryCheck[];
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;

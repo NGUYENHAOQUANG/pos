@@ -12,7 +12,7 @@ import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
 import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { useMaterialScreenLogic } from '@/features/material/hooks/useMaterialScreenLogic';
 
 export const MeterialScreen = () => {
@@ -25,7 +25,7 @@ export const MeterialScreen = () => {
         currentStatus,
         materials,
         importReceiptsData,
-        mappedExportReceipts,
+        exportReceiptsData,
         inventoryList,
         showSkeleton,
         isLoadingExportWarehouse,
@@ -48,6 +48,7 @@ export const MeterialScreen = () => {
         masterMaterials,
         isLoadingMasterMaterials,
         isRefetchingMasterMaterials,
+        isLoadingInventory,
 
         actions,
     } = useMaterialScreenLogic();
@@ -108,7 +109,7 @@ export const MeterialScreen = () => {
                 )}
                 {selectedTab === 'export' && (
                     <ExportWarehouseListScreen
-                        receipts={mappedExportReceipts}
+                        receipts={exportReceiptsData}
                         isLoading={isLoadingExportWarehouse || showSkeleton}
                         refreshing={!!isRefetchingExportWarehouse}
                         onRefresh={handleRefresh}
@@ -117,8 +118,8 @@ export const MeterialScreen = () => {
                 )}
                 {selectedTab === 'inventory' && (
                     <InventoryScreen
-                        data={inventoryList}
-                        isLoading={showSkeleton}
+                        data={inventoryList || []}
+                        isLoading={isLoadingInventory || showSkeleton}
                         refreshing={!!isRefetchingInventory}
                         onRefresh={handleRefresh}
                         onPressCreate={actions.createInventory}
@@ -150,7 +151,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        marginTop: spacing.md,
     },
     fullWidthButton: {
         width: '100%',

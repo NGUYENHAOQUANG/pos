@@ -58,6 +58,8 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
         paddingBottom: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     cardContent: {
         padding: spacing.md,

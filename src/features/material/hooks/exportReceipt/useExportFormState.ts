@@ -51,9 +51,7 @@ export const useExportFormState = () => {
     const { data: exportReceiptDetail, isLoading: isLoadingDetail } = useExportReceipt(
         exportReceiptId || ''
     );
-    const { data: exportReceiptItems } = useExportReceiptItems(
-        isEditMode ? exportReceiptId : undefined
-    );
+    const { data: exportReceiptItems } = useExportReceiptItems(exportReceiptId || '');
 
     // Initial Load for Edit Mode - Header info
     useEffect(() => {

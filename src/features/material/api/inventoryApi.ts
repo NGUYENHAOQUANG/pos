@@ -8,7 +8,10 @@ import {
     CreateInventoryCheckRequest,
     AddInventoryCheckItemsRequest,
     UpdateInventoryCheckItemsRequest,
-} from '@/features/material/types/inventory.types';
+    IInventoryCheck,
+    GetInventoryCheckItemsParams,
+    GetInventoryCheckItemsResponse,
+} from '@/features/material/types/inventoryCheck.types';
 
 export const inventoryApi = {
     getList: async (params?: GetInventoryChecksParams): Promise<GetInventoryChecksResponse> => {
@@ -31,21 +34,20 @@ export const inventoryApi = {
         );
         return data;
     },
-    getItems: async (checkId: string, params?: any): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.get<IApiResponse<any>>(
+    getItems: async (
+        checkId: string,
+        params?: GetInventoryCheckItemsParams
+    ): Promise<GetInventoryCheckItemsResponse> => {
+        const { data } = await apiClient.get<GetInventoryCheckItemsResponse>(
             API_ENDPOINTS.INVENTORY_CHECK.ITEMS(checkId),
             {
-                params: {
-                    ...params,
-                    InventoryCheckId: checkId, // Add explicit query param as per Swagger
-                    PageSize: 100, // Ensure we get all items
-                },
+                params,
             }
         );
         return data;
     },
-    create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<{ id: string }>> => {
-        const { data } = await apiClient.post<IApiResponse<{ id: string }>>(
+    create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<IInventoryCheck>> => {
+        const { data } = await apiClient.post<IApiResponse<IInventoryCheck>>(
             API_ENDPOINTS.INVENTORY_CHECK.CREATE,
             body
         );
@@ -80,18 +82,6 @@ export const inventoryApi = {
     submit: async (id: string): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.post<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.SUBMISSION(id)
-        );
-        return data;
-    },
-    approve: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.APPROVAL(id)
-        );
-        return data;
-    },
-    reject: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.REJECTION(id)
         );
         return data;
     },

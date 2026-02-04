@@ -4,6 +4,8 @@ import {
     GetExportReceiptsResponse,
     GetExportReceiptsParams,
     CreateExportReceiptRequest,
+    GetExportReceiptItemsResponse,
+    GetExportReceiptItemsParams,
 } from '@/features/material/types/exportReceipt.types';
 
 export const exportReceiptApi = {
@@ -20,8 +22,14 @@ export const exportReceiptApi = {
      * Get export receipt items
      * @param id - Receipt ID
      */
-    getItems: async (id: string): Promise<any> => {
-        const { data } = await apiClient.get(API_ENDPOINTS.EXPORT_RECEIPT.ITEMS(id));
+    getItems: async (
+        id: string,
+        params?: GetExportReceiptItemsParams
+    ): Promise<GetExportReceiptItemsResponse> => {
+        const { data } = await apiClient.get<GetExportReceiptItemsResponse>(
+            API_ENDPOINTS.EXPORT_RECEIPT.ITEMS(id),
+            { params }
+        );
         return data;
     },
     /**

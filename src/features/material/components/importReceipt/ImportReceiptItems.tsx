@@ -69,8 +69,8 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 12,
         paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xs,
     },
     materialCard: {
         backgroundColor: colors.white,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         marginBottom: spacing.md,
-        marginRight: spacing.xs, // Add some spacing for scrollbar
+        marginRight: spacing.xs,
     },
     materialHeader: {
         paddingVertical: spacing.sm,

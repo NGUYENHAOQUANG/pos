@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useInventoryDetail, useInventoryItems } from './useInventoryDetails';
+import {
+    useInventoryDetail,
+    useInventoryItems,
+} from '@/features/material/hooks/inventory/useInventory';
 import { showValidationError } from '@/features/material/utils/validationToast';
 
 interface UseInventoryFormProps {

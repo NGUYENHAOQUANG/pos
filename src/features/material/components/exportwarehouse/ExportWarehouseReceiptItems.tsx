@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
-import { IExportWarehouseMaterialItem } from '@/features/material/types/warehouse.types';
+import { ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
 import { formatCurrencyValue } from '@/shared/utils';
 
 interface ExportWarehouseReceiptItemsProps {
-    materials: IExportWarehouseMaterialItem[];
+    materials: ExportReceiptItem[];
 }
 
 export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsProps> = ({
@@ -15,7 +15,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
     return (
         <View style={styles.container}>
             {materials.map((item, index) => {
-                const itemTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+                const itemTotal = (item.quantity || 0) * (item.costPrice || 0);
 
                 return (
                     <View key={item.id || index} style={styles.materialCard}>
@@ -27,7 +27,9 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
                         <View style={styles.content}>
                             {/* Material Name - No Label */}
                             <View style={styles.nameRow}>
-                                <Text style={styles.materialName}>{item.materialName}</Text>
+                                <Text style={styles.materialName}>
+                                    {item.materialName || '---'}
+                                </Text>
                             </View>
 
                             <View style={styles.separatorFull} />
@@ -44,7 +46,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
                                     <View style={[styles.detailContent, styles.detailContentEnd]}>
                                         <Text style={styles.priceLabel}>Đơn giá: </Text>
                                         <Text style={styles.priceValue}>
-                                            {formatCurrency(parseFloat(item.price) || 0)}
+                                            {formatCurrency(item.costPrice || 0)}
                                         </Text>
                                     </View>
                                 </View>
@@ -56,7 +58,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
                             <View style={styles.footer}>
                                 <Text style={styles.footerLabel}>Thành tiền:</Text>
                                 <Text style={styles.footerValue}>
-                                    {formatCurrencyValue(itemTotal)}
+                                    {formatCurrencyValue(item.totalAmount || itemTotal)}
                                 </Text>
                             </View>
                         </View>
@@ -69,6 +71,7 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 12,
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xs,
     },

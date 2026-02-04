@@ -143,17 +143,8 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
         padding: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 0.4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 1,
-            },
-            android: {
-                elevation: 1,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     headerRow: {
         flexDirection: 'row',

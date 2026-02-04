@@ -12,18 +12,19 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { ButtonMaterialList } from '@/features/material/components/material/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IMaterial } from '@/features/material/types/material.types';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 interface WarehouseMaterialItemProps {
-    item: IMaterial;
-    onEdit?: (item: IMaterial) => void;
-    onHistoryPress?: (item: IMaterial) => void;
-    onAdjustmentPress?: (item: IMaterial) => void;
+    item: IWarehouseItem;
+    onEdit?: (item: IWarehouseItem) => void;
+    onHistoryPress?: (item: IWarehouseItem) => void;
+    onAdjustmentPress?: (item: IWarehouseItem) => void;
     hideRemaining?: boolean;
     alwaysExpanded?: boolean;
     showStatus?: boolean;
@@ -41,7 +42,7 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
     const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
 
     // Fetch details for this material item using the hook
-    const { data: detail } = useMaterial(item.id);
+    const { data: detail } = useMaterial(item.materialId);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -52,8 +53,8 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
         <View style={styles.container}>
             {/* Header Row */}
             <View style={styles.headerRow}>
-                <Text style={styles.name}>{item.name}</Text>
-                <MaterialGroup group={detail?.group || item.group} />
+                <Text style={styles.name}>{detail?.name || item.materialName}</Text>
+                <MaterialGroup group={detail?.group || MaterialGroupType.FARMING} />
             </View>
 
             <View style={styles.separator} />
@@ -65,10 +66,15 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
                     <Text
                         style={[
                             styles.detailValue,
-                            { color: item.isActive ? colors.green[600] : colors.red[500] },
+                            {
+                                color:
+                                    detail?.isActive !== false
+                                        ? colors.green[600]
+                                        : colors.red[500],
+                            },
                         ]}
                     >
-                        {item.isActive ? 'Hoạt động' : 'Ngưng'}
+                        {detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
                     </Text>
                 </View>
             )}
@@ -77,12 +83,12 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
             <View style={styles.infoRow}>
                 <Text style={styles.infoText}>
                     <Text style={styles.label}>Đơn vị tính: </Text>
-                    {detail?.unitName || item.unitName || item.unit}
+                    {detail?.unitName || item.unitName}
                 </Text>
                 {!hideRemaining && (
                     <Text style={styles.infoText}>
                         <Text style={styles.label}>Còn: </Text>
-                        {item.remaining}
+                        {item.quantity}
                     </Text>
                 )}
             </View>
@@ -93,18 +99,17 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
                     {!alwaysExpanded && <View style={styles.separatorCenter} />}
                     <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                        <Text style={styles.detailValue}>{detail?.type || item.type || '---'}</Text>
+                        <Text style={styles.detailValue}>{detail?.type || '---'}</Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailValue}>
                             <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                            {detail?.manufacturer || item.manufacturer || '---'}
+                            {detail?.manufacturer || '---'}
                         </Text>
                     </View>
                     <View style={styles.detailRow}>
                         <Text style={styles.detailValue}>
-                            <Text style={styles.detailLabel}>Mô tả:</Text>{' '}
-                            {detail?.usage || item.usage || '---'}
+                            <Text style={styles.detailLabel}>Mô tả:</Text> {detail?.usage || '---'}
                         </Text>
                     </View>
 
@@ -112,7 +117,7 @@ export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
                     {onEdit && (
                         <ButtonMaterialList
                             title="Sửa thông tin"
-                            onPress={() => onEdit(detail || item)}
+                            onPress={() => onEdit(item)}
                             style={styles.editButton}
                         />
                     )}
@@ -174,17 +179,8 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
         padding: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 0.4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 1,
-            },
-            android: {
-                elevation: 1,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     headerRow: {
         flexDirection: 'row',

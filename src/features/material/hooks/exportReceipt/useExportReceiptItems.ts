@@ -1,25 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
-import { ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
+import { GetExportReceiptItemsParams } from '@/features/material/types/exportReceipt.types';
 
-export const useExportReceiptItems = (receiptId?: string) => {
+const STALE_TIME_LONG = 5 * 60 * 1000; // 5 minutes
+
+export const useExportReceiptItems = (receiptId?: string, params?: GetExportReceiptItemsParams) => {
     return useQuery({
-        queryKey: materialKeys.exportReceiptItems(receiptId || ''),
+        queryKey: materialKeys.exportReceiptItems(receiptId || '', params),
         queryFn: async () => {
             if (!receiptId) return [];
-            const response = await exportReceiptApi.getItems(receiptId);
-            if (response.success && response.data) {
-                // Handle potential different response structures
-                const items = Array.isArray(response.data)
-                    ? response.data
-                    : response.data.items || [];
-
-                return items as ExportReceiptItem[];
-            }
-            return [];
+            const { data } = await exportReceiptApi.getItems(receiptId, params);
+            return data.items || [];
         },
         enabled: !!receiptId,
-        staleTime: 5 * 60 * 1000,
+        staleTime: STALE_TIME_LONG,
     });
 };

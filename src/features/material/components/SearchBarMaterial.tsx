@@ -213,9 +213,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 const styles = StyleSheet.create({
     container: {
         padding: spacing.md,
-        paddingBottom: spacing.xs,
         backgroundColor: '#F0F5FF',
-        zIndex: 1, // Lower than header so popup can show above
+        zIndex: 1,
     },
     topRow: {
         flexDirection: 'row',

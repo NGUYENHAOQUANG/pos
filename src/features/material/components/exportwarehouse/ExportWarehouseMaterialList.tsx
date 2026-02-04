@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, FlatList, Platform, UIManager, RefreshControl } from 'react-native';
-import { IExportWarehouseReceipt } from '../../types/warehouse.types';
+import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
 import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
@@ -12,7 +12,7 @@ if (Platform.OS === 'android') {
 }
 
 interface ExportWarehouseMaterialListProps {
-    receipts: IExportWarehouseReceipt[];
+    receipts: ExportReceipt[];
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;

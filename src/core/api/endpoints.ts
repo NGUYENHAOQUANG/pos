@@ -144,8 +144,6 @@ export const API_ENDPOINTS = {
         DELETE_ITEM: (checkId: string, itemId: string) =>
             `/inventorycheck/${checkId}/items/${itemId}`,
         SUBMISSION: (id: string) => `/inventorycheck/${id}/submission`,
-        APPROVAL: (id: string) => `/inventorycheck/${id}/approval`,
-        REJECTION: (id: string) => `/inventorycheck/${id}/rejection`,
     },
     PARAMETER_SETTING: {
         LIST: (zoneId: string) => `/zone/${zoneId}/settings`,
