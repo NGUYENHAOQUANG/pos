@@ -82,7 +82,7 @@ import { IInventoryTicket } from '@/features/material/types/inventoryTicket.type
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { IExportWarehouseReceipt } from '@/features/material/types/warehouse.types';
-import { IImportReceipt } from '@/features/material/types/importReceipt.types';
+import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
 // Wrapped Menu screens - Now using components directly
 const PersonalInformationWithProvider = PersonalInformationScreens;
@@ -166,7 +166,7 @@ export type AppStackParamList = {
     EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
     AddWarehouse: {
         availableMaterials: IMaterial[];
-        onSave?: (data: Omit<IImportReceipt, 'id'>) => void;
+        onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
         importReceiptId?: string;
     };
     AddExportWarehouse: {
