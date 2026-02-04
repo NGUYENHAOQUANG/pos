@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { colors } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 
 export const DeleteAccountButton: React.FC = () => {
@@ -25,7 +25,7 @@ export const DeleteAccountButton: React.FC = () => {
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
-        borderRadius: 8,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
     },

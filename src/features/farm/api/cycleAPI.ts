@@ -29,8 +29,12 @@ export const cycleApi = {
         return response.data?.data || response.data;
     },
 
-    deleteCycle: async (pondId: string, cycleId: string): Promise<void> => {
-        await apiClient.delete(API_ENDPOINTS.POND.CYCLE.DELETE(pondId, cycleId));
+    deleteCycle: async (
+        pondId: string,
+        cycleId: string
+    ): Promise<{ success?: boolean; message?: string }> => {
+        const response = await apiClient.delete(API_ENDPOINTS.POND.CYCLE.DELETE(pondId, cycleId));
+        return response.data || {};
     },
 
     getCyclesByPond: async (pondId: string): Promise<CycleData[]> => {

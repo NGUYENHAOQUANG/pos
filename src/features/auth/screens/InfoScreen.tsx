@@ -244,11 +244,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: 16,
         paddingVertical: spacing.md,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 8,
+        borderColor: colors.defaultBorder,
+        borderWidth: 1,
         marginHorizontal: spacing.xs,
     },
     logoSection: {
@@ -302,22 +299,22 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 14,
         color: colors.error,
-        marginTop: 2, // 2px từ input container đến error text
+        marginTop: 2,
     },
     unregisteredErrorContainer: {
-        marginTop: 2, // 2px từ input container đến error text
+        marginTop: 2,
     },
     unregisteredErrorText: {
-        fontSize: typography.fontSize.sm, // 14px
+        fontSize: typography.fontSize.sm,
         color: colors.error,
-        lineHeight: 22, // 22px theo Figma
-        fontWeight: typography.fontWeight.regular, // 400
+        lineHeight: 22,
+        fontWeight: typography.fontWeight.regular,
         letterSpacing: 0,
     },
     unregisteredLinkText: {
         color: colors.primary,
         textDecorationLine: 'underline',
-        fontWeight: typography.fontWeight.regular, // 400
+        fontWeight: typography.fontWeight.regular,
         letterSpacing: 0,
     },
     loginButton: {

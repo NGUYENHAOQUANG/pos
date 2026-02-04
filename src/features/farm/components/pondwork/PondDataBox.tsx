@@ -62,7 +62,13 @@ export const PondDataBox: React.FC<PondDataBoxProps> = ({
                         {resultItems.map((item, index) => (
                             <View key={index} style={styles.resultRow}>
                                 <Text style={styles.resultLabel}>{item.label}</Text>
-                                <Text style={styles.resultValue}>{formatValue(item.value)}</Text>
+                                <Text
+                                    style={styles.resultValue}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                >
+                                    {formatValue(item.value)}
+                                </Text>
                             </View>
                         ))}
                     </View>
@@ -100,7 +106,7 @@ const styles = StyleSheet.create({
     },
     resultBox: {
         backgroundColor: colors.neutral,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md,
         padding: 12,
         gap: 4,
         borderWidth: 1,
@@ -116,6 +122,7 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: colors.text,
         lineHeight: 22,
+        flexShrink: 0,
     },
     resultValue: {
         fontSize: 14,
@@ -123,6 +130,8 @@ const styles = StyleSheet.create({
         color: colors.text,
         lineHeight: 22,
         textAlign: 'right',
+        flexShrink: 1,
+        minWidth: 60,
     },
     disclaimer: {
         fontSize: 10,

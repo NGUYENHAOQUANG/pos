@@ -28,7 +28,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                     <Text style={styles.deviceType}>{device.type}</Text>
                 </View>
                 <View style={styles.headerRight}>
-                    <Tag status={device.status} style={{ alignSelf: 'center' }} />
+                    <Tag status={device.status} type="device" style={{ alignSelf: 'center' }} />
                     <View collapsable={false}>
                         <TouchableOpacity
                             style={styles.moreButton}
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
-        fontWeight: '500', // Making label slightly bolder based on visual hierarchy
+        fontWeight: '700',
     },
     value: {
         fontSize: typography.fontSize.sm,

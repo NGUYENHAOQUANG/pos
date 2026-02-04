@@ -41,7 +41,7 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={styles.name}>{item.name}</Text>
-                    <Tag status={getStatus(item.status)} style={styles.tag} />
+                    <Tag status={getStatus(item.status)} type="season" style={styles.tag} />
                 </View>
                 <Text style={styles.date}>{dateRange}</Text>
             </View>

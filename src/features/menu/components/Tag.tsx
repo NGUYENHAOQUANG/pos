@@ -12,70 +12,106 @@ export type TagStatus =
     | 'warehouse'
     | 'maintenance';
 
+export type TagType = 'member' | 'cycle' | 'device' | 'season';
+
 interface TagProps {
     status: TagStatus;
     style?: ViewStyle;
+    /** Context type to determine label mapping */
+    type?: TagType;
 }
 
-export const Tag: React.FC<TagProps> = ({ status, style }) => {
+export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
     const getStatusConfig = () => {
+        // Define label mappings for different contexts
+        const labelMappings: Record<TagType, Partial<Record<TagStatus, string>>> = {
+            member: {
+                pending: 'Chờ xác nhận',
+                active: 'Hoạt động',
+                paused: 'Tạm ngưng',
+                ended: 'Đã kết thúc',
+            },
+            cycle: {
+                pending: 'Chờ xác nhận',
+                active: 'Đang nuôi',
+                preparing: 'Chuẩn bị',
+                paused: 'Tạm ngưng',
+                ended: 'Đã kết thúc',
+            },
+            device: {
+                installed: 'Đã lắp đặt',
+                warehouse: 'Lưu kho',
+                maintenance: 'Đến hạn bảo trì',
+                active: 'Hoạt động',
+            },
+            season: {
+                pending: 'Chờ xác nhận',
+                active: 'Đang nuôi',
+                ended: 'Đã kết thúc',
+            },
+        };
+
+        // Get label from mapping based on type and status
+        const getLabel = (): string => {
+            return labelMappings[type]?.[status] || labelMappings.cycle[status] || '';
+        };
+
         switch (status) {
             case 'pending':
                 return {
-                    label: 'Chờ xác nhận',
+                    label: getLabel(),
                     color: colors.orange[500],
                     backgroundColor: colors.yellow[50],
                     borderColor: colors.yellow[300],
                 };
             case 'active':
                 return {
-                    label: 'Đang nuôi',
+                    label: getLabel(),
                     color: colors.green[600],
                     backgroundColor: colors.green[50],
                     borderColor: colors.green[300],
                 };
             case 'preparing':
                 return {
-                    label: 'Chuẩn bị',
+                    label: getLabel(),
                     color: colors.yellow[600],
                     backgroundColor: colors.yellow[50],
                     borderColor: colors.yellow[600],
                 };
             case 'paused':
                 return {
-                    label: 'Tạm ngưng',
+                    label: getLabel(),
                     color: colors.text,
                     backgroundColor: colors.gray[100],
                     borderColor: colors.borderDark,
                 };
             case 'ended':
                 return {
-                    label: 'Đã kết thúc',
+                    label: getLabel(),
                     color: colors.text,
                     backgroundColor: colors.gray[100],
                     borderColor: colors.borderDark,
                 };
             case 'installed':
                 return {
-                    label: 'Đã lắp đặt',
+                    label: getLabel(),
                     color: colors.green[600],
                     backgroundColor: colors.green[50],
-                    borderColor: colors.green[300], // Adjust specific shade if needed
+                    borderColor: colors.green[300],
                 };
             case 'warehouse':
                 return {
-                    label: 'Lưu kho',
+                    label: getLabel(),
                     color: colors.text,
-                    backgroundColor: colors.gray[100], // Using a light gray/blueish background if available, sticking to gray[100] as close match or colors.blue[50] if appropriate.
-                    // Based on image "Lưu kho" looks very neutral/gray.
+                    backgroundColor: colors.gray[100],
                     borderColor: colors.border,
                 };
             case 'maintenance':
                 return {
-                    label: 'Đến hạn bảo trì',
-                    color: colors.orange[500], // Orange text
-                    backgroundColor: colors.yellow[50], // Light orange background
-                    borderColor: colors.yellow[300], // Light orange border
+                    label: getLabel(),
+                    color: colors.orange[500],
+                    backgroundColor: colors.yellow[50],
+                    borderColor: colors.yellow[300],
                 };
             default:
                 return {

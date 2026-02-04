@@ -4,7 +4,7 @@ import { useAllPondJobs } from '@/features/farm/hooks/useAllPondJobs';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 40,
         backgroundColor: colors.primary,
-        borderRadius: spacing.sm,
+        borderRadius: borderRadius.md,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',

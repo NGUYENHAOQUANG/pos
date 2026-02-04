@@ -111,7 +111,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
                 <View style={styles.info}>
                     <View style={styles.headerRow}>
                         <Text style={styles.name}>{name}</Text>
-                        <Tag status={status} style={styles.tag} />
+                        <Tag status={status} type="member" style={styles.tag} />
                     </View>
                     <Text style={styles.details}>
                         {role} - {managementLevel}
