@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 
-export const ImportReceiptSkeleton = () => {
+const ImportReceiptSkeleton = () => {
     return (
         <View style={styles.card}>
             <View style={styles.cardContent}>
@@ -32,13 +32,34 @@ export const ImportReceiptSkeleton = () => {
     );
 };
 
+export const MaterialLoadingState = () => {
+    return (
+        <View style={styles.container}>
+            <FlatList
+                data={[1, 2, 3, 4, 5]}
+                renderItem={() => <ImportReceiptSkeleton />}
+                keyExtractor={item => item.toString()}
+                contentContainerStyle={styles.listContainer}
+                showsVerticalScrollIndicator={false}
+            />
+        </View>
+    );
+};
+
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    listContainer: {
+        paddingBottom: 100,
+    },
     card: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        // overflow: 'hidden',
         paddingBottom: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     cardContent: {
         padding: spacing.md,

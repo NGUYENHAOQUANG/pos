@@ -11,12 +11,16 @@ import {
     useExportWarehouse,
     useInventoryTickets,
     useImportReceipts,
+    useMaterials,
 } from '@/features/material/hooks';
 import { useZones } from '@/features/farm/hooks';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
-import { GetWarehouseItemsQueryParams } from '@/features/material/types/warehouse.types';
+import {
+    IWarehouseItem,
+    GetWarehouseItemsQueryParams,
+} from '@/features/material/types/warehouse.types';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 const DEFAULT_PAGE = 1;
@@ -137,8 +141,8 @@ export const useMaterialScreenLogic = () => {
     );
 
     const handleHistoryPress = useCallback(
-        (item: IMaterial) => {
-            setFilterMaterialName(item.name);
+        (item: IWarehouseItem) => {
+            setFilterMaterialName(item.materialName);
             setSelectedTab('history');
         },
         [setFilterMaterialName, setSelectedTab]
@@ -187,20 +191,8 @@ export const useMaterialScreenLogic = () => {
         isRefetching: isRefetchingWarehouseItems,
     } = useWarehouseItems(warehouseId, materialParams, { enabled: !!warehouseId });
 
-    const materials: IMaterial[] = useMemo(() => {
-        if (!warehouseItemsData?.items) return [];
-        return warehouseItemsData.items.map(item => ({
-            id: item.materialId,
-            name: item.materialName || '',
-            group: MaterialGroupType.FARMING,
-            unit: item.unitId,
-            unitName: item.unitName,
-            remaining: item.quantity,
-            isActive: true,
-            manufacturer: undefined,
-            type: undefined,
-            usage: undefined,
-        }));
+    const materials: IWarehouseItem[] = useMemo(() => {
+        return warehouseItemsData?.items || [];
     }, [warehouseItemsData]);
 
     const { isConnected } = useNetInfo();
@@ -221,18 +213,20 @@ export const useMaterialScreenLogic = () => {
             Search: searchText,
             MaterialName: filterMaterialName || undefined,
             WarehouseId: warehouseId || undefined,
+            Status: importReceiptStatusFilter || undefined,
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
         }),
-        [searchText, filterMaterialName, warehouseId]
+        [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]
     );
 
     const inventoryParams = useMemo(
         () => ({
             Search: searchText,
             WarehouseId: warehouseId,
+            Status: importReceiptStatusFilter || undefined,
         }),
-        [searchText, warehouseId]
+        [searchText, warehouseId, importReceiptStatusFilter]
     );
 
     // Fetch Other Lists
@@ -251,29 +245,37 @@ export const useMaterialScreenLogic = () => {
     } = useExportWarehouse(exportWarehouseParams);
 
     const {
-        data: inventoryList = [],
+        data: inventoryList,
         refetch: refetchInventory,
         isLoading: isLoadingInventory,
         isRefetching: isRefetchingInventory,
     } = useInventoryTickets(inventoryParams);
 
-    const mappedExportReceipts = useMemo(() => {
-        const items = exportWarehouseList?.items || [];
-        return items.map((item: any) => ({
-            id: item.id,
-            date: item.createdAt,
-            farm: item.pondName || item.warehouseName || item.farm || '---',
-            materials: item.materials || [],
-            totalAmount: item.totalAmount || 0,
-            totalItems: item.totalItems || 0,
-            status: item.status,
-        }));
+    const masterListParams = useMemo(
+        () => ({
+            SearchText: searchText || undefined,
+            MaterialTypeId: filterType || undefined,
+            Page: 1,
+            PageSize: 100,
+        }),
+        [searchText, filterType]
+    );
+
+    const {
+        data: masterMaterials = [],
+        isLoading: isLoadingMasterMaterials,
+        refetch: refetchMasterMaterials,
+        isRefetching: isRefetchingMasterMaterials,
+    } = useMaterials(masterListParams);
+
+    const exportReceiptsData = useMemo(() => {
+        return exportWarehouseList?.items || [];
     }, [exportWarehouseList]);
 
     const handleAdjustmentPress = useCallback(
-        (item: IMaterial) => {
+        (item: IWarehouseItem) => {
             navigation.navigate('AddInventory', {
-                initialMaterialName: item.name,
+                initialMaterialName: item.materialName,
             });
         },
         [navigation]
@@ -284,26 +286,45 @@ export const useMaterialScreenLogic = () => {
         refetchImportReceipts();
         refetchExportWarehouse();
         refetchInventory();
-    }, [refetchWarehouseItems, refetchImportReceipts, refetchExportWarehouse, refetchInventory]);
+        refetchMasterMaterials();
+    }, [
+        refetchWarehouseItems,
+        refetchImportReceipts,
+        refetchExportWarehouse,
+        refetchInventory,
+        refetchMasterMaterials,
+    ]);
+
+    // Auto refresh when screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            handleRefresh();
+        }, [handleRefresh])
+    );
 
     const actions = useMemo(
         () => ({
-            createImport: () =>
-                navigation.navigate('AddWarehouse', {
-                    availableMaterials: materials,
-                }),
-            createExport: () =>
-                navigation.navigate('AddExportWarehouse', {
-                    availableMaterials: materials,
-                }),
+            createImport: () => navigation.navigate('AddWarehouse', {}),
+            createExport: () => navigation.navigate('AddExportWarehouse', {}),
             createInventory: () => navigation.navigate('AddInventory', {}),
             createMaterial: () => navigation.navigate('AddMaterial', {}),
-            editMaterial: (item: IMaterial) =>
+            editMaterial: (item: IWarehouseItem) =>
                 navigation.navigate('EditMaterial', {
-                    material: item,
+                    material: {
+                        id: item.materialId,
+                        name: item.materialName || '',
+                        group: MaterialGroupType.FARMING,
+                        unit: item.unitId,
+                        unitName: item.unitName,
+                        remaining: item.quantity,
+                        isActive: true,
+                        manufacturer: undefined,
+                        type: undefined,
+                        usage: undefined,
+                    } as IMaterial,
                 }),
         }),
-        [navigation, materials]
+        [navigation]
     );
 
     return {
@@ -316,7 +337,7 @@ export const useMaterialScreenLogic = () => {
         menuPosition,
         materials,
         importReceiptsData,
-        mappedExportReceipts,
+        exportReceiptsData,
         inventoryList,
         showSkeleton,
         isLoadingImportReceipts,
@@ -327,6 +348,10 @@ export const useMaterialScreenLogic = () => {
         isRefetchingExportWarehouse,
         isRefetchingInventory,
 
+        // Master List
+        masterMaterials,
+        isLoadingMasterMaterials,
+        isRefetchingMasterMaterials,
         // Handlers
         handleDropdownSelect,
         handleShowMenu,

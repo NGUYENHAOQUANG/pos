@@ -6,9 +6,11 @@ import {
     GetInventoryChecksResponse,
     GetInventoryCheckDetailResponse,
     CreateInventoryCheckRequest,
-    AddInventoryCheckItemsRequest,
-    UpdateInventoryCheckItemsRequest,
-} from '../types/inventory.types';
+    UpdateInventoryCheckRequest,
+    IInventoryCheck,
+    GetInventoryCheckItemsParams,
+    GetInventoryCheckItemsResponse,
+} from '@/features/material/types/inventoryCheck.types';
 
 export const inventoryApi = {
     getList: async (params?: GetInventoryChecksParams): Promise<GetInventoryChecksResponse> => {
@@ -24,80 +26,36 @@ export const inventoryApi = {
         );
         return data;
     },
-    update: async (id: string, body: { note?: string }): Promise<IApiResponse<any>> => {
+    update: async (id: string, body: UpdateInventoryCheckRequest): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.patch<IApiResponse<any>>(
             `${API_ENDPOINTS.INVENTORY_CHECK.LIST}/${id}`,
             body
         );
         return data;
     },
-    getItems: async (checkId: string, params?: any): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.get<IApiResponse<any>>(
+    getItems: async (
+        checkId: string,
+        params?: GetInventoryCheckItemsParams
+    ): Promise<GetInventoryCheckItemsResponse> => {
+        const { data } = await apiClient.get<GetInventoryCheckItemsResponse>(
             API_ENDPOINTS.INVENTORY_CHECK.ITEMS(checkId),
             {
-                params: {
-                    ...params,
-                    InventoryCheckId: checkId, // Add explicit query param as per Swagger
-                    PageSize: 100, // Ensure we get all items
-                },
+                params,
             }
         );
         return data;
     },
-    create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<{ id: string }>> => {
-        const { data } = await apiClient.post<IApiResponse<{ id: string }>>(
+    create: async (body: CreateInventoryCheckRequest): Promise<IApiResponse<IInventoryCheck>> => {
+        const { data } = await apiClient.post<IApiResponse<IInventoryCheck>>(
             API_ENDPOINTS.INVENTORY_CHECK.CREATE,
             body
         );
         return data;
     },
-    addItems: async (
-        id: string,
-        body: AddInventoryCheckItemsRequest
-    ): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.ITEMS(id),
-            body
-        );
-        return data;
-    },
-    updateItems: async (
-        id: string,
-        body: UpdateInventoryCheckItemsRequest
-    ): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.patch<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.UPDATE_ITEMS(id),
-            body
-        );
-        return data;
-    },
+
     delete: async (id: string): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.delete<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.DELETE(id)
-        );
-        return data;
-    },
-    submit: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.SUBMISSION(id)
-        );
-        return data;
-    },
-    approve: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.APPROVAL(id)
-        );
-        return data;
-    },
-    reject: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.REJECTION(id)
-        );
-        return data;
-    },
-    deleteItem: async (checkId: string, itemId: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.delete<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.DELETE_ITEM(checkId, itemId)
         );
         return data;
     },

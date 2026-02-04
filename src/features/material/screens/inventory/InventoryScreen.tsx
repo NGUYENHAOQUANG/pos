@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
-import { ImportReceiptSkeleton } from '@/features/material/components/importReceipt/ImportReceiptSkeleton';
+import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { spacing } from '@/styles';
-import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
+import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 
 interface InventoryScreenProps {
-    data: IInventoryTicket[];
+    data: IInventoryCheck[];
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
@@ -23,14 +23,8 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({
 }) => {
     if (isLoading) {
         return (
-            <View style={styles.container}>
-                <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    renderItem={() => <ImportReceiptSkeleton />}
-                    keyExtractor={item => item.toString()}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                />
+            <View style={styles.containerLoading}>
+                <MaterialLoadingState />
             </View>
         );
     }
@@ -55,12 +49,16 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+    containerLoading: {
+        flex: 1,
+        paddingHorizontal: spacing.md,
+    },
     container: {
         flex: 1,
     },
     listContent: {
         paddingBottom: spacing['3xl'],
-        flexGrow: 1, // Ensure RefreshControl works even with empty list
+        flexGrow: 1,
     },
     emptyContent: {
         flex: 1,

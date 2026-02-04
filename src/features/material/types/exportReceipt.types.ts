@@ -1,15 +1,29 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+
+export enum ExportReceiptStatus {
+    Pending = 'Pending',
+    Draft = 'Draft',
+    Approved = 'Approved',
+    Rejected = 'Rejected',
+}
 
 export interface ExportReceiptItem {
-    exportReceiptItemId: string;
+    id: string;
+    exportReceiptId: string;
     materialId: string;
-    materialName?: string;
-    materialCode?: string;
-    unitId?: string;
-    unitName?: string;
+    materialName: string;
+    materialCode: string;
     quantity: number;
+    warehouseQuantity?: number;
+    unitId: string;
+    unitName: string;
     costPrice: number;
-    totalAmount?: number;
+    totalAmount: number;
+    no?: number;
+    creatorId?: string;
+    editorId?: string;
+    createdAt?: string;
+    editedAt?: string;
 }
 
 export interface ExportReceipt {
@@ -21,7 +35,7 @@ export interface ExportReceipt {
     pondName?: string;
     zoneId?: string;
     zoneName?: string;
-    status?: string;
+    status?: ExportReceiptStatus;
     totalItems?: number;
     totalAmount?: number;
     note?: string;
@@ -35,12 +49,9 @@ export interface ExportReceipt {
     no?: number;
     createdAt?: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
     materials?: ExportReceiptItem[];
-    // Deprecated fields kept just in case but should be removed if confirmed unused
-    // receiverName?: string;
-    // farm?: string;
 }
 
 export interface ExportReceiptItemRequest {
@@ -68,6 +79,23 @@ export interface UpdateExportReceiptRequest {
     documentIds?: string[];
 }
 
+// Action Types
+export interface UpdateExportReceiptItemCommand {
+    items: ExportReceiptItemRequest[];
+}
+export type UpdateExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type DeleteExportReceiptResponse = IApiResponse<boolean>;
+export type DeleteExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type SubmitExportReceiptResponse = IApiResponse<boolean>;
+export type ApproveExportReceiptResponse = IApiResponse<boolean>;
+
+export interface RejectExportReceiptCommand {
+    reason: string;
+}
+export type RejectExportReceiptResponse = IApiResponse<boolean>;
+
 export interface GetExportReceiptsParams {
     ReceiptCode?: string;
     Status?: string;
@@ -86,7 +114,22 @@ export interface GetExportReceiptsParams {
 export type GetExportReceiptsResponse = IApiResponse<IPaginate<ExportReceipt>>;
 export type GetExportReceiptByIdResponse = IApiResponse<ExportReceipt>;
 
-export type GetExportReceiptItemsResponse = IApiResponse<ExportReceiptItem[]>;
+export interface GetExportReceiptItemsParams {
+    ExportReceiptId?: string;
+    MaterialName?: string;
+    MaterialCode?: string;
+    MinQuantity?: number;
+    MaxQuantity?: number;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
+}
+
+export type GetExportReceiptItemsResponse = IApiResponse<IPaginate<ExportReceiptItem>>;
 
 export type { GetExportReceiptsParams as GetExportWarehouseParams };
 

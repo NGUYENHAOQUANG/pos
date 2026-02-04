@@ -5,9 +5,17 @@ import {
     UpdateExportReceiptRequest,
 } from '@/features/material/types/exportReceipt.types';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
-import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+
+// ============ Query Keys ============
+export const exportReceiptKeys = {
+    all: ['exportReceipts'] as const,
+    lists: () => [...exportReceiptKeys.all, 'list'] as const,
+    list: (params?: GetExportWarehouseParams) => [...exportReceiptKeys.lists(), params] as const,
+    detail: (id: string) => [...exportReceiptKeys.all, 'detail', id] as const,
+    items: (id: string) => [...exportReceiptKeys.all, 'items', id] as const,
+};
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -17,7 +25,7 @@ const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
  */
 export const useExportReceipts = (params?: GetExportWarehouseParams) => {
     return useQuery({
-        queryKey: materialKeys.exportWarehouse(params),
+        queryKey: exportReceiptKeys.list(params),
         queryFn: async () => {
             const response = await exportReceiptApi.getAll(params);
             if (response.success && response.data?.items) {
@@ -34,10 +42,7 @@ export const useExportReceipts = (params?: GetExportWarehouseParams) => {
  */
 export const useExportReceipt = (id: string) => {
     return useQuery({
-        queryKey: materialKeys.detail(id), // Using general detail key or should I use export specific? exportWarehouse doesn't have detail key structure in materialKeys.
-        // materialKeys.detail is generic. I should probably use a specific key if I want to avoid collisions, but detail(id) is usually global if IDs are unique.
-        // Actually materialKeys.detail(id) -> ['materials', 'detail', id].
-        // This seems fine if IDs are UUIDs.
+        queryKey: exportReceiptKeys.detail(id),
         queryFn: async () => {
             const response = await exportReceiptApi.getDetail(id);
             if (response.success) {
@@ -52,6 +57,7 @@ export const useExportReceipt = (id: string) => {
 
 /**
  * Hook to create a new export warehouse receipt
+ * Returns the created receipt ID in onSuccess data
  */
 export const useCreateExportReceipt = () => {
     const queryClient = useQueryClient();
@@ -59,19 +65,32 @@ export const useCreateExportReceipt = () => {
     return useMutation({
         mutationFn: async (payload: CreateExportReceiptRequest) => {
             const response = await exportReceiptApi.create(payload);
+            // Return the response data which contains the receipt ID
             return response;
         },
-        onSuccess: async () => {
+        onSuccess: async response => {
             showSuccessToast('Tạo phiếu xuất kho thành công');
 
-            // Optimize: Invalidate specific keys instead of 'all'
-            // Use prefix matching to hit all paginated lists
+            // Invalidate all related queries with refetchType 'active' for immediate refresh
             await Promise.all([
+                // Invalidate all export receipt queries (lists, details, items)
                 queryClient.invalidateQueries({
-                    queryKey: [...materialKeys.all, 'export-warehouse'],
+                    queryKey: exportReceiptKeys.all,
+                    refetchType: 'active',
                 }),
-                queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'warehouse'] }), // Update stock
+                // Update warehouse stock
+                queryClient.invalidateQueries({
+                    queryKey: ['warehouse-items'],
+                    refetchType: 'active',
+                }),
             ]);
+
+            // If we got a new receipt ID, also invalidate its specific items query
+            if (response?.data?.id) {
+                await queryClient.invalidateQueries({
+                    queryKey: exportReceiptKeys.items(response.data.id),
+                });
+            }
         },
         onError: (error: unknown) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');
@@ -88,21 +107,23 @@ export const useUpdateExportReceipt = () => {
 
     return useMutation({
         mutationFn: async (payload: UpdateExportReceiptRequest) => {
-            // Using UpdateRequest
             const { receiptId, ...updateData } = payload;
             const response = await exportReceiptApi.update(receiptId, updateData);
             return response;
         },
-        onSuccess: async (_data, variables) => {
+        onSuccess: async (_data, _variables) => {
             showSuccessToast('Cập nhật phiếu xuất kho thành công');
 
             await Promise.all([
+                // Invalidate all export receipt queries (lists, details, items)
                 queryClient.invalidateQueries({
-                    queryKey: [...materialKeys.all, 'export-warehouse'],
+                    queryKey: exportReceiptKeys.all,
+                    refetchType: 'active',
                 }),
-                queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'warehouse'] }), // Update stock
+                // Update warehouse stock
                 queryClient.invalidateQueries({
-                    queryKey: materialKeys.detail(variables.receiptId),
+                    queryKey: ['warehouse-items'],
+                    refetchType: 'active',
                 }),
             ]);
         },
@@ -132,9 +153,9 @@ export const useDeleteExportReceipt = () => {
 
             await Promise.all([
                 queryClient.invalidateQueries({
-                    queryKey: [...materialKeys.all, 'export-warehouse'],
+                    queryKey: exportReceiptKeys.lists(),
                 }),
-                queryClient.invalidateQueries({ queryKey: [...materialKeys.all, 'warehouse'] }),
+                queryClient.invalidateQueries({ queryKey: ['warehouse-items'] }),
             ]);
         },
         onError: (error: unknown) => {

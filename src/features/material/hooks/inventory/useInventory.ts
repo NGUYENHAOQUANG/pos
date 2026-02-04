@@ -3,50 +3,24 @@ import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import { handleError } from '@/shared/utils/errorHandler';
-// import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
-
-import {
-    GetInventoryParams,
-    IInventoryTicket,
-} from '@/features/material/types/inventoryTicket.types';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
-import { GetInventoryChecksParams } from '@/features/material/types/inventory.types';
+import {
+    GetInventoryChecksParams,
+    GetInventoryCheckItemsParams,
+    UpdateInventoryCheckRequest,
+    CreateInventoryCheckRequest,
+} from '@/features/material/types/inventoryCheck.types';
 
 const STALE_TIME_SHORT = 2 * 60 * 1000;
-/**
- * Hook to fetch inventory tickets (Mock Data)
- */
-export const useInventoryTickets = (params?: GetInventoryParams) => {
-    // const { userData } = useUserProfile();
 
+export const useInventoryTickets = (params?: GetInventoryChecksParams) => {
     return useQuery({
         queryKey: materialKeys.inventory(params),
         queryFn: async () => {
-            const apiParams: GetInventoryChecksParams = {
-                Page: params?.Page || 1,
-                PageSize: params?.PageSize || 100,
-                CheckCode: params?.Search, // Map Search to CheckCode
-                OrderBy: 'CreatedAt desc',
-                WarehouseId: params?.WarehouseId,
-            };
-
-            const response = await inventoryApi.getList(apiParams);
+            const response = await inventoryApi.getList(params);
 
             if (response.success && response.data?.items) {
-                return response.data.items.map(
-                    item =>
-                        ({
-                            id: item.id,
-                            checkerName: item.creator?.fullname || '---',
-                            date: item.createdAt
-                                ? new Date(item.createdAt).toLocaleDateString('vi-VN')
-                                : '',
-                            note: item.note || '',
-                            totalDifference: item.varianceTotalItems || 0,
-                            items: [], // Details fetched on demand by InventoryCard
-                            status: item.status || 'Draft',
-                        } as IInventoryTicket)
-                );
+                return response.data.items;
             }
 
             return [];
@@ -55,38 +29,8 @@ export const useInventoryTickets = (params?: GetInventoryParams) => {
     });
 };
 
-/**
- * Hook to add a new inventory ticket (Mock Data)
- */
-export const useAddInventoryTicket = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (ticket: IInventoryTicket) => {
-            await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-            return ticket;
-        },
-        onSuccess: newTicket => {
-            showSuccessToast('Tạo phiếu điều chỉnh tồn kho thành công');
-            queryClient.setQueryData(
-                materialKeys.inventory(),
-                (oldData: IInventoryTicket[] | undefined) => {
-                    return oldData ? [newTicket, ...oldData] : [newTicket];
-                }
-            );
-        },
-        onError: (error: unknown) => {
-            handleError(normalizeApiError(error));
-        },
-    });
-};
-
-/**
- * Hook to delete an inventory ticket
- */
 export const useDeleteInventoryTicket = () => {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async (id: string) => {
             const response = await inventoryApi.delete(id);
@@ -96,13 +40,95 @@ export const useDeleteInventoryTicket = () => {
             return response.data;
         },
         onSuccess: () => {
-            showSuccessToast('Xóa phiếu điều chỉnh tồn kho thành công');
+            showSuccessToast('Xóa phiếu thành công');
             queryClient.invalidateQueries({
-                queryKey: [...materialKeys.all, 'inventory'],
+                queryKey: ['materials', 'inventory'],
+                exact: false,
             });
         },
         onError: (error: unknown) => {
             handleError(normalizeApiError(error));
         },
+    });
+};
+
+export const useCreateInventoryCheck = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (payload: CreateInventoryCheckRequest) => {
+            console.log('Payload:', JSON.stringify(payload, null, 2));
+            const response = await inventoryApi.create(payload);
+            console.log('Response:', JSON.stringify(response, null, 2));
+            return response.data;
+        },
+        onSuccess: () => {
+            showSuccessToast('Tạo phiếu thành công');
+            queryClient.invalidateQueries({
+                queryKey: ['materials', 'inventory'],
+                exact: false,
+            });
+        },
+        onError: (error: unknown) => {
+            console.log('Error:', JSON.stringify(error, null, 2));
+            handleError(normalizeApiError(error));
+        },
+    });
+};
+
+export const useUpdateInventoryCheck = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, ...payload }: { id: string } & UpdateInventoryCheckRequest) => {
+            const response = await inventoryApi.update(id, payload);
+            console.log('Edit Response:', JSON.stringify(response, null, 2));
+            if (!response.success) {
+                throw new Error(response.message || 'Cập nhật phiếu thất bại');
+            }
+            return response.data;
+        },
+        onSuccess: () => {
+            showSuccessToast('Cập nhật phiếu thành công');
+            queryClient.invalidateQueries({
+                queryKey: ['materials', 'inventory'],
+                exact: false,
+            });
+        },
+        onError: (error: unknown) => {
+            handleError(normalizeApiError(error));
+        },
+    });
+};
+
+export const useInventoryDetail = (inventoryId?: string) => {
+    return useQuery({
+        queryKey: materialKeys.inventoryDetail(inventoryId || ''),
+        queryFn: async () => {
+            if (!inventoryId) return null;
+            const res = await inventoryApi.getDetail(inventoryId);
+            if (res.success) {
+                return res.data;
+            }
+            throw new Error(res.message || 'Failed to fetch inventory detail');
+        },
+        enabled: !!inventoryId,
+        refetchOnWindowFocus: false,
+    });
+};
+
+export const useInventoryItems = (inventoryId?: string, params?: GetInventoryCheckItemsParams) => {
+    return useQuery({
+        queryKey: materialKeys.inventoryItems(inventoryId || '', params),
+        queryFn: async () => {
+            if (!inventoryId) return [];
+
+            const response = await inventoryApi.getItems(inventoryId, params);
+
+            if (response.success && response.data?.items) {
+                return response.data.items;
+            }
+            return [];
+        },
+        enabled: !!inventoryId,
+        refetchOnWindowFocus: false,
     });
 };

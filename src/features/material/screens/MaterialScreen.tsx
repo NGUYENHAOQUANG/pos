@@ -7,13 +7,12 @@ import {
 } from '@/features/material/components/ButtonMaterial';
 import { HeadingMeterial } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { ImportReceiptList } from '@/features/material/components/importReceipt/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
-import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
+import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
 import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { useMaterialScreenLogic } from '@/features/material/hooks/useMaterialScreenLogic';
 
 export const MeterialScreen = () => {
@@ -26,12 +25,10 @@ export const MeterialScreen = () => {
         currentStatus,
         materials,
         importReceiptsData,
-        mappedExportReceipts,
+        exportReceiptsData,
         inventoryList,
         showSkeleton,
-        isLoadingImportReceipts,
         isLoadingExportWarehouse,
-        isLoadingInventory,
         isRefetchingWarehouseItems,
         isRefetchingImportReceipts,
         isRefetchingExportWarehouse,
@@ -47,6 +44,12 @@ export const MeterialScreen = () => {
         handleHistoryPress,
         handleAdjustmentPress,
         handleRefresh,
+        // Master List
+        masterMaterials,
+        isLoadingMasterMaterials,
+        isRefetchingMasterMaterials,
+        isLoadingInventory,
+
         actions,
     } = useMaterialScreenLogic();
 
@@ -76,14 +79,15 @@ export const MeterialScreen = () => {
             <View style={styles.content}>
                 {selectedTab === 'material' && (
                     <MaterialMasterListTab
+                        materials={masterMaterials}
+                        isLoading={showSkeleton || isLoadingMasterMaterials}
+                        refreshing={!!isRefetchingMasterMaterials}
+                        onRefresh={handleRefresh}
                         onPressCreate={actions.createMaterial}
-                        onEdit={actions.editMaterial}
-                        onHistoryPress={handleHistoryPress}
-                        onAdjustmentPress={handleAdjustmentPress}
                     />
                 )}
                 {selectedTab === 'list' && (
-                    <MaterialListScreen
+                    <WarehouseItemListScreen
                         materials={materials}
                         onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
@@ -97,28 +101,25 @@ export const MeterialScreen = () => {
                 {selectedTab === 'history' && (
                     <ImportReceiptList
                         data={importReceiptsData}
-                        isLoading={isLoadingImportReceipts}
+                        isLoading={showSkeleton}
                         refreshing={!!isRefetchingImportReceipts}
                         onRefresh={handleRefresh}
                         onPressCreate={actions.createImport}
                     />
                 )}
-                {selectedTab === 'export' &&
-                    (isLoadingExportWarehouse ? (
-                        <ExportWarehouseListScreen receipts={[]} isLoading={true} />
-                    ) : mappedExportReceipts.length > 0 ? (
-                        <ExportWarehouseListScreen
-                            receipts={mappedExportReceipts}
-                            refreshing={!!isRefetchingExportWarehouse}
-                            onRefresh={handleRefresh}
-                        />
-                    ) : (
-                        <MaterialEmptyState tab="history" onPress={actions.createImport} />
-                    ))}
+                {selectedTab === 'export' && (
+                    <ExportWarehouseListScreen
+                        receipts={exportReceiptsData}
+                        isLoading={isLoadingExportWarehouse || showSkeleton}
+                        refreshing={!!isRefetchingExportWarehouse}
+                        onRefresh={handleRefresh}
+                        onPressCreate={actions.createExport}
+                    />
+                )}
                 {selectedTab === 'inventory' && (
                     <InventoryScreen
-                        data={inventoryList}
-                        isLoading={isLoadingInventory || isRefetchingInventory}
+                        data={inventoryList || []}
+                        isLoading={isLoadingInventory || showSkeleton}
                         refreshing={!!isRefetchingInventory}
                         onRefresh={handleRefresh}
                         onPressCreate={actions.createInventory}
@@ -150,7 +151,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        marginTop: spacing.md,
     },
     fullWidthButton: {
         width: '100%',

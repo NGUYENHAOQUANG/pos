@@ -15,9 +15,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { colors, spacing, borderRadius } from '@/styles';
 import {
-    IInventoryTicket,
-    IInventoryTicketItem,
-} from '@/features/material/types/inventoryTicket.types';
+    IInventoryCheck,
+    IInventoryCheckItem,
+    InventoryCheckItem,
+} from '@/features/material/types/inventoryCheck.types';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { useInventoryItems } from '@/features/material/hooks/inventory';
@@ -29,7 +30,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface InventoryCardProps {
-    data: IInventoryTicket;
+    data: IInventoryCheck;
 }
 
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
@@ -43,20 +44,7 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
         shouldFetch ? data.id : undefined
     );
 
-    const displayItems: IInventoryTicketItem[] = React.useMemo(() => {
-        if (data.items && data.items.length > 0) {
-            return data.items;
-        }
-        if (fetchedItems) {
-            return fetchedItems.map(item => ({
-                id: item.inventoryCheckItemId || item.id,
-                materialName: item.materialName,
-                beforeQuantity: item.oldStock,
-                afterQuantity: Number(item.newStock),
-            }));
-        }
-        return [];
-    }, [data.items, fetchedItems]);
+    const items = React.useMemo(() => fetchedItems || data.items || [], [fetchedItems, data.items]);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -64,14 +52,14 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     };
 
     const totalDifference = React.useMemo(() => {
-        if (displayItems.length > 0) {
-            return displayItems.reduce(
-                (sum, item) => sum + (item.afterQuantity - item.beforeQuantity),
+        if (items.length > 0) {
+            return items.reduce(
+                (sum: number, item: any) => sum + (item.actualQty - item.expectedQty),
                 0
             );
         }
-        return data.totalDifference;
-    }, [displayItems, data.totalDifference]);
+        return data.varianceTotalItems || 0;
+    }, [items, data.varianceTotalItems]);
 
     const getStatusLabel = (status: string): MaterialGroupType => {
         switch (status) {
@@ -97,11 +85,13 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Người kiểm:</Text>
-                    <Text style={styles.value}>{data.checkerName}</Text>
+                    <Text style={styles.value}>{data.creator?.fullname || '---'}</Text>
                 </View>
                 <View style={[styles.row, styles.alignRight]}>
                     <Text style={styles.label}>Ngày Kiểm</Text>
-                    <Text style={styles.value}>{data.date}</Text>
+                    <Text style={styles.value}>
+                        {new Date(data.createdAt).toLocaleDateString('vi-VN')}
+                    </Text>
                 </View>
             </View>
 
@@ -151,23 +141,29 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
                 <View style={styles.expandedContainer}>
                     {isFetchingItems ? (
                         <ActivityIndicator size="small" color={colors.primary} />
-                    ) : displayItems.length > 0 ? (
-                        displayItems.map(item => (
-                            <View key={item.id} style={styles.detailItemContainer}>
+                    ) : items.length > 0 ? (
+                        items.map((item: any) => (
+                            <View
+                                key={
+                                    (item as InventoryCheckItem).id ||
+                                    (item as IInventoryCheckItem).inventoryCheckItemId
+                                }
+                                style={styles.detailItemContainer}
+                            >
                                 <Text style={styles.materialName}>{item.materialName}</Text>
 
                                 <View style={styles.detailRow}>
                                     <Text style={styles.detailLabel}>
                                         Tồn kho trước khi điều chỉnh:
                                     </Text>
-                                    <Text style={styles.detailValue}>{item.beforeQuantity}</Text>
+                                    <Text style={styles.detailValue}>{item.expectedQty}</Text>
                                 </View>
 
                                 <View style={styles.detailRow}>
                                     <Text style={styles.detailLabel}>
                                         Tồn kho sau khi điều chỉnh:
                                     </Text>
-                                    <Text style={styles.detailValue}>{item.afterQuantity}</Text>
+                                    <Text style={styles.detailValue}>{item.actualQty}</Text>
                                 </View>
                             </View>
                         ))
@@ -208,17 +204,8 @@ const styles = StyleSheet.create({
         padding: spacing.md,
         marginHorizontal: spacing.md,
         marginBottom: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     row: {
         flexDirection: 'row',

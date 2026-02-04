@@ -30,6 +30,7 @@ export const useExportWarehouseForm = () => {
         isEditMode: formState.isEditMode,
         exportReceiptId: formState.exportReceiptId,
         fileUploaderRef: formState.fileUploaderRef,
+        onReceiptCreated: formState.setExportReceiptId,
         setDeleteModalVisible: formState.setDeleteModalVisible,
     });
 
@@ -97,6 +98,7 @@ export const useExportWarehouseForm = () => {
         // Handlers
         handleAddMaterial: materials.handleAddMaterial,
         handleUpdateMaterial: materials.handleUpdateMaterial,
+        handleRemoveMaterial: materials.handleRemoveMaterial,
         handleDropdownOpen,
         handleDeletePress: submit.handleDeletePress,
         handleConfirmDelete: submit.handleConfirmDelete,

@@ -10,7 +10,7 @@ import {
     UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
@@ -99,10 +99,7 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>
-                        {item.totalAmount ? formatCurrencyValue(item.totalAmount) : '0'}{' '}
-                        <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-                    </Text>
+                    <Text style={styles.value}>{formatCurrency(item.totalAmount || 0)}</Text>
                 </View>
 
                 {/* Supplier Info - Visible when Expanded */}
@@ -162,18 +159,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 0.4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 1,
-            },
-            android: {
-                elevation: 1,
-            },
-        }),
         paddingBottom: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     cardContent: {
         padding: spacing.md,

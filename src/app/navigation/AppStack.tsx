@@ -78,7 +78,7 @@ import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/Delete
 // Types
 import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
-import { IInventoryTicket } from '@/features/material/types/inventoryTicket.types';
+import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { IExportWarehouseReceipt } from '@/features/material/types/warehouse.types';
@@ -165,17 +165,17 @@ export type AppStackParamList = {
     AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
     EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
     AddWarehouse: {
-        availableMaterials: IMaterial[];
+        availableMaterials?: IMaterial[];
         onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
         importReceiptId?: string;
     };
     AddExportWarehouse: {
-        availableMaterials: IMaterial[];
+        availableMaterials?: IMaterial[];
         onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
         exportReceiptId?: string;
     };
     AddInventory: {
-        onSave?: (data: IInventoryTicket) => void;
+        onSave?: (data: IInventoryCheck) => void;
         initialMaterialName?: string;
         inventoryId?: string;
     };

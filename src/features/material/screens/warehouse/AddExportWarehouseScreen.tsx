@@ -58,6 +58,7 @@ export const AddExportWarehouseScreen: React.FC = () => {
         // Handlers
         handleAddMaterial,
         handleUpdateMaterial,
+        handleRemoveMaterial,
         handleDropdownOpen,
         handleDeletePress,
         handleConfirmDelete,
@@ -144,9 +145,11 @@ export const AddExportWarehouseScreen: React.FC = () => {
                                 materials={formMaterials}
                                 onUpdateMaterial={handleUpdateMaterial}
                                 onAddMaterial={handleAddMaterial}
+                                onRemoveMaterial={handleRemoveMaterial}
                                 materialOptions={materialOptions}
                                 onDropdownOpen={handleDropdownOpen}
                                 title="Vật tư xuất kho"
+                                isPriceDisabled={true}
                             />
                         </ScrollView>
                     </SafeInputLayout>

@@ -10,21 +10,17 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import {
-    DropdownMaterial,
-    DropdownOption,
-} from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { numericStringSchema } from '@/shared/utils/validation';
-import { Input } from '@/shared/components/forms/Input';
+import { InventoryMaterialItem } from '@/features/material/components/inventory/InventoryMaterialItem';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 export interface InventoryItem {
-    id: string; // FE internal ID
-    inventoryCheckItemId?: string; // Backend ID (if exists)
+    id: string;
+    inventoryCheckItemId?: string;
     materialId: string;
     materialName: string;
     oldStock: number;
@@ -67,9 +63,6 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
         }
     };
 
-    // Calculate used material IDs to filter options
-    const usedMaterialIds = new Set(items.map(i => i.materialId).filter(Boolean));
-
     return (
         <View style={styles.mainMaterialCard}>
             <CollapseHead
@@ -82,11 +75,9 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                 <View style={styles.mainContent}>
                     {items.map((item, index) => {
                         const isDropdownOpen = activeDropdownId === item.id;
-                        const diff = item.newStock
-                            ? Number(item.newStock) - item.oldStock
-                            : -item.oldStock;
-
-                        // Filter options: Exclude materials selected in other rows
+                        const usedMaterialIds = new Set(
+                            items.map(i => i.materialId).filter(Boolean)
+                        );
                         const currentItemMaterialId = item.materialId;
                         const availableOptions = materialOptions.filter(
                             opt =>
@@ -95,107 +86,16 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                         );
 
                         return (
-                            <View
+                            <InventoryMaterialItem
                                 key={item.id}
-                                style={[
-                                    styles.materialWrapper,
-                                    isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
-                                ]}
-                            >
-                                <View style={styles.materialCard}>
-                                    <View style={styles.materialHeader}>
-                                        <Text style={styles.materialHeaderTitle}>
-                                            Vật tư {index + 1}
-                                        </Text>
-                                        <TouchableOpacity
-                                            onPress={() => onRemoveItem(item.id)}
-                                            style={styles.removeButton}
-                                        >
-                                            <Ionicons
-                                                name="close-circle-outline"
-                                                size={24}
-                                                color={colors.red[500]}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-
-                                    <View style={styles.content}>
-                                        {/* Material Selection */}
-                                        <View style={[styles.inputGroup, styles.zIndexMedium]}>
-                                            <DropdownMaterial
-                                                label="Tên vật tư"
-                                                required
-                                                value={item.materialId}
-                                                options={availableOptions}
-                                                onChange={val =>
-                                                    onUpdateItem(item.id, 'materialId', val)
-                                                }
-                                                placeholder="Chọn vật tư"
-                                                showAllOption={false}
-                                                isOpen={isDropdownOpen}
-                                                onToggle={() =>
-                                                    handleToggleDropdown(item.id, index)
-                                                }
-                                                inline={true}
-                                            />
-                                        </View>
-
-                                        {/* Stock Info */}
-                                        <View style={[styles.row, styles.zIndexNormal]}>
-                                            <View style={styles.col}>
-                                                <Text style={styles.label}>Tồn kho cũ:</Text>
-                                                <Text style={styles.oldStockValue}>
-                                                    {item.oldStock} {item.unit || ''}
-                                                </Text>
-                                            </View>
-
-                                            <View style={styles.dividerVertical} />
-
-                                            <View style={styles.col}>
-                                                <Input
-                                                    label="Tồn kho mới"
-                                                    required
-                                                    value={item.newStock}
-                                                    onChangeText={val => {
-                                                        const normalizedText = val.replace(
-                                                            /,/g,
-                                                            '.'
-                                                        );
-                                                        if (
-                                                            numericStringSchema.safeParse(
-                                                                normalizedText
-                                                            ).success
-                                                        ) {
-                                                            onUpdateItem(
-                                                                item.id,
-                                                                'newStock',
-                                                                normalizedText
-                                                            );
-                                                        }
-                                                    }}
-                                                    keyboardType="numeric"
-                                                    containerStyle={styles.noMarginBottom}
-                                                />
-                                            </View>
-                                        </View>
-
-                                        {/* Difference Footer */}
-                                        <View style={styles.footer}>
-                                            <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
-                                            <Text
-                                                style={[
-                                                    styles.footerValue,
-                                                    diff < 0
-                                                        ? styles.footerValueNegative
-                                                        : styles.footerValuePositive,
-                                                ]}
-                                            >
-                                                {diff > 0 ? `+${diff}` : diff} {item.unit || ''}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-                            </View>
+                                item={item}
+                                index={index}
+                                availableOptions={availableOptions}
+                                isDropdownOpen={isDropdownOpen}
+                                onUpdateItem={onUpdateItem}
+                                onRemoveItem={onRemoveItem}
+                                handleToggleDropdown={handleToggleDropdown}
+                            />
                         );
                     })}
 
@@ -235,89 +135,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: colors.gray[100],
     },
-    materialWrapper: {
-        marginBottom: spacing.md,
-    },
-    materialCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    materialHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[240],
-        backgroundColor: colors.backgroundSecondary,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-    },
-    materialHeaderTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.text,
-    },
-    removeButton: {
-        padding: 4,
-    },
-    content: {
-        padding: spacing.md,
-    },
-    inputGroup: {
-        marginBottom: 12,
-    },
-    row: {
-        flexDirection: 'row',
-        gap: spacing.lg,
-        marginBottom: 12,
-    },
-    col: {
-        flex: 1,
-    },
-    dividerVertical: {
-        width: 1,
-        height: '100%',
-        backgroundColor: colors.gray[100],
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: 8,
-        fontWeight: '400',
-    },
-    oldStockValue: {
-        fontSize: 15,
-        fontWeight: '500',
-        color: colors.text,
-        marginTop: 4,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-        paddingTop: spacing.sm,
-    },
-    footerLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    footerValue: {
-        fontSize: 15,
-        fontWeight: '600',
-        textAlign: 'right',
-    },
-    footerValueNegative: {
-        color: colors.red[900],
-    },
-    footerValuePositive: {
-        color: colors.success,
-    },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -336,17 +153,5 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginLeft: spacing.xs,
         fontWeight: '500',
-    },
-    noMarginBottom: {
-        marginBottom: 0,
-    },
-    zIndexHigh: {
-        zIndex: 100,
-    },
-    zIndexMedium: {
-        zIndex: 20,
-    },
-    zIndexNormal: {
-        zIndex: 10,
     },
 });

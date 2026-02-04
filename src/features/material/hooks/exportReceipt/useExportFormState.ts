@@ -15,7 +15,10 @@ import { FileUploaderRef } from '@/shared/components/forms/FileUploader';
 export const useExportFormState = () => {
     const route = useRoute<RouteProp<AppStackParamList, 'AddExportWarehouse'>>();
     const params = route.params;
-    const exportReceiptId = params?.exportReceiptId;
+    const initialReceiptId = params?.exportReceiptId;
+
+    // Use state for exportReceiptId so it can be updated after draft creation
+    const [exportReceiptId, setExportReceiptId] = useState<string | undefined>(initialReceiptId);
     const isEditMode = !!exportReceiptId;
 
     // Get selected zone from farmStore (for initial value only)
@@ -51,9 +54,7 @@ export const useExportFormState = () => {
     const { data: exportReceiptDetail, isLoading: isLoadingDetail } = useExportReceipt(
         exportReceiptId || ''
     );
-    const { data: exportReceiptItems } = useExportReceiptItems(
-        isEditMode ? exportReceiptId : undefined
-    );
+    const { data: exportReceiptItems } = useExportReceiptItems(exportReceiptId || '');
 
     // Initial Load for Edit Mode - Header info
     useEffect(() => {
@@ -77,6 +78,7 @@ export const useExportFormState = () => {
     return {
         // Route info
         exportReceiptId,
+        setExportReceiptId,
         isEditMode,
 
         // Form State

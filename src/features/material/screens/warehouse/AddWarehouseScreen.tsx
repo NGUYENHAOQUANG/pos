@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     Platform,
 } from 'react-native';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { WarehouseInformation } from '@/features/material/components/warehouse/WarehouseInformation';
@@ -83,15 +83,6 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
             <IconTrashOutlined width={20} height={20} />
         </TouchableOpacity>
     );
-
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
-    };
 
     useEffect(() => {
         setTabBarVisible(false);

@@ -42,6 +42,8 @@ export const warehouseApi = {
                 params,
             }
         );
+        console.log('warehouseId', warehouseId);
+        console.log(data);
         return data;
     },
 };

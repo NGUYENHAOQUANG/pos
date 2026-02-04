@@ -30,6 +30,9 @@ interface UseExportSubmitParams {
     // Refs
     fileUploaderRef: RefObject<FileUploaderRef | null>;
 
+    // Callbacks
+    onReceiptCreated?: (receiptId: string) => void;
+
     // Modal controls
     setDeleteModalVisible: (visible: boolean) => void;
 }
@@ -47,6 +50,7 @@ export const useExportSubmit = ({
     isEditMode,
     exportReceiptId,
     fileUploaderRef,
+    onReceiptCreated,
     setDeleteModalVisible,
 }: UseExportSubmitParams) => {
     const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
@@ -93,7 +97,7 @@ export const useExportSubmit = ({
                 );
                 if (invalidItemIndex !== -1) {
                     showValidationError(
-                        `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${invalidItemIndex + 1})`
+                        `Vui lòng điền đầy đủ thông tin vật tư (Vật tư ${invalidItemIndex + 1})`
                     );
                     return;
                 }
@@ -130,8 +134,12 @@ export const useExportSubmit = ({
                     );
                 } else {
                     addExportWarehouseReceipt(payload, {
-                        onSuccess: () => {
+                        onSuccess: response => {
                             fileUploaderRef.current?.markAsSaved();
+                            // Save the receipt ID so subsequent saves use update instead of create
+                            if (response?.data?.id && onReceiptCreated) {
+                                onReceiptCreated(response.data.id);
+                            }
                             navigation.goBack();
                         },
                     });
@@ -152,6 +160,7 @@ export const useExportSubmit = ({
             addExportWarehouseReceipt,
             navigation,
             fileUploaderRef,
+            onReceiptCreated,
         ]
     );
 
