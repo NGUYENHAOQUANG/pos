@@ -5,9 +5,10 @@ import { normalizeApiError } from '@/core/api/errorHandler';
 import { handleError } from '@/shared/utils/errorHandler';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 import {
-    CreateInventoryCheckRequest,
     GetInventoryChecksParams,
     GetInventoryCheckItemsParams,
+    UpdateInventoryCheckRequest,
+    CreateInventoryCheckRequest,
 } from '@/features/material/types/inventoryCheck.types';
 
 const STALE_TIME_SHORT = 2 * 60 * 1000;
@@ -28,12 +29,8 @@ export const useInventoryTickets = (params?: GetInventoryChecksParams) => {
     });
 };
 
-/**
- * Hook to delete an inventory ticket
- */
 export const useDeleteInventoryTicket = () => {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async (id: string) => {
             const response = await inventoryApi.delete(id);
@@ -43,9 +40,10 @@ export const useDeleteInventoryTicket = () => {
             return response.data;
         },
         onSuccess: () => {
-            showSuccessToast('Xóa phiếu điều chỉnh tồn kho thành công');
+            showSuccessToast('Xóa phiếu thành công');
             queryClient.invalidateQueries({
-                queryKey: [...materialKeys.all, 'inventory'],
+                queryKey: ['materials', 'inventory'],
+                exact: false,
             });
         },
         onError: (error: unknown) => {
@@ -56,21 +54,46 @@ export const useDeleteInventoryTicket = () => {
 
 export const useCreateInventoryCheck = () => {
     const queryClient = useQueryClient();
-
     return useMutation({
         mutationFn: async (payload: CreateInventoryCheckRequest) => {
-            const { data } = await inventoryApi.create(payload);
-            return data;
+            console.log('Payload:', JSON.stringify(payload, null, 2));
+            const response = await inventoryApi.create(payload);
+            console.log('Response:', JSON.stringify(response, null, 2));
+            return response.data;
         },
         onSuccess: () => {
-            showSuccessToast('Cập nhật phiếu điều chỉnh tồn kho thành công');
-            // Invalidate all inventory-related queries
+            showSuccessToast('Tạo phiếu thành công');
             queryClient.invalidateQueries({
-                queryKey: materialKeys.all,
-                refetchType: 'all',
+                queryKey: ['materials', 'inventory'],
+                exact: false,
             });
         },
-        onError: (error: any) => {
+        onError: (error: unknown) => {
+            console.log('Error:', JSON.stringify(error, null, 2));
+            handleError(normalizeApiError(error));
+        },
+    });
+};
+
+export const useUpdateInventoryCheck = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, ...payload }: { id: string } & UpdateInventoryCheckRequest) => {
+            const response = await inventoryApi.update(id, payload);
+            console.log('Edit Response:', JSON.stringify(response, null, 2));
+            if (!response.success) {
+                throw new Error(response.message || 'Cập nhật phiếu thất bại');
+            }
+            return response.data;
+        },
+        onSuccess: () => {
+            showSuccessToast('Cập nhật phiếu thành công');
+            queryClient.invalidateQueries({
+                queryKey: ['materials', 'inventory'],
+                exact: false,
+            });
+        },
+        onError: (error: unknown) => {
             handleError(normalizeApiError(error));
         },
     });

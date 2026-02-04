@@ -6,8 +6,7 @@ import {
     GetInventoryChecksResponse,
     GetInventoryCheckDetailResponse,
     CreateInventoryCheckRequest,
-    AddInventoryCheckItemsRequest,
-    UpdateInventoryCheckItemsRequest,
+    UpdateInventoryCheckRequest,
     IInventoryCheck,
     GetInventoryCheckItemsParams,
     GetInventoryCheckItemsResponse,
@@ -27,7 +26,7 @@ export const inventoryApi = {
         );
         return data;
     },
-    update: async (id: string, body: { note?: string }): Promise<IApiResponse<any>> => {
+    update: async (id: string, body: UpdateInventoryCheckRequest): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.patch<IApiResponse<any>>(
             `${API_ENDPOINTS.INVENTORY_CHECK.LIST}/${id}`,
             body
@@ -53,41 +52,10 @@ export const inventoryApi = {
         );
         return data;
     },
-    addItems: async (
-        id: string,
-        body: AddInventoryCheckItemsRequest
-    ): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.ITEMS(id),
-            body
-        );
-        return data;
-    },
-    updateItems: async (
-        id: string,
-        body: UpdateInventoryCheckItemsRequest
-    ): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.patch<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.UPDATE_ITEMS(id),
-            body
-        );
-        return data;
-    },
+
     delete: async (id: string): Promise<IApiResponse<any>> => {
         const { data } = await apiClient.delete<IApiResponse<any>>(
             API_ENDPOINTS.INVENTORY_CHECK.DELETE(id)
-        );
-        return data;
-    },
-    submit: async (id: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.post<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.SUBMISSION(id)
-        );
-        return data;
-    },
-    deleteItem: async (checkId: string, itemId: string): Promise<IApiResponse<any>> => {
-        const { data } = await apiClient.delete<IApiResponse<any>>(
-            API_ENDPOINTS.INVENTORY_CHECK.DELETE_ITEM(checkId, itemId)
         );
         return data;
     },

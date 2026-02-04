@@ -129,3 +129,16 @@ export interface UpdateInventoryCheckItemDto {
 export interface UpdateInventoryCheckItemsRequest {
     items: UpdateInventoryCheckItemDto[];
 }
+
+export interface UpdateInventoryCheckItemBody {
+    materialId: string;
+    actualQty: number;
+}
+
+export interface UpdateInventoryCheckRequest {
+    warehouseId?: string;
+    note?: string;
+    documentIds?: string[];
+    items?: UpdateInventoryCheckItemBody[];
+    autoSubmit?: boolean;
+}
