@@ -10,7 +10,7 @@ import {
     UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
@@ -99,10 +99,7 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>
-                        {item.totalAmount ? formatCurrencyValue(item.totalAmount) : '0'}{' '}
-                        <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-                    </Text>
+                    <Text style={styles.value}>{formatCurrency(item.totalAmount || 0)}</Text>
                 </View>
 
                 {/* Supplier Info - Visible when Expanded */}

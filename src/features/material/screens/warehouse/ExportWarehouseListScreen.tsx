@@ -9,6 +9,7 @@ interface ExportWarehouseListScreenProps {
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
+    onPressCreate?: () => void;
 }
 
 export const ExportWarehouseListScreen: React.FC<ExportWarehouseListScreenProps> = ({
@@ -16,6 +17,7 @@ export const ExportWarehouseListScreen: React.FC<ExportWarehouseListScreenProps>
     isLoading,
     refreshing,
     onRefresh,
+    onPressCreate,
 }) => {
     return (
         <View style={styles.container}>
@@ -24,6 +26,7 @@ export const ExportWarehouseListScreen: React.FC<ExportWarehouseListScreenProps>
                 isLoading={isLoading}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
+                onPressCreate={onPressCreate}
             />
         </View>
     );

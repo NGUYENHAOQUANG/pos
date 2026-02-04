@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { numericStringSchema } from '@/shared/utils/validation';
 import { Input } from '@/shared/components/forms/Input';
@@ -55,14 +55,6 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
-    };
-
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)} <Text style={styles.currencyUnderline}>đ</Text>
-            </>
-        );
     };
 
     // Store refs for each material item to measure position

@@ -9,33 +9,27 @@ import {
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { MaterialGroup } from './MaterialGroup';
-import { ButtonMaterialList } from './ButtonMaterialList';
+import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
+import { ButtonMaterialList } from '@/features/material/components/material/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IMaterial } from '../../types/material.types';
+import { IMaterial } from '@/features/material/types/material.types';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-interface MaterialListProps {
+interface MaterialMasterItemProps {
     item: IMaterial;
     onEdit?: (item: IMaterial) => void;
-    onHistoryPress?: (item: IMaterial) => void;
-    onAdjustmentPress?: (item: IMaterial) => void;
     hideRemaining?: boolean;
     alwaysExpanded?: boolean;
     showStatus?: boolean;
 }
 
-// ... (interface MaterialListProps)
-
-export const MaterialList: React.FC<MaterialListProps> = ({
+export const MaterialMasterItem: React.FC<MaterialMasterItemProps> = ({
     item,
     onEdit,
-    onHistoryPress,
-    onAdjustmentPress,
     hideRemaining,
     alwaysExpanded,
     showStatus,
@@ -109,15 +103,6 @@ export const MaterialList: React.FC<MaterialListProps> = ({
                             {detail?.usage || item.usage || '---'}
                         </Text>
                     </View>
-                    {/* Commented out - Đơn vị sử dụng và Liều dùng */}
-                    {/* <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Đơn vị sử dụng: </Text>
-                        <Text style={styles.detailValue}>{detail?.unitOfUse || item.unitOfUse || '---'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Liều dùng: </Text>
-                        <Text style={styles.detailValue}>{detail?.dosage || item.dosage || '---'}</Text>
-                    </View> */}
 
                     {/* Edit Button */}
                     {onEdit && (
@@ -147,34 +132,6 @@ export const MaterialList: React.FC<MaterialListProps> = ({
             )}
 
             {!alwaysExpanded && <View style={styles.separator} />}
-
-            {/* Action Buttons */}
-            {/* Action Buttons */}
-            {(onHistoryPress || onAdjustmentPress) && (
-                <View style={styles.actionRow}>
-                    {onHistoryPress && (
-                        <ButtonMaterialList
-                            title="Lịch sử nhập kho"
-                            onPress={() => onHistoryPress(item)}
-                            style={[
-                                styles.actionButton,
-                                !onAdjustmentPress ? { flex: 0, minWidth: '48%' } : undefined,
-                            ]}
-                        />
-                    )}
-                    {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
-                    {onAdjustmentPress && (
-                        <ButtonMaterialList
-                            title="Điều chỉnh tồn kho"
-                            onPress={() => onAdjustmentPress(item)}
-                            style={[
-                                styles.actionButton,
-                                !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
-                            ]}
-                        />
-                    )}
-                </View>
-            )}
         </View>
     );
 };

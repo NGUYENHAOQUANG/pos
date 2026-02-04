@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { IExportWarehouseMaterialItem } from '@/features/material/types/warehouse.types';
+import { formatCurrencyValue } from '@/shared/utils';
 
 interface ExportWarehouseReceiptItemsProps {
     materials: IExportWarehouseMaterialItem[];
@@ -11,15 +12,6 @@ interface ExportWarehouseReceiptItemsProps {
 export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsProps> = ({
     materials,
 }) => {
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
-    };
-
     return (
         <View style={styles.container}>
             {materials.map((item, index) => {

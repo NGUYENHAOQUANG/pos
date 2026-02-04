@@ -1,23 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ImportReceiptDetailItem } from '@/features/material/types/importReceipt.types';
+import { formatCurrencyValue } from '@/shared/utils';
 
 interface ImportReceiptItemsProps {
     materials: ImportReceiptDetailItem[];
 }
 
 export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ materials }) => {
-    const formatCurrency = (value: number) => {
-        return (
-            <>
-                {formatCurrencyValue(value)}{' '}
-                <Text style={{ textDecorationLine: 'underline' }}>đ</Text>
-            </>
-        );
-    };
-
     return (
         <View style={styles.container}>
             <View>

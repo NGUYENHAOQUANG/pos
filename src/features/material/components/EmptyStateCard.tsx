@@ -68,7 +68,13 @@ const styles = StyleSheet.create({
     },
 });
 
-export type MaterialTabType = 'list' | 'history' | 'inventory' | 'shrimp-inspection';
+export type MaterialTabType =
+    | 'list'
+    | 'history'
+    | 'inventory'
+    | 'shrimp-inspection'
+    | 'export'
+    | 'material';
 
 interface MaterialEmptyStateProps {
     tab: MaterialTabType;
@@ -78,13 +84,23 @@ interface MaterialEmptyStateProps {
 export const MaterialEmptyState: React.FC<MaterialEmptyStateProps> = ({ tab, onPress }) => {
     const config = {
         list: {
-            message: 'Chưa có vật tư nào được thêm.',
-            buttonTitle: 'Thêm vật tư',
+            message: 'Chưa có vật tư nào trong kho.',
+            buttonTitle: 'Thêm vật tư vào kho',
+            buttonStyle: undefined,
+        },
+        material: {
+            message: 'Chưa có vật tư nào trong danh mục.',
+            buttonTitle: 'Tạo vật tư mới',
             buttonStyle: undefined,
         },
         history: {
             message: 'Chưa có phiếu nhập kho nào được tạo.',
             buttonTitle: 'Tạo phiếu nhập kho',
+            buttonStyle: undefined,
+        },
+        export: {
+            message: 'Chưa có phiếu xuất kho nào được tạo.',
+            buttonTitle: 'Tạo phiếu xuất kho',
             buttonStyle: undefined,
         },
         inventory: {

@@ -1,50 +1,65 @@
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { MaterialListScreen } from '@/features/material/screens/material/MaterialListScreen';
 import { IMaterial } from '@/features/material/types/material.types';
-import { useMaterialStore } from '@/features/material/store';
+import { FlatList } from 'react-native';
+import { MaterialMasterItem } from '../../components/inventory/MaterialMasterItem';
+import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
+import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { spacing } from '@/styles';
 
 interface MaterialMasterListTabProps {
+    materials: IMaterial[];
+    isLoading?: boolean;
+    refreshing?: boolean;
+    onRefresh?: () => void;
     onPressCreate: () => void;
-    onEdit: (item: IMaterial) => void;
-    onHistoryPress?: (item: IMaterial) => void;
-    onAdjustmentPress?: (item: IMaterial) => void;
+    onEdit?: (item: IMaterial) => void;
 }
 
-export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({ onPressCreate }) => {
-    const filterType = useMaterialStore(state => state.filterType);
-    const searchText = useMaterialStore(state => state.searchText);
-
-    // Config params for API
-    const params = useMemo(
-        () => ({
-            SearchText: searchText || undefined,
-            MaterialTypeId: filterType || undefined,
-            Page: 1,
-            PageSize: 100, // Load enough items
-        }),
-        [searchText, filterType]
-    );
-
-    // Fetch materials
-    const { data: materials = [], isLoading, refetch, isRefetching } = useMaterials(params);
-
-    const handleRefresh = useCallback(() => {
-        refetch();
-    }, [refetch]);
+export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({
+    materials,
+    isLoading,
+    refreshing,
+    onRefresh,
+    onPressCreate,
+    onEdit,
+}) => {
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <MaterialItemSkeleton />}
+                    keyExtractor={item => item.toString()}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
-            <MaterialListScreen
-                materials={materials}
-                isLoading={isLoading}
-                refreshing={isRefetching}
-                onRefresh={handleRefresh}
-                onPressCreate={onPressCreate}
-                hideRemaining={true}
-                alwaysExpanded={true}
-                showStatus={true}
+            <FlatList
+                data={materials}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                    <MaterialMasterItem
+                        item={item}
+                        onEdit={onEdit}
+                        hideRemaining={true}
+                        alwaysExpanded={true}
+                        showStatus={true}
+                    />
+                )}
+                contentContainerStyle={[
+                    styles.listContent,
+                    materials.length === 0 && styles.emptyContent,
+                ]}
+                showsVerticalScrollIndicator={false}
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                ListEmptyComponent={<MaterialEmptyState tab="material" onPress={onPressCreate} />}
             />
         </View>
     );
@@ -53,5 +68,12 @@ export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({ on
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    emptyContent: {
+        flex: 1,
+    },
+    listContent: {
+        paddingBottom: spacing.xl,
+        flexGrow: 1,
     },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { colors, spacing } from '@/styles';
+import { formatCurrency } from '@/features/material/utils/formatCurrency';
 
 interface ExportWarehouseFooterProps {
     totalAmount: number;
@@ -18,9 +18,7 @@ export const ExportWarehouseFooter: React.FC<ExportWarehouseFooterProps> = ({
         <View style={styles.footer}>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Tổng tiền:</Text>
-                <Text style={styles.totalValue}>
-                    {formatCurrencyValue(totalAmount)} <Text style={styles.currencySymbol}>đ</Text>
-                </Text>
+                <Text style={styles.totalValue}>{formatCurrency(totalAmount)}</Text>
             </View>
             <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.draftButton} onPress={onSaveDraft}>
