@@ -61,8 +61,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                     <View style={styles.materialActions}>
                                         <View style={styles.quantityBox}>
                                             <Text style={styles.quantityText}>
-                                                {item.quantity}
-                                                {item.unit}
+                                                {item.quantity} {item.unit}
                                             </Text>
                                         </View>
                                         <TouchableOpacity
