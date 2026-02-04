@@ -15,10 +15,18 @@ import {
     DeleteExportReceiptItemResponse,
 } from '@/features/material/types/exportReceipt.types';
 
+export interface CreateExportReceiptResult {
+    id: string;
+    receiptCode?: string;
+    status?: string;
+}
+
 export const exportReceiptApi = {
     // ============ Receipt CRUD ============
-    create: async (payload: CreateExportReceiptRequest): Promise<IApiResponse<boolean>> => {
-        const { data } = await apiClient.post<IApiResponse<boolean>>(
+    create: async (
+        payload: CreateExportReceiptRequest
+    ): Promise<IApiResponse<CreateExportReceiptResult>> => {
+        const { data } = await apiClient.post<IApiResponse<CreateExportReceiptResult>>(
             API_ENDPOINTS.EXPORT_RECEIPT.CREATE,
             payload
         );

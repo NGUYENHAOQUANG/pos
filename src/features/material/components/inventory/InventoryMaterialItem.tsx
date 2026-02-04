@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 8,
         fontWeight: '400',
+        lineHeight: 24,
     },
     oldStockValue: {
         fontSize: 15,

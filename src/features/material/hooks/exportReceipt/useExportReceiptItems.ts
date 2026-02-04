@@ -2,17 +2,36 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { exportReceiptKeys } from '@/features/material/hooks/exportReceipt/useExportReceipt';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { GetExportReceiptItemsParams } from '@/features/material/types/exportReceipt.types';
-import { materialKeys } from '../materialKeys';
 
 const STALE_TIME_LONG = 5 * 60 * 1000; // 5 minutes
 
-export const useExportReceiptItems = (receiptId?: string, params?: GetExportReceiptItemsParams) => {
+export const useExportReceiptItems = (
+    receiptId?: string,
+    _params?: GetExportReceiptItemsParams
+) => {
     return useQuery({
-        queryKey: materialKeys.exportReceiptItems(receiptId || '', params),
+        // Use exportReceiptKeys.items for consistency with invalidation in useUpdateExportReceipt
+        queryKey: exportReceiptKeys.items(receiptId || ''),
         queryFn: async () => {
             if (!receiptId) return [];
-            const { data } = await exportReceiptApi.getItems(receiptId, params);
-            return data.items || [];
+            const { data } = await exportReceiptApi.getItems(receiptId);
+            const items = data.items || [];
+
+            // Sort items by 'no' (order number) first, then createdAt, then ID
+            return items.sort((a, b) => {
+                // Priority 1: Sort by manual order number 'no' if available
+                if (typeof a.no === 'number' && typeof b.no === 'number') {
+                    return a.no - b.no;
+                }
+
+                // Priority 2: Sort by CreatedAt (FIFO)
+                if (a.createdAt && b.createdAt) {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                }
+
+                // Priority 3: Fallback to ID
+                return (a.id || '').localeCompare(b.id || '');
+            });
         },
         enabled: !!receiptId,
         staleTime: STALE_TIME_LONG,

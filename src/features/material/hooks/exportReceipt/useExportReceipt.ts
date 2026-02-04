@@ -57,6 +57,7 @@ export const useExportReceipt = (id: string) => {
 
 /**
  * Hook to create a new export warehouse receipt
+ * Returns the created receipt ID in onSuccess data
  */
 export const useCreateExportReceipt = () => {
     const queryClient = useQueryClient();
@@ -64,17 +65,32 @@ export const useCreateExportReceipt = () => {
     return useMutation({
         mutationFn: async (payload: CreateExportReceiptRequest) => {
             const response = await exportReceiptApi.create(payload);
+            // Return the response data which contains the receipt ID
             return response;
         },
-        onSuccess: async () => {
+        onSuccess: async response => {
             showSuccessToast('Tạo phiếu xuất kho thành công');
 
+            // Invalidate all related queries with refetchType 'active' for immediate refresh
             await Promise.all([
+                // Invalidate all export receipt queries (lists, details, items)
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.lists(),
+                    queryKey: exportReceiptKeys.all,
+                    refetchType: 'active',
                 }),
-                queryClient.invalidateQueries({ queryKey: ['warehouse-items'] }), // Update stock
+                // Update warehouse stock
+                queryClient.invalidateQueries({
+                    queryKey: ['warehouse-items'],
+                    refetchType: 'active',
+                }),
             ]);
+
+            // If we got a new receipt ID, also invalidate its specific items query
+            if (response?.data?.id) {
+                await queryClient.invalidateQueries({
+                    queryKey: exportReceiptKeys.items(response.data.id),
+                });
+            }
         },
         onError: (error: unknown) => {
             const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');
@@ -95,16 +111,19 @@ export const useUpdateExportReceipt = () => {
             const response = await exportReceiptApi.update(receiptId, updateData);
             return response;
         },
-        onSuccess: async (_data, variables) => {
+        onSuccess: async (_data, _variables) => {
             showSuccessToast('Cập nhật phiếu xuất kho thành công');
 
             await Promise.all([
+                // Invalidate all export receipt queries (lists, details, items)
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.lists(),
+                    queryKey: exportReceiptKeys.all,
+                    refetchType: 'active',
                 }),
-                queryClient.invalidateQueries({ queryKey: ['warehouse-items'] }), // Update stock
+                // Update warehouse stock
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.detail(variables.receiptId),
+                    queryKey: ['warehouse-items'],
+                    refetchType: 'active',
                 }),
             ]);
         },

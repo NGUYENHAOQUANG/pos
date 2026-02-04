@@ -295,6 +295,13 @@ export const useMaterialScreenLogic = () => {
         refetchMasterMaterials,
     ]);
 
+    // Auto refresh when screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            handleRefresh();
+        }, [handleRefresh])
+    );
+
     const actions = useMemo(
         () => ({
             createImport: () => navigation.navigate('AddWarehouse', {}),

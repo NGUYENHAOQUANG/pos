@@ -73,6 +73,8 @@ export interface IWarehouseItem {
     unitName?: string;
     alertQty?: number;
     materialCode?: string;
+    costPrice?: number;
+    averagePrice?: number;
 }
 
 export type GetWarehouseItemsResponse = IAppResponse<IPaginate<IWarehouseItem>>;

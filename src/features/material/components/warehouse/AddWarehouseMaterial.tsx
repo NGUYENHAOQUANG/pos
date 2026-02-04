@@ -38,6 +38,7 @@ interface AddWarehouseMaterialProps {
     materialOptions?: DropdownOption[];
     onDropdownOpen?: (itemIndex: number) => void;
     title?: string; // Optional title prop
+    isPriceDisabled?: boolean; // New prop to control price input state
 }
 
 export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
@@ -48,6 +49,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
     materialOptions = [],
     onDropdownOpen,
     title = 'Vật tư nhập kho', // Default value
+    isPriceDisabled = false, // Default to false (editable)
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -80,9 +82,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                         const itemTotal =
                             (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
                         const displayTotal =
-                            itemTotal > 0
-                                ? formatCurrency(itemTotal)
-                                : 'Vui lòng nhập số lượng và đơn giá';
+                            itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
                         const isDropdownOpen = activeDropdownId === item.id;
 
                         // Calculate diff or check validation?
@@ -218,6 +218,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     }}
                                                     keyboardType="numeric"
                                                     containerStyle={styles.noMarginBottom}
+                                                    disabled={isPriceDisabled}
                                                 />
                                             </View>
                                         </View>

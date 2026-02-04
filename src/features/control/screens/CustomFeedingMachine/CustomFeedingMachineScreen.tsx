@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    TextInput,
-    ScrollView,
-    BackHandler,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
@@ -23,7 +15,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-
+import { Input } from '@/shared/components/forms/Input';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 
@@ -288,8 +280,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         <View style={styles.rowInputs}>
                             <View style={styles.inputWrapper}>
                                 <Text style={styles.inputLabel}>Chạy (giây)</Text>
-                                <TextInput
-                                    style={styles.textInput}
+                                <Input
                                     placeholder="Nhập số giây"
                                     placeholderTextColor={colors.gray[400]}
                                     keyboardType="numeric"
@@ -305,8 +296,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
                             <View style={styles.inputWrapper}>
                                 <Text style={styles.inputLabel}>Dừng (phút)</Text>
-                                <TextInput
-                                    style={styles.textInput}
+                                <Input
                                     placeholder="Nhập số phút"
                                     placeholderTextColor={colors.gray[400]}
                                     keyboardType="numeric"
