@@ -1,4 +1,11 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+
+export enum ExportReceiptStatus {
+    Pending = 'Pending',
+    Draft = 'Draft',
+    Approved = 'Approved',
+    Rejected = 'Rejected',
+}
 
 export interface ExportReceiptItem {
     exportReceiptItemId: string;
@@ -21,7 +28,7 @@ export interface ExportReceipt {
     pondName?: string;
     zoneId?: string;
     zoneName?: string;
-    status?: string;
+    status?: ExportReceiptStatus;
     totalItems?: number;
     totalAmount?: number;
     note?: string;
@@ -35,12 +42,9 @@ export interface ExportReceipt {
     no?: number;
     createdAt?: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
     materials?: ExportReceiptItem[];
-    // Deprecated fields kept just in case but should be removed if confirmed unused
-    // receiverName?: string;
-    // farm?: string;
 }
 
 export interface ExportReceiptItemRequest {
@@ -68,6 +72,23 @@ export interface UpdateExportReceiptRequest {
     documentIds?: string[];
 }
 
+// Action Types
+export interface UpdateExportReceiptItemCommand {
+    items: ExportReceiptItemRequest[];
+}
+export type UpdateExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type DeleteExportReceiptResponse = IApiResponse<boolean>;
+export type DeleteExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type SubmitExportReceiptResponse = IApiResponse<boolean>;
+export type ApproveExportReceiptResponse = IApiResponse<boolean>;
+
+export interface RejectExportReceiptCommand {
+    reason: string;
+}
+export type RejectExportReceiptResponse = IApiResponse<boolean>;
+
 export interface GetExportReceiptsParams {
     ReceiptCode?: string;
     Status?: string;
@@ -86,7 +107,11 @@ export interface GetExportReceiptsParams {
 export type GetExportReceiptsResponse = IApiResponse<IPaginate<ExportReceipt>>;
 export type GetExportReceiptByIdResponse = IApiResponse<ExportReceipt>;
 
-export type GetExportReceiptItemsResponse = IApiResponse<ExportReceiptItem[]>;
+// Helper type for flexible response (array or object wrapper)
+export type GetExportReceiptItemsResponseData =
+    | ExportReceiptItem[]
+    | { items: ExportReceiptItem[] };
+export type GetExportReceiptItemsResponse = IApiResponse<GetExportReceiptItemsResponseData>;
 
 export type { GetExportReceiptsParams as GetExportWarehouseParams };
 

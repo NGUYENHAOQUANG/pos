@@ -1,4 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useDeleteExportReceiptItem } from './useExportReceiptItems';
+import { showErrorToast } from '@/features/material/utils/validationToast';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
@@ -52,17 +55,23 @@ export const useExportMaterials = ({
         ];
     }, [warehouseItems]);
 
+    // Refs to track loaded state
+    const itemsLoadedRef = useRef(false);
+
+    // Mutation for deleting items
+    const { mutate: deleteReceiptItem } = useDeleteExportReceiptItem();
+
     // Load items for edit mode (API does not include items in detail response)
     useEffect(() => {
         if (
             isEditMode &&
             exportReceiptItems &&
             exportReceiptItems.length > 0 &&
-            formMaterials.length <= 1
+            !itemsLoadedRef.current
         ) {
             const mappedMaterials: MaterialItem[] = exportReceiptItems.map((item, index) => {
                 return {
-                    id: Date.now().toString() + index,
+                    id: item.materialId || Date.now().toString() + index, // Use materialId as ID if available for easier deletion
                     materialId: item.materialId,
                     materialName: item.materialName || '',
                     quantity: item.quantity ? String(item.quantity) : '0',
@@ -71,8 +80,9 @@ export const useExportMaterials = ({
                 };
             });
             setFormMaterials(mappedMaterials);
+            itemsLoadedRef.current = true;
         }
-    }, [isEditMode, exportReceiptItems, formMaterials.length]);
+    }, [isEditMode, exportReceiptItems]);
 
     // Handler: Add new material row
     const handleAddMaterial = useCallback(() => {
@@ -115,6 +125,44 @@ export const useExportMaterials = ({
         [warehouseItems]
     );
 
+    // Handler: Remove material
+    const handleRemoveMaterial = useCallback(
+        (id: string, exportReceiptId?: string) => {
+            // Optimistic update
+            const previousMaterials = [...formMaterials];
+            setFormMaterials(prev => prev.filter(item => item.id !== id));
+
+            // If in edit mode and item has real ID (assuming id is materialId for server items), call API
+            // Note: The mapping above uses materialId as 'id'.
+            // However, we need to distinguish between 'temp local id' and 'server material id'.
+            // In the map above: id: item.materialId || Date.now()...
+            // So if it's a server item, id IS materialId.
+
+            // Check if it's a server item (usually UUID, temp IDs are timestamps)
+            const isTempId = !id.includes('-');
+
+            if (isEditMode && exportReceiptId && !isTempId) {
+                deleteReceiptItem(
+                    { receiptId: exportReceiptId, itemId: id },
+                    {
+                        onError: (error: unknown) => {
+                            const errorMessage = getErrorMessage(error, 'Lỗi xóa vật tư');
+                            // Ignore "not found" errors as item is already gone
+                            if (
+                                !errorMessage.toLowerCase().includes('không tồn tại') &&
+                                !errorMessage.toLowerCase().includes('not found')
+                            ) {
+                                showErrorToast(errorMessage);
+                                setFormMaterials(previousMaterials); // Rollback
+                            }
+                        },
+                    }
+                );
+            }
+        },
+        [formMaterials, isEditMode, deleteReceiptItem]
+    );
+
     // Calculate total amount
     const calculateTotal = useCallback(() => {
         return formMaterials.reduce((sum, item) => {
@@ -136,5 +184,6 @@ export const useExportMaterials = ({
         // Handlers
         handleAddMaterial,
         handleUpdateMaterial,
+        handleRemoveMaterial,
     };
 };
