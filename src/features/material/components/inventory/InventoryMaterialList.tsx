@@ -19,8 +19,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 export interface InventoryItem {
-    id: string; // FE internal ID
-    inventoryCheckItemId?: string; // Backend ID (if exists)
+    id: string;
+    inventoryCheckItemId?: string;
     materialId: string;
     materialName: string;
     oldStock: number;

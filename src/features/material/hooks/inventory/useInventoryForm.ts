@@ -59,7 +59,18 @@ export const useInventoryForm = ({ inventoryId }: UseInventoryFormProps) => {
     // Sync Items
     useEffect(() => {
         if (itemsData && itemsData.length > 0) {
-            setItems(itemsData);
+            setItems(
+                itemsData.map(item => ({
+                    id: item.id,
+                    inventoryCheckItemId: item.id,
+                    materialId: item.materialId,
+                    materialName: item.materialName,
+                    oldStock: item.expectedQty,
+                    newStock: item.actualQty?.toString() || '',
+                    difference: item.difference,
+                    unit: item.unitName,
+                }))
+            );
         } else if (itemsData && itemsData.length === 0 && inventoryId) {
             // If existing inventory returns empty, init with 1 empty item
             setItems([
