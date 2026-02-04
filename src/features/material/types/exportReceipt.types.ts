@@ -1,4 +1,11 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+
+export enum ExportReceiptStatus {
+    Pending = 'Pending',
+    Draft = 'Draft',
+    Approved = 'Approved',
+    Rejected = 'Rejected',
+}
 
 export interface ExportReceiptItem {
     id: string;
@@ -28,7 +35,7 @@ export interface ExportReceipt {
     pondName?: string;
     zoneId?: string;
     zoneName?: string;
-    status?: string;
+    status?: ExportReceiptStatus;
     totalItems?: number;
     totalAmount?: number;
     note?: string;
@@ -42,8 +49,8 @@ export interface ExportReceipt {
     no?: number;
     createdAt?: string;
     editedAt?: string;
-    creator?: any;
-    editor?: any;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
     materials?: ExportReceiptItem[];
 }
 
@@ -71,6 +78,23 @@ export interface UpdateExportReceiptRequest {
     items?: ExportReceiptItemRequest[];
     documentIds?: string[];
 }
+
+// Action Types
+export interface UpdateExportReceiptItemCommand {
+    items: ExportReceiptItemRequest[];
+}
+export type UpdateExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type DeleteExportReceiptResponse = IApiResponse<boolean>;
+export type DeleteExportReceiptItemResponse = IApiResponse<boolean>;
+
+export type SubmitExportReceiptResponse = IApiResponse<boolean>;
+export type ApproveExportReceiptResponse = IApiResponse<boolean>;
+
+export interface RejectExportReceiptCommand {
+    reason: string;
+}
+export type RejectExportReceiptResponse = IApiResponse<boolean>;
 
 export interface GetExportReceiptsParams {
     ReceiptCode?: string;

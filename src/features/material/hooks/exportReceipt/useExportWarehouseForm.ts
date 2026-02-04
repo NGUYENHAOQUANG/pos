@@ -97,6 +97,7 @@ export const useExportWarehouseForm = () => {
         // Handlers
         handleAddMaterial: materials.handleAddMaterial,
         handleUpdateMaterial: materials.handleUpdateMaterial,
+        handleRemoveMaterial: materials.handleRemoveMaterial,
         handleDropdownOpen,
         handleDeletePress: submit.handleDeletePress,
         handleConfirmDelete: submit.handleConfirmDelete,

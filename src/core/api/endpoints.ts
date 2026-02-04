@@ -182,6 +182,8 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/exportreceipt/${id}`,
         ITEMS: (id: string) => `/exportreceipt/${id}/items`,
         UPDATE_ITEMS: (id: string) => `/exportreceipt/${id}/items`,
+        DELETE_ITEM: (receiptId: string, itemId: string) =>
+            `/exportreceipt/${receiptId}/items/${itemId}`,
         SUBMISSION: (id: string) => `/exportreceipt/${id}/submission`,
         APPROVAL: (id: string) => `/exportreceipt/${id}/approval`,
         REJECTION: (id: string) => `/exportreceipt/${id}/rejection`,

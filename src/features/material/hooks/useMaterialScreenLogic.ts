@@ -213,10 +213,11 @@ export const useMaterialScreenLogic = () => {
             Search: searchText,
             MaterialName: filterMaterialName || undefined,
             WarehouseId: warehouseId || undefined,
+            Status: importReceiptStatusFilter || undefined,
             Page: DEFAULT_PAGE,
             PageSize: DEFAULT_PAGE_SIZE,
         }),
-        [searchText, filterMaterialName, warehouseId]
+        [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]
     );
 
     const inventoryParams = useMemo(
