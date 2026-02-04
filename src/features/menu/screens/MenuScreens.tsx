@@ -9,7 +9,7 @@ import {
     Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 import BackgroundMenu from '@/assets/backgrounds/BackgroundMenu.svg';
 import LogoutIcon from '@/assets/Icon/IconMenu/LogoutOutlined.svg';
 import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
@@ -164,8 +164,8 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 16,
         marginHorizontal: 16,
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
+        borderTopLeftRadius: borderRadius.md,
+        borderTopRightRadius: borderRadius.md,
         overflow: 'hidden',
     },
     scrollContent: {
@@ -180,18 +180,13 @@ const styles = StyleSheet.create({
     },
     profileCard: {
         backgroundColor: colors.white,
-        borderRadius: 12,
+        borderRadius: borderRadius.md,
         padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 0,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
     },
     avatarContainer: {
         marginRight: 16,
@@ -244,7 +239,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.red[600],
-        borderRadius: 8,
+        borderRadius: borderRadius.md,
         paddingVertical: 12,
         gap: 8,
     },

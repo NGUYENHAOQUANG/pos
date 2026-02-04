@@ -54,7 +54,7 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        borderRadius: 8,
+        borderRadius: 12,
         padding: 8,
         alignItems: 'center',
         justifyContent: 'center',

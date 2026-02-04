@@ -358,13 +358,8 @@ export const AddSiphonScreen: React.FC = () => {
                 showAddJobSuccessToast('SIPHON');
                 navigation.goBack();
             }
-        } catch (error) {
-            console.error('Save siphon error:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Lưu thất bại',
-                text2: 'Có lỗi xảy ra khi gọi API',
-            });
+        } catch (_error) {
+            // Error handled by mutation onError
         }
     };
 

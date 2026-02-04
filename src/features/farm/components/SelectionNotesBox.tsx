@@ -51,15 +51,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: spacing.md,
         marginTop: 8,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 1,
         gap: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     title: {
         fontSize: 14,

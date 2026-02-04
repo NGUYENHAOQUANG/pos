@@ -359,8 +359,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        //...shadows.sm,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
         overflow: 'hidden',
@@ -428,7 +427,7 @@ const styles = StyleSheet.create({
     },
     detailButton: {
         paddingVertical: spacing.sm,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.primary,
         alignItems: 'center',
@@ -437,18 +436,18 @@ const styles = StyleSheet.create({
     },
     detailButtonText: {
         color: colors.primary,
-        fontWeight: '500',
+        fontWeight: '400',
         fontSize: 14,
     },
     cycleSection: {
         borderWidth: 1,
-        borderColor: '#DEE4ED',
-        borderRadius: 8,
+        borderColor: colors.defaultBorder,
+        borderRadius: borderRadius.md,
         marginHorizontal: spacing.md,
         marginBottom: 12,
     },
     cycleHeader: {
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.geekblue[100],
         padding: spacing.sm,
         borderTopLeftRadius: borderRadius.sm,
         borderTopRightRadius: borderRadius.sm,

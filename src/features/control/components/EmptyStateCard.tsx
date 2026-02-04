@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
@@ -85,17 +85,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     flatContainer: {
         backgroundColor: 'transparent',

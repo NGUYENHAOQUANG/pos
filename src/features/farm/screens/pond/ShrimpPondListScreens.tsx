@@ -11,7 +11,7 @@ import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { FarmData, POND_TYPES, PondData } from '@/features/farm/types/farm.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { PondListSkeleton } from '@/features/farm/components/pond/PondListSkeleton';
+import { PondListSkeleton } from '@/features/farm/components/skeleton/PondListSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { formatDate } from '@/features/farm/utils/dateUtils';

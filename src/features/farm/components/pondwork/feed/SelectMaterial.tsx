@@ -11,7 +11,7 @@ import {
     KeyboardAvoidingView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
@@ -181,28 +181,19 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: colors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
         padding: spacing.md,
     },
     container: {
         backgroundColor: colors.white,
-        borderRadius: spacing.sm,
+        borderRadius: borderRadius.md,
         width: '100%',
         maxWidth: 400,
         zIndex: 1,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.black,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 5,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     header: {
         flexDirection: 'row',

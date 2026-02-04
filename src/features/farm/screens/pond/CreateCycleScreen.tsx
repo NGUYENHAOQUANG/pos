@@ -430,15 +430,27 @@ export const CreateCycleScreen: React.FC = () => {
     const onConfirmDelete = async () => {
         if (pondId && initialData?.id) {
             try {
-                await deleteCycleMutation.mutateAsync({
+                const response = await deleteCycleMutation.mutateAsync({
                     pondId,
                     cycleId: initialData.id,
                 });
                 deleteActiveCycle(pondId);
                 deleteCycle(initialData.id);
                 setShowDeleteModal(false);
+                const successMessage =
+                    response?.success === true ||
+                    response?.message?.toLowerCase() === 'success' ||
+                    !response?.message
+                        ? 'Đã xóa chu kỳ thành công'
+                        : response.message;
+                Toast.show({
+                    type: 'success',
+                    text1: successMessage,
+                    position: 'top',
+                });
                 navigation.navigate('MainTabs', { screen: 'Farm' } as any);
-            } catch (error: any) {
+            } catch (error: unknown) {
+                setShowDeleteModal(false);
                 const normalizedError = normalizeApiError(error);
                 Toast.show({
                     type: 'error',
@@ -510,6 +522,7 @@ export const CreateCycleScreen: React.FC = () => {
                 message="Bạn sẽ không thể truy cập lại chu kỳ đã xóa. Các vật tư đã xuất kho cho chu kỳ này sẽ có thể bị ảnh hưởng. Bạn có chắc chắn muốn xóa chu kỳ này không?"
                 confirmText="Xóa chu kỳ"
                 cancelText="Không"
+                showSuccessToast={false}
             />
         </View>
     );

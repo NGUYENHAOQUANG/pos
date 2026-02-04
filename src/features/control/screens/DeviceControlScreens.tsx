@@ -13,7 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useControl } from '@/features/control/store/controlStore';
 import { Zone } from '@/features/farm/types/farm.types';
-import { DeviceControlSkeleton } from '@/features/control/components/DeviceControlSkeleton';
+import { DeviceControlSkeleton } from '@/features/control/components/skeleton/DeviceControlSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';

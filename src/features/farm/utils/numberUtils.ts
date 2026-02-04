@@ -4,18 +4,19 @@
  * @returns Formatted number string with dots as thousand separators (e.g., "1.000.000")
  */
 export const formatNumber = (num: string | number | null | undefined): string => {
-  if (num === null || num === undefined) return '';
+    if (num === null || num === undefined) return '';
 
-  let numStr: string;
-  if (typeof num === 'string') {
-    // Remove all non-numeric characters
-    numStr = num.replace(/\D/g, '');
-  } else {
-    numStr = num.toString();
-  }
+    let numValue: number;
+    if (typeof num === 'string') {
+        const cleaned = num.replace(/[^\d.]/g, '');
+        numValue = parseFloat(cleaned);
+    } else {
+        numValue = num;
+    }
 
-  if (!numStr) return '';
+    if (isNaN(numValue)) return '';
 
-  // Add dots as thousand separators
-  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const rounded = Math.round(numValue);
+
+    return rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };

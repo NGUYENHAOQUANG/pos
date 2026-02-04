@@ -153,13 +153,10 @@ export const JobCard: React.FC<JobCardProps> = ({
                 disabled={type === 'TRANSFER_POND'}
             >
                 <View style={styles.leftContent}>
-                    <config.icon width={40} height={40} style={{ marginRight: 12 }} />
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.title}>{displayTitle}</Text>
-                        {hasItems && (
-                            <Text style={styles.headerCountText}>{items.length} lượt</Text>
-                        )}
+                    <View style={styles.iconContainer}>
+                        <config.icon width={40} height={40} />
                     </View>
+                    <Text style={styles.title}>{displayTitle}</Text>
                 </View>
                 <View style={styles.actions}>
                     <TouchableOpacity style={styles.addButton} onPress={onPressAdd}>
@@ -215,13 +212,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.borderDark,
-        borderRadius: 8,
+        borderRadius: 12,
         marginBottom: 16,
-        shadowColor: colors.borderDark,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
         overflow: 'hidden',
     },
     header: {
@@ -236,10 +228,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
     },
+    iconContainer: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
 
     title: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: colors.text,
         flex: 1,
     },

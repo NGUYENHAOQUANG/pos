@@ -244,14 +244,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: 'white',
         borderTopWidth: 0,
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 10,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        // Ensure content is clipped to rounded corners if needed, though usually not for tab bar
+        borderColor: colors.defaultBorder,
+        borderWidth: 1,
         overflow: 'hidden',
     },
     tabItem: {

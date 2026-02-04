@@ -251,7 +251,8 @@ const CreateCycleForm: React.FC<Props> = ({
                                         : ''
                                 }
                                 onChangeText={text => {
-                                    const num = text ? parseFloat(text) : undefined;
+                                    const limitedText = text.slice(0, 10);
+                                    const num = limitedText ? parseFloat(limitedText) : undefined;
                                     updateField(
                                         'stockingQuantity',
                                         isNaN(num as number) ? undefined : num

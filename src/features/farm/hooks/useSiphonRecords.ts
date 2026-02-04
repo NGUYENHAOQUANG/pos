@@ -7,6 +7,7 @@ import {
     CreateSiphonCommand,
 } from '@/features/farm/types/siphon.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { handleError } from '@/shared/utils';
 
 export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
     return useQuery({
@@ -60,7 +61,6 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
 
     return { jobs, isLoading, error, refetch };
 };
-
 export const useCreateSiphonRecord = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -69,6 +69,7 @@ export const useCreateSiphonRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
         },
+        onError: error => handleError(error),
     });
 };
 
