@@ -274,7 +274,7 @@ export const useAddImportReceipt = () => {
         );
         if (invalidItemIndex !== -1) {
             showValidationError(
-                `Vui lòng điền đầy đủ thông tin vật tư (Dòng ${invalidItemIndex + 1})`
+                `Vui lòng điền đầy đủ thông tin vật tư (Vật tư ${invalidItemIndex + 1})`
             );
             return;
         }

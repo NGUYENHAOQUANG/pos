@@ -67,9 +67,15 @@ export const useExportMaterials = ({
             isEditMode &&
             exportReceiptItems &&
             exportReceiptItems.length > 0 &&
+            warehouseItems.length > 0 && // Wait for warehouse items to be loaded
             !itemsLoadedRef.current
         ) {
             const mappedMaterials: MaterialItem[] = exportReceiptItems.map((item, index) => {
+                // Lookup stock from warehouseItems to show available quantity
+                const warehouseItem = warehouseItems.find(
+                    (w: WarehouseItem) => String(w.materialId) === String(item.materialId)
+                );
+
                 return {
                     id: item.materialId || Date.now().toString() + index, // Use materialId as ID if available for easier deletion
                     materialId: item.materialId,
@@ -77,12 +83,13 @@ export const useExportMaterials = ({
                     quantity: item.quantity ? String(item.quantity) : '0',
                     price: item.costPrice ? String(item.costPrice) : '',
                     unit: item.unitName || '',
+                    availableQuantity: warehouseItem?.quantity || 0, // Show available stock from warehouse
                 };
             });
             setFormMaterials(mappedMaterials);
             itemsLoadedRef.current = true;
         }
-    }, [isEditMode, exportReceiptItems]);
+    }, [isEditMode, exportReceiptItems, warehouseItems]);
 
     // Handler: Add new material row
     const handleAddMaterial = useCallback(() => {
@@ -114,6 +121,11 @@ export const useExportMaterials = ({
                                 materialName: selectedMaterial?.materialName || '',
                                 availableQuantity: selectedMaterial?.quantity || 0,
                                 unit: selectedMaterial?.unitName || '',
+                                price: (
+                                    selectedMaterial?.costPrice ??
+                                    selectedMaterial?.averagePrice ??
+                                    0
+                                ).toString(),
                             };
                         }
                         return { ...item, [field]: value };

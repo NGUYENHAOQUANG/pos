@@ -149,6 +149,7 @@ export const AddExportWarehouseScreen: React.FC = () => {
                                 materialOptions={materialOptions}
                                 onDropdownOpen={handleDropdownOpen}
                                 title="Vật tư xuất kho"
+                                isPriceDisabled={true}
                             />
                         </ScrollView>
                     </SafeInputLayout>

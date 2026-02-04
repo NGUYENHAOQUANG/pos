@@ -30,6 +30,7 @@ export const useExportWarehouseForm = () => {
         isEditMode: formState.isEditMode,
         exportReceiptId: formState.exportReceiptId,
         fileUploaderRef: formState.fileUploaderRef,
+        onReceiptCreated: formState.setExportReceiptId,
         setDeleteModalVisible: formState.setDeleteModalVisible,
     });
 
