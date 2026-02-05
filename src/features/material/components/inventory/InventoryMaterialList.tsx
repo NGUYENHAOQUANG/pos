@@ -39,7 +39,7 @@ interface InventoryMaterialListProps {
 }
 
 export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
-    items,
+    items = [],
     onUpdateItem,
     onAddItem,
     onRemoveItem,
