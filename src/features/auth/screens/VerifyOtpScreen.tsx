@@ -27,6 +27,7 @@ import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
 import { NormalizedError } from '@/core/api/errorHandler';
+import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 // Countdown duration in seconds
 const COUNTDOWN_DURATION = 60;
@@ -237,6 +238,7 @@ export default function VerifyOTPScreen() {
 
     return (
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            <FloatingBubblesBackground />
             {!isKeyboardVisible && (
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color="#333" />

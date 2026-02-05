@@ -85,8 +85,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: spacing.md,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
     },
     flatContainer: {
         backgroundColor: 'transparent',

@@ -7,14 +7,11 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Platform } from 'react-native';
-
-// Delay before launching camera/library - required on iOS to allow modal to fully dismiss
-// Prevents "Application tried to present modally an active controller" crash
-const PICKER_DELAY_MS = Platform.OS === 'ios' ? 400 : 100;
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import { antdTheme } from '@/core/config/antd-theme';
 
+const PICKER_DELAY_MS = Platform.OS === 'ios' ? 400 : 100;
 interface ImagePickerActionSheetProps {
     visible: boolean;
     onClose: () => void;
@@ -97,17 +94,6 @@ const styles = StyleSheet.create({
         borderTopRightRadius: antdTheme.radius_lg || borderRadius.xl,
         paddingTop: antdTheme.v_spacing_md || spacing.md,
         paddingHorizontal: antdTheme.h_spacing_lg || spacing.lg,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: -2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
-            },
-            android: {
-                elevation: 5,
-            },
-        }),
     },
     titleContainer: {
         paddingVertical: antdTheme.v_spacing_md || spacing.md,
