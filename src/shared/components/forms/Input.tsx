@@ -144,59 +144,58 @@ export function Input({
                     />
                 )}
 
-                {/* Input Field using Ant Design InputItem */}
-                <View style={{ flex: 1 }}>
-                    <AntdInput
-                        value={value}
-                        onChangeText={onChangeText}
-                        placeholder={placeholder}
-                        placeholderTextColor={colors.textTertiary}
-                        editable={!disabled}
-                        type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
-                        keyboardType={keyboardType}
-                        autoCapitalize={autoCapitalize as any}
-                        multiline={multiline}
-                        numberOfLines={numberOfLines}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => {
-                            setIsFocused(false);
-                            onBlur?.();
-                        }}
-                        style={[
-                            styles.input,
-                            inputStyle,
-                            multiline && styles.inputMultiline,
-                            // Override InputItem specific defaults if necessary
-                            {
-                                height: '100%',
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                color: disabled ? colors.textTertiary : colors.text,
-                            },
-                        ]}
-                        // Override internal styles of InputItem container to remove List styling
-                        styles={{
-                            container: {
-                                borderBottomWidth: 0,
-                                marginLeft: 0,
-                                paddingLeft: 0,
-                                paddingRight: 0,
-                                minHeight: 0,
-                                height: '100%',
-                            },
-                            input: {
-                                fontSize: 16,
-                                color: colors.text,
-                                height: '100%',
-                                paddingVertical: 0,
-                                paddingLeft: 0,
-                                marginLeft: 0,
-                            },
-                        }}
-                        {...(restProps as any)}
-                        maxFontSizeMultiplier={1.1}
-                    />
-                </View>
+                <AntdInput
+                    value={value}
+                    onChangeText={onChangeText}
+                    placeholder={placeholder}
+                    placeholderTextColor={colors.textTertiary}
+                    editable={!disabled}
+                    type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
+                    keyboardType={keyboardType}
+                    autoCapitalize={autoCapitalize as any}
+                    multiline={multiline}
+                    textAlignVertical="center"
+                    numberOfLines={numberOfLines}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => {
+                        setIsFocused(false);
+                        onBlur?.();
+                    }}
+                    style={[
+                        styles.input,
+                        inputStyle,
+                        multiline && styles.inputMultiline,
+                        // Override InputItem specific defaults if necessary
+                        {
+                            lineHeight: 0,
+                            height: '100%',
+                            paddingVertical: 0,
+                            fontSize: 16,
+                            color: disabled ? colors.textTertiary : colors.text,
+                        },
+                    ]}
+                    // Override internal styles of InputItem container to remove List styling
+                    styles={{
+                        container: {
+                            borderBottomWidth: 0,
+                            marginLeft: 0,
+                            paddingLeft: 0,
+                            paddingRight: 0,
+                            minHeight: 0,
+                            height: '100%',
+                        },
+                        input: {
+                            fontSize: 16,
+                            color: colors.text,
+                            height: '100%',
+                            paddingVertical: 0,
+                            lineHeight: 0,
+                            paddingLeft: 0,
+                            marginLeft: 0,
+                        },
+                    }}
+                    {...(restProps as any)}
+                />
 
                 {/* Right Icon / Password Toggle */}
                 {(iconRight || showPasswordToggle) && (
