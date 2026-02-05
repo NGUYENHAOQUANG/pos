@@ -288,7 +288,11 @@ export const AppStack: React.FC = () => {
             {/* ControlDetail moved to MainNavigator to show Tab Bar */}
             {/* Control screens use Zustand store directly - no provider needed */}
             <Stack.Screen name="ConnectDevice" component={ConnectDeviceScreens} />
-            <Stack.Screen name="CustomFeedingMachine" component={CustomFeedingMachine} />
+            <Stack.Screen
+                name="CustomFeedingMachine"
+                component={CustomFeedingMachine}
+                options={{ gestureEnabled: false }}
+            />
             <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
             <Stack.Screen name="History" component={HistoryActivitieScreens} />
             <Stack.Screen name="UserManual" component={UserManualScreens} />
