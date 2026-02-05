@@ -10,6 +10,7 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
     launchCamera,
@@ -219,6 +220,47 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             onImagesChange?.(imageUris);
         }, [imageUris, onImagesChange]);
 
+        // Ref để NetInfo callback đọc uploadingUris mới nhất
+        const uploadingUrisRef = useRef<string[]>([]);
+        uploadingUrisRef.current = uploadingUris;
+
+        // Khi mạng khôi phục: retry upload cho các ảnh đang loading (chưa có document ID)
+        const prevConnectedRef = useRef<boolean | null>(null);
+        useEffect(() => {
+            const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+                const connected = state.isConnected;
+                if (connected === true && prevConnectedRef.current === false) {
+                    const pending = uploadingUrisRef.current.filter(
+                        uri => !uploadedFilesMap.current[uri]
+                    );
+                    pending.forEach(uri => {
+                        const fileToUpload = {
+                            uri,
+                            type: 'image/jpeg' as const,
+                            name: uri.split('/').pop() || 'image.jpg',
+                        };
+                        documentApi
+                            .upload([fileToUpload])
+                            .then(uploadedDocs => {
+                                if (
+                                    !isMounted.current ||
+                                    !uploadedDocs?.length ||
+                                    !uploadedDocs[0].id
+                                )
+                                    return;
+                                const docId = uploadedDocs[0].id;
+                                sessionUploadedFileIds.current.push(docId);
+                                uploadedFilesMap.current[uri] = docId;
+                                setUploadingUris(u => u.filter(u2 => u2 !== uri));
+                            })
+                            .catch(() => {});
+                    });
+                }
+                prevConnectedRef.current = connected;
+            });
+            return () => unsubscribe();
+        }, []);
+
         const requestCameraPermission = async (): Promise<boolean> => {
             if (Platform.OS === 'android') {
                 try {
@@ -243,6 +285,8 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
 
         const uploadFile = async (asset: Asset) => {
             if (!asset.uri) return;
+
+            let uploadSuccess = false;
 
             try {
                 // Optimistically update UI
@@ -274,17 +318,15 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     sessionUploadedFileIds.current.push(docId);
                     uploadedFilesMap.current[uri] = docId;
                     console.log(`[GeneralInfoBox] Upload success: ${docId}`);
+                    uploadSuccess = true;
                 }
             } catch (error) {
                 console.error('[GeneralInfoBox] Upload failed', error);
-                if (isMounted.current) {
-                    Alert.alert('Lỗi', 'Tải ảnh lên thất bại');
-                    // Remove the image from UI if upload failed
-                    setImageUris(prev => prev.filter(u => u !== asset.uri));
-                }
+                // Khi mất mạng: không hiện Alert, giữ loading spinner trên ô ảnh (NetworkStatusModal sẽ thông báo khi quay lại app)
             } finally {
-                if (isMounted.current && asset.uri) {
-                    setUploadingUris(prev => prev.filter(u => u !== asset.uri)); // Stop loading
+                // Chỉ ẩn loading khi upload thành công
+                if (isMounted.current && asset.uri && uploadSuccess) {
+                    setUploadingUris(prev => prev.filter(u => u !== asset.uri));
                 }
             }
         };
