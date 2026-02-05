@@ -3,9 +3,8 @@ import Toast from 'react-native-toast-message';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
-import { IMaterial } from '@/features/material/types/material.types';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { Loading } from '@/shared/components/ui/Loading';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -14,16 +13,8 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { formatDate } from '@/features/farm/utils/dateUtils';
-
-// Mock data (replace with real data or API later)
-const MOCK_MATERIALS: IMaterial[] = [
-    { id: '1', name: 'Thức ăn tôm thẻ', group: 'Nuôi', unit: 'kg', remaining: 100 },
-    { id: '2', name: 'Khoáng tạt', group: 'Nuôi', unit: 'kg', remaining: 50 },
-    { id: '3', name: 'Vôi nóng', group: 'Nuôi', unit: 'kg', remaining: 200 },
-    { id: '4', name: 'Khoáng tạc', group: 'Nuôi', unit: 'kg', remaining: 0 },
-];
-
+import { useFeeding, useCreateFeedingRecord } from '@/features/farm/hooks/feed/useFeeding';
+import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.types';
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'FeedTheShrimp'>;
 
 export const AddFeederScreens = () => {
@@ -31,14 +22,16 @@ export const AddFeederScreens = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pondId } = route.params || {}; // Assuming pondId is passed
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
     const scrollViewRef = useRef<ScrollView>(null);
+
+    // Danh sách vật tư cho màn Cho ăn (dùng logic giống HandleProblem)
+    const { materials } = useFeeding();
+
+    // Mutation để gọi API
+    const createMutation = useCreateFeedingRecord();
 
     const handleSaveInfo = () => {
         if (selectedMaterials.length === 0) {
@@ -51,58 +44,27 @@ export const AddFeederScreens = () => {
             return;
         }
 
-        if (pondId) {
-            const currentItems = getPondJobItems(pondId, 'FEED');
+        if (!pondId) return;
 
-            // Calculate next index based on max existing label to avoid duplicates
-            let maxIndex = 0;
-            currentItems.forEach(item => {
-                const match = item.label.match(/Lần (\d+)/);
-                if (match) {
-                    const index = parseInt(match[1], 10);
-                    if (index > maxIndex) maxIndex = index;
-                }
-            });
-            const nextIndex = maxIndex + 1;
+        // Construct create payload
+        const payload: CreateFeedingRecordPayload = {
+            feedingDetail: {
+                notes: note,
+                materials: selectedMaterials.map(m => ({
+                    warehouseItemId: m.material.id,
+                    quantity: m.quantity,
+                })),
+            },
+        };
 
-            // Use executionDate instead of now
-            // Format time as HH:mm to match existing job items style
-            const timeString = executionDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-            // Format date as DD/MM/YYYY for grouping using formatDate utility
-            const dateString = formatDate(executionDate);
-
-            const newItem = {
-                id: Date.now().toString(),
-                label: `Lần ${nextIndex}`,
-                time: timeString,
-                date: dateString,
-                pondId: pondId,
-                note: note || undefined,
-                materials: selectedMaterials,
-            };
-
-            // Save to context
-            updatePondJob(pondId, 'FEED', [...currentItems, newItem]);
-        }
-
-        // Logic to save all data
-        console.log('Saving feeding info:', {
-            time: new Date(),
-            materials: selectedMaterials,
-            note: note,
-        });
-
-        Toast.show({
-            type: 'success',
-            text1: 'Đã cho ăn thành công',
-            position: 'top',
-            visibilityTime: 3000,
-        });
-
-        navigation.goBack();
+        createMutation.mutate(
+            { pondId, payload },
+            {
+                onSuccess: () => {
+                    navigation.goBack();
+                },
+            }
+        );
     };
 
     return (
@@ -110,37 +72,39 @@ export const AddFeederScreens = () => {
             {/* Header */}
             <HeaderFarm type="simple" title="Cho ăn" onBack={() => navigation.goBack()} />
 
-            <View style={styles.contentContainer}>
-                <ScrollView
-                    ref={scrollViewRef}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* General Info Section */}
-                    <GeneralInfoBox
-                        date={executionDate}
-                        onDateChange={setExecutionDate}
-                        disabledDate={true}
-                    />
+            <Loading isLoading={createMutation.isPending}>
+                <View style={styles.contentContainer}>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* General Info Section */}
+                        <GeneralInfoBox
+                            date={executionDate}
+                            onDateChange={setExecutionDate}
+                            disabledDate={true}
+                        />
 
-                    {/* Select Material Section */}
-                    <MaterialSelectionBox
-                        selectedMaterials={selectedMaterials}
-                        onMaterialsChange={setSelectedMaterials}
-                        materials={MOCK_MATERIALS}
-                    />
+                        {/* Select Material Section */}
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            materials={materials}
+                        />
 
-                    {/* Note Section */}
-                    <SelectionNotesBox
-                        notes={note}
-                        onNotesChange={setNote}
-                        scrollViewRef={scrollViewRef}
-                    />
-                    {/* Add extra padding at bottom to ensure content isn't hidden behind footer if keybaord is open or just for scroll space */}
-                    <View style={styles.spacer} />
-                </ScrollView>
-            </View>
+                        {/* Note Section */}
+                        <SelectionNotesBox
+                            notes={note}
+                            onNotesChange={setNote}
+                            scrollViewRef={scrollViewRef}
+                        />
+                        {/* Add extra padding at bottom to ensure content isn't hidden behind footer if keybaord is open or just for scroll space */}
+                        <View style={styles.spacer} />
+                    </ScrollView>
+                </View>
+            </Loading>
 
             {/* Bottom Action Bar */}
             <ButtonBarFarm
