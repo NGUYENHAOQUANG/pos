@@ -15,6 +15,7 @@ import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
 import { colors, spacing, typography } from '@/styles';
 import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
+import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 export default function AuthScreen() {
     const insets = useSafeAreaInsets();
@@ -38,6 +39,7 @@ export default function AuthScreen() {
                     style={styles.container}
                     edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
                 >
+                    <FloatingBubblesBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
                     {Platform.OS === 'android' && (

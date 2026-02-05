@@ -4,220 +4,260 @@
  * @author Auto
  * @created 2025-01-27
  */
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ViewStyle,
-  Platform,
-  PermissionsAndroid,
-  Alert,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image as RNImage,
+    ViewStyle,
+    Platform,
+    PermissionsAndroid,
+    Alert,
 } from 'react-native';
 import {
-  launchCamera,
-  launchImageLibrary,
-  ImagePickerResponse,
-  MediaType,
+    launchCamera,
+    launchImageLibrary,
+    ImagePickerResponse,
+    MediaType,
+    Asset,
 } from 'react-native-image-picker';
+import { Image as ImageCompressor } from 'react-native-compressor';
+import RNFS from 'react-native-fs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {colors, spacing, borderRadius, typography, sizes} from '@/styles';
-import {ImagePickerActionSheet} from './ImagePickerActionSheet';
+import { colors, spacing, borderRadius, typography, sizes } from '@/styles';
+import { ImagePickerActionSheet } from './ImagePickerActionSheet';
 
 interface ImageUploadProps {
-  imageUri?: string | null;
-  onImageSelect?: (uri: string) => void;
-  onImageRemove?: () => void;
-  style?: ViewStyle;
-  label?: string;
+    imageUri?: string | null;
+    onImageSelect?: (uri: string, base64?: string) => void;
+    onImageRemove?: () => void;
+    style?: ViewStyle;
+    label?: string;
+    returnBase64?: boolean;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 export function ImageUpload({
-  imageUri,
-  onImageSelect,
-  onImageRemove,
-  style,
-  label,
+    imageUri,
+    onImageSelect,
+    onImageRemove,
+    style,
+    label,
+    returnBase64 = false,
 }: ImageUploadProps) {
-  const [actionSheetVisible, setActionSheetVisible] = useState(false);
+    const [actionSheetVisible, setActionSheetVisible] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-  const requestCameraPermission = async (): Promise<boolean> => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: 'Quyền truy cập camera',
-            message: 'Ứng dụng cần quyền truy cập camera để chụp ảnh',
-            buttonNeutral: 'Để sau',
-            buttonNegative: 'Hủy',
-            buttonPositive: 'OK',
-          },
+    const requestCameraPermission = async (): Promise<boolean> => {
+        if (Platform.OS === 'android') {
+            try {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.CAMERA,
+                    {
+                        title: 'Quyền truy cập camera',
+                        message: 'Ứng dụng cần quyền truy cập camera để chụp ảnh',
+                        buttonNeutral: 'Để sau',
+                        buttonNegative: 'Hủy',
+                        buttonPositive: 'OK',
+                    }
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            } catch (err) {
+                console.warn(err);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    const processImage = async (asset: Asset) => {
+        try {
+            setIsProcessing(true);
+            if (!asset.uri) return;
+
+            let finalUri = asset.uri;
+            const fileSize = asset.fileSize || 0;
+
+            if (fileSize > MAX_FILE_SIZE) {
+                finalUri = await ImageCompressor.compress(asset.uri, {
+                    compressionMethod: 'auto',
+                });
+            }
+
+            let base64String: string | undefined;
+            if (returnBase64) {
+                base64String = await RNFS.readFile(finalUri, 'base64');
+            }
+            onImageSelect?.(finalUri, base64String);
+        } catch (error) {
+            console.error('Error processing image:', error);
+            Alert.alert('Lỗi', 'Không thể xử lý ảnh này, vui lòng thử lại.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleResponse = (response: ImagePickerResponse) => {
+        if (response.didCancel) {
+            return;
+        }
+        if (response.errorMessage) {
+            Alert.alert('Lỗi', response.errorMessage);
+            return;
+        }
+        if (response.assets && response.assets[0]) {
+            processImage(response.assets[0]);
+        }
+    };
+
+    const handleTakePhoto = async () => {
+        const hasPermission = await requestCameraPermission();
+        if (!hasPermission) {
+            Alert.alert('Thông báo', 'Cần quyền truy cập camera để chụp ảnh');
+            return;
+        }
+
+        launchCamera(
+            {
+                mediaType: 'photo' as MediaType,
+                quality: 0.8,
+                saveToPhotos: true,
+            },
+            handleResponse
         );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
-    }
-    return true; 
-  };
+    };
 
-  const handleTakePhoto = async () => {
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
-      Alert.alert('Thông báo', 'Cần quyền truy cập camera để chụp ảnh');
-      return;
-    }
+    const handleChooseFromLibrary = () => {
+        launchImageLibrary(
+            {
+                mediaType: 'photo' as MediaType,
+                quality: 0.8,
+            },
+            handleResponse
+        );
+    };
 
-    launchCamera(
-      {
-        mediaType: 'photo' as MediaType,
-        quality: 0.8,
-        saveToPhotos: true,
-      },
-      (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-          return;
-        }
-        if (response.errorMessage) {
-          Alert.alert('Lỗi', response.errorMessage);
-          return;
-        }
-        if (response.assets && response.assets[0]?.uri) {
-          onImageSelect?.(response.assets[0].uri);
-        }
-      },
-    );
-  };
+    const handleImagePress = () => {
+        if (isProcessing) return;
 
-  const handleChooseFromLibrary = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo' as MediaType,
-        quality: 0.8,
-      },
-      (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-          return;
+        if (imageUri) {
+            setActionSheetVisible(true);
+        } else {
+            setActionSheetVisible(true);
         }
-        if (response.errorMessage) {
-          Alert.alert('Lỗi', response.errorMessage);
-          return;
-        }
-        if (response.assets && response.assets[0]?.uri) {
-          onImageSelect?.(response.assets[0].uri);
-        }
-      },
-    );
-  };
+    };
 
-  const handleImagePress = () => {
-    if (imageUri) {
-      // If image exists, show action sheet to change or remove
-      setActionSheetVisible(true);
-    } else {
-      // If no image, show action sheet to select
-      setActionSheetVisible(true);
-    }
-  };
-
-  return (
-    <View style={[styles.container, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <TouchableOpacity
-        style={styles.uploadContainer}
-        onPress={handleImagePress}
-        activeOpacity={0.7}>
-        {imageUri ? (
-          <View style={styles.imageContainer}>
-            <Image source={{uri: imageUri}} style={styles.image} />
+    return (
+        <View style={[styles.container, style]}>
+            {label && <Text style={styles.label}>{label}</Text>}
             <TouchableOpacity
-              style={styles.removeButton}
-              onPress={e => {
-                e.stopPropagation();
-                onImageRemove?.();
-              }}
-              activeOpacity={0.7}>
-              <Ionicons name="close-circle" size={24} color={colors.error} />
+                style={[styles.uploadContainer, isProcessing && styles.disabledContainer]}
+                onPress={handleImagePress}
+                disabled={isProcessing}
+                activeOpacity={0.7}
+            >
+                {imageUri ? (
+                    <View style={styles.imageContainer}>
+                        <RNImage source={{ uri: imageUri }} style={styles.image} />
+                        <TouchableOpacity
+                            style={styles.removeButton}
+                            onPress={e => {
+                                e.stopPropagation();
+                                onImageRemove?.();
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="close-circle" size={24} color={colors.error} />
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={styles.placeholderContainer}>
+                        <Ionicons
+                            name={isProcessing ? 'hourglass-outline' : 'image-outline'}
+                            size={sizes.icon['2xl']}
+                            color={colors.textSecondary}
+                        />
+                        {!isProcessing && (
+                            <Ionicons
+                                name="add-circle"
+                                size={sizes.icon.lg}
+                                color={colors.textSecondary}
+                                style={styles.addIcon}
+                            />
+                        )}
+                        {isProcessing && <Text style={styles.processingText}>Đang xử lý...</Text>}
+                    </View>
+                )}
             </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.placeholderContainer}>
-            <Ionicons
-              name="image-outline"
-              size={sizes.icon['2xl']}
-              color={colors.textSecondary}
-            />
-            <Ionicons
-              name="add-circle"
-              size={sizes.icon.lg}
-              color={colors.textSecondary}
-              style={styles.addIcon}
-            />
-          </View>
-        )}
-      </TouchableOpacity>
 
-      <ImagePickerActionSheet
-        visible={actionSheetVisible}
-        onClose={() => setActionSheetVisible(false)}
-        onTakePhoto={handleTakePhoto}
-        onChooseFromLibrary={handleChooseFromLibrary}
-      />
-    </View>
-  );
+            <ImagePickerActionSheet
+                visible={actionSheetVisible}
+                onClose={() => setActionSheetVisible(false)}
+                onTakePhoto={handleTakePhoto}
+                onChooseFromLibrary={handleChooseFromLibrary}
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.lg,
-  },
-  label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  uploadContainer: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray[100],
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-    overflow: 'hidden',
-  },
-  placeholderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  addIcon: {
-    position: 'absolute',
-    bottom: spacing.md,
-    right: spacing.md,
-  },
-  imageContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  removeButton: {
-    position: 'absolute',
-    top: spacing.sm,
-    right: spacing.sm,
-    backgroundColor: colors.white,
-    borderRadius: borderRadius.full,
-  },
+    container: {
+        marginBottom: spacing.lg,
+    },
+    label: {
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.medium,
+        color: colors.text,
+        marginBottom: spacing.xs,
+    },
+    uploadContainer: {
+        width: '100%',
+        aspectRatio: 1,
+        borderRadius: borderRadius.md,
+        backgroundColor: colors.gray[100],
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderStyle: 'dashed',
+        overflow: 'hidden',
+    },
+    disabledContainer: {
+        opacity: 0.7,
+        backgroundColor: colors.gray[200],
+    },
+    placeholderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+    },
+    addIcon: {
+        position: 'absolute',
+        bottom: spacing.md,
+        right: spacing.md,
+    },
+    imageContainer: {
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    removeButton: {
+        position: 'absolute',
+        top: spacing.sm,
+        right: spacing.sm,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.full,
+    },
+    processingText: {
+        marginTop: spacing.xs,
+        color: colors.textSecondary,
+        fontSize: typography.fontSize.xs,
+    },
 });
-
