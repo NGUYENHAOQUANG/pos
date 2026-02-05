@@ -1,30 +1,44 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { IMaterial } from '@/features/material/types/material.types';
 import { FlatList } from 'react-native';
 import { MaterialMasterItem } from '../../components/inventory/MaterialMasterItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { spacing } from '@/styles';
+import { useMaterials } from '@/features/material/hooks';
+import { useMaterialStore } from '@/features/material/store';
+import { useNetInfo } from '@react-native-community/netinfo';
 
-interface MaterialMasterListTabProps {
-    materials: IMaterial[];
-    isLoading?: boolean;
-    refreshing?: boolean;
-    onRefresh?: () => void;
+export const MaterialMasterListTab: React.FC<{
     onPressCreate: () => void;
-    onEdit?: (item: IMaterial) => void;
-}
+}> = ({ onPressCreate }) => {
+    // 1. Get Filters from Store
+    const searchText = useMaterialStore(state => state.searchText);
+    const filterType = useMaterialStore(state => state.filterType);
 
-export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({
-    materials,
-    isLoading,
-    refreshing,
-    onRefresh,
-    onPressCreate,
-    onEdit,
-}) => {
-    if (isLoading) {
+    // 2. Prepare Params
+    const masterListParams = React.useMemo(
+        () => ({
+            SearchText: searchText || undefined,
+            MaterialTypeId: filterType || undefined,
+            Page: 1,
+            PageSize: 100,
+        }),
+        [searchText, filterType]
+    );
+
+    // 3. Fetch Data
+    const {
+        data: masterMaterials = [],
+        isLoading: isLoadingMasterMaterials,
+        refetch: refetchMasterMaterials,
+        isRefetching: isRefetchingMasterMaterials,
+    } = useMaterials(masterListParams);
+
+    const { isConnected } = useNetInfo();
+    const showSkeleton = isLoadingMasterMaterials || (!!isConnected && isRefetchingMasterMaterials);
+
+    if (showSkeleton) {
         return (
             <View style={styles.container}>
                 <FlatList
@@ -41,12 +55,11 @@ export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({
     return (
         <View style={styles.container}>
             <FlatList
-                data={materials}
+                data={masterMaterials}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
                     <MaterialMasterItem
                         item={item}
-                        onEdit={onEdit}
                         hideRemaining={true}
                         alwaysExpanded={true}
                         showStatus={true}
@@ -54,11 +67,11 @@ export const MaterialMasterListTab: React.FC<MaterialMasterListTabProps> = ({
                 )}
                 contentContainerStyle={[
                     styles.listContent,
-                    materials.length === 0 && styles.emptyContent,
+                    masterMaterials.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
+                refreshing={isRefetchingMasterMaterials}
+                onRefresh={refetchMasterMaterials}
                 ListEmptyComponent={<MaterialEmptyState tab="material" onPress={onPressCreate} />}
             />
         </View>

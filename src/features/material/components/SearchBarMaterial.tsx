@@ -13,7 +13,6 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
 import { TabType } from '@/features/material/components/HeadingMaterial';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
-import { useMaterialsStore } from '@/features/material/store/materialsStore';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 
@@ -28,6 +27,7 @@ interface SearchBarMeterialProps {
     onGroupChange?: (group: string) => void;
     onStatusChange?: (status: string) => void;
     currentStatus?: string;
+    currentFilterValue?: string;
 }
 
 export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
@@ -37,6 +37,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     onGroupChange,
     onStatusChange,
     currentStatus = '',
+    currentFilterValue = '',
 }) => {
     const [localSearchText, setLocalSearchText] = useState('');
     const debouncedSearchText = useDebounce(localSearchText, 500);
@@ -58,9 +59,12 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         setVoteStatus(currentStatus);
     }, [currentStatus]);
 
-    // Get filterType from store to sync with selected value
-    const filterType = useMaterialsStore(state => state.filterType);
-    const [materialGroup, setMaterialGroup] = useState(filterType || '');
+    // Use passed prop or default to empty
+    const [materialGroup, setMaterialGroup] = useState(currentFilterValue);
+
+    useEffect(() => {
+        setMaterialGroup(currentFilterValue);
+    }, [currentFilterValue]);
 
     // Get material types from React Query
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
@@ -94,13 +98,6 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         return [{ label: 'Tất cả loại vật tư', value: '' }, ...options];
     }, [selectedTab, materialTypes, materialGroups]);
 
-    // Sync materialGroup with filterType from store
-    useEffect(() => {
-        if (filterType !== materialGroup) {
-            setMaterialGroup(filterType || '');
-        }
-    }, [filterType, materialGroup]);
-
     const handleToggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
@@ -122,6 +119,13 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         ],
         []
     );
+
+    const isLoading = selectedTab === 'list' ? isLoadingMaterialGroups : isLoadingMaterialTypes;
+    const placeholder = isLoading
+        ? 'Đang tải dữ liệu...'
+        : selectedTab === 'list'
+        ? 'Tất cả nhóm vật tư'
+        : 'Tất cả loại vật tư';
 
     return (
         <View style={styles.container}>
@@ -187,7 +191,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     {(selectedTab === 'list' || selectedTab === 'material') && (
                         <View style={styles.dropdownWrapper}>
                             <DropdownMaterial
-                                value={materialGroup}
+                                value={isLoading ? '' : materialGroup}
                                 onChange={value => {
                                     setMaterialGroup(value);
                                     onGroupChange?.(value);
@@ -196,11 +200,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                                 isOpen={isGroupDropdownOpen}
                                 onToggle={() => setIsGroupDropdownOpen(!isGroupDropdownOpen)}
                                 useAutoScroll={true}
-                                disabled={
-                                    selectedTab === 'list'
-                                        ? isLoadingMaterialGroups
-                                        : isLoadingMaterialTypes
-                                }
+                                placeholder={placeholder}
+                                disabled={isLoading}
                             />
                         </View>
                     )}
