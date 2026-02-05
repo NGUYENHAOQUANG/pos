@@ -22,6 +22,8 @@ import { FileUploader } from '@/shared/components/forms/FileUploader';
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 
+import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
+
 interface AddWarehouseScreenProps {}
 
 export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
@@ -71,6 +73,9 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         handleDeletePress,
         handleConfirmDelete,
         handleCancelDelete,
+
+        // Loading
+        isLoadingDetail,
     } = useAddImportReceipt();
 
     // Delete Button Component
@@ -88,6 +93,22 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    if (isLoadingDetail) {
+        return (
+            <>
+                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <View style={styles.container}>
+                    <HeaderMeterial
+                        title={isEditMode ? 'Chỉnh sửa phiếu nhập kho' : 'Tạo Phiếu Nhập Kho'}
+                        onBackPress={() => navigation.goBack()}
+                        rightComponent={canDelete ? deleteButton : undefined}
+                    />
+                    <AddMaterialSkeleton />
+                </View>
+            </>
+        );
+    }
 
     return (
         <>

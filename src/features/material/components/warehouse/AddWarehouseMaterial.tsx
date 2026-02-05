@@ -85,6 +85,16 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                             itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
                         const isDropdownOpen = activeDropdownId === item.id;
 
+                        // Filter options to exclude materials selected in other rows
+                        const otherSelectedIds = materials
+                            .filter((_, idx) => idx !== index)
+                            .map(m => String(m.materialId || ''))
+                            .filter(id => id !== '');
+
+                        const rowOptions = materialOptions.filter(
+                            opt => !otherSelectedIds.includes(String(opt.value))
+                        );
+
                         // Calculate diff or check validation?
                         const quantityNum = parseFloat(item.quantity) || 0;
                         const isOverStock =
@@ -133,7 +143,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 label="Tên vật tư"
                                                 required
                                                 value={item.materialId} // Use ID
-                                                options={materialOptions} // { label, value: ID }
+                                                options={rowOptions} // { label, value: ID }
                                                 onChange={val =>
                                                     onUpdateMaterial(item.id, 'materialId', val)
                                                 }

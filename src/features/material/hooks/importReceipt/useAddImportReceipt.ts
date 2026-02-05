@@ -59,13 +59,18 @@ export const useAddImportReceipt = () => {
     const { data: suppliers = [] } = useSuppliers();
 
     // Fetch Detail for Edit Mode - Using reusable hooks
-    const { data: importReceiptDetail } = useImportReceiptDetail(
+    const { data: importReceiptDetail, isLoading: isLoadingDetailData } = useImportReceiptDetail(
         isEditMode ? importReceiptId! : ''
     );
 
-    const { data: importReceiptItems } = useImportReceiptItems(isEditMode ? importReceiptId! : '', {
-        PageSize: 1000,
-    });
+    const { data: importReceiptItems, isLoading: isLoadingItems } = useImportReceiptItems(
+        isEditMode ? importReceiptId! : '',
+        {
+            PageSize: 1000,
+        }
+    );
+
+    const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItems);
 
     // Mutations & Actions
     const { submitWithFiles, isUploading } = useFileSubmit();
@@ -366,6 +371,7 @@ export const useAddImportReceipt = () => {
         isCreating,
         isUploading,
         isDeletingItem,
+        isLoadingDetail,
 
         // Handlers
         handleAddMaterial,
