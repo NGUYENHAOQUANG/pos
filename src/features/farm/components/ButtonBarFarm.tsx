@@ -11,6 +11,7 @@ interface ButtonBarFarmProps {
     primaryDisabled?: boolean;
     secondaryType?: 'default' | 'primary';
     style?: StyleProp<ViewStyle>;
+    isLoading?: boolean;
 }
 
 export const ButtonBarFarm: React.FC<ButtonBarFarmProps> = ({
@@ -21,6 +22,7 @@ export const ButtonBarFarm: React.FC<ButtonBarFarmProps> = ({
     primaryDisabled = false,
     secondaryType = 'default',
     style,
+    isLoading = false,
 }) => {
     const hasSecondary = !!secondaryTitle;
     const mode = hasSecondary ? 'double' : 'single';
@@ -47,6 +49,7 @@ export const ButtonBarFarm: React.FC<ButtonBarFarmProps> = ({
             onPrimaryPress={onPrimaryPress}
             onSecondaryPress={onSecondaryPress}
             primaryButtonDisabled={primaryDisabled}
+            primaryButtonLoading={isLoading}
             secondaryButtonStyle={secondaryButtonStyle}
             secondaryButtonTextStyle={secondaryButtonTextStyle}
             containerStyle={style as ViewStyle}

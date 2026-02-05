@@ -6,61 +6,86 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 
 import { colors } from '@/styles';
-// import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EditEnvironmentCard } from '@/features/menu/components/environment/EditEnvironmentCard';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
+import { useEnvironmentSettings } from '@/features/farm/hooks/envhooks/useSettingEnvironment';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import {
+    CreateEnvironmentSettingRequest,
+    UpdateEnvironmentSettingRequest,
+} from '@/features/farm/types/environmentSettings.types';
+import { useEnvironmentSettingStore } from '@/features/farm/store/environmentSettingStore';
 
 export const EditEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<any>();
-    // const { setTabBarVisible } = useTabBarVisibility();
+
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const zoneId = selectedZoneId ? String(selectedZoneId) : '';
 
     const parameter = route.params?.parameter;
 
-    const [name, setName] = useState(parameter?.name || '');
-    const [lowerLimit, setLowerLimit] = useState(
-        parameter?.min || parameter?.limit?.split(' - ')[0] || ''
-    );
-    const [upperLimit, setUpperLimit] = useState(
-        parameter?.max || parameter?.limit?.split(' - ')[1] || ''
-    );
-    // Initialize from alertEnabled, default to true if undefined
-    const [isAlertEnabled, setIsAlertEnabled] = useState(parameter?.alertEnabled ?? true);
+    const { data: settingsPage } = useEnvironmentSettings(zoneId);
 
-    // No explicit tab bar handling needed
+    const pendingChange = useEnvironmentSettingStore(state => state.getChange(parameter?.id));
+
+    const getInitialMin = () => {
+        if (pendingChange) return String(pendingChange.data.minValue);
+        return parameter?.min || parameter?.limit?.split(' - ')[0] || '';
+    };
+
+    const getInitialMax = () => {
+        if (pendingChange) return String(pendingChange.data.maxValue);
+        return parameter?.max || parameter?.limit?.split(' - ')[1] || '';
+    };
+
+    const getInitialAlertEnabled = () => {
+        if (pendingChange) return pendingChange.data.isActive;
+        return parameter?.alertEnabled ?? true;
+    };
+
+    const [name, setName] = useState(parameter?.name || '');
+    const [lowerLimit, setLowerLimit] = useState(getInitialMin());
+    const [upperLimit, setUpperLimit] = useState(getInitialMax());
+    const [isAlertEnabled, setIsAlertEnabled] = useState(getInitialAlertEnabled());
+
+    const addChange = useEnvironmentSettingStore(state => state.addChange);
 
     const handleSave = () => {
-        // Validate limits
-        if (lowerLimit && upperLimit) {
-            const lower = parseFloat(lowerLimit);
-            const upper = parseFloat(upperLimit);
+        const items = settingsPage?.items || [];
+        const existingSetting = items.find(s => s.metricId === parameter.id);
 
-            if (!isNaN(lower) && !isNaN(upper) && lower > upper) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Giới hạn dưới không được lớn hơn giới hạn trên',
-                });
-                return;
-            }
-        }
+        const minValue = parseFloat(lowerLimit || '0');
+        const maxValue = parseFloat(upperLimit || '0');
 
-        // Construct updated parameter object
-        const updatedParameter = {
-            ...parameter,
-            name,
-            min: lowerLimit,
-            max: upperLimit,
-            limit: lowerLimit && upperLimit ? `${lowerLimit} - ${upperLimit}` : '',
-            // Don't update isChecked here, as that controls visibility.
-            // isChecked is passed through from original parameter.
-            // We update alertEnabled.
-            alertEnabled: isAlertEnabled,
-        };
+        const settingId = existingSetting?.id || pendingChange?.settingId;
 
-        // Call the callback to update state in parent screen
-        if (route.params?.onSave) {
-            route.params.onSave(updatedParameter);
+        if (settingId) {
+            const payload: UpdateEnvironmentSettingRequest = {
+                metricId: parameter.id,
+                minValue,
+                maxValue,
+                isActive: isAlertEnabled,
+            };
+            addChange(parameter.id, {
+                metricId: parameter.id,
+                settingId: settingId,
+                data: payload,
+                type: 'update',
+            });
+        } else {
+            const payload: CreateEnvironmentSettingRequest = {
+                metricId: parameter.id,
+                minValue,
+                maxValue,
+                isActive: isAlertEnabled,
+            };
+            addChange(parameter.id, {
+                metricId: parameter.id,
+                data: payload,
+                type: 'create',
+            });
         }
 
         Toast.show(ToastMessages.Environment.UPDATE_SUCCESS);

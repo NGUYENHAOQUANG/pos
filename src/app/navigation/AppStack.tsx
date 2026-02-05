@@ -80,7 +80,6 @@ import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/typ
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
-import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { IExportWarehouseReceipt } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
@@ -122,8 +121,15 @@ export type AppStackParamList = {
         onSave?: (data: { advancedParameters: Array<{ id: string; name: string }> }) => void;
     };
     EditEnvironment: {
-        parameter: { id: string; name: string; limit: string; isChecked: boolean };
-        onSave?: (data: EnvironmentParameter) => void;
+        parameter: {
+            id: string;
+            name: string;
+            limit: string;
+            isChecked: boolean;
+            min?: string;
+            max?: string;
+            alertEnabled?: boolean;
+        };
     };
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: {
