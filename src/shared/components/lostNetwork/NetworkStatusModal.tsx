@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Modal, Dimensions, AppState, AppStateStatus } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -38,6 +38,26 @@ export const NetworkStatusModal = () => {
         });
 
         return () => unsubscribe();
+    }, []);
+
+    // Khi app trở lại foreground (vd: thoát camera, quay từ màn hình khác)
+    // cần kiểm tra lại mạng vì event NetInfo có thể bị bỏ qua khi app ở background
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+            if (nextAppState === 'active') {
+                NetInfo.fetch().then((state: NetInfoState) => {
+                    const connected = state.isConnected;
+                    if (connected === false) {
+                        setStatusType('lost');
+                        setVisible(true);
+                        prevConnectedRef.current = false;
+                    } else {
+                        prevConnectedRef.current = true;
+                    }
+                });
+            }
+        });
+        return () => subscription.remove();
     }, []);
 
     if (!visible) return null;
