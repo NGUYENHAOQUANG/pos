@@ -1,21 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { exportReceiptKeys } from '@/features/material/hooks/exportReceipt/useExportReceipt';
+import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { GetExportReceiptItemsParams } from '@/features/material/types/exportReceipt.types';
 
 const STALE_TIME_LONG = 5 * 60 * 1000; // 5 minutes
 
-export const useExportReceiptItems = (
-    receiptId?: string,
-    _params?: GetExportReceiptItemsParams
-) => {
+export const useExportReceiptItems = (receiptId?: string, params?: GetExportReceiptItemsParams) => {
     return useQuery({
-        // Use exportReceiptKeys.items for consistency with invalidation in useUpdateExportReceipt
-        queryKey: exportReceiptKeys.items(receiptId || ''),
+        // Use materialKeys.exportReceiptItems for consistency
+        queryKey: materialKeys.exportReceiptItems(receiptId || '', params),
         queryFn: async () => {
             if (!receiptId) return [];
-            const { data } = await exportReceiptApi.getItems(receiptId);
-            const items = data.items || [];
+            const { data: responseData } = await exportReceiptApi.getItems(receiptId);
+            // responseData is IPaginate<ExportReceiptItem>, we need the items array
+            const items = responseData.items || [];
 
             // Sort items by 'no' (order number) first, then createdAt, then ID
             return items.sort((a, b) => {
@@ -55,11 +53,11 @@ export const useDeleteExportReceiptItem = () => {
         onSuccess: async (_data, variables) => {
             // Invalidate the specific receipt items
             await queryClient.invalidateQueries({
-                queryKey: exportReceiptKeys.items(variables.receiptId),
+                queryKey: materialKeys.exportReceiptItems(variables.receiptId),
             });
             // Also invalidate detail to update total amount/count if needed
             await queryClient.invalidateQueries({
-                queryKey: exportReceiptKeys.detail(variables.receiptId),
+                queryKey: materialKeys.detail(variables.receiptId),
             });
         },
         onError: (_error: unknown) => {

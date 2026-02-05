@@ -7,15 +7,7 @@ import {
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
-
-// ============ Query Keys ============
-export const exportReceiptKeys = {
-    all: ['exportReceipts'] as const,
-    lists: () => [...exportReceiptKeys.all, 'list'] as const,
-    list: (params?: GetExportWarehouseParams) => [...exportReceiptKeys.lists(), params] as const,
-    detail: (id: string) => [...exportReceiptKeys.all, 'detail', id] as const,
-    items: (id: string) => [...exportReceiptKeys.all, 'items', id] as const,
-};
+import { materialKeys } from '@/features/material/hooks/materialKeys';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -25,7 +17,7 @@ const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
  */
 export const useExportReceipts = (params?: GetExportWarehouseParams) => {
     return useQuery({
-        queryKey: exportReceiptKeys.list(params),
+        queryKey: materialKeys.exportWarehouse(params),
         queryFn: async () => {
             const response = await exportReceiptApi.getAll(params);
             if (response.success && response.data?.items) {
@@ -42,7 +34,7 @@ export const useExportReceipts = (params?: GetExportWarehouseParams) => {
  */
 export const useExportReceipt = (id: string) => {
     return useQuery({
-        queryKey: exportReceiptKeys.detail(id),
+        queryKey: materialKeys.detail(id),
         queryFn: async () => {
             const response = await exportReceiptApi.getDetail(id);
             if (response.success) {
@@ -75,7 +67,7 @@ export const useCreateExportReceipt = () => {
             await Promise.all([
                 // Invalidate all export receipt queries (lists, details, items)
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.all,
+                    queryKey: [...materialKeys.all, 'export-warehouse'],
                     refetchType: 'active',
                 }),
                 // Update warehouse stock
@@ -88,7 +80,7 @@ export const useCreateExportReceipt = () => {
             // If we got a new receipt ID, also invalidate its specific items query
             if (response?.data?.id) {
                 await queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.items(response.data.id),
+                    queryKey: materialKeys.exportReceiptItems(response.data.id),
                 });
             }
         },
@@ -111,14 +103,18 @@ export const useUpdateExportReceipt = () => {
             const response = await exportReceiptApi.update(receiptId, updateData);
             return response;
         },
-        onSuccess: async (_data, _variables) => {
+        onSuccess: async (_data, variables) => {
             showSuccessToast('Cập nhật phiếu xuất kho thành công');
 
             await Promise.all([
-                // Invalidate all export receipt queries (lists, details, items)
+                // Invalidate all export receipt queries
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.all,
+                    queryKey: [...materialKeys.all, 'export-warehouse'],
                     refetchType: 'active',
+                }),
+                // Invalidate detail
+                queryClient.invalidateQueries({
+                    queryKey: materialKeys.detail(variables.receiptId),
                 }),
                 // Update warehouse stock
                 queryClient.invalidateQueries({
@@ -153,7 +149,7 @@ export const useDeleteExportReceipt = () => {
 
             await Promise.all([
                 queryClient.invalidateQueries({
-                    queryKey: exportReceiptKeys.lists(),
+                    queryKey: [...materialKeys.all, 'export-warehouse'],
                 }),
                 queryClient.invalidateQueries({ queryKey: ['warehouse-items'] }),
             ]);

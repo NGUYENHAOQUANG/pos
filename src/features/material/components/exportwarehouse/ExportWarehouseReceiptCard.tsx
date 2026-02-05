@@ -59,7 +59,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
     // Calculate total from items if main total is missing
     const calculatedTotal = useMemo(() => {
         if (!finalItems || finalItems.length === 0) return 0;
-        return finalItems.reduce((sum, curr) => {
+        return finalItems.reduce((sum: number, curr: ExportReceiptItem) => {
             const itemTotal = curr.totalAmount || (curr.quantity || 0) * (curr.costPrice || 0);
             return sum + (itemTotal || 0);
         }, 0);
