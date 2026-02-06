@@ -33,7 +33,6 @@ export const MeterialScreen = () => {
         handleFilterPress,
         handleTabSelect,
         handleHistoryPress,
-        handleAdjustmentPress,
         actions,
     } = useMaterialScreenLogic();
 
@@ -69,7 +68,6 @@ export const MeterialScreen = () => {
                     <WarehouseItemListScreen
                         onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
-                        onAdjustmentPress={handleAdjustmentPress}
                         onPressCreate={actions.createMaterial}
                     />
                 )}

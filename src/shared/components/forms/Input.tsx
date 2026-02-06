@@ -53,6 +53,8 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     inputStyle?: TextStyle;
     /** Custom input container styles (inner box) */
     inputContainerStyle?: ViewStyle;
+    /** Content to display at the right end of the input (e.g., units) */
+    suffix?: string | React.ReactNode;
 }
 
 /**
@@ -79,6 +81,7 @@ export function Input({
     autoCapitalize = 'sentences',
     multiline = false,
     numberOfLines = 1,
+    suffix,
     ...restProps
 }: InputProps) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -202,6 +205,19 @@ export function Input({
                     />
                 </View>
 
+                {/* Suffix */}
+                {suffix && (
+                    <View style={styles.suffixWrapper}>
+                        {typeof suffix === 'string' ? (
+                            <Text style={styles.suffixText} maxFontSizeMultiplier={1.1}>
+                                {suffix}
+                            </Text>
+                        ) : (
+                            suffix
+                        )}
+                    </View>
+                )}
+
                 {/* Right Icon / Password Toggle */}
                 {(iconRight || showPasswordToggle) && (
                     <TouchableOpacity
@@ -317,5 +333,15 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         color: colors.error,
         marginTop: spacing.xs,
+    },
+    suffixWrapper: {
+        justifyContent: 'center',
+        paddingLeft: spacing.sm,
+        paddingRight: 0,
+    },
+    suffixText: {
+        fontSize: 16,
+        color: colors.textSecondary,
+        fontWeight: '400',
     },
 });
