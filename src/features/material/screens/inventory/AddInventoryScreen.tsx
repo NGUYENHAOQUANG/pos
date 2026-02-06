@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView, Platform, StatusBar, TouchableOpacity } f
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
@@ -12,6 +11,7 @@ import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useAddInventoryLogic } from '@/features/material/hooks/inventory/useAddInventoryLogic';
+import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 
 const HEADER_HEIGHT = 250;
 const ITEM_HEIGHT = 380;
@@ -20,6 +20,7 @@ interface AddInventoryScreenProps {}
 
 export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
     const {
+        isLoading,
         isEditMode,
         date,
         isDatePickerVisible,
@@ -67,91 +68,93 @@ export const AddInventoryScreen: React.FC<AddInventoryScreenProps> = () => {
         </TouchableOpacity>
     );
 
+    if (isLoading) {
+        return <AddMaterialSkeleton />;
+    }
+
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={false}>
-                <View style={styles.container}>
-                    <HeaderMeterial
-                        title={
-                            isEditMode
-                                ? 'Chỉnh Sửa Phiếu Điều Chỉnh Tồn Kho'
-                                : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
-                        }
-                        onBackPress={goBack}
-                        rightComponent={isEditMode ? deleteButton : undefined}
-                    />
+            <View style={styles.container}>
+                <HeaderMeterial
+                    title={
+                        isEditMode
+                            ? 'Chỉnh Sửa Phiếu Điều Chỉnh Tồn Kho'
+                            : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
+                    }
+                    onBackPress={goBack}
+                    rightComponent={isEditMode ? deleteButton : undefined}
+                />
 
-                    <SafeInputLayout>
-                        <ScrollView
-                            ref={scrollViewRef}
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.contentContainer}
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            {/* Thông tin chung */}
-                            <InventoryGeneralInfo
-                                date={formatMaterialDate(date)}
-                                createdDate={formatMaterialDateTime(date)}
-                                note={note}
-                                onDatePress={() => setDatePickerVisible(true)}
-                                onNoteChange={setNote}
-                                warehouseName={warehouseName}
-                                creatorName={creatorName}
+                <SafeInputLayout>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.contentContainer}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* Thông tin chung */}
+                        <InventoryGeneralInfo
+                            date={formatMaterialDate(date)}
+                            createdDate={formatMaterialDateTime(date)}
+                            note={note}
+                            onDatePress={() => setDatePickerVisible(true)}
+                            onNoteChange={setNote}
+                            warehouseName={warehouseName}
+                            creatorName={creatorName}
+                        />
+
+                        {/* Nhập liệu vật tư */}
+                        <View style={styles.dropdownSection}>
+                            <InventoryMaterialList
+                                items={items}
+                                onUpdateItem={handleUpdateItem}
+                                onAddItem={handleAddItem}
+                                onRemoveItem={handleRemoveItem}
+                                materialOptions={materialOptions}
+                                onDropdownOpen={handleDropdownOpen}
                             />
+                        </View>
+                    </ScrollView>
+                </SafeInputLayout>
 
-                            {/* Nhập liệu vật tư */}
-                            <View style={styles.dropdownSection}>
-                                <InventoryMaterialList
-                                    items={items}
-                                    onUpdateItem={handleUpdateItem}
-                                    onAddItem={handleAddItem}
-                                    onRemoveItem={handleRemoveItem}
-                                    materialOptions={materialOptions}
-                                    onDropdownOpen={handleDropdownOpen}
-                                />
-                            </View>
-                        </ScrollView>
-                    </SafeInputLayout>
-
-                    {/* Nút Gửi Phiếu */}
-                    <ButtonBarMaterial
-                        mode="double"
-                        primaryTitle="Gửi Phiếu"
-                        secondaryTitle="Lưu Nháp"
-                        onPrimaryPress={handleSubmit}
-                        onSecondaryPress={handleSaveDraft}
-                        containerStyle={{
-                            borderTopWidth: 1,
-                            borderTopColor: colors.gray[200],
-                        }}
-                        secondaryButtonStyle={{
-                            flex: 1,
-                            minWidth: 0,
-                            borderColor: colors.blue[600],
-                        }}
-                        secondaryButtonTextStyle={{ color: colors.blue[600] }}
-                        primaryButtonStyle={{ flex: 1 }}
-                    />
-                    {/* Modal Chọn Ngày */}
-                    <DatePickerModal
-                        visible={isDatePickerVisible}
-                        onClose={() => setDatePickerVisible(false)}
-                        date={date}
-                        onSelectDate={handleDateConfirm}
-                    />
-                    {/* Confirmation Delete Modal */}
-                    <ConfirmationDeleteModal
-                        visible={deleteModalVisible}
-                        onConfirm={handleConfirmDelete}
-                        onCancel={handleCancelDelete}
-                        title="Xóa phiếu kiểm kho"
-                        message="Bạn có chắc chắn muốn xóa phiếu kiểm kho này không?"
-                        showSuccessToast={false}
-                    />
-                </View>
-            </Loading>
+                {/* Nút Gửi Phiếu */}
+                <ButtonBarMaterial
+                    mode="double"
+                    primaryTitle="Gửi Phiếu"
+                    secondaryTitle="Lưu Nháp"
+                    onPrimaryPress={handleSubmit}
+                    onSecondaryPress={handleSaveDraft}
+                    containerStyle={{
+                        borderTopWidth: 1,
+                        borderTopColor: colors.gray[200],
+                    }}
+                    secondaryButtonStyle={{
+                        flex: 1,
+                        minWidth: 0,
+                        borderColor: colors.blue[600],
+                    }}
+                    secondaryButtonTextStyle={{ color: colors.blue[600] }}
+                    primaryButtonStyle={{ flex: 1 }}
+                />
+                {/* Modal Chọn Ngày */}
+                <DatePickerModal
+                    visible={isDatePickerVisible}
+                    onClose={() => setDatePickerVisible(false)}
+                    date={date}
+                    onSelectDate={handleDateConfirm}
+                />
+                {/* Confirmation Delete Modal */}
+                <ConfirmationDeleteModal
+                    visible={deleteModalVisible}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
+                    title="Xóa phiếu kiểm kho"
+                    message="Bạn có chắc chắn muốn xóa phiếu kiểm kho này không?"
+                    showSuccessToast={false}
+                />
+            </View>
         </>
     );
 };

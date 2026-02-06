@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
@@ -26,8 +26,14 @@ export const useAddInventoryLogic = () => {
     const { data: warehouses } = useWarehouses({ ZoneId: selectedZoneId || undefined });
 
     // Inventory Data
-    const { data: inventoryDetail } = useInventoryDetail(inventoryId);
-    const { data: inventoryItems } = useInventoryItems(inventoryId, undefined);
+    const { data: inventoryDetail, isLoading: isLoadingDetail } = useInventoryDetail(inventoryId);
+    const { data: inventoryItems, isLoading: isLoadingItems } = useInventoryItems(
+        inventoryId,
+        undefined
+    );
+
+    // Consolidated Loading State
+    const isLoading = isEditMode && (isLoadingDetail || isLoadingItems);
 
     // Derived State
     const warehouseId = inventoryDetail?.warehouseId || warehouses?.[0]?.id;
@@ -67,8 +73,11 @@ export const useAddInventoryLogic = () => {
         }
     }, [inventoryDetail]);
 
+    // Track if we have already initialized items from inventoryDetail
+    const hasInitializedItems = useRef(false);
+
     useEffect(() => {
-        if (inventoryItems && inventoryItems.length > 0) {
+        if (!hasInitializedItems.current && inventoryItems && inventoryItems.length > 0) {
             const mappedItems = inventoryItems.map(item => ({
                 id: item.id || Date.now().toString() + Math.random(),
                 materialId: item.materialId,
@@ -80,7 +89,8 @@ export const useAddInventoryLogic = () => {
                 materialCode: item.materialCode,
             }));
             setItems(mappedItems);
-        } else if (!isEditMode && items.length === 0) {
+            hasInitializedItems.current = true;
+        } else if (!isEditMode && !hasInitializedItems.current && items.length === 0) {
             setItems([
                 {
                     id: Date.now().toString(),
@@ -92,6 +102,7 @@ export const useAddInventoryLogic = () => {
                     unit: '',
                 },
             ]);
+            hasInitializedItems.current = true;
         }
     }, [inventoryItems, isEditMode, items.length]);
 
@@ -217,7 +228,6 @@ export const useAddInventoryLogic = () => {
                     })),
                     autoSubmit: !isDraft,
                 };
-                console.log('Edit Payload:', JSON.stringify(updatePayload, null, 2));
                 await updateHeaderMutation.mutateAsync(updatePayload);
 
                 navigation.goBack();
@@ -232,6 +242,7 @@ export const useAddInventoryLogic = () => {
 
     return {
         // State
+        isLoading,
         isEditMode,
         date,
         isDatePickerVisible,

@@ -44,7 +44,6 @@ export default function ModalAddTurn({
                                 {
                                     color: colors.text,
                                     fontSize: 14,
-                                    textAlignVertical: 'center',
                                 },
                             ]}
                             numberOfLines={1}
@@ -100,7 +99,6 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        height: '100%',
         color: colors.text,
     },
     activeInput: {

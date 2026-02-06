@@ -13,7 +13,7 @@ import { WarehouseItemListScreen } from '@/features/material/screens/warehouseIt
 import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
 import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
 import { colors } from '@/styles';
-import { useMaterialScreenLogic } from '@/features/material/hooks/useMaterialScreenLogic';
+import { useMaterialScreenLogic } from '@/features/material/hooks/logic/useMaterialScreenLogic';
 
 export const MeterialScreen = () => {
     const {
@@ -23,16 +23,7 @@ export const MeterialScreen = () => {
         menuOpen,
         menuPosition,
         currentStatus,
-        materials,
-        importReceiptsData,
-        exportReceiptsData,
-        inventoryList,
-        showSkeleton,
-        isLoadingExportWarehouse,
-        isRefetchingWarehouseItems,
-        isRefetchingImportReceipts,
-        isRefetchingExportWarehouse,
-        isRefetchingInventory,
+        currentFilterValue,
         handleDropdownSelect,
         handleShowMenu,
         handleCloseMenu,
@@ -43,13 +34,6 @@ export const MeterialScreen = () => {
         handleTabSelect,
         handleHistoryPress,
         handleAdjustmentPress,
-        handleRefresh,
-        // Master List
-        masterMaterials,
-        isLoadingMasterMaterials,
-        isRefetchingMasterMaterials,
-        isLoadingInventory,
-
         actions,
     } = useMaterialScreenLogic();
 
@@ -73,57 +57,30 @@ export const MeterialScreen = () => {
                 onGroupChange={handleFilterType}
                 onStatusChange={handleFilterStatus}
                 selectedTab={selectedTab}
-                currentStatus={currentStatus}
+                currentStatus={currentStatus || undefined}
+                currentFilterValue={currentFilterValue || undefined}
             />
 
             <View style={styles.content}>
                 {selectedTab === 'material' && (
-                    <MaterialMasterListTab
-                        materials={masterMaterials}
-                        isLoading={showSkeleton || isLoadingMasterMaterials}
-                        refreshing={!!isRefetchingMasterMaterials}
-                        onRefresh={handleRefresh}
-                        onPressCreate={actions.createMaterial}
-                    />
+                    <MaterialMasterListTab onPressCreate={actions.createMaterial} />
                 )}
                 {selectedTab === 'list' && (
                     <WarehouseItemListScreen
-                        materials={materials}
                         onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
                         onAdjustmentPress={handleAdjustmentPress}
-                        isLoading={showSkeleton}
-                        refreshing={!!isRefetchingWarehouseItems}
-                        onRefresh={handleRefresh}
                         onPressCreate={actions.createMaterial}
                     />
                 )}
                 {selectedTab === 'history' && (
-                    <ImportReceiptList
-                        data={importReceiptsData}
-                        isLoading={showSkeleton}
-                        refreshing={!!isRefetchingImportReceipts}
-                        onRefresh={handleRefresh}
-                        onPressCreate={actions.createImport}
-                    />
+                    <ImportReceiptList onPressCreate={actions.createImport} />
                 )}
                 {selectedTab === 'export' && (
-                    <ExportWarehouseListScreen
-                        receipts={exportReceiptsData}
-                        isLoading={isLoadingExportWarehouse || showSkeleton}
-                        refreshing={!!isRefetchingExportWarehouse}
-                        onRefresh={handleRefresh}
-                        onPressCreate={actions.createExport}
-                    />
+                    <ExportWarehouseListScreen onPressCreate={actions.createExport} />
                 )}
                 {selectedTab === 'inventory' && (
-                    <InventoryScreen
-                        data={inventoryList || []}
-                        isLoading={isLoadingInventory || showSkeleton}
-                        refreshing={!!isRefetchingInventory}
-                        onRefresh={handleRefresh}
-                        onPressCreate={actions.createInventory}
-                    />
+                    <InventoryScreen onPressCreate={actions.createInventory} />
                 )}
             </View>
 

@@ -44,6 +44,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
         },
+        FEEDING_RECORDS: {
+            LIST: (pondId: string) => `/pond/${pondId}/feeding-records`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/feeding-records`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
+        },
         INCIDENT: {
             LIST: (pondId: string) => `/pond/${pondId}/incident`,
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/incident/${id}`,

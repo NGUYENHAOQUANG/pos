@@ -3,28 +3,41 @@ import { View, StyleSheet, FlatList } from 'react-native';
 import { spacing } from '@/styles';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { IPaginate } from '@/shared/types/common.types';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { ImportReceiptCard } from './ImportReceiptCard';
+import { useImportReceipts } from '@/features/material/hooks';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useMaterialStore } from '@/features/material/store';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
-interface ImportReceiptListProps {
-    data: IPaginate<ImportReceipt> | undefined;
-    onEndReached?: () => void;
-    refreshing?: boolean;
-    onRefresh?: () => void;
-    isLoading?: boolean;
-    onPressCreate?: () => void;
-}
+export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ onPressCreate }) => {
+    // 1. Get Filters from Store
+    const searchText = useMaterialStore(state => state.searchText);
+    const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
+    const { data: warehouses } = useWarehouses({
+        ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
+    });
+    const warehouseId = warehouses?.[0]?.id;
 
-export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
-    data,
-    onEndReached,
-    refreshing,
-    onRefresh,
-    isLoading,
-    onPressCreate,
-}) => {
-    const receipts = data?.items || [];
+    // 2. Prepare Params
+    const warehouseParams = React.useMemo(
+        () => ({
+            ReceiptCode: searchText || undefined,
+            WarehouseId: warehouseId || undefined,
+            Status: importReceiptStatusFilter || undefined,
+        }),
+        [searchText, warehouseId, importReceiptStatusFilter]
+    );
+
+    // 3. Fetch Data
+    const {
+        data: importReceiptsData,
+        refetch,
+        isRefetching,
+        isLoading,
+    } = useImportReceipts(warehouseParams);
+
+    const receipts = importReceiptsData?.items || [];
 
     if (isLoading) {
         return (
@@ -49,10 +62,8 @@ export const ImportReceiptList: React.FC<ImportReceiptListProps> = ({
                     receipts.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.5}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
+                refreshing={isRefetching}
+                onRefresh={refetch}
                 ListEmptyComponent={
                     <MaterialEmptyState tab="history" onPress={onPressCreate || (() => {})} />
                 }

@@ -143,8 +143,6 @@ export function Input({
                         style={styles.iconLeft}
                     />
                 )}
-
-                {/* Input Field using Ant Design InputItem */}
                 <View style={{ flex: 1 }}>
                     <AntdInput
                         value={value}
@@ -156,6 +154,7 @@ export function Input({
                         keyboardType={keyboardType}
                         autoCapitalize={autoCapitalize as any}
                         multiline={multiline}
+                        textAlignVertical="center"
                         numberOfLines={numberOfLines}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => {
@@ -168,6 +167,7 @@ export function Input({
                             multiline && styles.inputMultiline,
                             // Override InputItem specific defaults if necessary
                             {
+                                lineHeight: 0,
                                 height: '100%',
                                 paddingVertical: 0,
                                 fontSize: 16,
@@ -189,12 +189,16 @@ export function Input({
                                 color: colors.text,
                                 height: '100%',
                                 paddingVertical: 0,
+                                ...Platform.select({
+                                    ios: {
+                                        lineHeight: 0,
+                                    },
+                                }),
                                 paddingLeft: 0,
                                 marginLeft: 0,
                             },
                         }}
                         {...(restProps as any)}
-                        maxFontSizeMultiplier={1.1}
                     />
                 </View>
 

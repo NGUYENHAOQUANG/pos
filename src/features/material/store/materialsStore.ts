@@ -1,7 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabType } from '@/features/material/components/HeadingMaterial';
 
 interface MaterialsState {
@@ -26,78 +24,60 @@ interface MaterialsState {
 }
 
 export const useMaterialsStore = create<MaterialsState>()(
-    persist(
-        immer(set => ({
-            // Initial state
-            selectedTab: 'list',
-            searchText: '',
-            filterGroup: '',
-            filterType: '',
-            filterMaterialName: null,
-            importReceiptStatusFilter: '',
-            exportReceiptStatusFilter: '',
+    immer(set => ({
+        // Initial state
+        selectedTab: 'material',
+        searchText: '',
+        filterGroup: '',
+        filterType: '',
+        filterMaterialName: null,
+        importReceiptStatusFilter: '',
+        exportReceiptStatusFilter: '',
 
-            // Filter actions
-            setSelectedTab: (tab: TabType) =>
-                set(state => {
-                    state.selectedTab = tab;
-                }),
-
-            setSearchText: (text: string) =>
-                set(state => {
-                    state.searchText = text;
-                }),
-
-            setFilterGroup: (group: string) =>
-                set(state => {
-                    state.filterGroup = group;
-                }),
-
-            setFilterType: (type: string) =>
-                set(state => {
-                    state.filterType = type;
-                }),
-
-            setFilterMaterialName: (name: string | null) =>
-                set(state => {
-                    state.filterMaterialName = name;
-                }),
-
-            setImportReceiptStatusFilter: (status: string) =>
-                set(state => {
-                    state.importReceiptStatusFilter = status;
-                }),
-
-            setExportReceiptStatusFilter: (status: string) =>
-                set(state => {
-                    state.exportReceiptStatusFilter = status;
-                }),
-
-            resetFilters: () =>
-                set(state => {
-                    state.searchText = '';
-                    state.filterGroup = '';
-                    state.filterType = '';
-                    state.filterMaterialName = null;
-                    state.importReceiptStatusFilter = '';
-                    state.exportReceiptStatusFilter = '';
-                }),
-        })),
-        {
-            name: 'materials-storage',
-            storage: createJSONStorage(() => AsyncStorage),
-            partialize: state => ({
-                // Persist only what's needed, usually UI filters might not need persistence across app restarts
-                // unless desired. For now, we persist them as they were in the original file.
-                // Or maybe we should NOT persist filters?
-                // The original file persisted them. I'll keep persistence.
-                searchText: state.searchText,
-                filterGroup: state.filterGroup,
-                filterType: state.filterType,
-                selectedTab: state.selectedTab,
-                importReceiptStatusFilter: state.importReceiptStatusFilter,
-                exportReceiptStatusFilter: state.exportReceiptStatusFilter,
+        // Filter actions
+        setSelectedTab: (tab: TabType) =>
+            set(state => {
+                state.selectedTab = tab;
             }),
-        }
-    )
+
+        setSearchText: (text: string) =>
+            set(state => {
+                state.searchText = text;
+            }),
+
+        setFilterGroup: (group: string) =>
+            set(state => {
+                state.filterGroup = group;
+            }),
+
+        setFilterType: (type: string) =>
+            set(state => {
+                state.filterType = type;
+            }),
+
+        setFilterMaterialName: (name: string | null) =>
+            set(state => {
+                state.filterMaterialName = name;
+            }),
+
+        setImportReceiptStatusFilter: (status: string) =>
+            set(state => {
+                state.importReceiptStatusFilter = status;
+            }),
+
+        setExportReceiptStatusFilter: (status: string) =>
+            set(state => {
+                state.exportReceiptStatusFilter = status;
+            }),
+
+        resetFilters: () =>
+            set(state => {
+                state.searchText = '';
+                state.filterGroup = '';
+                state.filterType = '';
+                state.filterMaterialName = null;
+                state.importReceiptStatusFilter = '';
+                state.exportReceiptStatusFilter = '';
+            }),
+    }))
 );

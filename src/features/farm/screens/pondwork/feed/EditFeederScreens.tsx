@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Toast from 'react-native-toast-message';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
-import { IMaterial } from '@/features/material/types/material.types';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { Loading } from '@/shared/components/ui/Loading';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -17,14 +15,13 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-
-// Mock data (replace with real data or API later)
-const MOCK_MATERIALS: IMaterial[] = [
-    { id: '1', name: 'Thức ăn tôm thẻ', group: 'Nuôi', unit: 'kg', remaining: 100 },
-    { id: '2', name: 'Khoáng tạt', group: 'Nuôi', unit: 'kg', remaining: 50 },
-    { id: '3', name: 'Vôi nóng', group: 'Nuôi', unit: 'kg', remaining: 200 },
-    { id: '4', name: 'Khoáng tạc', group: 'Nuôi', unit: 'kg', remaining: 0 },
-];
+import {
+    useFeeding,
+    useUpdateFeedingRecord,
+    useDeleteFeedingRecord,
+    useFeedingRecordDetail,
+} from '@/features/farm/hooks/feed/useFeeding';
+import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditFeeder'>;
 
@@ -34,61 +31,89 @@ export const EditFeederScreens = () => {
     // TODO: Add jobId or similar to params to identify what to edit
     const { pondId, jobId } = route.params || {};
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
 
+    // Danh sách vật tư cho màn Cho ăn (dùng logic giống HandleProblem)
+    const { materials } = useFeeding();
+    const updateMutation = useUpdateFeedingRecord();
+    const deleteMutation = useDeleteFeedingRecord();
+
+    // Load existing data
+    // Fetch detail data
+    // Load existing data
+    // Fetch detail data
+    const { data: detailData, isLoading: isDetailLoading } = useFeedingRecordDetail(
+        pondId || '',
+        jobId || ''
+    );
+
+    const isLoading =
+        updateMutation.isPending || deleteMutation.isPending || (isDetailLoading && !!jobId);
+
     // Load existing data
     useEffect(() => {
-        if (pondId && jobId) {
-            const items = getPondJobItems(pondId, 'FEED');
-            const itemToEdit = items.find(i => i.id === jobId);
-            if (itemToEdit) {
-                setNote(itemToEdit.note || '');
-                if (itemToEdit.materials) {
-                    setSelectedMaterials(itemToEdit.materials);
+        if (detailData?.data) {
+            const item = detailData.data;
+            if (item.feedingDetail) {
+                setNote(item.feedingDetail.notes || '');
+
+                if (item.feedingDetail.materials) {
+                    // Map API materials to SelectedMaterialItem
+                    // We need to find the full material info from the 'materials' list
+                    const mappedMaterials: SelectedMaterialItem[] = item.feedingDetail.materials
+                        .map((apiMat: any) => {
+                            const fullMaterial = materials.find(
+                                m => m.id === apiMat.warehouseItemId
+                            );
+                            if (fullMaterial) {
+                                return {
+                                    material: fullMaterial,
+                                    quantity: apiMat.quantity,
+                                    unit: fullMaterial.unitName || '',
+                                };
+                            }
+                            return null;
+                        })
+                        .filter(
+                            (m: SelectedMaterialItem | null): m is SelectedMaterialItem =>
+                                m !== null
+                        );
+
+                    setSelectedMaterials(mappedMaterials);
                 }
-                // Do not override executionDate with saved time, keep it as current time (new Date())
+            }
+            // Parse createdAt string to Date object
+            if (item.createdAt) {
+                setExecutionDate(new Date(item.createdAt));
             }
         }
-    }, [pondId, jobId, getPondJobItems]);
+    }, [detailData, materials]);
 
     const handleSaveInfo = () => {
         if (pondId && jobId) {
-            const items = getPondJobItems(pondId, 'FEED');
-            const timeString = executionDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
+            // Construct payload
+            const payload: CreateFeedingRecordPayload = {
+                feedingDetail: {
+                    notes: note,
+                    materials: selectedMaterials.map(m => ({
+                        warehouseItemId: m.material.id, // Ensure we access material.id
+                        quantity: m.quantity,
+                    })),
+                },
+            };
 
-            const updatedItems = items.map(item => {
-                if (item.id === jobId) {
-                    return {
-                        ...item,
-                        time: timeString,
-                        note: note,
-                        materials: selectedMaterials,
-                    };
+            updateMutation.mutate(
+                { pondId, id: jobId, payload },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
                 }
-                return item;
-            });
-
-            updatePondJob(pondId, 'FEED', updatedItems);
-
-            Toast.show({
-                type: 'success',
-                text1: 'Đã cập nhật thông tin thành công',
-                position: 'top',
-                visibilityTime: 3000,
-            });
-
-            navigation.goBack();
+            );
         }
     };
 
@@ -99,10 +124,14 @@ export const EditFeederScreens = () => {
     const confirmDelete = () => {
         setShowDeleteModal(false);
         if (pondId && jobId) {
-            const items = getPondJobItems(pondId, 'FEED');
-            const updatedItems = items.filter(item => item.id !== jobId);
-            updatePondJob(pondId, 'FEED', updatedItems);
-            navigation.goBack();
+            deleteMutation.mutate(
+                { pondId, id: jobId },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
+                }
+            );
         }
     };
 
@@ -122,36 +151,38 @@ export const EditFeederScreens = () => {
                 rightAction={renderHeaderRight()}
             />
 
-            <View style={styles.contentContainer}>
-                <ScrollView
-                    ref={scrollViewRef}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* General Info Section */}
-                    <GeneralInfoBox
-                        date={executionDate}
-                        onDateChange={setExecutionDate}
-                        disabledDate={true}
-                    />
+            <Loading isLoading={isLoading}>
+                <View style={styles.contentContainer}>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {/* General Info Section */}
+                        <GeneralInfoBox
+                            date={executionDate}
+                            onDateChange={setExecutionDate}
+                            disabledDate={true}
+                        />
 
-                    {/* Select Material Section */}
-                    <MaterialSelectionBox
-                        selectedMaterials={selectedMaterials}
-                        onMaterialsChange={setSelectedMaterials}
-                        materials={MOCK_MATERIALS}
-                    />
+                        {/* Select Material Section */}
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            materials={materials}
+                        />
 
-                    {/* Note Section */}
-                    <SelectionNotesBox
-                        notes={note}
-                        onNotesChange={setNote}
-                        scrollViewRef={scrollViewRef}
-                    />
-                    <View style={styles.spacer} />
-                </ScrollView>
-            </View>
+                        {/* Note Section */}
+                        <SelectionNotesBox
+                            notes={note}
+                            onNotesChange={setNote}
+                            scrollViewRef={scrollViewRef}
+                        />
+                        <View style={styles.spacer} />
+                    </ScrollView>
+                </View>
+            </Loading>
 
             {/* Footer */}
             <ButtonBarFarm

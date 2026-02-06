@@ -15,6 +15,8 @@ import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useExportWarehouseForm } from '@/features/material/hooks/exportReceipt/useExportWarehouseForm';
 
+import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
+
 export const AddExportWarehouseScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
@@ -85,10 +87,26 @@ export const AddExportWarehouseScreen: React.FC = () => {
         </TouchableOpacity>
     );
 
+    if (isLoadingDetail) {
+        return (
+            <>
+                <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
+                <View style={styles.container}>
+                    <HeaderMeterial
+                        title={isEditMode ? 'Chỉnh Sửa Phiếu Xuất Kho' : 'Tạo Phiếu Xuất Kho'}
+                        onBackPress={() => navigation.goBack()}
+                        rightComponent={isEditMode ? deleteButton : null}
+                    />
+                    <AddMaterialSkeleton />
+                </View>
+            </>
+        );
+    }
+
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isSubmitting || isLoadingDetail}>
+            <Loading isLoading={isSubmitting}>
                 <View style={styles.container}>
                     <HeaderMeterial
                         title={isEditMode ? 'Chỉnh Sửa Phiếu Xuất Kho' : 'Tạo Phiếu Xuất Kho'}
