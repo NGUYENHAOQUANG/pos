@@ -10,7 +10,6 @@ import {
     CreateImportReceiptRequest,
     CreateImportReceiptItemCommand,
     UpdateImportReceiptItemCommand,
-    RejectImportReceiptCommand,
 } from '@/features/material/types/importReceipt.types';
 
 export const importReceiptKeys = {
@@ -170,59 +169,6 @@ export const useDeleteImportReceiptItem = () => {
         },
         onError: (error: Error) => {
             const errorMessage = getErrorMessage(error, 'Xóa vật tư thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-// ============ Workflow Mutation Hooks ============
-export const useSubmitImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: string) => importReceiptApi.submit(id),
-        onSuccess: (_, id) => {
-            showSuccessToast('Gửi duyệt phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Gửi duyệt phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-export const useApproveImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: string) => importReceiptApi.approve(id),
-        onSuccess: (_, id) => {
-            showSuccessToast('Duyệt phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Duyệt phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-export const useRejectImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ id, command }: { id: string; command?: RejectImportReceiptCommand }) =>
-            importReceiptApi.reject(id, command),
-        onSuccess: (_, { id }) => {
-            showSuccessToast('Từ chối phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Từ chối phiếu nhập kho thất bại');
             showErrorToast(errorMessage);
         },
     });
