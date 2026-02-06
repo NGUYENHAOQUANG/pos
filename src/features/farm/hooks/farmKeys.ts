@@ -85,4 +85,12 @@ export const farmKeys = {
             [...farmKeys.waterSupply.all(), 'list', pondId, ...(params ? [params] : [])] as const,
         detail: (id: string) => [...farmKeys.waterSupply.all(), 'detail', id] as const,
     },
+    environment: {
+        all: () => [...farmKeys.all, 'environment'] as const,
+        metricTypes: () => [...farmKeys.environment.all(), 'metricTypes'] as const,
+        settings: (zoneId: string) => [...farmKeys.environment.all(), 'settings', zoneId] as const,
+    },
+    metric: {
+        list: () => [...farmKeys.all, 'metric'] as const,
+    },
 };

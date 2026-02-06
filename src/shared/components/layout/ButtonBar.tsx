@@ -14,11 +14,13 @@ export interface ButtonBarProps {
     totalLabel?: string;
     totalValue?: string | number | React.ReactNode;
     primaryButtonDisabled?: boolean;
+    primaryButtonLoading?: boolean;
     primaryButtonStyle?: ViewStyle;
     primaryButtonTextStyle?: TextStyle;
     secondaryButtonStyle?: ViewStyle;
     secondaryButtonTextStyle?: TextStyle;
     secondaryButtonDisabled?: boolean;
+    secondaryButtonLoading?: boolean;
     containerStyle?: ViewStyle;
 }
 
@@ -31,11 +33,13 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     totalLabel = 'Tổng tiền:',
     totalValue = '0đ',
     primaryButtonDisabled = false,
+    primaryButtonLoading = false,
     primaryButtonStyle,
     primaryButtonTextStyle,
     secondaryButtonStyle,
     secondaryButtonTextStyle,
     secondaryButtonDisabled = false,
+    secondaryButtonLoading = false,
     containerStyle,
 }) => {
     // Consistent bottom spacing logic
@@ -61,6 +65,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}
+                            loading={primaryButtonLoading}
                             style={StyleSheet.flatten([styles.primaryButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}
                         />
@@ -83,6 +88,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                                 secondaryButtonTextStyle,
                             ])}
                             disabled={secondaryButtonDisabled}
+                            loading={secondaryButtonLoading}
                         />
                         <View style={styles.spacer} />
                         <Button
@@ -91,6 +97,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}
+                            loading={primaryButtonLoading}
                             style={StyleSheet.flatten([styles.flexButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}
                         />
@@ -106,6 +113,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}
+                            loading={primaryButtonLoading}
                             fullWidth
                             style={StyleSheet.flatten([styles.fullButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}
