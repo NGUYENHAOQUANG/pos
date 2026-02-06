@@ -66,6 +66,7 @@ export const DeviceControlScreens = () => {
         if (!pondsData?.pages) {
             // Even if no API data, show Mock Demo Ponds
             return [
+                { id: 'IOT_POND', name: 'Ao IOT', status: 'Framing' },
                 { id: 'N001', name: 'Ao N001', status: 'Framing' },
                 { id: 'N002', name: 'Ao N002', status: 'Framing' },
                 { id: 'N003', name: 'Ao N003', status: 'Framing' },
@@ -79,6 +80,7 @@ export const DeviceControlScreens = () => {
 
         // Demo: Inject N001, N002, N003 if they don't exist
         const demoPonds = [
+            { id: 'IOT_POND', name: 'Ao IOT', status: 'Framing' },
             { id: 'N001', name: 'Ao N001', status: 'Framing' },
             { id: 'N002', name: 'Ao N002', status: 'Framing' },
             { id: 'N003', name: 'Ao N003', status: 'Framing' },

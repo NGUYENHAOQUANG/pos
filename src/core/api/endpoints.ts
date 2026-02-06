@@ -20,6 +20,15 @@ export const API_ENDPOINTS = {
         PROFILE: '/auth/me',
         UPDATE_PROFILE: '/auth/profile',
     },
+    DEVICE: {
+        TOGGLE: '/device/toggle',
+        TOGGLE_TEST: '/device/toggle/test',
+        SCHEDULE: '/device/schedule',
+        SCHEDULE_TEST: '/device/schedule/test',
+        HEALTH: '/device/health',
+        HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
+        DEVICE_ID_REFERENCE: '/device/device-id-reference',
+    },
     POND: {
         CYCLE: {
             LIST: (pondId: string) => `/pond/${pondId}/cycle`,
@@ -34,6 +43,13 @@ export const API_ENDPOINTS = {
             CREATE: (pondId: string) => `/pond/${pondId}/siphon-records`,
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/siphon-records/${id}`,
+        },
+        FEEDING_RECORDS: {
+            LIST: (pondId: string) => `/pond/${pondId}/feeding-records`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/feeding-records`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/feeding-records/${id}`,
         },
         INCIDENT: {
             LIST: (pondId: string) => `/pond/${pondId}/incident`,

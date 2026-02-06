@@ -80,7 +80,6 @@ import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/typ
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
-import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { IExportWarehouseReceipt, IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
@@ -122,8 +121,15 @@ export type AppStackParamList = {
         onSave?: (data: { advancedParameters: Array<{ id: string; name: string }> }) => void;
     };
     EditEnvironment: {
-        parameter: { id: string; name: string; limit: string; isChecked: boolean };
-        onSave?: (data: EnvironmentParameter) => void;
+        parameter: {
+            id: string;
+            name: string;
+            limit: string;
+            isChecked: boolean;
+            min?: string;
+            max?: string;
+            alertEnabled?: boolean;
+        };
     };
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: {
@@ -289,7 +295,11 @@ export const AppStack: React.FC = () => {
             {/* ControlDetail moved to MainNavigator to show Tab Bar */}
             {/* Control screens use Zustand store directly - no provider needed */}
             <Stack.Screen name="ConnectDevice" component={ConnectDeviceScreens} />
-            <Stack.Screen name="CustomFeedingMachine" component={CustomFeedingMachine} />
+            <Stack.Screen
+                name="CustomFeedingMachine"
+                component={CustomFeedingMachine}
+                options={{ gestureEnabled: false }}
+            />
             <Stack.Screen name="Schedule" component={ScheduleActivitieScreens} />
             <Stack.Screen name="History" component={HistoryActivitieScreens} />
             <Stack.Screen name="UserManual" component={UserManualScreens} />

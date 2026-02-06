@@ -26,6 +26,7 @@ import { Input } from '@/shared/components/forms/Input';
 import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 
 import { NormalizedError } from '@/core/api/errorHandler';
+import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 export default function InfoScreen() {
     const insets = useSafeAreaInsets();
@@ -134,6 +135,7 @@ export default function InfoScreen() {
                     style={styles.container}
                     edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
                 >
+                    <FloatingBubblesBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
                     {Platform.OS === 'android' && (

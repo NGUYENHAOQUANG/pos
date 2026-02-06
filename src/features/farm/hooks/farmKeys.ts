@@ -41,6 +41,17 @@ export const farmKeys = {
             [...farmKeys.siphon.all(), 'list', pondId, ...(params ? [params] : [])] as const,
         detail: (id: string) => [...farmKeys.siphon.all(), 'detail', id] as const,
     },
+    feedingRecords: {
+        all: () => [...farmKeys.all, 'feedingRecords'] as const,
+        list: (pondId: string, params?: any) =>
+            [
+                ...farmKeys.feedingRecords.all(),
+                'list',
+                pondId,
+                ...(params ? [params] : []),
+            ] as const,
+        detail: (id: string) => [...farmKeys.feedingRecords.all(), 'detail', id] as const,
+    },
     incident: {
         all: () => [...farmKeys.all, 'incident'] as const,
         byPond: (pondId: string) => [...farmKeys.incident.all(), 'byPond', pondId] as const,
@@ -73,5 +84,13 @@ export const farmKeys = {
         list: (pondId: string, params?: any) =>
             [...farmKeys.waterSupply.all(), 'list', pondId, ...(params ? [params] : [])] as const,
         detail: (id: string) => [...farmKeys.waterSupply.all(), 'detail', id] as const,
+    },
+    environment: {
+        all: () => [...farmKeys.all, 'environment'] as const,
+        metricTypes: () => [...farmKeys.environment.all(), 'metricTypes'] as const,
+        settings: (zoneId: string) => [...farmKeys.environment.all(), 'settings', zoneId] as const,
+    },
+    metric: {
+        list: () => [...farmKeys.all, 'metric'] as const,
     },
 };

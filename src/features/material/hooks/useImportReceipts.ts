@@ -1,8 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { importReceiptApi } from '@/features/material/api/importReceiptApi';
 import { useImportReceiptStore } from '@/features/material/store/importReceiptStore';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { APP_CONFIG } from '@/shared/constants';
 
 import {
     GetImportReceiptsParams,
@@ -10,7 +12,7 @@ import {
     CreateImportReceiptRequest,
     CreateImportReceiptItemCommand,
     UpdateImportReceiptItemCommand,
-    RejectImportReceiptCommand,
+    ImportReceipt,
 } from '@/features/material/types/importReceipt.types';
 
 export const importReceiptKeys = {
@@ -44,6 +46,51 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
         },
         staleTime: STALE_TIME_SHORT,
     });
+};
+
+export const useInfiniteImportReceipts = (
+    params?: Omit<GetImportReceiptsParams, 'Page' | 'PageSize'>
+) => {
+    const storeParams = useImportReceiptStore(state => state.getQueryParams());
+    const key = importReceiptKeys.list({ ...storeParams, ...params });
+
+    const query = useInfiniteQuery({
+        queryKey: [...key, 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                ...storeParams,
+                ...params,
+                Page: pageParam,
+                PageSize: pageSize,
+            };
+
+            const response = await importReceiptApi.getAll(currentParams);
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách phiếu nhập');
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        staleTime: STALE_TIME_SHORT,
+    });
+
+    const receipts = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: ImportReceipt[], page) => {
+            return [...acc, ...(page.items || [])];
+        }, []);
+    }, [query.data]);
+
+    return {
+        ...query,
+        data: receipts,
+        total: query.data?.pages[0]?.totalCount || 0,
+    };
 };
 
 export const useImportReceiptDetail = (id: string) => {
@@ -152,77 +199,6 @@ export const useUpdateImportReceiptItems = () => {
         },
         onError: (error: Error) => {
             const errorMessage = getErrorMessage(error, 'Cập nhật vật tư thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-export const useDeleteImportReceiptItem = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ receiptId, itemId }: { receiptId: string; itemId: string }) =>
-            importReceiptApi.deleteItem(receiptId, itemId),
-        onSuccess: (_, { receiptId }) => {
-            showSuccessToast('Xóa vật tư thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(receiptId) });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(receiptId) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Xóa vật tư thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-// ============ Workflow Mutation Hooks ============
-export const useSubmitImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: string) => importReceiptApi.submit(id),
-        onSuccess: (_, id) => {
-            showSuccessToast('Gửi duyệt phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Gửi duyệt phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-export const useApproveImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: string) => importReceiptApi.approve(id),
-        onSuccess: (_, id) => {
-            showSuccessToast('Duyệt phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Duyệt phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};
-
-export const useRejectImportReceipt = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ id, command }: { id: string; command?: RejectImportReceiptCommand }) =>
-            importReceiptApi.reject(id, command),
-        onSuccess: (_, { id }) => {
-            showSuccessToast('Từ chối phiếu nhập kho thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Từ chối phiếu nhập kho thất bại');
             showErrorToast(errorMessage);
         },
     });

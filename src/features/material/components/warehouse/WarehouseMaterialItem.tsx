@@ -30,147 +30,168 @@ interface WarehouseMaterialItemProps {
     showStatus?: boolean;
 }
 
-export const WarehouseMaterialItem: React.FC<WarehouseMaterialItemProps> = ({
-    item,
-    onEdit,
-    onHistoryPress,
-    onAdjustmentPress,
-    hideRemaining,
-    alwaysExpanded,
-    showStatus,
-}) => {
-    const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
-
-    // Fetch details for this material item using the hook
-    const { data: detail } = useMaterial(item.materialId);
-
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setIsExpanded(!isExpanded);
-    };
+const arePropsEqual = (
+    prevProps: WarehouseMaterialItemProps,
+    nextProps: WarehouseMaterialItemProps
+) => {
+    const { item: prevItem } = prevProps;
+    const { item: nextItem } = nextProps;
 
     return (
-        <View style={styles.container}>
-            {/* Header Row */}
-            <View style={styles.headerRow}>
-                <Text style={styles.name}>{detail?.name || item.materialName}</Text>
-                <MaterialGroup group={detail?.group || MaterialGroupType.FARMING} />
-            </View>
-
-            <View style={styles.separator} />
-
-            {/* Status Field */}
-            {showStatus && (
-                <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Trạng thái: </Text>
-                    <Text
-                        style={[
-                            styles.detailValue,
-                            {
-                                color:
-                                    detail?.isActive !== false
-                                        ? colors.green[600]
-                                        : colors.red[500],
-                            },
-                        ]}
-                    >
-                        {detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
-                    </Text>
-                </View>
-            )}
-
-            {/* Basic Info Row */}
-            <View style={styles.infoRow}>
-                <Text style={styles.infoText}>
-                    <Text style={styles.label}>Đơn vị tính: </Text>
-                    {detail?.unitName || item.unitName}
-                </Text>
-                {!hideRemaining && (
-                    <Text style={styles.infoText}>
-                        <Text style={styles.label}>Còn: </Text>
-                        {item.quantity}
-                    </Text>
-                )}
-            </View>
-
-            {/* Expanded Content */}
-            {isExpanded && (
-                <View>
-                    {!alwaysExpanded && <View style={styles.separatorCenter} />}
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                        <Text style={styles.detailValue}>{detail?.type || '---'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailValue}>
-                            <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                            {detail?.manufacturer || '---'}
-                        </Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailValue}>
-                            <Text style={styles.detailLabel}>Mô tả:</Text> {detail?.usage || '---'}
-                        </Text>
-                    </View>
-
-                    {/* Edit Button */}
-                    {onEdit && (
-                        <ButtonMaterialList
-                            title="Sửa thông tin"
-                            onPress={() => onEdit(item)}
-                            style={styles.editButton}
-                        />
-                    )}
-                </View>
-            )}
-
-            {/* Expand Toggle */}
-            {!alwaysExpanded && (
-                <TouchableOpacity
-                    style={styles.expandToggle}
-                    onPress={toggleExpand}
-                    activeOpacity={0.7}
-                >
-                    <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                    <Ionicons
-                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={16}
-                        color={colors.primary}
-                    />
-                </TouchableOpacity>
-            )}
-
-            {!alwaysExpanded && <View style={styles.separator} />}
-
-            {/* Action Buttons */}
-            {(onHistoryPress || onAdjustmentPress) && (
-                <View style={styles.actionRow}>
-                    {onHistoryPress && (
-                        <ButtonMaterialList
-                            title="Lịch sử nhập kho"
-                            onPress={() => onHistoryPress(item)}
-                            style={[
-                                styles.actionButton,
-                                !onAdjustmentPress ? { flex: 0, minWidth: '48%' } : undefined,
-                            ]}
-                        />
-                    )}
-                    {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
-                    {onAdjustmentPress && (
-                        <ButtonMaterialList
-                            title="Điều chỉnh tồn kho"
-                            onPress={() => onAdjustmentPress(item)}
-                            style={[
-                                styles.actionButton,
-                                !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
-                            ]}
-                        />
-                    )}
-                </View>
-            )}
-        </View>
+        prevItem.id === nextItem.id &&
+        prevItem.quantity === nextItem.quantity &&
+        prevItem.materialId === nextItem.materialId &&
+        prevProps.hideRemaining === nextProps.hideRemaining &&
+        prevProps.alwaysExpanded === nextProps.alwaysExpanded &&
+        prevProps.showStatus === nextProps.showStatus
     );
 };
+
+export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
+    ({
+        item,
+        onEdit,
+        onHistoryPress,
+        onAdjustmentPress,
+        hideRemaining,
+        alwaysExpanded,
+        showStatus,
+    }) => {
+        const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
+
+        // Fetch details for this material item using the hook
+        const { data: detail } = useMaterial(item.materialId);
+
+        const toggleExpand = () => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setIsExpanded(!isExpanded);
+        };
+
+        return (
+            <View style={styles.container}>
+                {/* Header Row */}
+                <View style={styles.headerRow}>
+                    <Text style={styles.name}>{detail?.name || item.materialName}</Text>
+                    <MaterialGroup group={detail?.group || MaterialGroupType.FARMING} />
+                </View>
+
+                <View style={styles.separator} />
+
+                {/* Status Field */}
+                {showStatus && (
+                    <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Trạng thái: </Text>
+                        <Text
+                            style={[
+                                styles.detailValue,
+                                {
+                                    color:
+                                        detail?.isActive !== false
+                                            ? colors.green[600]
+                                            : colors.red[500],
+                                },
+                            ]}
+                        >
+                            {detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
+                        </Text>
+                    </View>
+                )}
+
+                {/* Basic Info Row */}
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoText}>
+                        <Text style={styles.label}>Đơn vị tính: </Text>
+                        {detail?.unitName || item.unitName}
+                    </Text>
+                    {!hideRemaining && (
+                        <Text style={styles.infoText}>
+                            <Text style={styles.label}>Còn: </Text>
+                            {item.quantity}
+                        </Text>
+                    )}
+                </View>
+
+                {/* Expanded Content */}
+                {isExpanded && (
+                    <View>
+                        {!alwaysExpanded && <View style={styles.separatorCenter} />}
+                        <View style={styles.detailRow}>
+                            <Text style={styles.detailLabel}>Loại vật tư: </Text>
+                            <Text style={styles.detailValue}>{detail?.type || '---'}</Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                            <Text style={styles.detailValue}>
+                                <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
+                                {detail?.manufacturer || '---'}
+                            </Text>
+                        </View>
+                        <View style={styles.detailRow}>
+                            <Text style={styles.detailValue}>
+                                <Text style={styles.detailLabel}>Mô tả:</Text>{' '}
+                                {detail?.usage || '---'}
+                            </Text>
+                        </View>
+
+                        {/* Edit Button */}
+                        {onEdit && (
+                            <ButtonMaterialList
+                                title="Sửa thông tin"
+                                onPress={() => onEdit(item)}
+                                style={styles.editButton}
+                            />
+                        )}
+                    </View>
+                )}
+
+                {/* Expand Toggle */}
+                {!alwaysExpanded && (
+                    <TouchableOpacity
+                        style={styles.expandToggle}
+                        onPress={toggleExpand}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
+                        <Ionicons
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={16}
+                            color={colors.primary}
+                        />
+                    </TouchableOpacity>
+                )}
+
+                {!alwaysExpanded && <View style={styles.separator} />}
+
+                {/* Action Buttons */}
+                {(onHistoryPress || onAdjustmentPress) && (
+                    <View style={styles.actionRow}>
+                        {onHistoryPress && (
+                            <ButtonMaterialList
+                                title="Lịch sử nhập kho"
+                                onPress={() => onHistoryPress(item)}
+                                style={[
+                                    styles.actionButton,
+                                    !onAdjustmentPress ? { flex: 0, minWidth: '48%' } : undefined,
+                                ]}
+                            />
+                        )}
+                        {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
+                        {onAdjustmentPress && (
+                            <ButtonMaterialList
+                                title="Điều chỉnh tồn kho"
+                                onPress={() => onAdjustmentPress(item)}
+                                style={[
+                                    styles.actionButton,
+                                    !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
+                                ]}
+                            />
+                        )}
+                    </View>
+                )}
+            </View>
+        );
+    },
+    arePropsEqual
+);
 
 const styles = StyleSheet.create({
     container: {

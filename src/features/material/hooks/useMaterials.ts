@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { materialApi } from '@/features/material/api/materialApi';
 import {
     IMaterial,
@@ -18,39 +18,31 @@ import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useMaterialTypes } from '@/features/material/hooks/useMaterialTypes';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
+import { APP_CONFIG } from '@/shared/constants';
 
-// Constants for staleTime (in milliseconds)
-const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
+const STALE_TIME_SHORT = 2 * 60 * 1000;
 
-// Helper function to map MaterialResponseV2 to IMaterial
 const mapMaterialResponse = (
     item: MaterialResponseV2,
-    groups: IMaterialGroupV2[],
-    types: IMaterialType[]
+    groupMap: Map<any, IMaterialGroupV2>,
+    typeMap: Map<any, IMaterialType>
 ): IMaterial => {
-    // Note: materialGroupId is number but groups now have string IDs (UUID)
-    // We need to match by converting or updating the backend to use consistent IDs
-    const groupName = item.materialGroupId
-        ? groups.find(g => g.id === item.materialGroupId)?.name || ''
-        : '';
-
-    const type = item.materialTypeId
-        ? types.find(t => t.id === item.materialTypeId)?.name || ''
-        : '';
+    const group = item.materialGroupId ? groupMap.get(item.materialGroupId) : undefined;
+    const type = item.materialTypeId ? typeMap.get(item.materialTypeId) : undefined;
 
     return {
         id: item.id,
         name: item.name || '',
-        group: groupName as MaterialGroupType, // Cast string to Enum as API returns matching values
+        group: (group?.name || '') as MaterialGroupType,
         groupId: item.materialGroupId,
-        type: type,
+        type: type?.name || '',
         typeId: item.materialTypeId,
         unit: item.unitId,
         unitName: item.unitName || undefined,
         manufacturer: item.manufacturer || undefined,
         usage: item.description || undefined,
         remaining: 0,
-        isActive: item.isActive ?? true, // Default to true if undefined
+        isActive: item.isActive ?? true,
     };
 };
 
@@ -75,13 +67,16 @@ export const useMaterials = (params?: GetMaterialsParams, options?: { enabled?: 
         enabled: options?.enabled,
     });
 
+    const groupMap = React.useMemo(() => new Map(groups.map(g => [g.id, g])), [groups]);
+    const typeMap = React.useMemo(() => new Map(types.map(t => [t.id, t])), [types]);
+
     // Map data on client side whenever dependencies change
     const mappedData = React.useMemo(() => {
         if (!query.data) return [];
         return query.data.map((item: MaterialResponseV2) =>
-            mapMaterialResponse(item, groups, types)
+            mapMaterialResponse(item, groupMap, typeMap)
         );
-    }, [query.data, groups, types]);
+    }, [query.data, groupMap, typeMap]);
 
     // Combined loading state
     const isLoading = isLoadingGroups || isLoadingTypes || query.isLoading;
@@ -109,7 +104,10 @@ export const useMaterial = (id: string | null) => {
                 // Get fresh groups and types for mapping
                 const currentGroups = groups.length > 0 ? groups : [];
                 const currentTypes = types.length > 0 ? types : [];
-                return mapMaterialResponse(response.data, currentGroups, currentTypes);
+                const groupMap = new Map(currentGroups.map(g => [g.id, g]));
+                const typeMap = new Map(currentTypes.map(t => [t.id, t]));
+
+                return mapMaterialResponse(response.data, groupMap, typeMap);
             }
             throw new Error(response.message || 'Không thể tải thông tin vật tư');
         },
@@ -186,4 +184,61 @@ export const useDeleteMaterial = () => {
             showErrorToast(errorMessage);
         },
     });
+};
+/**
+ * Hook to fetch materials with infinite scroll
+ * Default page size = 20
+ */
+export const useInfiniteMaterials = (
+    params?: Omit<GetMaterialsParams, 'Page' | 'PageSize'>,
+    options?: { enabled?: boolean }
+) => {
+    const { data: groups = [] } = useMaterialGroups();
+    const { data: types = [] } = useMaterialTypes();
+
+    const query = useInfiniteQuery({
+        queryKey: [...materialKeys.list(params || {}), 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                ...params,
+                Page: pageParam,
+                PageSize: pageSize,
+            };
+
+            const response = await materialApi.getAll(currentParams);
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách vật tư');
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        staleTime: STALE_TIME_SHORT,
+        enabled: options?.enabled,
+    });
+
+    const groupMap = React.useMemo(() => new Map(groups.map(g => [g.id, g])), [groups]);
+    const typeMap = React.useMemo(() => new Map(types.map(t => [t.id, t])), [types]);
+
+    // Flatten data
+    const materials = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: IMaterial[], page) => {
+            const items = page.items || [];
+            const mappedItems = items.map((item: MaterialResponseV2) =>
+                mapMaterialResponse(item, groupMap, typeMap)
+            );
+            return [...acc, ...mappedItems];
+        }, []);
+    }, [query.data, groupMap, typeMap]);
+
+    return {
+        ...query,
+        data: materials,
+        total: query.data?.pages[0]?.totalCount || 0,
+    };
 };

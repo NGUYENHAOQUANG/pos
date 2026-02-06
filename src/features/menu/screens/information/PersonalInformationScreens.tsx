@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { useQueries } from '@tanstack/react-query';
+import { useZones } from '@/features/farm/hooks/useZones';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -29,56 +31,39 @@ export const PersonalInformationScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // Extend PondData to include tempZoneId for local processing
-    interface PondWithZone extends PondData {
-        tempZoneId?: string;
-    }
+    // 1. Fetch Zones using React Query
+    const { data: zones = [], isFetching: isFetchingZones, refetch: refetchZones } = useZones();
+    const { setSelectedZoneId } = useFarmStore();
 
-    const { zones, fetchZones, setSelectedZoneId } = useFarmStore();
-    const [allPonds, setAllPonds] = React.useState<PondWithZone[]>([]);
-    const [refreshing, setRefreshing] = React.useState(false);
+    // 2. Fetch Ponds for each Zone using useQueries
+    // We map zones to query objects to fetch ponds in parallel
+    const pondQueries = useQueries({
+        queries: zones.map(zone => ({
+            queryKey: ['ponds', 'byZone', zone.id], // Use a consistent key pattern
+            queryFn: async () => {
+                const res = await pondApi.getPondsByZone(zone.id);
+                // Return ponds with their zoneId attached for easy grouping later
+                return (res.items || []).map(p => ({ ...p, tempZoneId: zone.id }));
+            },
+            staleTime: 1000 * 60 * 5, // 5 minutes
+        })),
+    });
 
-    const fetchPondsFromAllZones = React.useCallback(async (currentZones: Zone[]) => {
-        if (currentZones && currentZones.length > 0) {
-            try {
-                const promises = currentZones.map(async zone => {
-                    try {
-                        const res = await pondApi.getPondsByZone(zone.id);
-                        return (res.items || []).map(p => ({ ...p, tempZoneId: zone.id }));
-                    } catch (_) {
-                        return [];
-                    }
-                });
-
-                const results = await Promise.all(promises);
-                const flattenedPonds = results.reduce<PondWithZone[]>((acc, pondsInZone) => {
-                    return acc.concat(pondsInZone);
-                }, []);
-
-                setAllPonds(flattenedPonds);
-            } catch (_) {
-                // Should rarely reach here if individual promises catch errors
-                setAllPonds([]);
+    // 3. Aggregate all ponds from the queries
+    const allPonds = React.useMemo(() => {
+        return pondQueries.reduce((acc, query) => {
+            if (query.data) {
+                return acc.concat(query.data);
             }
-        } else {
-            setAllPonds([]);
-        }
-    }, []);
+            return acc;
+        }, [] as PondData[]);
+    }, [pondQueries]);
 
-    React.useEffect(() => {
-        // Fetch data initially
-        if (zones.length === 0) fetchZones();
-    }, [zones, fetchZones]);
-
-    React.useEffect(() => {
-        fetchPondsFromAllZones(zones);
-    }, [zones, fetchPondsFromAllZones]);
-
-    // Calculate connected farms from real data
+    // 4. Calculate connected farms (zones with pond counts)
     const connectedFarms = React.useMemo(() => {
         if (zones.length > 0) {
             return zones.map((zone: Zone) => {
-                const pondCount = allPonds.filter(p => p.tempZoneId === zone.id).length;
+                const pondCount = allPonds.filter((p: any) => p.tempZoneId === zone.id).length;
                 return {
                     id: zone.id,
                     name: zone.name,
@@ -88,6 +73,8 @@ export const PersonalInformationScreens: React.FC = () => {
         }
         return [];
     }, [zones, allPonds]);
+
+    const isRefreshing = isFetchingZones || pondQueries.some(q => q.isFetching);
 
     // Calculate totals based on what's being displayed (Mock or Real)
     const totalFarms = connectedFarms.length.toString();
@@ -100,15 +87,10 @@ export const PersonalInformationScreens: React.FC = () => {
     const showFarms = isFarmManager || (!isPondManager && !isFarmManager);
 
     const handleRefresh = async () => {
-        setRefreshing(true);
         try {
-            await refetch();
-            await fetchZones();
-            await fetchPondsFromAllZones(zones);
+            await Promise.all([refetch(), refetchZones(), ...pondQueries.map(q => q.refetch())]);
         } catch (error) {
             console.error('Refresh error:', error);
-        } finally {
-            setRefreshing(false);
         }
     };
 
@@ -133,7 +115,7 @@ export const PersonalInformationScreens: React.FC = () => {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                    <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />
                 }
             >
                 {/* General Info Section */}

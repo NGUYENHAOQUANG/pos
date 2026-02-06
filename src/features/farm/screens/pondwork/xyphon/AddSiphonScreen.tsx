@@ -195,23 +195,9 @@ export const AddSiphonScreen: React.FC = () => {
                         // Update Images
                         if (detail.documentIds && detail.documentIds.length > 0) {
                             try {
-                                // Fetch URLs for document IDs
-                                const results = await Promise.all(
-                                    detail.documentIds.map(async (id: string) => {
-                                        try {
-                                            const url = await documentApi.getUrl(id);
-                                            return { id, url };
-                                        } catch (e) {
-                                            console.error('Error fetching document URL:', e);
-                                            return { id, url: null };
-                                        }
-                                    })
-                                );
-                                const validResults = results.filter(
-                                    (r): r is { id: string; url: string } => !!r.url
-                                );
-                                setImageUris(validResults.map(r => r.url));
-                                setDocumentIds(validResults.map(r => r.id));
+                                const urls = await documentApi.getUrls(detail.documentIds);
+                                setImageUris(urls);
+                                setDocumentIds(detail.documentIds);
                             } catch (e) {
                                 console.error('Error fetching image URLs:', e);
                             }

@@ -1,45 +1,23 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Image,
-    LayoutChangeEvent,
-    Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Input } from '@/shared/components/forms/Input';
-import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
-import { launchCamera, launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
-import {
-    BoundingBoxOverlay,
-    Detection,
-} from '@/features/farm/components/boderbox/BoundingBoxOverlay';
-import { getMockResponse } from '@/features/farm/data/mockAiResponse';
+import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { Loading } from '@/shared/components/ui/Loading';
+import { farmDocumentApi } from '@/features/farm/api/farmDocumentApi';
 
 const CountingShrimpScreen: React.FC = () => {
     const navigation = useNavigation();
     const [result, _setResult] = useState<string>('0');
     const [imageUri, _setImageUri] = useState<string | null>(null);
     const [countTimes, _setCountTimes] = useState(0);
-    const [isPickerVisible, setIsPickerVisible] = useState(false);
-
-    // State for AI Bounding Box
-    const [detections, setDetections] = useState<Detection[]>([]);
-    const [layout, setLayout] = useState<{ width: number; height: number } | null>(null);
-    const [originalSize, setOriginalSize] = useState<{ width: number; height: number } | null>(
-        null
-    );
-    const [isLoading, setIsLoading] = useState(false);
 
     // Calculate count from current image to add later
     const [currentImageCount, setCurrentImageCount] = useState<number>(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSave = () => {
         // Return accumulated count to previous screen
@@ -50,79 +28,34 @@ const CountingShrimpScreen: React.FC = () => {
         });
     };
 
-    const handleImageResponse = (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-            console.log('User cancelled image picker');
-        } else if (response.errorCode) {
-            console.log('ImagePicker Error: ', response.errorMessage);
-        } else if (response.assets && response.assets.length > 0) {
-            const asset = response.assets[0];
-            const uri = asset.uri || null;
-            const fileName = asset.fileName || null;
+    const handleImageSelect = async (uri: string, _base64?: string) => {
+        _setImageUri(uri);
 
-            _setImageUri(uri);
-            _setImageUri(uri);
-
-            // Reset detections when new image is picked
-            setDetections([]);
-            setCurrentImageCount(0);
-
-            if (uri) {
+        if (uri) {
+            try {
                 setIsLoading(true);
-                /*
-                Image.getSize(uri, (width, height) => {
-                    setOriginalSize({ width, height });
-                    // api
-                }, (error) => {
-                     console.error("Lỗi lấy kích thước ảnh:", error);
+                const response = await farmDocumentApi.uploadImage({
+                    uri: uri,
                 });
-                */
 
-                const mockData = getMockResponse(fileName, uri, asset.fileSize || 0);
-                const MOCK_WIDTH = 3072;
-                const MOCK_HEIGHT = 3072;
+                if (response?.success && response?.data?.documents?.[0]?.id) {
+                    const documentId = response.data.documents[0].id;
+                    console.log('Upload ID:', documentId);
 
-                setOriginalSize({ width: MOCK_WIDTH, height: MOCK_HEIGHT });
-
-                // Simulate API delay and auto-process
-                setTimeout(() => {
-                    // Auto draw bounding boxes
-                    setDetections(mockData.detections as Detection[]);
-
-                    // Store the count for this image but don't add to total yet
-                    setCurrentImageCount(mockData.total_count);
-
-                    setIsLoading(false);
-                }, 1500);
+                    Alert.alert('Thành công', `Đã upload ảnh.\nID: ${documentId}`);
+                } else {
+                    console.warn('Không tìm thấy ID trong response:', response);
+                }
+            } catch (error: any) {
+                console.error('Upload thất bại:', error);
+                Alert.alert('Lỗi', 'Không thể upload ảnh');
+            } finally {
+                setIsLoading(false);
             }
         }
-    };
 
-    const handleTakePhoto = () => {
-        launchCamera(
-            {
-                mediaType: 'photo',
-                quality: 0.8,
-                includeBase64: false,
-            },
-            handleImageResponse
-        );
-    };
-
-    const handleChooseFromLibrary = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo',
-                quality: 0.8,
-                includeBase64: false,
-            },
-            handleImageResponse
-        );
-    };
-
-    const onLayout = (event: LayoutChangeEvent) => {
-        const { width, height } = event.nativeEvent.layout;
-        setLayout({ width, height });
+        // Reset count logic if needed
+        setCurrentImageCount(0);
     };
 
     const handleGetCount = () => {
@@ -130,18 +63,7 @@ const CountingShrimpScreen: React.FC = () => {
             Alert.alert('Chưa có ảnh', 'Vui lòng chụp hoặc chọn ảnh trước khi lấy số lượng.');
             return;
         }
-
-        if (detections.length === 0) {
-            Alert.alert('Thông báo', 'Đang xử lý hình ảnh, vui lòng đợi...');
-            return;
-        }
-
-        // Accumulate count
-        const currentTotal = parseInt(result || '0');
-        const newTotal = currentTotal + currentImageCount;
-        _setResult(newTotal.toString());
-        _setCountTimes(prev => prev + 1);
-        setCurrentImageCount(0);
+        Alert.alert('Info', 'Logic đếm tôm sẽ được tích hợp với API sau.');
     };
 
     return (
@@ -171,53 +93,23 @@ const CountingShrimpScreen: React.FC = () => {
                             </View>
 
                             <View style={styles.section}>
-                                <Text style={styles.label}>Hình ảnh</Text>
-
-                                <View style={styles.imageUploadContainer} onLayout={onLayout}>
-                                    {imageUri ? (
-                                        <>
-                                            <Image
-                                                source={{ uri: imageUri }}
-                                                style={styles.uploadedImage}
-                                                resizeMode="contain"
-                                            />
-                                            {layout && originalSize && detections.length > 0 && (
-                                                <BoundingBoxOverlay
-                                                    detections={detections}
-                                                    displayWidth={layout.width}
-                                                    displayHeight={layout.height}
-                                                    originalWidth={originalSize.width}
-                                                    originalHeight={originalSize.height}
-                                                />
-                                            )}
-                                        </>
-                                    ) : (
-                                        <TouchableOpacity
-                                            style={styles.uploadPlaceholder}
-                                            onPress={() => setIsPickerVisible(true)}
-                                        >
-                                            <View style={styles.plusIconContainer}>
-                                                <Text style={styles.plusIconText}>+</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
+                                <ImageUpload
+                                    label="Hình ảnh"
+                                    imageUri={imageUri}
+                                    onImageSelect={handleImageSelect}
+                                    onImageRemove={() => _setImageUri(null)}
+                                    returnBase64={true}
+                                />
                             </View>
 
                             <View style={styles.actionButtonsRow}>
                                 <TouchableOpacity
                                     style={styles.actionButton}
-                                    onPress={() => setIsPickerVisible(true)}
-                                >
-                                    <Text style={styles.actionButtonText}>Chụp lại</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.actionButton}
                                     onPress={() => {
-                                        setDetections([]);
                                         _setResult('0');
                                         _setCountTimes(0);
                                         setCurrentImageCount(0);
+                                        _setImageUri(null);
                                     }}
                                 >
                                     <Text style={styles.actionButtonText}>Đếm lại</Text>
@@ -235,13 +127,6 @@ const CountingShrimpScreen: React.FC = () => {
                             </View>
 
                             <Text style={styles.countTimesText}>Số lần đếm: {countTimes}</Text>
-
-                            <ImagePickerActionSheet
-                                visible={isPickerVisible}
-                                onClose={() => setIsPickerVisible(false)}
-                                onTakePhoto={handleTakePhoto}
-                                onChooseFromLibrary={handleChooseFromLibrary}
-                            />
                         </View>
                     </ScrollView>
                 </View>

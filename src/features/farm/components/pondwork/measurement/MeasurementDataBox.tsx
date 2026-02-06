@@ -99,18 +99,28 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     <FarmInput
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
-                        onChangeText={text => onShrimpSizeChange(formatNumericInput(text))}
+                        onChangeText={text => {
+                            if (text.length <= 6) {
+                                onShrimpSizeChange(formatNumericInput(text));
+                            }
+                        }}
                         keyboardType="numeric"
                         required
+                        maxLength={6}
                     />
                 </View>
                 <View style={styles.inputColumn}>
                     <FarmInput
                         label="Sản lượng còn lại (kg)"
                         value={remainingWeight}
-                        onChangeText={text => onRemainingWeightChange(formatDecimalInput(text))}
+                        onChangeText={text => {
+                            if (text.length <= 12) {
+                                onRemainingWeightChange(formatDecimalInput(text));
+                            }
+                        }}
                         keyboardType="numeric"
                         required
+                        maxLength={9}
                     />
                 </View>
             </View>

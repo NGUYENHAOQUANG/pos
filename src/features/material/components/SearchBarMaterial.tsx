@@ -59,13 +59,6 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         setVoteStatus(currentStatus);
     }, [currentStatus]);
 
-    // Use passed prop or default to empty
-    const [materialGroup, setMaterialGroup] = useState(currentFilterValue);
-
-    useEffect(() => {
-        setMaterialGroup(currentFilterValue);
-    }, [currentFilterValue]);
-
     // Get material types from React Query
     const { data: materialTypes = [], isLoading: isLoadingMaterialTypes } = useMaterialTypes();
     const { data: materialGroups = [], isLoading: isLoadingMaterialGroups } = useMaterialGroups();
@@ -126,6 +119,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         : selectedTab === 'list'
         ? 'Tất cả nhóm vật tư'
         : 'Tất cả loại vật tư';
+
+    const isValueInOptions = React.useMemo(() => {
+        if (!currentFilterValue) return true;
+        return dropdownOptions.some(opt => opt.value === currentFilterValue);
+    }, [currentFilterValue, dropdownOptions]);
 
     return (
         <View style={styles.container}>
@@ -191,9 +189,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     {(selectedTab === 'list' || selectedTab === 'material') && (
                         <View style={styles.dropdownWrapper}>
                             <DropdownMaterial
-                                value={isLoading ? '' : materialGroup}
+                                value={isLoading || !isValueInOptions ? '' : currentFilterValue}
                                 onChange={value => {
-                                    setMaterialGroup(value);
                                     onGroupChange?.(value);
                                 }}
                                 options={dropdownOptions}
