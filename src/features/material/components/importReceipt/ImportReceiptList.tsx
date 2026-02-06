@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { spacing } from '@/styles';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { spacing, colors } from '@/styles';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
 import { ImportReceiptCard } from './ImportReceiptCard';
-import { useImportReceipts } from '@/features/material/hooks';
+import { useInfiniteImportReceipts } from '@/features/material/hooks';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -31,13 +31,20 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
 
     // 3. Fetch Data
     const {
-        data: importReceiptsData,
+        data: receipts = [],
         refetch,
         isRefetching,
         isLoading,
-    } = useImportReceipts(warehouseParams);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteImportReceipts(warehouseParams);
 
-    const receipts = importReceiptsData?.items || [];
+    const handleLoadMore = () => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    };
 
     if (isLoading) {
         return (
@@ -62,8 +69,17 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
                     receipts.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
-                refreshing={isRefetching}
+                refreshing={isRefetching && !isFetchingNextPage}
                 onRefresh={refetch}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                    isFetchingNextPage ? (
+                        <View style={styles.loaderFooter}>
+                            <ActivityIndicator color={colors.primary} />
+                        </View>
+                    ) : null
+                }
                 ListEmptyComponent={
                     <MaterialEmptyState tab="history" onPress={onPressCreate || (() => {})} />
                 }
@@ -83,5 +99,9 @@ const styles = StyleSheet.create({
     },
     emptyContent: {
         flex: 1,
+    },
+    loaderFooter: {
+        paddingVertical: spacing.md,
+        alignItems: 'center',
     },
 });

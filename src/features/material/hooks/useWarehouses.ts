@@ -1,10 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
 import {
     GetWarehousesParams,
     GetWarehouseItemsQueryParams,
+    IWarehouseItem,
 } from '@/features/material/types/warehouse.types';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
+import { APP_CONFIG } from '@/shared/constants';
 
 export const useWarehouses = (params?: GetWarehousesParams) => {
     return useQuery({
@@ -32,4 +35,49 @@ export const useWarehouseItems = (
         },
         enabled: options?.enabled !== undefined ? options.enabled : !!warehouseId,
     });
+};
+
+export const useInfiniteWarehouseItems = (
+    warehouseId: string | undefined,
+    params?: Omit<GetWarehouseItemsQueryParams, 'Page' | 'PageSize'>,
+    options?: { enabled?: boolean }
+) => {
+    const query = useInfiniteQuery({
+        queryKey: ['warehouse-items', warehouseId, params, 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            if (!warehouseId) {
+                throw new Error('Warehouse ID is required');
+            }
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                ...params,
+                Page: pageParam,
+                PageSize: pageSize,
+            };
+            const response = await warehouseApi.getItems(warehouseId, currentParams);
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách vật tư kho');
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        enabled: options?.enabled !== undefined ? options.enabled : !!warehouseId,
+    });
+
+    const items = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: IWarehouseItem[], page) => {
+            return [...acc, ...(page.items || [])];
+        }, []);
+    }, [query.data]);
+
+    return {
+        ...query,
+        data: items,
+        total: query.data?.pages[0]?.totalCount || 0,
+    };
 };
