@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Image,
 } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { borderRadius, colors } from '@/styles';
 import BackgroundMenu from '@/assets/backgrounds/BackgroundMenu.svg';
@@ -114,6 +115,10 @@ export const MenuScreens: React.FC = () => {
                             <LogoutIcon width={16} height={16} />
                             <Text style={styles.logoutText}>Đăng xuất</Text>
                         </TouchableOpacity>
+                        {/* Version */}
+                        <Text style={styles.versionText}>
+                            Phiên bản {DeviceInfo.getVersion()} ({DeviceInfo.getBuildNumber()})
+                        </Text>
 
                         {/* Bottom spacer for tab bar */}
                         <View style={styles.bottomSpacer} />
@@ -250,5 +255,12 @@ const styles = StyleSheet.create({
     },
     bottomSpacer: {
         height: 8,
+    },
+    versionText: {
+        textAlign: 'center',
+        marginTop: 25,
+        fontSize: 13,
+        color: colors.textSecondary,
+        fontWeight: '400',
     },
 });
