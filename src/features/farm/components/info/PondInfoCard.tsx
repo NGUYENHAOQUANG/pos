@@ -81,5 +81,8 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         lineHeight: 22,
         color: colors.text,
+        flex: 1,
+        textAlign: 'right',
+        marginLeft: 80,
     },
 });
