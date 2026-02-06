@@ -37,12 +37,35 @@ export const useExportWarehouseForm = () => {
     // Destructure setters for stable references in callbacks
     const { setIsConfirmModalVisible, setDeleteModalVisible, scrollViewRef } = formState;
 
-    // Handler: Scroll to end when dropdown opens
-    const handleDropdownOpen = useCallback(() => {
-        setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 200);
-    }, [scrollViewRef]);
+    // Handler: Scroll to specific item when dropdown opens
+    const handleDropdownOpen = useCallback(
+        (index: number) => {
+            // Header is taller in Export screen (Zone, Pond, Note inputs) approx 580px
+            let headerHeight = 580;
+
+            if (formState.isEditMode) {
+                headerHeight += 80;
+            }
+
+            const FILE_ROW_HEIGHT = 40;
+            if (formState.files.length > 0) {
+                headerHeight += formState.files.length * FILE_ROW_HEIGHT;
+            }
+
+            // Material card height (same as Import)
+            const ITEM_HEIGHT = 280;
+
+            setTimeout(() => {
+                const scrollY = headerHeight + index * ITEM_HEIGHT;
+
+                scrollViewRef.current?.scrollTo({
+                    y: Math.max(0, scrollY - 50),
+                    animated: true,
+                });
+            }, 100);
+        },
+        [scrollViewRef, formState.isEditMode, formState.files]
+    );
 
     // Modal helpers
     const openConfirmModal = useCallback(
