@@ -82,3 +82,33 @@ export interface OtpResponse {
     details?: any | null;
     timestamp?: string;
 }
+
+export interface UserInfoResponse {
+    userId: string;
+    phoneNumber: string;
+    address: string | null;
+    email: string | null;
+    fullName: string;
+    avatar: string | { id: string; url: string } | null;
+    status: string;
+    roleCode: string;
+    roleName: string;
+    policies: string[];
+    lastLoginAt: string;
+    phoneNumberConfirmed: boolean;
+    emailConfirmed: boolean;
+}
+
+export interface UserProfileData {
+    id: string;
+    name: string;
+    phone: string;
+    email: string;
+    address?: string;
+    role: string;
+    level: string;
+    avatarUri: string | null;
+    status: string;
+    roleCode: string;
+    policies?: string[];
+}

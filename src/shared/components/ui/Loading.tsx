@@ -178,16 +178,14 @@ export const Loading: React.FC<LoadingProps> = ({
             cancelAnimation(overlayOpacity);
             overlayOpacity.value = 1;
         } else {
-            // Strategy: Immediate Fade + Extended Keep Alive
-            // 1. Start fading immediately (1000ms)
-            overlayOpacity.value = withTiming(0, { duration: 1000 });
+            // Strategy: Immediate Fade
+            // 1. Start fading immediately (300ms)
+            overlayOpacity.value = withTiming(0, { duration: 300 });
 
-            // 2. Keep component mounted & active for 2.5s total (1s fade + 1.5s buffer)
-            // This satisfies: "Hoạt động thêm 1-2 giây rồi tắt hẳn"
-            // Ensures animation loop survives any UI thread locks during content mount.
+            // 2. Unmount after fade completes
             const timer = setTimeout(() => {
                 setIsOverlayVisible(false);
-            }, 2500);
+            }, 300);
             return () => clearTimeout(timer);
         }
     }, [isLoading, children, overlayOpacity]);

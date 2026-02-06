@@ -1,79 +1,84 @@
-import { useState, useCallback } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/features/auth/store/authStore';
 import { authApi } from '@/features/auth/api/authApi';
 import { documentApi } from '@/features/material/api/documentApi';
-import { useFocusEffect } from '@react-navigation/native';
+import { UserProfileData } from '@/features/auth/types/auth.types';
 
-export interface UserProfileData {
-    name: string;
-    phone: string;
-    email: string;
-    address?: string;
-    role: string;
-    level: string;
-    avatarUri: string | null;
-}
+export type { UserProfileData };
 
 export const useUserProfile = () => {
-    const [userData, setUserData] = useState<UserProfileData>({
-        name: '',
-        phone: '',
-        email: '',
-        address: '',
-        role: 'Quản lý',
-        level: 'Quản lý trại',
-        avatarUri: null,
-    });
-    const [isLoading, setIsLoading] = useState(false);
+    const userProfileStore = useAuthStore(state => state.userProfile);
+    const updateUserProfile = useAuthStore(state => state.updateUserProfile);
 
-    const fetchUserProfile = useCallback(async () => {
-        setIsLoading(true);
-        try {
+    // Fetch using React Query
+    const {
+        data: fetchedProfile,
+        isLoading,
+        refetch,
+    } = useQuery({
+        queryKey: ['userProfile'],
+        queryFn: async () => {
             const response = await authApi.getMe();
-            if (response.success || response.result) {
-                const data = response.data as any; // Cast to access potential extra fields not in JwtResponse
+            if (!response.success && !response.result) {
+                throw new Error(response.message || 'Failed to fetch profile');
+            }
+            const data = response.data as any;
 
-                let avatarUrl = null;
-                const rawAvatar = data.avatar || data.avatarUrl;
+            let avatarUrl = null;
+            const rawAvatar = data.avatar || data.avatarUrl;
 
-                if (rawAvatar) {
-                    if (typeof rawAvatar === 'string') {
-                        avatarUrl = rawAvatar;
-                    } else if (typeof rawAvatar === 'object' && rawAvatar.id) {
-                        try {
-                            // If it's a document object, fetch the public URL using the ID
-                            avatarUrl = await documentApi.getUrl(rawAvatar.id);
-                        } catch (e) {
-                            console.error('Failed to get avatar URL', e);
-                        }
+            if (rawAvatar) {
+                if (typeof rawAvatar === 'string') {
+                    avatarUrl = rawAvatar;
+                } else if (typeof rawAvatar === 'object' && rawAvatar.id) {
+                    try {
+                        avatarUrl = await documentApi.getUrl(rawAvatar.id);
+                    } catch (e) {
+                        console.error('Failed to get avatar URL', e);
                     }
                 }
-
-                setUserData({
-                    name: data.fullName || '',
-                    phone: data.phoneNumber || '',
-                    email: data.email || '',
-                    address: data.address || '',
-                    role: data.roleName || data.roleCode || 'Quản lý',
-                    level: 'Quản lý trại',
-                    avatarUri: avatarUrl,
-                });
             }
-        } catch (error) {
-            console.error('Failed to fetch profile:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchUserProfile();
-        }, [fetchUserProfile])
-    );
+            const profile: UserProfileData = {
+                id: data.userId || '',
+                name: data.fullName || '',
+                phone: data.phoneNumber || '',
+                email: data.email || '',
+                address: data.address || '',
+                role: data.roleName || data.roleCode || 'Quản lý',
+                level: 'Quản lý trại',
+                avatarUri: avatarUrl,
+                status: data.status || '',
+                roleCode: data.roleCode || '',
+                policies: data.policies || [],
+            };
+            return profile;
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+
+    // Sync to store
+    useEffect(() => {
+        if (fetchedProfile) {
+            updateUserProfile(fetchedProfile);
+        }
+    }, [fetchedProfile, updateUserProfile]);
 
     return {
-        userData,
+        userData: userProfileStore || {
+            id: '',
+            name: '',
+            phone: '',
+            email: '',
+            address: '',
+            role: 'Quản lý',
+            level: 'Quản lý trại',
+            avatarUri: null,
+            status: '',
+            roleCode: '',
+        },
         isLoading,
-        refetch: fetchUserProfile,
+        refetch,
     };
 };
