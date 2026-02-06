@@ -14,6 +14,7 @@ import {
     LoginCredentials,
     RegisterData,
     CompleteProfilePayload,
+    UserProfileData,
 } from '@/features/auth/types/auth.types';
 
 interface AuthState {
@@ -40,7 +41,11 @@ interface AuthState {
     hasLaunched: boolean;
     setHasLaunched: (value: boolean) => void;
     // New action
+    // New action
     completeProfile: (data: CompleteProfilePayload) => Promise<void>;
+    // Profile Management
+    userProfile: UserProfileData | null;
+    updateUserProfile: (data: Partial<UserProfileData>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -54,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
             isSessionExpired: false,
             loading: false,
             hasLaunched: false,
+            userProfile: null,
 
             login: async (credentials: LoginCredentials) => {
                 set({ loading: true });
@@ -222,6 +228,7 @@ export const useAuthStore = create<AuthState>()(
                                   }
                                 : null,
                         }));
+                        // Also refresh profile if needed - managed by React Query now
                     } else {
                         throw new Error(response.message || 'Complete profile failed');
                     }
@@ -229,6 +236,14 @@ export const useAuthStore = create<AuthState>()(
                     set({ loading: false });
                     throw error;
                 }
+            },
+
+            updateUserProfile: (data: Partial<UserProfileData>) => {
+                set(state => ({
+                    userProfile: state.userProfile
+                        ? { ...state.userProfile, ...data }
+                        : (data as UserProfileData),
+                }));
             },
         }),
         {
