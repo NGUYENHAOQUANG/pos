@@ -106,4 +106,47 @@ export const documentApi = {
             return false;
         }
     },
+
+    uploadBase64: async (payload: {
+        base64Content: string;
+        fileName: string;
+        contentType: string;
+        storageType?: string;
+    }): Promise<UploadDocumentsResponse> => {
+        console.log('DEBUG: Calling endpoint:', API_ENDPOINTS.DOCUMENT.UPLOAD_BASE64);
+        const { data } = await apiClient.post<{
+            success: boolean;
+            data: UploadDocumentsResult;
+            message?: string;
+        }>(API_ENDPOINTS.DOCUMENT.UPLOAD_BASE64, {
+            ...payload,
+            storageType: payload.storageType || 'Unspecified',
+        });
+
+        console.log('DEBUG: uploadBase64 raw response:', JSON.stringify(data, null, 2));
+
+        if (data && 'data' in data && (data as any).data) {
+            const result = (data as any).data;
+
+            // Case 1: Response has 'document' property (as seen in logs)
+            if (result.document && result.document.id) {
+                return [result.document];
+            }
+
+            // Case 2: Response is directly the document object
+            if (result.id && result.fileName) {
+                return [result as DocumentResponse];
+            }
+
+            // Case 3: Response has 'documents' array (legacy/standard)
+            if (result.documents && Array.isArray(result.documents)) {
+                return result.documents;
+            }
+        }
+        if (Array.isArray(data)) {
+            return data;
+        }
+
+        return [];
+    },
 };

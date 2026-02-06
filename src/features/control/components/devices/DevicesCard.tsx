@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { DeviceCard } from './Devices';
-import { EControlMode, DeviceData } from '../../types/control.types';
-import { ButtonControlSwitch } from './ButtonControlSwitch';
+import { DeviceCard } from '@/features/control/components/devices/Devices';
+import { DeviceData } from '@/features/control/types/control.types';
+import { ButtonControlSwitch } from '@/features/control/components/devices/ButtonControlSwitch';
 import { spacing, colors } from '@/styles';
 
 // Mock Data Removed
@@ -31,58 +31,22 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
     onSwitchToSchedule,
     onSwitchToManual,
 }) => {
-    // Determine initial data
-    const initialData = devices || [];
-    const [localDevices, setLocalDevices] = useState<DeviceData[]>(initialData);
-
-    // Update local state if props change (optional, but good for robustness)
-    useEffect(() => {
-        if (devices) {
-            setLocalDevices(devices);
-        }
-    }, [devices]);
-
-    const handleToggle = (id: string, val: boolean) => {
-        // Update local state
-        setLocalDevices(prev => prev.map(d => (d.id === id ? { ...d, isOn: val } : d)));
-        // Call parent handler if provided
-        onToggle?.(id, val);
-    };
-
-    // Switch all devices to Schedule mode
-    const handleSwitchAllToSchedule = () => {
-        setLocalDevices(prev =>
-            prev.map(d =>
-                d.mode === EControlMode.LOCAL ? d : { ...d, mode: EControlMode.SCHEDULE }
-            )
-        );
-        onSwitchToSchedule?.();
-    };
-
-    // Switch all devices to Manual mode
-    const handleSwitchAllToManual = () => {
-        setLocalDevices(prev =>
-            prev.map(d => (d.mode === EControlMode.LOCAL ? d : { ...d, mode: EControlMode.MANUAL }))
-        );
-        onSwitchToManual?.();
-    };
-
     return (
         <View style={[styles.container, style]}>
             <View style={styles.header}>
                 <Text style={styles.title}>{title}</Text>
                 <ButtonControlSwitch
-                    onSwitchToSchedule={handleSwitchAllToSchedule}
-                    onSwitchToManual={handleSwitchAllToManual}
+                    onSwitchToSchedule={onSwitchToSchedule}
+                    onSwitchToManual={onSwitchToManual}
                 />
             </View>
 
             <View style={layout === 'grid' ? styles.gridContainer : styles.listContainer}>
-                {localDevices.map(device => (
+                {(devices || []).map(device => (
                     <DeviceCard
                         key={device.id}
                         data={device}
-                        onToggle={handleToggle}
+                        onToggle={(id, val) => onToggle?.(id, val)}
                         onSettingsPress={onSettingsPress}
                         onModePress={onModePress}
                         style={layout === 'grid' ? styles.gridItem : undefined}

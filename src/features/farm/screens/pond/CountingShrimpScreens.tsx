@@ -7,7 +7,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Input } from '@/shared/components/forms/Input';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { Loading } from '@/shared/components/ui/Loading';
-import { farmDocumentApi } from '@/features/farm/api/farmDocumentApi';
+import { documentApi } from '@/features/material/api/documentApi';
 
 const CountingShrimpScreen: React.FC = () => {
     const navigation = useNavigation();
@@ -28,18 +28,31 @@ const CountingShrimpScreen: React.FC = () => {
         });
     };
 
-    const handleImageSelect = async (uri: string, _base64?: string) => {
+    const handleImageSelect = async (uri: string, base64?: string) => {
         _setImageUri(uri);
 
-        if (uri) {
+        if (uri && base64) {
             try {
                 setIsLoading(true);
-                const response = await farmDocumentApi.uploadImage({
-                    uri: uri,
+                const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+                const contentType = 'image/jpeg';
+
+                console.log('Request Payload Info:', {
+                    fileName,
+                    contentType,
+                    storageType: 'Azure',
+                    base64Length: base64.length,
                 });
 
-                if (response?.success && response?.data?.documents?.[0]?.id) {
-                    const documentId = response.data.documents[0].id;
+                const response = await documentApi.uploadBase64({
+                    base64Content: base64,
+                    fileName: fileName,
+                    contentType: contentType,
+                    storageType: 'Azure',
+                });
+
+                if (response && response.length > 0) {
+                    const documentId = response[0].id;
                     console.log('Upload ID:', documentId);
 
                     Alert.alert('Thành công', `Đã upload ảnh.\nID: ${documentId}`);
