@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { MaterialMasterItem } from '../../components/inventory/MaterialMasterItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { spacing } from '@/styles';
-import { useMaterials } from '@/features/material/hooks';
+import { spacing, colors } from '@/styles';
+import { useInfiniteMaterials } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
 import { useNetInfo } from '@react-native-community/netinfo';
 
@@ -21,22 +20,34 @@ export const MaterialMasterListTab: React.FC<{
         () => ({
             SearchText: searchText || undefined,
             MaterialTypeId: filterType || undefined,
-            Page: 1,
-            PageSize: 100,
         }),
         [searchText, filterType]
     );
 
-    // 3. Fetch Data
+    // 3. Fetch Data with Infinite Scroll
     const {
         data: masterMaterials = [],
         isLoading: isLoadingMasterMaterials,
         refetch: refetchMasterMaterials,
         isRefetching: isRefetchingMasterMaterials,
-    } = useMaterials(masterListParams);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteMaterials(masterListParams);
 
     const { isConnected } = useNetInfo();
-    const showSkeleton = isLoadingMasterMaterials || (!!isConnected && isRefetchingMasterMaterials);
+    const showSkeleton =
+        isLoadingMasterMaterials ||
+        (!!isConnected &&
+            isRefetchingMasterMaterials &&
+            !isFetchingNextPage &&
+            masterMaterials.length === 0);
+
+    const handleLoadMore = () => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    };
 
     if (showSkeleton) {
         return (
@@ -70,8 +81,17 @@ export const MaterialMasterListTab: React.FC<{
                     masterMaterials.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
-                refreshing={isRefetchingMasterMaterials}
+                refreshing={isRefetchingMasterMaterials && !isFetchingNextPage}
                 onRefresh={refetchMasterMaterials}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                    isFetchingNextPage ? (
+                        <View style={styles.loaderFooter}>
+                            <ActivityIndicator color={colors.primary} />
+                        </View>
+                    ) : null
+                }
                 ListEmptyComponent={<MaterialEmptyState tab="material" onPress={onPressCreate} />}
             />
         </View>
@@ -88,5 +108,9 @@ const styles = StyleSheet.create({
     listContent: {
         paddingBottom: spacing.xl,
         flexGrow: 1,
+    },
+    loaderFooter: {
+        padding: spacing.md,
+        alignItems: 'center',
     },
 });

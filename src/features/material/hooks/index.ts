@@ -7,6 +7,7 @@ export {
 export { useUnits } from '@/features/material/hooks/useUnits';
 export {
     useMaterials,
+    useInfiniteMaterials,
     useMaterial,
     useCreateMaterial,
     useUpdateMaterial,
@@ -17,5 +18,8 @@ export {
     useAddExportWarehouseReceipt,
 } from '@/features/material/hooks/useExportWarehouse';
 export { useInventoryTickets } from '@/features/material/hooks/inventory/useInventory';
-export { useImportReceipts } from '@/features/material/hooks/useImportReceipts';
+export {
+    useImportReceipts,
+    useInfiniteImportReceipts,
+} from '@/features/material/hooks/useImportReceipts';
 export { materialKeys } from '@/features/material/hooks/materialKeys';

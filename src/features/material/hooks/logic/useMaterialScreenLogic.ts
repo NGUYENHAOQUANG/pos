@@ -30,7 +30,6 @@ interface UseMaterialScreenLogicReturn {
     handleFilterPress: () => void;
     handleTabSelect: (tab: TabType) => void;
     handleHistoryPress: (item: IWarehouseItem) => void;
-    handleAdjustmentPress: (item: IWarehouseItem) => void;
     actions: {
         createImport: () => void;
         createExport: () => void;
@@ -89,15 +88,6 @@ export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
     }, [setTabBarVisible]);
 
     // 5. Actions (Navigation)
-    const handleAdjustmentPress = useCallback(
-        (item: IWarehouseItem) => {
-            navigation.navigate('AddInventory', {
-                initialMaterialName: item.materialName,
-            });
-        },
-        [navigation]
-    );
-
     const actions = useMemo(
         () => ({
             createImport: () => navigation.navigate('AddWarehouse', {}),
@@ -148,7 +138,6 @@ export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
         // Tab & List Interaction Handlers
         handleTabSelect,
         handleHistoryPress,
-        handleAdjustmentPress,
 
         // Actions
         actions,

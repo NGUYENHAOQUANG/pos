@@ -31,7 +31,21 @@ interface ImportReceiptCardProps {
     item: ImportReceipt;
 }
 
-export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) => {
+const arePropsEqual = (prevProps: ImportReceiptCardProps, nextProps: ImportReceiptCardProps) => {
+    const { item: prevItem } = prevProps;
+    const { item: nextItem } = nextProps;
+
+    return (
+        prevItem.id === nextItem.id &&
+        prevItem.status === nextItem.status &&
+        prevItem.totalAmount === nextItem.totalAmount &&
+        prevItem.totalItems === nextItem.totalItems &&
+        prevItem.editedAt === nextItem.editedAt &&
+        prevItem.supplierName === nextItem.supplierName
+    );
+};
+
+export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -152,7 +166,7 @@ export const ImportReceiptCard: React.FC<ImportReceiptCardProps> = ({ item }) =>
             </TouchableOpacity>
         </View>
     );
-};
+}, arePropsEqual);
 
 const styles = StyleSheet.create({
     card: {

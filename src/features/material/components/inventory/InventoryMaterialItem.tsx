@@ -20,97 +20,107 @@ interface InventoryMaterialItemProps {
     handleToggleDropdown: (id: string, index: number) => void;
 }
 
-export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = ({
-    item,
-    index,
-    availableOptions,
-    isDropdownOpen,
-    onUpdateItem,
-    onRemoveItem,
-    handleToggleDropdown,
-}) => {
-    const diff = item.newStock ? Number(item.newStock) - item.oldStock : -item.oldStock;
+export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React.memo(
+    ({
+        item,
+        index,
+        availableOptions,
+        isDropdownOpen,
+        onUpdateItem,
+        onRemoveItem,
+        handleToggleDropdown,
+    }) => {
+        const diff = item.newStock ? Number(item.newStock) - item.oldStock : -item.oldStock;
 
-    return (
-        <View
-            style={[
-                styles.materialWrapper,
-                isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
-            ]}
-        >
-            <View style={styles.materialCard}>
-                <View style={styles.materialHeader}>
-                    <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
-                    <TouchableOpacity
-                        onPress={() => onRemoveItem(item.id)}
-                        style={styles.removeButton}
-                    >
-                        <Ionicons name="close-circle-outline" size={24} color={colors.red[500]} />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.content}>
-                    {/* Material Selection */}
-                    <View style={[styles.inputGroup, styles.zIndexMedium]}>
-                        <DropdownMaterial
-                            label="Tên vật tư"
-                            required
-                            value={item.materialId}
-                            options={availableOptions}
-                            onChange={val => onUpdateItem(item.id, 'materialId', val)}
-                            placeholder="Chọn vật tư"
-                            showAllOption={false}
-                            isOpen={isDropdownOpen}
-                            onToggle={() => handleToggleDropdown(item.id, index)}
-                            inline={true}
-                        />
+        return (
+            <View
+                style={[
+                    styles.materialWrapper,
+                    isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
+                ]}
+            >
+                <View style={styles.materialCard}>
+                    <View style={styles.materialHeader}>
+                        <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
+                        <TouchableOpacity
+                            onPress={() => onRemoveItem(item.id)}
+                            style={styles.removeButton}
+                        >
+                            <Ionicons
+                                name="close-circle-outline"
+                                size={24}
+                                color={colors.red[500]}
+                            />
+                        </TouchableOpacity>
                     </View>
 
-                    {/* Stock Info */}
-                    <View style={[styles.row, styles.zIndexNormal]}>
-                        <View style={styles.col}>
-                            <Text style={styles.label}>Tồn kho cũ:</Text>
-                            <Text style={styles.oldStockValue}>
-                                {item.oldStock} {item.unit || ''}
-                            </Text>
-                        </View>
-
-                        <View style={styles.dividerVertical} />
-
-                        <View style={styles.col}>
-                            <Input
-                                label="Tồn kho mới"
+                    <View style={styles.content}>
+                        {/* Material Selection */}
+                        <View style={[styles.inputGroup, styles.zIndexMedium]}>
+                            <DropdownMaterial
+                                label="Tên vật tư"
                                 required
-                                value={item.newStock}
-                                onChangeText={val => {
-                                    const normalizedText = val.replace(/,/g, '.');
-                                    if (numericStringSchema.safeParse(normalizedText).success) {
-                                        onUpdateItem(item.id, 'newStock', normalizedText);
-                                    }
-                                }}
-                                keyboardType="numeric"
-                                containerStyle={styles.noMarginBottom}
+                                value={item.materialId}
+                                options={availableOptions}
+                                onChange={val => onUpdateItem(item.id, 'materialId', val)}
+                                placeholder="Chọn vật tư"
+                                showAllOption={false}
+                                isOpen={isDropdownOpen}
+                                onToggle={() => handleToggleDropdown(item.id, index)}
+                                inline={true}
+                                displayValue={item.materialName}
                             />
                         </View>
-                    </View>
 
-                    {/* Difference Footer */}
-                    <View style={styles.footer}>
-                        <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
-                        <Text
-                            style={[
-                                styles.footerValue,
-                                diff < 0 ? styles.footerValueNegative : styles.footerValuePositive,
-                            ]}
-                        >
-                            {diff > 0 ? `+${diff}` : diff} {item.unit || ''}
-                        </Text>
+                        {/* Stock Info */}
+                        <View style={[styles.row, styles.zIndexNormal]}>
+                            <View style={styles.col}>
+                                <Text style={styles.label}>Tồn kho cũ:</Text>
+                                <Text style={styles.oldStockValue}>
+                                    {item.oldStock} {item.unit || ''}
+                                </Text>
+                            </View>
+
+                            <View style={styles.dividerVertical} />
+
+                            <View style={styles.col}>
+                                <Input
+                                    label="Tồn kho mới"
+                                    required
+                                    value={item.newStock}
+                                    onChangeText={val => {
+                                        const normalizedText = val.replace(/,/g, '.');
+                                        if (numericStringSchema.safeParse(normalizedText).success) {
+                                            onUpdateItem(item.id, 'newStock', normalizedText);
+                                        }
+                                    }}
+                                    keyboardType="numeric"
+                                    containerStyle={styles.noMarginBottom}
+                                    suffix={item.unit}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Difference Footer */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerLabel}>Tổng chênh lệch:</Text>
+                            <Text
+                                style={[
+                                    styles.footerValue,
+                                    diff < 0
+                                        ? styles.footerValueNegative
+                                        : styles.footerValuePositive,
+                                ]}
+                            >
+                                {diff > 0 ? `+${diff}` : diff} {item.unit || ''}
+                            </Text>
+                        </View>
                     </View>
                 </View>
             </View>
-        </View>
-    );
-};
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     materialWrapper: {

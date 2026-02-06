@@ -35,6 +35,7 @@ interface DropdownMaterialProps {
     onToggle: () => void;
     useAutoScroll?: boolean;
     disabled?: boolean;
+    displayValue?: string;
 }
 
 export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
@@ -58,6 +59,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     inline = false,
     useAutoScroll = false,
     disabled = false,
+    displayValue,
 }) => {
     // Helper to get normalized options
     const getNormalizedOptions = (): DropdownOption[] => {
@@ -216,7 +218,8 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     );
 
     // Get display label for current value
-    const currentLabel = allOptions.find(opt => opt.value === value)?.label || value?.toString();
+    const currentLabel =
+        displayValue || allOptions.find(opt => opt.value === value)?.label || value?.toString();
 
     const renderButtonContent = () => {
         if (useAutoScroll) {
