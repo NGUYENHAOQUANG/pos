@@ -211,5 +211,6 @@ export const API_ENDPOINTS = {
         UPLOAD: '/document',
         GET_URL: (id: string) => `/document/get-url/${id}`,
         DELETE: (id: string) => `/document/${id}`,
+        UPLOAD_BASE64: '/document/upload-base64',
     },
 } as const;

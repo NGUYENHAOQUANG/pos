@@ -27,6 +27,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useControl } from '../../store/controlStore';
+import { useDeviceToggle } from '../../hooks/useDeviceToggle';
 import Toast from 'react-native-toast-message';
 
 // Removed Mocks
@@ -41,7 +42,8 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
     const { pondName = 'Ao 1' } = route.params || {};
 
-    const { ponds, toggleDevice, updateDeviceMode } = useControl();
+    const { ponds, updateDeviceMode } = useControl();
+    const { toggleDevice } = useDeviceToggle();
     const currentPond = ponds.find(p => p.name === pondName);
     const allDevices = currentPond?.devices || [];
 
@@ -242,6 +244,55 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
             </View>
         );
     };
+
+    return (
+        <View style={styles.container}>
+            <HeaderDevices
+                title={`Thiết Bị - ${pondName}`}
+                onBackPress={() => navigation.goBack()}
+                rightComponent={renderRightHeader()}
+            />
+
+            <ScrollView contentContainerStyle={styles.content}>
+                {/* History Buttons Section */}
+                <View style={styles.historySection}>
+                    <ButtonHistory
+                        onSchedulePress={() => navigation.navigate('Schedule', { pondName })}
+                        onStatisticPress={() => navigation.navigate('History', { pondName })}
+                        style={styles.historyButton}
+                    />
+                </View>
+
+                {/* Feeder Section */}
+                <DevicesCard
+                    title="Máy cho ăn"
+                    devices={feeders}
+                    layout="grid"
+                    onSettingsPress={handleSettingsPress}
+                    onSwitchToSchedule={() => handleSwitchAll(feeders, EControlMode.SCHEDULE)}
+                    onSwitchToManual={() => handleSwitchAll(feeders, EControlMode.MANUAL)}
+                    onModePress={handleModeToggle}
+                    onToggle={handleToggleDevice}
+                    style={styles.extendedCard}
+                />
+
+                {/* Other Devices Section */}
+                <DevicesCard
+                    title="Thiết bị khác"
+                    devices={otherDevices}
+                    layout="grid"
+                    onSettingsPress={handleSettingsPress}
+                    onSwitchToSchedule={() => handleSwitchAll(otherDevices, EControlMode.SCHEDULE)}
+                    onSwitchToManual={() => handleSwitchAll(otherDevices, EControlMode.MANUAL)}
+                    onModePress={handleModeToggle}
+                    onToggle={handleToggleDevice}
+                    style={styles.extendedCard}
+                />
+            </ScrollView>
+
+            {renderPopupOverlay()}
+        </View>
+    );
 
     return (
         <View style={styles.container}>

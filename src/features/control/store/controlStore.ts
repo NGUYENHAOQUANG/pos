@@ -4,7 +4,6 @@ import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pond, EControlMode, DeviceData, PondDeviceStats } from '../types/control.types';
 import { PONDS_LIST, DEVICES_LIST } from '@/features/control/data/devicesData';
-import { deviceApi } from '@/features/control/api/deviceApi';
 
 // Helper to calculate stats
 const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
@@ -61,7 +60,7 @@ const createInitialPonds = (): Pond[] => {
                 id: d.id,
                 name: d.name,
                 mode: d.mode,
-                isOn: d.id === 'IOT-DEV-05' ? false : isActive,
+                isOn: d.pondId === 'IOT_POND' ? false : isActive,
                 errorMessage: isMaintenance ? 'Đang bảo trì' : undefined,
                 type: d.type,
                 farmId: d.farmId,
@@ -83,7 +82,7 @@ interface ControlStore {
     ponds: Pond[];
     addPond: () => void;
     connectDeviceToPond: (pondName: string, code?: string) => void;
-    toggleDevice: (pondId: string, deviceId: string, isOn: boolean) => void;
+    updateDeviceState: (pondId: string, deviceId: string, isOn: boolean) => void;
     updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => void;
     updateDeviceSettings: (pondId: string, deviceId: string, settings: Partial<DeviceData>) => void;
 }
@@ -149,7 +148,7 @@ export const useControlStore = create<ControlStore>()(
                 });
             },
 
-            toggleDevice: (pondId: string, deviceId: string, isOn: boolean) => {
+            updateDeviceState: (pondId: string, deviceId: string, isOn: boolean) => {
                 set(state => {
                     const pond = state.ponds.find(p => p.id === pondId);
                     if (!pond) return;
@@ -160,21 +159,6 @@ export const useControlStore = create<ControlStore>()(
                         pond.deviceStats = calculatePondStats(pond.devices);
                     }
                 });
-                if (pondId === 'IOT_POND' && deviceId === 'IOT-DEV-05') {
-                    const payload = {
-                        deviceId: 'test-devices-1',
-                        deviceName: 'FAN_1',
-                        internalDeviceId: 11,
-                        value: isOn ? 1 : 0,
-                        message: 'message',
-                    };
-
-                    // Fire and forget - Optimistic update already happened
-                    deviceApi.toggleDevice(payload).catch((error: unknown) => {
-                        console.error('Failed to toggle IOT device:', error);
-                        // Future: Revert state if needed
-                    });
-                }
             },
 
             updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => {
