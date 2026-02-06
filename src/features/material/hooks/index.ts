@@ -7,6 +7,7 @@ export {
 export { useUnits } from '@/features/material/hooks/useUnits';
 export {
     useMaterials,
+    useInfiniteMaterials,
     useMaterial,
     useCreateMaterial,
     useUpdateMaterial,
