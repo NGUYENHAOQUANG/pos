@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
@@ -16,7 +16,7 @@ import { showErrorToast } from '@/features/material/utils/validationToast';
 
 export const useAddInventoryLogic = () => {
     const navigation = useNavigation();
-    const route = useRoute<RouteProp<MaterialStackParamList, 'AddInventory'>>();
+    const route = useRoute<RouteProp<AppStackParamList, 'AddInventory'>>();
     const params = route.params;
     const inventoryId = params?.inventoryId;
     const isEditMode = !!inventoryId;
@@ -91,20 +91,37 @@ export const useAddInventoryLogic = () => {
             setItems(mappedItems);
             hasInitializedItems.current = true;
         } else if (!isEditMode && !hasInitializedItems.current && items.length === 0) {
-            setItems([
-                {
-                    id: Date.now().toString(),
-                    materialId: '',
-                    materialName: '',
-                    oldStock: 0,
-                    newStock: '',
-                    difference: 0,
-                    unit: '',
-                },
-            ]);
+            // Check for initialMaterial passed from navigation
+            if (params?.initialMaterial) {
+                const initMat = params.initialMaterial;
+                setItems([
+                    {
+                        id: Date.now().toString(),
+                        materialId: initMat.materialId,
+                        materialName: initMat.materialName,
+                        oldStock: initMat.quantity || 0,
+                        newStock: '',
+                        difference: 0,
+                        unit: initMat.unitName || '',
+                        materialCode: initMat.materialCode,
+                    },
+                ]);
+            } else {
+                setItems([
+                    {
+                        id: Date.now().toString(),
+                        materialId: '',
+                        materialName: '',
+                        oldStock: 0,
+                        newStock: '',
+                        difference: 0,
+                        unit: '',
+                    },
+                ]);
+            }
             hasInitializedItems.current = true;
         }
-    }, [inventoryItems, isEditMode, items.length]);
+    }, [inventoryItems, isEditMode, items.length, params?.initialMaterial]);
 
     // Handlers
     const handleDateConfirm = (selectedDate: Date) => {
@@ -128,7 +145,7 @@ export const useAddInventoryLogic = () => {
 
     const handleCancelDelete = () => setDeleteModalVisible(false);
 
-    const handleAddItem = () => {
+    const handleAddItem = useCallback(() => {
         setItems(prev => [
             ...prev,
             {
@@ -141,39 +158,43 @@ export const useAddInventoryLogic = () => {
                 unit: '',
             },
         ]);
-    };
+    }, []);
 
-    const handleRemoveItem = (id: string) => {
+    const handleRemoveItem = useCallback((id: string) => {
         setItems(prev => prev.filter(item => item.id !== id));
-    };
+    }, []);
 
-    const handleUpdateItem = (id: string, field: string, value: any) => {
-        setItems(prev =>
-            prev.map(item => {
-                if (item.id !== id) return item;
+    const handleUpdateItem = useCallback(
+        (id: string, field: string, value: any) => {
+            setItems(prev =>
+                prev.map(item => {
+                    if (item.id !== id) return item;
 
-                const updatedItem = { ...item, [field]: value };
+                    const updatedItem = { ...item, [field]: value };
 
-                if (field === 'materialId') {
-                    const selectedMaterial = warehouseItems.find(w => w.materialId === value);
-                    if (selectedMaterial) {
-                        updatedItem.materialName = selectedMaterial.materialName || '';
-                        updatedItem.oldStock = selectedMaterial.quantity || 0;
-                        updatedItem.unit = selectedMaterial.unitName || '';
-                        updatedItem.materialCode = selectedMaterial.materialCode || '';
+                    if (field === 'materialId') {
+                        const selectedMaterial = warehouseItems.find(w => w.materialId === value);
+                        if (selectedMaterial) {
+                            updatedItem.materialName = selectedMaterial.materialName || '';
+                            updatedItem.oldStock = selectedMaterial.quantity || 0;
+                            updatedItem.unit = selectedMaterial.unitName || '';
+                            updatedItem.materialCode = selectedMaterial.materialCode || '';
 
-                        const currentNewStock = parseFloat(updatedItem.newStock) || 0;
-                        updatedItem.difference = currentNewStock - (selectedMaterial.quantity || 0);
+                            const currentNewStock = parseFloat(updatedItem.newStock) || 0;
+                            updatedItem.difference =
+                                currentNewStock - (selectedMaterial.quantity || 0);
+                        }
+                    } else if (field === 'newStock') {
+                        const newStockVal = value === '' ? 0 : parseFloat(value);
+                        updatedItem.difference = newStockVal - (item.oldStock || 0);
                     }
-                } else if (field === 'newStock') {
-                    const newStockVal = value === '' ? 0 : parseFloat(value);
-                    updatedItem.difference = newStockVal - (item.oldStock || 0);
-                }
 
-                return updatedItem;
-            })
-        );
-    };
+                    return updatedItem;
+                })
+            );
+        },
+        [warehouseItems]
+    );
 
     const validateForm = () => {
         for (let i = 0; i < items.length; i++) {
