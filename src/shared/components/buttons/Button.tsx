@@ -150,7 +150,7 @@ export function Button({
                         style={textStyles}
                         maxFontSizeMultiplier={1.1}
                         numberOfLines={1}
-                        adjustsFontSizeToFit
+                        // adjustsFontSizeToFit
                     >
                         {title}
                     </Text>
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     },
     mediumSize: {
         minHeight: sizes.button.md,
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: 12,
         paddingVertical: spacing.sm,
     },
     largeSize: {
