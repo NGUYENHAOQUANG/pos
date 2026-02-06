@@ -18,12 +18,10 @@ import {
     useImportReceiptDetail,
     useImportReceiptItems,
     useDeleteImportReceipt,
-    useDeleteImportReceiptItem,
     importReceiptKeys,
 } from '@/features/material/hooks/useImportReceipts';
 import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
-import { showValidationError, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showValidationError } from '@/features/material/utils/validationToast';
 import {
     ImportSourceEnum,
     ImportReceiptStatus,
@@ -77,7 +75,6 @@ export const useAddImportReceipt = () => {
     const { mutate: createImportReceipt, isPending: isCreating } = useCreateImportReceipt();
     const { mutate: updateImportReceipt, isPending: isUpdating } = useUpdateImportReceipt();
     const { mutate: deleteImportReceipt, isPending: isDeleting } = useDeleteImportReceipt();
-    const { mutate: deleteReceiptItem, isPending: isDeletingItem } = useDeleteImportReceiptItem();
 
     // Delete Modal State
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -213,39 +210,7 @@ export const useAddImportReceipt = () => {
     };
 
     const handleRemoveMaterial = (id: string) => {
-        const isTempId = !id.includes('-');
-
-        // Backup current state for rollback if needed
-        const previousItems = [...warehouseItems];
-
-        // OPTIMISTIC UPDATE: Remove immediately from UI
         setWarehouseItems(prevItems => prevItems.filter(item => item.id !== id));
-
-        // In edit mode AND is a real server item (has GUID), call API to delete
-        if (isEditMode && importReceiptId && !isTempId) {
-            deleteReceiptItem(
-                { receiptId: importReceiptId, itemId: id },
-                {
-                    onSuccess: () => {
-                        // Success - do nothing, item already removed locally
-                        // Query invalidation will sync consistency later
-                    },
-                    onError: (error: any) => {
-                        const errorMessage = getErrorMessage(error, 'Lỗi xóa vật tư');
-
-                        // If error is NOT "not found", rollback the change
-                        // If it IS "not found", we consider it a success (item already gone)
-                        if (
-                            !errorMessage.toLowerCase().includes('không tồn tại') &&
-                            !errorMessage.toLowerCase().includes('not found')
-                        ) {
-                            showErrorToast(errorMessage);
-                            setWarehouseItems(previousItems);
-                        }
-                    },
-                }
-            );
-        }
     };
 
     const calculateTotal = () => {
@@ -370,7 +335,6 @@ export const useAddImportReceipt = () => {
         totalAmount,
         isCreating,
         isUploading,
-        isDeletingItem,
         isLoadingDetail,
 
         // Handlers

@@ -155,21 +155,3 @@ export const useUpdateImportReceiptItems = () => {
         },
     });
 };
-
-export const useDeleteImportReceiptItem = () => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({ receiptId, itemId }: { receiptId: string; itemId: string }) =>
-            importReceiptApi.deleteItem(receiptId, itemId),
-        onSuccess: (_, { receiptId }) => {
-            showSuccessToast('Xóa vật tư thành công');
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(receiptId) });
-            queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(receiptId) });
-        },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Xóa vật tư thất bại');
-            showErrorToast(errorMessage);
-        },
-    });
-};

@@ -149,19 +149,22 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         padding: spacing.md,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
     },
     title: {
+        flex: 1,
         fontSize: 16,
         fontWeight: '700',
         color: colors.text,
         textAlign: 'left',
+        marginRight: spacing.sm,
     },
     closeButton: {
         padding: 4,
+        marginTop: -4,
     },
     content: {
         padding: spacing.md,

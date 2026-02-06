@@ -44,9 +44,7 @@ export const useMaterialFilterLogic = () => {
         [setImportReceiptStatusFilter]
     );
 
-    const handleFilterPress = useCallback(() => {
-        // Implement complex filter modal logic here if needed
-    }, []);
+    const handleFilterPress = useCallback(() => {}, []);
 
     const clearFilters = useCallback(() => {
         setFilterType('');
