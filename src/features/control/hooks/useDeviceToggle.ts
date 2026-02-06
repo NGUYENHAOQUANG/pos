@@ -44,6 +44,12 @@ export const useDeviceToggle = () => {
             if (responseData?.status === 200) {
                 console.log('Toggle success! Updating store.');
                 updateDeviceState(pondId, deviceId, isOn);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Thành công',
+                    text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
+                    visibilityTime: 2000,
+                });
             } else {
                 console.warn('Toggle failed:', responseData);
                 Toast.show({
