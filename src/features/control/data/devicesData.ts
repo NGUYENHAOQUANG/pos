@@ -91,6 +91,10 @@ export interface IMaintenanceHistory {
 // 0. Pond List
 export const PONDS_LIST: IPond[] = [
     {
+        id: 'IOT_POND',
+        name: 'Ao IOT',
+    },
+    {
         id: 'N01',
         name: 'Ao N01',
     },
@@ -110,8 +114,61 @@ export const PONDS_LIST: IPond[] = [
 
 // 1. Device List
 export const DEVICES_LIST: IControlDevice[] = [
+    // --- Ao IOT Devices ---
+    {
+        id: 'IOT-DEV-01',
+        name: 'Máy cho ăn',
+        type: 'feeder',
+        pondId: 'IOT_POND',
+        farmId: 'KG-01',
+        connectDate: '1/12/2025',
+        status: 'active',
+        mode: EControlMode.SCHEDULE,
+    },
+    {
+        id: 'IOT-DEV-02',
+        name: 'Syphon',
+        type: 'syphon',
+        pondId: 'IOT_POND',
+        farmId: 'KG-01',
+        connectDate: '1/12/2025',
+        status: 'active',
+        mode: EControlMode.MANUAL,
+    },
+    {
+        id: 'IOT-DEV-03',
+        name: 'Quạt nước',
+        type: 'fan',
+        pondId: 'IOT_POND',
+        farmId: 'KG-01',
+        connectDate: '1/12/2025',
+        status: 'active',
+        mode: EControlMode.LOCAL,
+    },
+    {
+        id: 'IOT-DEV-04',
+        name: 'Máy sục khí oxy',
+        type: 'oxy',
+        pondId: 'IOT_POND',
+        farmId: 'KG-01',
+        connectDate: '1/12/2025',
+        status: 'active',
+        mode: EControlMode.SCHEDULE,
+    },
+    {
+        id: 'IOT-DEV-05',
+        name: 'Quạt nước 2',
+        type: 'fan',
+        pondId: 'IOT_POND',
+        farmId: 'KG-01',
+        connectDate: '1/12/2025',
+        status: 'active',
+        mode: EControlMode.MANUAL,
+    },
+    // --- End Ao IOT Devices ---
     {
         id: 'TB-001',
+
         name: 'Máy cho ăn tự động A1',
         type: 'feeder',
         pondId: 'N01',

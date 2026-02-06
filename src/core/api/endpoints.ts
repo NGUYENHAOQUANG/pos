@@ -20,6 +20,15 @@ export const API_ENDPOINTS = {
         PROFILE: '/auth/me',
         UPDATE_PROFILE: '/auth/profile',
     },
+    DEVICE: {
+        TOGGLE: '/device/toggle',
+        TOGGLE_TEST: '/device/toggle/test',
+        SCHEDULE: '/device/schedule',
+        SCHEDULE_TEST: '/device/schedule/test',
+        HEALTH: '/device/health',
+        HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
+        DEVICE_ID_REFERENCE: '/device/device-id-reference',
+    },
     POND: {
         CYCLE: {
             LIST: (pondId: string) => `/pond/${pondId}/cycle`,

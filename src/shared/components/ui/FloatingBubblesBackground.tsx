@@ -13,7 +13,6 @@ import { colors } from '@/styles';
 
 const { width, height } = Dimensions.get('window');
 
-// Component bong bóng bay lơ lửng
 const FloatingBubble = ({
     initialX,
     initialY,
