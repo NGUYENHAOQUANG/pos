@@ -128,9 +128,7 @@ export const AddEnvironmentScreen: React.FC = () => {
         const fetchImageUrls = async () => {
             if (itemToEdit && detail?.documentIds && detail.documentIds.length > 0) {
                 try {
-                    const urls = await Promise.all(
-                        detail.documentIds.map((id: string) => documentApi.getUrl(id))
-                    );
+                    const urls = await documentApi.getUrls(detail.documentIds);
                     setImageUris(urls);
                     setDocumentIds(detail.documentIds);
                 } catch (error) {

@@ -70,17 +70,7 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                                 .filter((url): url is string => !!url);
                         } else if (item.documentIds && item.documentIds.length > 0) {
                             // Fallback: resolve URLs from documentIds via documentApi.getUrl
-                            const urls = await Promise.all(
-                                item.documentIds.map(async id => {
-                                    try {
-                                        const url = await documentApi.getUrl(id);
-                                        return url || '';
-                                    } catch {
-                                        return '';
-                                    }
-                                })
-                            );
-                            imageUrls = urls.filter((url): url is string => !!url);
+                            imageUrls = await documentApi.getUrls(item.documentIds);
                         }
                         const sizeDetail = item.sizeMeasurementDetail ?? item.sizeMeasurement;
                         return {

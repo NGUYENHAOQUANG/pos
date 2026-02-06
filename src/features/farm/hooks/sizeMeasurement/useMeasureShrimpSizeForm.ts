@@ -70,28 +70,9 @@ export const useMeasureShrimpSizeForm = ({
                     setNotes(noteValue || '');
                 }
                 if (detail.documentIds && detail.documentIds.length > 0) {
-                    const results = await Promise.all(
-                        detail.documentIds.map(async id => {
-                            try {
-                                const url = await documentApi.getUrl(id);
-                                return { id, url };
-                            } catch {
-                                return { id, url: '' };
-                            }
-                        })
-                    );
-                    const validResults = results.filter(
-                        (r): r is { id: string; url: string } => !!r.url
-                    );
-                    const newImages = validResults.map(r => r.url);
-                    const newDocIds = validResults.map(r => r.id);
-
-                    setImages(prev =>
-                        JSON.stringify(prev) === JSON.stringify(newImages) ? prev : newImages
-                    );
-                    setInitialDocumentIds(prev =>
-                        JSON.stringify(prev) === JSON.stringify(newDocIds) ? prev : newDocIds
-                    );
+                    const urls = await documentApi.getUrls(detail.documentIds);
+                    setInitialDocumentIds(detail.documentIds);
+                    setImages(urls);
                 } else {
                     setImages([]);
                     setInitialDocumentIds([]);

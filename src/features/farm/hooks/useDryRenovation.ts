@@ -60,19 +60,7 @@ export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationP
                                 .map((doc: { publicUrl?: string }) => doc.publicUrl)
                                 .filter((url: string | undefined): url is string => !!url);
                         } else if (item.documentIds && item.documentIds.length > 0) {
-                            const urls = await Promise.all(
-                                item.documentIds.map(async (id: string) => {
-                                    try {
-                                        const url = await documentApi.getUrl(id);
-                                        return url || '';
-                                    } catch {
-                                        return '';
-                                    }
-                                })
-                            );
-                            imageUrls = urls.filter(
-                                (url: string | undefined): url is string => !!url
-                            );
+                            imageUrls = await documentApi.getUrls(item.documentIds);
                         }
                         return {
                             id: item.id,
