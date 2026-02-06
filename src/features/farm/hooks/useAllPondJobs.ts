@@ -11,6 +11,7 @@ import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
+import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/feed/useFeeding';
 
 export const useAllPondJobs = (pond: PondData | undefined) => {
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
@@ -49,6 +50,8 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
     const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pond?.id || '');
     // Fetch water supply records from API
     const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
+    // Fetch feeding records from API
+    const { jobs: apiFeedingJobs } = useFeedingRecordsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -75,6 +78,11 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
 
                 if (jobType) {
                     let items = pond?.id ? getPondJobItems(pond.id, jobType) : [];
+
+                    // Override with API data for FEED
+                    if (jobType === JOB_TYPES.FEED) {
+                        items = apiFeedingJobs;
+                    }
 
                     // Override with API data for MEASURE_SIZE
                     if (jobType === JOB_TYPES.MEASURE_SIZE) {
@@ -158,6 +166,7 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
         apiShrimpInspectionJobs,
         apiSiphonJobs,
         apiEnvJobs,
+        apiFeedingJobs,
         apiIncidentJobs,
         apiCleanRenovationJobs,
         apiDryRenovationJobs,
