@@ -180,11 +180,11 @@ export interface SeasonData {
     status: SeasonStatus; // Trạng thái
     statusName?: string; // Tên trạng thái hiển thị
     zoneId?: string | number; // ID of the zone this season belongs to
-    // API raw fields (optional)
     seasonName?: string;
     seasonCode?: string;
     code?: string; // New API field
     cycleCount?: number;
+    notes?: string;
 }
 
 export interface DropdownItem {
