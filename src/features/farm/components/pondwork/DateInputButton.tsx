@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
     dateText: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
         flex: 1,
     },

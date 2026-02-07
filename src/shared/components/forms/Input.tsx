@@ -63,7 +63,7 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
  */
 export function Input({
     label,
-    placeholder,
+    placeholder = 'Nhập',
     value,
     onChangeText,
     onBlur,
@@ -118,9 +118,11 @@ export function Input({
             {/* Label */}
             {label && (
                 <View style={styles.labelWrapper}>
-                    <View style={styles.requiredWrapper}>
-                        {required && <Text style={styles.required}>*</Text>}
-                    </View>
+                    {required && (
+                        <View style={styles.requiredWrapper}>
+                            <Text style={styles.required}>*</Text>{' '}
+                        </View>
+                    )}
                     <Text style={styles.label} maxFontSizeMultiplier={1.1}>
                         {label}
                     </Text>
@@ -164,20 +166,6 @@ export function Input({
                             setIsFocused(false);
                             onBlur?.();
                         }}
-                        style={[
-                            styles.input,
-                            inputStyle,
-                            multiline && styles.inputMultiline,
-                            // Override InputItem specific defaults if necessary
-                            {
-                                lineHeight: 0,
-                                height: '100%',
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                color: disabled ? colors.textTertiary : colors.text,
-                            },
-                        ]}
-                        // Override internal styles of InputItem container to remove List styling
                         styles={{
                             container: {
                                 borderBottomWidth: 0,
@@ -187,19 +175,28 @@ export function Input({
                                 minHeight: 0,
                                 height: '100%',
                             },
-                            input: {
-                                fontSize: 16,
-                                color: colors.text,
-                                height: '100%',
-                                paddingVertical: 0,
-                                ...Platform.select({
-                                    ios: {
-                                        lineHeight: 0,
-                                    },
-                                }),
-                                paddingLeft: 0,
-                                marginLeft: 0,
-                            },
+                            input: [
+                                styles.input,
+                                inputStyle,
+                                multiline && styles.inputMultiline,
+                                {
+                                    height: '100%',
+                                    paddingVertical: 0,
+                                    paddingLeft: 0,
+                                    marginLeft: 0,
+                                    fontSize: 16,
+                                    color: disabled ? colors.textTertiary : colors.text,
+                                    ...Platform.select({
+                                        ios: {
+                                            fontFamily: 'System',
+                                            lineHeight: 0,
+                                        },
+                                        android: {
+                                            lineHeight: 1.54 * 12,
+                                        },
+                                    }),
+                                },
+                            ],
                         }}
                         {...(restProps as any)}
                     />
@@ -269,7 +266,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '400',
         color: colors.text,
-        lineHeight: 24,
+        lineHeight: 22,
     },
     required: {
         color: colors.error,
@@ -303,16 +300,13 @@ const styles = StyleSheet.create({
         color: colors.text,
         letterSpacing: 0,
         paddingVertical: 0,
-        // textAlign: 'center',
-        height: '100%', // Match container height
-        // iOS doesn't support textAlignVertical, use lineHeight instead
+        height: '100%',
         ...Platform.select({
             android: {
-                textAlignVertical: 'center' as const,
+                textAlignVertical: 'center',
             },
             ios: {
-                // lineHeight: INPUT_LINE_HEIGHT,
-                // paddingVertical: (INPUT_HEIGHT - INPUT_LINE_HEIGHT) / 2 - 6, // Slight adjustment for optical center
+                fontFamily: 'System',
             },
         }),
     },

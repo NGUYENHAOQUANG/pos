@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 
+import { Input } from '@/shared/components/forms/Input';
 interface ShrimpInspectionFoodCheckBoxProps {
     foodAmount: string;
     onFoodAmountChange: (value: string) => void;
@@ -58,11 +58,12 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     return (
         <SelectionInfoBox title="Kiểm tra thức ăn">
             {/* Lượng thức ăn cho vào nhá */}
-            <FarmInput
+            <Input
                 label="Lượng thức ăn cho vào nhá (g)"
                 value={foodAmount}
                 onChangeText={handleFoodAmountChange}
                 keyboardType="numeric"
+                containerStyle={{ marginBottom: 0 }}
                 required
             />
 
