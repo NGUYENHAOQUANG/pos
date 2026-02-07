@@ -93,4 +93,15 @@ export const farmKeys = {
     metric: {
         list: () => [...farmKeys.all, 'metric'] as const,
     },
+    harvestRecords: {
+        all: () => [...farmKeys.all, 'harvestRecords'] as const,
+        byPond: (pondId: string, params?: any) =>
+            [
+                ...farmKeys.harvestRecords.all(),
+                'byPond',
+                pondId,
+                ...(params ? [params] : []),
+            ] as const,
+        detail: (id: string) => [...farmKeys.harvestRecords.all(), 'detail', id] as const,
+    },
 };
