@@ -26,7 +26,7 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
-import { NormalizedError } from '@/core/api/errorHandler';
+import { normalizeApiError, NormalizedError } from '@/core/api/errorHandler';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 // Countdown duration in seconds
@@ -166,9 +166,8 @@ export default function VerifyOTPScreen() {
 
             // Success! Store update (isAuthenticated=true) will trigger navigation to Main App if status is COMPLETED
         } catch (err) {
-            const error = err as NormalizedError;
-            console.error(error);
-            setErrorMessage(error.message);
+            const normalizedError = normalizeApiError(err);
+            setErrorMessage(normalizedError.message);
         } finally {
             setIsVerifying(false);
         }

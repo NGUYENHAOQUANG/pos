@@ -5,6 +5,8 @@
  * @created 2025-11-16
  */
 
+import { IApiResponse } from '@/shared/types/common.types';
+
 // Swagger: ApplicationUser
 export interface AuthUser {
     id: string; // sub
@@ -53,13 +55,14 @@ export interface CompleteProfilePayload {
 }
 
 // Swagger: JwtResponseAppResponse
-export interface AuthResponse {
-    result?: boolean; // Keep for backward compatibility
-    success?: boolean; // New API format
-    statusCode?: number;
-    message?: string;
-    data: JwtResponse;
-}
+export type AuthResponse = IApiResponse<JwtResponse>;
+// {
+//     result?: boolean; // Keep for backward compatibility
+//     success?: boolean; // New API format
+//     statusCode?: number;
+//     message?: string;
+//     data: JwtResponse;
+// }
 
 export interface OtpData {
     status?: 'Unverified' | 'COMPLETED' | string;

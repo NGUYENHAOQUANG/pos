@@ -15,6 +15,7 @@ import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { authApi } from '@/features/auth/api/authApi';
 import { documentApi } from '@/features/material/api/documentApi';
 import { Loading } from '@/shared/components/ui/Loading';
+import { handleError } from '@/shared/utils';
 
 export const EditPersonalInformationScreens: React.FC = () => {
     const navigation = useNavigation();
@@ -163,13 +164,7 @@ export const EditPersonalInformationScreens: React.FC = () => {
             await refetch(); // Refresh profile data
             navigation.goBack();
         } catch (error) {
-            console.error('Update profile error:', error);
-            Toast.show({
-                type: 'error',
-                text1: 'Cập nhật thất bại',
-                text2: 'Vui lòng thử lại sau',
-                position: 'top',
-            });
+            handleError(error);
         } finally {
             setIsSaving(false);
         }
