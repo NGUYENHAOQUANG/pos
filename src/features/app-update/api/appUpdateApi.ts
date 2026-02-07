@@ -12,7 +12,10 @@ export interface VersionCheckResult {
 export const appUpdateApi = {
     checkUpdate: async (): Promise<VersionCheckResult> => {
         try {
-            const version = await checkVersion();
+            const version = await checkVersion({
+                bundleId: 'com.mebisoft.mebieco',
+                country: 'vn',
+            });
             const currentVersion = DeviceInfo.getVersion();
             const storeVersion = version.version || '0.0.0';
             const needsUpdate = version.needsUpdate || false;
