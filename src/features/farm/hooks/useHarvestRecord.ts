@@ -6,6 +6,7 @@ import {
     IUpdateHarvestRecordReq,
     IHarvestRecordParams,
 } from '@/features/farm/types/harvestRecord.types';
+import { handleError } from '@/shared/utils/errorHandler';
 
 export const useHarvestRecords = (pondId: string, params?: IHarvestRecordParams) => {
     return useQuery({
@@ -27,13 +28,15 @@ export const useCreateHarvestRecord = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ pondId, data }: { pondId: string; data: ICreateHarvestRecordReq }) =>
-            harvestRecordApi.create(pondId, data),
+        mutationFn: ({ pondId, data }: { pondId: string; data: ICreateHarvestRecordReq }) => {
+            return harvestRecordApi.create(pondId, data);
+        },
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.harvestRecords.byPond(pondId),
             });
         },
+        onError: handleError,
     });
 };
 
@@ -58,6 +61,7 @@ export const useUpdateHarvestRecord = () => {
                 queryKey: farmKeys.harvestRecords.detail(id),
             });
         },
+        onError: handleError,
     });
 };
 
@@ -72,5 +76,6 @@ export const useDeleteHarvestRecord = () => {
                 queryKey: farmKeys.harvestRecords.byPond(pondId),
             });
         },
+        onError: handleError,
     });
 };
