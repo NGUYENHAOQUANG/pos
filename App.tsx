@@ -13,6 +13,7 @@ import { LogBox } from 'react-native';
 import notifee from '@notifee/react-native';
 import { NetworkStatusModal, SessionExpiredModal } from '@/shared/components';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { UpdateModal } from '@/features/app-update';
 // import {
 //   requestNotificationPermission,
 //   getFCMToken,
@@ -79,6 +80,7 @@ function App(): React.JSX.Element {
                 visible={isSessionExpired}
                 onConfirm={handleSessionExpiredConfirm}
             />
+            <UpdateModal />
             <Toast config={toastConfig} topOffset={0} />
         </SafeAreaProvider>
     );

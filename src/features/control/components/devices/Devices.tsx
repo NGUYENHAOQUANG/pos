@@ -62,7 +62,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
                 <View style={styles.rowTop}>
                     <DevicesStatusColor
                         icon={Icon}
-                        isOn={data.isOn}
+                        isOn={data.mode === EControlMode.LOCAL ? true : data.isOn}
                         errorMessage={data.errorMessage}
                         size={s(48)}
                     />
@@ -99,7 +99,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
                         <AutoScrollText text={data.name} style={styles.deviceName} />
                     </View>
                     <ButtonDevices
-                        value={data.isOn}
+                        value={data.mode === EControlMode.LOCAL ? true : data.isOn}
                         onValueChange={val => onToggle(data.id, val)}
                         trackColor={switchTrackColor}
                         style={styles.scaledButton}
