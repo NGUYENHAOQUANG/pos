@@ -17,7 +17,10 @@ import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
-import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
+import {
+    getHarvestSuccessMessage,
+    showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -33,6 +36,7 @@ import {
     useDeleteHarvestRecord,
 } from '@/features/farm/hooks/useHarvestRecord';
 import { HarvestType } from '@/features/farm/types/harvestRecord.types';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
@@ -169,12 +173,7 @@ export const AddHarvestScreen: React.FC = () => {
                 data: apiRequest,
             });
 
-            Toast.show({
-                type: 'success',
-                text1: getHarvestSuccessMessage(getHarvestTypeDisplay(data.harvestType)),
-                position: 'top',
-                visibilityTime: 3000,
-            });
+            showEditJobSuccessToast('HARVEST' as JobType);
         } else {
             await createHarvestMutation.mutateAsync({
                 pondId: pond.id,
@@ -185,7 +184,7 @@ export const AddHarvestScreen: React.FC = () => {
                 type: 'success',
                 text1: getHarvestSuccessMessage(getHarvestTypeDisplay(data.harvestType)),
                 position: 'top',
-                visibilityTime: 3000,
+                visibilityTime: 5000,
             });
         }
 
