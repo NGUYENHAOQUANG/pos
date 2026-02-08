@@ -2,10 +2,11 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ExportWarehouseMaterialList } from '@/features/material/components/exportwarehouse/ExportWarehouseMaterialList';
 import { spacing } from '@/styles';
-import { useExportWarehouse } from '@/features/material/hooks';
+import { useInfiniteExportWarehouse } from '@/features/material/hooks';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }> = ({
     onPressCreate,
@@ -20,36 +21,53 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
     const warehouseId = warehouses?.[0]?.id;
 
     // 2. Prepare Params
-    const exportWarehouseParams = React.useMemo(
-        () => ({
-            Search: searchText,
-            MaterialName: filterMaterialName || undefined,
-            WarehouseId: warehouseId || undefined,
-            Status: importReceiptStatusFilter || undefined,
-            Page: 1,
-            PageSize: 20,
-        }),
-        [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]
-    );
+    const exportWarehouseParams = React.useMemo(() => {
+        const params: any = {};
 
-    // 3. Fetch Data
+        if (searchText?.trim()) {
+            params.Search = searchText.trim();
+        }
+
+        if (filterMaterialName) {
+            params.MaterialName = filterMaterialName;
+        }
+
+        if (warehouseId) {
+            params.WarehouseId = warehouseId;
+        }
+
+        if (importReceiptStatusFilter) {
+            params.Status = importReceiptStatusFilter;
+        }
+
+        return params;
+    }, [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]);
+
+    // 3. Fetch Data with Infinite Scroll
     const {
-        data: exportWarehouseList,
+        data: receipts = [],
         refetch,
         isRefetching,
         isLoading,
-    } = useExportWarehouse(exportWarehouseParams);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteExportWarehouse(exportWarehouseParams);
 
-    const receipts = exportWarehouseList?.items || [];
+    const { isConnected } = useNetInfo();
+    const showSkeleton = isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
 
     return (
         <View style={styles.container}>
             <ExportWarehouseMaterialList
                 receipts={receipts}
-                isLoading={isLoading}
-                refreshing={isRefetching}
+                isLoading={showSkeleton}
+                refreshing={isRefetching && !isFetchingNextPage}
                 onRefresh={refetch}
                 onPressCreate={onPressCreate}
+                onLoadMore={fetchNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                hasNextPage={hasNextPage}
             />
         </View>
     );
