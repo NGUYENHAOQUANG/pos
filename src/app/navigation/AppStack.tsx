@@ -275,7 +275,6 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
             <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
             <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
-            <Stack.Screen name="TransferLog" component={AddTransferScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
             <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />
