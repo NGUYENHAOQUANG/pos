@@ -175,7 +175,7 @@ export const DEVICES_LIST: IControlDevice[] = [
         farmId: 'KG-01',
         connectDate: '1/12/2025',
         status: 'active',
-        mode: EControlMode.MANUAL,
+        mode: EControlMode.LOCAL,
     },
     // Syphon
     {
