@@ -6,7 +6,7 @@ import { HarvestType } from '@/features/farm/types/harvestRecord.types';
  * Simple schema without validation - API handles all validation
  */
 export const harvestFormSchema = z.object({
-    harvestType: z.enum(['FullHarvest', 'PartialHarvest', 'CloseCycle'] as const),
+    harvestType: z.enum(['FullHarvest', 'PartialHarvest'] as const),
     totalWeightKg: z.string().optional(),
     shrimpSize: z.string().optional(),
     referencePrice: z.string().optional(),
@@ -54,7 +54,6 @@ export const getHarvestTypeDisplay = (type: HarvestType): string => {
     const map: Record<HarvestType, string> = {
         FullHarvest: 'Thu hết',
         PartialHarvest: 'Thu tỉa',
-        CloseCycle: 'Đóng chu kỳ',
     };
     return map[type];
 };
@@ -66,7 +65,6 @@ export const getHarvestTypeFromDisplay = (display: string): HarvestType => {
     const map: Record<string, HarvestType> = {
         'Thu hết': 'FullHarvest',
         'Thu tỉa': 'PartialHarvest',
-        'Đóng chu kỳ': 'CloseCycle',
     };
     return map[display] || 'PartialHarvest';
 };

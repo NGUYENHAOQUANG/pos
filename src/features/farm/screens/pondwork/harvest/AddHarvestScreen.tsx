@@ -71,7 +71,6 @@ export const AddHarvestScreen: React.FC = () => {
         const typeMap: Record<string, HarvestType> = {
             'Thu hết': 'FullHarvest',
             'Thu tỉa': 'PartialHarvest',
-            'Đóng chu kỳ': 'CloseCycle',
         };
         return typeMap[meta.harvestType || 'Thu hết'] || 'PartialHarvest';
     };
@@ -89,7 +88,7 @@ export const AddHarvestScreen: React.FC = () => {
     const watchedHarvestType = watch('harvestType');
     const harvestType = getHarvestTypeDisplay(watchedHarvestType);
     const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
-    const harvestTypeOptions = ['Thu hết', 'Thu tỉa', 'Đóng chu kỳ'];
+    const harvestTypeOptions = ['Thu hết', 'Thu tỉa'];
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -135,7 +134,9 @@ export const AddHarvestScreen: React.FC = () => {
 
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
     const [confirmationModalType, setConfirmationModalType] = useState<
-        'harvest_full' | 'harvest_close_cycle' | null
+        | 'harvest_full'
+        // 'harvest_close_cycle' |
+        | null
     >(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -143,9 +144,9 @@ export const AddHarvestScreen: React.FC = () => {
         if (harvestType === 'Thu hết' && !itemToEdit) {
             setConfirmationModalType('harvest_full');
             setIsConfirmationModalVisible(true);
-        } else if (harvestType === 'Đóng chu kỳ' && !itemToEdit) {
-            setConfirmationModalType('harvest_close_cycle');
-            setIsConfirmationModalVisible(true);
+            // } else if (harvestType === 'Đóng chu kỳ' && !itemToEdit) {
+            //     setConfirmationModalType('harvest_close_cycle');
+            //     setIsConfirmationModalVisible(true);
         } else {
             handleSubmit(onSubmit)();
         }
@@ -229,16 +230,16 @@ export const AddHarvestScreen: React.FC = () => {
                     />
 
                     {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
-                    {harvestType !== 'Đóng chu kỳ' && (
-                        <HarvestDataBox
-                            yieldAmount={watch('totalWeightKg') || ''}
-                            onYieldAmountChange={value => setValue('totalWeightKg', value)}
-                            shrimpSize={watch('shrimpSize') || ''}
-                            onShrimpSizeChange={value => setValue('shrimpSize', value)}
-                            referencePrice={watch('referencePrice') || ''}
-                            onReferencePriceChange={value => setValue('referencePrice', value)}
-                        />
-                    )}
+                    {/* {harvestType !== 'Đóng chu kỳ' && ( */}
+                    <HarvestDataBox
+                        yieldAmount={watch('totalWeightKg') || ''}
+                        onYieldAmountChange={value => setValue('totalWeightKg', value)}
+                        shrimpSize={watch('shrimpSize') || ''}
+                        onShrimpSizeChange={value => setValue('shrimpSize', value)}
+                        referencePrice={watch('referencePrice') || ''}
+                        onReferencePriceChange={value => setValue('referencePrice', value)}
+                    />
+                    {/* )} */}
 
                     <SelectionNotesBox
                         notes={watch('notes') || ''}

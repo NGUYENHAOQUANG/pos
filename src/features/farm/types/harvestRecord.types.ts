@@ -1,6 +1,6 @@
 import { IApiResponse, IPaginate, IDocument, ICreatorEditor } from '@/shared/types/common.types';
 
-export type HarvestType = 'FullHarvest' | 'PartialHarvest' | 'CloseCycle';
+export type HarvestType = 'FullHarvest' | 'PartialHarvest';
 
 export interface IHarvestDetail {
     harvestType: HarvestType;
