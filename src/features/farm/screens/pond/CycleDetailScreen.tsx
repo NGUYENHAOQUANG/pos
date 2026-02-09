@@ -161,6 +161,7 @@ export const CycleDetailScreen: React.FC = () => {
     const transferInfo = activeCycleData?.transferInfo;
 
     const [refreshing, setRefreshing] = useState(false);
+    const [isCycleNameExpanded, setIsCycleNameExpanded] = useState(false);
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
@@ -252,9 +253,32 @@ export const CycleDetailScreen: React.FC = () => {
                             <Text style={styles.label}>Vụ nuôi:</Text>
                             <Text style={styles.value}>{seasonLabel}</Text>
                         </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Tên chu kỳ:</Text>
-                            <Text style={styles.value}>{activeCycleData?.cycleName || '---'}</Text>
+                        {/* Custom row for Tên chu kỳ with expand/collapse */}
+                        <View style={[styles.infoRow, styles.cycleNameRow]}>
+                            <Text style={[styles.label, styles.cycleNameLabel]}>Tên chu kỳ:</Text>
+                            <View style={styles.cycleNameValueContainer}>
+                                <Text
+                                    style={[styles.value, styles.cycleNameText]}
+                                    numberOfLines={isCycleNameExpanded ? undefined : 1}
+                                >
+                                    {activeCycleData?.cycleName || '---'}
+                                </Text>
+                                {(activeCycleData?.cycleName?.length || 0) > 25 && (
+                                    <TouchableOpacity
+                                        onPress={() => setIsCycleNameExpanded(!isCycleNameExpanded)}
+                                        style={styles.expandButton}
+                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    >
+                                        <Ionicons
+                                            name={
+                                                isCycleNameExpanded ? 'chevron-up' : 'chevron-down'
+                                            }
+                                            size={18}
+                                            color={colors.gray[500]}
+                                        />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
                         <View style={styles.infoRow}>
                             <Text style={styles.label}>Tôm giống:</Text>
@@ -471,5 +495,25 @@ const styles = StyleSheet.create({
         color: colors.primary,
         fontWeight: typography.fontWeight.bold,
         marginTop: spacing.xs,
+    },
+    cycleNameRow: {
+        alignItems: 'flex-start',
+    },
+    cycleNameLabel: {
+        marginTop: 2,
+    },
+    cycleNameValueContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
+    cycleNameText: {
+        textAlign: 'right',
+        flex: 1,
+    },
+    expandButton: {
+        marginLeft: 6,
+        paddingHorizontal: 2,
     },
 });
