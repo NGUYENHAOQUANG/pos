@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Platform } from 'react-native';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import { antdTheme } from '@/core/config/antd-theme';
@@ -38,11 +39,11 @@ export function ImagePickerActionSheet({
     };
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={styles.backdrop} onPress={onClose}>
-                <Pressable
+                <Animated.View
+                    entering={SlideInDown.duration(300)}
                     style={[styles.content, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
-                    onPress={e => e.stopPropagation()}
                 >
                     {/* Title */}
                     <View style={styles.titleContainer}>
@@ -76,7 +77,7 @@ export function ImagePickerActionSheet({
                     >
                         <Text style={styles.cancelText}>Hủy</Text>
                     </TouchableOpacity>
-                </Pressable>
+                </Animated.View>
             </Pressable>
         </Modal>
     );

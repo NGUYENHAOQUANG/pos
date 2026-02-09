@@ -28,7 +28,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
-    const { itemToEdit, pond: routePond } = route.params || {};
+    const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
     const scrollViewRef = useRef<ScrollView>(null);
@@ -86,6 +86,12 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
 
+    useEffect(() => {
+        if (aiShrimpSize) {
+            setShrimpSize(aiShrimpSize);
+        }
+    }, [aiShrimpSize, setShrimpSize]);
+
     const onSavePress = () => {
         const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
         handleSave(documentIds);
@@ -130,6 +136,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                         remainingWeight={remainingWeight}
                         onRemainingWeightChange={setRemainingWeight}
                         stockingQuantity={stockingQuantity}
+                        onAIMeasurePress={() => navigation.navigate('MeasureShrimpSizeAIScreen')}
                     />
                     <SelectionNotesBox
                         notes={notes}
