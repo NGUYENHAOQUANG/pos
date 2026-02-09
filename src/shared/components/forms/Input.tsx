@@ -120,7 +120,7 @@ export function Input({
                 <View style={styles.labelWrapper}>
                     {required && (
                         <View style={styles.requiredWrapper}>
-                            <Text style={styles.required}>*</Text>{' '}
+                            <Text style={styles.required}>*</Text>
                         </View>
                     )}
                     <Text style={styles.label} maxFontSizeMultiplier={1.1}>
