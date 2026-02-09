@@ -7,9 +7,9 @@ import {
 } from '@/features/material/types/exportReceipt.types';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { APP_CONFIG } from '@/shared/constants';
+import { handleError } from '@/shared/utils';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -94,9 +94,9 @@ export const useAddExportWarehouseReceipt = () => {
                 queryKey: materialKeys.exportWarehouse(),
             });
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            console.log(error);
+            handleError(error);
         },
     });
 };
