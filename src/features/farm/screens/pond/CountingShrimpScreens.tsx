@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -37,7 +37,11 @@ const CountingShrimpScreen: React.FC = () => {
         });
     };
 
-    const handleImageSelect = async (uri: string, base64?: string) => {
+    const handleImageSelect = async (
+        uri: string,
+        base64?: string,
+        file?: { fileName: string; type: string }
+    ) => {
         _setImageUri(uri);
         // Reset current image specific states
         setDetections([]);
@@ -49,8 +53,9 @@ const CountingShrimpScreen: React.FC = () => {
                 setIsLoading(true);
 
                 // --- RESTORED API CALL FOR DEBUGGING ---
-                const fileName = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-                const contentType = 'image/jpeg'; // Assuming jpeg/png based on camera/library
+                const fileName =
+                    file?.fileName || uri.split('/').pop() || `image_${Date.now()}.jpg`;
+                const contentType = file?.type || 'image/jpeg';
 
                 console.log('DEBUG: Starting uploadBase64...');
                 console.log('DEBUG: fileName:', fileName);
@@ -72,21 +77,34 @@ const CountingShrimpScreen: React.FC = () => {
                     console.warn('DEBUG: Upload response empty or invalid');
                 }
 
+                // Get actual image size
+                Image.getSize(
+                    uri,
+                    (width, height) => {
+                        console.log(`DEBUG: Actual image size: ${width}x${height}`);
+                        setImageDimensions({ width, height });
+
+                        // Use actual dimensions for mock data
+                        const mockCount = Math.floor(Math.random() * 50) + 10;
+                        setCurrentImageCount(mockCount);
+                        const mockDetections: DetectionDot[] = [];
+                        for (let i = 0; i < mockCount; i++) {
+                            mockDetections.push({
+                                id: i,
+                                center: {
+                                    x: Math.random() * width,
+                                    y: Math.random() * height,
+                                },
+                            });
+                        }
+                        setDetections(mockDetections);
+                    },
+                    error => {
+                        console.error('Failed to get image size:', error);
+                    }
+                );
+
                 await new Promise<void>(resolve => setTimeout(() => resolve(), 1500));
-                const mockCount = Math.floor(Math.random() * 50) + 10;
-                setCurrentImageCount(mockCount);
-                const mockDetections: DetectionDot[] = [];
-                for (let i = 0; i < mockCount; i++) {
-                    mockDetections.push({
-                        id: i,
-                        center: {
-                            x: Math.random() * 1024,
-                            y: Math.random() * 1024,
-                        },
-                    });
-                }
-                setDetections(mockDetections);
-                setImageDimensions({ width: 1024, height: 1024 });
             } catch (error: any) {
                 console.error('AI processing failed:', error);
                 Toast.show({

@@ -1,22 +1,33 @@
-/**
- * @file ImagePickerActionSheet.tsx
- * @description Action sheet for image picker options using Ant Design theme
- * @author Auto
- * @created 2025-01-27
- * @updated 2025-01-27 - Applied Ant Design theme styling
- */
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    Pressable,
+    Platform,
+    FlatList,
+    Image,
+    PermissionsAndroid,
+    Dimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, borderRadius, typography } from '@/styles';
-import { antdTheme } from '@/core/config/antd-theme';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import { colors, spacing, borderRadius } from '@/styles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const PICKER_DELAY_MS = Platform.OS === 'ios' ? 400 : 100;
+const { width } = Dimensions.get('window');
+const COLUMN_COUNT = 4;
+const SPACING = spacing.xs;
+const ITEM_SIZE = (width - spacing.lg * 2 - SPACING * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
+
 interface ImagePickerActionSheetProps {
     visible: boolean;
     onClose: () => void;
     onTakePhoto: () => void;
     onChooseFromLibrary: () => void;
+    onImageSelected?: (uri: string, asset?: { fileName?: string; type?: string }) => void;
 }
 
 export function ImagePickerActionSheet({
@@ -24,58 +35,209 @@ export function ImagePickerActionSheet({
     onClose,
     onTakePhoto,
     onChooseFromLibrary,
+    onImageSelected,
 }: ImagePickerActionSheetProps) {
     const insets = useSafeAreaInsets();
+    const [photos, setPhotos] = useState<any[]>([]);
+    const [hasPermission, setHasPermission] = useState(false);
 
-    const handleTakePhoto = () => {
-        onClose();
-        setTimeout(() => onTakePhoto(), PICKER_DELAY_MS);
+    const loadPhotos = React.useCallback(async () => {
+        try {
+            const result = await CameraRoll.getPhotos({
+                first: 32,
+                assetType: 'Photos',
+            });
+            setPhotos(result.edges);
+        } catch (error) {
+            console.error('Failed to load photos:', error);
+        }
+    }, []);
+
+    const checkPermissionAndLoadPhotos = React.useCallback(async () => {
+        if (Platform.OS === 'android') {
+            const permission =
+                Platform.Version >= 33
+                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+            const hasPermission = await PermissionsAndroid.check(permission);
+            if (hasPermission) {
+                setHasPermission(true);
+                loadPhotos();
+            } else {
+                const status = await PermissionsAndroid.request(permission);
+                if (status === PermissionsAndroid.RESULTS.GRANTED) {
+                    setHasPermission(true);
+                    loadPhotos();
+                } else {
+                    setHasPermission(false);
+                }
+            }
+        } else {
+            setHasPermission(true);
+            loadPhotos();
+        }
+    }, [loadPhotos]);
+
+    useEffect(() => {
+        if (visible) {
+            checkPermissionAndLoadPhotos();
+        }
+    }, [visible, checkPermissionAndLoadPhotos]);
+
+    const normalizeAsset = (uri: string, filename?: string | null, type?: string | null) => {
+        let mimeType = type;
+        let name = filename || uri.split('/').pop() || `image-${Date.now()}`;
+
+        // Attempt to infer mimeType from URI or fileName if missing
+        if (!mimeType) {
+            const lowerUri = uri.toLowerCase();
+            const lowerName = name.toLowerCase();
+            if (lowerUri.endsWith('.png') || lowerName.endsWith('.png')) mimeType = 'image/png';
+            else if (lowerUri.endsWith('.gif') || lowerName.endsWith('.gif'))
+                mimeType = 'image/gif';
+            else if (lowerUri.endsWith('.webp') || lowerName.endsWith('.webp'))
+                mimeType = 'image/webp';
+            else mimeType = 'image/jpeg';
+        }
+
+        // Ensure extension exists and matches mimeType
+        const hasExtension = name.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
+        if (!hasExtension) {
+            const ext = mimeType.split('/')[1] === 'jpeg' ? 'jpg' : mimeType.split('/')[1] || 'jpg';
+            name = `${name}.${ext}`;
+        }
+
+        return {
+            fileName: name,
+            type: mimeType,
+        };
     };
 
-    const handleChooseFromLibrary = () => {
+    const handlePhotoSelect = (uri: string, asset?: { fileName?: string; type?: string }) => {
         onClose();
-        setTimeout(() => onChooseFromLibrary(), PICKER_DELAY_MS);
+        setTimeout(() => {
+            if (onImageSelected) {
+                // If asset is provided (from quick select), normalize it.
+                // If not (fallback?), we might not have info, but here we usually have it from renderItem.
+                // Actually handlePhotoSelect is called with (uri, {fileName, type}) from renderItem.
+                const normalized = asset
+                    ? normalizeAsset(uri, asset.fileName, asset.type)
+                    : undefined;
+                onImageSelected(uri, normalized);
+            } else {
+                onChooseFromLibrary();
+            }
+        }, 300);
     };
+
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <View style={styles.indicator} />
+            <Text style={styles.title}>Chọn ảnh</Text>
+        </View>
+    );
+
+    const renderItem = ({ item }: { item: any; index: number }) => {
+        if (item.isCamera) {
+            return (
+                <TouchableOpacity
+                    style={[styles.photoItem, styles.cameraItem]}
+                    onPress={() => {
+                        onClose();
+                        setTimeout(() => onTakePhoto(), 300);
+                    }}
+                >
+                    <Ionicons name="camera" size={32} color={colors.black} />
+                    <Text style={styles.cameraText}>Chụp ảnh</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        if (item.isLibrary) {
+            return (
+                <TouchableOpacity
+                    style={[
+                        styles.photoItem,
+                        styles.cameraItem,
+                        { backgroundColor: colors.gray[100] },
+                    ]}
+                    onPress={() => {
+                        onClose();
+                        setTimeout(() => onChooseFromLibrary(), 300);
+                    }}
+                >
+                    <Ionicons name="images" size={32} color={colors.black} />
+                    <Text style={styles.cameraText}>Thư viện</Text>
+                </TouchableOpacity>
+            );
+        }
+
+        return (
+            <TouchableOpacity
+                style={styles.photoItem}
+                onPress={() =>
+                    handlePhotoSelect(item.node.image.uri, {
+                        fileName: item.node.image.filename,
+                        type: item.node.type,
+                    })
+                }
+            >
+                <Image source={{ uri: item.node.image.uri }} style={styles.photo} />
+            </TouchableOpacity>
+        );
+    };
+
+    const data = [{ isCamera: true }, { isLibrary: true }, ...photos];
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={styles.backdrop} onPress={onClose}>
-                <Pressable
-                    style={[styles.content, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
-                    onPress={e => e.stopPropagation()}
-                >
-                    {/* Title */}
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.title}>Thêm ảnh</Text>
+                <Pressable style={styles.container} onPress={e => e.stopPropagation()}>
+                    <View style={styles.card}>
+                        {renderHeader()}
+
+                        <FlatList
+                            data={data}
+                            renderItem={renderItem}
+                            keyExtractor={(item, index) =>
+                                item.isCamera
+                                    ? 'camera'
+                                    : item.isLibrary
+                                    ? 'library'
+                                    : item.node?.image?.uri + index
+                            }
+                            numColumns={COLUMN_COUNT}
+                            columnWrapperStyle={styles.columnWrapper}
+                            contentContainerStyle={styles.listContent}
+                            showsVerticalScrollIndicator={false}
+                            style={styles.flatList}
+                            ListFooterComponent={
+                                !hasPermission ? (
+                                    <View
+                                        style={[
+                                            styles.permissionContainer,
+                                            { marginBottom: Math.max(insets.bottom, spacing.md) },
+                                        ]}
+                                    >
+                                        <Text style={styles.permissionText}>
+                                            Cần quyền truy cập thư viện ảnh để hiển thị ảnh gần đây.
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={styles.permissionButton}
+                                            onPress={checkPermissionAndLoadPhotos}
+                                        >
+                                            <Text style={styles.permissionButtonText}>
+                                                Cấp quyền
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                ) : (
+                                    <View style={{ height: Math.max(insets.bottom, spacing.md) }} />
+                                )
+                            }
+                        />
                     </View>
-
-                    {/* Options */}
-                    <View style={styles.optionsContainer}>
-                        <TouchableOpacity
-                            style={styles.optionButton}
-                            onPress={handleTakePhoto}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.optionText}>Chụp ảnh</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.optionButton}
-                            onPress={handleChooseFromLibrary}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.optionText}>Thư viện ảnh</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Cancel Button */}
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={onClose}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.cancelText}>Hủy</Text>
-                    </TouchableOpacity>
                 </Pressable>
             </Pressable>
         </Modal>
@@ -85,59 +247,91 @@ export function ImagePickerActionSheet({
 const styles = StyleSheet.create({
     backdrop: {
         flex: 1,
-        backgroundColor: antdTheme.fill_mask || 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
     },
-    content: {
-        backgroundColor: antdTheme.fill_base || colors.white,
-        borderTopLeftRadius: antdTheme.radius_lg || borderRadius.xl,
-        borderTopRightRadius: antdTheme.radius_lg || borderRadius.xl,
-        paddingTop: antdTheme.v_spacing_md || spacing.md,
-        paddingHorizontal: antdTheme.h_spacing_lg || spacing.lg,
+    container: {
+        width: '100%',
+        justifyContent: 'flex-end',
     },
-    titleContainer: {
-        paddingVertical: antdTheme.v_spacing_md || spacing.md,
-        borderBottomWidth: antdTheme.border_width_md || 1,
-        borderBottomColor: antdTheme.border_color_base || colors.borderLight,
-        marginBottom: antdTheme.v_spacing_md || spacing.md,
+    card: {
+        backgroundColor: colors.white,
+        borderTopLeftRadius: borderRadius.xl,
+        borderTopRightRadius: borderRadius.xl,
+        paddingTop: spacing.sm,
+        maxHeight: '80%',
+        width: '100%',
+        overflow: 'hidden',
+    },
+    header: {
+        alignItems: 'center',
+        paddingBottom: spacing.md,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray[200],
+    },
+    indicator: {
+        width: 40,
+        height: 4,
+        backgroundColor: colors.gray[300],
+        borderRadius: 2,
+        marginBottom: spacing.sm,
     },
     title: {
-        fontSize: antdTheme.font_size_heading || typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
-        color: antdTheme.color_text_base || colors.text,
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
+    },
+    flatList: {
+        flexGrow: 0,
+    },
+    listContent: {
+        padding: spacing.lg,
+        paddingBottom: spacing.xl * 2,
+    },
+    columnWrapper: {
+        gap: SPACING,
+        marginBottom: SPACING,
+    },
+    photoItem: {
+        width: ITEM_SIZE,
+        height: ITEM_SIZE,
+        borderRadius: borderRadius.md,
+        overflow: 'hidden',
+        backgroundColor: colors.gray[100],
+    },
+    photo: {
+        width: '100%',
+        height: '100%',
+    },
+    cameraItem: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.gray[100],
+    },
+    cameraText: {
+        marginTop: spacing.xs,
+        fontSize: 12,
+        color: colors.black,
+        fontWeight: '500',
+    },
+
+    permissionContainer: {
+        padding: spacing.xl,
+        alignItems: 'center',
+        gap: spacing.md,
+    },
+    permissionText: {
         textAlign: 'center',
+        color: colors.text,
     },
-    optionsContainer: {
-        gap: antdTheme.v_spacing_sm || spacing.sm,
-        marginBottom: antdTheme.v_spacing_md || spacing.md,
-    },
-    optionButton: {
+    permissionButton: {
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.xl,
         backgroundColor: colors.primary,
-        paddingVertical: antdTheme.v_spacing_md || spacing.md,
-        paddingHorizontal: antdTheme.h_spacing_lg || spacing.lg,
-        borderRadius: antdTheme.radius_md || borderRadius.md,
-        alignItems: 'center',
-        marginBottom: antdTheme.v_spacing_sm || spacing.sm,
+        borderRadius: borderRadius.md,
     },
-    optionText: {
-        fontSize: antdTheme.font_size_base || typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.textInverse,
-    },
-    cancelButton: {
-        backgroundColor: colors.white,
-        borderWidth: antdTheme.border_width_md || 1,
-        borderColor: colors.primary,
-        paddingVertical: antdTheme.v_spacing_md || spacing.md,
-        paddingHorizontal: antdTheme.h_spacing_lg || spacing.lg,
-        borderRadius: antdTheme.radius_md || borderRadius.md,
-        alignItems: 'center',
-        marginTop: antdTheme.v_spacing_sm || spacing.sm,
-        marginBottom: antdTheme.v_spacing_md || spacing.md,
-    },
-    cancelText: {
-        fontSize: antdTheme.font_size_base || typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.primary,
+    permissionButtonText: {
+        color: colors.white,
+        fontWeight: '600',
     },
 });
