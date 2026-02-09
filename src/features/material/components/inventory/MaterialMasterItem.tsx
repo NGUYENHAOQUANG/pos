@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: spacing.sm,
+        marginVertical: 6,
     },
     infoText: {
         fontSize: 14,
@@ -182,12 +182,12 @@ const styles = StyleSheet.create({
     },
     label: {
         fontWeight: '600',
+        fontSize: 14,
     },
     detailRow: {
         flexDirection: 'row',
-        marginBottom: spacing.xs,
+        marginVertical: 6,
         flexWrap: 'wrap',
-        marginTop: spacing.sm,
     },
     detailLabel: {
         fontSize: 14,
@@ -228,9 +228,11 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: colors.borderLight,
         marginHorizontal: -spacing.md,
+        marginVertical: spacing.xs,
     },
     separatorCenter: {
         height: 1,
         backgroundColor: colors.borderLight,
+        marginVertical: spacing.sm,
     },
 });
