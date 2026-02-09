@@ -36,6 +36,7 @@ interface ImageUploadProps {
     style?: ViewStyle;
     label?: string;
     returnBase64?: boolean;
+    children?: React.ReactNode;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -47,6 +48,7 @@ export function ImageUpload({
     style,
     label,
     returnBase64 = false,
+    children,
 }: ImageUploadProps) {
     const [actionSheetVisible, setActionSheetVisible] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -162,6 +164,7 @@ export function ImageUpload({
                 {imageUri ? (
                     <View style={styles.imageContainer}>
                         <RNImage source={{ uri: imageUri }} style={styles.image} />
+                        {children}
                         <TouchableOpacity
                             style={styles.removeButton}
                             onPress={e => {

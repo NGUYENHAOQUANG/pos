@@ -15,7 +15,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { Input } from '@/shared/components/forms/Input';
+//import { Input } from '@/shared/components/forms/Input';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 
@@ -274,7 +274,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     </View>
 
                     {/* 2. CẤU HÌNH MÁY */}
-                    <View style={styles.card}>
+                    {/* <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Cấu hình máy</Text>
                         <View style={styles.fullWidthDivider} />
                         <View style={styles.rowInputs}>
@@ -310,7 +310,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 />
                             </View>
                         </View>
-                    </View>
+                    </View> */}
 
                     {/* 3. LỊCH HOẠT ĐỘNG */}
                     <ActivitySchedule

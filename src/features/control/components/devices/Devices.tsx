@@ -12,6 +12,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ButtonControlMode } from './ButtonControlMode';
 import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
+import Toast from 'react-native-toast-message';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
@@ -115,10 +116,20 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                         </View>
                         <ButtonDevices
                             value={data.mode === EControlMode.LOCAL ? true : data.isOn}
-                            onValueChange={val => onToggle(data.id, val)}
+                            onValueChange={val => {
+                                if (data.mode === EControlMode.LOCAL) {
+                                    Toast.show({
+                                        type: 'error',
+                                        text1: 'Không thể bật/tắt thiết bị này',
+                                        position: 'top',
+                                    });
+                                    return;
+                                }
+                                onToggle(data.id, val);
+                            }}
                             trackColor={switchTrackColor}
                             style={styles.scaledButton}
-                            disabled={data.mode === EControlMode.LOCAL || isLoading}
+                            disabled={isLoading}
                         />
                     </View>
                 </View>
