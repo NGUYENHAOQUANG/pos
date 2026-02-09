@@ -11,6 +11,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
+import { stockTransferApi } from '@/features/farm/api/stockTransferApi';
+import { usePondsByZone } from '@/features/farm/hooks/usePonds';
 
 // Sử dụng HeaderFarm có sẵn
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -73,7 +75,12 @@ export const CycleDetailScreen: React.FC = () => {
     const pond = getPondById(pondId);
 
     // --- Dynamic Breed Name Fetching (same as ShrimpPond) ---
-    const effectiveZoneId = pond?.zoneId?.toString();
+    // Get zone ID from pond store or active cycle data
+    const effectiveZoneId = useMemo(() => {
+        if (pond?.zoneId) return pond.zoneId.toString();
+        if (activeCycleData?.pond?.zoneId) return activeCycleData.pond.zoneId.toString();
+        return null;
+    }, [pond?.zoneId, activeCycleData?.pond?.zoneId]);
 
     // Fetch Warehouses for this Zone
     const { data: warehouses } = useWarehouses({
@@ -159,6 +166,120 @@ export const CycleDetailScreen: React.FC = () => {
 
     // Get transfer info if exists
     const transferInfo = activeCycleData?.transferInfo;
+
+    // Fetch all ponds in the zone to find stock transfers
+    const { data: zonePondsData } = usePondsByZone(effectiveZoneId);
+
+    // Flatten zone ponds
+    const zonePonds = useMemo(() => {
+        if (!zonePondsData?.pages) return [];
+        return zonePondsData.pages.reduce<{ id: string; name: string }[]>(
+            (acc, page) => [
+                ...acc,
+                ...(page.items || []).map((p: { id: string; name: string }) => ({
+                    id: p.id,
+                    name: p.name,
+                })),
+            ],
+            []
+        );
+    }, [zonePondsData]);
+
+    // console.log('[CycleDetail] effectiveZoneId:', effectiveZoneId);
+    // console.log('[CycleDetail] zonePonds count:', zonePonds.length);
+
+    // Fetch stock transfers from all zone ponds and find incoming transfer to current pond
+    const { data: incomingTransfer } = useQuery({
+        queryKey: ['incoming-stock-transfer', pondId, zonePonds.length],
+        queryFn: async () => {
+            // console.log('[CycleDetail] Search for incoming transfers to pondId:', pondId, 'from zonePonds:', zonePonds.length);
+
+            // Try fetching from current pond first (in case API returns incoming transfers or mixed)
+            if (pondId) {
+                try {
+                    const response = await stockTransferApi.getList(pondId, {
+                        PageSize: 100,
+                        OrderBy: 'CreatedAt desc',
+                    });
+                    const transfers = response?.data?.items || [];
+                    // Check if any transfer is FROM another pond? (Usually getList(pondId) returns FROM pondId)
+                    // But let's log just in case
+                    console.log(
+                        '[CycleDetail] Transfers associated with current pond:',
+                        transfers.length
+                    );
+                } catch (e) {
+                    console.log('[CycleDetail] Error fetching current pond transfers:', e);
+                }
+            }
+
+            if (!pondId || zonePonds.length === 0) return null;
+
+            // Search stock transfers from each pond in zone
+            for (const zonePond of zonePonds) {
+                if (zonePond.id === pondId) continue; // Skip current pond
+
+                try {
+                    const response = await stockTransferApi.getList(zonePond.id, {
+                        PageSize: 100,
+                        OrderBy: 'CreatedAt desc',
+                    });
+
+                    const transfers = response?.data?.items || [];
+                    // console.log('[CycleDetail] Transfers from', zonePond.name, ':', transfers.length);
+
+                    // Find transfer where current pond is in toPonds
+                    for (const transfer of transfers) {
+                        const matchingToPond = transfer.toPonds?.find(
+                            (tp: { toPondId: string }) => tp.toPondId === pondId
+                        );
+                        if (matchingToPond) {
+                            // console.log('[CycleDetail] Found incoming transfer!', {
+                            //     fromPondId: transfer.fromPondId,
+                            //     fromPondName: zonePond.name,
+                            //     shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
+                            // });
+                            return {
+                                fromPondId: transfer.fromPondId,
+                                fromPondName: zonePond.name,
+                                shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
+                                quantity: matchingToPond.quantity,
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.log('[CycleDetail] Error fetching from', zonePond.name, ':', error);
+                }
+            }
+            // console.log('[CycleDetail] No incoming transfer found');
+            return null;
+        },
+        enabled: !!pondId && zonePonds.length > 0,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Get source pond name from incoming stock transfer
+    const sourcePondName = useMemo(() => {
+        // 1. Check transferInfo first
+        if (transferInfo?.sourcePondName) return transferInfo.sourcePondName;
+        // 2. Get from incoming stock transfer
+        if (incomingTransfer?.fromPondName) return incomingTransfer.fromPondName;
+        // 3. Fallback
+        return '-';
+    }, [transferInfo, incomingTransfer]);
+
+    // Get shrimp size from incoming stock transfer (cỡ tôm đã lưu khi tạo phiếu sang ao)
+    const shrimpSize = useMemo(() => {
+        // 1. Check shrimpSize from incoming stock transfer
+        if (incomingTransfer?.shrimpSizePcsPerKg) {
+            // console.log('[CycleDetail] shrimpSize from stock transfer:', incomingTransfer.shrimpSizePcsPerKg);
+            return `${incomingTransfer.shrimpSizePcsPerKg}`;
+        }
+        // 2. Check transferInfo fallback
+        if (transferInfo?.shrimpSize) return transferInfo.shrimpSize;
+        // 3. Fallback
+        return '-';
+    }, [incomingTransfer, transferInfo]);
 
     const [refreshing, setRefreshing] = useState(false);
     const [isCycleNameExpanded, setIsCycleNameExpanded] = useState(false);
@@ -306,55 +427,40 @@ export const CycleDetailScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Thông tin sang ao - Hiển thị nếu có transferInfo */}
-                {transferInfo && (
-                    <View style={[styles.card, styles.transferCard]}>
-                        <View style={styles.cardHeaderWithBorder}>
-                            <Text style={styles.cardTitle}>Thông tin sang ao</Text>
-                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
+                {/* Thông tin sang ao - Luôn hiển thị */}
+                <View style={[styles.card, { marginTop: spacing.sm }]}>
+                    <View style={styles.cardHeaderWithBorder}>
+                        <Text style={styles.cardTitle}>Thông tin sang ao</Text>
+                        <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>Ngày nhận ao:</Text>
+                            <Text style={styles.value}>{displayStockingDate}</Text>
                         </View>
-
-                        <View style={styles.infoContainer}>
-                            <View style={styles.infoRow}>
-                                <Text style={styles.label}>Ngày sang ao:</Text>
-                                <Text style={styles.value}>
-                                    {formatDate(new Date(transferInfo.transferDate))}
-                                </Text>
-                            </View>
-                            <View style={styles.infoRow}>
-                                <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
-                                <Text style={styles.value}>{transferInfo.shrimpSize}</Text>
-                            </View>
-                            <View style={styles.infoRow}>
-                                <Text style={styles.label}>Tổng số tôm dự kiến (con):</Text>
-                                <Text style={styles.value}>
-                                    {transferInfo.totalEstimatedShrimp?.toLocaleString() || 0}
-                                </Text>
-                            </View>
-
-                            <View style={[styles.line]} />
-
-                            {/* Ao nhận header - outside of card */}
-                            <View style={styles.infoRow}>
-                                <Text style={styles.label}>Ao nhận</Text>
-                                <Text style={styles.value}>1</Text>
-                            </View>
-
-                            {/* Card for receiving ponds list */}
-                            <View style={styles.receivingPondCard}>
-                                {/* Hiển thị ao nguồn và số lượng */}
-                                <View style={styles.subRow}>
-                                    <Text style={styles.subLabel}>
-                                        {transferInfo.sourcePondName}
-                                    </Text>
-                                    <Text style={styles.subValue}>
-                                        {transferInfo.quantity?.toLocaleString() || 0}
-                                    </Text>
-                                </View>
-                            </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>Chuyển sang từ ao:</Text>
+                            <Text style={styles.value}>{sourcePondName}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>Ngày nuôi (DOC):</Text>
+                            <Text style={styles.value}>{doc} ngày</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
+                            <Text style={styles.value}>{shrimpSize}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                            <Text style={styles.label}>Số lượng tôm sang (con):</Text>
+                            <Text style={styles.value}>
+                                {activeCycleData?.stockingQuantity?.toLocaleString() ||
+                                    activeCycleData?.totalStocking?.toLocaleString() ||
+                                    0}
+                            </Text>
                         </View>
                     </View>
-                )}
+                </View>
             </ScrollView>
         </View>
     );
@@ -515,5 +621,10 @@ const styles = StyleSheet.create({
     expandButton: {
         marginLeft: 6,
         paddingHorizontal: 2,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
 });
