@@ -1,6 +1,6 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { CreateWaterSupplyCommand } from '@/features/farm/types/waterSupply.types';
+import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.types';
 
 export const waterSupplyApi = {
     create: async (pondId: string, data: CreateWaterSupplyCommand): Promise<boolean> => {

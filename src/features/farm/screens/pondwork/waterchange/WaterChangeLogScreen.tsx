@@ -9,7 +9,7 @@ import { JobExecution, WaterSupplyMeta } from '@/features/farm/types/farm.types'
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 
 // Hooks
-import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
+import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterChangeRecords';
 import { ActivityIndicator, View } from 'react-native';
 import { colors } from '@/styles';
 

@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { waterSupplyApi } from '@/features/farm/api/waterSupplyApi';
+import { waterSupplyApi } from '@/features/farm/api/waterChangeApi';
 import { farmKeys } from './farmKeys';
 import {
     IWaterSupplyParams,
     IWaterSupplyRecord,
     CreateWaterSupplyCommand,
-} from '@/features/farm/types/waterSupply.types';
+} from '@/features/farm/types/waterChange.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 
@@ -22,12 +22,7 @@ export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParam
 
 export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSupplyParams) => {
     // 1. Fetch List keys
-    const {
-        data: listData,
-        isLoading: isListLoading,
-        error: listError,
-        refetch: refetchList,
-    } = useWaterSupplyRecords(pondId, params);
+    const { data: listData, isLoading, error, refetch } = useWaterSupplyRecords(pondId, params);
 
     // 2. Determine IDs to fetch details for
     const responseData = listData?.data;
@@ -38,42 +33,7 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
     // Fetch Material Definitions for name lookup
     const { data: materialsData } = useMaterials();
 
-    // 3. Fetch details for ALL items because List API returns empty/zero fields
-    const {
-        data: detailedItems,
-        isLoading: isDetailsLoading,
-        error: detailsError,
-        refetch: refetchDetails,
-    } = useQuery({
-        queryKey: ['waterSupplyDetails', pondId, rawItems.map(i => i.id).join(',')],
-        queryFn: async () => {
-            if (rawItems.length === 0) return [];
-            const detailPromises = rawItems.map(item =>
-                waterSupplyApi
-                    .getDetail(pondId, item.id)
-                    .then(res => res.data)
-                    .catch(err => {
-                        // If item is not found (404), it means it was deleted. Return null to filter it out.
-                        if (err?.response?.status === 404 || err?.statusCode === 404) {
-                            return null;
-                        }
-                        console.error(`Failed to fetch detail for ${item.id}`, err);
-                        return item; // Fallback to list item if other error
-                    })
-            );
-            const results = await Promise.all(detailPromises);
-            return results.filter(item => item !== null);
-        },
-        enabled: rawItems.length > 0,
-    });
-
-    const isLoading = isListLoading || (rawItems.length > 0 && isDetailsLoading);
-    const error = listError || detailsError;
-
-    // Use detailed items if available, otherwise raw items (while loading or if empty)
-    const itemsToRender = detailedItems && detailedItems.length > 0 ? detailedItems : rawItems;
-
-    const sortedItems = [...itemsToRender].sort((a, b) => {
+    const sortedItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return timeA - timeB; // Sort ascending by time (Lần 1, Lần 2...)
@@ -115,13 +75,6 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
             images: item.waterChangeDetail?.documentIds || item.documentIds || [],
         },
     }));
-
-    const refetch = async () => {
-        await refetchList();
-        if (rawItems.length > 0) {
-            await refetchDetails();
-        }
-    };
 
     return { jobs, isLoading, error, refetch };
 };
