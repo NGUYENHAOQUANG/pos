@@ -175,31 +175,24 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
     const handleSave = () => {
         if (results.length > 0) {
-            // Aggregate results
-            const allItems = results.reduce<HealthCheckItem[]>((acc, r) => acc.concat(r.items), []);
-            const totalCountAll = allItems.length;
-            const sickCountAll = allItems.filter(i => i.status !== 'HEALTHY').length;
+            // Use the LAST result (Current Check) instead of aggregating all checks
+            const latestResult = results[results.length - 1];
+            const items = latestResult.items;
+            const totalCount = latestResult.totalCount;
+            const sickCount = items.filter(i => i.status !== 'HEALTHY').length;
 
-            // Cumulative Infection Rate
-            const avgInfectionRate =
-                totalCountAll > 0
-                    ? parseFloat(((sickCountAll / totalCountAll) * 100).toFixed(2))
-                    : 0;
-
-            const isHealthy = sickCountAll === 0;
+            const isHealthy = sickCount === 0;
             const statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
 
             const params = {
                 aiHealthCheckResult: {
-                    totalCount: totalCountAll,
-                    infectionRate: avgInfectionRate,
+                    totalCount: totalCount,
+                    infectionRate: latestResult.infectionRate,
                     status: statusString,
                     imageUri: imageUri, // Passing latest image
-                    details: JSON.stringify(allItems), // Pass ALL items
+                    details: JSON.stringify(items), // Pass items of the latest check
                 },
             };
-
-            console.log('Sending AI Result:', params);
 
             navigation.navigate({
                 name: 'ShrimpInspectionScreen',

@@ -103,7 +103,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
             // Update form state
             setAverageInfectionRate(infectionRate);
             setAiTotalCount(totalCount || 0);
-            setIsHealthy(status === 'Khỏe mạnh');
+            setIsHealthy(status === 'Khỏe mạnh' || Number(infectionRate) === 0);
             // Parse details (serialized items) if available and calculate diagnosisDetails
             if (details) {
                 try {
@@ -184,8 +184,18 @@ export const ShrimpInspectionScreen: React.FC = () => {
             if (typeof diagnosisDetails === 'string' && diagnosisDetails) {
                 statusString = diagnosisDetails;
             } else if (Array.isArray(diagnosisDetails) && diagnosisDetails.length > 0) {
-                // If diagnosisDetails is array with items, extract disease types
-                statusString = diagnosisDetails.map(d => d.diseaseType).join(', ');
+                const diseaseTypeToVietnamese: Record<string, string> = {
+                    Healthy: 'Khỏe mạnh',
+                    WSSV: 'Đốm trắng',
+                    BlackGill: 'Mang đen',
+                    Yellowhead: 'Đầu vàng',
+                };
+
+                const diseases = diagnosisDetails
+                    .filter(d => d.diseaseType !== 'Healthy')
+                    .map(d => diseaseTypeToVietnamese[d.diseaseType] || d.diseaseType);
+
+                statusString = diseases.length > 0 ? diseases.join(', ') : 'Khỏe mạnh';
             } else {
                 // Fallback to isHealthy status
                 statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
