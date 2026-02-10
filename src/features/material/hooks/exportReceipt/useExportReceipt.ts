@@ -5,9 +5,9 @@ import {
     UpdateExportReceiptRequest,
 } from '@/features/material/types/exportReceipt.types';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
+import { handleError } from '@/shared/utils';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
@@ -84,9 +84,9 @@ export const useCreateExportReceipt = () => {
                 });
             }
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            console.log(error);
+            handleError(error);
         },
     });
 };
@@ -123,9 +123,8 @@ export const useUpdateExportReceipt = () => {
                 }),
             ]);
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Cập nhật phiếu xuất kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -154,9 +153,8 @@ export const useDeleteExportReceipt = () => {
                 queryClient.invalidateQueries({ queryKey: ['warehouse-items'] }),
             ]);
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Xóa phiếu xuất kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };

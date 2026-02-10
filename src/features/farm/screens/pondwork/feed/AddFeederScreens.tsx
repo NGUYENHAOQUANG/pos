@@ -27,7 +27,7 @@ export const AddFeederScreens = () => {
     const [executionDate, setExecutionDate] = useState(new Date());
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Danh sách vật tư cho màn Cho ăn (dùng logic giống HandleProblem)
+    // Danh sách vật tư cho màn Cho ăn
     const { materials } = useFeeding();
 
     // Mutation để gọi API

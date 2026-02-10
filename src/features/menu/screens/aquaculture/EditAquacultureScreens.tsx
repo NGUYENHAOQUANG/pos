@@ -88,7 +88,7 @@ export const EditAquacultureScreens: React.FC = () => {
                         startDate: data.startDate?.toISOString(),
                         endDate: data.endDate?.toISOString(),
                         status: newStatus,
-                        // notes: data.note // TODO: Add notes to SeasonData if needed
+                        notes: data.note,
                     }
                 );
 
@@ -203,6 +203,7 @@ export const EditAquacultureScreens: React.FC = () => {
                                 startDate: new Date(aquaculture.startDate),
                                 endDate: new Date(aquaculture.endDate),
                                 status: getFormStatus(aquaculture.status),
+                                note: aquaculture.notes || '',
                             }}
                             zones={zones}
                             isEdit={true}

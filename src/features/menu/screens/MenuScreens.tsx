@@ -116,9 +116,7 @@ export const MenuScreens: React.FC = () => {
                             <Text style={styles.logoutText}>Đăng xuất</Text>
                         </TouchableOpacity>
                         {/* Version */}
-                        <Text style={styles.versionText}>
-                            Phiên bản {DeviceInfo.getVersion()} ({DeviceInfo.getBuildNumber()})
-                        </Text>
+                        <Text style={styles.versionText}>Phiên bản {DeviceInfo.getVersion()}</Text>
 
                         {/* Bottom spacer for tab bar */}
                         <View style={styles.bottomSpacer} />

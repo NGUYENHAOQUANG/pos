@@ -15,9 +15,13 @@ export {
 } from '@/features/material/hooks/useMaterials';
 export {
     useExportWarehouse,
+    useInfiniteExportWarehouse,
     useAddExportWarehouseReceipt,
 } from '@/features/material/hooks/useExportWarehouse';
-export { useInventoryTickets } from '@/features/material/hooks/inventory/useInventory';
+export {
+    useInventoryTickets,
+    useInfiniteInventoryTickets,
+} from '@/features/material/hooks/inventory/useInventory';
 export {
     useImportReceipts,
     useInfiniteImportReceipts,

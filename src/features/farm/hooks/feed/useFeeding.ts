@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import Toast from 'react-native-toast-message';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { feedingRecordApi } from '@/features/farm/api/feedingRecordApi';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
@@ -28,6 +29,12 @@ export const useFeeding = () => {
     // Danh sách vật tư master
     const { data: allMaterials = [] } = useMaterials();
 
+    // Lấy danh sách nhóm vật tư để filter "Nuôi"
+    const { data: groups = [] } = useMaterialGroups();
+    const feedGroupId = useMemo(() => {
+        return groups.find(g => g.name.toLowerCase().includes('nuôi'))?.id;
+    }, [groups]);
+
     // Kho theo ZoneId
     const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
     const defaultWarehouseId = warehouses?.[0]?.id;
@@ -37,6 +44,7 @@ export const useFeeding = () => {
         defaultWarehouseId,
         {
             PageSize: 1000,
+            MaterialGroupId: feedGroupId,
         },
         { enabled: !!defaultWarehouseId }
     );

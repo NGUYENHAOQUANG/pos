@@ -92,11 +92,7 @@ const handleTokenRefresh = async (): Promise<string | null> => {
     try {
         const response = await authApi.refreshToken(refreshToken);
 
-        if (
-            (response.success || response.result) &&
-            response.data?.accessToken &&
-            response.data?.refreshToken
-        ) {
+        if (response.success && response.data?.accessToken && response.data?.refreshToken) {
             const {
                 accessToken,
                 refreshToken: newRefreshToken,

@@ -1,17 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
     GetExportWarehouseParams,
     CreateExportReceiptRequest,
+    ExportReceipt,
 } from '@/features/material/types/exportReceipt.types';
 import { exportReceiptApi } from '@/features/material/api/exportReceiptApi';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
+import { APP_CONFIG } from '@/shared/constants';
+import { handleError } from '@/shared/utils';
 
 // Constants for staleTime
 const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
+
 /**
- * Hook to fetch export warehouse receipts (Mock Data)
+ * Hook to fetch export warehouse receipts
  */
 export const useExportWarehouse = (params?: GetExportWarehouseParams) => {
     return useQuery({
@@ -28,7 +32,52 @@ export const useExportWarehouse = (params?: GetExportWarehouseParams) => {
 };
 
 /**
- * Hook to create a new export warehouse receipt (Mock Data)
+ * Hook to fetch export warehouse receipts with infinite scroll
+ */
+export const useInfiniteExportWarehouse = (
+    params?: Omit<GetExportWarehouseParams, 'Page' | 'PageSize'>,
+    options?: { enabled?: boolean }
+) => {
+    const query = useInfiniteQuery({
+        queryKey: [...materialKeys.exportWarehouse(params), 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                ...params,
+                Page: pageParam,
+                PageSize: pageSize,
+            };
+            const response = await exportReceiptApi.getAll(currentParams);
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách phiếu xuất kho');
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        enabled: options?.enabled,
+        staleTime: STALE_TIME_SHORT,
+    });
+
+    const items = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: ExportReceipt[], page) => {
+            return [...acc, ...(page.items || [])];
+        }, []);
+    }, [query.data]);
+
+    return {
+        ...query,
+        data: items,
+        total: query.data?.pages[0]?.totalCount || 0,
+    };
+};
+
+/**
+ * Hook to create a new export warehouse receipt
  */
 export const useAddExportWarehouseReceipt = () => {
     const queryClient = useQueryClient();
@@ -45,9 +94,9 @@ export const useAddExportWarehouseReceipt = () => {
                 queryKey: materialKeys.exportWarehouse(),
             });
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu xuất kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            console.log(error);
+            handleError(error);
         },
     });
 };

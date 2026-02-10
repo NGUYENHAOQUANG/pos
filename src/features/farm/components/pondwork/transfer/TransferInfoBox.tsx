@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -8,6 +8,7 @@ import { IconError } from '@/assets/icons';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { ReceivingPondDropdown } from './ReceivingPondDropdown';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
+import { Input } from '@/shared/components/forms/Input';
 
 export interface ReceivingPondItem {
     id: string;
@@ -208,13 +209,17 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                     </Text>
                                 )}
                                 <View style={styles.inputRow}>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={formatNumber(pond.quantity)}
-                                        onChangeText={text => handleQuantityChange(pond.id, text)}
-                                        keyboardType="numeric"
-                                        placeholder="0"
-                                    />
+                                    <View style={styles.inputContainer}>
+                                        <Input
+                                            value={formatNumber(pond.quantity)}
+                                            onChangeText={text =>
+                                                handleQuantityChange(pond.id, text)
+                                            }
+                                            keyboardType="numeric"
+                                            placeholder="0"
+                                            containerStyle={{ marginBottom: 0 }}
+                                        />
+                                    </View>
                                     {/* Delete Button - only show if more than 1 row */}
                                     {receivingPonds.length > 1 && (
                                         <TouchableOpacity
@@ -306,16 +311,8 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
         alignItems: 'center',
     },
-    input: {
+    inputContainer: {
         flex: 1,
-        height: 40,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 6,
-        fontSize: 14,
-        color: colors.text,
     },
     deleteButton: {
         width: 40,

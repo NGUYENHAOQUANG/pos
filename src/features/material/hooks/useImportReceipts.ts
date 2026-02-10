@@ -2,8 +2,7 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { importReceiptApi } from '@/features/material/api/importReceiptApi';
 import { useImportReceiptStore } from '@/features/material/store/importReceiptStore';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { APP_CONFIG } from '@/shared/constants';
 
 import {
@@ -14,6 +13,7 @@ import {
     UpdateImportReceiptItemCommand,
     ImportReceipt,
 } from '@/features/material/types/importReceipt.types';
+import { handleError } from '@/shared/utils';
 
 export const importReceiptKeys = {
     all: ['importReceipts'] as const,
@@ -125,9 +125,8 @@ export const useCreateImportReceipt = () => {
             showSuccessToast('Tạo phiếu nhập kho thành công');
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
         },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Tạo phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -144,9 +143,8 @@ export const useUpdateImportReceipt = () => {
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
         },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Cập nhật phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -160,9 +158,8 @@ export const useDeleteImportReceipt = () => {
             showSuccessToast('Xóa phiếu nhập kho thành công');
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
         },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Xóa phiếu nhập kho thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -179,9 +176,8 @@ export const useAddImportReceiptItems = () => {
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
         },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Thêm vật tư thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -197,9 +193,8 @@ export const useUpdateImportReceiptItems = () => {
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
         },
-        onError: (error: Error) => {
-            const errorMessage = getErrorMessage(error, 'Cập nhật vật tư thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };

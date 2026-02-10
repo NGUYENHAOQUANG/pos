@@ -15,6 +15,7 @@ import { AppNavigator } from './navigation/AppNavigator';
 import { antdTheme } from '../core/config/antd-theme';
 import { TabBarVisibilityProvider } from './navigation/TabBarVisibilityContext';
 import { SplashScreen } from '@/shared/components/layout/SplashScreen';
+import { NetworkStatusModal } from '@/shared/components/lostNetwork/NetworkStatusModal';
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager } from '@tanstack/react-query';
 
@@ -70,6 +71,9 @@ export function AppProviders() {
 
             {/* Splash Screen overlay - outside navigation stack, prevents back navigation */}
             <SplashScreen visible={showSplash} />
+
+            {/* Network Status Modal - monitors connection globally */}
+            <NetworkStatusModal />
         </SafeAreaProvider>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 import { spacing } from '@/styles';
 import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
@@ -96,7 +96,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>
             <View style={styles.inputRow}>
                 <View style={styles.inputColumn}>
-                    <FarmInput
+                    <Input
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
                         onChangeText={text => {
@@ -110,7 +110,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     />
                 </View>
                 <View style={styles.inputColumn}>
-                    <FarmInput
+                    <Input
                         label="Sản lượng còn lại (kg)"
                         value={remainingWeight}
                         onChangeText={text => {

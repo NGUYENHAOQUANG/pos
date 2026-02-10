@@ -1,6 +1,6 @@
 import React from 'react';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { Input } from '@/shared/components/forms/Input';
 
 interface SiphonLossBoxProps {
     lossAmount: string;
@@ -28,12 +28,13 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
 
     return (
         <SelectionInfoBox title="Số tôm hao (kg)">
-            <FarmInput
+            <Input
                 label="Số tôm hao (kg)"
                 value={lossAmount}
                 onChangeText={text => handleNumericInput(text, onLossAmountChange)}
                 keyboardType="numeric"
                 required
+                containerStyle={{ marginBottom: 0 }}
             />
         </SelectionInfoBox>
     );

@@ -12,6 +12,7 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { useWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { documentApi } from '@/features/material/api/documentApi';
 import { IDocument } from '@/shared/types/common.types';
 
@@ -73,20 +74,39 @@ export const useHandleProblemForm = ({
         { enabled: !!defaultWarehouseId }
     );
 
-    const materials: IMaterial[] = useMemo(() => {
-        return (warehouseItemsData?.items || []).map((item: any) => {
-            const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+    const { data: groups = [] } = useMaterialGroups();
 
-            return {
-                id: item.id,
-                name: item.materialName || item.material?.name || materialDef?.name || 'Unknown',
-                group: item.material?.materialGroup?.name || '',
-                unit: item.unitId || materialDef?.unit || '',
-                unitName: item.unitName || item.material?.unit?.name || materialDef?.unitName || '',
-                remaining: item.quantity || 0,
-            };
-        });
-    }, [warehouseItemsData, allMaterials]);
+    const allowedGroupIds = useMemo(() => {
+        return groups
+            .filter(g => {
+                const name = g.name.toLowerCase();
+                return name.includes('thiết bị điện') || name.includes('công cụ');
+            })
+            .map(g => g.id);
+    }, [groups]);
+
+    const materials: IMaterial[] = useMemo(() => {
+        return (warehouseItemsData?.items || [])
+            .filter((item: any) => {
+                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+                const groupId = item.material?.materialGroup?.id || materialDef?.groupId;
+                return allowedGroupIds.includes(groupId);
+            })
+            .map((item: any) => {
+                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+
+                return {
+                    id: item.id,
+                    name:
+                        item.materialName || item.material?.name || materialDef?.name || 'Unknown',
+                    group: item.material?.materialGroup?.name || '',
+                    unit: item.unitId || materialDef?.unit || '',
+                    unitName:
+                        item.unitName || item.material?.unit?.name || materialDef?.unitName || '',
+                    remaining: item.quantity || 0,
+                };
+            });
+    }, [warehouseItemsData, allMaterials, allowedGroupIds]);
 
     const createCleanMutation = useCreateCleanRenovation();
     const updateCleanMutation = useUpdateCleanRenovation();
@@ -413,57 +433,38 @@ export const useHandleProblemForm = ({
 
     const handleDelete = () => setShowDeleteModal(true);
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!pond?.id || !item?.id) return;
 
-        if (currentJobType === 'CLEAN_POND') {
-            deleteCleanMutation.mutate(
-                { pondId: pond.id, id: item.id },
-                {
-                    onSuccess: () => {
-                        navigation.goBack();
-                    },
-                    onError: handleError,
-                }
-            );
-            setShowDeleteModal(false);
-            return;
-        }
-
-        if (currentJobType === 'SUN_DRY_POND') {
-            deleteDryMutation.mutate(
-                { pondId: pond.id, id: item.id },
-                {
-                    onSuccess: () => {
-                        navigation.goBack();
-                    },
-                    onError: handleError,
-                }
-            );
-            setShowDeleteModal(false);
-            return;
-        }
-
-        if (currentJobType === 'TROUBLESHOOTING') {
-            deleteIncidentMutation.mutate(
-                { pondId: pond.id, id: item.id },
-                {
-                    onSuccess: () => {
-                        navigation.goBack();
-                    },
-                    onError: handleError,
-                }
-            );
-            setShowDeleteModal(false);
-            return;
-        }
-
-        // Fallback
-        const currentItems = getPondJobItems(pond.id, currentJobType);
-        const updatedItems = currentItems.filter((i: any) => i.id !== item.id);
-        updatePondJob(pond.id, currentJobType, updatedItems);
-        navigation.goBack();
         setShowDeleteModal(false);
+        await new Promise(resolve => setTimeout(() => resolve(null), 400));
+
+        try {
+            if (currentJobType === 'CLEAN_POND') {
+                await deleteCleanMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                navigation.goBack();
+                return;
+            }
+
+            if (currentJobType === 'SUN_DRY_POND') {
+                await deleteDryMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                navigation.goBack();
+                return;
+            }
+
+            if (currentJobType === 'TROUBLESHOOTING') {
+                await deleteIncidentMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                navigation.goBack();
+                return;
+            }
+
+            const currentItems = getPondJobItems(pond.id, currentJobType);
+            const updatedItems = currentItems.filter((i: any) => i.id !== item.id);
+            updatePondJob(pond.id, currentJobType, updatedItems);
+            navigation.goBack();
+        } catch (error) {
+            handleError(error);
+        }
     };
 
     const cancelDelete = () => setShowDeleteModal(false);

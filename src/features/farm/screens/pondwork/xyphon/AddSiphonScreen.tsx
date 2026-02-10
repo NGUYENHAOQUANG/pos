@@ -26,10 +26,8 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { documentApi } from '@/features/material/api/documentApi';
+import { useSiphonMaterials } from '@/features/farm/hooks/useSiphonRecords';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -89,43 +87,8 @@ export const AddSiphonScreen: React.FC = () => {
         };
     }, [itemToEdit, meta]);
 
-    // Fetch all materials definitions to check for groups (Tools)
-    const { data: allMaterials = [] } = useMaterials();
-
-    // Fetch warehouse for the current farm (Zone)
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: pond?.zoneId });
-    const warehouseId = warehouses?.[0]?.id; // Assume first warehouse of the zone
-
-    // Fetch items in the warehouse
-    const { data: warehouseItemsData } = useWarehouseItems(warehouseId, undefined, {
-        enabled: !!warehouseId,
-    });
-    const warehouseItems = useMemo(() => warehouseItemsData?.items || [], [warehouseItemsData]);
-
-    // Filter and Map: Get "Tools" from the warehouse items
-    const materials = useMemo(() => {
-        if (!warehouseItems.length || !allMaterials.length) return [];
-
-        return warehouseItems
-            .map(item => {
-                // Find corresponding material definition to check Group
-                const materialDef = allMaterials.find(m => m.id === item.materialId);
-
-                if (materialDef && materialDef.group === MaterialGroupType.TOOLS) {
-                    // Return IMaterial-like object, KEY: id must be warehouseItemId
-                    return {
-                        id: item.id, // Use WarehouseItemId unique to this stock
-                        name: item.materialName || materialDef.name,
-                        group: MaterialGroupType.TOOLS,
-                        unit: item.unitId,
-                        unitName: item.unitName || materialDef.unitName,
-                        remaining: item.quantity,
-                    } as IMaterial;
-                }
-                return null;
-            })
-            .filter((item): item is IMaterial => item !== null);
-    }, [warehouseItems, allMaterials]);
+    // Fetch materials using the new hook
+    const { materials } = useSiphonMaterials(pond?.zoneId);
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -152,34 +115,19 @@ export const AddSiphonScreen: React.FC = () => {
                             setNotes(detail.siphonDetail.notes || '');
 
                             // Update Materials
-                            if (detail.siphonDetail.materials && warehouseItems.length > 0) {
+                            if (detail.siphonDetail.materials && materials.length > 0) {
                                 const mappedMaterials: SelectedMaterialItem[] =
                                     detail.siphonDetail.materials
                                         .map((m: any) => {
-                                            // Find material in warehouseItems
-                                            const foundItem = warehouseItems.find(
-                                                wi => wi.id === m.warehouseItemId
+                                            // Find material in materials (id matches warehouseItemId)
+                                            const foundItem = materials.find(
+                                                mat => mat.id === m.warehouseItemId
                                             );
                                             if (foundItem) {
-                                                // Find definition for unit name fallback
-                                                const def = allMaterials.find(
-                                                    amd => amd.id === foundItem.materialId
-                                                );
                                                 return {
-                                                    material: {
-                                                        id: foundItem.id,
-                                                        name:
-                                                            foundItem.materialName ||
-                                                            def?.name ||
-                                                            '',
-                                                        unitName:
-                                                            foundItem.unitName ||
-                                                            def?.unitName ||
-                                                            '',
-                                                        remaining: foundItem.quantity,
-                                                    } as any,
+                                                    material: foundItem,
                                                     quantity: m.quantity,
-                                                    unit: foundItem.unitName || def?.unitName || '',
+                                                    unit: foundItem.unitName || '',
                                                 };
                                             }
                                             return null;
@@ -212,7 +160,7 @@ export const AddSiphonScreen: React.FC = () => {
         if (itemToEdit) {
             fetchDetail();
         }
-    }, [pond?.id, itemToEdit, warehouseItems, allMaterials]);
+    }, [pond?.id, itemToEdit, materials]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
