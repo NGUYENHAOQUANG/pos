@@ -220,7 +220,7 @@ export function ImagePickerActionSheet({
             } else {
                 onChooseFromLibrary();
             }
-        }, 300);
+        }, 500);
     };
 
     const renderHeader = () => (
@@ -242,7 +242,7 @@ export function ImagePickerActionSheet({
                     style={[styles.photoItem, styles.cameraItem]}
                     onPress={() => {
                         onClose();
-                        setTimeout(() => onTakePhoto(), 300);
+                        setTimeout(() => onTakePhoto(), 500);
                     }}
                 >
                     <Ionicons name="camera" size={32} color={colors.black} />
@@ -261,7 +261,7 @@ export function ImagePickerActionSheet({
                     ]}
                     onPress={() => {
                         onClose();
-                        setTimeout(() => onChooseFromLibrary(), 300);
+                        setTimeout(() => onChooseFromLibrary(), 500);
                     }}
                 >
                     <Ionicons name="images" size={32} color={colors.black} />

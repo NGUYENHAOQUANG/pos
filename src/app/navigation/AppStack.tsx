@@ -42,6 +42,8 @@ import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/wate
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 import CountingShrimpScreen from '@/features/farm/screens/pond/CountingShrimpScreens';
+import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeAIScreen';
+import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
 // Material screens
 import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
@@ -111,9 +113,19 @@ export type AppStackParamList = {
     FeedingLog: { pondId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
-    ShrimpInspectionScreen: { pond: PondData; itemToEdit?: JobExecution };
+    ShrimpInspectionScreen: {
+        pond: PondData;
+        itemToEdit?: JobExecution;
+        aiHealthCheckResult?: any;
+    };
+    ShrimpHealthCheckAIScreen: { pond: PondData };
     MeasureShrimpSizeLogScreen: { pond: PondData };
-    MeasureShrimpSizeScreen: { pond: PondData; itemToEdit?: JobExecution };
+    MeasureShrimpSizeScreen: {
+        pond: PondData;
+        itemToEdit?: JobExecution;
+        aiShrimpSize?: string;
+    };
+    MeasureShrimpSizeAIScreen: undefined;
     PondworkLogScreen: { pond: PondData };
     AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
     SettingEnvironment: {
@@ -261,6 +273,8 @@ export const AppStack: React.FC = () => {
                 component={MeasureShrimpSizeLogScreen}
             />
             <Stack.Screen name="MeasureShrimpSizeScreen" component={MeasureShrimpSizeScreen} />
+            <Stack.Screen name="ShrimpHealthCheckAIScreen" component={ShrimpHealthCheckAIScreen} />
+            <Stack.Screen name="MeasureShrimpSizeAIScreen" component={MeasureShrimpSizeAIScreen} />
             <Stack.Screen name="PondworkLogScreen" component={PondworkLogScreen} />
             <Stack.Screen name="AddEnvironmentScreen" component={AddEnvironmentScreen} />
             <Stack.Screen name="SettingEnvironment" component={SettingEnvironmentScreens} />

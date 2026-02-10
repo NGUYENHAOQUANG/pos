@@ -33,7 +33,7 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
 export const ShrimpInspectionScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const { pond, itemToEdit } = route.params || {};
+    const { pond, itemToEdit, aiHealthCheckResult } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
@@ -73,7 +73,23 @@ export const ShrimpInspectionScreen: React.FC = () => {
         meta,
     });
 
-    // Hide tab bar when this screen is mounted
+    // Handle AI Result
+    useEffect(() => {
+        if (aiHealthCheckResult) {
+            const { totalCount, infectionRate, status, imageUri } = aiHealthCheckResult;
+
+            const aiNote = `[Kết quả AI]\n- Số lượng mẫu: ${totalCount}\n- Tỉ lệ nhiễm bệnh: ${infectionRate}%\n- Tình trạng: ${status}`;
+
+            setNotes(prev => (prev ? `${prev}\n\n${aiNote}` : aiNote));
+
+            if (imageUri) {
+                setImageUris(prev => [...prev, imageUri]);
+            }
+
+            navigation.setParams({ aiHealthCheckResult: undefined });
+        }
+    }, [aiHealthCheckResult, setNotes, setImageUris, navigation]);
+
     useEffect(() => {
         setTabBarVisible(false);
     }, [setTabBarVisible]);
@@ -82,6 +98,10 @@ export const ShrimpInspectionScreen: React.FC = () => {
         if (navigation.canGoBack()) {
             navigation.goBack();
         }
+    };
+
+    const handleAICheckPress = () => {
+        navigation.navigate('ShrimpHealthCheckAIScreen', { pond });
     };
 
     const handleSavePress = () => {
@@ -167,6 +187,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                             onStoolColorChange={setStoolColor}
                             liver={liver}
                             onLiverChange={setLiver}
+                            onAICheckPress={handleAICheckPress}
                         />
 
                         {/* Ghi chú Box */}
