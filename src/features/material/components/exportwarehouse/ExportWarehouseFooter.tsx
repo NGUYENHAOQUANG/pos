@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 
@@ -14,8 +15,11 @@ export const ExportWarehouseFooter: React.FC<ExportWarehouseFooterProps> = ({
     onSaveDraft,
     onSubmit,
 }) => {
+    const insets = useSafeAreaInsets();
+    const safeBottom = Math.max(insets.bottom, 12);
+
     return (
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: safeBottom }]}>
             <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Tổng tiền:</Text>
                 <Text style={styles.totalValue}>{formatCurrency(totalAmount)}</Text>
@@ -38,7 +42,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         paddingTop: 16,
         paddingHorizontal: spacing.md,
-        paddingBottom: Platform.OS === 'ios' ? 32 : 16,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },

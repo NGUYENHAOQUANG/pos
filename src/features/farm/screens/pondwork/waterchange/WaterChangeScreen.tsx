@@ -121,17 +121,6 @@ export const WaterSupplyScreen = () => {
     const materials = useMemo(() => {
         const items = warehouseItemsData?.items || [];
 
-        if (items.length > 0) {
-            console.log(
-                'DEBUG Warehouse Items:',
-                items.map((i: any) => ({
-                    id: i.id, // warehouseItemId
-                    name: i.materialName,
-                    materialId: i.materialId, // materialDefinitionId
-                }))
-            );
-        }
-
         if (!items.length || !allMaterials.length) return [];
 
         return items
@@ -336,12 +325,6 @@ export const WaterSupplyScreen = () => {
                 })),
             },
         };
-
-        console.log('DEBUG WaterSupply handleSave:', {
-            pondId: pond?.id,
-            itemId: item?.id,
-            payload: JSON.stringify(payload, null, 2),
-        });
 
         try {
             if (item) {

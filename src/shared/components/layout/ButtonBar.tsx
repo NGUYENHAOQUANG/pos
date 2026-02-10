@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, Platform } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
 
@@ -42,9 +43,9 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     secondaryButtonLoading = false,
     containerStyle,
 }) => {
-    // Consistent bottom spacing logic
-    // iOS: 32, Android: 16
-    const paddingBottom = Platform.OS === 'ios' ? 32 : 16;
+    const insets = useSafeAreaInsets();
+    // Use actual safe area insets with minimum fallback
+    const paddingBottom = Math.max(insets.bottom, 12);
 
     const renderContent = () => {
         switch (mode) {
