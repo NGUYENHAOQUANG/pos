@@ -191,7 +191,18 @@ export function ImageUpload({
 
     return (
         <View style={[styles.container, style]}>
-            {label && <Text style={styles.label}>{label}</Text>}
+            <View style={styles.headerRow}>
+                {label && <Text style={styles.label}>{label}</Text>}
+                {imageUri && onImageRemove && (
+                    <TouchableOpacity
+                        onPress={onImageRemove}
+                        activeOpacity={0.7}
+                        style={styles.textDeleteButton}
+                    >
+                        <Text style={styles.textDelete}>Gỡ ảnh</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
             <TouchableOpacity
                 style={[styles.uploadContainer, isProcessing && styles.disabledContainer]}
                 onPress={handleImagePress}
@@ -202,16 +213,6 @@ export function ImageUpload({
                     <View style={styles.imageContainer}>
                         <RNImage source={{ uri: imageUri }} style={styles.image} />
                         {children}
-                        <TouchableOpacity
-                            style={styles.removeButton}
-                            onPress={e => {
-                                e.stopPropagation();
-                                onImageRemove?.();
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons name="close-circle" size={24} color={colors.error} />
-                        </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={styles.placeholderContainer}>
@@ -256,10 +257,24 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: spacing.md,
     },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.xs,
+    },
     label: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         color: colors.text,
+    },
+    textDeleteButton: {
+        paddingHorizontal: spacing.sm,
+    },
+    textDelete: {
+        fontSize: typography.fontSize.sm,
+        color: colors.error,
+        fontWeight: typography.fontWeight.medium,
         marginRight: spacing.sm,
     },
     uploadContainer: {

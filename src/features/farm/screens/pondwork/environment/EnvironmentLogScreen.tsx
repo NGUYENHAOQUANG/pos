@@ -195,7 +195,7 @@ export const EnvironmentLogScreen: React.FC = () => {
 
     return (
         <BaseLogScreen
-            title="Nhật ký đo môi trường"
+            title="Nhật ký đo thông số môi trường"
             startDate={startDate}
             endDate={endDate}
             onStartDateChange={setStartDate}

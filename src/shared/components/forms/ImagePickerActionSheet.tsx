@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -11,17 +11,21 @@ import {
     Image,
     PermissionsAndroid,
     Dimensions,
+    Animated,
+    Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { PanGestureHandler, State, GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const { width } = Dimensions.get('window');
+const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const COLUMN_COUNT = 4;
 const SPACING = spacing.xs;
 const ITEM_SIZE = (width - spacing.lg * 2 - SPACING * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
 
+// ... interface remains same ...
 interface ImagePickerActionSheetProps {
     visible: boolean;
     onClose: () => void;
@@ -43,6 +47,14 @@ export function ImagePickerActionSheet({
     const insets = useSafeAreaInsets();
     const [photos, setPhotos] = useState<any[]>([]);
     const [hasPermission, setHasPermission] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    // Animation values
+    const translateY = useRef(new Animated.Value(0)).current;
+
+    // Initial height is 50% of screen, expanded is 90%
+    const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.5;
+    const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.9;
+    const modalHeight = useRef(new Animated.Value(INITIAL_HEIGHT)).current;
 
     const loadPhotos = React.useCallback(async () => {
         try {
@@ -88,8 +100,73 @@ export function ImagePickerActionSheet({
     useEffect(() => {
         if (visible) {
             checkPermissionAndLoadPhotos();
+            // Reset state
+            setIsExpanded(false);
+            translateY.setValue(0);
+            modalHeight.setValue(INITIAL_HEIGHT);
         }
-    }, [visible, checkPermissionAndLoadPhotos]);
+    }, [visible, checkPermissionAndLoadPhotos, modalHeight, translateY, INITIAL_HEIGHT]);
+
+    // Handle drag gesture
+    const onGestureEvent = Animated.event([{ nativeEvent: { translationY: translateY } }], {
+        useNativeDriver: false,
+    });
+
+    const onHandlerStateChange = (event: any) => {
+        if (event.nativeEvent.oldState === State.ACTIVE) {
+            const { translationY, velocityY } = event.nativeEvent;
+
+            // Dragging UP (negative Y) -> Expand
+            if (translationY < -50 || velocityY < -500) {
+                if (!isExpanded) {
+                    setIsExpanded(true);
+                    Animated.parallel([
+                        Animated.spring(modalHeight, {
+                            toValue: EXPANDED_HEIGHT,
+                            useNativeDriver: false,
+                            friction: 8,
+                        }),
+                        Animated.spring(translateY, {
+                            toValue: 0,
+                            useNativeDriver: false,
+                        }),
+                    ]).start();
+                } else {
+                    Animated.spring(translateY, {
+                        toValue: 0,
+                        useNativeDriver: false,
+                    }).start();
+                }
+            }
+            // Dragging DOWN (positive Y) -> Collapse or Close
+            else if (translationY > 50 || velocityY > 500) {
+                if (isExpanded) {
+                    setIsExpanded(false);
+                    Animated.parallel([
+                        Animated.spring(modalHeight, {
+                            toValue: INITIAL_HEIGHT,
+                            useNativeDriver: false,
+                            friction: 8,
+                        }),
+                        Animated.spring(translateY, {
+                            toValue: 0,
+                            useNativeDriver: false,
+                        }),
+                    ]).start();
+                } else {
+                    // Close immediate when dragging down
+                    onClose();
+                }
+            }
+            // Reset
+            else {
+                Animated.spring(translateY, {
+                    toValue: 0,
+                    useNativeDriver: false,
+                }).start();
+            }
+        }
+    };
 
     const normalizeAsset = (
         uri: string,
@@ -147,10 +224,15 @@ export function ImagePickerActionSheet({
     };
 
     const renderHeader = () => (
-        <View style={styles.header}>
-            <View style={styles.indicator} />
-            <Text style={styles.title}>Chọn ảnh</Text>
-        </View>
+        <PanGestureHandler
+            onGestureEvent={onGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+        >
+            <Animated.View style={styles.header}>
+                <View style={styles.indicator} />
+                <Text style={styles.title}>Chọn ảnh</Text>
+            </Animated.View>
+        </PanGestureHandler>
     );
 
     const renderItem = ({ item, index: _index }: { item: any; index: number }) => {
@@ -209,54 +291,71 @@ export function ImagePickerActionSheet({
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <Pressable style={styles.backdrop} onPress={onClose}>
-                <Pressable style={styles.container} onPress={e => e.stopPropagation()}>
-                    <View style={styles.card}>
-                        {renderHeader()}
+            <GestureHandlerRootView style={{ width: '100%', height: '100%' }}>
+                <Pressable style={styles.backdrop} onPress={onClose}>
+                    <Pressable style={styles.container} onPress={e => e.stopPropagation()}>
+                        <Animated.View
+                            style={[
+                                styles.card,
+                                {
+                                    height: Animated.subtract(modalHeight, translateY),
+                                },
+                            ]}
+                        >
+                            {renderHeader()}
 
-                        <FlatList
-                            data={data}
-                            renderItem={renderItem}
-                            keyExtractor={(item, index) =>
-                                item.isCamera
-                                    ? 'camera'
-                                    : item.isLibrary
-                                    ? 'library'
-                                    : (item.node?.image?.uri || index.toString()) + index
-                            }
-                            numColumns={COLUMN_COUNT}
-                            columnWrapperStyle={styles.columnWrapper}
-                            contentContainerStyle={styles.listContent}
-                            showsVerticalScrollIndicator={false}
-                            style={styles.flatList}
-                            ListFooterComponent={
-                                !hasPermission ? (
-                                    <View
-                                        style={[
-                                            styles.permissionContainer,
-                                            { marginBottom: Math.max(insets.bottom, spacing.md) },
-                                        ]}
-                                    >
-                                        <Text style={styles.permissionText}>
-                                            Cần quyền truy cập thư viện ảnh để hiển thị ảnh gần đây.
-                                        </Text>
-                                        <TouchableOpacity
-                                            style={styles.permissionButton}
-                                            onPress={checkPermissionAndLoadPhotos}
+                            <FlatList
+                                data={data}
+                                renderItem={renderItem}
+                                keyExtractor={(item, index) =>
+                                    item.isCamera
+                                        ? 'camera'
+                                        : item.isLibrary
+                                        ? 'library'
+                                        : (item.node?.image?.uri || index.toString()) + index
+                                }
+                                numColumns={COLUMN_COUNT}
+                                columnWrapperStyle={styles.columnWrapper}
+                                contentContainerStyle={styles.listContent}
+                                showsVerticalScrollIndicator={false}
+                                style={styles.flatList}
+                                ListFooterComponent={
+                                    !hasPermission ? (
+                                        <View
+                                            style={[
+                                                styles.permissionContainer,
+                                                {
+                                                    marginBottom: Math.max(
+                                                        insets.bottom,
+                                                        spacing.md
+                                                    ),
+                                                },
+                                            ]}
                                         >
-                                            <Text style={styles.permissionButtonText}>
-                                                Cấp quyền
+                                            <Text style={styles.permissionText}>
+                                                Cần quyền truy cập thư viện ảnh để hiển thị ảnh gần
+                                                đây.
                                             </Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                ) : (
-                                    <View style={{ height: Math.max(insets.bottom, spacing.md) }} />
-                                )
-                            }
-                        />
-                    </View>
+                                            <TouchableOpacity
+                                                style={styles.permissionButton}
+                                                onPress={() => Linking.openSettings()}
+                                            >
+                                                <Text style={styles.permissionButtonText}>
+                                                    Cấp quyền
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ) : (
+                                        <View
+                                            style={{ height: Math.max(insets.bottom, spacing.md) }}
+                                        />
+                                    )
+                                }
+                            />
+                        </Animated.View>
+                    </Pressable>
                 </Pressable>
-            </Pressable>
+            </GestureHandlerRootView>
         </Modal>
     );
 }
@@ -276,7 +375,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: borderRadius.xl,
         borderTopRightRadius: borderRadius.xl,
         paddingTop: spacing.sm,
-        maxHeight: '80%',
+        maxHeight: '100%',
         width: '100%',
         overflow: 'hidden',
     },
