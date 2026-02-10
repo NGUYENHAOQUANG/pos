@@ -34,7 +34,8 @@ interface ImageUploadProps {
     onImageSelect?: (
         uri: string,
         base64?: string,
-        file?: { fileName: string; type: string }
+        file?: { fileName: string; type: string },
+        dimensions?: { width: number; height: number }
     ) => void;
     onImageRemove?: () => void;
     style?: ViewStyle;
@@ -114,8 +115,12 @@ export function ImageUpload({
 
             const fileName = asset.fileName || finalUri.split('/').pop() || 'image.jpg';
             const type = asset.type || 'image/jpeg';
+            const dimensions =
+                asset.width && asset.height
+                    ? { width: asset.width, height: asset.height }
+                    : undefined;
 
-            onImageSelect?.(finalUri, base64String, { fileName, type });
+            onImageSelect?.(finalUri, base64String, { fileName, type }, dimensions);
         } catch (error) {
             console.error('Error processing image:', error);
             Alert.alert('Lỗi', 'Không thể xử lý ảnh này, vui lòng thử lại.');
@@ -223,9 +228,15 @@ export function ImageUpload({
                 onClose={() => setActionSheetVisible(false)}
                 onTakePhoto={handleTakePhoto}
                 onChooseFromLibrary={handleChooseFromLibrary}
-                onImageSelected={(uri, asset) =>
-                    processImage({ uri, fileName: asset?.fileName, type: asset?.type })
-                }
+                onImageSelected={(uri, asset) => {
+                    processImage({
+                        uri,
+                        fileName: asset?.fileName,
+                        type: asset?.type,
+                        width: asset?.width,
+                        height: asset?.height,
+                    });
+                }}
             />
         </View>
     );
