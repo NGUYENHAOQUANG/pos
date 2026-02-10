@@ -20,7 +20,8 @@ export interface IWaterSupplyRecord {
         addedVolume?: number; // Added
         note?: string; // Corrected from 'notes' to 'note'
         materials?: Array<{
-            materialId: string; // Updated
+            materialId?: string; // Updated
+            warehouseItemId?: string; // Added to cover both cases
             quantity: number;
             warehouseItemName?: string;
             unitName?: string;
@@ -41,8 +42,9 @@ export interface IWaterSupplyParams {
 }
 
 export interface CreateWaterSupplyCommand {
+    documentIds?: string[];
     waterChangeDetail: {
-        documentIds?: string[]; // Added
+        // documentIds removed as it is at root now
         targetWaterLevel: number; // Updated from targetLevel
         waterAdded: number; // Updated from supplyLevel
         waterRemoved?: number; // Added
@@ -51,7 +53,7 @@ export interface CreateWaterSupplyCommand {
         addedVolume?: number; // Added
         note?: string; // Corrected from 'notes' to 'note'
         materials: Array<{
-            materialId: string; // Updated from warehouseItemId
+            warehouseItemId: string; // Updated from materialId
             quantity: number;
         }>;
     };

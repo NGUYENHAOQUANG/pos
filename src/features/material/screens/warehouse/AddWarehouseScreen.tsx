@@ -1,13 +1,6 @@
 import React, { useEffect } from 'react';
-import {
-    View,
-    StyleSheet,
-    StatusBar,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    Platform,
-} from 'react-native';
+import { View, StyleSheet, StatusBar, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
@@ -28,6 +21,8 @@ interface AddWarehouseScreenProps {}
 
 export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
     const { setTabBarVisible } = useTabBarVisibility();
+    const insets = useSafeAreaInsets();
+    const safeBottom = Math.max(insets.bottom, 12);
 
     const {
         // State
@@ -156,7 +151,7 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                         </ScrollView>
                     </SafeInputLayout>
 
-                    <View style={styles.footer}>
+                    <View style={[styles.footer, { paddingBottom: safeBottom }]}>
                         <View style={styles.totalRow}>
                             <Text style={styles.totalLabel}>Tổng tiền:</Text>
                             <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
@@ -214,7 +209,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         paddingTop: 16,
         paddingHorizontal: spacing.md,
-        paddingBottom: Platform.OS === 'ios' ? 32 : 16,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },

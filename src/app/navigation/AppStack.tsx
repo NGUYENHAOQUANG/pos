@@ -23,8 +23,8 @@ import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environme
 import { CreateCycleScreen } from '@/features/farm/screens/pond/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
-import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/watersupply/WaterSupplyScreen';
-import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/watersupply/WaterSupplyLogScreen';
+import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
+import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
@@ -282,7 +282,6 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
             <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
             <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
-            <Stack.Screen name="TransferLog" component={AddTransferScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
             <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />

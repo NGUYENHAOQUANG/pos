@@ -100,6 +100,20 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
         },
+        HARVEST_RECORDS: {
+            LIST: (pondId: string) => `/pond/${pondId}/harvest-records`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/harvest-records/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/harvest-records`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/harvest-records/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/harvest-records/${id}`,
+        },
+        STOCK_TRANSFER: {
+            LIST: (pondId: string) => `/pond/${pondId}/stock-transfer`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/stock-transfer`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',

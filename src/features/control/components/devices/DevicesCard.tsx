@@ -18,6 +18,7 @@ interface DevicesCardProps {
     // onMenuPress?: () => void; // Replaced by specific actions
     onSwitchToSchedule?: () => void;
     onSwitchToManual?: () => void;
+    loadingIds?: Record<string, boolean>;
 }
 
 export const DevicesCard: React.FC<DevicesCardProps> = ({
@@ -30,6 +31,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
     onModePress,
     onSwitchToSchedule,
     onSwitchToManual,
+    loadingIds = {},
 }) => {
     return (
         <View style={[styles.container, style]}>
@@ -50,6 +52,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
                         onSettingsPress={onSettingsPress}
                         onModePress={onModePress}
                         style={layout === 'grid' ? styles.gridItem : undefined}
+                        isLoading={loadingIds[device.id]}
                     />
                 ))}
             </View>

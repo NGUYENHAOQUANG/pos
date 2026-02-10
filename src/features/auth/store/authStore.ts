@@ -16,6 +16,7 @@ import {
     CompleteProfilePayload,
     UserProfileData,
 } from '@/features/auth/types/auth.types';
+import { NormalizedError } from '@/core/api/errorHandler';
 
 interface AuthState {
     user: AuthUser | null;
@@ -66,7 +67,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await authApi.login(credentials);
 
-                    if ((response.success || response.result) && response.data.accessToken) {
+                    if (response.success && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
                         const accessTokenExpires = response.data.accessTokenExpiresAt;
@@ -103,7 +104,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const response = await authApi.verifyOtp(contact, otpCode);
 
-                    if ((response.success || response.result) && response.data.accessToken) {
+                    if (response.success && response.data.accessToken) {
                         const token = response.data.accessToken;
                         const refreshToken = response.data.refreshToken;
                         const accessTokenExpires = response.data.accessTokenExpiresAt;
@@ -212,29 +213,24 @@ export const useAuthStore = create<AuthState>()(
             completeProfile: async (data: CompleteProfilePayload) => {
                 set({ loading: true });
                 try {
-                    const response = await authApi.completeProfile(data);
-                    if (response.success || response.result) {
-                        // Update user status and authenticate
-                        set(state => ({
-                            loading: false,
-                            isAuthenticated: true,
-                            user: state.user
-                                ? {
-                                      ...state.user,
-                                      name: data.fullName,
-                                      email: data.email || state.user.email,
-                                      avatar: data.avatarUrl || state.user.avatar,
-                                      loginStatus: 'COMPLETED',
-                                  }
-                                : null,
-                        }));
-                        // Also refresh profile if needed - managed by React Query now
-                    } else {
-                        throw new Error(response.message || 'Complete profile failed');
-                    }
+                    await authApi.completeProfile(data);
+                    set(state => ({
+                        loading: false,
+                        isAuthenticated: true,
+                        user: state.user
+                            ? {
+                                  ...state.user,
+                                  name: data.fullName,
+                                  email: data.email || state.user.email,
+                                  avatar: data.avatarUrl || state.user.avatar,
+                                  loginStatus: 'COMPLETED',
+                              }
+                            : null,
+                    }));
                 } catch (error) {
                     set({ loading: false });
-                    throw error;
+                    console.log(error);
+                    throw error as NormalizedError;
                 }
             },
 

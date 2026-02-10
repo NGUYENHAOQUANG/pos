@@ -1,8 +1,18 @@
-import { View, StyleSheet, TouchableOpacity, ViewStyle, StyleProp, Dimensions } from 'react-native';
+import React from 'react';
+import {
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    ViewStyle,
+    StyleProp,
+    Dimensions,
+    ActivityIndicator,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ButtonControlMode } from './ButtonControlMode';
 import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
+import Toast from 'react-native-toast-message';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
@@ -21,95 +31,118 @@ export interface DeviceCardProps {
     onSettingsPress?: (id: string) => void;
     onModePress?: (id: string) => void;
     style?: StyleProp<ViewStyle>;
+    isLoading?: boolean;
 }
 
-export const DeviceCard: React.FC<DeviceCardProps> = ({
-    data,
-    onToggle,
-    onSettingsPress,
-    onModePress,
-    style,
-}) => {
-    // Determine styles based on state
-    let containerStyle: ViewStyle = styles.cardContainer;
-    let switchTrackColor: string = colors.primary;
+export const DeviceCard = React.memo<DeviceCardProps>(
+    ({ data, onToggle, onSettingsPress, onModePress, style, isLoading }) => {
+        // Determine styles based on state
+        let containerStyle: ViewStyle = styles.cardContainer;
+        let switchTrackColor: string = colors.primary;
 
-    if (data.errorMessage) {
-        // Error State
-        containerStyle = { ...styles.cardContainer, ...styles.cardError };
-        switchTrackColor = colors.primary;
-    } else if (data.mode === EControlMode.LOCAL) {
-        // Local Mode (Active but locked)
-        containerStyle = { ...styles.cardContainer, ...styles.cardActive };
-        switchTrackColor = colors.primaryLight; // Lighter blue to indicate read-only/local
-    } else if (!data.isOn) {
-        // Inactive State
-        containerStyle = { ...styles.cardContainer, ...styles.cardInactive };
-        switchTrackColor = colors.gray[200];
-    } else {
-        // Active State
-        containerStyle = { ...styles.cardContainer, ...styles.cardActive };
-    }
+        if (data.errorMessage) {
+            // Error State
+            containerStyle = { ...styles.cardContainer, ...styles.cardError };
+            switchTrackColor = colors.primary;
+        } else if (data.mode === EControlMode.LOCAL) {
+            // Local Mode (Active but locked)
+            containerStyle = { ...styles.cardContainer, ...styles.cardActive };
+            switchTrackColor = colors.primaryLight; // Lighter blue to indicate read-only/local
+        } else if (!data.isOn) {
+            // Inactive State
+            containerStyle = { ...styles.cardContainer, ...styles.cardInactive };
+            switchTrackColor = colors.gray[200];
+        } else {
+            // Active State
+            containerStyle = { ...styles.cardContainer, ...styles.cardActive };
+        }
 
-    const Icon = getDeviceIcon(data.type);
+        const Icon = getDeviceIcon(data.type);
 
-    if (!Icon) return null;
+        if (!Icon) return null;
 
-    return (
-        <View style={[containerStyle, style]}>
-            <View style={styles.innerContent}>
-                {/* Top Row: Icon & Settings */}
-                <View style={styles.rowTop}>
-                    <DevicesStatusColor
-                        icon={Icon}
-                        isOn={data.isOn}
-                        errorMessage={data.errorMessage}
-                        size={s(48)}
-                    />
-                    <TouchableOpacity
-                        style={styles.settingsButton}
-                        onPress={() => onSettingsPress?.(data.id)}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="settings-outline" size={s(18)} color={colors.gray[600]} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Middle Row: Error & Mode */}
-                <View style={styles.rowMiddle}>
-                    <View style={styles.errorContainer}>
-                        {data.errorMessage ? (
-                            <AutoScrollText text={data.errorMessage} style={styles.errorText} />
-                        ) : null}
+        return (
+            <View style={[containerStyle, style]}>
+                <View
+                    style={[styles.innerContent, isLoading && { opacity: 0.3 }]}
+                    collapsable={false}
+                    renderToHardwareTextureAndroid={true}
+                >
+                    {/* Top Row: Icon & Settings */}
+                    <View style={styles.rowTop}>
+                        <DevicesStatusColor
+                            icon={Icon}
+                            isOn={data.mode === EControlMode.LOCAL ? true : data.isOn}
+                            errorMessage={data.errorMessage}
+                            size={s(48)}
+                        />
+                        <TouchableOpacity
+                            style={styles.settingsButton}
+                            onPress={() => onSettingsPress?.(data.id)}
+                            activeOpacity={0.7}
+                            disabled={isLoading}
+                        >
+                            <Ionicons
+                                name="settings-outline"
+                                size={s(18)}
+                                color={colors.gray[600]}
+                            />
+                        </TouchableOpacity>
                     </View>
-                    <ButtonControlMode
-                        mode={data.mode}
-                        onPress={
-                            data.mode === EControlMode.LOCAL
-                                ? undefined
-                                : () => onModePress?.(data.id)
-                        }
-                        style={styles.scaledButton}
-                    />
+
+                    {/* Middle Row: Error & Mode */}
+                    <View style={styles.rowMiddle}>
+                        <View style={styles.errorContainer}>
+                            {data.errorMessage ? (
+                                <AutoScrollText text={data.errorMessage} style={styles.errorText} />
+                            ) : null}
+                        </View>
+                        <ButtonControlMode
+                            mode={data.mode}
+                            onPress={
+                                data.mode === EControlMode.LOCAL
+                                    ? undefined
+                                    : () => onModePress?.(data.id)
+                            }
+                            style={styles.scaledButton}
+                            disabled={isLoading}
+                        />
+                    </View>
+
+                    {/* Bottom Row: Name & Switch */}
+                    <View style={styles.rowBottom}>
+                        <View style={styles.nameContainer}>
+                            <AutoScrollText text={data.name} style={styles.deviceName} />
+                        </View>
+                        <ButtonDevices
+                            value={data.mode === EControlMode.LOCAL ? true : data.isOn}
+                            onValueChange={val => {
+                                if (data.mode === EControlMode.LOCAL) {
+                                    Toast.show({
+                                        type: 'error',
+                                        text1: 'Không thể bật/tắt thiết bị này',
+                                        position: 'top',
+                                    });
+                                    return;
+                                }
+                                onToggle(data.id, val);
+                            }}
+                            trackColor={switchTrackColor}
+                            style={styles.scaledButton}
+                            disabled={isLoading}
+                        />
+                    </View>
                 </View>
 
-                {/* Bottom Row: Name & Switch */}
-                <View style={styles.rowBottom}>
-                    <View style={styles.nameContainer}>
-                        <AutoScrollText text={data.name} style={styles.deviceName} />
+                {isLoading && (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="small" color={colors.primary} />
                     </View>
-                    <ButtonDevices
-                        value={data.isOn}
-                        onValueChange={val => onToggle(data.id, val)}
-                        trackColor={switchTrackColor}
-                        style={styles.scaledButton}
-                        disabled={data.mode === EControlMode.LOCAL}
-                    />
-                </View>
+                )}
             </View>
-        </View>
-    );
-};
+        );
+    }
+);
 
 const styles = StyleSheet.create({
     cardContainer: {
@@ -190,5 +223,12 @@ const styles = StyleSheet.create({
     },
     scaledButton: {
         transform: [{ scale: scaleFactor < 1 ? scaleFactor : 1 }],
+    },
+    loadingContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+        borderRadius: s(16), // Match card border radius
     },
 });

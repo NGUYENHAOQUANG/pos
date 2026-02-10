@@ -26,7 +26,7 @@ import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
-import { NormalizedError } from '@/core/api/errorHandler';
+import { normalizeApiError, NormalizedError } from '@/core/api/errorHandler';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 // Countdown duration in seconds
@@ -73,6 +73,19 @@ export default function VerifyOTPScreen() {
             keyboardHideListener.remove();
             keyboardShowListener.remove();
         };
+    }, []);
+
+    // Auto-focus first input when screen mounts to show keyboard immediately
+    // Use delay on iOS to ensure smooth animation and prevent keyboard flicker
+    useEffect(() => {
+        const timer = setTimeout(
+            () => {
+                otpInputRef.current?.focusFirst();
+            },
+            Platform.OS === 'ios' ? 100 : 0
+        );
+
+        return () => clearTimeout(timer);
     }, []);
     // Calculate remaining countdown based on real elapsed time
     const calculateRemainingTime = React.useCallback(() => {
@@ -166,9 +179,8 @@ export default function VerifyOTPScreen() {
 
             // Success! Store update (isAuthenticated=true) will trigger navigation to Main App if status is COMPLETED
         } catch (err) {
-            const error = err as NormalizedError;
-            console.error(error);
-            setErrorMessage(error.message);
+            const normalizedError = normalizeApiError(err);
+            setErrorMessage(normalizedError.message);
         } finally {
             setIsVerifying(false);
         }
@@ -215,7 +227,17 @@ export default function VerifyOTPScreen() {
             setCountdown(COUNTDOWN_DURATION);
             setOtp(['', '', '', '']);
             setErrorMessage('');
-            otpInputRef.current?.focusFirst();
+
+            // Delay focus on iOS to prevent keyboard flicker when OTP autofill happens
+            // iOS dismisses keyboard when notification appears, then we focus again
+            // Adding delay allows iOS to complete its autofill animation smoothly
+            if (Platform.OS === 'ios') {
+                setTimeout(() => {
+                    otpInputRef.current?.focusFirst();
+                }, 300);
+            } else {
+                otpInputRef.current?.focusFirst();
+            }
 
             Toast.show({
                 type: 'success',

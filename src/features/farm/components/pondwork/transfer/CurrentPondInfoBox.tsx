@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewStyle } from 'react-native';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, InfoItem, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
 interface CurrentPondInfoBoxProps {
@@ -51,13 +51,14 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
             containerStyle={containerStyle}
         >
             {/* Shrimp Size Input */}
-            <FarmInput
+            <Input
                 label="Cỡ tôm (con/kg)"
                 value={shrimpSize}
                 onChangeText={onShrimpSizeChange}
                 keyboardType="numeric"
                 placeholder="0"
                 required
+                containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>
     );

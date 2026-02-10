@@ -17,7 +17,7 @@ import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
-import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/watersupply/WaterSupplyInfoBox';
+import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/waterchange/WaterChangeInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
@@ -33,16 +33,19 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 // API & Hooks
-import { waterSupplyApi } from '@/features/farm/api/waterSupplyApi';
+import { waterSupplyApi } from '@/features/farm/api/waterChangeApi';
 import {
     useCreateWaterSupplyRecord,
     useUpdateWaterSupplyRecord,
     useDeleteWaterSupplyRecord,
-} from '@/features/farm/hooks/useWaterSupplyRecords';
-import { CreateWaterSupplyCommand } from '@/features/farm/types/waterSupply.types';
+} from '@/features/farm/hooks/useWaterChangeRecords';
+import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.types';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+
 import { documentApi } from '@/features/material/api/documentApi';
+import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupply'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -77,7 +80,9 @@ export const WaterSupplyScreen = () => {
 
     // Images
     const [imageUris, setImageUris] = useState<string[]>([]);
+
     const [documentIds, setDocumentIds] = useState<string[]>([]);
+    const [detailData, setDetailData] = useState<IWaterSupplyRecord | null>(null);
 
     // Modal Delete
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -89,38 +94,59 @@ export const WaterSupplyScreen = () => {
 
     // --- Fetch Materials (Warehouse) ---
     const { data: allMaterials = [] } = useMaterials();
+    const { data: groups = [] } = useMaterialGroups();
+
+    const allowedGroupIds = useMemo(() => {
+        return groups
+            .filter(g => {
+                const name = g.name.toLowerCase();
+                return name.includes('thiết bị điện') || name.includes('công cụ');
+            })
+            .map(g => g.id);
+    }, [groups]);
+
     const { data: warehouses = [] } = useWarehouses({ ZoneId: pond?.zoneId });
     const warehouseId = warehouses?.[0]?.id; // Assume first warehouse
-    const { data: warehouseItemsData } = useWarehouseItems(warehouseId, undefined, {
-        enabled: !!warehouseId,
-    });
-    const warehouseItems = useMemo(() => warehouseItemsData?.items || [], [warehouseItemsData]);
 
-    // Filter appropriate materials (Logic from Siphon or generic?)
-    // User didn't specify material type restriction for Water Supply, but usually treatments use minerals/chemicals.
-    // I will list all available items from warehouse for flexibility unless specified.
-    // Siphon filtered for TOOLS, but Water Supply might need chemicals.
-    // Let's allow all non-feed items or just all items?
-    // Existing code used mock: Zeolite, Chlorine, Vôi nóng (Minerals/Chemicals).
-    // Let's enable all items for now, or filter by Group if needed.
-    // Usually 'Khoáng', 'Diệt khuẩn', 'Xử lý' are common.
+    const { data: warehouseItemsData } = useWarehouseItems(
+        warehouseId,
+        {
+            PageSize: 1000,
+        },
+        {
+            enabled: !!warehouseId,
+        }
+    );
 
     const materials = useMemo(() => {
-        if (!warehouseItems.length || !allMaterials.length) return [];
+        const items = warehouseItemsData?.items || [];
 
-        return warehouseItems.map(item => {
-            const materialDef = allMaterials.find(m => m.id === item.materialId);
-            return {
-                id: item.id, // warehouseItemId (dùng làm key cho UI)
-                materialDefId: item.materialId, // ID định danh vật tư (dùng để gửi API)
-                name: item.materialName || materialDef?.name,
-                group: materialDef?.group,
-                unit: item.unitId,
-                unitName: item.unitName || materialDef?.unitName,
-                remaining: item.quantity,
-            } as IMaterial & { materialDefId: string }; // Mở rộng type tạm thời
-        });
-    }, [warehouseItems, allMaterials]);
+        if (!items.length || !allMaterials.length) return [];
+
+        return items
+            .filter((item: any) => {
+                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+                const groupId = item.material?.materialGroup?.id || materialDef?.groupId;
+                return allowedGroupIds.includes(groupId);
+            })
+            .map((item: any) => {
+                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
+                return {
+                    id: item.id, // warehouseItemId
+                    materialDefId: item.materialId,
+                    name:
+                        item.materialName || item.material?.name || materialDef?.name || 'Unknown',
+                    group: item.material?.materialGroup?.name || '',
+                    unit: item.unitId || (materialDef as any)?.unit || '',
+                    unitName:
+                        item.unitName ||
+                        item.material?.unit?.name ||
+                        (materialDef as any)?.unitName ||
+                        '',
+                    remaining: item.quantity || 0,
+                } as IMaterial & { materialDefId: string };
+            });
+    }, [warehouseItemsData, allMaterials, allowedGroupIds]);
 
     // --- Load Data khi Edit ---
     useEffect(() => {
@@ -129,98 +155,78 @@ export const WaterSupplyScreen = () => {
                 try {
                     const response = await waterSupplyApi.getDetail(pond.id, item.id);
                     if (response && response.data) {
-                        const detail = response.data; // IWaterSupplyRecord
-                        console.log('API Detail Response:', JSON.stringify(detail, null, 2));
-
-                        // Date
-                        if (detail.createdAt) {
-                            setSelectedDate(new Date(detail.createdAt));
-                        }
-
-                        // Detail fields
-                        if (detail.waterChangeDetail) {
-                            setTargetLevel(
-                                detail.waterChangeDetail.targetWaterLevel?.toString() ||
-                                    detail.waterChangeDetail.TargetWaterLevel?.toString() ||
-                                    ''
-                            );
-                            setSupplyLevel(
-                                detail.waterChangeDetail.waterAdded?.toString() ||
-                                    detail.waterChangeDetail.WaterAdded?.toString() ||
-                                    ''
-                            );
-
-                            // Check both 'note' and 'notes'
-                            setNote(
-                                detail.waterChangeDetail.note ||
-                                    detail.waterChangeDetail.notes ||
-                                    ''
-                            );
-
-                            // Load Images
-                            const docIds =
-                                detail.waterChangeDetail.documentIds || detail.documentIds;
-                            if (docIds && docIds.length > 0) {
-                                setDocumentIds(docIds);
-                                documentApi
-                                    .getUrls(docIds)
-                                    .then(urls => setImageUris(urls))
-                                    .catch(err => console.error('Fetch image URLs failed', err));
-                            }
-
-                            // Materials
-                            if (detail.waterChangeDetail.materials && warehouseItems.length > 0) {
-                                const mappedMaterials: SelectedMaterialItem[] =
-                                    detail.waterChangeDetail.materials
-                                        .map((m: any) => {
-                                            // API trả về materialId hoặc warehouseItemId
-                                            const foundItem = warehouseItems.find(
-                                                wi =>
-                                                    wi.materialId === m.materialId ||
-                                                    wi.id === m.warehouseItemId ||
-                                                    wi.id === m.materialId ||
-                                                    wi.materialId === m.MaterialId // PascalCase check (m.MaterialId)
-                                            );
-                                            const def = allMaterials.find(
-                                                amd => amd.id === foundItem?.materialId
-                                            );
-
-                                            if (foundItem) {
-                                                return {
-                                                    material: {
-                                                        id: foundItem.id,
-                                                        materialDefId: foundItem.materialId,
-                                                        name:
-                                                            foundItem.materialName ||
-                                                            def?.name ||
-                                                            '',
-                                                        unitName:
-                                                            foundItem.unitName ||
-                                                            def?.unitName ||
-                                                            '',
-                                                        remaining: foundItem.quantity,
-                                                    } as any,
-                                                    quantity: m.quantity,
-                                                    unit: foundItem.unitName || def?.unitName || '',
-                                                };
-                                            }
-                                            return null;
-                                        })
-                                        .filter((m: any) => m !== null);
-                                setSelectedMaterials(mappedMaterials);
-                            }
-                        }
-                        // ...
-                        // ...
+                        setDetailData(response.data);
                     }
                 } catch (e) {
                     console.error('Fetch detail error:', e);
                 }
             }
         };
-
         fetchDetail();
-    }, [pond?.id, item?.id, warehouseItems, allMaterials]);
+    }, [pond?.id, item?.id]);
+
+    // Bind Basic Data
+    useEffect(() => {
+        if (!detailData) return;
+
+        if (detailData.createdAt) setSelectedDate(new Date(detailData.createdAt));
+
+        if (detailData.waterChangeDetail) {
+            const detailAny = detailData.waterChangeDetail as any;
+            setTargetLevel(
+                detailAny.targetWaterLevel?.toString() ||
+                    detailAny.TargetWaterLevel?.toString() ||
+                    ''
+            );
+            setSupplyLevel(
+                detailAny.waterAdded?.toString() || detailAny.WaterAdded?.toString() || ''
+            );
+            setNote(detailAny.note || detailAny.notes || '');
+
+            // Images
+            const docIds = detailData.waterChangeDetail.documentIds || detailData.documentIds;
+            if (docIds && docIds.length > 0) {
+                setDocumentIds(docIds);
+                documentApi.getUrls(docIds).then(setImageUris).catch(console.error);
+            }
+        }
+    }, [detailData, setImageUris]);
+
+    // Bind Materials (Wait for materials from warehouse)
+    useEffect(() => {
+        if (!detailData?.waterChangeDetail?.materials || materials.length === 0) return;
+
+        const mapped = detailData.waterChangeDetail.materials
+            .map((m: any) => {
+                // Try to find in warehouse items
+                // Priority: warehouseItemId, then materialId
+                const targetId = m.warehouseItemId || m.materialId;
+
+                let found = materials.find(
+                    mat => mat.id === targetId || mat.materialDefId === targetId
+                );
+
+                if (found) {
+                    return {
+                        material: found,
+                        quantity: m.quantity,
+                        unit: found.unitName,
+                    } as SelectedMaterialItem;
+                }
+                return null;
+            })
+            .filter(Boolean) as SelectedMaterialItem[];
+
+        // Only set if we found something, to avoid clearing valid user selection if re-runs?
+        // Actually for Edit mode, we want to set initial.
+        // If user already changed selectedMaterials, this might overwrite?
+        // But this only runs when detailData changes or materials loads.
+        // detailData changes once. materials might change once.
+        // To be safe, checking if selectedMaterials is empty might start initial load only.
+        if (mapped.length > 0) {
+            setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
+        }
+    }, [detailData, materials]);
     // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
     const calculateInfo = useMemo(() => {
         // 1. Kiểm tra nếu chưa nhập liệu thì trả về '-'
@@ -303,8 +309,9 @@ export const WaterSupplyScreen = () => {
         // Payload
         // Payload chuẩn theo Swagger
         const payload: CreateWaterSupplyCommand = {
+            documentIds: currentDocumentIds, // Array string (Root level)
             waterChangeDetail: {
-                documentIds: currentDocumentIds, // Array string
+                // documentIds: currentDocumentIds, // Removed
                 targetWaterLevel: parseFloat(targetLevel),
                 waterAdded: parseFloat(supplyLevel),
                 waterRemoved: parseFloat(calculateInfo.drainLevel) || 0,
@@ -313,13 +320,11 @@ export const WaterSupplyScreen = () => {
                 addedVolume: parseFloat(calculateInfo.volumeSupply) || 0,
                 note: note, // "note" (số ít)
                 materials: selectedMaterials.map(m => ({
-                    materialId: (m.material as any).materialDefId || m.material.id,
+                    warehouseItemId: m.material.id, // warehouseItemId
                     quantity: m.quantity,
                 })),
             },
         };
-
-        // console.log('HandleSave WaterSupply - Payload:', payload); // Cleaned up to avoid noise, API will log request body
 
         try {
             if (item) {

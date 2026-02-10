@@ -297,8 +297,8 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                 // Formatted file for upload
                 const fileToUpload = {
                     uri: asset.uri,
-                    type: asset.type,
-                    name: asset.fileName,
+                    type: asset.type || 'image/jpeg',
+                    name: asset.fileName || asset.uri.split('/').pop() || `image-${Date.now()}.jpg`,
                 };
 
                 const uploadedDocs = await documentApi.upload([fileToUpload]);
@@ -583,6 +583,9 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         onClose={() => setActionSheetVisible(false)}
                         onTakePhoto={handleTakePhoto}
                         onChooseFromLibrary={handleChooseFromLibrary}
+                        onImageSelected={(uri, asset) =>
+                            uploadFile({ uri, fileName: asset?.fileName, type: asset?.type })
+                        }
                     />
                 )}
 

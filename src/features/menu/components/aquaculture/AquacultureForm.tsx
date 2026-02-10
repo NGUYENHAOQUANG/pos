@@ -12,6 +12,7 @@ import { Aquaculture } from '@/features/menu/types/menu.types';
 import { Zone } from '@/features/farm/types/farm.types';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
+import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 
 interface AquacultureFormProps {
     initialValues?: Partial<Aquaculture> & { zoneId?: number | string };
@@ -145,13 +146,13 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Cycle Name & Code */}
                 <View style={styles.row}>
                     <View style={styles.flex1}>
-                        <Input
+                        <FarmInput
                             label="Tên vụ nuôi"
                             required
                             value={cycleName}
                             onChangeText={setCycleName}
                             placeholder="Nhập"
-                            containerStyle={styles.noMarginBottom}
+                            containerStyle={{ marginBottom: 0 }}
                         />
                     </View>
                     <View style={styles.flex1}>

@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { showSuccessToast } from '@/features/material/utils/validationToast';
-import { normalizeApiError } from '@/core/api/errorHandler';
 import { handleError } from '@/shared/utils/errorHandler';
 import { inventoryApi } from '@/features/material/api/inventoryApi';
 import {
@@ -9,7 +9,9 @@ import {
     GetInventoryCheckItemsParams,
     UpdateInventoryCheckRequest,
     CreateInventoryCheckRequest,
+    IInventoryCheck,
 } from '@/features/material/types/inventoryCheck.types';
+import { APP_CONFIG } from '@/shared/constants';
 
 const STALE_TIME_SHORT = 2 * 60 * 1000;
 
@@ -27,6 +29,51 @@ export const useInventoryTickets = (params?: GetInventoryChecksParams) => {
         },
         staleTime: STALE_TIME_SHORT,
     });
+};
+
+/**
+ * Hook to fetch inventory tickets with infinite scroll
+ */
+export const useInfiniteInventoryTickets = (
+    params?: Omit<GetInventoryChecksParams, 'Page' | 'PageSize'>,
+    options?: { enabled?: boolean }
+) => {
+    const query = useInfiniteQuery({
+        queryKey: [...materialKeys.inventory(params), 'infinite'],
+        queryFn: async ({ pageParam = 1 }) => {
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                ...params,
+                Page: pageParam,
+                PageSize: pageSize,
+            };
+            const response = await inventoryApi.getList(currentParams);
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách phiếu kiểm kho');
+        },
+        initialPageParam: 1,
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
+        },
+        enabled: options?.enabled,
+        staleTime: STALE_TIME_SHORT,
+    });
+
+    const items = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: IInventoryCheck[], page) => {
+            return [...acc, ...(page.items || [])];
+        }, []);
+    }, [query.data]);
+
+    return {
+        ...query,
+        data: items,
+        total: query.data?.pages[0]?.totalCount || 0,
+    };
 };
 
 export const useDeleteInventoryTicket = () => {
@@ -47,7 +94,7 @@ export const useDeleteInventoryTicket = () => {
             });
         },
         onError: (error: unknown) => {
-            handleError(normalizeApiError(error));
+            handleError(error);
         },
     });
 };
@@ -56,9 +103,7 @@ export const useCreateInventoryCheck = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (payload: CreateInventoryCheckRequest) => {
-            console.log('Payload:', JSON.stringify(payload, null, 2));
             const response = await inventoryApi.create(payload);
-            console.log('Response:', JSON.stringify(response, null, 2));
             return response.data;
         },
         onSuccess: () => {
@@ -69,8 +114,7 @@ export const useCreateInventoryCheck = () => {
             });
         },
         onError: (error: unknown) => {
-            console.log('Error:', JSON.stringify(error, null, 2));
-            handleError(normalizeApiError(error));
+            handleError(error);
         },
     });
 };
@@ -80,7 +124,6 @@ export const useUpdateInventoryCheck = () => {
     return useMutation({
         mutationFn: async ({ id, ...payload }: { id: string } & UpdateInventoryCheckRequest) => {
             const response = await inventoryApi.update(id, payload);
-            console.log('Edit Response:', JSON.stringify(response, null, 2));
             if (!response.success) {
                 throw new Error(response.message || 'Cập nhật phiếu thất bại');
             }
@@ -94,7 +137,7 @@ export const useUpdateInventoryCheck = () => {
             });
         },
         onError: (error: unknown) => {
-            handleError(normalizeApiError(error));
+            handleError(error);
         },
     });
 };

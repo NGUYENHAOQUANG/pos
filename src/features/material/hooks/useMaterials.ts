@@ -13,12 +13,12 @@ import {
     GetMaterialsParams,
     MaterialResponseV2,
 } from '@/features/material/types/material.types';
-import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useMaterialTypes } from '@/features/material/hooks/useMaterialTypes';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
 import { APP_CONFIG } from '@/shared/constants';
+import { handleError } from '@/shared/utils';
 
 const STALE_TIME_SHORT = 2 * 60 * 1000;
 
@@ -130,9 +130,8 @@ export const useCreateMaterial = () => {
             // Invalidate materials list to refetch
             queryClient.invalidateQueries({ queryKey: materialKeys.lists() });
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Tạo vật tư thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -151,17 +150,8 @@ export const useUpdateMaterial = () => {
             queryClient.invalidateQueries({ queryKey: materialKeys.lists() });
             queryClient.invalidateQueries({ queryKey: materialKeys.detail(variables.id) });
         },
-        onError: (error: any) => {
-            if (error?.statusCode === 400 && error?.data?.details) {
-                const splitMessage = error.data.details.split(';')[0];
-                if (splitMessage) {
-                    showErrorToast(splitMessage.trim());
-                    return;
-                }
-            }
-
-            const errorMessage = getErrorMessage(error, 'Cập nhật vật tư thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };
@@ -179,9 +169,8 @@ export const useDeleteMaterial = () => {
             // Invalidate materials list
             queryClient.invalidateQueries({ queryKey: materialKeys.lists() });
         },
-        onError: (error: unknown) => {
-            const errorMessage = getErrorMessage(error, 'Xóa vật tư thất bại');
-            showErrorToast(errorMessage);
+        onError: error => {
+            handleError(error);
         },
     });
 };

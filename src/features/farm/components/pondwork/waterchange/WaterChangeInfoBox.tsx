@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { spacing } from '@/styles';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
+import { Input } from '@/shared/components/forms/Input';
 
 interface WaterSupplyInfoBoxProps {
     targetLevel: string;
@@ -54,24 +54,26 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
         <PondDataBox title="Mực nước và thể tích" resultItems={resultItems}>
             <View style={styles.rowInput}>
                 <View style={styles.colInputLeft}>
-                    <FarmInput
+                    <Input
                         label="Mực nước mục tiêu (cm)"
                         value={targetLevel}
                         onChangeText={text => handleNumericInput(text, onTargetLevelChange)}
                         keyboardType="numeric"
                         required
+                        containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
 
                 <View style={styles.colGap} />
 
                 <View style={styles.colInputRight}>
-                    <FarmInput
+                    <Input
                         label="Số cm cấp"
                         value={supplyLevel}
                         onChangeText={text => handleNumericInput(text, onSupplyLevelChange)}
                         keyboardType="numeric"
                         required
+                        containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
             </View>

@@ -4,8 +4,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { IconError } from '@/assets/icons';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
+import { Input } from '@/shared/components/forms/Input';
 
 interface EnvironmentParametersBoxProps {
     pH: string;
@@ -58,17 +58,9 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onMagieChange,
     no3 = '',
     onNo3Change,
-    // limits = {}, // eslint-disable-line @typescript-eslint/no-unused-vars
 }) => {
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
-        // const limit = limits[id];
-
-        // if (limit) {
-        //     return `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
-        // }
-
-        // Default: Name (Unit) or just Name
         return unit ? `${baseName} (${unit})` : baseName;
     };
 
@@ -114,11 +106,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Text style={styles.errorText}>Vui lòng nhập ít nhất 1 chỉ số</Text>
                 </View>
             )}
-            <View style={styles.inputsContainer}>
+            <View>
                 {/* Row 1 */}
                 <View style={styles.row}>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH)}
                             value={pH}
                             keyboardType="default"
@@ -126,7 +118,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         />
                     </View>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
                             value={doValue}
                             keyboardType="default"
@@ -138,7 +130,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 {/* Row 2 */}
                 <View style={styles.row}>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
                             value={temperature}
                             keyboardType="default"
@@ -146,7 +138,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         />
                     </View>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
                             value={salinity}
                             keyboardType="default"
@@ -158,7 +150,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 {/* Row 3 */}
                 <View style={styles.row}>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
                             value={alkalinity}
                             keyboardType="default"
@@ -166,7 +158,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         />
                     </View>
                     <View style={styles.column}>
-                        <FarmInput
+                        <Input
                             label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
                             value={transparency}
                             keyboardType="default"
@@ -197,7 +189,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
 
                         return (
                             <View key={param.id} style={styles.fullWidthRow}>
-                                <FarmInput
+                                <Input
                                     label={label}
                                     value={paramValue}
                                     keyboardType="default"
@@ -244,9 +236,6 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         color: colors.text,
         flex: 1,
-    },
-    inputsContainer: {
-        gap: spacing.md,
     },
     row: {
         flexDirection: 'row',
