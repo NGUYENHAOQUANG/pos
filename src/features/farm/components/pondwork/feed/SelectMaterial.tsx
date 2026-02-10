@@ -14,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { Input } from '@/shared/components/forms/Input';
 
 interface SelectMaterialProps {
     isVisible: boolean;
@@ -119,7 +119,7 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                 <View style={styles.row}>
                                     {/* Quantity Input */}
                                     <View style={[styles.fieldGroup, styles.quantityContainer]}>
-                                        <FarmInput
+                                        <Input
                                             label="Số lượng"
                                             value={quantity}
                                             onChangeText={text => {
@@ -138,16 +138,14 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
 
                                     {/* Unit Input - Disabled */}
                                     <View style={styles.quantityContainer}>
-                                        <FarmInput
+                                        <Input
                                             label="Đơn vị"
                                             placeholder="Đơn vị"
                                             value={selectedUnit}
                                             onChangeText={() => {}}
                                             editable={false}
                                             required
-                                            style={{
-                                                backgroundColor: colors.gray[100],
-                                            }}
+                                            disabled
                                         />
                                     </View>
                                 </View>

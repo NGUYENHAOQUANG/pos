@@ -25,8 +25,8 @@ import { colors, spacing, typography } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
 
-import { NormalizedError } from '@/core/api/errorHandler';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import { handleError } from '@/shared/utils';
 
 export default function InfoScreen() {
     const insets = useSafeAreaInsets();
@@ -84,24 +84,8 @@ export default function InfoScreen() {
                 type: 'success',
                 text1: 'Cập nhật thông tin thành công',
             });
-        } catch (error: any) {
-            const normalizedError = error as NormalizedError;
-            const message = normalizedError.message || 'Cập nhật thất bại';
-
-            // Check for validation errors if available in data
-            const validationErrors = normalizedError.data?.validationErrors;
-
-            let displayMessage = message;
-            if (validationErrors) {
-                displayMessage += '\n' + JSON.stringify(validationErrors);
-            }
-
-            Toast.show({
-                type: 'error',
-                text1: 'Lỗi',
-                text2: displayMessage,
-                visibilityTime: 4000,
-            });
+        } catch (error) {
+            handleError(error);
         } finally {
             setIsLoading(false);
         }

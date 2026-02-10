@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { spacing } from '@/styles';
-import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
 interface HarvestDataBoxProps {
@@ -68,34 +68,37 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             <View style={styles.row}>
                 {/* Sản lượng (kg) */}
                 <View style={[styles.col, { paddingRight: spacing.xs }]}>
-                    <FarmInput
+                    <Input
                         label="Sản lượng (kg)"
                         value={yieldAmount}
                         onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
                         keyboardType="numeric"
                         required
+                        containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
 
                 {/* Cỡ tôm (con/kg) */}
                 <View style={[styles.col, { paddingLeft: spacing.xs }]}>
-                    <FarmInput
+                    <Input
                         label="Cỡ tôm (con/kg)"
                         value={shrimpSize}
                         onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
                         keyboardType="numeric"
                         required
+                        containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
             </View>
 
             {/* Second Row: Giá tôm tham khảo */}
-            <FarmInput
+            <Input
                 label="Giá tôm tham khảo (VNĐ/kg)"
                 value={referencePrice}
                 onChangeText={text => handleNumericInput(text, onReferencePriceChange)}
                 keyboardType="numeric"
                 required
+                containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>
     );
