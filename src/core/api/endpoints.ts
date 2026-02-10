@@ -22,10 +22,9 @@ export const API_ENDPOINTS = {
     },
     DEVICE: {
         LIST: '/device',
-        TOGGLE: '/device/toggle',
-        TOGGLE_TEST: '/device/toggle/test',
+        TOGGLE: (id: string) => `/device/${id}/toggle`,
         SCHEDULE: '/device/schedule',
-        SCHEDULE_TEST: '/device/schedule/test',
+        GET_SCHEDULES: (deviceId: string) => `/devices/${deviceId}/schedule`, //disable get schedule
         HEALTH: '/device/health',
         HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
         DEVICE_ID_REFERENCE: '/device/device-id-reference',

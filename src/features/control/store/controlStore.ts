@@ -234,7 +234,7 @@ export const useControlStore = create<ControlStore>()(
                                     type,
                                     pondId: 'IOT_POND',
                                     farmId: 'KG-01',
-                                    mode: EControlMode.MANUAL,
+                                    mode: EControlMode.SCHEDULE,
                                     isOn: item.connectionStatus === 'On',
                                     errorMessage:
                                         item.installationStatus !== 'Installed'

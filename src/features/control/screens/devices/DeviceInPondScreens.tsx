@@ -47,7 +47,12 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
 
     React.useEffect(() => {
         if (pondName === 'Ao IOT') {
-            fetchIoTDevices();
+            fetchIoTDevices(); // Fetch immediately
+            const interval = setInterval(() => {
+                fetchIoTDevices();
+            }, 20000); // Fetch every 20s
+
+            return () => clearInterval(interval); // Cleanup on unmount
         }
     }, [pondName, fetchIoTDevices]);
     const { toggleDevice, loadingIds } = useDeviceToggle();

@@ -6,6 +6,8 @@ import {
     TouchableOpacity,
     Modal,
     TouchableWithoutFeedback,
+    ViewStyle,
+    TextStyle,
 } from 'react-native';
 import IconTrash from 'react-native-vector-icons/Feather';
 import IconAdd from 'react-native-vector-icons/Ionicons';
@@ -22,9 +24,16 @@ export interface ScheduleItem {
 interface ActivityScheduleProps {
     schedules: ScheduleItem[];
     onUpdateSchedules: (newSchedules: ScheduleItem[]) => void;
+    style?: ViewStyle;
+    titleStyle?: TextStyle;
 }
 
-export default function ActivitySchedule({ schedules, onUpdateSchedules }: ActivityScheduleProps) {
+export default function ActivitySchedule({
+    schedules,
+    onUpdateSchedules,
+    style,
+    titleStyle,
+}: ActivityScheduleProps) {
     const [isModalVisible, setModalVisible] = useState(false);
     const [tempStartTime, setTempStartTime] = useState<Date | null>(null);
     const [tempEndTime, setTempEndTime] = useState<Date | null>(null);
@@ -72,9 +81,9 @@ export default function ActivitySchedule({ schedules, onUpdateSchedules }: Activ
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
             <View style={styles.card}>
-                <Text style={styles.headerTitle}>Lịch hoạt động</Text>
+                <Text style={[styles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
                 <View style={styles.fullWidthDivider} />
 
                 {/* Danh sách các lượt đã thêm */}
@@ -87,14 +96,14 @@ export default function ActivitySchedule({ schedules, onUpdateSchedules }: Activ
                                 value={item.startTime}
                                 onChange={date => handleTimeChange(item.id, 'start', date)}
                                 style={styles.timeInput}
-                                placeholder="00:00"
+                                placeholder="00:00:00"
                             />
                             <Text style={styles.dashSeparator}>-</Text>
                             <ModalAddTurn
                                 value={item.endTime}
                                 onChange={date => handleTimeChange(item.id, 'end', date)}
                                 style={styles.timeInput}
-                                placeholder="00:00"
+                                placeholder="00:00:00"
                             />
                         </View>
 
