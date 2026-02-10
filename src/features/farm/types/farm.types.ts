@@ -215,6 +215,14 @@ export interface ShrimpInspectionMeta {
     images?: string[];
     // Keep associated document IDs so edits can preserve existing images
     documentIds?: string[];
+    // AI Health Check mapping
+    averageInfectionRate?: number;
+    isHealthy?: boolean;
+    diagnosisDetails?: Array<{
+        diseaseType: string;
+        probabilityPercent: number;
+    }> | null;
+    aiItems?: any[]; // Array of detailed AI check items
 }
 
 export interface EnvironmentMeta {

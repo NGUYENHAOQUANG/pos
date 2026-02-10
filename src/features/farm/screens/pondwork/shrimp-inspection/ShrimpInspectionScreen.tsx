@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,7 +14,10 @@ import {
     GeneralInfoBoxRef,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { ShrimpInspectionFoodCheckBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionFoodCheckBox';
-import { ShrimpInspectionObservationBox } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
+import {
+    ShrimpInspectionObservationBox,
+    AIHealthCheckResult,
+} from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -26,6 +29,7 @@ import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { useShrimpHealthCheckForm } from '@/features/farm/hooks/shrimpHealthCheck/useShrimpHealthCheckForm';
+import { useAggregatedAIDiagnosis } from '@/features/farm/hooks/shrimpHealthCheck/useAggregatedAIDiagnosis';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -61,6 +65,14 @@ export const ShrimpInspectionScreen: React.FC = () => {
         setNotes,
         imageUris,
         setImageUris,
+        averageInfectionRate,
+        setAverageInfectionRate,
+        isHealthy,
+        setIsHealthy,
+        diagnosisDetails,
+        setDiagnosisDetails,
+        aiItems,
+        setAiItems,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         handleSave,
@@ -73,22 +85,123 @@ export const ShrimpInspectionScreen: React.FC = () => {
         meta,
     });
 
+    // Get aggregated AI diagnosis stats from all records in the cycle
+    const { aggregatedStats } = useAggregatedAIDiagnosis(
+        pond?.id,
+        diagnosisDetails,
+        itemToEdit?.id
+    );
+
+    // State to store AI total count for display
+    const [aiTotalCount, setAiTotalCount] = useState<number>(0);
+
     // Handle AI Result
     useEffect(() => {
         if (aiHealthCheckResult) {
-            const { totalCount, infectionRate, status, imageUri } = aiHealthCheckResult;
+            const { totalCount, infectionRate, status, details } = aiHealthCheckResult as any;
 
-            const aiNote = `[Kết quả AI]\n- Số lượng mẫu: ${totalCount}\n- Tỉ lệ nhiễm bệnh: ${infectionRate}%\n- Tình trạng: ${status}`;
+            // Update form state
+            setAverageInfectionRate(infectionRate);
+            setAiTotalCount(totalCount || 0);
+            setIsHealthy(status === 'Khỏe mạnh');
+            // Parse details (serialized items) if available and calculate diagnosisDetails
+            if (details) {
+                try {
+                    const parsedItems = JSON.parse(details);
+                    if (Array.isArray(parsedItems)) {
+                        setAiItems(parsedItems);
 
-            setNotes(prev => (prev ? `${prev}\n\n${aiNote}` : aiNote));
+                        // Calculate diagnosisDetails for form state
+                        if (parsedItems.length > 0) {
+                            const total = parsedItems.length;
+                            const diagnosisCounts: Record<string, number> = {};
 
-            if (imageUri) {
-                setImageUris(prev => [...prev, imageUri]);
+                            parsedItems.forEach((item: any) => {
+                                const diagnosis = item.diagnosis || 'Khỏe mạnh';
+                                diagnosisCounts[diagnosis] = (diagnosisCounts[diagnosis] || 0) + 1;
+                            });
+
+                            const diagnosisToEnumMap: Record<string, string> = {
+                                'Khỏe mạnh': 'Healthy',
+                                'Đốm trắng': 'WSSV',
+                                'Mang đen': 'BlackGill',
+                                'Đầu vàng': 'Yellowhead',
+                            };
+
+                            const calculatedDetails = Object.entries(diagnosisCounts)
+                                .map(([diagnosis, count]) => {
+                                    const percentage = parseFloat(
+                                        ((count / total) * 100).toFixed(2)
+                                    );
+                                    const diseaseType = diagnosisToEnumMap[diagnosis];
+                                    if (!diseaseType) return null;
+                                    return { diseaseType, probabilityPercent: percentage };
+                                })
+                                .filter(Boolean) as Array<{
+                                diseaseType: string;
+                                probabilityPercent: number;
+                            }>;
+
+                            setDiagnosisDetails(calculatedDetails);
+                        } else {
+                            setDiagnosisDetails(null);
+                        }
+                    }
+                } catch (_error) {
+                    setAiItems([]);
+                    setDiagnosisDetails(null);
+                }
+            } else {
+                setAiItems([]);
+                setDiagnosisDetails(null);
             }
+
+            // Upload image if provided
+            // NOTE: We no longer upload the AI image or add it to the main image list
+            // as per user request (AI image is different from inspection image).
 
             navigation.setParams({ aiHealthCheckResult: undefined });
         }
-    }, [aiHealthCheckResult, setNotes, setImageUris, navigation]);
+    }, [
+        aiHealthCheckResult,
+        navigation,
+        setAverageInfectionRate,
+        setIsHealthy,
+        setDiagnosisDetails,
+        setAiItems,
+        setAiTotalCount,
+    ]);
+
+    // Construct AI result object for display from form state
+    // We only show it if there is a diagnosis (checked)
+    const displayAiResult: AIHealthCheckResult | null = useMemo(() => {
+        // If we have data (either from edit or new check)
+        // We assume if diagnosisDetails is present or averageInfectionRate > 0 or even 0 but explicit check happened
+        // Ideally we need a flag "hasAiCheck". For now, check if diagnosisDetails is set.
+        if (diagnosisDetails || averageInfectionRate > 0 || !isHealthy) {
+            // Convert diagnosisDetails to status string
+            let statusString: string;
+            if (typeof diagnosisDetails === 'string' && diagnosisDetails) {
+                statusString = diagnosisDetails;
+            } else if (Array.isArray(diagnosisDetails) && diagnosisDetails.length > 0) {
+                // If diagnosisDetails is array with items, extract disease types
+                statusString = diagnosisDetails.map(d => d.diseaseType).join(', ');
+            } else {
+                // Fallback to isHealthy status
+                statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
+            }
+
+            const result = {
+                totalCount: aiTotalCount,
+                infectionRate: averageInfectionRate,
+                status: statusString,
+                imageUri: null, // Image is handled via imageUris list
+                items: aiItems.length > 0 ? aiItems : undefined,
+            };
+            return result;
+        }
+        return null;
+    }, [averageInfectionRate, isHealthy, diagnosisDetails, aiItems, aiTotalCount]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -106,6 +219,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
 
     const handleSavePress = () => {
         const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
+
         handleSave(documentIds, () => {
             generalInfoBoxRef.current?.markAsSaved();
             if (itemToEdit) {
@@ -188,6 +302,8 @@ export const ShrimpInspectionScreen: React.FC = () => {
                             liver={liver}
                             onLiverChange={setLiver}
                             onAICheckPress={handleAICheckPress}
+                            aiResult={displayAiResult}
+                            aggregatedStats={aggregatedStats}
                         />
 
                         {/* Ghi chú Box */}

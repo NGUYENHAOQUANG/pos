@@ -39,6 +39,18 @@ export const useShrimpHealthCheckForm = ({
     const [liver, setLiver] = useState(meta?.liver || 'Bình thường');
     const [notes, setNotes] = useState(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta?.images || []);
+
+    // AI State
+    const [averageInfectionRate, setAverageInfectionRate] = useState<number>(
+        meta?.averageInfectionRate ?? 0
+    );
+    const [isHealthy, setIsHealthy] = useState<boolean>(meta?.isHealthy ?? true);
+    const [diagnosisDetails, setDiagnosisDetails] = useState<Array<{
+        diseaseType: string;
+        probabilityPercent: number;
+    }> | null>(meta?.diagnosisDetails ?? null);
+    const [aiItems, setAiItems] = useState<any[]>([]);
+
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
     // Initial data for change detection
@@ -52,6 +64,10 @@ export const useShrimpHealthCheckForm = ({
         liver: string;
         notes: string;
         images: string[];
+        averageInfectionRate: number;
+        isHealthy: boolean;
+        diagnosisDetails: Array<{ diseaseType: string; probabilityPercent: number }> | null;
+        aiItems: any[];
     } | null>(null);
 
     useEffect(() => {
@@ -83,7 +99,19 @@ export const useShrimpHealthCheckForm = ({
             liver: meta?.liver || 'Bình thường',
             notes: itemToEdit?.note || '',
             images: meta?.images || [],
+            averageInfectionRate: meta?.averageInfectionRate ?? 0,
+            isHealthy: meta?.isHealthy ?? true,
+            diagnosisDetails: meta?.diagnosisDetails ?? null,
+            aiItems: meta?.aiItems || [],
         });
+
+        // Set AI state values when editing
+        if (meta) {
+            setAverageInfectionRate(meta.averageInfectionRate ?? 0);
+            setIsHealthy(meta.isHealthy ?? true);
+            setDiagnosisDetails(meta.diagnosisDetails ?? null);
+            setAiItems(meta.aiItems || []);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemToEdit, meta]);
 
@@ -106,6 +134,9 @@ export const useShrimpHealthCheckForm = ({
         if (stoolColor !== initialData.stoolColor) return true;
         if (liver !== initialData.liver) return true;
         if (notes !== initialData.notes) return true;
+        if (averageInfectionRate !== initialData.averageInfectionRate) return true;
+        if (isHealthy !== initialData.isHealthy) return true;
+        if (diagnosisDetails !== initialData.diagnosisDetails) return true;
 
         if (imageUris.length !== initialData.images.length) return true;
         const imagesChanged = imageUris.some((uri, index) => uri !== initialData.images[index]);
@@ -116,10 +147,8 @@ export const useShrimpHealthCheckForm = ({
 
     const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
 
-    const handleError = (err: unknown) => {
-        const error = err as NormalizedError;
-
-        if (error.type === 'VALIDATION_ERROR') {
+    const handleError = (error: NormalizedError) => {
+        if (error.type === 'VALIDATION_ERROR' && error.fields) {
             const firstFieldKey = Object.keys(error.fields)[0];
             if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
                 Toast.show({
@@ -171,6 +200,9 @@ export const useShrimpHealthCheckForm = ({
             liver,
             notes,
             documentIds,
+            averageInfectionRate,
+            isHealthy,
+            aiItems: aiItems,
         });
 
         if (itemToEdit) {
@@ -191,7 +223,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: handleError,
+                    onError: error => handleError(error as unknown as NormalizedError),
                 }
             );
         } else {
@@ -211,7 +243,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: handleError,
+                    onError: error => handleError(error as unknown as NormalizedError),
                 }
             );
         }
@@ -233,12 +265,12 @@ export const useShrimpHealthCheckForm = ({
                     });
                     navigation.goBack();
                 },
-                onError: (error: any) => {
+                onError: error => {
+                    const normalizedError = error as unknown as NormalizedError;
                     Toast.show({
                         type: 'error',
                         text1: 'Không thể xoá kiểm tra tôm',
-                        text2:
-                            error?.response?.data?.message || error?.message || 'Vui lòng thử lại',
+                        text2: normalizedError.message || 'Vui lòng thử lại',
                         position: 'top',
                         visibilityTime: 3000,
                     });
@@ -267,6 +299,14 @@ export const useShrimpHealthCheckForm = ({
         setNotes,
         imageUris,
         setImageUris,
+        averageInfectionRate,
+        setAverageInfectionRate,
+        isHealthy,
+        setIsHealthy,
+        diagnosisDetails,
+        aiItems,
+        setAiItems,
+        setDiagnosisDetails,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         // handlers

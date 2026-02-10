@@ -10,6 +10,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,33 +24,47 @@ import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionI
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
+interface HealthCheckItem {
+    id: string;
+    index: number;
+    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    diagnosis: string;
+    confidence: number; // 0-100
+}
+
+interface HealthCheckResult {
+    id: number;
+    totalCount: number;
+    items: HealthCheckItem[];
+    healthStatusSummary: string; // Summary string for display
+    infectionRate: number; // percentage
+}
+
 export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute();
     const { pond: _pond } = (route.params as any) || {};
 
     // State for measurements history
-    interface HealthCheckItem {
-        id: string;
-        index: number;
-        status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-        diagnosis: string;
-        confidence: number; // 0-100
-    }
-
-    interface HealthCheckResult {
-        id: number;
-        totalCount: number;
-        items: HealthCheckItem[];
-        healthStatusSummary: string; // Summary string for display
-        infectionRate: number; // percentage
-    }
 
     const [results, setResults] = useState<HealthCheckResult[]>([]);
     const [imageUri, _setImageUri] = useState<string | null>(null);
     const [_imageBase64, setImageBase64] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+    // Show toast when new result arrives
+    React.useEffect(() => {
+        if (results.length > 0) {
+            const latest = results[results.length - 1];
+            const hasSick = latest.items.some(i => i.status !== 'HEALTHY');
+
+            Toast.show({
+                type: hasSick ? 'error' : 'success',
+                text1: hasSick ? 'Phát hiện tôm bệnh !' : 'Tôm khỏe mạnh',
+                visibilityTime: 3000,
+            });
+        }
+    }, [results]);
 
     // Derived state for current/latest display
     const currentResult = results.length > 0 ? results[results.length - 1] : null;
@@ -80,8 +95,8 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
             // Mock Data
             const mockCount = Math.floor(Math.random() * 20) + 5; // 5-25 shrimp
-            const mockInfectionRate = parseFloat((Math.random() * 20).toFixed(2)); // 0-20% infection
 
+            // Generate Detailed Items
             const detailedItems: HealthCheckItem[] = Array.from({ length: mockCount }, (_, i) => {
                 const rand = Math.random();
                 let status: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
@@ -106,14 +121,27 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
             // Count issues
             const issuesCount = detailedItems.filter(i => i.status !== 'HEALTHY').length;
+            const infectionRate = parseFloat(((issuesCount / mockCount) * 100).toFixed(2));
+
+            // Generate Summary based on rules
+            let summary = '';
+            const firstSick = detailedItems.find(i => i.status !== 'HEALTHY');
+
+            if (issuesCount > 0 && firstSick) {
+                summary = `Tôm ${firstSick.index}: ${firstSick.diagnosis}... Xem thêm`;
+            } else if (detailedItems.length > 0) {
+                // All healthy
+                summary = `Tôm ${detailedItems[0].index}: ${detailedItems[0].diagnosis}`;
+            } else {
+                summary = 'Chưa xác định';
+            }
 
             const newResult: HealthCheckResult = {
                 id: Date.now(),
                 totalCount: mockCount,
                 items: detailedItems,
-                healthStatusSummary:
-                    issuesCount > 0 ? `Đã phát hiện ${issuesCount} vấn đề` : 'Tôm khỏe mạnh',
-                infectionRate: mockInfectionRate,
+                healthStatusSummary: summary,
+                infectionRate: infectionRate,
             };
 
             setResults(prev => [...prev, newResult]);
@@ -146,22 +174,36 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     };
 
     const handleSave = () => {
-        if (currentResult) {
-            const statusList = currentResult.items
-                .filter(i => i.status !== 'HEALTHY')
-                .map(i => i.diagnosis)
-                .join(', ');
+        if (results.length > 0) {
+            // Aggregate results
+            const allItems = results.reduce<HealthCheckItem[]>((acc, r) => acc.concat(r.items), []);
+            const totalCountAll = allItems.length;
+            const sickCountAll = allItems.filter(i => i.status !== 'HEALTHY').length;
+
+            // Cumulative Infection Rate
+            const avgInfectionRate =
+                totalCountAll > 0
+                    ? parseFloat(((sickCountAll / totalCountAll) * 100).toFixed(2))
+                    : 0;
+
+            const isHealthy = sickCountAll === 0;
+            const statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
+
+            const params = {
+                aiHealthCheckResult: {
+                    totalCount: totalCountAll,
+                    infectionRate: avgInfectionRate,
+                    status: statusString,
+                    imageUri: imageUri, // Passing latest image
+                    details: JSON.stringify(allItems), // Pass ALL items
+                },
+            };
+
+            console.log('Sending AI Result:', params);
 
             navigation.navigate({
                 name: 'ShrimpInspectionScreen',
-                params: {
-                    aiHealthCheckResult: {
-                        totalCount: currentResult.totalCount,
-                        infectionRate: currentResult.infectionRate,
-                        status: statusList || 'Khỏe mạnh',
-                        imageUri: imageUri,
-                    },
-                },
+                params,
                 merge: true,
             } as any);
         } else {
@@ -288,12 +330,11 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         </View>
 
                         {/* Image Upload Area */}
+
                         <View>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Hình ảnh xử lý</Text>
-                            </View>
                             <View>
                                 <ImageUpload
+                                    label="Hình ảnh xử lý"
                                     imageUri={imageUri}
                                     onImageSelect={handleImageSelect}
                                     onImageRemove={() => {

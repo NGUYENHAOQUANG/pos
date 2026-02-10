@@ -18,6 +18,13 @@ export interface ShrimpHealthCheckDetail {
     fecesColor?: FecesColorEnum;
     liverCondition?: LiverConditionEnum;
     notes?: string;
+    // AI Health Check fields
+    averageInfectionRate?: number;
+    isHealthy?: boolean;
+    diagnosisDetails?: Array<{
+        diseaseType: string;
+        probabilityPercent: number;
+    }>;
 }
 
 export interface CreateShrimpHealthCheckPayload {
@@ -61,6 +68,13 @@ export interface ShrimpHealthCheckDetailDto {
     fecesColor?: FecesColorEnum;
     liverCondition?: LiverConditionEnum;
     notes?: string;
+    // AI Health Check fields (from GET response)
+    averageInfectionRate?: number;
+    isHealthy?: boolean;
+    diagnosisDetails?: Array<{
+        diseaseType: string;
+        probabilityPercent: number;
+    }>;
 }
 
 export interface ShrimpHealthCheckDto {
