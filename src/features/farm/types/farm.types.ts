@@ -277,6 +277,7 @@ export interface MeasureSizeMeta {
     shrimpSize?: string;
     remainingWeight?: string;
     totalShrimpCount?: number | null;
+    averageShrimpSize?: number | null;
     survivalRate?: number | null;
     notes?: string;
     images?: string[];
