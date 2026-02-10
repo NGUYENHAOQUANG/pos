@@ -157,9 +157,35 @@ export const HandleProblemLogScreen = () => {
 
     const { groupedData } = useLogScreenData(config);
 
+    const getButtonTitle = () => {
+        switch (currentJobType) {
+            case 'CLEAN_POND':
+                return 'Bắt đầu rửa ao';
+            case 'SUN_DRY_POND':
+                return 'Bắt đầu phơi ao';
+            case 'TROUBLESHOOTING':
+                return 'Bắt đầu ghi lại sự cố';
+            default:
+                return 'Bắt đầu ghi lại sự cố';
+        }
+    };
+
+    const getEmptyMessage = () => {
+        switch (currentJobType) {
+            case 'CLEAN_POND':
+                return 'Chưa có dữ liệu rửa ao';
+            case 'SUN_DRY_POND':
+                return 'Chưa có dữ liệu phơi ao';
+            case 'TROUBLESHOOTING':
+                return 'Chưa có dữ liệu xử lý sự cố';
+            default:
+                return 'Chưa có dữ liệu xử lý sự cố';
+        }
+    };
+
     const screenTitle = getTitle();
-    const emptyMessage = 'Chưa có dữ liệu xử lý sự cố';
-    const buttonTitle = 'Bắt đầu ghi lại sự cố';
+    const emptyMessage = getEmptyMessage();
+    const buttonTitle = getButtonTitle();
 
     const handleCreateNew = () => {
         if (pond) navigation.navigate('HandleProblem', { pond, jobType: currentJobType as any });

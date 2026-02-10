@@ -14,6 +14,7 @@ import { CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { useCyclesByPond } from '@/features/farm/hooks/useCycle.ts';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
@@ -30,6 +31,7 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'PondDetail'>;
 export const ShrimpFarmScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
+    const insets = useSafeAreaInsets();
     const { pond: pondFromParams } = route.params || {};
 
     const [selectedTab, setSelectedTab] = useState<string>('work');
@@ -405,7 +407,9 @@ export const ShrimpFarmScreens: React.FC = () => {
                 !currentCycle &&
                 (typeof pond?.type === 'string' ? pond.type : pond?.type?.name) ===
                     POND_TYPES.NURSERY && (
-                    <View style={styles.footer}>
+                    <View
+                        style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}
+                    >
                         <TouchableOpacity
                             style={styles.startButton}
                             onPress={handleStartCycle}
