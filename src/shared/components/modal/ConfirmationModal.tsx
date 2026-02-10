@@ -62,7 +62,7 @@ interface ConfirmationModalProps {
     type: ConfirmationModalType;
     // Optional overrides for custom messages
     title?: string;
-    message?: string;
+    message?: string | React.ReactNode;
     confirmText?: string;
     cancelText?: string;
 }
@@ -105,7 +105,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
                                 {/* Message */}
                                 <View style={styles.messageContainer}>
-                                    <Text style={styles.message}>{finalMessage}</Text>
+                                    {typeof finalMessage === 'string' ? (
+                                        <Text style={styles.message}>{finalMessage}</Text>
+                                    ) : (
+                                        finalMessage
+                                    )}
                                 </View>
 
                                 {/* Buttons */}

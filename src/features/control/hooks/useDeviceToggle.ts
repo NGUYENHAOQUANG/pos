@@ -9,54 +9,52 @@ export const useDeviceToggle = () => {
     const { updateDeviceState } = useControl();
 
     const toggleDevice = async (pondId: string, deviceId: string, isOn: boolean) => {
-        // 1. Check if device needs API call
-        const hardwareConfig = DEVICE_HARDWARE_MAP[deviceId];
-
-        // If no config, just update local state (Legacy/Mock devices)
-        if (!hardwareConfig) {
-            console.log(`No hardware config for ${deviceId}, updating local state only.`);
-            updateDeviceState(pondId, deviceId, isOn);
-            return;
-        }
-
-        // 2. Set loading state
+        // Set loading state for ALL devices to show UI feedback
         setLoadingIds(prev => ({ ...prev, [deviceId]: true }));
 
         try {
-            // 3. Prepare Payload
-            const payload = {
-                deviceId: hardwareConfig.deviceId,
-                deviceName: hardwareConfig.deviceName,
-                internalDeviceId: hardwareConfig.internalDeviceId,
-                value: isOn ? 1 : 0,
-                message: 'Toggle via App',
-            };
-
-            console.log('Sending toggle request:', payload);
-
-            // 4. Call API
-            const response = await deviceApi.toggleDevice(payload);
-            const responseData = (response.data as any)?.data;
-
-            console.log('Toggle response:', JSON.stringify(responseData, null, 2));
-
-            // 5. Check Success (Status 200)
-            if (responseData?.status === 200) {
-                console.log('Toggle success! Updating store.');
+            // 1. Check if device needs API call
+            const hardwareConfig = DEVICE_HARDWARE_MAP[deviceId];
+            if (!hardwareConfig) {
+                console.log(`No hardware config for ${deviceId}, updating local state only.`);
+                await new Promise<void>(resolve => setTimeout(() => resolve(), 300));
                 updateDeviceState(pondId, deviceId, isOn);
-                Toast.show({
-                    type: 'success',
-                    text1: 'Thành công',
-                    text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
-                    visibilityTime: 2000,
-                });
             } else {
-                console.warn('Toggle failed:', responseData);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Điều khiển thất bại',
-                    text2: `Lỗi từ thiết bị: ${responseData?.status || 'Unknown'}`,
-                });
+                // 2. Prepare Payload
+                const payload = {
+                    deviceId: hardwareConfig.deviceId,
+                    deviceName: hardwareConfig.deviceName,
+                    internalDeviceId: hardwareConfig.internalDeviceId,
+                    value: isOn ? 1 : 0,
+                    message: 'Toggle via App',
+                };
+
+                console.log('Sending toggle request:', payload);
+
+                // 3. Call API
+                const response = await deviceApi.toggleDevice(payload);
+                const responseData = (response.data as any)?.data;
+
+                console.log('Toggle response:', JSON.stringify(responseData, null, 2));
+
+                // 4. Check Success (Status 200)
+                if (responseData?.status === 200) {
+                    console.log('Toggle success! Updating store.');
+                    updateDeviceState(pondId, deviceId, isOn);
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Thành công',
+                        text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
+                        visibilityTime: 2000,
+                    });
+                } else {
+                    console.warn('Toggle failed:', responseData);
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Điều khiển thất bại',
+                        text2: `Lỗi từ thiết bị: ${responseData?.status || 'Unknown'}`,
+                    });
+                }
             }
         } catch (error) {
             console.error('API Error:', error);

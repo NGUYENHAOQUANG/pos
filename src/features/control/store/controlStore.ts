@@ -20,7 +20,7 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
 
         if (device.errorMessage) {
             stats[type].warning++;
-        } else if (device.isOn) {
+        } else if (device.isOn || device.mode === EControlMode.LOCAL) {
             stats[type].active++;
         } else {
             stats[type].inactive++;
@@ -55,12 +55,13 @@ const createInitialPonds = (): Pond[] => {
         const devices: DeviceData[] = rawDevices.map(d => {
             const isActive = d.status === 'active';
             const isMaintenance = d.status === 'maintenance';
+            const isLocal = d.mode === EControlMode.LOCAL;
 
             return {
                 id: d.id,
                 name: d.name,
                 mode: d.mode,
-                isOn: d.pondId === 'IOT_POND' ? false : isActive,
+                isOn: d.pondId === 'IOT_POND' && !isLocal ? false : isActive,
                 errorMessage: isMaintenance ? 'Đang bảo trì' : undefined,
                 type: d.type,
                 farmId: d.farmId,

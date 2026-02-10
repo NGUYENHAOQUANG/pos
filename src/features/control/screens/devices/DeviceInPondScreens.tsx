@@ -43,12 +43,18 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const { pondName = 'Ao 1' } = route.params || {};
 
     const { ponds, updateDeviceMode } = useControl();
-    const { toggleDevice } = useDeviceToggle();
-    const currentPond = ponds.find(p => p.name === pondName);
-    const allDevices = currentPond?.devices || [];
+    const { toggleDevice, loadingIds } = useDeviceToggle();
+    const currentPond = React.useMemo(
+        () => ponds.find(p => p.name === pondName),
+        [ponds, pondName]
+    );
+    const allDevices = React.useMemo(() => currentPond?.devices || [], [currentPond]);
 
-    const feeders: DeviceData[] = allDevices.filter(d => d.type === 'feeder');
-    const otherDevices: DeviceData[] = allDevices.filter(d => d.type !== 'feeder');
+    const feeders = React.useMemo(() => allDevices.filter(d => d.type === 'feeder'), [allDevices]);
+    const otherDevices = React.useMemo(
+        () => allDevices.filter(d => d.type !== 'feeder'),
+        [allDevices]
+    );
 
     const [showAddPopup, setShowAddPopup] = useState(false);
     const [buttonPosition, setButtonPosition] = useState<{
@@ -131,59 +137,74 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     };
 
     // Show Custom Feeding Machine Screen
-    const handleSettingsPress = (id: string) => {
-        const selectedDevice = allDevices.find(d => d.id === id);
+    const handleSettingsPress = React.useCallback(
+        (id: string) => {
+            const selectedDevice = allDevices.find(d => d.id === id);
 
-        if (selectedDevice?.mode === EControlMode.LOCAL) {
-            Toast.show({
-                type: 'error',
-                text1: 'Không thể cấu hình thiết bị này',
+            if (selectedDevice?.mode === EControlMode.LOCAL) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Không thể cấu hình thiết bị này',
+                });
+                return;
+            }
+
+            const initialMode =
+                selectedDevice?.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual';
+
+            navigation.navigate('CustomFeedingMachine', {
+                initialMode,
+                deviceId: id,
+                pondName,
+                pondId: currentPond?.id || '',
             });
-            return;
-        }
+        },
+        [allDevices, currentPond, navigation, pondName]
+    );
 
-        const initialMode = selectedDevice?.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual';
+    const handleToggleDevice = React.useCallback(
+        (id: string, isOn: boolean) => {
+            if (currentPond) {
+                toggleDevice(currentPond.id, id, isOn);
+            }
+        },
+        [currentPond, toggleDevice]
+    );
 
-        navigation.navigate('CustomFeedingMachine', {
-            initialMode,
-            deviceId: id,
-            pondName,
-            pondId: currentPond?.id || '',
-        });
-    };
+    const handleSwitchAll = React.useCallback(
+        (devicesList: DeviceData[], mode: EControlMode) => {
+            if (!currentPond) return;
+            devicesList.forEach(d => {
+                if (d.mode === EControlMode.LOCAL) return;
+                updateDeviceMode(currentPond.id, d.id, mode);
+            });
 
-    const handleToggleDevice = (id: string, isOn: boolean) => {
-        if (currentPond) {
-            toggleDevice(currentPond.id, id, isOn);
-        }
-    };
+            Toast.show({
+                type: 'success',
+                text1:
+                    mode === EControlMode.SCHEDULE
+                        ? 'Đã chuyển tất cả sang Lịch trình'
+                        : 'Đã chuyển tất cả sang Thủ công',
+            });
+        },
+        [currentPond, updateDeviceMode]
+    );
 
-    const handleSwitchAll = (devicesList: DeviceData[], mode: EControlMode) => {
-        if (!currentPond) return;
-        devicesList.forEach(d => {
-            if (d.mode === EControlMode.LOCAL) return;
-            updateDeviceMode(currentPond.id, d.id, mode);
-        });
-
-        Toast.show({
-            type: 'success',
-            text1:
-                mode === EControlMode.SCHEDULE
-                    ? 'Đã chuyển tất cả sang Lịch trình'
-                    : 'Đã chuyển tất cả sang Thủ công',
-        });
-    };
-
-    const handleModeToggle = (id: string) => {
-        if (!currentPond) return;
-        const device = allDevices.find(d => d.id === id);
-        if (device) {
-            if (device.mode === EControlMode.LOCAL) return;
-            const newMode =
-                device.mode === EControlMode.SCHEDULE ? EControlMode.MANUAL : EControlMode.SCHEDULE;
-            updateDeviceMode(currentPond.id, id, newMode);
-        }
-    };
+    const handleModeToggle = React.useCallback(
+        (id: string) => {
+            if (!currentPond) return;
+            const device = allDevices.find(d => d.id === id);
+            if (device) {
+                if (device.mode === EControlMode.LOCAL) return;
+                const newMode =
+                    device.mode === EControlMode.SCHEDULE
+                        ? EControlMode.MANUAL
+                        : EControlMode.SCHEDULE;
+                updateDeviceMode(currentPond.id, id, newMode);
+            }
+        },
+        [currentPond, allDevices, updateDeviceMode]
+    );
 
     const renderRightHeader = () => (
         <View style={styles.headerRightContainer}>
@@ -274,6 +295,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     onModePress={handleModeToggle}
                     onToggle={handleToggleDevice}
                     style={styles.extendedCard}
+                    loadingIds={loadingIds}
                 />
 
                 {/* Other Devices Section */}
@@ -287,55 +309,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                     onModePress={handleModeToggle}
                     onToggle={handleToggleDevice}
                     style={styles.extendedCard}
-                />
-            </ScrollView>
-
-            {renderPopupOverlay()}
-        </View>
-    );
-
-    return (
-        <View style={styles.container}>
-            <HeaderDevices
-                title={`Thiết Bị - ${pondName}`}
-                onBackPress={() => navigation.goBack()}
-                rightComponent={renderRightHeader()}
-            />
-
-            <ScrollView contentContainerStyle={styles.content}>
-                {/* History Buttons Section */}
-                <View style={styles.historySection}>
-                    <ButtonHistory
-                        onSchedulePress={() => navigation.navigate('Schedule', { pondName })}
-                        onStatisticPress={() => navigation.navigate('History', { pondName })}
-                        style={styles.historyButton}
-                    />
-                </View>
-
-                {/* Feeder Section */}
-                <DevicesCard
-                    title="Máy cho ăn"
-                    devices={feeders}
-                    layout="grid"
-                    onSettingsPress={handleSettingsPress}
-                    onSwitchToSchedule={() => handleSwitchAll(feeders, EControlMode.SCHEDULE)}
-                    onSwitchToManual={() => handleSwitchAll(feeders, EControlMode.MANUAL)}
-                    onModePress={handleModeToggle}
-                    onToggle={handleToggleDevice}
-                    style={styles.extendedCard}
-                />
-
-                {/* Other Devices Section */}
-                <DevicesCard
-                    title="Thiết bị khác"
-                    devices={otherDevices}
-                    layout="grid"
-                    onSettingsPress={handleSettingsPress}
-                    onSwitchToSchedule={() => handleSwitchAll(otherDevices, EControlMode.SCHEDULE)}
-                    onSwitchToManual={() => handleSwitchAll(otherDevices, EControlMode.MANUAL)}
-                    onModePress={handleModeToggle}
-                    onToggle={handleToggleDevice}
-                    style={styles.extendedCard}
+                    loadingIds={loadingIds}
                 />
             </ScrollView>
 
