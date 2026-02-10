@@ -8,8 +8,8 @@ export interface ToggleDeviceRequest {
 
 export interface CreateScheduleRequest {
     deviceId: string;
-    startTime: string; // ISO 8601 format
-    endtime: string; // ISO 8601 format (matching API field name)
+    startTime: string;
+    endtime: string;
 }
 
 export interface ScheduleResponse {
