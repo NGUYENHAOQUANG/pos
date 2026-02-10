@@ -230,5 +230,6 @@ export const API_ENDPOINTS = {
     AI: {
         SEEDSTOCK_COUNTING: '/api/v1/seedstock_counting/predict',
         ESTIMATED_SIZE: '/api/v1/estimated_size/predict',
+        SHRIMP_HEALTH_PREDICT: '/api/v1/shrimp_health/predict',
     },
 } as const;

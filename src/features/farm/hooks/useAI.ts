@@ -7,6 +7,7 @@ import {
     aiApi,
     SeedstockCountingResponse,
     EstimatedSizeResponse,
+    ShrimpHealthResponse,
     AIPredictRequest,
 } from '@/features/farm/api/aiApi';
 import { handleError } from '@/shared/utils/errorHandler';
@@ -31,6 +32,18 @@ export const useEstimateShrimpSize = (): UseMutationResult<
 > => {
     return useMutation<EstimatedSizeResponse, Error, AIPredictRequest>({
         mutationFn: aiApi.estimateSize,
+        onError: handleError,
+    });
+};
+
+export const usePredictShrimpHealth = (): UseMutationResult<
+    ShrimpHealthResponse,
+    Error,
+    AIPredictRequest,
+    unknown
+> => {
+    return useMutation<ShrimpHealthResponse, Error, AIPredictRequest>({
+        mutationFn: aiApi.predictHealth,
         onError: handleError,
     });
 };

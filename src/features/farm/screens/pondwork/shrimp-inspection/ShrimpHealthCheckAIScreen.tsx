@@ -20,6 +20,11 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { usePredictShrimpHealth } from '@/features/farm/hooks/useAI';
+import {
+    ShrimpHealthBoundingBoxOverlay,
+    HealthDetectionBox,
+} from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -47,9 +52,14 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
     const [results, setResults] = useState<HealthCheckResult[]>([]);
     const [imageUri, _setImageUri] = useState<string | null>(null);
-    const [_imageBase64, setImageBase64] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [imageBase64, setImageBase64] = useState<string | null>(null);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+    const [detections, setDetections] = useState<HealthDetectionBox[]>([]);
+    const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
+    const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
+
+    const { mutate: predictHealth, isPending } = usePredictShrimpHealth();
 
     // Derived state for current/latest display
     const currentResult = results.length > 0 ? results[results.length - 1] : null;
@@ -58,66 +68,95 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const countTimes = results.length;
 
-    const isScreenLoading = isLoading;
+    const isScreenLoading = isPending;
 
-    const handleImageSelect = (uri: string, base64?: string) => {
+    const mapClassToStatus = (
+        className: string
+    ): { status: 'HEALTHY' | 'WARNING' | 'CRITICAL'; diagnosis: string } => {
+        switch (className) {
+            case 'Healthy':
+                return { status: 'HEALTHY', diagnosis: 'Khỏe mạnh' };
+            case 'Black Gill':
+                return { status: 'WARNING', diagnosis: 'Mang đen' };
+            case 'WSSV':
+                return { status: 'CRITICAL', diagnosis: 'Đốm trắng' };
+            default:
+                return { status: 'WARNING', diagnosis: className };
+        }
+    };
+
+    const handleImageSelect = (
+        uri: string,
+        base64?: string,
+        _file?: any,
+        dimensions?: { width: number; height: number }
+    ) => {
         _setImageUri(uri);
         if (base64) {
             setImageBase64(base64);
         }
+        if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
+            setImageDimensions(dimensions);
+        }
+        setDetections([]);
     };
 
     const handleGetResult = () => {
-        if (!imageUri) {
+        if (!imageUri || !imageBase64) {
             Alert.alert('Chưa có hình ảnh', 'Vui lòng chọn hoặc chụp ảnh để kiểm tra.');
             return;
         }
 
-        setIsLoading(true);
-        // Simulate AI delay
-        setTimeout(() => {
-            setIsLoading(false);
+        predictHealth(
+            { image_base: imageBase64 },
+            {
+                onSuccess: response => {
+                    const detailedItems: HealthCheckItem[] = response.results.map(r => {
+                        const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
+                        return {
+                            id: `${Date.now()}-${r.id}`,
+                            index: r.id,
+                            status,
+                            diagnosis,
+                            confidence: Math.round(r.prediction.top1_conf * 100),
+                        };
+                    });
 
-            // Mock Data
-            const mockCount = Math.floor(Math.random() * 20) + 5; // 5-25 shrimp
-            const mockInfectionRate = parseFloat((Math.random() * 20).toFixed(2)); // 0-20% infection
+                    const issuesCount = detailedItems.filter(i => i.status !== 'HEALTHY').length;
+                    const totalCount = detailedItems.length;
+                    const infectionRate =
+                        totalCount > 0
+                            ? parseFloat(((issuesCount / totalCount) * 100).toFixed(2))
+                            : 0;
 
-            const detailedItems: HealthCheckItem[] = Array.from({ length: mockCount }, (_, i) => {
-                const rand = Math.random();
-                let status: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
-                let diagnosis = 'Khỏe mạnh';
+                    const newResult: HealthCheckResult = {
+                        id: Date.now(),
+                        totalCount,
+                        items: detailedItems,
+                        healthStatusSummary:
+                            issuesCount > 0
+                                ? `Đã phát hiện ${issuesCount} vấn đề`
+                                : 'Tôm khỏe mạnh',
+                        infectionRate,
+                    };
 
-                if (rand > 0.85) {
-                    status = 'CRITICAL';
-                    diagnosis = 'Đốm trắng';
-                } else if (rand > 0.7) {
-                    status = 'WARNING';
-                    diagnosis = 'Mang đen';
-                }
+                    // Map to DetectionBox for bounding box overlay
+                    const newDetections: HealthDetectionBox[] = response.results.map(r => {
+                        const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
+                        return {
+                            id: r.id,
+                            bbox: r.bbox,
+                            label: `${diagnosis} (${Math.round(r.prediction.top1_conf * 100)}%)`,
+                            confidence: r.seg_conf,
+                            color: getStatusColor(status),
+                        };
+                    });
 
-                return {
-                    id: `${Date.now()}-${i}`,
-                    index: i + 1,
-                    status,
-                    diagnosis,
-                    confidence: Math.floor(Math.random() * 30) + 70,
-                };
-            });
-
-            // Count issues
-            const issuesCount = detailedItems.filter(i => i.status !== 'HEALTHY').length;
-
-            const newResult: HealthCheckResult = {
-                id: Date.now(),
-                totalCount: mockCount,
-                items: detailedItems,
-                healthStatusSummary:
-                    issuesCount > 0 ? `Đã phát hiện ${issuesCount} vấn đề` : 'Tôm khỏe mạnh',
-                infectionRate: mockInfectionRate,
-            };
-
-            setResults(prev => [...prev, newResult]);
-        }, 1500);
+                    setResults(prev => [...prev, newResult]);
+                    setDetections(newDetections);
+                },
+            }
+        );
     };
 
     const handleReset = () => {
@@ -132,6 +171,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         _setImageUri(null);
                         setImageBase64(null);
                         setResults([]);
+                        setDetections([]);
                     },
                 },
             ]
@@ -292,16 +332,40 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                             <View style={styles.labelWrapper}>
                                 <Text style={styles.label}>Hình ảnh xử lý</Text>
                             </View>
-                            <View>
+                            <View
+                                onLayout={event => {
+                                    const { width, height } = event.nativeEvent.layout;
+                                    setDisplayDimensions({ width, height });
+                                }}
+                            >
                                 <ImageUpload
                                     imageUri={imageUri}
                                     onImageSelect={handleImageSelect}
                                     onImageRemove={() => {
                                         _setImageUri(null);
                                         setImageBase64(null);
+                                        setDetections([]);
                                     }}
                                     returnBase64={true}
-                                />
+                                    aspectRatio={
+                                        imageDimensions.width > 0 && imageDimensions.height > 0
+                                            ? imageDimensions.width / imageDimensions.height
+                                            : 1
+                                    }
+                                >
+                                    {imageUri && detections.length > 0 && (
+                                        <ShrimpHealthBoundingBoxOverlay
+                                            detections={detections}
+                                            displayWidth={displayDimensions.width}
+                                            displayHeight={
+                                                displayDimensions.width /
+                                                (imageDimensions.width / imageDimensions.height)
+                                            }
+                                            originalWidth={imageDimensions.width}
+                                            originalHeight={imageDimensions.height}
+                                        />
+                                    )}
+                                </ImageUpload>
 
                                 {/* Action Buttons */}
                                 <View style={styles.actionButtons}>

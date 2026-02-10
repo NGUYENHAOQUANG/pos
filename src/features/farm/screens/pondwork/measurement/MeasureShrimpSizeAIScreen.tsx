@@ -15,9 +15,9 @@ import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionI
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import { useEstimateShrimpSize } from '@/features/farm/hooks/useAI';
 import {
-    BoundingBoxOverlay,
-    DetectionBox,
-} from '@/features/farm/components/boderbox/BoundingBoxOverlay';
+    ShrimpMeasurementBoundingBoxOverlay,
+    MeasurementDetectionBox,
+} from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -43,7 +43,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [isLoading, _setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
 
-    const [detections, setDetections] = useState<DetectionBox[]>([]);
+    const [detections, setDetections] = useState<MeasurementDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
 
@@ -122,14 +122,14 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onSuccess: data => {
                     let count = 0;
                     let sizes: number[] = [];
-                    let newDetections: DetectionBox[] = [];
+                    let newDetections: MeasurementDetectionBox[] = [];
 
                     // New format with results object
                     if (data.results && data.results.objects) {
                         count = data.results.count;
                         sizes = data.results.objects.map(obj => obj.length_cm);
 
-                        // Map to DetectionBox
+                        // Map to MeasurementDetectionBox
                         newDetections = data.results.objects.map(obj => ({
                             id: obj.id,
                             bbox: obj.bbox,
@@ -329,12 +329,20 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                         setDetections([]);
                                     }}
                                     returnBase64={true}
+                                    aspectRatio={
+                                        imageDimensions.width > 0 && imageDimensions.height > 0
+                                            ? imageDimensions.width / imageDimensions.height
+                                            : 1
+                                    }
                                 >
                                     {imageUri && detections.length > 0 && (
-                                        <BoundingBoxOverlay
+                                        <ShrimpMeasurementBoundingBoxOverlay
                                             detections={detections}
                                             displayWidth={displayDimensions.width}
-                                            displayHeight={displayDimensions.height}
+                                            displayHeight={
+                                                displayDimensions.width /
+                                                (imageDimensions.width / imageDimensions.height)
+                                            }
                                             originalWidth={imageDimensions.width}
                                             originalHeight={imageDimensions.height}
                                         />
