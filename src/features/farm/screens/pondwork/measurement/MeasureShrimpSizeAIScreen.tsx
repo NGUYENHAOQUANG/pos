@@ -13,12 +13,19 @@ import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { Input } from '@/shared/components/forms/Input';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
-import { useDocumentUpload } from '@/shared/hooks/useDocumentUpload';
+import { useEstimateShrimpSize } from '@/features/farm/hooks/useAI';
+import {
+    BoundingBoxOverlay,
+    DetectionBox,
+} from '@/features/farm/components/boderbox/BoundingBoxOverlay';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+
+    // Use the hook
+    const { mutate: estimateSize, isPending: isAnalyzing } = useEstimateShrimpSize();
 
     // State for measurements history
     interface Measurement {
@@ -32,8 +39,13 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [measurements, setMeasurements] = useState<Measurement[]>([]);
     const [measuredWeight, setMeasuredWeight] = useState<string>('');
     const [imageUri, _setImageUri] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [base64Image, setBase64Image] = useState<string | null>(null);
+    const [isLoading, _setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+    const [detections, setDetections] = useState<DetectionBox[]>([]);
+    const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
+    const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
 
     // Derived state for current/latest display
     const currentMeasurement =
@@ -73,14 +85,23 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     // Count times is just the length of history
     const countTimes = measurements.length;
 
-    const { mutateAsync: uploadBase64Image, isPending: isUploading } = useDocumentUpload();
-    const isScreenLoading = isLoading || isUploading;
+    // Include isAnalyzing in loading state
+    const isScreenLoading = isLoading || isAnalyzing;
 
-    const handleImageSelect = async (uri: string, base64?: string) => {
+    const handleImageSelect = async (
+        uri: string,
+        base64?: string,
+        _file?: any,
+        dimensions?: { width: number; height: number }
+    ) => {
         _setImageUri(uri);
-        if (uri && base64) {
-            await uploadBase64Image({ uri, base64 });
+        if (base64) {
+            setBase64Image(base64);
         }
+        if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
+            setImageDimensions(dimensions);
+        }
+        setDetections([]); // Clear previous detections
     };
 
     const handleGetCount = () => {
@@ -90,33 +111,73 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             return;
         }
 
-        setIsLoading(true);
-        // Simulate AI delay
-        setTimeout(() => {
-            setIsLoading(false);
+        if (!base64Image) {
+            Alert.alert('Chưa có ảnh', 'Vui lòng chọn hoặc chụp ảnh tôm.');
+            return;
+        }
 
-            const mockCount = 20;
+        estimateSize(
+            { image_base: base64Image },
+            {
+                onSuccess: data => {
+                    let count = 0;
+                    let sizes: number[] = [];
+                    let newDetections: DetectionBox[] = [];
 
-            const baseSize = parseFloat((Math.random() * (15 - 10) + 10).toFixed(2));
-            const newSizes = Array.from({ length: mockCount }, () => {
-                const variance = (Math.random() - 0.5) * 2; // -1 to 1
-                return parseFloat((baseSize + variance).toFixed(2));
-            });
+                    // New format with results object
+                    if (data.results && data.results.objects) {
+                        count = data.results.count;
+                        sizes = data.results.objects.map(obj => obj.length_cm);
 
-            // Cỡ tôm (con/kg) = 1000 * Số lượng tôm được đo / Khối lượng tôm được đo
-            const currentPcsPerKg = Math.round((1000 * mockCount) / weightVal);
+                        // Map to DetectionBox
+                        newDetections = data.results.objects.map(obj => ({
+                            id: obj.id,
+                            bbox: obj.bbox,
+                            label: `${obj.length_cm.toFixed(2)} cm`,
+                            confidence: obj.confidence,
+                        }));
+                    } else {
+                        // Old format or fallback
+                        if (data.detections) {
+                            count = data.detections.length;
+                            const avgSize = data.average_size_cm || 0;
+                            sizes = Array(count).fill(avgSize);
 
-            const newMeasurement: Measurement = {
-                id: Date.now(),
-                count: mockCount,
-                weight: weightVal,
-                sizes: newSizes,
-                pcsPerKg: currentPcsPerKg,
-            };
+                            if (data.detections.length > 0) {
+                                newDetections = data.detections.map(
+                                    (d: {
+                                        id: number;
+                                        box: number[];
+                                        score: number;
+                                        class_name: string;
+                                    }) => ({
+                                        id: d.id,
+                                        bbox: d.box,
+                                        confidence: d.score,
+                                        label: d.class_name,
+                                    })
+                                );
+                            }
+                        } else {
+                            // const _avgSize = data.average_size_cm || 0;
+                            // const _pcsPerKg = data.shrimp_count_per_kg || 0;
+                        }
+                    }
 
-            setMeasurements(prev => [...prev, newMeasurement]);
-            setMeasuredWeight('');
-        }, 1500);
+                    const newMeasurement: Measurement = {
+                        id: Date.now(),
+                        count: count,
+                        weight: weightVal,
+                        sizes: sizes,
+                        pcsPerKg: data.shrimp_count_per_kg || 0,
+                    };
+
+                    setMeasurements(prev => [...prev, newMeasurement]);
+                    setDetections(newDetections);
+                    setMeasuredWeight('');
+                },
+            }
+        );
     };
 
     const handleReset = () => {
@@ -254,12 +315,32 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             <View style={styles.labelWrapper}>
                                 <Text style={styles.label}>Hình ảnh xử lý</Text>
                             </View>
-                            <ImageUpload
-                                imageUri={imageUri}
-                                onImageSelect={handleImageSelect}
-                                onImageRemove={() => _setImageUri(null)}
-                                returnBase64={true}
-                            />
+                            <View
+                                onLayout={event => {
+                                    const { width, height } = event.nativeEvent.layout;
+                                    setDisplayDimensions({ width, height });
+                                }}
+                            >
+                                <ImageUpload
+                                    imageUri={imageUri}
+                                    onImageSelect={handleImageSelect}
+                                    onImageRemove={() => {
+                                        _setImageUri(null);
+                                        setDetections([]);
+                                    }}
+                                    returnBase64={true}
+                                >
+                                    {imageUri && detections.length > 0 && (
+                                        <BoundingBoxOverlay
+                                            detections={detections}
+                                            displayWidth={displayDimensions.width}
+                                            displayHeight={displayDimensions.height}
+                                            originalWidth={imageDimensions.width}
+                                            originalHeight={imageDimensions.height}
+                                        />
+                                    )}
+                                </ImageUpload>
+                            </View>
                             <View style={styles.actionButtons}>
                                 <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
                                     <Text style={styles.resetButtonText}>Đo lại</Text>

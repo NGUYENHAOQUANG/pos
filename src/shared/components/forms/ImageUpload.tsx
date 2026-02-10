@@ -34,7 +34,8 @@ interface ImageUploadProps {
     onImageSelect?: (
         uri: string,
         base64?: string,
-        file?: { fileName: string; type: string }
+        file?: { fileName: string; type: string },
+        dimensions?: { width: number; height: number }
     ) => void;
     onImageRemove?: () => void;
     style?: ViewStyle;
@@ -84,10 +85,11 @@ export function ImageUpload({
             setIsProcessing(true);
             if (!asset.uri) return;
 
+            let isPhAsset = asset.uri.startsWith('ph://');
             let finalUri = asset.uri;
             let fileSize = asset.fileSize;
 
-            if (!fileSize) {
+            if (!fileSize && !isPhAsset) {
                 try {
                     const stat = await RNFS.stat(asset.uri);
                     fileSize = Number(stat.size);
@@ -97,10 +99,19 @@ export function ImageUpload({
             }
             fileSize = fileSize || 0;
 
-            if (fileSize > MAX_FILE_SIZE) {
-                finalUri = await ImageCompressor.compress(asset.uri, {
-                    compressionMethod: 'auto',
-                });
+            if (isPhAsset || fileSize > MAX_FILE_SIZE) {
+                const compressConfig = isPhAsset
+                    ? {
+                          compressionMethod: 'auto',
+                          maxWidth: 30000,
+                          maxHeight: 30000,
+                          quality: 0.9,
+                      }
+                    : {
+                          compressionMethod: 'auto',
+                      };
+
+                finalUri = await ImageCompressor.compress(asset.uri, compressConfig as any);
             }
 
             let base64String: string | undefined;
@@ -114,8 +125,12 @@ export function ImageUpload({
 
             const fileName = asset.fileName || finalUri.split('/').pop() || 'image.jpg';
             const type = asset.type || 'image/jpeg';
+            const dimensions =
+                asset.width && asset.height
+                    ? { width: asset.width, height: asset.height }
+                    : undefined;
 
-            onImageSelect?.(finalUri, base64String, { fileName, type });
+            onImageSelect?.(finalUri, base64String, { fileName, type }, dimensions);
         } catch (error) {
             console.error('Error processing image:', error);
             Alert.alert('Lỗi', 'Không thể xử lý ảnh này, vui lòng thử lại.');
@@ -176,7 +191,18 @@ export function ImageUpload({
 
     return (
         <View style={[styles.container, style]}>
-            {label && <Text style={styles.label}>{label}</Text>}
+            <View style={styles.headerRow}>
+                {label && <Text style={styles.label}>{label}</Text>}
+                {imageUri && onImageRemove && (
+                    <TouchableOpacity
+                        onPress={onImageRemove}
+                        activeOpacity={0.7}
+                        style={styles.textDeleteButton}
+                    >
+                        <Text style={styles.textDelete}>Gỡ ảnh</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
             <TouchableOpacity
                 style={[styles.uploadContainer, isProcessing && styles.disabledContainer]}
                 onPress={handleImagePress}
@@ -187,16 +213,6 @@ export function ImageUpload({
                     <View style={styles.imageContainer}>
                         <RNImage source={{ uri: imageUri }} style={styles.image} />
                         {children}
-                        <TouchableOpacity
-                            style={styles.removeButton}
-                            onPress={e => {
-                                e.stopPropagation();
-                                onImageRemove?.();
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons name="close-circle" size={24} color={colors.error} />
-                        </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={styles.placeholderContainer}>
@@ -223,9 +239,15 @@ export function ImageUpload({
                 onClose={() => setActionSheetVisible(false)}
                 onTakePhoto={handleTakePhoto}
                 onChooseFromLibrary={handleChooseFromLibrary}
-                onImageSelected={(uri, asset) =>
-                    processImage({ uri, fileName: asset?.fileName, type: asset?.type })
-                }
+                onImageSelected={(uri, asset) => {
+                    processImage({
+                        uri,
+                        fileName: asset?.fileName,
+                        type: asset?.type,
+                        width: asset?.width,
+                        height: asset?.height,
+                    });
+                }}
             />
         </View>
     );
@@ -233,13 +255,27 @@ export function ImageUpload({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: spacing.xs,
     },
     label: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         color: colors.text,
-        marginBottom: spacing.xs,
+    },
+    textDeleteButton: {
+        paddingHorizontal: spacing.sm,
+    },
+    textDelete: {
+        fontSize: typography.fontSize.sm,
+        color: colors.error,
+        fontWeight: typography.fontWeight.medium,
+        marginRight: spacing.sm,
     },
     uploadContainer: {
         width: '100%',

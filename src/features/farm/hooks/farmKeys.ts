@@ -109,4 +109,7 @@ export const farmKeys = {
         list: (pondId: string, params?: Record<string, unknown>) =>
             [...farmKeys.pondRecords.all(), 'list', pondId, ...(params ? [params] : [])] as const,
     },
+    ai: {
+        all: () => [...farmKeys.all, 'ai'] as const,
+    },
 };

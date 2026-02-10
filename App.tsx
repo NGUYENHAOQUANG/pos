@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/config/toastConfig';
 import { StatusBar } from 'react-native';
@@ -72,17 +73,19 @@ function App(): React.JSX.Element {
     //   }, []);
 
     return (
-        <SafeAreaProvider>
-            <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-            <AppProviders />
-            <NetworkStatusModal />
-            <SessionExpiredModal
-                visible={isSessionExpired}
-                onConfirm={handleSessionExpiredConfirm}
-            />
-            <UpdateModal />
-            <Toast config={toastConfig} topOffset={0} />
-        </SafeAreaProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+                <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+                <AppProviders />
+                <NetworkStatusModal />
+                <SessionExpiredModal
+                    visible={isSessionExpired}
+                    onConfirm={handleSessionExpiredConfirm}
+                />
+                <UpdateModal />
+                <Toast config={toastConfig} topOffset={0} />
+            </SafeAreaProvider>
+        </GestureHandlerRootView>
     );
 }
 
