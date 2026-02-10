@@ -233,7 +233,7 @@ export function ImageUpload({
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
     },
     label: {
         fontSize: typography.fontSize.sm,
