@@ -21,6 +21,24 @@ export const apiClient: AxiosInstance = axios.create({
     },
 });
 
+export const aiClient: AxiosInstance = axios.create({
+    baseURL: ENV.API_URL_AI,
+    timeout: 60000,
+    headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ENV.API_KEY_AI,
+    },
+});
+
+// Response interceptor for AI Client - simple error logging
+aiClient.interceptors.response.use(
+    response => response,
+    error => {
+        console.error('[AI API Error]', error?.response?.data || error.message);
+        return Promise.reject(error);
+    }
+);
+
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
 
