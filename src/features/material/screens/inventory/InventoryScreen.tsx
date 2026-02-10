@@ -1,13 +1,14 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { InventoryCard } from '@/features/material/components/inventory/InventoryCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { spacing } from '@/styles';
-import { useInventoryTickets } from '@/features/material/hooks';
+import { spacing, colors } from '@/styles';
+import { useInfiniteInventoryTickets } from '@/features/material/hooks/inventory/useInventory';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPressCreate }) => {
     // 1. Get Filters from Store
@@ -19,24 +20,45 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
     const warehouseId = warehouses?.[0]?.id;
 
     // 2. Prepare Params
-    const inventoryParams = React.useMemo(
-        () => ({
-            Search: searchText,
-            WarehouseId: warehouseId,
-            Status: importReceiptStatusFilter || undefined,
-        }),
-        [searchText, warehouseId, importReceiptStatusFilter]
-    );
+    const inventoryParams = React.useMemo(() => {
+        const params: any = {};
 
-    // 3. Fetch Data
+        if (searchText?.trim()) {
+            params.Search = searchText.trim();
+        }
+
+        if (warehouseId) {
+            params.WarehouseId = warehouseId;
+        }
+
+        if (importReceiptStatusFilter) {
+            params.Status = importReceiptStatusFilter;
+        }
+
+        return params;
+    }, [searchText, warehouseId, importReceiptStatusFilter]);
+
+    // 3. Fetch Data with Infinite Scroll
     const {
-        data: inventoryList,
+        data: inventoryList = [],
         refetch,
         isLoading,
         isRefetching,
-    } = useInventoryTickets(inventoryParams);
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteInventoryTickets(inventoryParams);
 
-    if (isLoading) {
+    const { isConnected } = useNetInfo();
+    const showSkeleton = isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+
+    const handleLoadMore = () => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    };
+
+    if (showSkeleton) {
         return (
             <View style={styles.containerLoading}>
                 <MaterialLoadingState />
@@ -44,22 +66,29 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
         );
     }
 
-    const data = inventoryList || [];
-
     return (
         <View style={styles.container}>
             <FlatList
-                data={data}
+                data={inventoryList}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => <InventoryCard data={item} />}
                 ListEmptyComponent={<MaterialEmptyState tab="inventory" onPress={onPressCreate} />}
                 contentContainerStyle={[
                     styles.listContent,
-                    (!data || data.length === 0) && styles.emptyContent,
+                    inventoryList.length === 0 && styles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
-                refreshing={isRefetching}
+                refreshing={isRefetching && !isFetchingNextPage}
                 onRefresh={refetch}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                    isFetchingNextPage ? (
+                        <View style={styles.loaderFooter}>
+                            <ActivityIndicator color={colors.primary} />
+                        </View>
+                    ) : null
+                }
             />
         </View>
     );
@@ -79,5 +108,9 @@ const styles = StyleSheet.create({
     },
     emptyContent: {
         flex: 1,
+    },
+    loaderFooter: {
+        paddingVertical: spacing.md,
+        alignItems: 'center',
     },
 });
