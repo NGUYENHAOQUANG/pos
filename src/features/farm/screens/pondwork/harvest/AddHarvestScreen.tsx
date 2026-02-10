@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useForm } from 'react-hook-form';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -15,12 +16,27 @@ import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/Harv
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
-import { getHarvestSuccessMessage } from '@/features/farm/utils/toastMessages';
+import {
+    getHarvestSuccessMessage,
+    showEditJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 import Toast from 'react-native-toast-message';
-import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
+import { parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import {
+    HarvestFormData,
+    getHarvestTypeDisplay,
+    getHarvestTypeFromDisplay,
+    mapFormToApiRequest,
+} from '@/features/farm/schemas/harvestFormSchema';
+import {
+    useCreateHarvestRecord,
+    useUpdateHarvestRecord,
+    useDeleteHarvestRecord,
+} from '@/features/farm/hooks/useHarvestRecord';
+import { HarvestType } from '@/features/farm/types/harvestRecord.types';
+import { JobType } from '@/features/farm/components/pondwork/JobItem';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddHarvestScreen'>;
@@ -33,47 +49,46 @@ export const AddHarvestScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
     const scrollViewRef = useRef<ScrollView>(null);
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
-    const deleteCycle = useFarmStore(state => state.deleteCycle);
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+    const createHarvestMutation = useCreateHarvestRecord();
+    const updateHarvestMutation = useUpdateHarvestRecord();
+    const deleteHarvestMutation = useDeleteHarvestRecord();
 
-    // Initialize state from itemToEdit if available
     const meta = useMemo(() => (itemToEdit?.meta as HarvestMeta) || {}, [itemToEdit?.meta]);
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
-    const [harvestType, setHarvestType] = useState<string>(meta.harvestType || 'Thu hết');
-    const [yieldAmount, setYieldAmount] = useState<string>(meta.yieldAmount || '');
-    const [shrimpSize, setShrimpSize] = useState<string>(meta.shrimpSize || '');
-    const [referencePrice, setReferencePrice] = useState<string>(meta.referencePrice || '');
 
-    // Harvest type options
-    const harvestTypeOptions = ['Thu hết', 'Thu tỉa', 'Đóng chu kỳ'];
+    const getInitialDate = () => {
+        if (!itemToEdit?.date) return new Date();
+        const date = parseDate(itemToEdit.date);
+        if (itemToEdit.time) {
+            const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+            if (!isNaN(hours) && !isNaN(minutes)) {
+                date.setHours(hours, minutes);
+            }
+        }
+        return date;
+    };
 
-    // Store initial data for comparison when editing
-    const initialData = useMemo(() => {
-        if (!itemToEdit) return null;
-        return {
-            date: (() => {
-                const date = itemToEdit.date ? parseDate(itemToEdit.date) : new Date();
-                if (itemToEdit.date && itemToEdit.time) {
-                    const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                    if (!isNaN(hours) && !isNaN(minutes)) {
-                        date.setHours(hours, minutes);
-                    }
-                }
-                return date;
-            })(),
-            notes: itemToEdit?.note || '',
-            harvestType: meta.harvestType || 'Thu hết',
-            yieldAmount: meta.yieldAmount || '',
+    const getInitialHarvestType = (): HarvestType => {
+        const typeMap: Record<string, HarvestType> = {
+            'Thu hết': 'FullHarvest',
+            'Thu tỉa': 'PartialHarvest',
+        };
+        return typeMap[meta.harvestType || 'Thu hết'] || 'PartialHarvest';
+    };
+
+    const { handleSubmit, watch, setValue } = useForm<HarvestFormData>({
+        defaultValues: {
+            harvestType: getInitialHarvestType(),
+            totalWeightKg: meta.yieldAmount || '',
             shrimpSize: meta.shrimpSize || '',
             referencePrice: meta.referencePrice || '',
-        };
-    }, [itemToEdit, meta]);
+            notes: itemToEdit?.note || '',
+        },
+    });
+
+    const watchedHarvestType = watch('harvestType');
+    const harvestType = getHarvestTypeDisplay(watchedHarvestType);
+    const [selectedDate, setSelectedDate] = useState<Date>(getInitialDate());
+    const harvestTypeOptions = ['Thu hết', 'Thu tỉa'];
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -94,108 +109,54 @@ export const AddHarvestScreen: React.FC = () => {
         setDeleteModalVisible(true);
     };
 
-    const handleConfirmDelete = () => {
-        if (pond?.id && itemToEdit) {
-            const currentItems = getPondJobItems(pond.id, 'HARVEST');
-            const updatedItems = currentItems.filter(item => item.id !== itemToEdit.id);
-            updatePondJob(pond.id, 'HARVEST', updatedItems);
-            setDeleteModalVisible(false);
-            navigation.goBack();
-        }
+    const handleConfirmDelete = async () => {
+        if (!pond?.id || !itemToEdit?.id) return;
+
+        await deleteHarvestMutation.mutateAsync({
+            pondId: pond.id,
+            id: itemToEdit.id,
+        });
+
+        Toast.show({
+            type: 'success',
+            text1: 'Đã xóa thông tin thu hoạch',
+            position: 'top',
+            visibilityTime: 3000,
+        });
+
+        setDeleteModalVisible(false);
+        navigation.goBack();
     };
 
     const handleCancelDelete = () => {
         setDeleteModalVisible(false);
     };
 
-    // Check if data has changed from initial (when editing)
-    const hasChanges = useMemo(() => {
-        if (!itemToEdit || !initialData) return true; // New item always has "changes"
-
-        // Compare dates (only date part, not time)
-        const currentDateStr = selectedDate.toDateString();
-        const initialDateStr = initialData.date.toDateString();
-        if (currentDateStr !== initialDateStr) return true;
-
-        // Compare notes
-        if (notes !== initialData.notes) return true;
-
-        // Compare harvestType
-        if (harvestType !== initialData.harvestType) return true;
-
-        // Compare harvest data
-        if (yieldAmount !== initialData.yieldAmount) return true;
-        if (shrimpSize !== initialData.shrimpSize) return true;
-        if (referencePrice !== initialData.referencePrice) return true;
-
-        return false;
-    }, [
-        itemToEdit,
-        initialData,
-        selectedDate,
-        notes,
-        harvestType,
-        yieldAmount,
-        shrimpSize,
-        referencePrice,
-    ]);
-
-    const isButtonDisabled = itemToEdit && !hasChanges;
-
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
     const [confirmationModalType, setConfirmationModalType] = useState<
-        'harvest_full' | 'harvest_close_cycle' | null
+        | 'harvest_full'
+        // 'harvest_close_cycle' |
+        | null
     >(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const handleSavePress = () => {
-        // Show confirmation modal if harvestType is 'Thu hết' or 'Đóng chu kỳ' and it's a new item
         if (harvestType === 'Thu hết' && !itemToEdit) {
             setConfirmationModalType('harvest_full');
             setIsConfirmationModalVisible(true);
-        } else if (harvestType === 'Đóng chu kỳ' && !itemToEdit) {
-            setConfirmationModalType('harvest_close_cycle');
-            setIsConfirmationModalVisible(true);
+            // } else if (harvestType === 'Đóng chu kỳ' && !itemToEdit) {
+            //     setConfirmationModalType('harvest_close_cycle');
+            //     setIsConfirmationModalVisible(true);
         } else {
-            handleSave();
+            handleSubmit(onSubmit)();
         }
     };
 
     const handleConfirmSave = () => {
-        const currentType = confirmationModalType;
         setIsConfirmationModalVisible(false);
         setConfirmationModalType(null);
 
-        // Nếu là "Đóng chu kỳ", xóa chu kỳ hiện tại trước khi lưu
-        if (currentType === 'harvest_close_cycle' && pond?.id) {
-            // Tìm cycle đang active cho pond này
-            const currentCycle = activeCycles[pond.id];
-            const cyclesForPond = getCyclesByPondId(pond.id);
-
-            // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
-            const cycleToDelete =
-                currentCycle ||
-                cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
-                cyclesForPond[0];
-
-            if (cycleToDelete && cycleToDelete.id) {
-                // Xóa cycle khỏi cycles array
-                deleteCycle(cycleToDelete.id);
-
-                // Tìm tất cả các ponds có cycle này trong activeCycles và xóa chúng
-                Object.keys(activeCycles).forEach(pondId => {
-                    const cycleInActive = activeCycles[pondId];
-                    if (cycleInActive && cycleInActive.id === cycleToDelete.id) {
-                        deleteActiveCycle(pondId);
-                    }
-                });
-            } else {
-                // Fallback: xóa cycle của pond hiện tại
-                deleteActiveCycle(pond.id);
-            }
-        }
-
-        handleSave();
+        handleSubmit(onSubmit)();
     };
 
     const handleCancelConfirmation = () => {
@@ -203,93 +164,28 @@ export const AddHarvestScreen: React.FC = () => {
         setConfirmationModalType(null);
     };
 
-    const handleSave = () => {
-        if (harvestType !== 'Đóng chu kỳ') {
-            if (!yieldAmount.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập sản lượng thu hoạch',
-                    position: 'top',
-                    visibilityTime: 3000,
-                });
-                return;
-            }
-            if (!shrimpSize.trim()) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Vui lòng nhập cỡ tôm thu hoạch',
-                    position: 'top',
-                    visibilityTime: 3000,
-                });
-                return;
-            }
-        }
+    const onSubmit = async (data: HarvestFormData) => {
+        const apiRequest = mapFormToApiRequest(data);
 
-        if (!pond?.id) {
-            navigation.goBack();
-            return;
-        }
-
-        const pondId = pond.id;
-        const currentItems = getPondJobItems(pondId, 'HARVEST');
-
-        // Time & date formatting
-        const timeString = selectedDate.toLocaleTimeString('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
-        const baseData = {
-            label: itemToEdit?.label || `Lần ${currentItems.length + 1}`,
-            time: timeString,
-            date: formatDate(selectedDate),
-            note: notes || undefined,
-            meta: {
-                ...(itemToEdit?.meta || {}),
-                harvestType,
-                yieldAmount,
-                shrimpSize,
-                referencePrice,
-            },
-        };
-
-        if (itemToEdit) {
-            // Update existing HARVEST job
-            const updatedItems = currentItems.map(item =>
-                item.id === itemToEdit.id ? { ...item, ...baseData } : item
-            );
-            updatePondJob(pondId, 'HARVEST', updatedItems);
-            Toast.show({
-                type: 'success',
-                text1: getHarvestSuccessMessage(harvestType),
-                position: 'top',
-                visibilityTime: 3000,
+        if (itemToEdit?.id) {
+            await updateHarvestMutation.mutateAsync({
+                pondId: pond.id,
+                id: itemToEdit.id,
+                data: apiRequest,
             });
+
+            showEditJobSuccessToast('HARVEST' as JobType);
         } else {
-            // Create new HARVEST job with proper next index
-            let maxIndex = 0;
-            currentItems.forEach(item => {
-                const match = item.label.match(/Lần (\d+)/);
-                if (match) {
-                    const index = parseInt(match[1], 10);
-                    if (index > maxIndex) maxIndex = index;
-                }
+            await createHarvestMutation.mutateAsync({
+                pondId: pond.id,
+                data: apiRequest,
             });
-            const nextIndex = maxIndex + 1;
 
-            const newItem = {
-                id: Date.now().toString(),
-                ...baseData,
-                label: `Lần ${nextIndex}`,
-                pondId: pondId,
-            };
-
-            updatePondJob(pondId, 'HARVEST', [...currentItems, newItem]);
             Toast.show({
                 type: 'success',
-                text1: getHarvestSuccessMessage(harvestType),
+                text1: getHarvestSuccessMessage(getHarvestTypeDisplay(data.harvestType)),
                 position: 'top',
-                visibilityTime: 3000,
+                visibilityTime: 5000,
             });
         }
 
@@ -326,25 +222,28 @@ export const AddHarvestScreen: React.FC = () => {
                         activityLabel="Chọn loại thu hoạch"
                         activityOptions={harvestTypeOptions}
                         selectedActivity={harvestType}
-                        onSelectActivity={setHarvestType}
+                        onSelectActivity={value => {
+                            const apiType = getHarvestTypeFromDisplay(value);
+                            setValue('harvestType', apiType);
+                        }}
                         disabledDate={true}
                     />
 
                     {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
-                    {harvestType !== 'Đóng chu kỳ' && (
-                        <HarvestDataBox
-                            yieldAmount={yieldAmount}
-                            onYieldAmountChange={setYieldAmount}
-                            shrimpSize={shrimpSize}
-                            onShrimpSizeChange={setShrimpSize}
-                            referencePrice={referencePrice}
-                            onReferencePriceChange={setReferencePrice}
-                        />
-                    )}
+                    {/* {harvestType !== 'Đóng chu kỳ' && ( */}
+                    <HarvestDataBox
+                        yieldAmount={watch('totalWeightKg') || ''}
+                        onYieldAmountChange={value => setValue('totalWeightKg', value)}
+                        shrimpSize={watch('shrimpSize') || ''}
+                        onShrimpSizeChange={value => setValue('shrimpSize', value)}
+                        referencePrice={watch('referencePrice') || ''}
+                        onReferencePriceChange={value => setValue('referencePrice', value)}
+                    />
+                    {/* )} */}
 
                     <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
+                        notes={watch('notes') || ''}
+                        onNotesChange={value => setValue('notes', value)}
                         scrollViewRef={scrollViewRef}
                     />
                 </ScrollView>
@@ -357,7 +256,6 @@ export const AddHarvestScreen: React.FC = () => {
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={handleCancel}
-                    primaryDisabled={isButtonDisabled}
                 />
             </View>
 

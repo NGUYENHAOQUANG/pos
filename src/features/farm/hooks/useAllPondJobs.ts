@@ -12,6 +12,7 @@ import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovat
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterSupplyRecords';
 import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/feed/useFeeding';
+import { useHarvestRecordsAsJobs } from './useHarvestRecord';
 
 export const useAllPondJobs = (pond: PondData | undefined) => {
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
@@ -52,6 +53,8 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
     const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
     // Fetch feeding records from API
     const { jobs: apiFeedingJobs } = useFeedingRecordsAsJobs(pond?.id || '');
+    // Fetch harvest records from API
+    const { jobs: apiHarvestJobs } = useHarvestRecordsAsJobs(pond?.id || '');
 
     // Get job types from API only (no fallback)
     const jobs = useMemo(() => {
@@ -123,6 +126,10 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
                         items = apiWaterSupplyJobs;
                     }
 
+                    if (jobType === JOB_TYPES.HARVEST) {
+                        items = apiHarvestJobs;
+                    }
+
                     jobTypes.push({
                         type: jobType,
                         items,
@@ -168,6 +175,7 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
         apiEnvJobs,
         apiFeedingJobs,
         apiIncidentJobs,
+        apiHarvestJobs,
         apiCleanRenovationJobs,
         apiDryRenovationJobs,
         apiWaterSupplyJobs,

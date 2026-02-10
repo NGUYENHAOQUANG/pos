@@ -1,51 +1,80 @@
 import React from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { HarvestMeta } from '@/features/farm/types/farm.types';
-import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
-import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
-import { convertHarvestMetaToActivityData } from '@/features/farm/utils/metaConverters';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { JobExecution } from '@/features/farm/types/farm.types';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'HarvestLog'>;
+import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
+import { HarvestMeta, JobExecution } from '@/features/farm/types/farm.types';
+import { convertHarvestMetaToActivityData } from '@/features/farm/utils/metaConverters';
+import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
+import { useHarvestRecordsAsJobs } from '@/features/farm/hooks/useHarvestRecord';
+
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'HarvestLog'>;
 
 export const HarvestLogScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
-  const route = useRoute<ScreenRouteProp>();
-  const { pond } = route.params || {};
+    const navigation = useNavigation<NavigationProp>();
+    const { params } = useRoute<ScreenRouteProp>();
+    const { pond } = params || {};
 
-  const config: LogScreenConfig<HarvestMeta> = {
-    jobType: 'HARVEST',
-    pond,
-    metaConverter: (item: JobExecution, meta: HarvestMeta) =>
-      convertHarvestMetaToActivityData(item, meta),
-    itemFilter: (_item, meta) => meta?.harvestType === 'Thu tỉa',
-    editRoute: 'AddHarvestScreen',
-    getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
-  };
+    const [startDate, setStartDate] = React.useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
+    const [endDate, setEndDate] = React.useState(new Date());
 
-  const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const [refreshing, setRefreshing] = React.useState(false);
 
-  const handleStartHarvest = () => {
-    if (pond) {
-      navigation.navigate('AddHarvestScreen', { pond });
-    }
-  };
+    const { jobs, isLoading, refetch } = useHarvestRecordsAsJobs(pond?.id || '', {
+        CreateAtFrom: startDate.toISOString(),
+        CreateAtTo: endDate.toISOString(),
+    });
 
-  return (
-    <BaseLogScreen
-      title="Nhật ký thu hoạch"
-      startDate={startDate}
-      endDate={endDate}
-      onStartDateChange={setStartDate}
-      onEndDateChange={setEndDate}
-      groupedData={groupedData}
-      emptyMessage="Chưa có dữ liệu thu hoạch"
-      emptyButtonTitle="Bắt đầu thu hoạch"
-      onEmptyButtonPress={handleStartHarvest}
-    />
-  );
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        setTimeout(async () => {
+            refetch();
+            await refetch();
+            setRefreshing(false);
+        }, 500);
+    }, [refetch]);
+
+    const config: LogScreenConfig<HarvestMeta> = {
+        jobType: 'HARVEST',
+        pond,
+        externalData: jobs,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
+        metaConverter: (item: JobExecution, meta: HarvestMeta) =>
+            convertHarvestMetaToActivityData(item, meta),
+        editRoute: 'AddHarvestScreen',
+        getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
+    };
+
+    const { groupedData } = useLogScreenData(config);
+
+    const handleNavigateToCreate = () => {
+        if (pond) {
+            navigation.navigate('AddHarvestScreen', { pond });
+        }
+    };
+
+    return (
+        <BaseLogScreen
+            title="Nhật ký thu hoạch"
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+            groupedData={groupedData}
+            emptyMessage="Chưa có dữ liệu thu hoạch"
+            emptyButtonTitle="Bắt đầu thu hoạch"
+            onEmptyButtonPress={handleNavigateToCreate}
+            isLoading={isLoading || refreshing}
+            isRefreshing={refreshing}
+            onRefresh={onRefresh}
+        />
+    );
 };
