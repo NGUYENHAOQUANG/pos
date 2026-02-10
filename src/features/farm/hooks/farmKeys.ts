@@ -104,4 +104,7 @@ export const farmKeys = {
             ] as const,
         detail: (id: string) => [...farmKeys.harvestRecords.all(), 'detail', id] as const,
     },
+    ai: {
+        all: () => [...farmKeys.all, 'ai'] as const,
+    },
 };

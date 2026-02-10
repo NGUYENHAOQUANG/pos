@@ -44,6 +44,7 @@ const CountingShrimpScreen: React.FC = () => {
         dimensions?: { width: number; height: number }
     ) => {
         _setImageUri(uri);
+        setIsLoading(true);
         // Set dimensions immediately if available from asset (best for mapping AI coords)
         if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
             setImageDimensions(dimensions);
@@ -56,11 +57,12 @@ const CountingShrimpScreen: React.FC = () => {
 
         if (uri && base64) {
             try {
-                setIsLoading(true);
-
                 // Call AI API for counting
                 console.log('DEBUG: Calling AI API...');
-                const aiResponse = await aiApi.countSeedstock(base64);
+                console.log('BASE64_IMAGE_START');
+                console.log(base64);
+                console.log('BASE64_IMAGE_END');
+                const aiResponse = await aiApi.countSeedstock({ image_base: base64 });
                 console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
 
                 const count = aiResponse.total_count || 0;

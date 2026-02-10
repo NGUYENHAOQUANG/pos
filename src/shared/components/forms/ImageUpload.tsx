@@ -85,10 +85,11 @@ export function ImageUpload({
             setIsProcessing(true);
             if (!asset.uri) return;
 
+            let isPhAsset = asset.uri.startsWith('ph://');
             let finalUri = asset.uri;
             let fileSize = asset.fileSize;
 
-            if (!fileSize) {
+            if (!fileSize && !isPhAsset) {
                 try {
                     const stat = await RNFS.stat(asset.uri);
                     fileSize = Number(stat.size);
@@ -98,10 +99,19 @@ export function ImageUpload({
             }
             fileSize = fileSize || 0;
 
-            if (fileSize > MAX_FILE_SIZE) {
-                finalUri = await ImageCompressor.compress(asset.uri, {
-                    compressionMethod: 'auto',
-                });
+            if (isPhAsset || fileSize > MAX_FILE_SIZE) {
+                const compressConfig = isPhAsset
+                    ? {
+                          compressionMethod: 'auto',
+                          maxWidth: 30000,
+                          maxHeight: 30000,
+                          quality: 0.9,
+                      }
+                    : {
+                          compressionMethod: 'auto',
+                      };
+
+                finalUri = await ImageCompressor.compress(asset.uri, compressConfig as any);
             }
 
             let base64String: string | undefined;
@@ -250,7 +260,7 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         color: colors.text,
-        marginBottom: spacing.xs,
+        marginRight: spacing.sm,
     },
     uploadContainer: {
         width: '100%',
