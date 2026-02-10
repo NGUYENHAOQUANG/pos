@@ -21,48 +21,36 @@ export const useDeviceToggle = () => {
                 return;
             }
 
-            const internalDeviceId = device.internalDeviceId;
+            // 2. Prepare Payload (Send deviceId UUID)
+            const payload = {
+                deviceId: device.id,
+            };
 
-            // 2. Check if it's a real IoT device (has internalDeviceId)
-            if (!internalDeviceId) {
-                console.log(`No internalDeviceId for ${deviceId}, updating local state only.`);
-                await new Promise<void>(resolve => setTimeout(() => resolve(), 300));
+            console.log('Sending toggle request for device:', device.name, payload);
+
+            // 3. Call API
+            const response = await deviceApi.toggleDevice(payload);
+            const responseData = (response.data as any)?.data; // Assuming API returns wrapped data
+
+            // 4. Check Success (Status 200)
+            const isSuccess = response.status === 200 || response.data?.success;
+
+            if (isSuccess) {
+                console.log('Toggle success! Updating store.');
                 updateDeviceState(pondId, deviceId, isOn);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Thành công',
+                    text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
+                    visibilityTime: 2000,
+                });
             } else {
-                // 3. Prepare Payload (Only internalDeviceId needed for toggle)
-                const payload = {
-                    internalDeviceId: internalDeviceId,
-                };
-
-                console.log('Sending toggle request for device:', device.name, payload);
-
-                // 4. Call API
-                const response = await deviceApi.toggleDevice(payload);
-                const responseData = (response.data as any)?.data; // Assuming API returns wrapped data
-
-                // 5. Check Success (Status 200)
-                // Note: Adjust success check based on actual API response structure if needed
-                // Currently assuming successful toggle returns 200 or success flag
-                const isSuccess = response.status === 200 || response.data?.success;
-
-                if (isSuccess) {
-                    console.log('Toggle success! Updating store.');
-                    updateDeviceState(pondId, deviceId, isOn);
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Thành công',
-                        text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
-                        visibilityTime: 2000,
-                    });
-                } else {
-                    console.warn('Toggle failed:', responseData);
-                    Toast.show({
-                        type: 'error',
-                        text1: 'Điều khiển thất bại',
-                        text2: `Lỗi: ${responseData?.message || 'Unknown error'}`,
-                    });
-                    // Revert state if needed? Currently we only update on success so no revert needed.
-                }
+                console.warn('Toggle failed:', responseData);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Điều khiển thất bại',
+                    text2: `Lỗi: ${responseData?.message || 'Unknown error'}`,
+                });
             }
         } catch (error) {
             console.error('API Error:', error);

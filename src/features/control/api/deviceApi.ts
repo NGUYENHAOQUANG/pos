@@ -1,8 +1,9 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 
+// Request Interface
 export interface ToggleDeviceRequest {
-    internalDeviceId: number;
+    deviceId: string;
 }
 
 // Response Interface
@@ -21,7 +22,7 @@ export const deviceApi = {
     toggleDevice: (payload: ToggleDeviceRequest) => {
         return apiClient.patch(API_ENDPOINTS.DEVICE.TOGGLE, null, {
             params: {
-                InternalDeviceId: payload.internalDeviceId,
+                id: payload.deviceId,
             },
         });
     },

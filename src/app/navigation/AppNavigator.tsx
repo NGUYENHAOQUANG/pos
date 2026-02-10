@@ -21,8 +21,6 @@ const Stack = createNativeStackNavigator<RootParamList>();
 
 export function AppNavigator() {
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-    console.log('[AppNavigator] Rendered. Is Authenticated:', isAuthenticated);
-
     return (
         <Stack.Navigator
             initialRouteName="Auth"
