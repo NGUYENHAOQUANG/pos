@@ -23,8 +23,8 @@ import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environme
 import { CreateCycleScreen } from '@/features/farm/screens/pond/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
-import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/watersupply/WaterSupplyScreen';
-import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/watersupply/WaterSupplyLogScreen';
+import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
+import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
