@@ -17,6 +17,7 @@ import {
 } from '@/features/farm/types/farm.types';
 import { useMemo } from 'react';
 import { useEnvironmentInit } from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 // Query keys
 export const envMeasurementKeys = {
@@ -54,6 +55,7 @@ export const useCreateEnvMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: envMeasurementKeys.lists(),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -77,6 +79,7 @@ export const useUpdateEnvMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: envMeasurementKeys.lists(),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -90,6 +93,7 @@ export const useDeleteEnvMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: envMeasurementKeys.lists(),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

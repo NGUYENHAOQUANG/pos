@@ -80,10 +80,23 @@ export const useMeasureShrimpSizeForm = ({
             } else if (itemToEdit && itemToEdit.meta) {
                 const meta = itemToEdit.meta as any;
                 if (meta.date) setTime(new Date(meta.date));
-                if (meta.shrimpSize) setShrimpSize(meta.shrimpSize);
-                if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight);
+
+                // Convert numbers to strings safely
+                if (meta.shrimpSize !== undefined && meta.shrimpSize !== null) {
+                    setShrimpSize(meta.shrimpSize.toString());
+                }
+                if (meta.remainingWeight !== undefined && meta.remainingWeight !== null) {
+                    setRemainingWeight(meta.remainingWeight.toString());
+                }
+
                 if (meta.notes) setNotes(meta.notes);
-                if (meta.images) {
+
+                // Map documents from API response if available
+                if (meta.documents && Array.isArray(meta.documents)) {
+                    const docUrls = meta.documents.map((d: any) => d.publicUrl).filter(Boolean);
+                    setImages(docUrls);
+                    setInitialDocumentIds(meta.documents.map((d: any) => d.id));
+                } else if (meta.images) {
                     setImages(meta.images);
                     setInitialDocumentIds(meta.documentIds || []);
                 }

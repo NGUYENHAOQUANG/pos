@@ -114,6 +114,9 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/stock-transfer/${id}`,
         },
+        RECORD: {
+            LIST: (pondId: string) => `/pond/${pondId}/record`,
+        },
     },
     POND_TYPES: {
         LIST: '/pondcategory',

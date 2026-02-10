@@ -86,6 +86,7 @@ export const useCreateWaterSupplyRecord = () => {
             waterSupplyApi.create(pondId, data),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -104,6 +105,7 @@ export const useUpdateWaterSupplyRecord = () => {
         }) => waterSupplyApi.update(pondId, id, data),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -115,6 +117,7 @@ export const useDeleteWaterSupplyRecord = () => {
             waterSupplyApi.delete(pondId, id),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

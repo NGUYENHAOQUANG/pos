@@ -196,6 +196,7 @@ export const useCreateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.feedingRecords.list(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             Toast.show({
                 type: 'success',
                 text1: 'Đã cho ăn thành công',
@@ -228,6 +229,7 @@ export const useUpdateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.feedingRecords.detail(id),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             Toast.show({
                 type: 'success',
                 text1: 'Cập nhật hồ sơ thành công',
@@ -253,6 +255,7 @@ export const useDeleteFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.feedingRecords.detail(id),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             Toast.show({
                 type: 'success',
                 text1: 'Xóa hồ sơ thành công',

@@ -133,6 +133,7 @@ export const useCreateDryRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.dryRenovations.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -167,6 +168,7 @@ export const useUpdateDryRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.dryRenovations.detail(id),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -181,6 +183,7 @@ export const useDeleteDryRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.dryRenovations.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

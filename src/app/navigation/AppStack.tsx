@@ -109,7 +109,7 @@ export type AppStackParamList = {
     // ============== Farm Screens (Tab Bar hidden) ==============
     PondDetail: { pond: PondData };
     FeedTheShrimp: { pondId: string };
-    EditFeeder: { pondId: string; jobId?: string };
+    EditFeeder: { pondId: string; jobId?: string; itemToEdit?: JobExecution };
     FeedingLog: { pondId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
@@ -153,7 +153,7 @@ export type AppStackParamList = {
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
-    EditWaterTreatmentScreens: { pondId: string; jobId: string };
+    EditWaterTreatmentScreens: { pondId: string; jobId: string; itemToEdit?: JobExecution };
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: PondData; item?: JobExecution };
     WaterSupplyLog: { pond: PondData };
