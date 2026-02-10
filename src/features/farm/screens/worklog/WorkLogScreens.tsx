@@ -1,40 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilterActive } from '@/assets/icons';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
-import { PondData, JobExecution } from '@/features/farm/types/farm.types';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { PondData } from '@/features/farm/types/farm.types';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
-import {
-    TrackingDayCard,
-    TrackingGroup,
-    TimelineActivity,
-} from '@/features/farm/components/TrackingList';
-import { parseDate, formatDate, compareTime } from '@/features/farm/utils/dateUtils';
+import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
 import { TouchableOpacity } from 'react-native';
-import {
-    convertEnvironmentMetaToActivityData,
-    convertShrimpInspectionMetaToActivityData,
-    convertSiphonMetaToActivityData,
-    convertTransferMetaToActivityData,
-    convertHarvestMetaToActivityData,
-    convertFeedJobToActivityData,
-    convertWaterSupplyMetaToActivityData,
-    convertWaterTreatmentJobToActivityData,
-    convertMeasureSizeMetaToActivityData,
-} from '@/features/farm/utils/metaConverters';
-import {
-    ShrimpInspectionMeta,
-    MeasureSizeMeta,
-    EnvironmentMeta,
-    WaterSupplyMeta,
-    SiphonMeta,
-    TransferMeta,
-    HarvestMeta,
-} from '@/features/farm/types/farm.types';
+import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
+import { JobExecution } from '@/features/farm/types/farm.types';
+import type { IPondRecordItem } from '@/features/farm/types/pondRecord.types';
 
 interface WorkLogScreensProps {
     pond?: PondData;
@@ -58,88 +35,95 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const feedJobs = useFarmStore(state => state.feedJobs);
-    const shrimpInspectionJobs = useFarmStore(state => state.shrimpInspectionJobs);
-    const measureSizeJobs = useFarmStore(state => state.measureSizeJobs);
-    const environmentJobs = useFarmStore(state => state.environmentJobs);
-    const waterTreatmentJobs = useFarmStore(state => state.waterTreatmentJobs);
-    const waterChangeJobs = useFarmStore(state => state.waterChangeJobs);
-    const siphonJobs = useFarmStore(state => state.siphonJobs);
-    const troubleshootingJobs = useFarmStore(state => state.troubleshootingJobs);
-    const transferPondJobs = useFarmStore(state => state.transferPondJobs);
-    const cleanPondJobs = useFarmStore(state => state.cleanPondJobs);
-    const sunDryJobs = useFarmStore(state => state.sunDryJobs);
-    const harvestJobs = useFarmStore(state => state.harvestJobs);
+    // Fetch records from API
+    const adjustedEndDate = useMemo(() => {
+        const d = new Date(endDate);
+        d.setHours(23, 59, 59, 999);
+        return d;
+    }, [endDate]);
 
-    const jobDataMap = useMemo(
-        () => ({
-            FEED: feedJobs,
-            SHRIMP_INSPECTION: shrimpInspectionJobs,
-            MEASURE_SIZE: measureSizeJobs,
-            ENVIRONMENT: environmentJobs,
-            WATER_TREATMENT: waterTreatmentJobs,
-            WATER_CHANGE: waterChangeJobs,
-            SIPHON: siphonJobs,
-            TROUBLESHOOTING: troubleshootingJobs,
-            TRANSFER_POND: transferPondJobs,
-            CLEAN_POND: cleanPondJobs,
-            SUN_DRY_POND: sunDryJobs,
-            HARVEST: harvestJobs,
-        }),
-        [
-            feedJobs,
-            shrimpInspectionJobs,
-            measureSizeJobs,
-            environmentJobs,
-            waterTreatmentJobs,
-            waterChangeJobs,
-            siphonJobs,
-            troubleshootingJobs,
-            transferPondJobs,
-            cleanPondJobs,
-            sunDryJobs,
-            harvestJobs,
-        ]
-    );
+    const { groups, isLoading } = usePondRecordGroups(pond?.id || '', {
+        startDate,
+        endDate: adjustedEndDate,
+        operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
+    });
 
-    // Helper to get data for a specific job
-    const getJobData = (type: JobType, item: JobExecution) => {
-        switch (type) {
-            case 'FEED':
-                return convertFeedJobToActivityData(item);
-            case 'SHRIMP_INSPECTION':
-                return convertShrimpInspectionMetaToActivityData(
-                    (item.meta as ShrimpInspectionMeta) || {}
-                );
-            case 'MEASURE_SIZE':
-                return convertMeasureSizeMetaToActivityData(
-                    item,
-                    (item.meta as MeasureSizeMeta) || {}
-                );
-            case 'ENVIRONMENT':
-                return convertEnvironmentMetaToActivityData((item.meta as EnvironmentMeta) || {});
-            case 'WATER_TREATMENT':
-                return convertWaterTreatmentJobToActivityData(item);
-            case 'WATER_CHANGE':
-                return convertWaterSupplyMetaToActivityData(
-                    item,
-                    (item.meta as WaterSupplyMeta) || {}
-                );
-            case 'SIPHON':
-                return convertSiphonMetaToActivityData(item, (item.meta as SiphonMeta) || {});
-            case 'TRANSFER_POND':
-                return convertTransferMetaToActivityData((item.meta as TransferMeta) || {});
-            case 'HARVEST':
-                return convertHarvestMetaToActivityData(item, (item.meta as HarvestMeta) || {});
-            case 'CLEAN_POND':
-            case 'SUN_DRY_POND':
-                // These might not have specific meta converters or use generic ones
-                return item.note ? [{ label: 'Ghi chú', value: item.note }] : [];
-            default:
-                return [];
-        }
-    };
+    // Convert API groups to TrackingGroup[] with onEdit handlers
+    const groupedLogs: TrackingGroup[] = useMemo(() => {
+        return groups.map(group => ({
+            id: group.id,
+            date: group.date,
+            activities: group.activities.map(activity => {
+                // Get the hidden record item and jobType
+                const recordItem = (activity as unknown as Record<string, unknown>)._recordItem as
+                    | IPondRecordItem
+                    | undefined;
+                const jobType = (activity as unknown as Record<string, unknown>)._jobType as
+                    | JobType
+                    | undefined;
+
+                return {
+                    ...activity,
+                    onEdit:
+                        onEditJobItem && jobType && recordItem
+                            ? () => {
+                                  // Convert record to JobExecution for edit handler
+                                  const createdDate = recordItem.createdAt
+                                      ? new Date(recordItem.createdAt)
+                                      : new Date();
+                                  const timeStr = createdDate.toLocaleTimeString('en-GB', {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                  });
+
+                                  const refData: any = recordItem.referenceData || {};
+
+                                  // Transform meta to match what Edit Screens expect (Work Tab compatibility)
+                                  const mappedMeta = { ...refData };
+
+                                  // Mapping for Measure Size
+                                  if (refData.shrimpSizePcsPerKg)
+                                      mappedMeta.shrimpSize = refData.shrimpSizePcsPerKg;
+                                  if (refData.estimatedRemainingStockKg)
+                                      mappedMeta.remainingWeight =
+                                          refData.estimatedRemainingStockKg;
+
+                                  // Mapping for Harvest
+                                  if (refData.totalWeightKg)
+                                      mappedMeta.yieldAmount = refData.totalWeightKg;
+                                  // Harvest also uses shrimpSize, mapped above if key matches, or:
+                                  if (refData.shrimpSizePcsPerKg)
+                                      mappedMeta.shrimpSize = refData.shrimpSizePcsPerKg;
+
+                                  // Mapping for Shrimp Inspection (images alias)
+                                  if (refData.documents)
+                                      mappedMeta.images = refData.documents
+                                          .map((d: any) => d.publicUrl)
+                                          .filter(Boolean);
+
+                                  const jobExecution: JobExecution = {
+                                      id: recordItem.id,
+                                      label: activity.title,
+                                      time: timeStr,
+                                      date: activity.time,
+                                      pondId: pond?.id || '',
+
+                                      // Map fields to match "Work Tab" structure (syncing Log -> Work)
+                                      note: (refData.notes as string) ?? refData.note ?? undefined,
+                                      materials: refData.materials, // Pass raw materials array
+                                      documentIds: refData.documentIds,
+                                      images: refData.images || refData.documentIds, // Fallback/Alias
+
+                                      meta: mappedMeta, // Use transformed meta
+                                      createdAt: recordItem.createdAt,
+                                  };
+                                  onEditJobItem(jobType, jobExecution);
+                              }
+                            : undefined,
+                };
+            }),
+        }));
+    }, [groups, onEditJobItem, pond?.id]);
 
     // Calculate available job types based on passed props (from Work tab)
     const availableFilterOptions = useMemo(() => {
@@ -148,100 +132,6 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
             value: type,
         }));
     }, [availableJobTypes]);
-
-    // Calculate grouped logs
-    const groupedLogs: TrackingGroup[] = useMemo(() => {
-        if (!pond?.id) return [];
-
-        let allJobs: { type: JobType; item: JobExecution }[] = [];
-
-        // 1. Collect jobs for available types
-        availableJobTypes.forEach(type => {
-            // Use jobDataMap instead of removed pondJobs
-            const rawItems = jobDataMap[type]?.[pond.id] || [];
-            const items = rawItems.filter(item => !item.pondId || item.pondId === pond.id);
-
-            items.forEach(item => {
-                allJobs.push({ type, item });
-            });
-        });
-
-        // 2. Filter by date
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-
-        allJobs = allJobs.filter(({ item }) => {
-            const date = item.date ? parseDate(item.date) : new Date();
-            return date >= start && date <= end;
-        });
-
-        // 3. Filter by type (if filters selected)
-        if (selectedFilters.length > 0) {
-            allJobs = allJobs.filter(({ type }) => selectedFilters.includes(type));
-        }
-
-        // 4. Sort by date desc, then time desc, then by original index desc
-        const indexedJobs = allJobs.map((job, idx) => ({ ...job, originalIndex: idx }));
-
-        indexedJobs.sort((a, b) => {
-            const dateA = a.item.date ? parseDate(a.item.date) : new Date(0);
-            const dateB = b.item.date ? parseDate(b.item.date) : new Date(0);
-            if (dateA.getTime() !== dateB.getTime()) {
-                return dateB.getTime() - dateA.getTime();
-            }
-            const timeCompare = compareTime(b.item.time || '00:00', a.item.time || '00:00');
-            if (timeCompare !== 0) {
-                return timeCompare;
-            }
-            return b.originalIndex - a.originalIndex;
-        });
-
-        allJobs = indexedJobs;
-
-        // 5. Group by date
-        const groups: Record<string, TimelineActivity[]> = {};
-        const groupOrder: string[] = [];
-
-        allJobs.forEach(({ type, item }) => {
-            const dateStr = item.date || formatDate(new Date());
-            if (!groups[dateStr]) {
-                groups[dateStr] = [];
-                groupOrder.push(dateStr);
-            }
-
-            groups[dateStr].push({
-                id: item.id,
-                time: item.time,
-                title: JOB_CONFIG[type]?.defaultTitle || item.label,
-                data: getJobData(type, item),
-                note: item.note,
-                onEdit: () => onEditJobItem?.(type, item),
-            });
-        });
-
-        // Sort groups by date descending
-        groupOrder.sort((a, b) => {
-            const dateA = parseDate(a);
-            const dateB = parseDate(b);
-            return dateB.getTime() - dateA.getTime();
-        });
-
-        return groupOrder.map(date => ({
-            id: date,
-            date: date,
-            activities: groups[date],
-        }));
-    }, [
-        pond?.id,
-        jobDataMap,
-        startDate,
-        endDate,
-        selectedFilters,
-        onEditJobItem,
-        availableJobTypes,
-    ]);
 
     // Handle Filter Apply
     const handleApplyFilter = (selectedTypes: string[]) => {
@@ -277,7 +167,11 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {hasData ? (
+                {isLoading ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color={colors.primary} />
+                    </View>
+                ) : hasData ? (
                     <View style={styles.listContainer}>
                         {groupedLogs.map(group => (
                             <TrackingDayCard key={group.id} group={group} style={styles.dayCard} />
@@ -322,17 +216,22 @@ const styles = StyleSheet.create({
     },
     dateRange: {
         height: 40,
-        // Remove default margin or padding if necessary to fit design
     },
     scrollContent: {
         flexGrow: 1,
         paddingVertical: spacing.sm,
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: spacing.xl,
+    },
     listContainer: {
         gap: spacing.sm,
     },
     dayCard: {
-        // Optional styling for the card container if needed
+        // Optional styling for the card container
     },
     emptyStateContainer: {
         flex: 1,

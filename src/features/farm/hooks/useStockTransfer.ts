@@ -4,6 +4,7 @@ import { CreateStockTransferRequest, GetStockTransfersParams } from '../types/st
 import { APP_CONFIG } from '@/shared/constants';
 import { showSuccessToast, showErrorToast } from '@/features/material/utils/validationToast';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 const KEYS = {
     list: (pondId: string, params?: GetStockTransfersParams) => ['stock-transfers', pondId, params],
@@ -56,6 +57,7 @@ export const useCreateStockTransfer = () => {
         onSuccess: (_, variables) => {
             showSuccessToast('Tạo phiếu sang ao thành công');
             queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: error => {
             const message = getErrorMessage(error, 'Tạo phiếu sang ao thất bại');

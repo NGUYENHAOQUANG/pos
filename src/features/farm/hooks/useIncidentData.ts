@@ -25,6 +25,7 @@ export const useCreateIncident = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.incident.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -49,6 +50,7 @@ export const useDeleteIncident = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.incident.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -71,6 +73,7 @@ export const useUpdateIncident = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.incident.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

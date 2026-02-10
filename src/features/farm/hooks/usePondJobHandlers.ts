@@ -176,7 +176,11 @@ export const usePondJobHandlers = (
 
             switch (type) {
                 case JOB_TYPES.FEED:
-                    navigation.navigate('EditFeeder', { pondId: pond.id, jobId: item.id });
+                    navigation.navigate('EditFeeder', {
+                        pondId: pond.id,
+                        jobId: item.id,
+                        itemToEdit: item,
+                    });
                     break;
 
                 case JOB_TYPES.SHRIMP_INSPECTION:
@@ -199,6 +203,7 @@ export const usePondJobHandlers = (
                     navigation.navigate('EditWaterTreatmentScreens', {
                         pondId: pond.id,
                         jobId: item.id,
+                        itemToEdit: item,
                     });
                     break;
 

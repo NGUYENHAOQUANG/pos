@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -29,7 +29,7 @@ export const EditFeederScreens = () => {
     const navigation = useNavigation();
     const route = useRoute<ScreenRouteProp>();
     // TODO: Add jobId or similar to params to identify what to edit
-    const { pondId, jobId } = route.params || {};
+    const { pondId, jobId, itemToEdit } = route.params || {};
 
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
@@ -44,8 +44,6 @@ export const EditFeederScreens = () => {
 
     // Load existing data
     // Fetch detail data
-    // Load existing data
-    // Fetch detail data
     const { data: detailData, isLoading: isDetailLoading } = useFeedingRecordDetail(
         pondId || '',
         jobId || ''
@@ -54,7 +52,57 @@ export const EditFeederScreens = () => {
     const isLoading =
         updateMutation.isPending || deleteMutation.isPending || (isDetailLoading && !!jobId);
 
-    // Load existing data
+    // Helper to map materials
+    const mapMaterials = useCallback(
+        (rawMaterials: any[]): SelectedMaterialItem[] => {
+            return rawMaterials
+                .map((apiMat: any) => {
+                    // apiMat can be from API detail (warehouseItemId) or from WorkLog meta (id or warehouseItemId? check usePondRecords)
+                    // In usePondRecords, Feeding meta has 'materials' array.
+                    // Let's assume meta material structure matches what we need or has enough info.
+                    // Checking usePondRecords: ref.materials is { id, name, quantity, unit, warehouseItemId } usually?
+                    // Actually usePondRecords just says "ref.materials".
+                    // Let's map safely finding by ID if possible.
+
+                    // If coming from meta, it might have warehouseItemId or just id.
+                    const matId = apiMat.warehouseItemId || apiMat.id;
+                    const fullMaterial = materials.find(m => m.id === matId);
+
+                    if (fullMaterial) {
+                        return {
+                            material: fullMaterial,
+                            quantity: apiMat.quantity,
+                            unit: fullMaterial.unitName || '',
+                        };
+                    }
+                    return null;
+                })
+                .filter((m): m is SelectedMaterialItem => m !== null);
+        },
+        [materials]
+    );
+
+    // Load initial data from itemToEdit (fast)
+    useEffect(() => {
+        if (itemToEdit?.meta) {
+            const meta = itemToEdit.meta as any;
+            if (meta.notes) setNote(meta.notes);
+            if (meta.materials) {
+                const mapped = mapMaterials(meta.materials);
+                if (mapped.length > 0) setSelectedMaterials(mapped);
+            }
+            if (itemToEdit.createdAt) {
+                setExecutionDate(new Date(itemToEdit.createdAt));
+            } else if (itemToEdit.date) {
+                // Fallback if createdAt missing but date string exists
+                // itemToEdit.date is "DD/MM/YYYY" usually? or ISO?
+                // JobExecution date is usually "DD/MM/YYYY". time is "HH:mm".
+                // Let's rely on createdAt first.
+            }
+        }
+    }, [itemToEdit, materials, mapMaterials]);
+
+    // Update data when detail API returns (authoritative)
     useEffect(() => {
         if (detailData?.data) {
             const item = detailData.data;
@@ -62,28 +110,8 @@ export const EditFeederScreens = () => {
                 setNote(item.feedingDetail.notes || '');
 
                 if (item.feedingDetail.materials) {
-                    // Map API materials to SelectedMaterialItem
-                    // We need to find the full material info from the 'materials' list
-                    const mappedMaterials: SelectedMaterialItem[] = item.feedingDetail.materials
-                        .map((apiMat: any) => {
-                            const fullMaterial = materials.find(
-                                m => m.id === apiMat.warehouseItemId
-                            );
-                            if (fullMaterial) {
-                                return {
-                                    material: fullMaterial,
-                                    quantity: apiMat.quantity,
-                                    unit: fullMaterial.unitName || '',
-                                };
-                            }
-                            return null;
-                        })
-                        .filter(
-                            (m: SelectedMaterialItem | null): m is SelectedMaterialItem =>
-                                m !== null
-                        );
-
-                    setSelectedMaterials(mappedMaterials);
+                    const mapped = mapMaterials(item.feedingDetail.materials);
+                    setSelectedMaterials(mapped);
                 }
             }
             // Parse createdAt string to Date object
@@ -91,7 +119,7 @@ export const EditFeederScreens = () => {
                 setExecutionDate(new Date(item.createdAt));
             }
         }
-    }, [detailData, materials]);
+    }, [detailData, materials, mapMaterials]);
 
     const handleSaveInfo = () => {
         if (pondId && jobId) {

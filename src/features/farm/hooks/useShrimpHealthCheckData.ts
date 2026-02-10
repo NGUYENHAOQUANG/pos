@@ -232,6 +232,7 @@ export const useCreateShrimpHealthCheck = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: () => {},
     });
@@ -260,6 +261,7 @@ export const useUpdateShrimpHealthCheck = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: () => {},
     });
@@ -280,6 +282,7 @@ export const useDeleteShrimpHealthCheck = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: () => {},
     });
