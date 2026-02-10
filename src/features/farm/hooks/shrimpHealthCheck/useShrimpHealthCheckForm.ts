@@ -9,7 +9,7 @@ import {
     useDeleteShrimpHealthCheck,
 } from '@/features/farm/hooks/useShrimpHealthCheckData';
 import { JobExecution, ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
-import { mapToApiPayload } from '@/features/farm/utils/shrimpHealthCheckMapper';
+import { mapToApiPayload, mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 
 interface UseShrimpHealthCheckFormProps {
@@ -87,9 +87,9 @@ export const useShrimpHealthCheckForm = ({
             return d;
         })();
 
-        setSelectedDate(dateObj);
+        // RE-WRITING LOGIC:
 
-        setInitialData({
+        let initialFormState = {
             date: dateObj,
             foodAmount: meta?.foodAmount || '',
             leftoverFood: meta?.leftoverFood || 'Hết',
@@ -103,16 +103,51 @@ export const useShrimpHealthCheckForm = ({
             isHealthy: meta?.isHealthy ?? true,
             diagnosisDetails: meta?.diagnosisDetails ?? null,
             aiItems: meta?.aiItems || [],
-        });
+        };
 
-        // Set AI state values when editing
-        if (meta) {
-            setAverageInfectionRate(meta.averageInfectionRate ?? 0);
-            setIsHealthy(meta.isHealthy ?? true);
-            setDiagnosisDetails(meta.diagnosisDetails ?? null);
-            setAiItems(meta.aiItems || []);
+        // If meta contains raw keys (e.g. from WorkLog), map it!
+        if (meta && (meta as any).feedInTrapG !== undefined) {
+            const fromApi = mapFromApiResponse({
+                value: (meta as any).feedInTrapG,
+                healthCheck: meta as any,
+                images: (meta as any).documents?.map((d: any) => d.publicUrl) || meta.images || [],
+            });
+            initialFormState = {
+                ...initialFormState,
+                foodAmount: fromApi.foodAmount,
+                leftoverFood: fromApi.leftoverFood,
+                intestine: fromApi.intestine,
+                intestineColor: fromApi.intestineColor,
+                stoolColor: fromApi.stoolColor,
+                liver: fromApi.liver,
+                notes: fromApi.notes || itemToEdit?.note || '',
+                // Update AI fields from API response if present
+                averageInfectionRate:
+                    fromApi.averageInfectionRate ?? initialFormState.averageInfectionRate,
+                isHealthy: fromApi.isHealthy ?? initialFormState.isHealthy,
+                diagnosisDetails: fromApi.diagnosisDetails ?? initialFormState.diagnosisDetails,
+                aiItems: fromApi.aiItems ?? initialFormState.aiItems,
+            };
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        setSelectedDate(dateObj);
+        setInitialData(initialFormState);
+
+        // Update state hooks
+        setFoodAmount(initialFormState.foodAmount);
+        setLeftoverFood(initialFormState.leftoverFood);
+        setIntestine(initialFormState.intestine);
+        setIntestineColor(initialFormState.intestineColor);
+        setStoolColor(initialFormState.stoolColor);
+        setLiver(initialFormState.liver);
+        setNotes(initialFormState.notes);
+        setImageUris(initialFormState.images);
+
+        // Update AI state hooks
+        setAverageInfectionRate(initialFormState.averageInfectionRate);
+        setIsHealthy(initialFormState.isHealthy);
+        setDiagnosisDetails(initialFormState.diagnosisDetails);
+        setAiItems(initialFormState.aiItems);
     }, [itemToEdit, meta]);
 
     const isSaving =

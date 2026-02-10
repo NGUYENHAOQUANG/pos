@@ -142,22 +142,37 @@ export const useHandleProblemForm = ({
 
     useEffect(() => {
         if (item) {
-            setNote(item.note || '');
-            if (item.materials) {
-                const enrichedMaterials = item.materials.map((m: any) => {
-                    const warehouseItem = materials.find(wm => wm.id === m.material.id);
-                    if (warehouseItem) {
-                        return {
-                            material: warehouseItem,
-                            quantity: m.quantity,
-                            unit: warehouseItem.unitName || '',
-                        };
-                    }
-                    return m;
-                });
+            setNote(item.note || item.meta?.notes || '');
+
+            // Materials can be in item.materials (if stored in local store) or item.meta.materials (if passed from WorkLog)
+            const rawMaterials = item.materials || item.meta?.materials;
+
+            if (rawMaterials && Array.isArray(rawMaterials)) {
+                const enrichedMaterials = rawMaterials
+                    .map((m: any) => {
+                        // m structure might be { warehouseItemId: '...', quantity: ... } (from API)
+                        // or { material: { id: ... }, quantity: ... } (from local store)
+                        const matId = m.warehouseItemId || m.material?.id;
+                        const warehouseItem = materials.find(wm => wm.id === matId);
+
+                        if (warehouseItem) {
+                            return {
+                                material: warehouseItem,
+                                quantity: Number(m.quantity),
+                                unit: warehouseItem.unitName || '',
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(
+                        (m): m is { material: IMaterial; quantity: number; unit: string } =>
+                            m !== null
+                    );
+
                 setSelectedMaterials(enrichedMaterials);
             }
-            // Resolve image URLs: incident/API có documentIds → gọi documentApi.getUrls; fallback item.images (Rửa ao/Phơi ao)
+
+            // Resolve image URLs
             if (item.documentIds?.length) {
                 setInitialDocumentIds(item.documentIds);
                 documentApi.getUrls(item.documentIds).then(setImageUris);
@@ -167,7 +182,28 @@ export const useHandleProblemForm = ({
             } else if (item.images?.length) {
                 setImageUris(item.images);
             }
-            if (item.date) {
+
+            // Set Date
+            if (item.createdAt) {
+                setSelectedDate(new Date(item.createdAt));
+            } else if (item.date) {
+                // If item.date is DD/MM/YYYY, we might need to parse.
+                // But usually createdAt is safer.
+                // For now, if no createdAt, try to parse meta date/time if available
+                if (item.meta?.date && item.meta?.time) {
+                    const [day, month, year] = item.meta.date.split('/').map(Number);
+                    const [hours, minutes] = item.meta.time.split(':').map(Number);
+                    if (
+                        !isNaN(day) &&
+                        !isNaN(month) &&
+                        !isNaN(year) &&
+                        !isNaN(hours) &&
+                        !isNaN(minutes)
+                    ) {
+                        const d = new Date(year, month - 1, day, hours, minutes);
+                        setSelectedDate(d);
+                    }
+                }
             }
         }
     }, [item, materials]);
