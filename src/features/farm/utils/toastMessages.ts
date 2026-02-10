@@ -34,12 +34,16 @@ const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>
         edit: 'Đã cập nhật sang ao thành công',
     },
     CLEAN_POND: {
-        add: 'Đã ghi sự cố thành công',
-        edit: 'Đã cập nhật sự cố thành công',
+        add: 'Đã thêm rửa ao thành công',
+        edit: 'Đã cập nhật rửa ao thành công',
     },
     SUN_DRY_POND: {
         add: 'Đã thêm phơi ao thành công',
         edit: 'Đã cập nhật phơi ao thành công',
+    },
+    TROUBLESHOOTING: {
+        add: 'Đã ghi sự cố thành công',
+        edit: 'Đã cập nhật sự cố thành công',
     },
     HARVEST: {
         add: 'Đã thêm thu hoạch thành công',
