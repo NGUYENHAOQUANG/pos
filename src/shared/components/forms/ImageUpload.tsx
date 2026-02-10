@@ -31,7 +31,11 @@ import { ImagePickerActionSheet } from './ImagePickerActionSheet';
 
 interface ImageUploadProps {
     imageUri?: string | null;
-    onImageSelect?: (uri: string, base64?: string) => void;
+    onImageSelect?: (
+        uri: string,
+        base64?: string,
+        file?: { fileName: string; type: string }
+    ) => void;
     onImageRemove?: () => void;
     style?: ViewStyle;
     label?: string;
@@ -75,13 +79,23 @@ export function ImageUpload({
         return true;
     };
 
-    const processImage = async (asset: Asset) => {
+    const processImage = async (asset: Asset & { fileName?: string; type?: string }) => {
         try {
             setIsProcessing(true);
             if (!asset.uri) return;
 
             let finalUri = asset.uri;
-            const fileSize = asset.fileSize || 0;
+            let fileSize = asset.fileSize;
+
+            if (!fileSize) {
+                try {
+                    const stat = await RNFS.stat(asset.uri);
+                    fileSize = Number(stat.size);
+                } catch (error) {
+                    console.warn('Cannot stat file for size check', error);
+                }
+            }
+            fileSize = fileSize || 0;
 
             if (fileSize > MAX_FILE_SIZE) {
                 finalUri = await ImageCompressor.compress(asset.uri, {
@@ -93,7 +107,15 @@ export function ImageUpload({
             if (returnBase64) {
                 base64String = await RNFS.readFile(finalUri, 'base64');
             }
-            onImageSelect?.(finalUri, base64String);
+
+            // Asset passed here might come from ImagePickerActionSheet (normalized) or ImagePicker (raw)
+            // If raw, we might need fallback, but ImagePickerActionSheet should normalize it.
+            // However, processImage is also called by handleResponse (camera/library).
+
+            const fileName = asset.fileName || finalUri.split('/').pop() || 'image.jpg';
+            const type = asset.type || 'image/jpeg';
+
+            onImageSelect?.(finalUri, base64String, { fileName, type });
         } catch (error) {
             console.error('Error processing image:', error);
             Alert.alert('Lỗi', 'Không thể xử lý ảnh này, vui lòng thử lại.');
@@ -201,6 +223,9 @@ export function ImageUpload({
                 onClose={() => setActionSheetVisible(false)}
                 onTakePhoto={handleTakePhoto}
                 onChooseFromLibrary={handleChooseFromLibrary}
+                onImageSelected={(uri, asset) =>
+                    processImage({ uri, fileName: asset?.fileName, type: asset?.type })
+                }
             />
         </View>
     );
