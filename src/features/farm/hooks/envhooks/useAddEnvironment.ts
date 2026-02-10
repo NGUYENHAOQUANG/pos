@@ -108,6 +108,34 @@ export const useAddEnvironment = ({
             setTan(getMetricValue(ENVIRONMENT_METRIC_IDS.TAN));
             setMagie(getMetricValue(ENVIRONMENT_METRIC_IDS.MAGIE));
             setNo3(getMetricValue(ENVIRONMENT_METRIC_IDS.NO3));
+        } else if (itemToEdit && itemToEdit.meta) {
+            const meta = itemToEdit.meta as any;
+
+            // Helper for case-insensitive access
+            const getVal = (...keys: string[]) => {
+                for (const k of keys) {
+                    if (meta[k] != null && meta[k] !== '') return meta[k].toString();
+                }
+                return '';
+            };
+
+            if (meta.date) setSelectedDate(new Date(meta.date));
+            if (meta.createdAt) setSelectedDate(new Date(meta.createdAt)); // Fallback
+
+            setPH(getVal('pH', 'PH', 'Ph'));
+            setDissolvedOxygen(getVal('dissolvedOxygen', 'DissolvedOxygen', 'DO', 'Do', 'do'));
+            setTemperature(getVal('temperature', 'Temperature', 'Temp'));
+            setSalinity(getVal('salinity', 'Salinity'));
+            setAlkalinity(getVal('alkalinity', 'Alkalinity'));
+            setTransparency(getVal('transparency', 'Transparency'));
+            setKali(getVal('kali', 'Kali', 'K'));
+            setTan(getVal('tan', 'Tan', 'TAN'));
+            setMagie(getVal('magie', 'Magie', 'Mg'));
+            setNo3(getVal('no3', 'NO3', 'No3'));
+
+            // Notes
+            const noteVal = getVal('notes', 'Notes', 'Note', 'note');
+            if (noteVal) setNotes(noteVal);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [detail, metricTypes]);

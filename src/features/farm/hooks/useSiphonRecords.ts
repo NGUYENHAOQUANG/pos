@@ -128,6 +128,7 @@ export const useCreateSiphonRecord = () => {
             siphonApi.create(pondId, data),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: error => handleError(error),
     });
@@ -147,6 +148,7 @@ export const useUpdateSiphonRecord = () => {
         }) => siphonApi.update(pondId, id, data),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -158,6 +160,7 @@ export const useDeleteSiphonRecord = () => {
             siphonApi.delete(pondId, id),
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

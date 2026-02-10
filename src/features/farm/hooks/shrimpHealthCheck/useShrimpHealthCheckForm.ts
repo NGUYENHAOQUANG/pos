@@ -9,7 +9,7 @@ import {
     useDeleteShrimpHealthCheck,
 } from '@/features/farm/hooks/useShrimpHealthCheckData';
 import { JobExecution, ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
-import { mapToApiPayload } from '@/features/farm/utils/shrimpHealthCheckMapper';
+import { mapToApiPayload, mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 
 interface UseShrimpHealthCheckFormProps {
@@ -71,9 +71,9 @@ export const useShrimpHealthCheckForm = ({
             return d;
         })();
 
-        setSelectedDate(dateObj);
+        // RE-WRITING LOGIC:
 
-        setInitialData({
+        let initialFormState = {
             date: dateObj,
             foodAmount: meta?.foodAmount || '',
             leftoverFood: meta?.leftoverFood || 'Hết',
@@ -83,8 +83,39 @@ export const useShrimpHealthCheckForm = ({
             liver: meta?.liver || 'Bình thường',
             notes: itemToEdit?.note || '',
             images: meta?.images || [],
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        };
+
+        // If meta contains raw keys (e.g. from WorkLog), map it!
+        if (meta && (meta as any).feedInTrapG !== undefined) {
+            const fromApi = mapFromApiResponse({
+                value: (meta as any).feedInTrapG,
+                healthCheck: meta as any,
+                images: (meta as any).documents?.map((d: any) => d.publicUrl) || meta.images || [],
+            });
+            initialFormState = {
+                ...initialFormState,
+                foodAmount: fromApi.foodAmount,
+                leftoverFood: fromApi.leftoverFood,
+                intestine: fromApi.intestine,
+                intestineColor: fromApi.intestineColor,
+                stoolColor: fromApi.stoolColor,
+                liver: fromApi.liver,
+                notes: fromApi.notes || itemToEdit?.note || '',
+            };
+        }
+
+        setSelectedDate(dateObj);
+        setInitialData(initialFormState);
+
+        // Update state hooks
+        setFoodAmount(initialFormState.foodAmount);
+        setLeftoverFood(initialFormState.leftoverFood);
+        setIntestine(initialFormState.intestine);
+        setIntestineColor(initialFormState.intestineColor);
+        setStoolColor(initialFormState.stoolColor);
+        setLiver(initialFormState.liver);
+        setNotes(initialFormState.notes);
+        setImageUris(initialFormState.images);
     }, [itemToEdit, meta]);
 
     const isSaving =

@@ -152,6 +152,7 @@ export const useCreateSizeMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.sizeMeasurements.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -176,6 +177,7 @@ export const useUpdateSizeMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.sizeMeasurements.detail(id),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -190,6 +192,7 @@ export const useDeleteSizeMeasurement = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.sizeMeasurements.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

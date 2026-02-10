@@ -1,0 +1,449 @@
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { pondRecordApi } from '@/features/farm/api/pondRecordApi';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { formatDate } from '@/features/farm/utils/dateUtils';
+import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
+import { mapFromApiResponse as mapShrimpHealthAndEnv } from '@/features/farm/utils/shrimpHealthCheckMapper';
+import { JOB_CONFIG, JobType } from '@/features/farm/components/pondwork/JobItem';
+import type {
+    IPondRecordItem,
+    IPondRecordListParams,
+    IPondRecordReferenceData,
+} from '@/features/farm/types/pondRecord.types';
+import type { JobExecution } from '@/features/farm/types/farm.types';
+import type { TimelineActivity } from '@/features/farm/components/TrackingList';
+import type { ActivityData } from '@/features/farm/components/ActivityCard';
+
+// Display name mapping for operation types not in operationTypeMapping
+const OPERATION_DISPLAY_NAME: Record<string, string> = {
+    ReleaseShrimp: 'Thả tôm giống',
+    Feeding: 'Cho ăn',
+    ShrimpHealthCheck: 'Kiểm tra tôm',
+    SizeMeasurement: 'Đo kích thước tôm',
+    EnvMeasurement: 'Đo thông số môi trường',
+    WaterTreatment: 'Xử lý nước',
+    WaterChange: 'Thay/Cấp nước',
+    Siphon: 'Xi - phông',
+    Incident: 'Xử lý sự cố',
+    StockTransfer: 'Sang ao',
+    CleanPond: 'Rửa ao',
+    SunDryPond: 'Phơi ao',
+    CleanRenovation: 'Rửa ao',
+    DryRenovation: 'Phơi ao',
+    Harvest: 'Thu hoạch',
+};
+
+/**
+ * Hook to fetch pond records from GET /pond/{pondId}/record
+ */
+export const usePondRecords = (pondId: string, params?: IPondRecordListParams) => {
+    const query = useQuery({
+        queryKey: farmKeys.pondRecords.list(pondId, params as Record<string, unknown>),
+        queryFn: () => pondRecordApi.list(pondId, params),
+        enabled: !!pondId,
+    });
+
+    return query;
+};
+
+/**
+ * Convert referenceData to ActivityData[] based on operationType
+ */
+const convertReferenceDataToActivityData = (
+    operationType: string,
+    ref: IPondRecordReferenceData
+): ActivityData[] => {
+    const data: ActivityData[] = [];
+
+    switch (operationType) {
+        case 'ReleaseShrimp':
+            if (ref.quantity != null)
+                data.push({ label: 'Số lượng (con)', value: `${ref.quantity}` });
+            if (ref.density != null)
+                data.push({ label: 'Mật độ (con/m²)', value: `${ref.density}` });
+            if (ref.ageDays != null) data.push({ label: 'Số ngày tuổi', value: `${ref.ageDays}` });
+            if (ref.estimatedCost != null)
+                data.push({
+                    label: 'Chi phí ước tính (VNĐ)',
+                    value: `${Number(ref.estimatedCost).toLocaleString()}`,
+                });
+            break;
+
+        case 'Feeding':
+            if (ref.materials && ref.materials.length > 0) {
+                ref.materials.forEach(m => {
+                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                });
+            }
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'EnvMeasurement': {
+            const r = ref as any;
+            // Helper to check multiple keys
+            const getVal = (...keys: string[]) => {
+                for (const k of keys) {
+                    if (r[k] != null) return r[k];
+                }
+                return null;
+            };
+
+            const valPH = getVal('pH', 'PH', 'Ph');
+            if (valPH != null) data.push({ label: 'pH', value: `${valPH}` });
+
+            const valDO = getVal('dissolvedOxygen', 'DissolvedOxygen', 'DO', 'Do');
+            if (valDO != null) data.push({ label: 'DO (mg/L)', value: `${valDO}` });
+
+            const valTemp = getVal('temperature', 'Temperature', 'Temp');
+            if (valTemp != null) data.push({ label: 'Nhiệt độ (°C)', value: `${valTemp}` });
+
+            const valSal = getVal('salinity', 'Salinity');
+            if (valSal != null) data.push({ label: 'Độ mặn (ppt)', value: `${valSal}` });
+
+            const valAlk = getVal('alkalinity', 'Alkalinity');
+            if (valAlk != null) data.push({ label: 'Độ kiềm (mg/L)', value: `${valAlk}` });
+
+            const valTrans = getVal('transparency', 'Transparency');
+            if (valTrans != null) data.push({ label: 'Độ trong (cm)', value: `${valTrans}` });
+
+            const valKali = getVal('kali', 'Kali', 'K');
+            if (valKali != null) data.push({ label: 'Kali (mg/L)', value: `${valKali}` });
+
+            const valTan = getVal('tan', 'Tan', 'TAN');
+            if (valTan != null) data.push({ label: 'TAN (mg/L)', value: `${valTan}` });
+
+            const valMagie = getVal('magie', 'Magie', 'Mg');
+            if (valMagie != null) data.push({ label: 'Magie (mg/L)', value: `${valMagie}` });
+
+            const valNO3 = getVal('no3', 'NO3', 'No3');
+            if (valNO3 != null) data.push({ label: 'NO3 (mg/L)', value: `${valNO3}` });
+
+            const valNotes = getVal('notes', 'Notes', 'Note', 'note');
+            if (valNotes) data.push({ label: 'Ghi chú', value: `${valNotes}` });
+            break;
+        }
+
+        case 'ShrimpHealthCheck': {
+            // Map raw API data to UI labels
+            const uiState = mapShrimpHealthAndEnv({
+                value: (ref as any).feedInTrapG ?? 0,
+                healthCheck: ref as any,
+                images: (ref as any).documents?.map((d: any) => d.publicUrl) || [],
+            });
+
+            if (uiState.foodAmount != null)
+                data.push({ label: 'Thức ăn cho vào nhá (g)', value: `${uiState.foodAmount}` });
+            if (uiState.leftoverFood)
+                data.push({ label: 'Thức ăn thừa', value: `${uiState.leftoverFood}` });
+            if (uiState.intestine)
+                data.push({ label: 'Đường ruột', value: `${uiState.intestine}` });
+            if (uiState.intestineColor)
+                data.push({ label: 'Màu đường ruột', value: `${uiState.intestineColor}` });
+            if (uiState.stoolColor)
+                data.push({ label: 'Màu phân', value: `${uiState.stoolColor}` });
+            if (uiState.liver) data.push({ label: 'Gan', value: `${uiState.liver}` });
+            if (uiState.notes) data.push({ label: 'Ghi chú', value: `${uiState.notes}` });
+            break;
+        }
+
+        case 'SizeMeasurement':
+            if (ref.shrimpSizePcsPerKg != null)
+                data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
+            if (ref.averageShrimpSize != null && Number(ref.averageShrimpSize) > 0)
+                data.push({
+                    label: 'Trọng lượng tôm TB (g/con)',
+                    value: `${ref.averageShrimpSize}`,
+                });
+            if (ref.estimatedRemainingStockKg != null)
+                data.push({
+                    label: 'Sản lượng còn lại (kg)',
+                    value: `${ref.estimatedRemainingStockKg}`,
+                });
+            if (ref.totalShrimpCount != null)
+                data.push({
+                    label: 'Tổng số tôm hiện tại (con)',
+                    value: `${Math.round(Number(ref.totalShrimpCount))}`,
+                });
+            if (ref.releaseQuantity != null)
+                data.push({ label: 'Số lượng thả (con)', value: `${ref.releaseQuantity}` });
+            if (ref.survivalRatePercentage != null)
+                data.push({
+                    label: 'Tỉ lệ sống (%)',
+                    value: `${Math.round(Number(ref.survivalRatePercentage))}`,
+                });
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'Siphon':
+            if (ref.shrimpLossKg != null)
+                data.push({ label: 'Hao hụt tôm (kg)', value: `${ref.shrimpLossKg}` });
+            if (ref.materials && ref.materials.length > 0) {
+                ref.materials.forEach(m => {
+                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                });
+            }
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'WaterChange':
+            if (ref.targetWaterLevel != null)
+                data.push({ label: 'Mực nước mục tiêu (cm)', value: `${ref.targetWaterLevel}` });
+            if (ref.waterAdded != null)
+                data.push({ label: 'Số cm cấp', value: `${ref.waterAdded}` });
+            if (ref.waterRemoved != null)
+                data.push({ label: 'Mực nước xả xuống (cm)', value: `${ref.waterRemoved}` });
+            if (ref.previousVolume != null)
+                data.push({ label: 'Thể tích trước (m³)', value: `${ref.previousVolume}` });
+            if (ref.addedVolume != null)
+                data.push({ label: 'Thể tích nước cấp (m³)', value: `${ref.addedVolume}` });
+            if (ref.finalVolume != null)
+                data.push({ label: 'Thể tích sau cấp (m³)', value: `${ref.finalVolume}` });
+            if (ref.materials && ref.materials.length > 0) {
+                ref.materials.forEach(m => {
+                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                });
+            }
+            if (ref.note) data.push({ label: 'Ghi chú', value: `${ref.note}` });
+            break;
+
+        case 'WaterTreatment':
+            if (ref.materials && ref.materials.length > 0) {
+                ref.materials.forEach(m => {
+                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                });
+            }
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'Harvest':
+            if (ref.harvestType)
+                data.push({ label: 'Loại thu hoạch', value: `${ref.harvestType}` });
+            if (ref.totalWeightKg != null)
+                data.push({ label: 'Sản lượng (kg)', value: `${ref.totalWeightKg}` });
+            if (ref.shrimpSizePcsPerKg != null)
+                data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
+            if (ref.referencePrice != null)
+                data.push({ label: 'Giá tham khảo (VNĐ/kg)', value: `${ref.referencePrice}` });
+            if (ref.revenue != null)
+                data.push({ label: 'Doanh thu (VNĐ)', value: `${ref.revenue}` });
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'StockTransfer':
+            if (ref.shrimpSizePcsPerKg != null)
+                data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
+            if (ref.transferMethod)
+                data.push({ label: 'Hình thức chuyển', value: `${ref.transferMethod}` });
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        case 'Incident':
+        case 'CleanPond':
+        case 'CleanRenovation':
+        case 'SunDryPond':
+        case 'DryRenovation':
+            if (ref.materials && ref.materials.length > 0) {
+                ref.materials.forEach(m => {
+                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                });
+            }
+            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
+            break;
+
+        default: {
+            // For unknown operation types, try to display all non-null fields from referenceData
+            const skipKeys = new Set(['OperationType']);
+            Object.entries(ref).forEach(([key, value]) => {
+                if (value != null && !skipKeys.has(key) && typeof value !== 'object') {
+                    data.push({ label: key, value: `${value}` });
+                }
+            });
+            break;
+        }
+    }
+
+    // Fallback: if no data extracted but notes exist
+    if (data.length === 0 && ref.notes) {
+        data.push({ label: 'Ghi chú', value: ref.notes });
+    }
+
+    return data;
+};
+
+/**
+ * Determine display title from operationType
+ */
+const getRecordTitle = (record: IPondRecordItem): string => {
+    const opType = record.operationType;
+    if (!opType) return 'Công việc';
+
+    // Check display name mapping first
+    if (OPERATION_DISPLAY_NAME[opType]) {
+        return OPERATION_DISPLAY_NAME[opType];
+    }
+
+    // Then try JOB_CONFIG via operationTypeMapping
+    const jobType = mapOperationTypeToJobType(opType);
+    if (jobType && JOB_CONFIG[jobType]) {
+        return JOB_CONFIG[jobType].defaultTitle;
+    }
+
+    return opType;
+};
+
+/**
+ * Determine JobType from record's operationType
+ */
+const getRecordJobType = (record: IPondRecordItem): JobType | undefined => {
+    if (record.operationType) {
+        return mapOperationTypeToJobType(record.operationType);
+    }
+    return undefined;
+};
+
+export interface PondRecordGroup {
+    id: string;
+    date: string;
+    activities: TimelineActivity[];
+}
+
+/**
+ * Hook that fetches pond records and groups them by date for WorkLogScreens display
+ */
+export const usePondRecordGroups = (
+    pondId: string,
+    options?: {
+        startDate?: Date;
+        endDate?: Date;
+        operationNameFilter?: string[];
+    }
+) => {
+    const params: IPondRecordListParams = {
+        PageSize: 1000,
+        OrderBy: 'CreatedAt desc',
+    };
+
+    if (options?.startDate) {
+        params.CreateAtFrom = options.startDate.toISOString();
+    }
+    if (options?.endDate) {
+        params.CreateAtTo = options.endDate.toISOString();
+    }
+
+    const { data, isLoading, error, refetch } = usePondRecords(pondId, params);
+
+    const rawItems: IPondRecordItem[] = useMemo(() => data?.data?.items ?? [], [data]);
+
+    const groups: PondRecordGroup[] = useMemo(() => {
+        let filteredItems = rawItems;
+
+        // Filter by operation type if provided
+        if (options?.operationNameFilter && options.operationNameFilter.length > 0) {
+            filteredItems = filteredItems.filter(item => {
+                if (!item.operationType) return false;
+                const jobType = mapOperationTypeToJobType(item.operationType);
+                return jobType ? options.operationNameFilter!.includes(jobType) : false;
+            });
+        }
+
+        // Sort by createdAt desc
+        const sortedItems = [...filteredItems].sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeB - timeA;
+        });
+
+        // Group by date
+        const dateGroups: Record<string, TimelineActivity[]> = {};
+        const dateOrder: string[] = [];
+
+        sortedItems.forEach(item => {
+            const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
+            const dateStr = formatDate(createdDate);
+
+            if (!dateGroups[dateStr]) {
+                dateGroups[dateStr] = [];
+                dateOrder.push(dateStr);
+            }
+
+            const timeStr = createdDate.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            const title = getRecordTitle(item);
+            const activityData = item.referenceData
+                ? convertReferenceDataToActivityData(item.operationType || '', item.referenceData)
+                : [];
+            const jobType = getRecordJobType(item);
+
+            const activity: TimelineActivity = {
+                id: item.id,
+                time: timeStr,
+                title,
+                data: activityData,
+                note: item.referenceData?.notes ?? undefined,
+                onEdit: undefined,
+            };
+
+            // Store jobType and record for edit handler
+            (activity as TimelineActivity & { _jobType?: JobType })._jobType = jobType;
+            (activity as TimelineActivity & { _recordItem?: IPondRecordItem })._recordItem = item;
+
+            dateGroups[dateStr].push(activity);
+        });
+
+        return dateOrder.map(date => ({
+            id: date,
+            date,
+            activities: dateGroups[date],
+        }));
+    }, [rawItems, options?.operationNameFilter]);
+
+    return { groups, isLoading, error, refetch, rawItems };
+};
+
+/**
+ * Convert record items to JobExecution[] for store compatibility
+ */
+export const useRecordsAsJobs = (pondId: string) => {
+    const { data, isLoading, error, refetch } = usePondRecords(pondId);
+
+    const rawItems: IPondRecordItem[] = useMemo(() => data?.data?.items ?? [], [data]);
+
+    const jobs: JobExecution[] = useMemo(() => {
+        const sortedItems = [...rawItems].sort((a, b) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeA - timeB;
+        });
+
+        const dayCounts: Record<string, number> = {};
+
+        return sortedItems.map(item => {
+            const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
+            const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
+            if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
+            dayCounts[dateKey]++;
+
+            const timeStr = createdDate.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            const dateStr = formatDate(createdDate);
+
+            return {
+                id: item.id,
+                label: `Lần ${dayCounts[dateKey]}`,
+                time: timeStr,
+                date: dateStr,
+                note: item.referenceData?.notes ?? undefined,
+                pondId: undefined,
+                createdAt: item.createdAt,
+            };
+        });
+    }, [rawItems]);
+
+    return { jobs, isLoading, error, refetch };
+};
