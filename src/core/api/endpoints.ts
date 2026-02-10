@@ -227,4 +227,8 @@ export const API_ENDPOINTS = {
         DELETE: (id: string) => `/document/${id}`,
         UPLOAD_BASE64: '/document/upload-base64',
     },
+    AI: {
+        SEEDSTOCK_COUNTING: '/api/v1/seedstock_counting/predict',
+        ESTIMATED_SIZE: '/api/v1/estimated_size/predict',
+    },
 } as const;

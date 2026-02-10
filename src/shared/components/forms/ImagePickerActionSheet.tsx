@@ -27,7 +27,10 @@ interface ImagePickerActionSheetProps {
     onClose: () => void;
     onTakePhoto: () => void;
     onChooseFromLibrary: () => void;
-    onImageSelected?: (uri: string, asset?: { fileName?: string; type?: string }) => void;
+    onImageSelected?: (
+        uri: string,
+        asset?: { fileName?: string; type?: string; width?: number; height?: number }
+    ) => void;
 }
 
 export function ImagePickerActionSheet({
@@ -46,7 +49,10 @@ export function ImagePickerActionSheet({
             const result = await CameraRoll.getPhotos({
                 first: 32,
                 assetType: 'Photos',
+                include: ['filename', 'fileSize', 'imageSize'],
+                groupTypes: Platform.OS === 'ios' ? 'All' : undefined,
             });
+
             setPhotos(result.edges);
         } catch (error) {
             console.error('Failed to load photos:', error);
@@ -85,7 +91,13 @@ export function ImagePickerActionSheet({
         }
     }, [visible, checkPermissionAndLoadPhotos]);
 
-    const normalizeAsset = (uri: string, filename?: string | null, type?: string | null) => {
+    const normalizeAsset = (
+        uri: string,
+        filename?: string | null,
+        type?: string | null,
+        width?: number | null,
+        height?: number | null
+    ) => {
         let mimeType = type;
         let name = filename || uri.split('/').pop() || `image-${Date.now()}`;
 
@@ -111,24 +123,27 @@ export function ImagePickerActionSheet({
         return {
             fileName: name,
             type: mimeType,
+            width: width || undefined,
+            height: height || undefined,
         };
     };
 
-    const handlePhotoSelect = (uri: string, asset?: { fileName?: string; type?: string }) => {
+    const handlePhotoSelect = (
+        uri: string,
+        asset?: { fileName?: string; type?: string; width?: number; height?: number }
+    ) => {
         onClose();
         setTimeout(() => {
             if (onImageSelected) {
-                // If asset is provided (from quick select), normalize it.
-                // If not (fallback?), we might not have info, but here we usually have it from renderItem.
-                // Actually handlePhotoSelect is called with (uri, {fileName, type}) from renderItem.
                 const normalized = asset
-                    ? normalizeAsset(uri, asset.fileName, asset.type)
+                    ? normalizeAsset(uri, asset.fileName, asset.type, asset.width, asset.height)
                     : undefined;
+
                 onImageSelected(uri, normalized);
             } else {
                 onChooseFromLibrary();
             }
-        }, 300);
+        }, 500);
     };
 
     const renderHeader = () => (
@@ -138,14 +153,14 @@ export function ImagePickerActionSheet({
         </View>
     );
 
-    const renderItem = ({ item }: { item: any; index: number }) => {
+    const renderItem = ({ item, index: _index }: { item: any; index: number }) => {
         if (item.isCamera) {
             return (
                 <TouchableOpacity
                     style={[styles.photoItem, styles.cameraItem]}
                     onPress={() => {
                         onClose();
-                        setTimeout(() => onTakePhoto(), 300);
+                        setTimeout(() => onTakePhoto(), 500);
                     }}
                 >
                     <Ionicons name="camera" size={32} color={colors.black} />
@@ -164,7 +179,7 @@ export function ImagePickerActionSheet({
                     ]}
                     onPress={() => {
                         onClose();
-                        setTimeout(() => onChooseFromLibrary(), 300);
+                        setTimeout(() => onChooseFromLibrary(), 500);
                     }}
                 >
                     <Ionicons name="images" size={32} color={colors.black} />
@@ -176,12 +191,14 @@ export function ImagePickerActionSheet({
         return (
             <TouchableOpacity
                 style={styles.photoItem}
-                onPress={() =>
-                    handlePhotoSelect(item.node.image.uri, {
+                onPress={() => {
+                    handlePhotoSelect(item.node.image.uri || item.node.image, {
                         fileName: item.node.image.filename,
                         type: item.node.type,
-                    })
-                }
+                        width: item.node.image.width,
+                        height: item.node.image.height,
+                    });
+                }}
             >
                 <Image source={{ uri: item.node.image.uri }} style={styles.photo} />
             </TouchableOpacity>
@@ -205,7 +222,7 @@ export function ImagePickerActionSheet({
                                     ? 'camera'
                                     : item.isLibrary
                                     ? 'library'
-                                    : item.node?.image?.uri + index
+                                    : (item.node?.image?.uri || index.toString()) + index
                             }
                             numColumns={COLUMN_COUNT}
                             columnWrapperStyle={styles.columnWrapper}

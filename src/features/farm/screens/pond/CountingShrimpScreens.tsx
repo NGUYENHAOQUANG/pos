@@ -7,7 +7,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Input } from '@/shared/components/forms/Input';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { Loading } from '@/shared/components/ui/Loading';
-import { documentApi } from '@/features/material/api/documentApi';
+import { aiApi } from '@/features/farm/api/aiApi';
 import Toast from 'react-native-toast-message';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
@@ -40,9 +40,16 @@ const CountingShrimpScreen: React.FC = () => {
     const handleImageSelect = async (
         uri: string,
         base64?: string,
-        file?: { fileName: string; type: string }
+        _file?: { fileName: string; type: string },
+        dimensions?: { width: number; height: number }
     ) => {
         _setImageUri(uri);
+        setIsLoading(true);
+        // Set dimensions immediately if available from asset (best for mapping AI coords)
+        if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
+            setImageDimensions(dimensions);
+        }
+
         // Reset current image specific states
         setDetections([]);
         setCurrentImageCount(0);
@@ -50,59 +57,59 @@ const CountingShrimpScreen: React.FC = () => {
 
         if (uri && base64) {
             try {
-                setIsLoading(true);
+                // Call AI API for counting
+                console.log('DEBUG: Calling AI API...');
+                console.log('BASE64_IMAGE_START');
+                console.log(base64);
+                console.log('BASE64_IMAGE_END');
+                const aiResponse = await aiApi.countSeedstock({ image_base: base64 });
+                console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
 
-                // --- RESTORED API CALL FOR DEBUGGING ---
-                const fileName =
-                    file?.fileName || uri.split('/').pop() || `image_${Date.now()}.jpg`;
-                const contentType = file?.type || 'image/jpeg';
+                const count = aiResponse.total_count || 0;
+                setCurrentImageCount(count);
 
-                console.log('DEBUG: Starting uploadBase64...');
-                console.log('DEBUG: fileName:', fileName);
-                console.log('DEBUG: contentType:', contentType);
-                console.log('DEBUG: base64 length:', base64.length);
+                // Process detections immediately (independent of image size fetching)
+                if (
+                    aiResponse.detections &&
+                    Array.isArray(aiResponse.detections) &&
+                    aiResponse.detections.length > 0
+                ) {
+                    console.log(`DEBUG: Processing ${aiResponse.detections.length} detections...`);
+                    try {
+                        const newDetections: DetectionDot[] = aiResponse.detections
+                            .map((d, index) => {
+                                if (!d || !d.center) {
+                                    return null;
+                                }
+                                return {
+                                    id: d.id || index,
+                                    center: {
+                                        x: d.center.x,
+                                        y: d.center.y,
+                                    },
+                                };
+                            })
+                            .filter((d): d is DetectionDot => d !== null);
 
-                const response = await documentApi.uploadBase64({
-                    base64Content: base64,
-                    fileName: fileName,
-                    contentType: contentType,
-                    storageType: 'Azure',
-                });
-
-                console.log('DEBUG: uploadBase64 response:', JSON.stringify(response, null, 2));
-
-                if (response && response.length > 0) {
-                    console.log('DEBUG: Upload success, ID:', response[0].id);
+                        setDetections(newDetections);
+                    } catch (mapError) {
+                        console.error('DEBUG: Error mapping detections:', mapError);
+                    }
                 } else {
-                    console.warn('DEBUG: Upload response empty or invalid');
+                    setDetections([]);
                 }
 
-                // Get actual image size
-                Image.getSize(
-                    uri,
-                    (width, height) => {
-                        console.log(`DEBUG: Actual image size: ${width}x${height}`);
-                        setImageDimensions({ width, height });
-
-                        // Use actual dimensions for mock data
-                        const mockCount = Math.floor(Math.random() * 50) + 10;
-                        setCurrentImageCount(mockCount);
-                        const mockDetections: DetectionDot[] = [];
-                        for (let i = 0; i < mockCount; i++) {
-                            mockDetections.push({
-                                id: i,
-                                center: {
-                                    x: Math.random() * width,
-                                    y: Math.random() * height,
-                                },
-                            });
-                        }
-                        setDetections(mockDetections);
-                    },
-                    error => {
-                        console.error('Failed to get image size:', error);
-                    }
-                );
+                // If dimensions missing, fetch them for overlay scaling
+                if (!dimensions) {
+                    Image.getSize(
+                        uri,
+                        (width, height) => {
+                            console.log(`DEBUG: Fallback Image.getSize: ${width}x${height}`);
+                            setImageDimensions({ width, height });
+                        },
+                        error => console.error('Failed to get image size:', error)
+                    );
+                }
 
                 await new Promise<void>(resolve => setTimeout(() => resolve(), 1500));
             } catch (error: any) {

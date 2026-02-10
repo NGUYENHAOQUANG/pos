@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 
 interface MeasurementDataBoxProps {
@@ -11,6 +11,7 @@ interface MeasurementDataBoxProps {
     remainingWeight: string;
     onRemainingWeightChange: (value: string) => void;
     stockingQuantity?: number; // Số lượng thả ban đầu (PLs) để tính tỉ lệ sống
+    onAIMeasurePress?: () => void;
 }
 
 export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
@@ -19,6 +20,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     remainingWeight,
     onRemainingWeightChange,
     stockingQuantity,
+    onAIMeasurePress,
 }) => {
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
@@ -124,6 +126,9 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     />
                 </View>
             </View>
+            <TouchableOpacity style={styles.aiButton} onPress={onAIMeasurePress}>
+                <Text style={styles.aiButtonText}>Đo kích thước & cỡ tôm bằng AI</Text>
+            </TouchableOpacity>
         </PondDataBox>
     );
 };
@@ -135,5 +140,19 @@ const styles = StyleSheet.create({
     },
     inputColumn: {
         flex: 1,
+    },
+    aiButton: {
+        backgroundColor: colors.blue[50],
+        borderWidth: 1,
+        borderColor: colors.blue[200],
+        paddingVertical: 12,
+        borderRadius: borderRadius.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    aiButtonText: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: '400',
     },
 });
