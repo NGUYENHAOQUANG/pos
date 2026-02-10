@@ -104,4 +104,9 @@ export const farmKeys = {
             ] as const,
         detail: (id: string) => [...farmKeys.harvestRecords.all(), 'detail', id] as const,
     },
+    pondRecords: {
+        all: () => [...farmKeys.all, 'pondRecords'] as const,
+        list: (pondId: string, params?: Record<string, unknown>) =>
+            [...farmKeys.pondRecords.all(), 'list', pondId, ...(params ? [params] : [])] as const,
+    },
 };

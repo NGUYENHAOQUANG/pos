@@ -21,7 +21,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<ScreenRouteProp>();
     // EditFeeder gets params: pondId, jobId. We do the same.
-    const { pondId, jobId } = route.params || {};
+    const { pondId, jobId, itemToEdit } = route.params || {};
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
     const updatePondJob = useFarmStore(state => state.updatePondJob);
@@ -36,22 +36,64 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
     // Load existing data
     useEffect(() => {
-        if (pondId && jobId) {
+        // Prioritize itemToEdit passed from navigation (WorkLog)
+        if (itemToEdit) {
+            setNote(itemToEdit.note || '');
+            if (itemToEdit.materials) {
+                // Ensure materials are cast correctly if needed
+                setSelectedMaterials(itemToEdit.materials as SelectedMaterialItem[]);
+            }
+            if (itemToEdit.waterTreatmentType) {
+                setActivityType(itemToEdit.waterTreatmentType);
+            }
+
+            // Parse date/time
+            if (itemToEdit.date && itemToEdit.time) {
+                const [day, month, year] = itemToEdit.date.split('/').map(Number);
+                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
+                if (
+                    !isNaN(day) &&
+                    !isNaN(month) &&
+                    !isNaN(year) &&
+                    !isNaN(hours) &&
+                    !isNaN(minutes)
+                ) {
+                    const date = new Date(year, month - 1, day, hours, minutes);
+                    setExecutionDate(date);
+                }
+            } else if (itemToEdit.createdAt) {
+                setExecutionDate(new Date(itemToEdit.createdAt));
+            }
+        } else if (pondId && jobId) {
+            // Fallback to store lookup if itemToEdit is not passed (e.g. deep link or other nav)
             const items = getPondJobItems(pondId, 'WATER_TREATMENT');
-            const itemToEdit = items.find(i => i.id === jobId);
-            if (itemToEdit) {
-                setNote(itemToEdit.note || '');
-                if (itemToEdit.materials) {
-                    setSelectedMaterials(itemToEdit.materials);
+            const foundItem = items.find(i => i.id === jobId);
+            if (foundItem) {
+                setNote(foundItem.note || '');
+                if (foundItem.materials) {
+                    setSelectedMaterials(foundItem.materials);
                 }
-                if (itemToEdit.waterTreatmentType) {
-                    setActivityType(itemToEdit.waterTreatmentType);
+                if (foundItem.waterTreatmentType) {
+                    setActivityType(foundItem.waterTreatmentType);
                 }
-                // Do not override date/time with itemToEdit.date/time
-                // executionDate is already initialized to new Date() (current time) by useState
+                // Parse date/time for store item
+                if (foundItem.date && foundItem.time) {
+                    const [day, month, year] = foundItem.date.split('/').map(Number);
+                    const [hours, minutes] = foundItem.time.split(':').map(Number);
+                    if (
+                        !isNaN(day) &&
+                        !isNaN(month) &&
+                        !isNaN(year) &&
+                        !isNaN(hours) &&
+                        !isNaN(minutes)
+                    ) {
+                        const date = new Date(year, month - 1, day, hours, minutes);
+                        setExecutionDate(date);
+                    }
+                }
             }
         }
-    }, [pondId, jobId, getPondJobItems]);
+    }, [pondId, jobId, itemToEdit, getPondJobItems]);
 
     const handleBack = () => {
         navigation.goBack();

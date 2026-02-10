@@ -16,6 +16,7 @@ export const useCreateCycle = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(variables.pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
 
             // Sync to store using response data immediately to avoid extra round-trip
             try {
@@ -65,6 +66,7 @@ export const useUpdateCycle = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             // Refresh ALL pond lists
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
 
             // Sync to store using response data immediately
             try {
@@ -109,6 +111,7 @@ export const useDeleteCycle = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             // Refresh ALL pond lists
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };

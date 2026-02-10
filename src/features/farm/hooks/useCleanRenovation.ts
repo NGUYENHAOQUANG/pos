@@ -135,6 +135,7 @@ export const useCreateCleanRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.cleanRenovations.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -161,6 +162,7 @@ export const useUpdateCleanRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.cleanRenovations.detail(id),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
@@ -175,6 +177,7 @@ export const useDeleteCleanRenovation = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.cleanRenovations.byPond(pondId),
             });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
     });
 };
