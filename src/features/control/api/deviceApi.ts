@@ -2,15 +2,30 @@ import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 
 export interface ToggleDeviceRequest {
-    deviceId: string;
-    deviceName: string;
     internalDeviceId: number;
-    value: number; // 0 or 1
-    message?: string;
+}
+
+// Response Interface
+export interface DeviceItem {
+    id: string;
+    deviceCode: string;
+    deviceType: 'Syphon' | 'Feeder' | 'AirBlower' | 'PaddleWheel';
+    name: string;
+    deviceHubName: string;
+    connectionStatus: 'On' | 'Off' | 'Disconnect';
+    installationStatus: string;
+    no: number;
 }
 
 export const deviceApi = {
     toggleDevice: (payload: ToggleDeviceRequest) => {
-        return apiClient.post(API_ENDPOINTS.DEVICE.TOGGLE, payload);
+        return apiClient.patch(API_ENDPOINTS.DEVICE.TOGGLE, null, {
+            params: {
+                InternalDeviceId: payload.internalDeviceId,
+            },
+        });
+    },
+    getDevices: () => {
+        return apiClient.get<{ data: { items: DeviceItem[] } }>(API_ENDPOINTS.DEVICE.LIST);
     },
 };

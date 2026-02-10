@@ -8,6 +8,7 @@ import {
     TouchableHighlight,
     Platform,
     Dimensions,
+    RefreshControl,
 } from 'react-native';
 import Animated, {
     useSharedValue,
@@ -42,7 +43,13 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
     const { pondName = 'Ao 1' } = route.params || {};
 
-    const { ponds, updateDeviceMode } = useControl();
+    const { ponds, updateDeviceMode, fetchIoTDevices } = useControl();
+
+    React.useEffect(() => {
+        if (pondName === 'Ao IOT') {
+            fetchIoTDevices();
+        }
+    }, [pondName, fetchIoTDevices]);
     const { toggleDevice, loadingIds } = useDeviceToggle();
     const currentPond = React.useMemo(
         () => ponds.find(p => p.name === pondName),
@@ -69,6 +76,24 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const lastPosition = useRef<{ x: number; y: number; width: number; height: number } | null>(
         null
     );
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        try {
+            if (pondName === 'Ao IOT') {
+                await fetchIoTDevices();
+            } else {
+                // Mock delay for other ponds
+                await new Promise(resolve => setTimeout(() => resolve(true), 1000));
+            }
+        } catch (error) {
+            console.error('Refresh failed:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [pondName, fetchIoTDevices]);
+
     const rotation = useSharedValue(0);
     const overlayAnimation = useSharedValue(0);
 
@@ -274,7 +299,17 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                 rightComponent={renderRightHeader()}
             />
 
-            <ScrollView contentContainerStyle={styles.content}>
+            <ScrollView
+                contentContainerStyle={styles.content}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={[colors.primary]}
+                        tintColor={colors.primary}
+                    />
+                }
+            >
                 {/* History Buttons Section */}
                 <View style={styles.historySection}>
                     <ButtonHistory

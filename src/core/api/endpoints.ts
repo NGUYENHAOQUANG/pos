@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
         UPDATE_PROFILE: '/auth/profile',
     },
     DEVICE: {
+        LIST: '/device',
         TOGGLE: '/device/toggle',
         TOGGLE_TEST: '/device/toggle/test',
         SCHEDULE: '/device/schedule',

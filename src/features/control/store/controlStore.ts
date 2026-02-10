@@ -4,6 +4,7 @@ import { immer } from 'zustand/middleware/immer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Pond, EControlMode, DeviceData, PondDeviceStats } from '../types/control.types';
 import { PONDS_LIST, DEVICES_LIST } from '@/features/control/data/devicesData';
+import { deviceApi, DeviceItem } from '@/features/control/api/deviceApi';
 
 // Helper to calculate stats
 const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
@@ -86,6 +87,7 @@ interface ControlStore {
     updateDeviceState: (pondId: string, deviceId: string, isOn: boolean) => void;
     updateDeviceMode: (pondId: string, deviceId: string, mode: EControlMode) => void;
     updateDeviceSettings: (pondId: string, deviceId: string, settings: Partial<DeviceData>) => void;
+    fetchIoTDevices: () => Promise<void>;
 }
 
 // Zustand Store
@@ -189,6 +191,67 @@ export const useControlStore = create<ControlStore>()(
                         Object.assign(device, settings);
                     }
                 });
+            },
+
+            fetchIoTDevices: async () => {
+                try {
+                    const response = await deviceApi.getDevices();
+                    // response.data is the payload { success: true, data: { items: [] } }
+                    // But apiClient might unwrap data? Let's check client.ts.
+                    // client.ts: response interceptor returns response.
+                    // So we access response.data.data.items if strictly typed.
+                    // However, often people use a wrapper.
+                    // Let's assume response.data is the full JSON object.
+                    const data = response.data;
+                    if (data?.data?.items) {
+                        const items = data.data.items as DeviceItem[];
+                        set(state => {
+                            const pond = state.ponds.find(p => p.id === 'IOT_POND');
+                            if (!pond) return;
+
+                            const newDevices: DeviceData[] = items.map(item => {
+                                let type: 'feeder' | 'fan' | 'oxy' | 'syphon' = 'feeder';
+                                switch (item.deviceType) {
+                                    case 'Syphon':
+                                        type = 'syphon';
+                                        break;
+                                    case 'Feeder':
+                                        type = 'feeder';
+                                        break;
+                                    case 'AirBlower':
+                                        type = 'oxy';
+                                        break;
+                                    case 'PaddleWheel':
+                                        type = 'fan';
+                                        break;
+                                    default:
+                                        type = 'feeder';
+                                }
+
+                                return {
+                                    id: item.id,
+                                    name: item.name,
+                                    type,
+                                    pondId: 'IOT_POND',
+                                    farmId: 'KG-01',
+                                    mode: EControlMode.MANUAL,
+                                    isOn: item.connectionStatus === 'On',
+                                    errorMessage:
+                                        item.installationStatus !== 'Installed'
+                                            ? item.installationStatus
+                                            : undefined,
+                                    internalDeviceId: item.no,
+                                };
+                            });
+
+                            pond.devices = newDevices;
+                            pond.hasDevices = newDevices.length > 0;
+                            pond.deviceStats = calculatePondStats(newDevices);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch IoT devices:', error);
+                }
             },
         })),
         {
