@@ -18,11 +18,13 @@ import {
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { TransferMeta } from '@/features/farm/types/farm.types';
-import {
-    showAddJobSuccessToast,
-    showEditJobSuccessToast,
-} from '@/features/farm/utils/toastMessages';
+import type { TransferMeta, PondData } from '@/features/farm/types/farm.types';
+import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
+import { useCreateStockTransfer } from '@/features/farm/hooks/useStockTransfer';
+import { usePondsByZone } from '@/features/farm/hooks/usePonds';
+import { useCyclesByPond } from '@/features/farm/hooks/useCycle';
+import { useSizeMeasurements } from '@/features/farm/hooks/useSizeMeasurement';
+import type { CreateStockTransferRequest } from '@/features/farm/types/stockTransfer.types';
 import Toast from 'react-native-toast-message';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -40,13 +42,13 @@ export const AddTransferScreen: React.FC = () => {
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
     const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const ponds = useFarmStore(state => state.ponds);
     const getCurrentCycleForPond = useFarmStore(state => state.getCurrentCycleForPond);
     const breedOptions = useFarmStore(state => state.breedOptions);
     const handleTransferPond = useFarmStore(state => state.handleTransferPond);
-    const calculateTotalEstimatedShrimp = useFarmStore(
-        state => state.calculateTotalEstimatedShrimp
-    );
+    const ponds = useFarmStore(state => state.ponds); // Fallback for dropdown when zoneId unavailable
+
+    // API mutation hook
+    const { mutateAsync: createStockTransfer, isPending: _isCreating } = useCreateStockTransfer();
 
     // ========== ROUTE PARAMS ==========
     const {
@@ -55,6 +57,15 @@ export const AddTransferScreen: React.FC = () => {
         latestShrimpSize: latestShrimpSizeFromParams,
         cycleData: cycleDataFromParams,
     } = route.params || {};
+
+    // Fetch ponds by zone from API for dropdown
+    const { data: pondsByZoneData } = usePondsByZone(pond?.zoneId || null);
+
+    // Fetch cycle data from API
+    const { data: cyclesData } = useCyclesByPond(pond?.id || '');
+
+    // Fetch size measurements from API to get survivalRatePercentage
+    const { data: sizeMeasurementsData } = useSizeMeasurements(pond?.id || '');
 
     // ========== COMPUTED VALUES ==========
     // Meta data from itemToEdit
@@ -82,36 +93,117 @@ export const AddTransferScreen: React.FC = () => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
     };
 
-    // Pond options for receiving ponds dropdown (exclude current pond)
     const pondOptions = useMemo(() => {
         if (!pond?.id) return [];
-        return ponds
-            .filter(p => p.id !== pond.id)
+
+        let availablePonds: PondData[] = [];
+
+        // Priority 1: API data (by zone)
+        if (pondsByZoneData?.pages) {
+            availablePonds = pondsByZoneData.pages.reduce<PondData[]>(
+                (acc, page) => [...acc, ...(page.items || [])],
+                []
+            );
+        }
+        // Priority 2: Fallback to farmStore ponds
+        else if (ponds && ponds.length > 0) {
+            availablePonds = ponds;
+        }
+
+        if (availablePonds.length === 0) return [];
+
+        // Determine source pond type (handle both string and object)
+        const sourceType = typeof pond.type === 'string' ? pond.type : pond.type?.name;
+
+        let targetType = '';
+        if (sourceType === 'Ao vèo') {
+            targetType = 'Ao nuôi';
+        } else if (sourceType === 'Ao nuôi') {
+            targetType = 'Ao sẵn sàng';
+        }
+
+        return availablePonds
+            .filter(p => {
+                // Exclude current pond
+                if (p.id === pond.id) return false;
+
+                // Filter by type if logic applies
+                if (targetType) {
+                    const pType = typeof p.type === 'string' ? p.type : p.type?.name;
+                    return pType === targetType;
+                }
+
+                return true;
+            })
             .map(p => ({
                 id: p.id,
                 label: p.name,
             }));
-    }, [ponds, pond?.id]);
+    }, [pondsByZoneData, pond?.id, pond?.type, ponds]);
 
-    // Get cycle data from params or calculate if not provided (fallback for edit mode)
+    // Get cycle data with priority: 1. params (from navigation), 2. API, 3. local store
     const cycleData = useMemo(() => {
-        if (cycleDataFromParams !== undefined) {
-            return cycleDataFromParams; // Data provided from parent
+        // Priority 1: From route params (navigation passes this correctly)
+        if (cycleDataFromParams !== undefined && cycleDataFromParams !== null) {
+            return cycleDataFromParams;
         }
+        // Priority 2: API data (get active cycle)
+        if (cyclesData && Array.isArray(cyclesData) && cyclesData.length > 0) {
+            // Find the active cycle (InProgress/Active status) or get the first one
+            const activeCycle =
+                cyclesData.find(
+                    (c: { status?: string }) => c.status === 'InProgress' || c.status === 'Active'
+                ) || cyclesData[0];
+            return activeCycle;
+        }
+        // Priority 3: From local store (fallback)
         if (!pond?.id) return null;
         return getCurrentCycleForPond(pond.id);
-    }, [cycleDataFromParams, pond?.id, getCurrentCycleForPond]);
+    }, [cycleDataFromParams, cyclesData, pond?.id, getCurrentCycleForPond]);
 
     const shrimpBreed = cycleData?.breedSource
         ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
         : undefined;
 
-    const actualStockingQuantity = cycleData?.stockingQuantity ?? 0;
+    const actualStockingQuantity = cycleData?.stockingQuantity ?? cycleData?.totalStocking ?? 0;
 
-    // Calculate total estimated shrimp (kg): (Số lượng thả thực tế × Tỉ lệ sống dự kiến) / Cỡ tôm (con/kg)
+    // Get the latest survival rate and totalShrimpCount from size measurements API
+    const { latestSurvivalRate, latestTotalShrimpCount } = useMemo(() => {
+        const items = sizeMeasurementsData?.data?.items;
+        if (!items || items.length === 0)
+            return { latestSurvivalRate: null, latestTotalShrimpCount: null };
+        // Sort by createdAt descending to get the latest
+        const sorted = [...items].sort((a: { createdAt?: string }, b: { createdAt?: string }) => {
+            const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return timeB - timeA;
+        });
+        const latest = sorted[0] as {
+            sizeMeasurementDetail?: { survivalRatePercentage?: number; totalShrimpCount?: number };
+            sizeMeasurement?: { survivalRatePercentage?: number; totalShrimpCount?: number };
+        };
+        const detail = latest?.sizeMeasurementDetail || latest?.sizeMeasurement;
+        return {
+            latestSurvivalRate: detail?.survivalRatePercentage ?? null,
+            latestTotalShrimpCount: detail?.totalShrimpCount ?? null,
+        };
+    }, [sizeMeasurementsData]);
+
+    // Calculate total estimated shrimp (con): Use server value (totalShrimpCount) first, then calculate from survivalRate
+    // Backend validates totalStocking against this value from size measurement
     const totalEstimatedShrimp = useMemo(() => {
-        return calculateTotalEstimatedShrimp(actualStockingQuantity, shrimpSize, pond?.id);
-    }, [actualStockingQuantity, shrimpSize, pond?.id, calculateTotalEstimatedShrimp]);
+        // Priority 1: Use totalShrimpCount from size measurement API (backend uses this for validation)
+        if (latestTotalShrimpCount !== null && latestTotalShrimpCount > 0) {
+            return latestTotalShrimpCount;
+        }
+        // Priority 2: Calculate from survivalRate
+        if (!actualStockingQuantity || actualStockingQuantity === 0) return 0;
+        if (latestSurvivalRate !== null && latestSurvivalRate > 0) {
+            return Math.round(actualStockingQuantity * (latestSurvivalRate / 100));
+        }
+        // Fallback: assume 100% survival rate (return full stocking quantity)
+        return actualStockingQuantity;
+    }, [latestTotalShrimpCount, actualStockingQuantity, latestSurvivalRate]);
 
     // Initial data for comparison when editing
     const initialData = useMemo(() => {
@@ -190,7 +282,7 @@ export const AddTransferScreen: React.FC = () => {
         setIsConfirmationModalVisible(false);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!shrimpSize) {
             Toast.show({
                 type: 'error',
@@ -252,47 +344,67 @@ export const AddTransferScreen: React.FC = () => {
         };
 
         if (itemToEdit) {
-            // Update existing TRANSFER_POND job
+            // Update existing TRANSFER_POND job (local only, API doesn't support update)
             const updatedItems = currentItems.map(item =>
                 item.id === itemToEdit.id ? { ...item, ...baseData } : item
             );
             updatePondJob(pondId, 'TRANSFER_POND', updatedItems);
             showEditJobSuccessToast('TRANSFER_POND');
         } else {
-            // Create new TRANSFER_POND job with proper next index
-            let maxIndex = 0;
-            currentItems.forEach(item => {
-                const match = item.label.match(/Lần (\d+)/);
-                if (match) {
-                    const index = parseInt(match[1], 10);
-                    if (index > maxIndex) maxIndex = index;
-                }
-            });
-            const nextIndex = maxIndex + 1;
-
-            const newItem = {
-                id: Date.now().toString(),
-                ...baseData,
-                label: `Lần ${nextIndex}`,
-                pondId: pondId,
+            // Prepare API request data - map receivingPonds to API format
+            const toPondsData = validReceivingPonds.map(p => ({
+                toPondId: p.receivingPond || '',
+                // Remove formatting (dots, commas) before parsing - p.quantity may be "300.006" formatted
+                quantity: parseInt(p.quantity.replace(/\D/g, ''), 10) || 0,
+            }));
+            // Backend validates: totalStocking must match the measured value (DB value)
+            // Using totalEstimatedShrimp ensures we send the DB-derived value if available
+            const apiRequestData: CreateStockTransferRequest = {
+                toPonds: toPondsData,
+                totalStocking: totalEstimatedShrimp, // Use DB value (Measured)
+                shrimpSizePcsPerKg: parseInt(shrimpSize, 10) || 0,
+                notes: notes || undefined,
             };
 
-            updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
-            showAddJobSuccessToast('TRANSFER_POND');
+            try {
+                // Call API to create stock transfer
+                await createStockTransfer({ pondId, data: apiRequestData });
 
-            // Handle transfer: create cycles for receiving ponds
-            handleTransferPond(
-                pondId,
-                receivingPonds.map(p => ({
-                    receivingPond: p.receivingPond,
-                    quantity: p.quantity,
-                })),
-                formatDate(selectedDate),
-                shrimpSize,
-                totalEstimatedShrimp
-            );
+                // Create new TRANSFER_POND job with proper next index
+                let maxIndex = 0;
+                currentItems.forEach(item => {
+                    const match = item.label.match(/Lần (\d+)/);
+                    if (match) {
+                        const index = parseInt(match[1], 10);
+                        if (index > maxIndex) maxIndex = index;
+                    }
+                });
+                const nextIndex = maxIndex + 1;
 
-            // Note: Source cycle deletion is handled in handleTransferPond
+                const newItem = {
+                    id: Date.now().toString(),
+                    ...baseData,
+                    label: `Lần ${nextIndex}`,
+                    pondId: pondId,
+                };
+
+                updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
+
+                // Handle transfer: create cycles for receiving ponds (local state)
+                handleTransferPond(
+                    pondId,
+                    receivingPonds.map(p => ({
+                        receivingPond: p.receivingPond,
+                        quantity: p.quantity,
+                    })),
+                    formatDate(selectedDate),
+                    shrimpSize,
+                    totalEstimatedShrimp
+                );
+            } catch {
+                // Error is already handled in useCreateStockTransfer hook
+                return;
+            }
         }
 
         // Reset navigation stack: MainTabs -> PondDetail

@@ -50,7 +50,7 @@ const arePropsEqual = (
 export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
     ({
         item,
-        onEdit,
+        //onEdit,
         onHistoryPress,
         onAdjustmentPress,
         hideRemaining,
@@ -133,13 +133,14 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                         </View>
 
                         {/* Edit Button */}
-                        {onEdit && (
+                        {/* Edit Button */}
+                        {/* {onEdit && (
                             <ButtonMaterialList
                                 title="Sửa thông tin"
                                 onPress={() => onEdit(item)}
                                 style={styles.editButton}
                             />
-                        )}
+                        )} */}
                     </View>
                 )}
 

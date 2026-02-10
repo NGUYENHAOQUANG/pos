@@ -31,6 +31,13 @@ export interface OperationType {
     lastModifiedAt?: string;
 }
 
+export interface IStatus {
+    id: number;
+    name: string;
+    code: string;
+    color?: string;
+}
+
 // PondTypeOperation - mapping between PondType and OperationType
 // Defines which operations are available for each pond type
 export interface PondTypeOperation {
