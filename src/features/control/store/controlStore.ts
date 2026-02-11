@@ -255,7 +255,7 @@ export const useControlStore = create<ControlStore>()(
             },
         })),
         {
-            name: 'control-storage-v7', // Bump version to force reload initial data
+            name: 'control-storage-v8', // Bump: removed IOT mock devices
             storage: createJSONStorage(() => AsyncStorage),
         }
     )
