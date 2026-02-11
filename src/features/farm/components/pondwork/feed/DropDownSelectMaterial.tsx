@@ -7,6 +7,7 @@ import {
     TextInput,
     FlatList,
     Platform,
+    Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -32,6 +33,8 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
+    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+    const triggerRef = useRef<View>(null);
     const inputRef = useRef<TextInput>(null);
 
     // Filter data based on search text
@@ -42,13 +45,24 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
     }, [data, searchText]);
 
     useEffect(() => {
-        if (isOpen && inputRef.current) {
-            // Create a small delay to ensure the component is rendered before focusing
+        if (isOpen) {
+            // Focus input after modal opens
             setTimeout(() => {
                 inputRef.current?.focus();
             }, 100);
         }
     }, [isOpen]);
+
+    const handleOpen = () => {
+        triggerRef.current?.measureInWindow((x, y, width) => {
+            setDropdownPosition({
+                top: y,
+                left: x,
+                width: width,
+            });
+            setIsOpen(true);
+        });
+    };
 
     const handleSelect = (item: IMaterial) => {
         onSelect(item);
@@ -63,28 +77,11 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 
     // Render the input trigger
     const renderTrigger = () => {
-        if (isOpen) {
-            return (
-                <View style={[styles.triggerContainer, styles.triggerOpen]}>
-                    <TextInput
-                        ref={inputRef}
-                        style={styles.input}
-                        placeholder={placeholder}
-                        placeholderTextColor={colors.gray[400]}
-                        value={searchText}
-                        onChangeText={setSearchText}
-                    />
-                    <TouchableOpacity onPress={() => setIsOpen(false)}>
-                        <Ionicons name="search-outline" size={18} color={colors.defaultBorder} />
-                    </TouchableOpacity>
-                </View>
-            );
-        }
-
         return (
             <TouchableOpacity
+                ref={triggerRef}
                 style={styles.triggerContainer}
-                onPress={() => setIsOpen(true)}
+                onPress={handleOpen}
                 activeOpacity={0.7}
             >
                 <Text style={[styles.triggerText, !selectedItem && styles.placeholderText]}>
@@ -99,77 +96,123 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
         <View style={styles.container}>
             {renderTrigger()}
 
-            {isOpen && (
-                <View style={styles.dropdown}>
-                    {filteredData.length > 0 ? (
-                        <FlatList
-                            data={filteredData}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => {
-                                const isOutOfStock =
-                                    item.remaining === 0 || item.remaining === undefined;
-                                return (
-                                    <TouchableOpacity
-                                        style={styles.item}
-                                        onPress={() => handleSelect(item)}
-                                    >
-                                        <Text
-                                            style={[
-                                                styles.itemName,
-                                                isOutOfStock && styles.textDisabled,
-                                            ]}
-                                            numberOfLines={1}
-                                        >
-                                            {item.name}
-                                        </Text>
-                                        <View style={styles.stockContainer}>
-                                            <Text
-                                                style={[
-                                                    styles.itemStock,
-                                                    isOutOfStock && styles.textDisabled,
-                                                ]}
-                                            >
-                                                Kho: {item.remaining ?? 0}{' '}
-                                                {item.unitName
-                                                    ? String(item.unitName).toLowerCase()
-                                                    : ''}
-                                            </Text>
-                                            {isOutOfStock && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        setIsOpen(false);
-                                                        onImportMore?.(item);
-                                                    }}
-                                                    hitSlop={{
-                                                        top: 10,
-                                                        bottom: 10,
-                                                        left: 10,
-                                                        right: 10,
-                                                    }}
-                                                >
-                                                    <Text style={styles.importMore}>
-                                                        . Nhập thêm
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            )}
-                                        </View>
-                                    </TouchableOpacity>
-                                );
-                            }}
-                            style={styles.list}
-                        />
-                    ) : (
-                        <View style={styles.emptyContainer}>
-                            <EmptyStateIcon width={60} height={60} />
-                            <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
-                            <TouchableOpacity style={styles.createButton} onPress={handleCreateNew}>
-                                <Ionicons name="add" size={16} color={colors.primary} />
-                                <Text style={styles.createButtonText}>Tạo vật tư mới</Text>
+            <Modal
+                visible={isOpen}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setIsOpen(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setIsOpen(false)}
+                >
+                    <View
+                        style={[
+                            styles.dropdownWrapper,
+                            {
+                                top: dropdownPosition.top,
+                                left: dropdownPosition.left,
+                                width: dropdownPosition.width,
+                            },
+                        ]}
+                    >
+                        {/* Search Input (Replaces Trigger visual) */}
+                        <View style={[styles.triggerContainer, styles.triggerOpen]}>
+                            <TextInput
+                                ref={inputRef}
+                                style={styles.input}
+                                placeholder={placeholder}
+                                placeholderTextColor={colors.gray[400]}
+                                value={searchText}
+                                onChangeText={setSearchText}
+                            />
+                            <TouchableOpacity onPress={() => setIsOpen(false)}>
+                                <Ionicons
+                                    name="search-outline"
+                                    size={18}
+                                    color={colors.defaultBorder}
+                                />
                             </TouchableOpacity>
                         </View>
-                    )}
-                </View>
-            )}
+
+                        {/* List Content */}
+                        <View style={styles.dropdownListContainer}>
+                            {filteredData.length > 0 ? (
+                                <FlatList
+                                    data={filteredData}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({ item }) => {
+                                        const isOutOfStock =
+                                            item.remaining === 0 || item.remaining === undefined;
+                                        return (
+                                            <TouchableOpacity
+                                                style={styles.item}
+                                                onPress={() => handleSelect(item)}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        styles.itemName,
+                                                        isOutOfStock && styles.textDisabled,
+                                                    ]}
+                                                    numberOfLines={1}
+                                                >
+                                                    {item.name}
+                                                </Text>
+                                                <View style={styles.stockContainer}>
+                                                    <Text
+                                                        style={[
+                                                            styles.itemStock,
+                                                            isOutOfStock && styles.textDisabled,
+                                                        ]}
+                                                    >
+                                                        Kho: {item.remaining ?? 0}{' '}
+                                                        {item.unitName
+                                                            ? String(item.unitName).toLowerCase()
+                                                            : ''}
+                                                    </Text>
+                                                    {isOutOfStock && (
+                                                        <TouchableOpacity
+                                                            onPress={() => {
+                                                                setIsOpen(false);
+                                                                onImportMore?.(item);
+                                                            }}
+                                                            hitSlop={{
+                                                                top: 10,
+                                                                bottom: 10,
+                                                                left: 10,
+                                                                right: 10,
+                                                            }}
+                                                        >
+                                                            <Text style={styles.importMore}>
+                                                                . Nhập thêm
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
+                                            </TouchableOpacity>
+                                        );
+                                    }}
+                                    style={styles.list}
+                                    keyboardShouldPersistTaps="handled"
+                                />
+                            ) : (
+                                <View style={styles.emptyContainer}>
+                                    <EmptyStateIcon width={60} height={60} />
+                                    <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
+                                    <TouchableOpacity
+                                        style={styles.createButton}
+                                        onPress={handleCreateNew}
+                                    >
+                                        <Ionicons name="add" size={16} color={colors.primary} />
+                                        <Text style={styles.createButtonText}>Tạo vật tư mới</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View>
     );
 };
@@ -178,6 +221,12 @@ const styles = StyleSheet.create({
     container: {
         zIndex: 10, // Ensure dropdown sits on top
         width: '100%',
+    },
+    modalOverlay: {
+        flex: 1,
+    },
+    dropdownWrapper: {
+        position: 'absolute',
     },
     triggerContainer: {
         flexDirection: 'row',
@@ -208,14 +257,13 @@ const styles = StyleSheet.create({
         padding: 0, // Reset default padding
         marginRight: spacing.sm,
     },
-    dropdown: {
-        position: 'absolute',
-        top: 44, // height 40 + 4px margin
-        left: 0,
-        right: 0,
+    dropdownListContainer: {
+        marginTop: 4,
         backgroundColor: colors.white,
         borderRadius: borderRadius.sm,
-        padding: spacing.xs,
+        borderWidth: 1,
+        borderTopWidth: 0,
+        borderColor: colors.defaultBorder,
         maxHeight: 300,
         ...Platform.select({
             ios: {
