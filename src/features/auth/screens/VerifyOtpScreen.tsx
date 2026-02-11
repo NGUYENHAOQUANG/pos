@@ -216,17 +216,6 @@ export default function VerifyOTPScreen() {
             setOtp(['', '', '', '']);
             setErrorMessage('');
 
-            // Delay focus on iOS to prevent keyboard flicker when OTP autofill happens
-            // iOS dismisses keyboard when notification appears, then we focus again
-            // Adding delay allows iOS to complete its autofill animation smoothly
-            if (Platform.OS === 'ios') {
-                setTimeout(() => {
-                    otpInputRef.current?.focusFirst();
-                }, 300);
-            } else {
-                otpInputRef.current?.focusFirst();
-            }
-
             Toast.show({
                 type: 'success',
                 text1: 'Đã gửi lại mã OTP',
