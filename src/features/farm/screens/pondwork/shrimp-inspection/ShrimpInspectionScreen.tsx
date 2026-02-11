@@ -29,7 +29,6 @@ import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { useShrimpHealthCheckForm } from '@/features/farm/hooks/shrimpHealthCheck/useShrimpHealthCheckForm';
-import { useAggregatedAIDiagnosis } from '@/features/farm/hooks/shrimpHealthCheck/useAggregatedAIDiagnosis';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
@@ -84,13 +83,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
         itemToEdit,
         meta,
     });
-
-    // Get aggregated AI diagnosis stats from all records in the cycle
-    const { aggregatedStats } = useAggregatedAIDiagnosis(
-        pond?.id,
-        diagnosisDetails,
-        itemToEdit?.id
-    );
 
     // State to store AI total count for display
     const [aiTotalCount, setAiTotalCount] = useState<number>(0);
@@ -313,7 +305,6 @@ export const ShrimpInspectionScreen: React.FC = () => {
                             onLiverChange={setLiver}
                             onAICheckPress={handleAICheckPress}
                             aiResult={displayAiResult}
-                            aggregatedStats={aggregatedStats}
                         />
 
                         {/* Ghi chú Box */}

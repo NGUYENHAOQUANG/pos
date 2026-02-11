@@ -30,15 +30,6 @@ interface ShrimpInspectionObservationBoxProps {
     onAICheckPress?: () => void;
     aiResult?: AIHealthCheckResult | null;
     onViewAIDetails?: () => void;
-    aggregatedStats?: {
-        totalShrimp: number;
-        percentages: Array<{
-            diagnosis: string;
-            count: number;
-            percentage: number;
-        }>;
-        recordCount: number;
-    } | null;
 }
 
 const intestineOptions = ['Đầy', 'Rỗng'];
@@ -76,7 +67,6 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
     onAICheckPress,
     aiResult,
     onViewAIDetails,
-    aggregatedStats,
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -185,16 +175,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
 
                             <View style={styles.modalBody}>
                                 {/* Show aggregated stats if available, otherwise show current record stats */}
-                                {aggregatedStats && aggregatedStats.percentages.length > 0 ? (
-                                    aggregatedStats.percentages.map(item => (
-                                        <View key={item.diagnosis} style={styles.diseaseRow}>
-                                            <Text style={styles.diseaseName}>{item.diagnosis}</Text>
-                                            <Text style={styles.diseasePercent}>
-                                                {item.percentage}%
-                                            </Text>
-                                        </View>
-                                    ))
-                                ) : aiResult?.items && aiResult.items.length > 0 ? (
+                                {aiResult?.items && aiResult.items.length > 0 ? (
                                     Object.entries(
                                         aiResult.items.reduce(
                                             (acc: Record<string, number>, item: any) => {
@@ -204,30 +185,36 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                                             },
                                             {}
                                         )
-                                    ).map(([diagnosis, count]) => (
-                                        <View key={diagnosis} style={styles.diseaseRow}>
-                                            <Text style={styles.diseaseName}>{diagnosis}</Text>
-                                            <Text style={styles.diseasePercent}>
-                                                {(
-                                                    ((count as number) / aiResult.items!.length) *
-                                                    100
-                                                ).toFixed(1)}
-                                                %
-                                            </Text>
-                                        </View>
-                                    ))
-                                ) : diseases.length > 0 ? (
-                                    diseases.map((disease, index) => (
-                                        <View key={index} style={styles.diseaseRow}>
-                                            <Text style={styles.diseaseName}>{disease}</Text>
-                                            <Text style={styles.diseasePercent}>
-                                                {diseases.length === 1
-                                                    ? aiResult?.infectionRate
-                                                    : '- '}
-                                                %
-                                            </Text>
-                                        </View>
-                                    ))
+                                    )
+                                        .filter(([diagnosis]) => diagnosis !== 'Khỏe mạnh')
+                                        .map(([diagnosis, count]) => (
+                                            <View key={diagnosis} style={styles.diseaseRow}>
+                                                <Text style={styles.diseaseName}>{diagnosis}</Text>
+                                                <Text style={styles.diseasePercent}>
+                                                    {(
+                                                        ((count as number) /
+                                                            aiResult.items!.length) *
+                                                        100
+                                                    ).toFixed(1)}
+                                                    %
+                                                </Text>
+                                            </View>
+                                        ))
+                                ) : diseases.filter(d => d !== 'Khỏe mạnh').length > 0 ? (
+                                    diseases
+                                        .filter(d => d !== 'Khỏe mạnh')
+                                        .map((disease, index) => (
+                                            <View key={index} style={styles.diseaseRow}>
+                                                <Text style={styles.diseaseName}>{disease}</Text>
+                                                <Text style={styles.diseasePercent}>
+                                                    {diseases.filter(d => d !== 'Khỏe mạnh')
+                                                        .length === 1
+                                                        ? aiResult?.infectionRate
+                                                        : '- '}
+                                                    %
+                                                </Text>
+                                            </View>
+                                        ))
                                 ) : (
                                     <Text style={styles.noInfoText}>
                                         Không có thông tin chi tiết
