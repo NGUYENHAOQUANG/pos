@@ -96,6 +96,9 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 return { status: 'WARNING', diagnosis: 'Mang đen' };
             case 'WSSV':
                 return { status: 'CRITICAL', diagnosis: 'Đốm trắng' };
+            case 'Yellowhead':
+            case 'Yellow Head':
+                return { status: 'CRITICAL', diagnosis: 'Đầu vàng' };
             default:
                 return { status: 'WARNING', diagnosis: className };
         }
