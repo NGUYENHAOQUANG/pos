@@ -14,7 +14,8 @@ export type ConfirmationModalType =
     | 'transfer'
     | 'harvest_full'
     | 'harvest_close_cycle'
-    | 'measure_size_required';
+    | 'measure_size_required'
+    | 'measure_reset';
 
 interface ConfirmationConfig {
     title: string;
@@ -51,6 +52,12 @@ Bạn có chắc chắn muốn đóng chu kỳ không?`,
         message:
             'Cần đo kích thước tôm trước khi tiến hành sang ao. Bạn có muốn đo kích thước tôm ngay bây giờ không?',
         confirmText: 'Xác nhận',
+        cancelText: 'Hủy',
+    },
+    measure_reset: {
+        title: 'Đo lại',
+        message: 'Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa.',
+        confirmText: 'Đồng ý',
         cancelText: 'Hủy',
     },
 };
