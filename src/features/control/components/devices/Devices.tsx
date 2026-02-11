@@ -39,12 +39,14 @@ export const DeviceCard = React.memo<DeviceCardProps>(
         // Determine styles based on state
         let containerStyle: ViewStyle = styles.cardContainer;
         let switchTrackColor: string = colors.primary;
+        const isOxy = data.type === 'oxy';
+        const effectiveMode = isOxy ? EControlMode.LOCAL : data.mode;
 
         if (data.errorMessage) {
             // Error State
             containerStyle = { ...styles.cardContainer, ...styles.cardError };
             switchTrackColor = colors.primary;
-        } else if (data.mode === EControlMode.LOCAL) {
+        } else if (effectiveMode === EControlMode.LOCAL) {
             // Local Mode (Active but locked)
             containerStyle = { ...styles.cardContainer, ...styles.cardActive };
             switchTrackColor = colors.primaryLight; // Lighter blue to indicate read-only/local
@@ -72,7 +74,7 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                     <View style={styles.rowTop}>
                         <DevicesStatusColor
                             icon={Icon}
-                            isOn={data.mode === EControlMode.LOCAL ? true : data.isOn}
+                            isOn={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
                             errorMessage={data.errorMessage}
                             size={s(48)}
                         />
@@ -98,9 +100,9 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                             ) : null}
                         </View>
                         <ButtonControlMode
-                            mode={data.mode}
+                            mode={effectiveMode}
                             onPress={
-                                data.mode === EControlMode.LOCAL
+                                effectiveMode === EControlMode.LOCAL
                                     ? undefined
                                     : () => onModePress?.(data.id)
                             }
@@ -115,9 +117,9 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                             <AutoScrollText text={data.name} style={styles.deviceName} />
                         </View>
                         <ButtonDevices
-                            value={data.mode === EControlMode.LOCAL ? true : data.isOn}
+                            value={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
                             onValueChange={val => {
-                                if (data.mode === EControlMode.LOCAL) {
+                                if (effectiveMode === EControlMode.LOCAL) {
                                     Toast.show({
                                         type: 'error',
                                         text1: 'Không thể bật/tắt thiết bị này',

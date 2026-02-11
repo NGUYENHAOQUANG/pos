@@ -219,10 +219,10 @@ export const useControlStore = create<ControlStore>()(
                                         type = 'feeder';
                                         break;
                                     case 'AirBlower':
-                                        type = 'oxy';
+                                        type = 'fan';
                                         break;
                                     case 'PaddleWheel':
-                                        type = 'fan';
+                                        type = 'oxy';
                                         break;
                                     default:
                                         type = 'feeder';
@@ -255,7 +255,7 @@ export const useControlStore = create<ControlStore>()(
             },
         })),
         {
-            name: 'control-storage-v6', // Bump version to force reload initial data
+            name: 'control-storage-v7', // Bump version to force reload initial data
             storage: createJSONStorage(() => AsyncStorage),
         }
     )
