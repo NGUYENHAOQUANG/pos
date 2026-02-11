@@ -43,6 +43,7 @@ export interface DeviceData {
     farmId?: string; // Add farmId for filtering
 
     // Extended properties for persistence
+    internalDeviceId?: number;
     feedingConfig?: FeedingConfig;
     schedules?: DeviceSchedule[];
 }

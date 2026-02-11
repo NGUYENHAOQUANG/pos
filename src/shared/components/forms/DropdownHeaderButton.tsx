@@ -304,6 +304,7 @@ export const DropdownHeaderButton: React.FC<DropdownHeaderButtonProps> = ({
                             keyExtractor={item => item.id.toString()}
                             renderItem={renderItem}
                             contentContainerStyle={styles.dropdownScrollContent}
+                            showsVerticalScrollIndicator={false}
                         />
                     </Animated.View>
                 </TouchableOpacity>

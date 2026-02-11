@@ -245,18 +245,6 @@ export const useAuthStore = create<AuthState>()(
         {
             name: 'auth-storage',
             storage: createJSONStorage(() => Storage),
-            onRehydrateStorage: () => state => {
-                console.log('[AuthStore] Hydration start');
-                if (state) {
-                    console.log(
-                        '[AuthStore] Hydration finished. Is Authenticated:',
-                        state.isAuthenticated
-                    );
-                    console.log('[AuthStore] Token restored:', state.token ? 'Yes' : 'No (Null)');
-                } else {
-                    console.log('[AuthStore] Hydration failed or state is null');
-                }
-            },
         }
     )
 );

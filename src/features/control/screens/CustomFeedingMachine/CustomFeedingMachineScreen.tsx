@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, BackHandler } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    BackHandler,
+    RefreshControl,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { useControl } from '../../store/controlStore';
+import { deviceApi } from '../../api/deviceApi';
 import { EControlMode } from '../../types/control.types';
 
 import ActivitySchedule, {
@@ -137,7 +146,67 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         return () => subscription.remove();
     }, []);
 
-    const handleSave = () => {
+    const [isSaving, setIsSaving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Fetch schedules from API
+    const fetchSchedules = React.useCallback(async () => {
+        if (!deviceId) return;
+        try {
+            const response = await deviceApi.getSchedules(deviceId);
+            if (response.data && response.data.data && response.data.data.items) {
+                const items = response.data.data.items;
+                // Sort by 'no'
+                items.sort((a, b) => a.no - b.no);
+
+                const mappedSchedules = items.map(item => {
+                    // Parse time strings "HH:mm:ss.fffffff" to Date
+                    const parseTime = (timeStr: string) => {
+                        if (!timeStr) return null;
+                        const [h, m, s] = timeStr.split(':');
+                        const date = new Date();
+                        if (h) date.setHours(parseInt(h));
+                        if (m) date.setMinutes(parseInt(m));
+                        if (s) {
+                            const seconds = parseFloat(s);
+                            date.setSeconds(Math.floor(seconds));
+                            date.setMilliseconds(
+                                Math.round((seconds - Math.floor(seconds)) * 1000)
+                            );
+                        } else {
+                            date.setSeconds(0);
+                            date.setMilliseconds(0);
+                        }
+                        return date;
+                    };
+
+                    return {
+                        id: item.id,
+                        startTime: parseTime(item.startTime),
+                        endTime: parseTime(item.endTime),
+                    };
+                });
+
+                setSchedules(mappedSchedules);
+            }
+        } catch (error) {
+            console.error('Failed to fetch schedules:', error);
+        }
+    }, [deviceId]);
+
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await fetchSchedules();
+        setRefreshing(false);
+    }, [fetchSchedules]);
+
+    React.useEffect(() => {
+        fetchSchedules();
+    }, [fetchSchedules]);
+
+    const handleSave = async () => {
+        if (isSaving) return;
+        setIsSaving(true);
         console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
 
         const controlMode = mode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
@@ -162,16 +231,80 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 },
                 schedules: deviceSchedules,
             });
-        }
 
-        Toast.show({
-            type: 'success',
-            text1: 'Cập nhật cấu hình thành công',
-        });
+            // Call schedule API for each schedule entry when mode is schedule
+            if (mode === 'schedule' && schedules.length > 0) {
+                try {
+                    // Build ISO datetime using local time (not UTC)
+                    const toLocalISO = (date: Date): string => {
+                        const y = date.getFullYear();
+                        const mo = String(date.getMonth() + 1).padStart(2, '0');
+                        const d = String(date.getDate()).padStart(2, '0');
+                        const h = String(date.getHours()).padStart(2, '0');
+                        const min = String(date.getMinutes()).padStart(2, '0');
+                        const sec = String(date.getSeconds()).padStart(2, '0');
+                        return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
+                    };
+
+                    const validSchedules = schedules.filter(s => s.startTime && s.endTime);
+                    const responses = await Promise.all(
+                        validSchedules.map(s => {
+                            const payload = {
+                                deviceId,
+                                startTime: toLocalISO(s.startTime!),
+                                endtime: toLocalISO(s.endTime!),
+                            };
+                            console.log('[Schedule API] Sending payload:', JSON.stringify(payload));
+                            return deviceApi.createSchedule(payload);
+                        })
+                    );
+
+                    // Log responses from backend
+                    responses.forEach((r, i) => {
+                        console.log(`[Schedule API] Response ${i + 1}:`, JSON.stringify(r.data));
+                    });
+                    // Check all responses for success
+                    const allSuccess = responses.every(r => r.data?.success === true);
+
+                    if (allSuccess) {
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Cập nhật lịch trình thành công',
+                        });
+                    } else {
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lỗi',
+                            text2: 'Một số lịch trình không thể lưu',
+                        });
+                        setIsSaving(false);
+                        return;
+                    }
+                } catch (error: any) {
+                    console.error('Failed to create schedules:', error);
+                    const errorMessage =
+                        error?.response?.data?.message ||
+                        'Thời gian bắt đầu phải nhỏ hơn thời gian hiện tại';
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Lỗi',
+                        text2: errorMessage,
+                    });
+                    setIsSaving(false);
+                    return; // Don't navigate back on error
+                }
+            } else {
+                Toast.show({
+                    type: 'success',
+                    text1: 'Cập nhật cấu hình thành công',
+                });
+            }
+        }
 
         onSave?.(mode);
         setIsDirty(false); // Reset dirty state on save
         isDirtyRef.current = false;
+        setIsSaving(false);
         if (onBack) {
             onBack();
         } else {
@@ -197,7 +330,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
     return (
         <View style={styles.container}>
-            <HeaderDevices title="Tuỳ Chỉnh Máy Cho Ăn" onBackPress={handleCancel} />
+            <HeaderDevices title="Tuỳ Chỉnh Máy" onBackPress={handleCancel} />
 
             <ConfirmModal
                 visible={showConfirmModal}
@@ -225,6 +358,9 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
                     {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
                     <View style={styles.card}>
@@ -326,10 +462,13 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
             <ButtonBar
                 mode="double"
-                primaryTitle="Lưu Thay Đổi"
+                primaryTitle={isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                 secondaryTitle="Hủy Thay Đổi"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleCancel}
+                primaryButtonDisabled={isSaving}
+                primaryButtonLoading={isSaving}
+                secondaryButtonDisabled={isSaving}
             />
         </View>
     );

@@ -88,6 +88,14 @@ export const useFeedingRecords = (pondId: string) => {
 
 export const useFeedingRecordsAsJobs = (pondId: string) => {
     const { data, isLoading, error, refetch } = useFeedingRecords(pondId);
+    const { materials: availableMaterials } = useFeeding();
+
+    const materialMap = useMemo(() => {
+        return availableMaterials.reduce((acc, curr) => {
+            acc[curr.id] = curr;
+            return acc;
+        }, {} as Record<string, IMaterial>);
+    }, [availableMaterials]);
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];
 
@@ -119,15 +127,18 @@ export const useFeedingRecordsAsJobs = (pondId: string) => {
             date: dateStr,
             note: item.feedingDetail?.notes ?? undefined,
             pondId: item.pondId,
-            materials: item.feedingDetail?.materials?.map(m => ({
-                material: {
-                    id: m.warehouseItemId,
-                    name: 'Vật tư',
-                    unitName: '',
-                } as any,
-                quantity: m.quantity,
-                unit: '',
-            })),
+            materials: item.feedingDetail?.materials?.map(m => {
+                const mat = materialMap[m.warehouseItemId];
+                return {
+                    material: {
+                        id: m.warehouseItemId,
+                        name: mat?.name || 'Vật tư',
+                        unitName: mat?.unitName || '',
+                    } as any,
+                    quantity: m.quantity,
+                    unit: mat?.unitName || '',
+                };
+            }),
             documentIds: item.documentIds,
             images: item.documentIds ?? [],
             createdAt: item.createdAt,
@@ -188,7 +199,7 @@ export const useCreateFeedingRecord = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             Toast.show({
                 type: 'success',
-                text1: 'Thêm hồ sơ cho ăn thành công',
+                text1: 'Đã cho ăn thành công',
                 position: 'top',
             });
         },

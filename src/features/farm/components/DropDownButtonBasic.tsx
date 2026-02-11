@@ -167,6 +167,7 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                             renderItem={renderItem}
                             // scrollEnabled={false}
                             contentContainerStyle={styles.dropdownScrollContent}
+                            showsVerticalScrollIndicator={false}
                         />
                     </View>
                 </TouchableOpacity>
