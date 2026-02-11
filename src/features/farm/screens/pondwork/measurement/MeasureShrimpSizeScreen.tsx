@@ -4,11 +4,11 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useQuery } from '@tanstack/react-query';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useQuery } from '@tanstack/react-query';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { CycleData } from '@/features/farm/types/farm.types';
 import {
@@ -31,6 +31,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
+    // Route params now contain full pond object which should be used directly
     const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
@@ -39,9 +40,9 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     const currentPond = routePond;
 
-    // Get stocking quantity from cycle data
-    // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
-    // Get initial active cycle from store
+    // --- Active Cycle Logic ---
+
+    // 1. Try to get cycle from Store first
     const initialActiveCycle = useFarmStore(
         useCallback(
             state => {
@@ -58,7 +59,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         )
     );
 
-    // Fetch cycles if initialActiveCycle is missing (e.g. direct navigation or store cleared)
+    // 2. Fetch cycles if needed (using React Query)
     const { data: cycles } = useQuery({
         queryKey: ['cycles', currentPond?.id],
         queryFn: async () => {
@@ -73,7 +74,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         enabled: !!currentPond?.id && !initialActiveCycle,
     });
 
-    // Determine the active cycle
+    // 3. Determine active cycle
     const activeCycle = useMemo(() => {
         if (initialActiveCycle) return initialActiveCycle;
         if (cycles && cycles.length > 0) {
@@ -88,7 +89,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         return undefined;
     }, [initialActiveCycle, cycles, currentPond?.id]);
 
-    // Fetch fresh cycle details once we have an ID
+    // 4. Fetch detailed cycle data
     const { data: fetchedCycleData } = useQuery({
         queryKey: ['cycleDetail', currentPond?.id, activeCycle?.id],
         queryFn: async () => {
@@ -117,35 +118,24 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     const activeCycleData = fetchedCycleData || activeCycle;
 
-    // Get stocking quantity from cycle data
+    // --- Stocking Quantity Optimization ---
     const stockingQuantity = useMemo(() => {
-        let quantity: number | undefined;
-        if (activeCycleData?.transferInfo?.originalCycle?.stockingQuantity) {
-            quantity = Number(activeCycleData.transferInfo.originalCycle.stockingQuantity);
-        } else if (activeCycleData?.stockingQuantity) {
-            quantity = Number(activeCycleData.stockingQuantity);
-        } else if ((activeCycleData as any)?.totalStocking) {
-            quantity = Number((activeCycleData as any).totalStocking);
-        }
+        if (!activeCycleData) return undefined;
 
-        console.log('MeasureShrimpSize - activeCycleData:', {
-            id: activeCycleData?.id,
-            hasTransferInfo: !!activeCycleData?.transferInfo,
-            stockingQuantity: activeCycleData?.stockingQuantity,
-            totalStocking: (activeCycleData as any)?.totalStocking,
-            resolvedQuantity: quantity,
-        });
-
-        return quantity;
+        // Optimized check sequence
+        return (
+            activeCycleData.transferInfo?.originalCycle?.stockingQuantity ??
+            activeCycleData.stockingQuantity ??
+            (activeCycleData as any).totalStocking
+        );
     }, [activeCycleData]);
 
+    // --- AI Measurement Sync ---
     const latestAIMeasurement = useFarmStore(state =>
         currentPond?.id ? state.latestAIMeasurement[currentPond.id] : undefined
     );
-
     const clearLatestAIMeasurement = useFarmStore(state => state.clearLatestAIMeasurement);
 
-    // Clear AI measurement when unmounting
     useEffect(() => {
         return () => {
             if (currentPond?.id) {
@@ -154,6 +144,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         };
     }, [currentPond?.id, clearLatestAIMeasurement]);
 
+    // --- Form Handling ---
     const {
         time,
         setTime,
@@ -171,6 +162,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
+        isSubmitting,
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
         itemToEdit,
@@ -179,12 +171,14 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         },
     });
 
+    // --- Sync Effects ---
+    // Only update if values are explicitly undefined in current state to avoid overwriting user input
+    // or if specific conditions are met (like AI measurement just arrived)
     useEffect(() => {
-        if (latestAIMeasurement?.averageSizeCm) {
+        if (latestAIMeasurement?.averageSizeCm && !averageShrimpSize) {
             setAverageShrimpSize(latestAIMeasurement.averageSizeCm.toString());
         }
-    }, [latestAIMeasurement, setAverageShrimpSize]);
-    // ...
+    }, [latestAIMeasurement, averageShrimpSize, setAverageShrimpSize]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -192,12 +186,13 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     }, [setTabBarVisible]);
 
     useEffect(() => {
-        if (aiShrimpSize) {
+        if (aiShrimpSize && !shrimpSize) {
             setShrimpSize(aiShrimpSize);
         }
-    }, [aiShrimpSize, setShrimpSize]);
+    }, [aiShrimpSize, shrimpSize, setShrimpSize]);
 
     const onSavePress = () => {
+        if (isSubmitting) return;
         const documentIds = generalInfoBoxRef.current?.getUploadedIds() || [];
         handleSave(documentIds);
     };
@@ -266,6 +261,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     secondaryTitle="Huỷ"
                     onPrimaryPress={onSavePress}
                     onSecondaryPress={navigation.goBack}
+                    isLoading={isSubmitting}
                 />
             </View>
 

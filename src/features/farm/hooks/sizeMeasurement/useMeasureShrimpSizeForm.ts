@@ -10,6 +10,7 @@ import {
 } from '@/features/farm/hooks/useSizeMeasurement';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { NormalizedError } from '@/core/api/errorHandler';
+import { numericStringSchema } from '@/shared/utils/validation';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
@@ -25,7 +26,9 @@ export const useMeasureShrimpSizeForm = ({
     const navigation = useNavigation();
 
     // API Hooks
-    const { data: apiData } = useSizeMeasurement(pondId || '', itemToEdit?.id || '');
+    // If itemToEdit is provided, we use it directly as per requirement (Router data usage)
+    // We disable fetching detail by ID when itemToEdit is present
+    const { data: apiData } = useSizeMeasurement(pondId || '', '');
     const detail = apiData?.data;
 
     const createSizeMeasurement = useCreateSizeMeasurement();
@@ -45,11 +48,39 @@ export const useMeasureShrimpSizeForm = ({
     // Populate state
     useEffect(() => {
         const populateData = async () => {
-            if (detail) {
-                if (detail.createdAt) {
-                    setTime(new Date(detail.createdAt));
+            if (itemToEdit) {
+                // Handling JobExecution from Router/List
+                const meta = itemToEdit.meta as any;
+
+                const createdAt = itemToEdit.createdAt || meta?.date;
+                if (createdAt) setTime(new Date(createdAt));
+
+                if (meta) {
+                    if (meta.shrimpSize) setShrimpSize(meta.shrimpSize.toString());
+                    if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight.toString());
+                    if (meta.averageShrimpSize)
+                        setAverageShrimpSize(meta.averageShrimpSize.toString());
+                    if (meta.notes) setNotes(meta.notes);
+
+                    if (meta.documents && Array.isArray(meta.documents)) {
+                        const docUrls = meta.documents.map((d: any) => d.publicUrl).filter(Boolean);
+                        setImages(docUrls);
+                        setInitialDocumentIds(meta.documents.map((d: any) => d.id));
+                    } else if (meta.images) {
+                        setImages(meta.images);
+                        setInitialDocumentIds(meta.documentIds || []);
+                    } else if (itemToEdit.images) {
+                        // Fallback to top level images if meta images missing
+                        setImages(itemToEdit.images);
+                        setInitialDocumentIds(itemToEdit.documentIds || []);
+                    }
                 }
+            } else if (detail) {
+                // Handling API Detail response
+                if (detail.createdAt) setTime(new Date(detail.createdAt));
+
                 const sizeDetail = detail.sizeMeasurementDetail ?? detail.sizeMeasurement;
+
                 if (sizeDetail) {
                     const {
                         shrimpSizePcsPerKg,
@@ -58,46 +89,17 @@ export const useMeasureShrimpSizeForm = ({
                         notes: noteValue,
                     } = sizeDetail;
 
-                    setShrimpSize(
-                        shrimpSizePcsPerKg !== undefined && shrimpSizePcsPerKg !== null
-                            ? shrimpSizePcsPerKg.toString()
-                            : ''
-                    );
-                    setRemainingWeight(
-                        estimatedRemainingStockKg !== undefined &&
-                            estimatedRemainingStockKg !== null
-                            ? estimatedRemainingStockKg.toString()
-                            : ''
-                    );
-                    setAverageShrimpSize(
-                        avgSize !== undefined && avgSize !== null ? avgSize.toString() : ''
-                    );
-                    setNotes(noteValue || '');
+                    if (shrimpSizePcsPerKg != null) setShrimpSize(shrimpSizePcsPerKg.toString());
+                    if (estimatedRemainingStockKg != null)
+                        setRemainingWeight(estimatedRemainingStockKg.toString());
+                    if (avgSize != null) setAverageShrimpSize(avgSize.toString());
+                    if (noteValue) setNotes(noteValue);
                 }
+
                 if (detail.documentIds && detail.documentIds.length > 0) {
                     const urls = await documentApi.getUrls(detail.documentIds);
                     setInitialDocumentIds(detail.documentIds);
                     setImages(urls);
-                } else {
-                    setImages([]);
-                    setInitialDocumentIds([]);
-                }
-            } else if (itemToEdit && itemToEdit.meta) {
-                const meta = itemToEdit.meta as any;
-                if (meta.date) setTime(new Date(meta.date));
-                if (meta.shrimpSize) setShrimpSize(meta.shrimpSize);
-                if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight);
-                if (meta.averageShrimpSize) setAverageShrimpSize(meta.averageShrimpSize.toString());
-                if (meta.notes) setNotes(meta.notes);
-
-                // Map documents from API response if available
-                if (meta.documents && Array.isArray(meta.documents)) {
-                    const docUrls = meta.documents.map((d: any) => d.publicUrl).filter(Boolean);
-                    setImages(docUrls);
-                    setInitialDocumentIds(meta.documents.map((d: any) => d.id));
-                } else if (meta.images) {
-                    setImages(meta.images);
-                    setInitialDocumentIds(meta.documentIds || []);
                 }
             }
         };
@@ -133,10 +135,17 @@ export const useMeasureShrimpSizeForm = ({
     };
 
     const handleSave = (documentIds: string[]) => {
-        if (!shrimpSize || !remainingWeight) {
-            Toast.show({ type: 'error', text1: 'Vui lòng nhập đủ thông tin bắt buộc' });
+        const isSizeValid = numericStringSchema.safeParse(shrimpSize).success;
+        const isWeightValid = numericStringSchema.safeParse(remainingWeight).success;
+
+        if (!isSizeValid || !isWeightValid || !shrimpSize || !remainingWeight) {
+            Toast.show({
+                type: 'error',
+                text1: 'Vui lòng nhập đúng định dạng số cho kích thước và trọng lượng',
+            });
             return;
         }
+
         if (!pondId) {
             Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin ao' });
             return;
