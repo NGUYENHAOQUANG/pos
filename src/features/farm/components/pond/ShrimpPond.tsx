@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 import {
     View,
     Text,
@@ -301,7 +302,12 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                             </Text>
                             <Text style={styles.cycleDate}>
                                 {cycleData.stockingDate || cycleData.startDate
-                                    ? `${cycleData.stockingDate || cycleData.startDate} - nay`
+                                    ? `${formatDate(
+                                          new Date(
+                                              (cycleData.stockingDate ||
+                                                  cycleData.startDate) as string
+                                          )
+                                      )} - nay`
                                     : '- - nay'}
                             </Text>
                         </View>

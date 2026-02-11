@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
-import { parseDate } from '@/features/farm/utils/dateUtils';
+import { parseDate, formatDate } from '@/features/farm/utils/dateUtils';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
@@ -226,11 +226,15 @@ export const ShrimpFarmScreens: React.FC = () => {
                                         <View style={styles.cycleCardWrapper}>
                                             <CycleCard
                                                 cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                                                startDate={currentCycle?.stockingDate ?? ''}
-                                                doc={calculateDOC(currentCycle?.stockingDate ?? '')}
-                                                stockingQuantity={
-                                                    currentCycle?.stockingQuantity || 0
+                                                startDate={
+                                                    currentCycle?.stockingDate
+                                                        ? formatDate(
+                                                              new Date(currentCycle.stockingDate)
+                                                          )
+                                                        : ''
                                                 }
+                                                doc={calculateDOC(currentCycle?.stockingDate ?? '')}
+                                                stockingQuantity={currentCycle?.totalStocking || 0}
                                                 breed={
                                                     currentCycle.breedName ||
                                                     shrimpSeeds?.find(
@@ -263,11 +267,16 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                         currentCycle.transferInfo.originalCycle
                                                             .cycleName || 'Chu kỳ ao vèo'
                                                     }
-                                                    startDate={
-                                                        currentCycle.transferInfo.originalCycle
-                                                            .stockingDate
-                                                    }
-                                                    endDate={currentCycle.transferInfo.transferDate}
+                                                    startDate={formatDate(
+                                                        new Date(
+                                                            currentCycle.transferInfo.originalCycle.stockingDate
+                                                        )
+                                                    )}
+                                                    endDate={formatDate(
+                                                        new Date(
+                                                            currentCycle.transferInfo.transferDate
+                                                        )
+                                                    )}
                                                     doc={
                                                         currentCycle.transferInfo.originalCycle
                                                             .doc || 0

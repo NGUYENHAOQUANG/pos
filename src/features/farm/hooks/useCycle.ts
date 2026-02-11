@@ -105,3 +105,11 @@ export const useActiveCycle = (pondId: string) => {
 
     return cycleDetail || activeCycleSummary || null;
 };
+
+export const useCycleDetail = (pondId: string, cycleId: string) => {
+    return useQuery({
+        queryKey: ['cycle', pondId, cycleId],
+        queryFn: () => cycleApi.getCycleDetail(pondId, cycleId),
+        enabled: !!pondId && !!cycleId,
+    });
+};

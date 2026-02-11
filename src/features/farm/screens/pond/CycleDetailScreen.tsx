@@ -38,18 +38,7 @@ export const CycleDetailScreen: React.FC = () => {
         queryKey: ['cycleDetail', pondId, initialCycleData?.id],
         queryFn: async () => {
             if (!pondId || !initialCycleData?.id) return null;
-            const rawData = await cycleApi.getCycleDetail(pondId, initialCycleData.id);
-            // Map raw API data to CycleData interface
-            if (rawData) {
-                return {
-                    ...rawData,
-                    cycleName: rawData.name || (rawData as any).cycleName,
-                    breedSource: rawData.breedSource || (rawData as any).warehouseItemId,
-                    stockingDate: (rawData as any).createdAt || rawData.stockingDate,
-                    season: rawData.season,
-                } as CycleData;
-            }
-            return null;
+            return await cycleApi.getCycleDetail(pondId, initialCycleData.id);
         },
         enabled: !!pondId && !!initialCycleData?.id,
         initialData: initialCycleData,
