@@ -368,7 +368,11 @@ export const AddTransferScreen: React.FC = () => {
 
             try {
                 // Call API to create stock transfer
-                await createStockTransfer({ pondId, data: apiRequestData });
+                await createStockTransfer({
+                    pondId,
+                    data: apiRequestData,
+                    zoneId: pond.zoneId?.toString(),
+                });
 
                 // Create new TRANSFER_POND job with proper next index
                 let maxIndex = 0;
