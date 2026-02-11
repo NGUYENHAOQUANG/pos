@@ -10,6 +10,8 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
+import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
@@ -132,12 +134,12 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const handleGetCount = () => {
         const weightVal = parseFloat(measuredWeight);
         if (isNaN(weightVal) || weightVal <= 0) {
-            Alert.alert('Thông tin không hợp lệ', 'Khối lượng tôm phải lớn hơn 0.');
+            Toast.show(ToastMessages.ShrimpMeasurement.WEIGHT_REQUIRED);
             return;
         }
 
         if (!base64Image) {
-            Alert.alert('Chưa có ảnh', 'Vui lòng chọn hoặc chụp ảnh tôm.');
+            Toast.show(ToastMessages.ShrimpMeasurement.IMAGE_REQUIRED);
             return;
         }
 
@@ -307,10 +309,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                     ) {
                                         setIsSheetVisible(true);
                                     } else {
-                                        Alert.alert(
-                                            'Chưa có dữ liệu',
-                                            'Vui lòng lấy kết quả đo trước khi xem chi tiết.'
-                                        );
+                                        Toast.show(ToastMessages.ShrimpMeasurement.NO_DATA);
                                     }
                                 }}
                                 activeOpacity={0.7}
@@ -360,23 +359,26 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             )}
                         </View>
                         <View>
-                            <ImageUpload
-                                label="Hình ảnh xử lý"
-                                imageUri={imageUri}
-                                onImageSelect={handleImageSelect}
-                                onImageRemove={() => {
-                                    _setImageUri(null);
-                                    setDetections([]);
+                            <View
+                                onLayout={event => {
+                                    const { width, height } = event.nativeEvent.layout;
+                                    setDisplayDimensions({ width, height });
                                 }}
-                                returnBase64={true}
                             >
-                                <View
-                                    style={StyleSheet.absoluteFill}
-                                    pointerEvents="box-none"
-                                    onLayout={event => {
-                                        const { width, height } = event.nativeEvent.layout;
-                                        setDisplayDimensions({ width, height });
+                                <ImageUpload
+                                    label="Hình ảnh xử lý"
+                                    imageUri={imageUri}
+                                    onImageSelect={handleImageSelect}
+                                    onImageRemove={() => {
+                                        _setImageUri(null);
+                                        setDetections([]);
                                     }}
+                                    returnBase64={true}
+                                    aspectRatio={
+                                        imageDimensions.width > 0 && imageDimensions.height > 0
+                                            ? imageDimensions.width / imageDimensions.height
+                                            : 1
+                                    }
                                 >
                                     {imageUri && detections.length > 0 && (
                                         <ShrimpMeasurementBoundingBoxOverlay
@@ -390,8 +392,8 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                             originalHeight={imageDimensions.height}
                                         />
                                     )}
-                                </View>
-                            </ImageUpload>
+                                </ImageUpload>
+                            </View>
                             <View style={styles.actionButtons}>
                                 <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
                                     <Text style={styles.resetButtonText}>Đo lại</Text>
@@ -582,7 +584,7 @@ const styles = StyleSheet.create({
     actionButtons: {
         flexDirection: 'row',
         gap: spacing.md,
-        marginBottom: spacing.md,
+        marginBottom: 34,
     },
     resetButton: {
         flex: 1,
@@ -590,8 +592,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.xs,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     resetButtonText: {
         fontSize: 14,
@@ -604,8 +607,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.sm,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     actionButtonText: {
         fontSize: 14,
