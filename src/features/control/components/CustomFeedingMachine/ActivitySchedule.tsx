@@ -218,11 +218,8 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         padding: 16,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     rowItem: {
         flexDirection: 'row',
