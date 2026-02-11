@@ -360,28 +360,23 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             )}
                         </View>
                         <View>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Hình ảnh xử lý</Text>
-                            </View>
-                            <View
-                                onLayout={event => {
-                                    const { width, height } = event.nativeEvent.layout;
-                                    setDisplayDimensions({ width, height });
+                            <ImageUpload
+                                label="Hình ảnh xử lý"
+                                imageUri={imageUri}
+                                onImageSelect={handleImageSelect}
+                                onImageRemove={() => {
+                                    _setImageUri(null);
+                                    setDetections([]);
                                 }}
+                                returnBase64={true}
                             >
-                                <ImageUpload
-                                    imageUri={imageUri}
-                                    onImageSelect={handleImageSelect}
-                                    onImageRemove={() => {
-                                        _setImageUri(null);
-                                        setDetections([]);
+                                <View
+                                    style={StyleSheet.absoluteFill}
+                                    pointerEvents="box-none"
+                                    onLayout={event => {
+                                        const { width, height } = event.nativeEvent.layout;
+                                        setDisplayDimensions({ width, height });
                                     }}
-                                    returnBase64={true}
-                                    aspectRatio={
-                                        imageDimensions.width > 0 && imageDimensions.height > 0
-                                            ? imageDimensions.width / imageDimensions.height
-                                            : 1
-                                    }
                                 >
                                     {imageUri && detections.length > 0 && (
                                         <ShrimpMeasurementBoundingBoxOverlay
@@ -395,8 +390,8 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                             originalHeight={imageDimensions.height}
                                         />
                                     )}
-                                </ImageUpload>
-                            </View>
+                                </View>
+                            </ImageUpload>
                             <View style={styles.actionButtons}>
                                 <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
                                     <Text style={styles.resetButtonText}>Đo lại</Text>

@@ -195,13 +195,13 @@ export const EnvironmentLogScreen: React.FC = () => {
 
     return (
         <BaseLogScreen
-            title="Nhật ký đo thông số môi trường"
+            title="Nhật ký đo môi trường"
             startDate={startDate}
             endDate={endDate}
             onStartDateChange={setStartDate}
             onEndDateChange={setEndDate}
             groupedData={groupedData}
-            emptyMessage="Chưa có dữ liệu đo môi trường"
+            emptyMessage="Chưa có dữ liệu đo thông số môi trường"
             emptyButtonTitle="Bắt đầu đo thông số môi trường"
             onEmptyButtonPress={handleStartEnvironment}
             isLoading={isLoading}

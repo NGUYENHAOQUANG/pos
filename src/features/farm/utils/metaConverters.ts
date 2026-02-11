@@ -91,6 +91,48 @@ export const convertShrimpInspectionMetaToActivityData = (
     if (meta.liver) {
         data.push({ label: 'Gan', value: meta.liver });
     }
+
+    // Add AI Health Check info based on isHealthy status
+    if (meta.isHealthy !== undefined) {
+        // 1. Average Infection Rate (Trung bình tỉ lệ nhiễm bệnh)
+        if (meta.averageInfectionRate !== undefined && meta.averageInfectionRate > 0) {
+            data.push({
+                label: 'Trung bình tỉ lệ nhiễm bệnh:',
+                value: `${meta.averageInfectionRate}%`,
+            });
+        }
+
+        // 2. Shrimp Status (Tình trạng tôm) - Based purely on isHealthy flag
+        const statusText = meta.isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
+        data.push({
+            label: 'Tình trạng tôm:',
+            value: statusText,
+            // Highlight as warning if not healthy
+            isWarning: !meta.isHealthy,
+        });
+
+        // 3. List of Diseases (Các loại bệnh) only if details exist and show actual diseases
+        if (meta.diagnosisDetails && meta.diagnosisDetails.length > 0) {
+            const diseaseMap: Record<string, string> = {
+                Healthy: 'Khỏe mạnh',
+                WSSV: 'Đốm trắng',
+                BlackGill: 'Mang đen',
+                Yellowhead: 'Đầu vàng',
+            };
+
+            const diseases = meta.diagnosisDetails
+                .filter(d => d.diseaseType !== 'Healthy')
+                .map(d => diseaseMap[d.diseaseType] || d.diseaseType)
+                .join(', ');
+
+            if (diseases) {
+                // Display inline and left-aligned as requested: "Các loại bệnh: A, B, C"
+                // Putting everything in label ensures it aligns left and wraps if needed
+                data.push({ label: `Các loại bệnh: ${diseases}`, value: '' });
+            }
+        }
+    }
+
     if (meta.images && meta.images.length > 0) {
         data.push({ label: 'Hình ảnh:', value: `${meta.images.length} ảnh` });
     }

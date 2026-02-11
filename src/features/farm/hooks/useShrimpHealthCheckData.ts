@@ -20,21 +20,42 @@ const convertToJobExecutions = async (
     shrimpHealthChecks: ShrimpHealthCheckDto[],
     pondId: string
 ): Promise<JobExecution[]> => {
-    // Đếm tổng số lượt mỗi ngày
+    // 1. Parse dates and prepare for sorting/grouping
+    const parsedChecks = shrimpHealthChecks.map(check => {
+        const createdDate = check.createdAt ? new Date(check.createdAt) : new Date();
+        const timestamp = createdDate.getTime();
+        const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
+        return {
+            ...check,
+            parsedDate: createdDate,
+            timestamp,
+            dateKey,
+        };
+    });
+
+    // 2. Sort DESC (Newest first). Tie-break with ID DESC if times are equal.
+    // This ensures "created last" comes first in the list.
+    const sortedChecks = parsedChecks.sort((a, b) => {
+        const timeDiff = b.timestamp - a.timestamp;
+        if (timeDiff !== 0) return timeDiff;
+        // If times are equal, assume higher ID is newer (lexicographical sort for strings usually works for KSUID/UUIDv7,
+        // if random UUID it's arbitrary but stable. If numeric string ID, might need parseInt)
+        return (b.id || '').localeCompare(a.id || '');
+    });
+
+    // 3. Count total per day
     const totalPerDay: Record<string, number> = {};
-    shrimpHealthChecks.forEach(check => {
-        const d = check.createdAt ? new Date(check.createdAt) : new Date();
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+    sortedChecks.forEach(check => {
+        totalPerDay[check.dateKey] = (totalPerDay[check.dateKey] || 0) + 1;
     });
 
-    // Sắp xếp theo createdAt giảm dần (mới nhất trước), dùng total - dayCounts + 1 để mới nhất = Lần N
-    const sortedChecks = [...shrimpHealthChecks].sort((a, b) => {
-        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeB - timeA;
-    });
-
+    // 4. Map to JobExecution with "Lần N" label
+    // Since list is sorted DESC (Newest -> Oldest), the first item for a day is the "Last" one (highest index).
+    // Formula: Index = Total - CountSoFar + 1.
+    // Example: Total=3.
+    // 1st Item (Newest): Count=1. Index = 3 - 1 + 1 = 3 (Lần 3).
+    // 2nd Item: Count=2. Index = 3 - 2 + 1 = 2 (Lần 2).
+    // 3rd Item (Oldest): Count=3. Index = 3 - 3 + 1 = 1 (Lần 1).
     const dayCounts: Record<string, number> = {};
 
     return Promise.all(
@@ -48,15 +69,15 @@ const convertToJobExecutions = async (
                     .filter((url): url is string => !!url);
             }
 
-            // Map API response to UI state (including resolved image URLs)
+            // Map API response to UI state
             const uiState = mapFromApiResponse({
                 value: check.value,
                 healthCheck: check.healthCheck,
                 images: imageUrls,
             });
 
-            // Chuẩn hóa createdAt, fallback về "now" nếu không có
-            const createdDate = check.createdAt ? new Date(check.createdAt) : new Date();
+            // Use the already parsed date
+            const createdDate = check.parsedDate;
 
             // Dùng format dd/MM/yyyy cho UI & time HH:mm
             const dateStr = formatDate(createdDate);
@@ -65,8 +86,8 @@ const convertToJobExecutions = async (
                 minute: '2-digit',
             });
 
-            // Lần 1 = cũ nhất, Lần N = mới nhất. Sort giảm dần (mới trước) + công thức đảo để mới nhất = số lớn nhất.
-            const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
+            // Calculate "Lần N"
+            const dateKey = check.dateKey;
             if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
             dayCounts[dateKey]++;
             const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
@@ -88,7 +109,13 @@ const convertToJobExecutions = async (
                     liver: uiState.liver,
                     images: uiState.images,
                     documentIds: check.documentIds || [],
+                    // AI Health Check fields
+                    averageInfectionRate: uiState.averageInfectionRate,
+                    isHealthy: uiState.isHealthy,
+                    diagnosisDetails: uiState.diagnosisDetails,
+                    aiItems: uiState.aiItems,
                 },
+                createdAt: check.createdAt, // Preserve originalcreatedAt string for other uses if needed
             };
         })
     );

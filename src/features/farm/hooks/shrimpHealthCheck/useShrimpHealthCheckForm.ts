@@ -39,6 +39,18 @@ export const useShrimpHealthCheckForm = ({
     const [liver, setLiver] = useState(meta?.liver || 'Bình thường');
     const [notes, setNotes] = useState(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta?.images || []);
+
+    // AI State
+    const [averageInfectionRate, setAverageInfectionRate] = useState<number>(
+        meta?.averageInfectionRate ?? 0
+    );
+    const [isHealthy, setIsHealthy] = useState<boolean>(meta?.isHealthy ?? true);
+    const [diagnosisDetails, setDiagnosisDetails] = useState<Array<{
+        diseaseType: string;
+        probabilityPercent: number;
+    }> | null>(meta?.diagnosisDetails ?? null);
+    const [aiItems, setAiItems] = useState<any[]>([]);
+
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
     // Initial data for change detection
@@ -52,6 +64,10 @@ export const useShrimpHealthCheckForm = ({
         liver: string;
         notes: string;
         images: string[];
+        averageInfectionRate: number;
+        isHealthy: boolean;
+        diagnosisDetails: Array<{ diseaseType: string; probabilityPercent: number }> | null;
+        aiItems: any[];
     } | null>(null);
 
     useEffect(() => {
@@ -83,6 +99,10 @@ export const useShrimpHealthCheckForm = ({
             liver: meta?.liver || 'Bình thường',
             notes: itemToEdit?.note || '',
             images: meta?.images || [],
+            averageInfectionRate: meta?.averageInfectionRate ?? 0,
+            isHealthy: meta?.isHealthy ?? true,
+            diagnosisDetails: meta?.diagnosisDetails ?? null,
+            aiItems: meta?.aiItems || [],
         };
 
         // If meta contains raw keys (e.g. from WorkLog), map it!
@@ -101,6 +121,12 @@ export const useShrimpHealthCheckForm = ({
                 stoolColor: fromApi.stoolColor,
                 liver: fromApi.liver,
                 notes: fromApi.notes || itemToEdit?.note || '',
+                // Update AI fields from API response if present
+                averageInfectionRate:
+                    fromApi.averageInfectionRate ?? initialFormState.averageInfectionRate,
+                isHealthy: fromApi.isHealthy ?? initialFormState.isHealthy,
+                diagnosisDetails: fromApi.diagnosisDetails ?? initialFormState.diagnosisDetails,
+                aiItems: fromApi.aiItems ?? initialFormState.aiItems,
             };
         }
 
@@ -116,6 +142,12 @@ export const useShrimpHealthCheckForm = ({
         setLiver(initialFormState.liver);
         setNotes(initialFormState.notes);
         setImageUris(initialFormState.images);
+
+        // Update AI state hooks
+        setAverageInfectionRate(initialFormState.averageInfectionRate);
+        setIsHealthy(initialFormState.isHealthy);
+        setDiagnosisDetails(initialFormState.diagnosisDetails);
+        setAiItems(initialFormState.aiItems);
     }, [itemToEdit, meta]);
 
     const isSaving =
@@ -137,6 +169,9 @@ export const useShrimpHealthCheckForm = ({
         if (stoolColor !== initialData.stoolColor) return true;
         if (liver !== initialData.liver) return true;
         if (notes !== initialData.notes) return true;
+        if (averageInfectionRate !== initialData.averageInfectionRate) return true;
+        if (isHealthy !== initialData.isHealthy) return true;
+        if (diagnosisDetails !== initialData.diagnosisDetails) return true;
 
         if (imageUris.length !== initialData.images.length) return true;
         const imagesChanged = imageUris.some((uri, index) => uri !== initialData.images[index]);
@@ -147,10 +182,8 @@ export const useShrimpHealthCheckForm = ({
 
     const isButtonDisabled = !isFormComplete || (itemToEdit && !hasChanges);
 
-    const handleError = (err: unknown) => {
-        const error = err as NormalizedError;
-
-        if (error.type === 'VALIDATION_ERROR') {
+    const handleError = (error: NormalizedError) => {
+        if (error.type === 'VALIDATION_ERROR' && error.fields) {
             const firstFieldKey = Object.keys(error.fields)[0];
             if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
                 Toast.show({
@@ -202,6 +235,9 @@ export const useShrimpHealthCheckForm = ({
             liver,
             notes,
             documentIds,
+            averageInfectionRate,
+            isHealthy,
+            aiItems: aiItems,
         });
 
         if (itemToEdit) {
@@ -222,7 +258,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: handleError,
+                    onError: error => handleError(error as unknown as NormalizedError),
                 }
             );
         } else {
@@ -242,7 +278,7 @@ export const useShrimpHealthCheckForm = ({
                         });
                         navigation.goBack();
                     },
-                    onError: handleError,
+                    onError: error => handleError(error as unknown as NormalizedError),
                 }
             );
         }
@@ -264,12 +300,12 @@ export const useShrimpHealthCheckForm = ({
                     });
                     navigation.goBack();
                 },
-                onError: (error: any) => {
+                onError: error => {
+                    const normalizedError = error as unknown as NormalizedError;
                     Toast.show({
                         type: 'error',
                         text1: 'Không thể xoá kiểm tra tôm',
-                        text2:
-                            error?.response?.data?.message || error?.message || 'Vui lòng thử lại',
+                        text2: normalizedError.message || 'Vui lòng thử lại',
                         position: 'top',
                         visibilityTime: 3000,
                     });
@@ -298,6 +334,14 @@ export const useShrimpHealthCheckForm = ({
         setNotes,
         imageUris,
         setImageUris,
+        averageInfectionRate,
+        setAverageInfectionRate,
+        isHealthy,
+        setIsHealthy,
+        diagnosisDetails,
+        aiItems,
+        setAiItems,
+        setDiagnosisDetails,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         // handlers
