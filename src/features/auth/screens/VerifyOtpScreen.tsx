@@ -75,18 +75,6 @@ export default function VerifyOTPScreen() {
         };
     }, []);
 
-    // Auto-focus first input when screen mounts to show keyboard immediately
-    // Use delay on iOS to ensure smooth animation and prevent keyboard flicker
-    useEffect(() => {
-        const timer = setTimeout(
-            () => {
-                otpInputRef.current?.focusFirst();
-            },
-            Platform.OS === 'ios' ? 100 : 0
-        );
-
-        return () => clearTimeout(timer);
-    }, []);
     // Calculate remaining countdown based on real elapsed time
     const calculateRemainingTime = React.useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
