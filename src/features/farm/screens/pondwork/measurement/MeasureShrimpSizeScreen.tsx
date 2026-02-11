@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { useQuery } from '@tanstack/react-query';
+import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { CycleData } from '@/features/farm/types/farm.types';
 import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
@@ -38,24 +41,118 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     // Get stocking quantity from cycle data
     // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
-    const stockingQuantity = useFarmStore(
+    // Get initial active cycle from store
+    const initialActiveCycle = useFarmStore(
         useCallback(
             state => {
                 if (!currentPond?.id) return undefined;
-                const currentCycle = state.activeCycles[currentPond.id];
-                const cyclesForPond = state.getCyclesByPondId(currentPond.id);
-
-                // Ưu tiên cycle từ activeCycles, nếu không có thì tìm trong cycles
-                const cycle =
-                    currentCycle ||
-                    cyclesForPond.find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
-                    cyclesForPond[0];
-
-                return cycle?.stockingQuantity ? Number(cycle.stockingQuantity) : undefined;
+                return (
+                    state.activeCycles[currentPond.id] ||
+                    state
+                        .getCyclesByPondId(currentPond.id)
+                        .find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
+                    state.getCyclesByPondId(currentPond.id)[0]
+                );
             },
             [currentPond?.id]
         )
     );
+
+    // Fetch cycles if initialActiveCycle is missing (e.g. direct navigation or store cleared)
+    const { data: cycles } = useQuery({
+        queryKey: ['cycles', currentPond?.id],
+        queryFn: async () => {
+            if (!currentPond?.id) return [];
+            try {
+                return await cycleApi.getCyclesByPond(currentPond.id);
+            } catch (error) {
+                console.log('Error fetching cycles:', error);
+                return [];
+            }
+        },
+        enabled: !!currentPond?.id && !initialActiveCycle,
+    });
+
+    // Determine the active cycle
+    const activeCycle = useMemo(() => {
+        if (initialActiveCycle) return initialActiveCycle;
+        if (cycles && cycles.length > 0) {
+            return (
+                cycles.find(
+                    c =>
+                        (c.status === 'InProgress' || c.status === 'Active') &&
+                        c.receivingPonds?.includes(currentPond?.id || '')
+                ) || cycles[0]
+            );
+        }
+        return undefined;
+    }, [initialActiveCycle, cycles, currentPond?.id]);
+
+    // Fetch fresh cycle details once we have an ID
+    const { data: fetchedCycleData } = useQuery({
+        queryKey: ['cycleDetail', currentPond?.id, activeCycle?.id],
+        queryFn: async () => {
+            if (!currentPond?.id || !activeCycle?.id) return null;
+            try {
+                const rawData = await cycleApi.getCycleDetail(currentPond.id, activeCycle.id);
+                if (rawData) {
+                    return {
+                        ...rawData,
+                        cycleName: rawData.name || (rawData as any).cycleName,
+                        breedSource: rawData.breedSource || (rawData as any).warehouseItemId,
+                        stockingDate: (rawData as any).createdAt || rawData.stockingDate,
+                        season: rawData.season,
+                    } as CycleData;
+                }
+            } catch (error) {
+                console.log('Error fetching cycle detail:', error);
+            }
+            return null;
+        },
+        enabled: !!currentPond?.id && !!activeCycle?.id,
+        initialData: initialActiveCycle,
+        refetchOnMount: 'always',
+        staleTime: 0,
+    });
+
+    const activeCycleData = fetchedCycleData || activeCycle;
+
+    // Get stocking quantity from cycle data
+    const stockingQuantity = useMemo(() => {
+        let quantity: number | undefined;
+        if (activeCycleData?.transferInfo?.originalCycle?.stockingQuantity) {
+            quantity = Number(activeCycleData.transferInfo.originalCycle.stockingQuantity);
+        } else if (activeCycleData?.stockingQuantity) {
+            quantity = Number(activeCycleData.stockingQuantity);
+        } else if ((activeCycleData as any)?.totalStocking) {
+            quantity = Number((activeCycleData as any).totalStocking);
+        }
+
+        console.log('MeasureShrimpSize - activeCycleData:', {
+            id: activeCycleData?.id,
+            hasTransferInfo: !!activeCycleData?.transferInfo,
+            stockingQuantity: activeCycleData?.stockingQuantity,
+            totalStocking: (activeCycleData as any)?.totalStocking,
+            resolvedQuantity: quantity,
+        });
+
+        return quantity;
+    }, [activeCycleData]);
+
+    const latestAIMeasurement = useFarmStore(state =>
+        currentPond?.id ? state.latestAIMeasurement[currentPond.id] : undefined
+    );
+
+    const clearLatestAIMeasurement = useFarmStore(state => state.clearLatestAIMeasurement);
+
+    // Clear AI measurement when unmounting
+    useEffect(() => {
+        return () => {
+            if (currentPond?.id) {
+                clearLatestAIMeasurement(currentPond.id);
+            }
+        };
+    }, [currentPond?.id, clearLatestAIMeasurement]);
 
     const {
         time,
@@ -64,6 +161,8 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         setShrimpSize,
         remainingWeight,
         setRemainingWeight,
+        averageShrimpSize,
+        setAverageShrimpSize,
         notes,
         setNotes,
         images,
@@ -79,6 +178,12 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             generalInfoBoxRef.current?.markAsSaved();
         },
     });
+
+    useEffect(() => {
+        if (latestAIMeasurement?.averageSizeCm) {
+            setAverageShrimpSize(latestAIMeasurement.averageSizeCm.toString());
+        }
+    }, [latestAIMeasurement, setAverageShrimpSize]);
     // ...
 
     useEffect(() => {
@@ -136,7 +241,16 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                         remainingWeight={remainingWeight}
                         onRemainingWeightChange={setRemainingWeight}
                         stockingQuantity={stockingQuantity}
-                        onAIMeasurePress={() => navigation.navigate('MeasureShrimpSizeAIScreen')}
+                        onAIMeasurePress={() =>
+                            navigation.navigate('MeasureShrimpSizeAIScreen', {
+                                pondId: currentPond?.id || '',
+                            })
+                        }
+                        averageSizeCm={
+                            averageShrimpSize
+                                ? parseFloat(averageShrimpSize)
+                                : latestAIMeasurement?.averageSizeCm
+                        }
                     />
                     <SelectionNotesBox
                         notes={notes}

@@ -4,6 +4,7 @@ export interface ISizeMeasurementDetail {
     estimatedRemainingStockKg: number;
     totalShrimpCount?: number;
     survivalRatePercentage?: number;
+    averageShrimpSize?: number;
     releaseQuantity?: number;
     notes?: string | null;
 }
@@ -29,6 +30,7 @@ export interface ICreateSizeMeasurementReq {
     sizeMeasurementDetail: {
         shrimpSizePcsPerKg: number;
         estimatedRemainingStockKg: number;
+        averageShrimpSize?: number;
         notes?: string | null;
     };
 }
@@ -38,6 +40,7 @@ export interface IUpdateSizeMeasurementReq {
     sizeMeasurementDetail: {
         shrimpSizePcsPerKg: number;
         estimatedRemainingStockKg: number;
+        averageShrimpSize?: number;
         notes?: string | null;
     };
 }

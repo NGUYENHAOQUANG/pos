@@ -125,7 +125,7 @@ export type AppStackParamList = {
         itemToEdit?: JobExecution;
         aiShrimpSize?: string;
     };
-    MeasureShrimpSizeAIScreen: undefined;
+    MeasureShrimpSizeAIScreen: { pondId: string };
     PondworkLogScreen: { pond: PondData };
     AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
     SettingEnvironment: {

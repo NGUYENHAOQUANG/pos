@@ -9,6 +9,7 @@ export interface DetectionBox {
     corners?: number[][]; // [[x,y], [x,y], ...]
     label?: string;
     confidence?: number;
+    color?: string; // Hex color string
 }
 
 interface BoundingBoxOverlayProps {
@@ -52,7 +53,7 @@ export const BoundingBoxOverlay: React.FC<BoundingBoxOverlayProps> = ({
                                     y={y}
                                     width={width}
                                     height={height}
-                                    stroke={colors.red ? colors.red[600] : 'red'}
+                                    stroke={detection.color || colors.red?.[600] || 'red'}
                                     strokeWidth="2"
                                     fill="transparent"
                                 />
@@ -60,7 +61,7 @@ export const BoundingBoxOverlay: React.FC<BoundingBoxOverlayProps> = ({
                                     <SvgText
                                         x={x}
                                         y={y - 5}
-                                        fill={colors.red ? colors.red[600] : 'red'}
+                                        fill={detection.color || colors.red?.[600] || 'red'}
                                         fontSize="12"
                                         fontWeight="bold"
                                     >
@@ -78,7 +79,7 @@ export const BoundingBoxOverlay: React.FC<BoundingBoxOverlayProps> = ({
                             <Polygon
                                 key={detection.id}
                                 points={points}
-                                stroke={colors.green ? colors.green[500] : 'green'}
+                                stroke={detection.color || colors.green?.[500] || 'green'}
                                 strokeWidth="2"
                                 fill="transparent"
                             />

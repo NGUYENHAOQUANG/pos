@@ -41,6 +41,7 @@ interface ImageUploadProps {
     style?: ViewStyle;
     label?: string;
     returnBase64?: boolean;
+    aspectRatio?: number;
     children?: React.ReactNode;
 }
 
@@ -53,6 +54,7 @@ export function ImageUpload({
     style,
     label,
     returnBase64 = false,
+    aspectRatio,
     children,
 }: ImageUploadProps) {
     const [actionSheetVisible, setActionSheetVisible] = useState(false);
@@ -204,7 +206,11 @@ export function ImageUpload({
                 )}
             </View>
             <TouchableOpacity
-                style={[styles.uploadContainer, isProcessing && styles.disabledContainer]}
+                style={[
+                    styles.uploadContainer,
+                    isProcessing && styles.disabledContainer,
+                    aspectRatio ? { aspectRatio } : undefined,
+                ]}
                 onPress={handleImagePress}
                 disabled={isProcessing}
                 activeOpacity={0.7}

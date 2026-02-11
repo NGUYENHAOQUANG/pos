@@ -12,6 +12,7 @@ interface MeasurementDataBoxProps {
     onRemainingWeightChange: (value: string) => void;
     stockingQuantity?: number; // Số lượng thả ban đầu (PLs) để tính tỉ lệ sống
     onAIMeasurePress?: () => void;
+    averageSizeCm?: number | null;
 }
 
 export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
@@ -21,10 +22,10 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     onRemainingWeightChange,
     stockingQuantity,
     onAIMeasurePress,
+    averageSizeCm,
 }) => {
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
-    const [shrimpWeight, setShrimpWeight] = useState<number | null>(null);
 
     useEffect(() => {
         const size = parseFloat(shrimpSize);
@@ -38,7 +39,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
             // Tỉ lệ sống (%) = (Tổng số con hiện tại / Số lượng giống thả ban đầu) × 100
             if (stockingQuantity && Number(stockingQuantity) > 0) {
                 const initialStock = Number(stockingQuantity);
-                const rate = Math.round((currentTotal / initialStock) * 100);
+                // Làm tròn tối đa 2 chữ số thập phân
+                const rate = Math.round((currentTotal / initialStock) * 100 * 100) / 100;
                 setSurvivalRate(rate);
             } else {
                 setSurvivalRate(null);
@@ -47,15 +49,6 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
             setTotalShrimp(null);
             setSurvivalRate(null);
         }
-
-        if (!isNaN(size) && size > 0) {
-            // Trọng lượng trung bình = 1000 / Cỡ tôm
-            const weightPerShrimp = 1000 / size;
-            // Keep precision for display
-            setShrimpWeight(weightPerShrimp);
-        } else {
-            setShrimpWeight(null);
-        }
     }, [shrimpSize, remainingWeight, stockingQuantity]);
 
     // Build result items
@@ -63,10 +56,13 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         const items: ResultItem[] = [];
 
         items.push({
-            label: 'Số lượng thả (Pls)',
+            label: 'Trung bình kích thước tôm (cm)',
             value:
-                stockingQuantity && Number(stockingQuantity) > 0
-                    ? Number(stockingQuantity).toLocaleString('en-US')
+                averageSizeCm !== undefined && averageSizeCm !== null
+                    ? averageSizeCm.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                      })
                     : '-',
         });
 
@@ -77,22 +73,16 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         items.push({
             label: 'Tỉ lệ sống dự kiến (%)',
-            value: survivalRate !== null ? survivalRate.toLocaleString('en-US') : '-',
-        });
-
-        items.push({
-            label: 'Trọng lượng tôm (g/con)',
             value:
-                shrimpWeight !== null
-                    ? shrimpWeight.toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
+                survivalRate !== null
+                    ? survivalRate.toLocaleString('en-US', {
                           maximumFractionDigits: 2,
                       })
                     : '-',
         });
 
         return items;
-    }, [totalShrimp, survivalRate, shrimpWeight, stockingQuantity]);
+    }, [totalShrimp, survivalRate, averageSizeCm]);
 
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>

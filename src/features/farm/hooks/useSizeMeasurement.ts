@@ -92,6 +92,7 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                                 remainingWeight: sizeDetail?.estimatedRemainingStockKg?.toString(),
                                 totalShrimpCount: sizeDetail?.totalShrimpCount || null,
                                 survivalRate: sizeDetail?.survivalRatePercentage || null,
+                                averageShrimpSize: sizeDetail?.averageShrimpSize ?? null,
                                 notes: sizeDetail?.notes,
                                 images: imageUrls,
                                 documentIds: item.documentIds || [],

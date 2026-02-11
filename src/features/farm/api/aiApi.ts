@@ -42,6 +42,13 @@ export const aiApi = {
         );
         return response.data;
     },
+    predictHealth: async (data: AIPredictRequest): Promise<ShrimpHealthResponse> => {
+        const response = await aiClient.post<ShrimpHealthResponse>(
+            API_ENDPOINTS.AI.SHRIMP_HEALTH_PREDICT,
+            data
+        );
+        return response.data;
+    },
 };
 
 export interface EstimatedSizeResponse {
@@ -65,5 +72,29 @@ export interface EstimatedSizeResponse {
         score: number;
         class_id: number;
         class_name: string;
+    }>;
+}
+
+export interface ShrimpHealthResponse {
+    status_code?: number;
+    message?: string;
+    datetime?: string;
+    device?: string;
+    execution_provider?: string[];
+    meta_data?: {
+        total_pipeline_time?: string;
+        segment_time?: string;
+        classifier_time?: string;
+        num_detections?: number;
+    };
+    results: Array<{
+        id: number;
+        bbox: number[];
+        seg_conf: number;
+        prediction: {
+            top1_class: string;
+            top1_conf: number;
+            all_classes: Record<string, number>;
+        };
     }>;
 }
