@@ -10,6 +10,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,32 +29,46 @@ import {
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
+interface HealthCheckItem {
+    id: string;
+    index: number;
+    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    diagnosis: string;
+    confidence: number; // 0-100
+}
+
+interface HealthCheckResult {
+    id: number;
+    totalCount: number;
+    items: HealthCheckItem[];
+    healthStatusSummary: string; // Summary string for display
+    infectionRate: number; // percentage
+}
+
 export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute();
     const { pond: _pond } = (route.params as any) || {};
 
     // State for measurements history
-    interface HealthCheckItem {
-        id: string;
-        index: number;
-        status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
-        diagnosis: string;
-        confidence: number; // 0-100
-    }
-
-    interface HealthCheckResult {
-        id: number;
-        totalCount: number;
-        items: HealthCheckItem[];
-        healthStatusSummary: string; // Summary string for display
-        infectionRate: number; // percentage
-    }
 
     const [results, setResults] = useState<HealthCheckResult[]>([]);
     const [imageUri, _setImageUri] = useState<string | null>(null);
     const [imageBase64, setImageBase64] = useState<string | null>(null);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+    // Show toast when new result arrives
+    React.useEffect(() => {
+        if (results.length > 0) {
+            const latest = results[results.length - 1];
+            const hasSick = latest.items.some(i => i.status !== 'HEALTHY');
+
+            Toast.show({
+                type: hasSick ? 'error' : 'success',
+                text1: hasSick ? 'Phát hiện tôm bệnh !' : 'Tôm khỏe mạnh',
+                visibilityTime: 3000,
+            });
+        }
+    }, [results]);
 
     const [detections, setDetections] = useState<HealthDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
@@ -186,22 +201,29 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     };
 
     const handleSave = () => {
-        if (currentResult) {
-            const statusList = currentResult.items
-                .filter(i => i.status !== 'HEALTHY')
-                .map(i => i.diagnosis)
-                .join(', ');
+        if (results.length > 0) {
+            // Use the LAST result (Current Check) instead of aggregating all checks
+            const latestResult = results[results.length - 1];
+            const items = latestResult.items;
+            const totalCount = latestResult.totalCount;
+            const sickCount = items.filter(i => i.status !== 'HEALTHY').length;
+
+            const isHealthy = sickCount === 0;
+            const statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
+
+            const params = {
+                aiHealthCheckResult: {
+                    totalCount: totalCount,
+                    infectionRate: latestResult.infectionRate,
+                    status: statusString,
+                    imageUri: imageUri, // Passing latest image
+                    details: JSON.stringify(items), // Pass items of the latest check
+                },
+            };
 
             navigation.navigate({
                 name: 'ShrimpInspectionScreen',
-                params: {
-                    aiHealthCheckResult: {
-                        totalCount: currentResult.totalCount,
-                        infectionRate: currentResult.infectionRate,
-                        status: statusList || 'Khỏe mạnh',
-                        imageUri: imageUri,
-                    },
-                },
+                params,
                 merge: true,
             } as any);
         } else {
@@ -328,10 +350,8 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         </View>
 
                         {/* Image Upload Area */}
+
                         <View>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Hình ảnh xử lý</Text>
-                            </View>
                             <View
                                 onLayout={event => {
                                     const { width, height } = event.nativeEvent.layout;
@@ -339,6 +359,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                 }}
                             >
                                 <ImageUpload
+                                    label="Hình ảnh xử lý"
                                     imageUri={imageUri}
                                     onImageSelect={handleImageSelect}
                                     onImageRemove={() => {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,8 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
+import Toast from 'react-native-toast-message';
+import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
@@ -19,6 +21,7 @@ import {
     ShrimpMeasurementBoundingBoxOverlay,
     MeasurementDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
@@ -49,6 +52,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [base64Image, setBase64Image] = useState<string | null>(null);
     const [isLoading, _setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+    const [isResetModalVisible, setIsResetModalVisible] = useState(false);
 
     const [detections, setDetections] = useState<MeasurementDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
@@ -132,12 +136,12 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const handleGetCount = () => {
         const weightVal = parseFloat(measuredWeight);
         if (isNaN(weightVal) || weightVal <= 0) {
-            Alert.alert('Thông tin không hợp lệ', 'Khối lượng tôm phải lớn hơn 0.');
+            Toast.show(ToastMessages.ShrimpMeasurement.WEIGHT_REQUIRED);
             return;
         }
 
         if (!base64Image) {
-            Alert.alert('Chưa có ảnh', 'Vui lòng chọn hoặc chụp ảnh tôm.');
+            Toast.show(ToastMessages.ShrimpMeasurement.IMAGE_REQUIRED);
             return;
         }
 
@@ -209,17 +213,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     };
 
     const handleReset = () => {
-        Alert.alert('Đo lại', 'Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa.', [
-            { text: 'Hủy', style: 'cancel' },
-            {
-                text: 'Đồng ý',
-                onPress: () => {
-                    _setImageUri(null);
-                    setMeasurements([]);
-                    setMeasuredWeight('');
-                },
-            },
-        ]);
+        setIsResetModalVisible(true);
+    };
+
+    const confirmReset = () => {
+        setIsResetModalVisible(false);
+        _setImageUri(null);
+        setMeasurements([]);
+        setMeasuredWeight('');
+        setDetections([]);
+        Toast.show(ToastMessages.ShrimpMeasurement.RESET_SUCCESS);
     };
 
     const handleSave = () => {
@@ -307,10 +310,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                     ) {
                                         setIsSheetVisible(true);
                                     } else {
-                                        Alert.alert(
-                                            'Chưa có dữ liệu',
-                                            'Vui lòng lấy kết quả đo trước khi xem chi tiết.'
-                                        );
+                                        Toast.show(ToastMessages.ShrimpMeasurement.NO_DATA);
                                     }
                                 }}
                                 activeOpacity={0.7}
@@ -360,9 +360,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             )}
                         </View>
                         <View>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Hình ảnh xử lý</Text>
-                            </View>
                             <View
                                 onLayout={event => {
                                     const { width, height } = event.nativeEvent.layout;
@@ -370,6 +367,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 }}
                             >
                                 <ImageUpload
+                                    label="Hình ảnh xử lý"
                                     imageUri={imageUri}
                                     onImageSelect={handleImageSelect}
                                     onImageRemove={() => {
@@ -458,6 +456,13 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     </Animated.View>
                 </TouchableOpacity>
             </Modal>
+
+            <ConfirmationModal
+                visible={isResetModalVisible}
+                onConfirm={confirmReset}
+                onCancel={() => setIsResetModalVisible(false)}
+                type="measure_reset"
+            />
         </View>
     );
 };
@@ -587,7 +592,7 @@ const styles = StyleSheet.create({
     actionButtons: {
         flexDirection: 'row',
         gap: spacing.md,
-        marginBottom: spacing.md,
+        marginBottom: 34,
     },
     resetButton: {
         flex: 1,
@@ -595,8 +600,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.xs,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     resetButtonText: {
         fontSize: 14,
@@ -609,8 +615,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.sm,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     actionButtonText: {
         fontSize: 14,

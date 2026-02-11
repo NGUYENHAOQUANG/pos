@@ -135,4 +135,22 @@ export const ToastMessages = {
             position: 'top',
         },
     },
+    ShrimpMeasurement: {
+        WEIGHT_REQUIRED: {
+            type: 'error',
+            text1: 'Khối lượng tôm phải lớn hơn 0',
+        },
+        IMAGE_REQUIRED: {
+            type: 'error',
+            text1: 'Vui lòng chọn hoặc chụp ảnh tôm',
+        },
+        NO_DATA: {
+            type: 'error',
+            text1: 'Vui lòng lấy kết quả đo trước khi xem chi tiết',
+        },
+        RESET_SUCCESS: {
+            type: 'success',
+            text1: 'Đã xóa dữ liệu để đo lại',
+        },
+    },
 } as const;
