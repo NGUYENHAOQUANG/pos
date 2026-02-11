@@ -92,7 +92,12 @@ export const DeviceControlScreens = () => {
     }, [pondsData]);
 
     // Device Data from Control Store (Local State)
-    const { ponds: devicePonds } = useControl();
+    const { ponds: devicePonds, fetchIoTDevices } = useControl();
+
+    // Fetch IoT devices on mount so Ao IOT has data before user enters it
+    React.useEffect(() => {
+        fetchIoTDevices();
+    }, [fetchIoTDevices]);
 
     // Map zones to FarmLocation format
     const farmLocations: FarmLocation[] = useMemo(() => {
