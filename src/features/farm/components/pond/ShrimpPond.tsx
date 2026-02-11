@@ -42,7 +42,7 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 // import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { useQuery } from '@tanstack/react-query';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
-import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
+import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     name,
@@ -146,7 +146,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     // over fresh API data (which only has basic info from list endpoint)
     // Get cycle data for this pond - prioritize active cycle
     const activeCycle = useActiveCycle(pondId || '');
-    const { data: cycles } = useCyclesByPond(pondId || '');
 
     const cycleData = useMemo(() => {
         if (!pondId) return null;
@@ -154,13 +153,8 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         // 1. Prefer active cycle
         if (activeCycle) return activeCycle;
 
-        // 2. Fallback to latest cycle from list
-        if (cycles && cycles.length > 0) {
-            return cycles[0];
-        }
-
         return null;
-    }, [pondId, activeCycle, cycles]);
+    }, [pondId, activeCycle]);
 
     // Calculate DOC - check both possible field names
     const effectiveStockingDate = cycleData?.stockingDate || cycleData?.startDate;

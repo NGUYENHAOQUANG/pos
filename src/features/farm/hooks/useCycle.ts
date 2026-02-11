@@ -88,9 +88,7 @@ export const useActiveCycle = (pondId: string) => {
                     c.status === 'InProgress' ||
                     c.status === 'Chưa hoàn thành' ||
                     c.status === 'Hoạt động'
-            ) ||
-            cycles[0] ||
-            null
+            ) || null
         );
     }, [cycles]);
 
