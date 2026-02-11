@@ -218,12 +218,20 @@ const CountingShrimpScreen: React.FC = () => {
                                         setIsCountAdded(false);
                                     }}
                                     returnBase64={true}
+                                    aspectRatio={
+                                        imageDimensions.width > 0 && imageDimensions.height > 0
+                                            ? imageDimensions.width / imageDimensions.height
+                                            : 1
+                                    }
                                 >
                                     {imageUri && detections.length > 0 && (
                                         <DotingOverlay
                                             detections={detections}
                                             displayWidth={displayDimensions.width}
-                                            displayHeight={displayDimensions.width}
+                                            displayHeight={
+                                                displayDimensions.width /
+                                                (imageDimensions.width / imageDimensions.height)
+                                            }
                                             originalWidth={imageDimensions.width}
                                             originalHeight={imageDimensions.height}
                                         />

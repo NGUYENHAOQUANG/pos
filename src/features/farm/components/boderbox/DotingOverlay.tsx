@@ -45,10 +45,8 @@ export const DotingOverlay: React.FC<DotingOverlayProps> = ({
                             key={detection.id}
                             cx={cx}
                             cy={cy}
-                            r="3" // Radius of the dot
+                            r="2" // Radius of the dot
                             fill={colors.red ? colors.red[600] : 'red'}
-                            //stroke="white"
-                            //strokeWidth="1"
                         />
                     );
                 })}

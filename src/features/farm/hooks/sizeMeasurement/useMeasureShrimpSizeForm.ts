@@ -36,6 +36,7 @@ export const useMeasureShrimpSizeForm = ({
     const [time, setTime] = useState(new Date());
     const [shrimpSize, setShrimpSize] = useState('');
     const [remainingWeight, setRemainingWeight] = useState('');
+    const [averageShrimpSize, setAverageShrimpSize] = useState('');
     const [notes, setNotes] = useState('');
     const [images, setImages] = useState<string[]>([]);
     const [initialDocumentIds, setInitialDocumentIds] = useState<string[]>([]);
@@ -53,6 +54,7 @@ export const useMeasureShrimpSizeForm = ({
                     const {
                         shrimpSizePcsPerKg,
                         estimatedRemainingStockKg,
+                        averageShrimpSize: avgSize,
                         notes: noteValue,
                     } = sizeDetail;
 
@@ -67,6 +69,9 @@ export const useMeasureShrimpSizeForm = ({
                             ? estimatedRemainingStockKg.toString()
                             : ''
                     );
+                    setAverageShrimpSize(
+                        avgSize !== undefined && avgSize !== null ? avgSize.toString() : ''
+                    );
                     setNotes(noteValue || '');
                 }
                 if (detail.documentIds && detail.documentIds.length > 0) {
@@ -80,15 +85,9 @@ export const useMeasureShrimpSizeForm = ({
             } else if (itemToEdit && itemToEdit.meta) {
                 const meta = itemToEdit.meta as any;
                 if (meta.date) setTime(new Date(meta.date));
-
-                // Convert numbers to strings safely
-                if (meta.shrimpSize !== undefined && meta.shrimpSize !== null) {
-                    setShrimpSize(meta.shrimpSize.toString());
-                }
-                if (meta.remainingWeight !== undefined && meta.remainingWeight !== null) {
-                    setRemainingWeight(meta.remainingWeight.toString());
-                }
-
+                if (meta.shrimpSize) setShrimpSize(meta.shrimpSize);
+                if (meta.remainingWeight) setRemainingWeight(meta.remainingWeight);
+                if (meta.averageShrimpSize) setAverageShrimpSize(meta.averageShrimpSize.toString());
                 if (meta.notes) setNotes(meta.notes);
 
                 // Map documents from API response if available
@@ -151,6 +150,7 @@ export const useMeasureShrimpSizeForm = ({
             sizeMeasurementDetail: {
                 shrimpSizePcsPerKg: size,
                 estimatedRemainingStockKg: weight,
+                averageShrimpSize: averageShrimpSize ? parseFloat(averageShrimpSize) : undefined,
                 notes,
             },
         };
@@ -215,6 +215,8 @@ export const useMeasureShrimpSizeForm = ({
         setShrimpSize,
         remainingWeight,
         setRemainingWeight,
+        averageShrimpSize,
+        setAverageShrimpSize,
         notes,
         setNotes,
         images,

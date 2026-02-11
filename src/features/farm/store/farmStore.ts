@@ -128,6 +128,9 @@ export const useFarmStore = create<FarmState>()(
                     case 'SHRIMP_INSPECTION':
                         state.updateShrimpInspectionJob(pondId, items);
                         break;
+                    case 'MEASURE_SIZE':
+                        state.updateMeasureSizeJob(pondId, items);
+                        break;
                     case 'ENVIRONMENT':
                         state.updateEnvironmentJob(pondId, items);
                         break;

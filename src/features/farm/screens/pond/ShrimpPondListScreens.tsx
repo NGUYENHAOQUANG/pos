@@ -187,8 +187,7 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
                         try {
                             const detail = await cycleApi.getCycleDetail(c.pondId, c.id);
                             return { ...c, ...detail };
-                        } catch (e) {
-                            console.warn(`Failed to fetch detail for cycle ${c.id}`, e);
+                        } catch (_) {
                             return c;
                         }
                     }

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert, Modal } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -14,15 +14,22 @@ import { Input } from '@/shared/components/forms/Input';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import { useEstimateShrimpSize } from '@/features/farm/hooks/useAI';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
-    BoundingBoxOverlay,
-    DetectionBox,
-} from '@/features/farm/components/boderbox/BoundingBoxOverlay';
+    ShrimpMeasurementBoundingBoxOverlay,
+    MeasurementDetectionBox,
+} from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
 
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
+    const route = useRoute<MeasureShrimpSizeAIScreenRouteProp>();
+    const { pondId } = route.params || {};
+
+    // Store action to save AI result
+    const setLatestAIMeasurement = useFarmStore(state => state.setLatestAIMeasurement);
 
     // Use the hook
     const { mutate: estimateSize, isPending: isAnalyzing } = useEstimateShrimpSize();
@@ -43,7 +50,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [isLoading, _setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
 
-    const [detections, setDetections] = useState<DetectionBox[]>([]);
+    const [detections, setDetections] = useState<MeasurementDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
 
@@ -52,6 +59,18 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         measurements.length > 0 ? measurements[measurements.length - 1] : null;
     const previousMeasurement =
         measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+    const previousAverageSizeCm = useMemo(() => {
+        if (!previousMeasurement || previousMeasurement.sizes.length === 0) return 0;
+        const total = previousMeasurement.sizes.reduce((sum, s) => sum + s, 0);
+        return (total / previousMeasurement.sizes.length).toFixed(2);
+    }, [previousMeasurement]);
+
+    const previousSizePcsPerKg = useMemo(() => {
+        if (!previousMeasurement || previousMeasurement.weight <= 0) return 0;
+        console.log('previousMeasurement', previousMeasurement);
+        return Math.round((1000 * previousMeasurement.count) / previousMeasurement.weight);
+    }, [previousMeasurement]);
 
     const aiCount = currentMeasurement?.count ?? null;
     // Rule: Kích thước tôm có id là #1
@@ -75,11 +94,17 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         return parseFloat((totalSizeSum / totalCount).toFixed(2));
     }, [measurements]);
 
-    // Rule: Cỡ tôm (con/kg) = Tổng Cỡ tôm <tất cả lần đo> / số lần đo
+    // Rule: Cỡ tôm (con/kg) = 1000 * Số lượng tôm được đo / Khối lượng tôm được đo
     const sizePcsPerKg = useMemo(() => {
         if (measurements.length === 0) return null;
-        const totalPcsPerKg = measurements.reduce((sum, m) => sum + m.pcsPerKg, 0);
-        return Math.round(totalPcsPerKg / measurements.length);
+        let totalCount = 0;
+        let totalWeight = 0;
+        measurements.forEach(m => {
+            totalCount += m.count;
+            totalWeight += m.weight;
+        });
+        if (totalWeight === 0) return 0;
+        return Math.round((1000 * totalCount) / totalWeight);
     }, [measurements]);
 
     // Count times is just the length of history
@@ -122,14 +147,14 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onSuccess: data => {
                     let count = 0;
                     let sizes: number[] = [];
-                    let newDetections: DetectionBox[] = [];
+                    let newDetections: MeasurementDetectionBox[] = [];
 
                     // New format with results object
                     if (data.results && data.results.objects) {
                         count = data.results.count;
                         sizes = data.results.objects.map(obj => obj.length_cm);
 
-                        // Map to DetectionBox
+                        // Map to MeasurementDetectionBox
                         newDetections = data.results.objects.map(obj => ({
                             id: obj.id,
                             bbox: obj.bbox,
@@ -164,12 +189,15 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                         }
                     }
 
+                    // Calculate pcsPerKg locally
+                    const pcsPerKg = weightVal > 0 ? Math.round((1000 * count) / weightVal) : 0;
+
                     const newMeasurement: Measurement = {
                         id: Date.now(),
                         count: count,
                         weight: weightVal,
                         sizes: sizes,
-                        pcsPerKg: data.shrimp_count_per_kg || 0,
+                        pcsPerKg: pcsPerKg,
                     };
 
                     setMeasurements(prev => [...prev, newMeasurement]);
@@ -196,6 +224,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     const handleSave = () => {
         if (sizePcsPerKg !== null && averageSizeCm !== null) {
+            // Save to store if we have a pondId
+            if (pondId && aiCount !== null) {
+                setLatestAIMeasurement(pondId, {
+                    averageSizeCm,
+                    sizePcsPerKg,
+                    aiCount,
+                    timestamp: Date.now(),
+                });
+            }
+
             navigation.navigate({
                 name: 'MeasureShrimpSizeScreen',
                 params: {
@@ -279,7 +317,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             >
                                 <Text style={styles.readOnlyText}>
                                     {sizeShrimp1 !== null
-                                        ? `${sizeShrimp1.toString()} (Tôm #1)`
+                                        ? `Tôm 1: ${sizeShrimp1.toFixed(2)} cm... Xem thêm`
                                         : 'Kết quả kích thước tôm (cm) từ AI'}
                                 </Text>
                                 <Ionicons
@@ -310,6 +348,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 Kết quả được hệ thống tính tự động từ khối lượng và số lượng tôm
                                 được đo
                             </Text>
+                            {measurements.length > 1 && (
+                                <View style={styles.previousStatsContainer}>
+                                    <Text style={styles.previousStatsText}>
+                                        • TBKTT (cm) lần đo trước: {previousAverageSizeCm}
+                                    </Text>
+                                    <Text style={styles.previousStatsText}>
+                                        • CT (con/kg) lần đo trước: {previousSizePcsPerKg}
+                                    </Text>
+                                </View>
+                            )}
                         </View>
                         <View>
                             <ImageUpload
@@ -331,10 +379,13 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                     }}
                                 >
                                     {imageUri && detections.length > 0 && (
-                                        <BoundingBoxOverlay
+                                        <ShrimpMeasurementBoundingBoxOverlay
                                             detections={detections}
                                             displayWidth={displayDimensions.width}
-                                            displayHeight={displayDimensions.height}
+                                            displayHeight={
+                                                displayDimensions.width /
+                                                (imageDimensions.width / imageDimensions.height)
+                                            }
                                             originalWidth={imageDimensions.width}
                                             originalHeight={imageDimensions.height}
                                         />
@@ -509,6 +560,17 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         marginTop: spacing.xs,
         fontStyle: 'italic',
+    },
+    previousStatsContainer: {
+        marginTop: spacing.xs,
+        alignItems: 'flex-start',
+        paddingHorizontal: spacing.md,
+    },
+    previousStatsText: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        fontStyle: 'italic',
+        lineHeight: 18,
     },
     imageContainer: {
         height: 300,

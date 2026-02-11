@@ -9,9 +9,9 @@ export const getDeviceIcon = (type: string): React.FC<SvgProps> => {
         case 'feeder':
             return FeederIcon;
         case 'fan':
-            return FanIcon;
-        case 'oxy':
             return OxyIcon;
+        case 'oxy':
+            return FanIcon;
         case 'syphon':
             return SyphonIcon;
         default:

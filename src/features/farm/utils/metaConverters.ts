@@ -360,6 +360,8 @@ export const convertMeasureSizeMetaToActivityData = (
         value: meta.remainingWeight || '0',
     });
 
+    data.push({ label: 'Trung bình kích thước tôm (cm):', value: meta.averageShrimpSize ?? '--' });
+
     // 3. Tổng số tôm hiện tại
     data.push({
         label: 'Tổng số tôm hiện tại (con)',
