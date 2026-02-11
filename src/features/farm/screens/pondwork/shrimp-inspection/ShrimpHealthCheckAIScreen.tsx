@@ -135,7 +135,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             { image_base: imageBase64 },
             {
                 onSuccess: response => {
-                    console.log('AI Response:', JSON.stringify(response, null, 2));
                     const detailedItems: HealthCheckItem[] = response.results.map(r => {
                         const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
                         return {
