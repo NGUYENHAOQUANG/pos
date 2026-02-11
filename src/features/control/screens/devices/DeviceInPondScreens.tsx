@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     Text,
     TouchableHighlight,
-    Platform,
     Dimensions,
     RefreshControl,
 } from 'react-native';
@@ -408,17 +407,8 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.xs,
         minWidth: 140,
         zIndex: 1001,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.15,
-                shadowRadius: 12,
-            },
-            android: {
-                elevation: 8,
-            },
-        }),
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
     },
     popupItem: {
         paddingVertical: spacing.sm,

@@ -65,7 +65,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 return {
                     ...activity,
                     onEdit:
-                        onEditJobItem && jobType && recordItem
+                        onEditJobItem && jobType && jobType !== 'TRANSFER_POND' && recordItem
                             ? () => {
                                   // Convert record to JobExecution for edit handler
                                   const createdDate = recordItem.createdAt

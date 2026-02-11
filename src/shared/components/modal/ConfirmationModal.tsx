@@ -15,7 +15,8 @@ export type ConfirmationModalType =
     | 'harvest_full'
     | 'harvest_close_cycle'
     | 'measure_size_required'
-    | 'reset_check';
+    | 'reset_check'
+    | 'measure_reset';
 
 interface ConfirmationConfig {
     title: string;
@@ -57,6 +58,12 @@ Bạn có chắc chắn muốn đóng chu kỳ không?`,
     reset_check: {
         title: 'Kiểm tra lại',
         message: 'Bạn có chắc chắn muốn kiểm tra lại không? Dữ liệu hiện tại sẽ bị xóa.',
+        confirmText: 'Đồng ý',
+        cancelText: 'Hủy',
+    },
+    measure_reset: {
+        title: 'Đo lại',
+        message: 'Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa.',
         confirmText: 'Đồng ý',
         cancelText: 'Hủy',
     },

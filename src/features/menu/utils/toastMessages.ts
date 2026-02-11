@@ -148,5 +148,9 @@ export const ToastMessages = {
             type: 'error',
             text1: 'Vui lòng lấy kết quả đo trước khi xem chi tiết',
         },
+        RESET_SUCCESS: {
+            type: 'success',
+            text1: 'Đã xóa dữ liệu để đo lại',
+        },
     },
 } as const;
