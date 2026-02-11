@@ -110,13 +110,13 @@ export const HandleProblemLogScreen = () => {
     const getTitle = () => {
         switch (currentJobType) {
             case 'CLEAN_POND':
-                return 'Nhật ký Rửa ao';
+                return 'Nhật ký rửa ao';
             case 'SUN_DRY_POND':
-                return 'Nhật ký Phơi ao';
+                return 'Nhật ký phơi ao';
             case 'TROUBLESHOOTING':
-                return 'Nhật ký Xử lý sự cố';
+                return 'Nhật ký xử lý sự cố';
             default:
-                return 'Nhật ký Xử lý sự cố';
+                return 'Nhật ký xử lý sự cố';
         }
     };
 

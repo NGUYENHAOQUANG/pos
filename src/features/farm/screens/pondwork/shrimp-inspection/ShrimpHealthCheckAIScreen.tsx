@@ -5,7 +5,6 @@ import {
     ScrollView,
     Text,
     TouchableOpacity,
-    Alert,
     Modal,
     TouchableWithoutFeedback,
 } from 'react-native';
@@ -26,6 +25,7 @@ import {
     ShrimpHealthBoundingBoxOverlay,
     HealthDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -56,6 +56,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const [imageUri, _setImageUri] = useState<string | null>(null);
     const [imageBase64, setImageBase64] = useState<string | null>(null);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+    const [isResetModalVisible, setIsResetModalVisible] = useState(false);
     // Show toast when new result arrives
     React.useEffect(() => {
         if (results.length > 0) {
@@ -118,7 +119,12 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
     const handleGetResult = () => {
         if (!imageUri || !imageBase64) {
-            Alert.alert('Chưa có hình ảnh', 'Vui lòng chọn hoặc chụp ảnh để kiểm tra.');
+            Toast.show({
+                type: 'error',
+                text1: 'Chưa có hình ảnh',
+                text2: 'Vui lòng chọn hoặc chụp ảnh để kiểm tra.',
+                visibilityTime: 3000,
+            });
             return;
         }
 
@@ -126,6 +132,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             { image_base: imageBase64 },
             {
                 onSuccess: response => {
+                    console.log('AI Response:', JSON.stringify(response, null, 2));
                     const detailedItems: HealthCheckItem[] = response.results.map(r => {
                         const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
                         return {
@@ -148,10 +155,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         id: Date.now(),
                         totalCount,
                         items: detailedItems,
-                        healthStatusSummary:
-                            issuesCount > 0
-                                ? `Đã phát hiện ${issuesCount} vấn đề`
-                                : 'Tôm khỏe mạnh',
+                        healthStatusSummary: issuesCount > 0 ? 'Phát hiện bệnh' : 'Tôm khỏe mạnh',
                         infectionRate,
                     };
 
@@ -175,28 +179,26 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     };
 
     const handleReset = () => {
-        Alert.alert(
-            'Kiểm tra lại',
-            'Bạn có chắc chắn muốn kiểm tra lại không? Dữ liệu hiện tại sẽ bị xóa.',
-            [
-                { text: 'Hủy', style: 'cancel' },
-                {
-                    text: 'Đồng ý',
-                    onPress: () => {
-                        _setImageUri(null);
-                        setImageBase64(null);
-                        setResults([]);
-                        setDetections([]);
-                    },
-                },
-            ]
-        );
+        setIsResetModalVisible(true);
+    };
+
+    const handleConfirmReset = () => {
+        _setImageUri(null);
+        setImageBase64(null);
+        setResults([]);
+        setDetections([]);
+        setIsResetModalVisible(false);
     };
     const handleShowDetails = () => {
         if (currentResult?.items && currentResult.items.length > 0) {
             setIsSheetVisible(true);
         } else {
-            Alert.alert('Chưa có dữ liệu', 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.');
+            Toast.show({
+                type: 'info',
+                text1: 'Chưa có dữ liệu',
+                text2: 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.',
+                visibilityTime: 3000,
+            });
         }
     };
 
@@ -234,13 +236,13 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const getStatusColor = (status: 'HEALTHY' | 'WARNING' | 'CRITICAL') => {
         switch (status) {
             case 'HEALTHY':
-                return '#4CAF50';
+                return colors.healthStatus.healthy;
             case 'WARNING':
-                return '#FF6E6E';
+                return colors.healthStatus.warning;
             case 'CRITICAL':
-                return '#FF6E6E';
+                return colors.healthStatus.critical;
             default:
-                return '#9E9E9E';
+                return colors.healthStatus.default;
         }
     };
 
@@ -323,10 +325,30 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                         styles.readOnlyText,
                                         !currentResult && styles.placeholderText,
                                     ]}
+                                    numberOfLines={1}
+                                    ellipsizeMode="tail"
                                 >
-                                    {currentResult
-                                        ? currentResult.healthStatusSummary
-                                        : 'Kết quả tình trạng tôm từ AI'}
+                                    {(() => {
+                                        if (!currentResult) return 'Kết quả tình trạng tôm từ AI';
+
+                                        // Find first sick shrimp
+                                        const firstSick = currentResult.items.find(
+                                            i => i.status !== 'HEALTHY'
+                                        );
+                                        if (firstSick) {
+                                            return `Tôm ${firstSick.index}: ${firstSick.diagnosis}... Xem thêm`;
+                                        }
+
+                                        // If all healthy, show Tôm #1 (or first item)
+                                        const firstItem =
+                                            currentResult.items.find(i => i.index === 1) ||
+                                            currentResult.items[0];
+                                        if (firstItem) {
+                                            return `Tôm ${firstItem.index}: ${firstItem.diagnosis}... Xem thêm`;
+                                        }
+
+                                        return currentResult.healthStatusSummary;
+                                    })()}
                                 </Text>
                                 <Ionicons
                                     name="list-outline"
@@ -341,7 +363,25 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                             <View style={styles.readOnlyInputGray}>
                                 <Text style={styles.label}>Trung bình tỉ lệ nhiễm bệnh</Text>
                                 <Text style={styles.summaryValue}>
-                                    {currentResult ? `${currentResult.infectionRate}%` : '-'}
+                                    {(() => {
+                                        if (results.length === 0) return '-';
+
+                                        let totalSick = 0;
+                                        let totalChecked = 0;
+
+                                        results.forEach(res => {
+                                            totalChecked += res.totalCount;
+                                            totalSick += res.items.filter(
+                                                i => i.status !== 'HEALTHY'
+                                            ).length;
+                                        });
+
+                                        if (totalChecked === 0) return '0%';
+
+                                        const rate = (totalSick / totalChecked) * 100;
+                                        // Format nicely, maybe remove trailing zeros if integer
+                                        return `${parseFloat(rate.toFixed(2))}%`;
+                                    })()}
                                 </Text>
                             </View>
                             <Text style={styles.disclaimer}>
@@ -512,6 +552,13 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                     </Animated.View>
                 </View>
             </Modal>
+            {/* Confirmation Modal for Reset */}
+            <ConfirmationModal
+                visible={isResetModalVisible}
+                onConfirm={handleConfirmReset}
+                onCancel={() => setIsResetModalVisible(false)}
+                type="reset_check"
+            />
         </View>
     );
 };
