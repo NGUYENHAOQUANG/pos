@@ -50,7 +50,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
             fetchIoTDevices(); // Fetch immediately
             const interval = setInterval(() => {
                 fetchIoTDevices();
-            }, 200000);
+            }, 20000);
 
             return () => clearInterval(interval); // Cleanup on unmount
         }
