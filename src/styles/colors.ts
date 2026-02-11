@@ -145,6 +145,12 @@ export const colors = {
     overlayLight: 'rgba(0, 0, 0, 0.45)', // Lighter overlay for modals
     overlayLoading: 'rgba(255, 255, 255, 0.7)',
     // Status colors (for DevicesStatus)
+    healthStatus: {
+        healthy: '#4CAF50',
+        warning: '#FF6E6E',
+        critical: '#FF6E6E',
+        default: '#9E9E9E',
+    },
     status: {
         // Total ponds - Blue
         totalText: '#2F6BFF',
