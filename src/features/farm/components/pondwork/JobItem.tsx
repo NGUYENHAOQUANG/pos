@@ -189,9 +189,11 @@ export const JobCard: React.FC<JobCardProps> = ({
                                             <IconWarningOutlined width={16} height={16} />
                                         )}
                                     </View>
-                                    <TouchableOpacity onPress={() => onEditItem?.(item)}>
-                                        <AntDesign name="edit" size={18} color={colors.text} />
-                                    </TouchableOpacity>
+                                    {type !== 'TRANSFER_POND' && (
+                                        <TouchableOpacity onPress={() => onEditItem?.(item)}>
+                                            <AntDesign name="edit" size={18} color={colors.text} />
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
                                 {arr.length > 1 && index < arr.length - 1 && (
                                     <View style={styles.itemDivider} />

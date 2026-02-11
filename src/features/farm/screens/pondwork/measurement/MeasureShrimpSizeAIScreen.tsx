@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,6 +21,7 @@ import {
     ShrimpMeasurementBoundingBoxOverlay,
     MeasurementDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
+import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
@@ -51,6 +52,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [base64Image, setBase64Image] = useState<string | null>(null);
     const [isLoading, _setIsLoading] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
+    const [isResetModalVisible, setIsResetModalVisible] = useState(false);
 
     const [detections, setDetections] = useState<MeasurementDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
@@ -211,17 +213,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     };
 
     const handleReset = () => {
-        Alert.alert('Đo lại', 'Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa.', [
-            { text: 'Hủy', style: 'cancel' },
-            {
-                text: 'Đồng ý',
-                onPress: () => {
-                    _setImageUri(null);
-                    setMeasurements([]);
-                    setMeasuredWeight('');
-                },
-            },
-        ]);
+        setIsResetModalVisible(true);
+    };
+
+    const confirmReset = () => {
+        setIsResetModalVisible(false);
+        _setImageUri(null);
+        setMeasurements([]);
+        setMeasuredWeight('');
+        setDetections([]);
+        Toast.show(ToastMessages.ShrimpMeasurement.RESET_SUCCESS);
     };
 
     const handleSave = () => {
@@ -455,6 +456,13 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     </Animated.View>
                 </TouchableOpacity>
             </Modal>
+
+            <ConfirmationModal
+                visible={isResetModalVisible}
+                onConfirm={confirmReset}
+                onCancel={() => setIsResetModalVisible(false)}
+                type="measure_reset"
+            />
         </View>
     );
 };
