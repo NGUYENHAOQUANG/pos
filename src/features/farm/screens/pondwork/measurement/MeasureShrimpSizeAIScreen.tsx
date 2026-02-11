@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     actionButtons: {
         flexDirection: 'row',
         gap: spacing.md,
-        marginBottom: spacing.md,
+        marginBottom: 34,
     },
     resetButton: {
         flex: 1,
@@ -590,8 +590,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.xs,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     resetButtonText: {
         fontSize: 14,
@@ -604,8 +605,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.gray[300],
         borderRadius: borderRadius.sm,
-        paddingVertical: 12,
+        paddingVertical: spacing.sm,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     actionButtonText: {
         fontSize: 14,
