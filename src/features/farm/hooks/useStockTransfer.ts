@@ -154,12 +154,21 @@ export const useCreateStockTransfer = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ pondId, data }: { pondId: string; data: CreateStockTransferRequest }) =>
-            stockTransferApi.create(pondId, data),
+        mutationFn: ({
+            pondId,
+            data,
+        }: {
+            pondId: string;
+            data: CreateStockTransferRequest;
+            zoneId?: string;
+        }) => stockTransferApi.create(pondId, data),
         onSuccess: (_, variables) => {
             showSuccessToast('Tạo phiếu sang ao thành công');
             queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({
+                queryKey: farmKeys.ponds.byZone(variables.zoneId || 'all'),
+            });
         },
         onError: error => {
             const message = getErrorMessage(error, 'Tạo phiếu sang ao thất bại');

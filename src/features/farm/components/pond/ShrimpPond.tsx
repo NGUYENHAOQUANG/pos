@@ -293,7 +293,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
             </View>
 
             {/* Cycle Info Section */}
-            {cycleData && hasData && (
+            {cycleData && cycleData.status !== 'Hoàn thành' && (
                 <>
                     <View style={styles.cycleSection}>
                         <View style={styles.cycleHeader}>
