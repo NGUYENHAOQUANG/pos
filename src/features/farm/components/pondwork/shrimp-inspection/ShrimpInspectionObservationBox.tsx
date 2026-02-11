@@ -104,32 +104,38 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
             {/* AI Result Section */}
             <View style={styles.aiSection}>
                 {aiResult ? (
-                    <View style={styles.aiResultBox}>
-                        <View style={styles.aiResultRow}>
-                            <Text style={styles.aiResultLabel}>Trung bình tỉ lệ nhiễm bệnh</Text>
-                            <Text style={styles.aiResultValue}>{aiResult.infectionRate}%</Text>
-                        </View>
-                        <View style={styles.aiResultRow}>
-                            <Text style={styles.aiResultLabel}>Tình trạng tôm</Text>
-                            {aiResult.status === 'Khỏe mạnh' ? (
-                                <View style={styles.statusBadgeGreen}>
-                                    <Text style={styles.statusTextGreen}>Khỏe mạnh</Text>
-                                </View>
-                            ) : (
-                                <View style={styles.statusBadgeRed}>
-                                    <Text style={styles.statusTextRed}>Nhiễm bệnh</Text>
-                                </View>
-                            )}
-                        </View>
-                        {aiResult.status !== 'Khỏe mạnh' && (
+                    <>
+                        <Text style={styles.aiTitle}>Tình trạng tôm - AI</Text>
+                        <View style={styles.aiResultBox}>
+                            <View style={styles.aiResultRow}>
+                                <Text style={styles.aiResultLabel}>
+                                    Trung bình tỉ lệ nhiễm bệnh
+                                </Text>
+                                <Text style={styles.aiResultValue}>{aiResult.infectionRate}%</Text>
+                            </View>
+                            <View style={styles.aiResultRow}>
+                                <Text style={styles.aiResultLabel}>Tình trạng tôm</Text>
+                                {aiResult.status === 'Khỏe mạnh' ? (
+                                    <View style={styles.statusBadgeGreen}>
+                                        <Text style={styles.statusTextGreen}>Khỏe mạnh</Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.statusBadgeRed}>
+                                        <Text style={styles.statusTextRed}>Nhiễm bệnh</Text>
+                                    </View>
+                                )}
+                            </View>
                             <TouchableOpacity
                                 style={styles.viewDetailButton}
                                 onPress={handleViewDetails}
                             >
                                 <Text style={styles.viewDetailText}>Xem chi tiết</Text>
                             </TouchableOpacity>
-                        )}
-                    </View>
+                        </View>
+                        <Text style={styles.aiDisclaimer}>
+                            Kết quả chẩn đoán tình trạng tôm từ AI
+                        </Text>
+                    </>
                 ) : null}
 
                 <TouchableOpacity style={styles.aiButton} onPress={onAICheckPress}>
@@ -254,6 +260,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text,
         marginBottom: spacing.sm,
+        paddingBottom: spacing.xs,
     },
     aiResultBox: {
         borderWidth: 1,
