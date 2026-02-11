@@ -352,9 +352,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         {/* Image Upload Area */}
 
                         <View>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Hình ảnh xử lý</Text>
-                            </View>
                             <View
                                 onLayout={event => {
                                     const { width, height } = event.nativeEvent.layout;
