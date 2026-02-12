@@ -7,7 +7,6 @@ import {
     TextInput,
     FlatList,
     Platform,
-    Modal,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -33,8 +32,6 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-    const triggerRef = useRef<View>(null);
     const inputRef = useRef<TextInput>(null);
 
     // Filter data based on search text
@@ -46,23 +43,12 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            // Focus input after modal opens
+            // Focus input after dropdown opens
             setTimeout(() => {
                 inputRef.current?.focus();
             }, 100);
         }
     }, [isOpen]);
-
-    const handleOpen = () => {
-        triggerRef.current?.measureInWindow((x, y, width) => {
-            setDropdownPosition({
-                top: y,
-                left: x,
-                width: width,
-            });
-            setIsOpen(true);
-        });
-    };
 
     const handleSelect = (item: IMaterial) => {
         onSelect(item);
@@ -77,11 +63,14 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 
     // Render the input trigger
     const renderTrigger = () => {
+        // If open, we hide the trigger visually, effectively replaced by the dropdown input
+        // But we keep it rendered to maintain layout height if needed,
+        // OR simply let the absolute dropdown sit on top.
+        // Since the dropdown wrapper is absolute, the trigger remains in flow underneath.
         return (
             <TouchableOpacity
-                ref={triggerRef}
                 style={styles.triggerContainer}
-                onPress={handleOpen}
+                onPress={() => setIsOpen(true)}
                 activeOpacity={0.7}
             >
                 <Text style={[styles.triggerText, !selectedItem && styles.placeholderText]}>
@@ -96,27 +85,17 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
         <View style={styles.container}>
             {renderTrigger()}
 
-            <Modal
-                visible={isOpen}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setIsOpen(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setIsOpen(false)}
-                >
-                    <View
-                        style={[
-                            styles.dropdownWrapper,
-                            {
-                                top: dropdownPosition.top,
-                                left: dropdownPosition.left,
-                                width: dropdownPosition.width,
-                            },
-                        ]}
-                    >
+            {isOpen && (
+                <>
+                    {/* Backdrop to close on outside press */}
+                    <TouchableOpacity
+                        style={styles.overlayBackdrop}
+                        activeOpacity={1}
+                        onPress={() => setIsOpen(false)}
+                    />
+
+                    {/* Dropdown Content */}
+                    <View style={styles.dropdownWrapper}>
                         {/* Search Input (Replaces Trigger visual) */}
                         <View style={[styles.triggerContainer, styles.triggerOpen]}>
                             <TextInput
@@ -195,6 +174,7 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
                                     }}
                                     style={styles.list}
                                     keyboardShouldPersistTaps="handled"
+                                    nestedScrollEnabled={true}
                                 />
                             ) : (
                                 <View style={styles.emptyContainer}>
@@ -211,22 +191,33 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
                             )}
                         </View>
                     </View>
-                </TouchableOpacity>
-            </Modal>
+                </>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        zIndex: 10, // Ensure dropdown sits on top
+        zIndex: 10, // Ensure dropdown sits on top within its local context
         width: '100%',
+        position: 'relative',
     },
-    modalOverlay: {
-        flex: 1,
+    overlayBackdrop: {
+        position: 'absolute',
+        top: -1000,
+        left: -1000,
+        right: -1000,
+        bottom: -1000,
+        zIndex: 1,
+        // backgroundColor: 'rgba(0,0,0,0.1)', // Optional debug color
     },
     dropdownWrapper: {
         position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        zIndex: 2,
     },
     triggerContainer: {
         flexDirection: 'row',
@@ -240,7 +231,7 @@ const styles = StyleSheet.create({
         borderColor: colors.gray[200],
     },
     triggerOpen: {
-        borderColor: colors.blue ? colors.blue[600] : '#1677FF', // Use fallback or check colors.ts
+        borderColor: colors.blue ? colors.blue[600] : '#1677FF',
     },
     triggerText: {
         fontSize: 14,
