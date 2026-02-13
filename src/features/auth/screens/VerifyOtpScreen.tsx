@@ -75,18 +75,6 @@ export default function VerifyOTPScreen() {
         };
     }, []);
 
-    // Auto-focus first input when screen mounts to show keyboard immediately
-    // Use delay on iOS to ensure smooth animation and prevent keyboard flicker
-    useEffect(() => {
-        const timer = setTimeout(
-            () => {
-                otpInputRef.current?.focusFirst();
-            },
-            Platform.OS === 'ios' ? 100 : 0
-        );
-
-        return () => clearTimeout(timer);
-    }, []);
     // Calculate remaining countdown based on real elapsed time
     const calculateRemainingTime = React.useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -227,17 +215,6 @@ export default function VerifyOTPScreen() {
             setCountdown(COUNTDOWN_DURATION);
             setOtp(['', '', '', '']);
             setErrorMessage('');
-
-            // Delay focus on iOS to prevent keyboard flicker when OTP autofill happens
-            // iOS dismisses keyboard when notification appears, then we focus again
-            // Adding delay allows iOS to complete its autofill animation smoothly
-            if (Platform.OS === 'ios') {
-                setTimeout(() => {
-                    otpInputRef.current?.focusFirst();
-                }, 300);
-            } else {
-                otpInputRef.current?.focusFirst();
-            }
 
             Toast.show({
                 type: 'success',

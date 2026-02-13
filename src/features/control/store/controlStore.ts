@@ -219,10 +219,10 @@ export const useControlStore = create<ControlStore>()(
                                         type = 'feeder';
                                         break;
                                     case 'AirBlower':
-                                        type = 'fan';
+                                        type = 'oxy';
                                         break;
                                     case 'PaddleWheel':
-                                        type = 'oxy';
+                                        type = 'fan';
                                         break;
                                     default:
                                         type = 'feeder';
@@ -234,7 +234,8 @@ export const useControlStore = create<ControlStore>()(
                                     type,
                                     pondId: 'IOT_POND',
                                     farmId: 'KG-01',
-                                    mode: EControlMode.SCHEDULE,
+                                    mode:
+                                        type === 'oxy' ? EControlMode.LOCAL : EControlMode.SCHEDULE,
                                     isOn: item.connectionStatus === 'On',
                                     errorMessage:
                                         item.installationStatus !== 'Installed'
@@ -255,7 +256,7 @@ export const useControlStore = create<ControlStore>()(
             },
         })),
         {
-            name: 'control-storage-v8', // Bump: removed IOT mock devices
+            name: 'control-storage-v8',
             storage: createJSONStorage(() => AsyncStorage),
         }
     )
