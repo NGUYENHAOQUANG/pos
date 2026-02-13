@@ -172,6 +172,7 @@ export const CreateCycleScreen: React.FC = () => {
                 materialCode: seed.materialCode,
                 price: seed.averagePrice || 0,
                 supplier: seed.manufacturer || seed.supplier || 'N/A',
+                remainingQuantity: seed.quantity ?? 0,
             }));
         } else {
             options = [];
@@ -192,6 +193,7 @@ export const CreateCycleScreen: React.FC = () => {
                         materialCode: '', // Unknown if not in list
                         price: 0, // Unknown
                         supplier: '',
+                        remainingQuantity: 0,
                     },
                     ...options,
                 ];

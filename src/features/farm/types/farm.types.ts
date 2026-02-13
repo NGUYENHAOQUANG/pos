@@ -224,6 +224,7 @@ export interface BreedOption extends DropdownItem {
     materialCode?: string;
     price?: number;
     supplier?: string;
+    remainingQuantity?: number;
 }
 
 export interface ShrimpInspectionMeta {
