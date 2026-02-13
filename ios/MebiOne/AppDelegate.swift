@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = UIWindow(frame: UIScreen.main.bounds)
+    window = NoScaleWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
       withModuleName: "Mebieco",
@@ -48,5 +48,14 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #else
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
+  }
+}
+
+class NoScaleWindow: UIWindow {
+  override var traitCollection: UITraitCollection {
+    if #available(iOS 13.0, *) {
+      return UITraitCollection(traitsFrom: [super.traitCollection, UITraitCollection(preferredContentSizeCategory: .large)])
+    }
+    return super.traitCollection
   }
 }
