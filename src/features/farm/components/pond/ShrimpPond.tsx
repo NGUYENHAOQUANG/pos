@@ -38,10 +38,7 @@ interface ShrimpPondProps {
     effectiveZoneId?: string; // Add prop to receive zoneId from parent
 }
 
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-// import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
-import { useQuery } from '@tanstack/react-query';
-import { warehouseApi } from '@/features/material/api/warehouseApi';
+import { usePondBreedInfo } from '@/features/farm/hooks/usePondBreedInfo';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
@@ -71,7 +68,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.WASTE;
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const breedOptions = useFarmStore(state => state.breedOptions);
     const calculateDOC = useFarmStore(state => state.calculateDOC);
     const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
     // Store actions to sync local data
@@ -85,62 +81,9 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     // 1. Get Zone ID - Prefer prop if available (reliable), else try store (might be missing on list refresh)
     const effectiveZoneId = propZoneId || pond?.zoneId?.toString();
 
-    // 2. Fetch Warehouses for this Zone
-    const { data: warehouses } = useWarehouses({
-        PageSize: 100,
-        ZoneId: effectiveZoneId,
-    });
-    // const defaultWarehouseId = warehouses?.[0]?.id;
+    const { getBreedLabel } = usePondBreedInfo(effectiveZoneId);
 
-    // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
-    // (Cycle might use seed from a warehouse that isn't the first one)
-    // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
-    // (Cycle might use seed from a warehouse that isn't the first one)
-    const { data: shrimpSeeds } = useQuery({
-        queryKey: ['shrimp-seeds-all-warehouses-shrimp-pond', effectiveZoneId, warehouses?.length],
-        queryFn: async () => {
-            if (!warehouses || warehouses.length === 0) {
-                // console.log(`[ShrimpPond] No warehouses found for Zone ${effectiveZoneId}`);
-                return [];
-            }
-
-            try {
-                // Fetch seeds from all warehouses
-                const promises = warehouses.map(w =>
-                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
-                );
-
-                const results = await Promise.all(promises);
-
-                // Flatten results
-                const allItems = results.reduce<any[]>((acc, r: any) => {
-                    if (r?.data?.items) {
-                        return acc.concat(r.data.items);
-                    }
-                    return acc;
-                }, []);
-
-                // Deduplicate by ID
-                const seen = new Set();
-                const uniqueItems = allItems.filter((item: any) => {
-                    if (seen.has(item.id)) return false;
-                    seen.add(item.id);
-                    return true;
-                });
-
-                return uniqueItems;
-            } catch (error) {
-                console.warn('Failed to fetch seeds from warehouses', error);
-                return [];
-            }
-        },
-        enabled: !!warehouses && warehouses.length > 0,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-    });
-
-    // --- Dynamic Breed Name Fetching ---
-    // 1. Get Zone ID
-    // ... (keep this part)
+    // Get cycle data for this pond - prioritize active cycle
 
     // Get cycle data for this pond - prioritize STORE data (has full details from ShrimpPondListScreens)
     // over fresh API data (which only has basic info from list endpoint)
@@ -164,28 +107,8 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
     const breedLabel = useMemo(() => {
         const breedId = cycleData?.breedSource || cycleData?.warehouseItemId;
-        // console.log(`[ShrimpPond] resolving breed for ${name}: ID=${breedId}, seeds=${shrimpSeeds?.length}`);
-
-        if (!breedId) return undefined;
-
-        // 1. Prefer saved name if available
-        if (cycleData?.breedName) return cycleData.breedName;
-
-        // 2. Try dynamic API data
-        if (shrimpSeeds?.length) {
-            const seed = shrimpSeeds.find((s: any) => s.id === breedId);
-            if (seed?.materialName) {
-                // console.log(`[ShrimpPond] Found breed name from API: ${seed.materialName}`);
-                return seed.materialName;
-            }
-        }
-
-        // 3. Fallback to static/store options
-        const fallback = breedOptions.find(b => b.value === breedId)?.label;
-        if (!fallback) {
-        }
-        return fallback;
-    }, [cycleData, shrimpSeeds, breedOptions]);
+        return getBreedLabel(breedId, cycleData?.breedName);
+    }, [cycleData, getBreedLabel]);
 
     // Display Logic Override: REMOVED as per request.
     const displayType = type;
@@ -235,7 +158,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         <View style={[styles.container, style]}>
             {/* Header Section */}
             <View style={styles.header}>
-                <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
+                <IconPond width={40} height={40} style={styles.pondIcon} />
                 <View style={styles.infoContainer}>
                     <Text style={styles.nameText}>{name}</Text>
                     <Text style={styles.areaText}>
@@ -371,6 +294,9 @@ const styles = StyleSheet.create({
     infoContainer: {
         flex: 1,
         justifyContent: 'center',
+    },
+    pondIcon: {
+        marginRight: spacing.sm,
     },
     nameText: {
         fontSize: 16,

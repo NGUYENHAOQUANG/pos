@@ -25,8 +25,8 @@ import {
     useEnvironmentInit,
     useZoneResolution,
     useParameterConfiguration,
-} from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
-import { useAddEnvironment } from '@/features/farm/hooks/envhooks/useAddEnvironment';
+} from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
+import { useAddEnvironment } from '@/features/farm/hooks/pondwork/envhooks/useAddEnvironment';
 import { documentApi } from '@/features/material/api/documentApi';
 
 // ... (keep imports)

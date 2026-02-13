@@ -4,6 +4,7 @@ import {
     CreateCycleCommand,
     CycleData,
     UpdateCycleCommand,
+    CycleApiResponse,
 } from '@/features/farm/types/farm.types';
 
 export const cycleApi = {
@@ -54,15 +55,18 @@ export const cycleApi = {
         });
 
         const responseDataObject = response.data?.data;
-        const items =
+        const items: CycleApiResponse[] =
             responseDataObject?.items || (Array.isArray(response.data) ? response.data : []);
 
-        return items.map((item: any) => ({
-            ...item,
-            cycleName: item.name || item.cycleName,
-            breedSource: item.breedSource || item.warehouseItemId,
-            stockingDate: item.stockingDate || item.createdAt,
-            season: item.season,
-        }));
+        return items.map(
+            item =>
+                ({
+                    ...item,
+                    cycleName: item.name || item.cycleName || '',
+                    breedSource: item.breedSource || item.warehouseItemId || '',
+                    stockingDate: item.stockingDate || item.createdAt || '',
+                    season: item.season,
+                } as CycleData)
+        );
     },
 };
