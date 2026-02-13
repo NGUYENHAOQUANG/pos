@@ -43,7 +43,7 @@ export const CycleDetailScreen: React.FC = () => {
         enabled: !!pondId && !!initialCycleData?.id,
         initialData: initialCycleData,
         refetchOnMount: 'always', // Always refetch when screen mounts
-        staleTime: 0, // Data is always stale, will refetch on focus
+        staleTime: 0, // Data is always stale, will refetch on focus 123
     });
 
     // Refetch data when screen gains focus (e.g., after editing)
