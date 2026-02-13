@@ -10,7 +10,7 @@ import { useEnvMeasurements } from '@/features/farm/hooks/useEnvMeasurement';
 import {
     useEnvironmentInit,
     useZoneResolution,
-} from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+} from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
 

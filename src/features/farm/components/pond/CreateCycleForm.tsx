@@ -162,6 +162,10 @@ const CreateCycleForm: React.FC<Props> = ({
                                 breedOptions.find(o => o.value === formData.breedSource)
                                     ?.supplier || ''
                             }
+                            remainingQuantity={
+                                breedOptions.find(o => o.value === formData.breedSource)
+                                    ?.remainingQuantity
+                            }
                         />
                     )}
                     <View style={styles.inputGroupNoMargin}>

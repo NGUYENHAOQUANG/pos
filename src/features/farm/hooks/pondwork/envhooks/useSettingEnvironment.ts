@@ -6,7 +6,7 @@ import {
     CreateEnvironmentSettingRequest,
     UpdateEnvironmentSettingRequest,
 } from '@/features/farm/types/environmentSettings.types';
-import { farmKeys } from '../farmKeys';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 export const useEnvironmentMetricTypes = () => {
     return useQuery({
