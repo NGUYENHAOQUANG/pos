@@ -96,6 +96,9 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 return { status: 'WARNING', diagnosis: 'Mang đen' };
             case 'WSSV':
                 return { status: 'CRITICAL', diagnosis: 'Đốm trắng' };
+            case 'Yellowhead':
+            case 'Yellow Head':
+                return { status: 'CRITICAL', diagnosis: 'Đầu vàng' };
             default:
                 return { status: 'WARNING', diagnosis: className };
         }
@@ -132,7 +135,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             { image_base: imageBase64 },
             {
                 onSuccess: response => {
-                    console.log('AI Response:', JSON.stringify(response, null, 2));
                     const detailedItems: HealthCheckItem[] = response.results.map(r => {
                         const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
                         return {
@@ -194,7 +196,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             setIsSheetVisible(true);
         } else {
             Toast.show({
-                type: 'info',
+                type: 'error',
                 text1: 'Chưa có dữ liệu',
                 text2: 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.',
                 visibilityTime: 3000,
@@ -204,22 +206,26 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
     const handleSave = () => {
         if (results.length > 0) {
-            // Use the LAST result (Current Check) instead of aggregating all checks
-            const latestResult = results[results.length - 1];
-            const items = latestResult.items;
-            const totalCount = latestResult.totalCount;
-            const sickCount = items.filter(i => i.status !== 'HEALTHY').length;
+            // Aggregate all results
+            const allItems = results.reduce<HealthCheckItem[]>(
+                (acc, res) => acc.concat(res.items),
+                []
+            );
+            const totalCount = results.reduce((acc, res) => acc + res.totalCount, 0);
+            const sickCount = allItems.filter(i => i.status !== 'HEALTHY').length;
 
+            const infectionRate =
+                totalCount > 0 ? parseFloat(((sickCount / totalCount) * 100).toFixed(2)) : 0;
             const isHealthy = sickCount === 0;
             const statusString = isHealthy ? 'Khỏe mạnh' : 'Nhiễm bệnh';
 
             const params = {
                 aiHealthCheckResult: {
                     totalCount: totalCount,
-                    infectionRate: latestResult.infectionRate,
+                    infectionRate: infectionRate,
                     status: statusString,
-                    imageUri: imageUri, // Passing latest image
-                    details: JSON.stringify(items), // Pass items of the latest check
+                    imageUri: imageUri, // Passing latest image or maybe we should not pass image if it's aggregated
+                    details: JSON.stringify(allItems), // Pass items of ALL checks
                 },
             };
 
@@ -329,25 +335,25 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                     ellipsizeMode="tail"
                                 >
                                     {(() => {
-                                        if (!currentResult) return 'Kết quả tình trạng tôm từ AI';
+                                        if (results.length === 0)
+                                            return 'Kết quả tình trạng tôm từ AI';
 
-                                        // Find first sick shrimp
-                                        const firstSick = currentResult.items.find(
+                                        // Aggregate all items to find any sickness across all checks
+                                        const allItems = results.reduce<HealthCheckItem[]>(
+                                            (acc, res) => acc.concat(res.items),
+                                            []
+                                        );
+
+                                        // Find first sick shrimp in the entire session
+                                        const firstSick = allItems.find(
                                             i => i.status !== 'HEALTHY'
                                         );
                                         if (firstSick) {
                                             return `Tôm ${firstSick.index}: ${firstSick.diagnosis}... Xem thêm`;
                                         }
 
-                                        // If all healthy, show Tôm #1 (or first item)
-                                        const firstItem =
-                                            currentResult.items.find(i => i.index === 1) ||
-                                            currentResult.items[0];
-                                        if (firstItem) {
-                                            return `Tôm ${firstItem.index}: ${firstItem.diagnosis}... Xem thêm`;
-                                        }
-
-                                        return currentResult.healthStatusSummary;
+                                        // If all healthy
+                                        return 'Tôm khỏe mạnh';
                                     })()}
                                 </Text>
                                 <Ionicons
@@ -379,7 +385,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                         if (totalChecked === 0) return '0%';
 
                                         const rate = (totalSick / totalChecked) * 100;
-                                        // Format nicely, maybe remove trailing zeros if integer
                                         return `${parseFloat(rate.toFixed(2))}%`;
                                     })()}
                                 </Text>
@@ -486,68 +491,72 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.modalListContent}
                         >
-                            {currentResult?.items.map(item => {
-                                const color = getStatusColor(item.status);
-                                return (
-                                    <View key={item.id} style={[styles.cardContainer]}>
-                                        <View style={styles.cardRow}>
-                                            {/* Left: Index Badge */}
-                                            <View
-                                                style={[
-                                                    styles.indexBadge,
-                                                    { backgroundColor: color + '20' },
-                                                ]}
-                                            >
-                                                <Text style={[styles.indexText, { color }]}>
-                                                    {item.index}
-                                                </Text>
-                                            </View>
-
-                                            {/* Center: Diagnosis */}
-                                            <View style={styles.cardCenter}>
-                                                <Text style={styles.diagnosisText}>
-                                                    {item.diagnosis}
-                                                </Text>
-                                                <View style={styles.progressRow}>
-                                                    <View style={styles.progressBarBackground}>
-                                                        <View
-                                                            style={[
-                                                                styles.progressBarFill,
-                                                                {
-                                                                    width: `${item.confidence}%`,
-                                                                    backgroundColor: color,
-                                                                },
-                                                            ]}
-                                                        />
-                                                    </View>
-                                                    <Text
-                                                        style={[
-                                                            styles.confidencePercent,
-                                                            { color },
-                                                        ]}
-                                                    >
-                                                        {item.confidence}%
+                            {results
+                                .reduce<HealthCheckItem[]>((acc, r) => acc.concat(r.items), [])
+                                .map((item, index) => {
+                                    // Use index + 1 for display index, ensuring unique keys if needed
+                                    // Or use item.id which we generated as unique timestamp-id
+                                    const color = getStatusColor(item.status);
+                                    return (
+                                        <View key={item.id} style={[styles.cardContainer]}>
+                                            <View style={styles.cardRow}>
+                                                {/* Left: Index Badge */}
+                                                <View
+                                                    style={[
+                                                        styles.indexBadge,
+                                                        { backgroundColor: color + '20' },
+                                                    ]}
+                                                >
+                                                    <Text style={[styles.indexText, { color }]}>
+                                                        {index + 1}
                                                     </Text>
                                                 </View>
-                                            </View>
 
-                                            {/* Right: Status Icon */}
-                                            <View
-                                                style={[
-                                                    styles.statusIconContainer,
-                                                    { backgroundColor: color + '15' },
-                                                ]}
-                                            >
-                                                <Ionicons
-                                                    name={getStatusIcon(item.status)}
-                                                    size={20}
-                                                    color={color}
-                                                />
+                                                {/* Center: Diagnosis */}
+                                                <View style={styles.cardCenter}>
+                                                    <Text style={styles.diagnosisText}>
+                                                        {item.diagnosis}
+                                                    </Text>
+                                                    <View style={styles.progressRow}>
+                                                        <View style={styles.progressBarBackground}>
+                                                            <View
+                                                                style={[
+                                                                    styles.progressBarFill,
+                                                                    {
+                                                                        width: `${item.confidence}%`,
+                                                                        backgroundColor: color,
+                                                                    },
+                                                                ]}
+                                                            />
+                                                        </View>
+                                                        <Text
+                                                            style={[
+                                                                styles.confidencePercent,
+                                                                { color },
+                                                            ]}
+                                                        >
+                                                            {item.confidence}%
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Right: Status Icon */}
+                                                <View
+                                                    style={[
+                                                        styles.statusIconContainer,
+                                                        { backgroundColor: color + '15' },
+                                                    ]}
+                                                >
+                                                    <Ionicons
+                                                        name={getStatusIcon(item.status)}
+                                                        size={20}
+                                                        color={color}
+                                                    />
+                                                </View>
                                             </View>
                                         </View>
-                                    </View>
-                                );
-                            })}
+                                    );
+                                })}
                         </ScrollView>
                     </Animated.View>
                 </View>
