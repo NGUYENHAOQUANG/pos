@@ -60,15 +60,6 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   }
 }
 
-// class NoScaleWindow: UIWindow {
-//   override var traitCollection: UITraitCollection {
-//     if #available(iOS 13.0, *) {
-//       return UITraitCollection(traitsFrom: [super.traitCollection, UITraitCollection(preferredContentSizeCategory: .large)])
-//     }
-//     return super.traitCollection
-//   }
-// }
-
 class NoScaleApplication: UIApplication {
     override var preferredContentSizeCategory: UIContentSizeCategory {
         return .large
