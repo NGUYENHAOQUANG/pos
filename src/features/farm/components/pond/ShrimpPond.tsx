@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 import {
     View,
     Text,
@@ -41,6 +42,7 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 // import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { useQuery } from '@tanstack/react-query';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
+import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     name,
@@ -69,8 +71,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.WASTE;
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
     const breedOptions = useFarmStore(state => state.breedOptions);
     const calculateDOC = useFarmStore(state => state.calculateDOC);
     const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
@@ -144,23 +144,17 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
     // Get cycle data for this pond - prioritize STORE data (has full details from ShrimpPondListScreens)
     // over fresh API data (which only has basic info from list endpoint)
+    // Get cycle data for this pond - prioritize active cycle
+    const activeCycle = useActiveCycle(pondId || '');
+
     const cycleData = useMemo(() => {
         if (!pondId) return null;
 
-        // 1. FIRST - Try store data (has full details because ShrimpPondListScreens fetches detail for each cycle)
-        const currentCycle = activeCycles[pondId];
-        const cyclesForPond = getCyclesByPondId(pondId);
+        // 1. Prefer active cycle
+        if (activeCycle) return activeCycle;
 
-        const storeData =
-            currentCycle ||
-            cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pondId)) ||
-            cyclesForPond.find(
-                cycle => cycle.pondId === pondId || cycle.sourcePonds?.includes(pondId)
-            ) ||
-            null;
-
-        return storeData;
-    }, [pondId, activeCycles, getCyclesByPondId]);
+        return null;
+    }, [pondId, activeCycle]);
 
     // Calculate DOC - check both possible field names
     const effectiveStockingDate = cycleData?.stockingDate || cycleData?.startDate;
@@ -302,7 +296,12 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                             </Text>
                             <Text style={styles.cycleDate}>
                                 {cycleData.stockingDate || cycleData.startDate
-                                    ? `${cycleData.stockingDate || cycleData.startDate} - nay`
+                                    ? `${formatDate(
+                                          new Date(
+                                              (cycleData.stockingDate ||
+                                                  cycleData.startDate) as string
+                                          )
+                                      )} - nay`
                                     : '- - nay'}
                             </Text>
                         </View>

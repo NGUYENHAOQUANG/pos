@@ -10,9 +10,8 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { CycleData, POND_TYPES } from '@/features/farm/types/farm.types';
-import { useCyclesByPond } from '@/features/farm/hooks/useCycle.ts';
-import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { POND_TYPES } from '@/features/farm/types/farm.types';
+import { useCyclesByPond, useActiveCycle } from '@/features/farm/hooks/useCycle.ts';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -39,12 +38,12 @@ export const ShrimpFarmScreens: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const activeCycles = useFarmStore(state => state.activeCycles);
+
     const breedOptions = useFarmStore(state => state.breedOptions);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+
     const getPondById = useFarmStore(state => state.getPondById);
     const ponds = useFarmStore(state => state.ponds);
-    const cycles = useFarmStore(state => state.cycles);
+
     const operationsByPondTypeRaw = useFarmStore(state => state.operationsByPondType);
     const operationsByPondType = useMemo(
         () => operationsByPondTypeRaw || {},
@@ -127,21 +126,7 @@ export const ShrimpFarmScreens: React.FC = () => {
         enabled: !!warehouses && warehouses.length > 0,
     });
 
-    const foundCycle = useMemo(() => {
-        if (!pond?.id) return null;
-        const cyclesForPond = getCyclesByPondId(pond.id);
-        if (cyclesForPond.length === 0) return null;
-        const cycleInReceiving = cyclesForPond.find(cycle =>
-            cycle.receivingPonds?.includes(pond.id)
-        );
-        if (cycleInReceiving) return cycleInReceiving;
-        return cyclesForPond[0] || null;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pond?.id, getCyclesByPondId, cycles]);
-    const currentCycle: CycleData | null = useMemo(() => {
-        const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
-        return currentCycleData || foundCycle;
-    }, [pond?.id, activeCycles, foundCycle]);
+    const currentCycle = useActiveCycle(pond?.id || '');
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -179,75 +164,9 @@ export const ShrimpFarmScreens: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
     const headerDisplayType = undefined;
 
-    const {
-        data: cyclesData,
-        refetch: refetchCycles,
-        isRefetching: isRefetchingCycles,
-    } = useCyclesByPond(pond?.id || '');
-    const setCycles = useFarmStore(state => state.setCycles);
-    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
-    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
-
-    useEffect(() => {
-        if (cyclesData) {
-            setCycles(cyclesData);
-
-            // Find and sync active cycle for this pond
-            if (pond?.id) {
-                const activeForPond = cyclesData.find(
-                    (c: any) =>
-                        (c.pondId === pond.id || c.sourcePonds?.includes(pond.id)) &&
-                        c.status !== 'Completed' &&
-                        c.status !== 'Canceled' &&
-                        c.status !== 'Hoàn thành'
-                );
-
-                if (activeForPond) {
-                    const syncCycleToStore = (data: any) => {
-                        const mappedCycle = {
-                            ...data,
-                            cycleName: data.name || data.cycleName,
-                            stockingQuantity:
-                                data.stockingQuantity || (data as any).totalStocking || 0,
-                            stockingDate: formatDate(
-                                new Date((data as any).createdAt || data.stockingDate || new Date())
-                            ),
-                            status:
-                                data.status === 'InProgress'
-                                    ? 'Chưa hoàn thành'
-                                    : data.status === 'Completed'
-                                    ? 'Hoàn thành'
-                                    : data.status,
-                        };
-                        saveActiveCycle(pond.id, mappedCycle);
-                    };
-
-                    if (activeForPond.id) {
-                        cycleApi
-                            .getCycleDetail(pond.id, activeForPond.id)
-                            .then(detail => {
-                                if (detail) {
-                                    syncCycleToStore(detail);
-                                } else {
-                                    syncCycleToStore(activeForPond);
-                                }
-                            })
-                            .catch(err => {
-                                console.warn(
-                                    'Failed to fetch cycle detail in screen, using list data',
-                                    err
-                                );
-                                syncCycleToStore(activeForPond);
-                            });
-                    } else {
-                        syncCycleToStore(activeForPond);
-                    }
-                } else {
-                    deleteActiveCycle(pond.id);
-                }
-            }
-        }
-    }, [cyclesData, setCycles, saveActiveCycle, deleteActiveCycle, pond?.id]);
+    const { refetch: refetchCycles, isRefetching: isRefetchingCycles } = useCyclesByPond(
+        pond?.id || ''
+    );
 
     // Refetch cycles when screen gains focus (e.g., after editing)
     useFocusEffect(
@@ -307,11 +226,15 @@ export const ShrimpFarmScreens: React.FC = () => {
                                         <View style={styles.cycleCardWrapper}>
                                             <CycleCard
                                                 cycleName={currentCycle.cycleName || 'Chưa đặt tên'}
-                                                startDate={currentCycle?.stockingDate ?? ''}
-                                                doc={calculateDOC(currentCycle?.stockingDate ?? '')}
-                                                stockingQuantity={
-                                                    currentCycle?.stockingQuantity || 0
+                                                startDate={
+                                                    currentCycle?.stockingDate
+                                                        ? formatDate(
+                                                              new Date(currentCycle.stockingDate)
+                                                          )
+                                                        : ''
                                                 }
+                                                doc={calculateDOC(currentCycle?.stockingDate ?? '')}
+                                                stockingQuantity={currentCycle?.totalStocking || 0}
                                                 breed={
                                                     currentCycle.breedName ||
                                                     shrimpSeeds?.find(
@@ -344,11 +267,16 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                         currentCycle.transferInfo.originalCycle
                                                             .cycleName || 'Chu kỳ ao vèo'
                                                     }
-                                                    startDate={
-                                                        currentCycle.transferInfo.originalCycle
-                                                            .stockingDate
-                                                    }
-                                                    endDate={currentCycle.transferInfo.transferDate}
+                                                    startDate={formatDate(
+                                                        new Date(
+                                                            currentCycle.transferInfo.originalCycle.stockingDate
+                                                        )
+                                                    )}
+                                                    endDate={formatDate(
+                                                        new Date(
+                                                            currentCycle.transferInfo.transferDate
+                                                        )
+                                                    )}
                                                     doc={
                                                         currentCycle.transferInfo.originalCycle
                                                             .doc || 0

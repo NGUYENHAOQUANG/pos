@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
 import {
     ENVIRONMENT_METRIC_IDS,
     PondData,
@@ -46,21 +46,21 @@ export const useAddEnvironment = ({
     const deleteEnvMeasurement = useDeleteEnvMeasurement();
 
     // Get active cycle for operationId (Store only - Safe)
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+    // Get active cycle for operationId
+    const activeCycle = useActiveCycle(pond?.id || '');
+    const { data: cycles } = useCyclesByPond(pond?.id || '');
 
     const currentCycle = useMemo(() => {
         if (!pond?.id) return null;
-        // Priority 1: Active cycle in store
-        const directCycle = activeCycles[pond.id];
-        if (directCycle) return directCycle;
+        // Priority 1: Active cycle
+        if (activeCycle) return activeCycle;
 
-        // Priority 2: History in store (find open or first)
-        const pondCycles = getCyclesByPondId(pond.id);
+        // Priority 2: History (find open or first)
+        const pondCycles = cycles || [];
         const found = pondCycles.find(c => c.status !== 'Hoàn thành') || pondCycles[0];
 
         return found;
-    }, [pond?.id, activeCycles, getCyclesByPondId]);
+    }, [pond?.id, activeCycle, cycles]);
 
     // Helper: Get metric value from measurements array
     const getMetricValue = (metricCode: string): string => {

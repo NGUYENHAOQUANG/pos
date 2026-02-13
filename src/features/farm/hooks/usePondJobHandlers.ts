@@ -1,7 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
 import { JOB_TYPES, PondData, JobExecution } from '@/features/farm/types/farm.types';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -18,8 +19,11 @@ export const usePondJobHandlers = (
 
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
     const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const activeCycles = useFarmStore(state => state.activeCycles);
-    const getCyclesByPondId = useFarmStore(state => state.getCyclesByPondId);
+
+    // Use hooks to get cycle data
+    const activeCycle = useActiveCycle(pond?.id || '');
+    const { data: cyclesData } = useCyclesByPond(pond?.id || '');
+    const cycles = useMemo(() => cyclesData || [], [cyclesData]);
 
     const handleAddJobItem = useCallback(
         (type: JobType) => {
@@ -91,12 +95,10 @@ export const usePondJobHandlers = (
                     latestShrimpSize = latestMeta?.shrimpSize;
 
                     // Get cycle data for current pond
-                    const currentCycleData = pond?.id ? activeCycles[pond.id] : null;
-                    const cyclesForPond = getCyclesByPondId(pond.id);
                     const cycleData =
-                        currentCycleData ||
-                        cyclesForPond.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
-                        cyclesForPond[0] ||
+                        activeCycle ||
+                        cycles.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
+                        cycles[0] ||
                         null;
 
                     navigation.navigate('AddTransferScreen', {
@@ -163,8 +165,8 @@ export const usePondJobHandlers = (
             navigation,
             apiMeasureSizeJobs,
             setIsMeasureSizeModalVisible,
-            activeCycles,
-            getCyclesByPondId,
+            activeCycle,
+            cycles,
             getPondJobItems,
             updatePondJob,
         ]
