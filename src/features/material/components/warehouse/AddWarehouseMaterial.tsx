@@ -13,8 +13,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { numericStringSchema } from '@/shared/utils/validation';
 import { Input } from '@/shared/components/forms/Input';
+import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -72,6 +72,26 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
         }
     };
 
+    const handleQuantityChange = React.useCallback(
+        (id: string, val: string) => {
+            const cleanVal = warehouseFormUtils.sanitizeNumericInput(val, 'quantity');
+            if (cleanVal !== null) {
+                onUpdateMaterial(id, 'quantity', cleanVal);
+            }
+        },
+        [onUpdateMaterial]
+    );
+
+    const handlePriceChange = React.useCallback(
+        (id: string, val: string) => {
+            const cleanVal = warehouseFormUtils.sanitizeNumericInput(val, 'price');
+            if (cleanVal !== null) {
+                onUpdateMaterial(id, 'price', cleanVal);
+            }
+        },
+        [onUpdateMaterial]
+    );
+
     return (
         <View style={styles.mainMaterialCard}>
             <CollapseHead title={title} isExpanded={isExpanded} onToggle={toggleExpand} />
@@ -79,27 +99,23 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
             {isExpanded && (
                 <View style={styles.mainContent}>
                     {materials.map((item, index) => {
-                        const itemTotal =
-                            (parseFloat(item.quantity) || 0) * (parseFloat(item.price) || 0);
+                        const itemTotal = warehouseFormUtils.calculateItemTotal(
+                            item.quantity,
+                            item.price
+                        );
                         const displayTotal =
                             itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
                         const isDropdownOpen = activeDropdownId === item.id;
 
-                        // Filter options to exclude materials selected in other rows
-                        const otherSelectedIds = materials
-                            .filter((_, idx) => idx !== index)
-                            .map(m => String(m.materialId || ''))
-                            .filter(id => id !== '');
-
-                        const rowOptions = materialOptions.filter(
-                            opt => !otherSelectedIds.includes(String(opt.value))
+                        const rowOptions = warehouseFormUtils.getAvailableDropdownOptions(
+                            materials,
+                            materialOptions,
+                            index
                         );
-
-                        // Calculate diff or check validation?
-                        const quantityNum = parseFloat(item.quantity) || 0;
-                        const isOverStock =
-                            item.availableQuantity !== undefined &&
-                            quantityNum > item.availableQuantity;
+                        const isOverStock = warehouseFormUtils.isQuantityOverStock(
+                            item.quantity,
+                            item.availableQuantity
+                        );
 
                         return (
                             <View
@@ -176,15 +192,9 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     required
                                                     placeholder="Nhập số lượng"
                                                     value={item.quantity}
-                                                    onChangeText={val => {
-                                                        if (/^\d*\.?\d*$/.test(val)) {
-                                                            onUpdateMaterial(
-                                                                item.id,
-                                                                'quantity',
-                                                                val
-                                                            );
-                                                        }
-                                                    }}
+                                                    onChangeText={val =>
+                                                        handleQuantityChange(item.id, val)
+                                                    }
                                                     keyboardType="numeric"
                                                     containerStyle={styles.noMarginBottom}
                                                 />
@@ -208,24 +218,12 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                     }
                                                     required
                                                     placeholder="Nhập đơn giá"
-                                                    value={item.price.replace(
-                                                        /\B(?=(\d{3})+(?!\d))/g,
-                                                        ','
+                                                    value={warehouseFormUtils.formatPriceInput(
+                                                        item.price
                                                     )}
-                                                    onChangeText={val => {
-                                                        // Remove commas for storage/validation
-                                                        const cleanVal = val.replace(/,/g, '');
-                                                        if (
-                                                            numericStringSchema.safeParse(cleanVal)
-                                                                .success
-                                                        ) {
-                                                            onUpdateMaterial(
-                                                                item.id,
-                                                                'price',
-                                                                cleanVal
-                                                            );
-                                                        }
-                                                    }}
+                                                    onChangeText={val =>
+                                                        handlePriceChange(item.id, val)
+                                                    }
                                                     keyboardType="numeric"
                                                     containerStyle={styles.noMarginBottom}
                                                     disabled={isPriceDisabled}
@@ -451,5 +449,16 @@ const styles = StyleSheet.create({
     },
     zIndexNormal: {
         zIndex: 10,
+    },
+    dropdownHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    addNewText: {
+        color: colors.blue[600],
+        fontSize: 14,
+        fontWeight: '500',
     },
 });
