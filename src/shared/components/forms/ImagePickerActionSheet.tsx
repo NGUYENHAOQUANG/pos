@@ -1,36 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Modal,
-    Pressable,
-    Platform,
-    FlatList,
-    Image,
-    PermissionsAndroid,
-    Dimensions,
-    Animated,
-    Linking,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import {
+    launchCamera,
+    launchImageLibrary,
+    ImagePickerResponse,
+    Asset,
+} from 'react-native-image-picker';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { PanGestureHandler, State, GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const { width, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const COLUMN_COUNT = 4;
-const SPACING = spacing.xs;
-const ITEM_SIZE = (width - spacing.lg * 2 - SPACING * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
-
-// ... interface remains same ...
 interface ImagePickerActionSheetProps {
     visible: boolean;
     onClose: () => void;
-    onTakePhoto: () => void;
-    onChooseFromLibrary: () => void;
+    onTakePhoto?: () => void; // Keeping for compatibility, though we might handle it internally
+    onChooseFromLibrary?: () => void; // Keeping for compatibility
     onImageSelected?: (
         uri: string,
         asset?: { fileName?: string; type?: string; width?: number; height?: number }
@@ -45,317 +29,105 @@ export function ImagePickerActionSheet({
     onImageSelected,
 }: ImagePickerActionSheetProps) {
     const insets = useSafeAreaInsets();
-    const [photos, setPhotos] = useState<any[]>([]);
-    const [hasPermission, setHasPermission] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
-    // Animation values
-    const translateY = useRef(new Animated.Value(0)).current;
 
-    // Initial height is 50% of screen, expanded is 90%
-    const INITIAL_HEIGHT = SCREEN_HEIGHT * 0.5;
-    const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.9;
-    const modalHeight = useRef(new Animated.Value(INITIAL_HEIGHT)).current;
-
-    const loadPhotos = React.useCallback(async () => {
-        try {
-            const result = await CameraRoll.getPhotos({
-                first: 32,
-                assetType: 'Photos',
-                include: ['filename', 'fileSize', 'imageSize'],
-                groupTypes: Platform.OS === 'ios' ? 'All' : undefined,
-            });
-
-            setPhotos(result.edges);
-        } catch (error) {
-            console.error('Failed to load photos:', error);
-        }
-    }, []);
-
-    const checkPermissionAndLoadPhotos = React.useCallback(async () => {
-        if (Platform.OS === 'android') {
-            const permission =
-                Platform.Version >= 33
-                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
-                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
-
-            const hasPermission = await PermissionsAndroid.check(permission);
-            if (hasPermission) {
-                setHasPermission(true);
-                loadPhotos();
-            } else {
-                const status = await PermissionsAndroid.request(permission);
-                if (status === PermissionsAndroid.RESULTS.GRANTED) {
-                    setHasPermission(true);
-                    loadPhotos();
-                } else {
-                    setHasPermission(false);
-                }
-            }
-        } else {
-            setHasPermission(true);
-            loadPhotos();
-        }
-    }, [loadPhotos]);
-
-    useEffect(() => {
-        if (visible) {
-            checkPermissionAndLoadPhotos();
-            // Reset state
-            setIsExpanded(false);
-            translateY.setValue(0);
-            modalHeight.setValue(INITIAL_HEIGHT);
-        }
-    }, [visible, checkPermissionAndLoadPhotos, modalHeight, translateY, INITIAL_HEIGHT]);
-
-    // Handle drag gesture
-    const onGestureEvent = Animated.event([{ nativeEvent: { translationY: translateY } }], {
-        useNativeDriver: false,
-    });
-
-    const onHandlerStateChange = (event: any) => {
-        if (event.nativeEvent.oldState === State.ACTIVE) {
-            const { translationY, velocityY } = event.nativeEvent;
-
-            // Dragging UP (negative Y) -> Expand
-            if (translationY < -50 || velocityY < -500) {
-                if (!isExpanded) {
-                    setIsExpanded(true);
-                    Animated.parallel([
-                        Animated.spring(modalHeight, {
-                            toValue: EXPANDED_HEIGHT,
-                            useNativeDriver: false,
-                            friction: 8,
-                        }),
-                        Animated.spring(translateY, {
-                            toValue: 0,
-                            useNativeDriver: false,
-                        }),
-                    ]).start();
-                } else {
-                    Animated.spring(translateY, {
-                        toValue: 0,
-                        useNativeDriver: false,
-                    }).start();
-                }
-            }
-            // Dragging DOWN (positive Y) -> Collapse or Close
-            else if (translationY > 50 || velocityY > 500) {
-                if (isExpanded) {
-                    setIsExpanded(false);
-                    Animated.parallel([
-                        Animated.spring(modalHeight, {
-                            toValue: INITIAL_HEIGHT,
-                            useNativeDriver: false,
-                            friction: 8,
-                        }),
-                        Animated.spring(translateY, {
-                            toValue: 0,
-                            useNativeDriver: false,
-                        }),
-                    ]).start();
-                } else {
-                    // Close immediate when dragging down
-                    onClose();
-                }
-            }
-            // Reset
-            else {
-                Animated.spring(translateY, {
-                    toValue: 0,
-                    useNativeDriver: false,
-                }).start();
+    const handleResponse = (response: ImagePickerResponse) => {
+        if (response.didCancel) {
+            // User cancelled image picker
+        } else if (response.errorCode) {
+            console.error('ImagePicker Error: ', response.errorMessage);
+        } else if (response.assets && response.assets.length > 0) {
+            const asset: Asset = response.assets[0];
+            if (asset.uri && onImageSelected) {
+                onImageSelected(asset.uri, {
+                    fileName: asset.fileName,
+                    type: asset.type,
+                    width: asset.width,
+                    height: asset.height,
+                });
             }
         }
-    };
-
-    const normalizeAsset = (
-        uri: string,
-        filename?: string | null,
-        type?: string | null,
-        width?: number | null,
-        height?: number | null
-    ) => {
-        let mimeType = type;
-        let name = filename || uri.split('/').pop() || `image-${Date.now()}`;
-
-        // Attempt to infer mimeType from URI or fileName if missing
-        if (!mimeType) {
-            const lowerUri = uri.toLowerCase();
-            const lowerName = name.toLowerCase();
-            if (lowerUri.endsWith('.png') || lowerName.endsWith('.png')) mimeType = 'image/png';
-            else if (lowerUri.endsWith('.gif') || lowerName.endsWith('.gif'))
-                mimeType = 'image/gif';
-            else if (lowerUri.endsWith('.webp') || lowerName.endsWith('.webp'))
-                mimeType = 'image/webp';
-            else mimeType = 'image/jpeg';
-        }
-
-        // Ensure extension exists and matches mimeType
-        const hasExtension = name.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/);
-        if (!hasExtension) {
-            const ext = mimeType.split('/')[1] === 'jpeg' ? 'jpg' : mimeType.split('/')[1] || 'jpg';
-            name = `${name}.${ext}`;
-        }
-
-        return {
-            fileName: name,
-            type: mimeType,
-            width: width || undefined,
-            height: height || undefined,
-        };
-    };
-
-    const handlePhotoSelect = (
-        uri: string,
-        asset?: { fileName?: string; type?: string; width?: number; height?: number }
-    ) => {
         onClose();
-        setTimeout(() => {
-            if (onImageSelected) {
-                const normalized = asset
-                    ? normalizeAsset(uri, asset.fileName, asset.type, asset.width, asset.height)
-                    : undefined;
-
-                onImageSelected(uri, normalized);
-            } else {
-                onChooseFromLibrary();
-            }
-        }, 500);
     };
 
-    const renderHeader = () => (
-        <PanGestureHandler
-            onGestureEvent={onGestureEvent}
-            onHandlerStateChange={onHandlerStateChange}
-        >
-            <Animated.View style={styles.header}>
-                <View style={styles.indicator} />
-                <Text style={styles.title}>Chọn ảnh</Text>
-            </Animated.View>
-        </PanGestureHandler>
-    );
-
-    const renderItem = ({ item, index: _index }: { item: any; index: number }) => {
-        if (item.isCamera) {
-            return (
-                <TouchableOpacity
-                    style={[styles.photoItem, styles.cameraItem]}
-                    onPress={() => {
-                        onClose();
-                        setTimeout(() => onTakePhoto(), 500);
-                    }}
-                >
-                    <Ionicons name="camera" size={32} color={colors.black} />
-                    <Text style={styles.cameraText}>Chụp ảnh</Text>
-                </TouchableOpacity>
-            );
+    const handleTakePhoto = async () => {
+        if (onTakePhoto) {
+            onTakePhoto();
+            onClose();
+        } else {
+            const result = await launchCamera({
+                mediaType: 'photo',
+                quality: 0.8,
+                saveToPhotos: true,
+            });
+            handleResponse(result);
         }
-
-        if (item.isLibrary) {
-            return (
-                <TouchableOpacity
-                    style={[
-                        styles.photoItem,
-                        styles.cameraItem,
-                        { backgroundColor: colors.gray[100] },
-                    ]}
-                    onPress={() => {
-                        onClose();
-                        setTimeout(() => onChooseFromLibrary(), 500);
-                    }}
-                >
-                    <Ionicons name="images" size={32} color={colors.black} />
-                    <Text style={styles.cameraText}>Thư viện</Text>
-                </TouchableOpacity>
-            );
-        }
-
-        return (
-            <TouchableOpacity
-                style={styles.photoItem}
-                onPress={() => {
-                    handlePhotoSelect(item.node.image.uri || item.node.image, {
-                        fileName: item.node.image.filename,
-                        type: item.node.type,
-                        width: item.node.image.width,
-                        height: item.node.image.height,
-                    });
-                }}
-            >
-                <Image source={{ uri: item.node.image.uri }} style={styles.photo} />
-            </TouchableOpacity>
-        );
     };
 
-    const data = [{ isCamera: true }, { isLibrary: true }, ...photos];
+    const handleChooseLibrary = async () => {
+        if (onChooseFromLibrary) {
+            onChooseFromLibrary();
+            onClose();
+        } else {
+            const result = await launchImageLibrary({
+                mediaType: 'photo',
+                quality: 0.8,
+                selectionLimit: 1, // Single image selection
+            });
+            handleResponse(result);
+        }
+    };
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <GestureHandlerRootView style={{ width: '100%', height: '100%' }}>
-                <Pressable style={styles.backdrop} onPress={onClose}>
-                    <Pressable style={styles.container} onPress={e => e.stopPropagation()}>
-                        <Animated.View
-                            style={[
-                                styles.card,
-                                {
-                                    height: Animated.subtract(modalHeight, translateY),
-                                },
-                            ]}
-                        >
-                            {renderHeader()}
+            <Pressable style={styles.backdrop} onPress={onClose}>
+                <Pressable
+                    style={[styles.card, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}
+                    onPress={e => e.stopPropagation()}
+                >
+                    <View style={styles.header}>
+                        <View style={styles.indicator} />
+                        <Text style={styles.title}>Chọn ảnh thiết bị</Text>
+                    </View>
 
-                            <FlatList
-                                data={data}
-                                renderItem={renderItem}
-                                keyExtractor={(item, index) =>
-                                    item.isCamera
-                                        ? 'camera'
-                                        : item.isLibrary
-                                        ? 'library'
-                                        : (item.node?.image?.uri || index.toString()) + index
-                                }
-                                numColumns={COLUMN_COUNT}
-                                columnWrapperStyle={styles.columnWrapper}
-                                contentContainerStyle={styles.listContent}
-                                showsVerticalScrollIndicator={false}
-                                style={styles.flatList}
-                                ListFooterComponent={
-                                    !hasPermission ? (
-                                        <View
-                                            style={[
-                                                styles.permissionContainer,
-                                                {
-                                                    marginBottom: Math.max(
-                                                        insets.bottom,
-                                                        spacing.md
-                                                    ),
-                                                },
-                                            ]}
-                                        >
-                                            <Text style={styles.permissionText}>
-                                                Cần quyền truy cập thư viện ảnh để hiển thị ảnh gần
-                                                đây.
-                                            </Text>
-                                            <TouchableOpacity
-                                                style={styles.permissionButton}
-                                                onPress={() => Linking.openSettings()}
-                                            >
-                                                <Text style={styles.permissionButtonText}>
-                                                    Cấp quyền
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    ) : (
-                                        <View
-                                            style={{ height: Math.max(insets.bottom, spacing.md) }}
-                                        />
-                                    )
-                                }
-                            />
-                        </Animated.View>
-                    </Pressable>
+                    <View style={styles.content}>
+                        <TouchableOpacity
+                            style={styles.optionButton}
+                            onPress={handleTakePhoto}
+                            activeOpacity={0.7}
+                        >
+                            <View
+                                style={[
+                                    styles.iconContainer,
+                                    { backgroundColor: colors.primary + '15' },
+                                ]}
+                            >
+                                <Ionicons name="camera" size={24} color={colors.primary} />
+                            </View>
+                            <Text style={styles.optionText}>Chụp ảnh mới</Text>
+                            <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                        </TouchableOpacity>
+
+                        <View style={styles.divider} />
+
+                        <TouchableOpacity
+                            style={styles.optionButton}
+                            onPress={handleChooseLibrary}
+                            activeOpacity={0.7}
+                        >
+                            <View
+                                style={[
+                                    styles.iconContainer,
+                                    { backgroundColor: colors.info + '15' },
+                                ]}
+                            >
+                                <Ionicons name="images" size={24} color={colors.info} />
+                            </View>
+                            <Text style={styles.optionText}>Chọn từ thư viện</Text>
+                            <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
+                        </TouchableOpacity>
+                    </View>
                 </Pressable>
-            </GestureHandlerRootView>
+            </Pressable>
         </Modal>
     );
 }
@@ -366,88 +138,55 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
     },
-    container: {
-        width: '100%',
-        justifyContent: 'flex-end',
-    },
     card: {
         backgroundColor: colors.white,
         borderTopLeftRadius: borderRadius.xl,
         borderTopRightRadius: borderRadius.xl,
         paddingTop: spacing.sm,
-        maxHeight: '100%',
         width: '100%',
         overflow: 'hidden',
     },
     header: {
         alignItems: 'center',
-        paddingBottom: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[200],
+        paddingBottom: spacing.lg,
     },
     indicator: {
         width: 40,
         height: 4,
         backgroundColor: colors.gray[300],
         borderRadius: 2,
-        marginBottom: spacing.sm,
+        marginBottom: spacing.md,
     },
     title: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: '700',
         color: colors.text,
     },
-    flatList: {
-        flexGrow: 0,
+    content: {
+        paddingHorizontal: spacing.lg,
     },
-    listContent: {
-        padding: spacing.lg,
-        paddingBottom: spacing.xl * 2,
+    optionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: spacing.md,
     },
-    columnWrapper: {
-        gap: SPACING,
-        marginBottom: SPACING,
-    },
-    photoItem: {
-        width: ITEM_SIZE,
-        height: ITEM_SIZE,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
-        backgroundColor: colors.gray[100],
-    },
-    photo: {
-        width: '100%',
-        height: '100%',
-    },
-    cameraItem: {
+    iconContainer: {
+        width: 44,
+        height: 44,
+        borderRadius: borderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.gray[100],
+        marginRight: spacing.md,
     },
-    cameraText: {
-        marginTop: spacing.xs,
-        fontSize: 12,
-        color: colors.black,
+    optionText: {
+        flex: 1,
+        fontSize: 16,
         fontWeight: '500',
-    },
-
-    permissionContainer: {
-        padding: spacing.xl,
-        alignItems: 'center',
-        gap: spacing.md,
-    },
-    permissionText: {
-        textAlign: 'center',
         color: colors.text,
     },
-    permissionButton: {
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.xl,
-        backgroundColor: colors.primary,
-        borderRadius: borderRadius.md,
-    },
-    permissionButtonText: {
-        color: colors.white,
-        fontWeight: '600',
+    divider: {
+        height: 1,
+        backgroundColor: colors.gray[100],
+        marginLeft: 60, // Align with text
     },
 });
