@@ -24,5 +24,13 @@ class MainApplication : Application(), ReactApplication {
     super.onCreate()
     loadReactNative(this)
   }
+
+  override fun getResources(): android.content.res.Resources {
+    val res = super.getResources()
+    val config = android.content.res.Configuration(res.configuration)
+    config.fontScale = 1.0f
+    res.updateConfiguration(config, res.displayMetrics)
+    return res
+  }
 }
 
