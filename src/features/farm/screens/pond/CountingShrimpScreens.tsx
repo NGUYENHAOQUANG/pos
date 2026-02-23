@@ -216,6 +216,7 @@ const CountingShrimpScreen: React.FC = () => {
                                         setDetections([]);
                                         setCurrentImageCount(0);
                                         setIsCountAdded(false);
+                                        setImageDimensions({ width: 1, height: 1 });
                                     }}
                                     returnBase64={true}
                                     aspectRatio={

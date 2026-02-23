@@ -373,6 +373,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                     onImageRemove={() => {
                                         _setImageUri(null);
                                         setDetections([]);
+                                        setImageDimensions({ width: 1, height: 1 });
                                     }}
                                     returnBase64={true}
                                     aspectRatio={

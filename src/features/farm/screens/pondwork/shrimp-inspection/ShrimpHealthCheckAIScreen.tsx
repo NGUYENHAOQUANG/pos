@@ -411,6 +411,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                                         _setImageUri(null);
                                         setImageBase64(null);
                                         setDetections([]);
+                                        setImageDimensions({ width: 1, height: 1 });
                                     }}
                                     returnBase64={true}
                                     aspectRatio={
