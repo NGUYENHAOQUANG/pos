@@ -1,9 +1,8 @@
+import { useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { CreateCycleCommand, UpdateCycleCommand } from '@/features/farm/types/farm.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 
 export const useCreateCycle = () => {
     const queryClient = useQueryClient();
@@ -17,32 +16,6 @@ export const useCreateCycle = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
-
-            // Sync to store using response data immediately to avoid extra round-trip
-            try {
-                const detail = responseData as any;
-                if (detail && detail.id) {
-                    const mappedCycle = {
-                        ...detail,
-                        cycleName: detail.name || detail.cycleName,
-                        sourcePonds: detail.sourcePonds || (detail.pondId ? [detail.pondId] : []),
-                        receivingPonds: detail.receivingPonds || [],
-                        stockingQuantity: detail.stockingQuantity || detail.totalStocking || 0,
-                        stockingDate: formatDate(
-                            new Date(detail.createdAt || detail.stockingDate || new Date())
-                        ),
-                        status:
-                            detail.status === 'InProgress'
-                                ? 'Chưa hoàn thành'
-                                : detail.status === 'Completed'
-                                ? 'Hoàn thành'
-                                : detail.status,
-                    };
-                    useFarmStore.getState().saveActiveCycle(variables.pondId, mappedCycle);
-                }
-            } catch (err) {
-                console.warn('Failed to sync created cycle to store', err);
-            }
         },
     });
 };
@@ -67,34 +40,6 @@ export const useUpdateCycle = () => {
             // Refresh ALL pond lists
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
-
-            // Sync to store using response data immediately
-            try {
-                const detail = data as any;
-                if (detail) {
-                    const mappedCycle = {
-                        ...detail,
-                        cycleName: detail.name || detail.cycleName,
-                        sourcePonds: detail.sourcePonds || (detail.pondId ? [detail.pondId] : []),
-                        receivingPonds: detail.receivingPonds || [],
-                        stockingQuantity: detail.stockingQuantity || detail.totalStocking || 0,
-                        stockingDate: formatDate(
-                            new Date(detail.createdAt || detail.stockingDate || new Date())
-                        ),
-                        status:
-                            detail.status === 'InProgress'
-                                ? 'Chưa hoàn thành'
-                                : detail.status === 'Completed'
-                                ? 'Hoàn thành'
-                                : detail.status,
-                    };
-
-                    // Update active cycle in store
-                    useFarmStore.getState().saveActiveCycle(variables.pondId, mappedCycle);
-                }
-            } catch (err) {
-                console.warn('Failed to sync updated cycle to store', err);
-            }
         },
     });
 };
@@ -123,5 +68,46 @@ export const useCyclesByPond = (pondId: string) => {
         enabled: !!pondId,
         staleTime: 0,
         refetchOnMount: 'always',
+    });
+};
+
+export const useActiveCycle = (pondId: string) => {
+    const { data: cycles } = useQuery({
+        queryKey: farmKeys.cycles.byPond(pondId),
+        queryFn: () => cycleApi.getCyclesByPond(pondId),
+        enabled: !!pondId,
+        staleTime: 1000 * 60 * 5, // Cache 5 minutes
+    });
+
+    const activeCycleSummary = useMemo(() => {
+        if (!cycles || cycles.length === 0) return null;
+
+        return (
+            cycles.find(
+                c =>
+                    c.status === 'InProgress' ||
+                    c.status === 'Chưa hoàn thành' ||
+                    c.status === 'Hoạt động'
+            ) || null
+        );
+    }, [cycles]);
+
+    const activeCycleId = activeCycleSummary?.id;
+
+    const { data: cycleDetail } = useQuery({
+        queryKey: farmKeys.cycles.detail(activeCycleId || ''),
+        queryFn: () => cycleApi.getCycleDetail(pondId, activeCycleId!),
+        enabled: !!pondId && !!activeCycleId,
+        staleTime: 1000 * 60 * 5, // Cache 5 minutes
+    });
+
+    return cycleDetail || activeCycleSummary || null;
+};
+
+export const useCycleDetail = (pondId: string, cycleId: string) => {
+    return useQuery({
+        queryKey: ['cycle', pondId, cycleId],
+        queryFn: () => cycleApi.getCycleDetail(pondId, cycleId),
+        enabled: !!pondId && !!cycleId,
     });
 };

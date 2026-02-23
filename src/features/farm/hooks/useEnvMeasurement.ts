@@ -16,7 +16,7 @@ import {
     EnvironmentMeta,
 } from '@/features/farm/types/farm.types';
 import { useMemo } from 'react';
-import { useEnvironmentInit } from '@/features/farm/hooks/envhooks/useEnvironmentLogic';
+import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 // Query keys

@@ -100,7 +100,7 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
 
                             <View style={styles.content}>
                                 {/* Material Selection */}
-                                <View style={styles.fieldGroup}>
+                                <View style={[styles.fieldGroup, { zIndex: 100 }]}>
                                     <Text style={styles.label}>
                                         <Text style={styles.required}>* </Text>
                                         Chọn loại sản phẩm

@@ -42,9 +42,7 @@ export const AddTransferScreen: React.FC = () => {
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
     const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getCurrentCycleForPond = useFarmStore(state => state.getCurrentCycleForPond);
     const breedOptions = useFarmStore(state => state.breedOptions);
-    const handleTransferPond = useFarmStore(state => state.handleTransferPond);
     const ponds = useFarmStore(state => state.ponds); // Fallback for dropdown when zoneId unavailable
 
     // API mutation hook
@@ -156,10 +154,8 @@ export const AddTransferScreen: React.FC = () => {
                 ) || cyclesData[0];
             return activeCycle;
         }
-        // Priority 3: From local store (fallback)
-        if (!pond?.id) return null;
-        return getCurrentCycleForPond(pond.id);
-    }, [cycleDataFromParams, cyclesData, pond?.id, getCurrentCycleForPond]);
+        return null;
+    }, [cycleDataFromParams, cyclesData]);
 
     const shrimpBreed = cycleData?.breedSource
         ? breedOptions.find(b => b.value === cycleData.breedSource)?.label
@@ -394,17 +390,7 @@ export const AddTransferScreen: React.FC = () => {
 
                 updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
 
-                // Handle transfer: create cycles for receiving ponds (local state)
-                handleTransferPond(
-                    pondId,
-                    receivingPonds.map(p => ({
-                        receivingPond: p.receivingPond,
-                        quantity: p.quantity,
-                    })),
-                    formatDate(selectedDate),
-                    shrimpSize,
-                    totalEstimatedShrimp
-                );
+                updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
             } catch {
                 // Error is already handled in useCreateStockTransfer hook
                 return;
@@ -413,14 +399,7 @@ export const AddTransferScreen: React.FC = () => {
 
         // Reset navigation stack: MainTabs -> PondDetail
         // This way: user stays on PondDetail, but back button goes to MainTabs (farm list)
-        if (pond) {
-            navigation.reset({
-                index: 1,
-                routes: [{ name: 'MainTabs' }, { name: 'PondDetail', params: { pond } }],
-            });
-        } else {
-            navigation.goBack();
-        }
+        navigation.goBack();
     };
 
     return (

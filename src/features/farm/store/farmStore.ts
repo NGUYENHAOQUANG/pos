@@ -289,10 +289,9 @@ export const useFarmStore = create<FarmState>()(
                 transferPondJobs: state.transferPondJobs,
                 cleanPondJobs: state.cleanPondJobs,
                 sunDryJobs: state.sunDryJobs,
-                activeCycles: state.activeCycles,
+
                 ponds: state.ponds,
                 seasons: state.seasons,
-                cycles: state.cycles,
                 environmentSettings: state.environmentSettings,
                 zones: state.zones,
                 selectedZoneId: state.selectedZoneId,

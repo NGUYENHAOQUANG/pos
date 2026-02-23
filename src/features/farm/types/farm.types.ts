@@ -79,46 +79,67 @@ export interface Zone {
 export interface PondData {
     id: string;
     name: string;
-    area?: string; // Legacy
-    areaSqm?: number; // From API
+    area?: string;
+    areaSqm?: number;
     type: PondType | string;
     lastUpdate?: string;
     lastActivity?: string;
-    size?: string; // Kích thước (m) - ví dụ: "50×28"
-    zone?: string; // Khu vực - ví dụ: "KV-A"
-    zoneId?: string; // Added for filtering
-    status?: string; // Trạng thái - ví dụ: "Đang hoạt động", "Chuẩn bị"
-    farmCode?: string; // Mã trại - ví dụ: "KG-01"
-    shape?: string; // Hình dáng ao - ví dụ: "Hình chữ nhật", "Vuông", "Bất định"
-    depth?: string | number; // Legacy
+    size?: string;
+    zone?: string;
+    zoneId?: string;
+    status?: string;
+    farmCode?: string;
+    shape?: string;
+    depth?: string | number;
     maxDepth?: number;
 }
 
 export interface CycleData {
-    id: string; // Mã chu kỳ
+    id: string;
     breedSource: string;
     breedName?: string;
-    season: string | any; // API returns object sometimes
-    cycleName: string; // Mapped from 'name'? Check response
-    name?: string; // Real API field
-    stockingDate: string; // Date?
-    startDate?: string; // Real API field maybe?
+    season: string | any;
+    cycleName: string;
+    name?: string;
+    stockingDate: string;
+    startDate?: string;
     endDate?: string;
     stockingQuantity: number;
-    totalStocking?: number; // Real API field
+    totalStocking?: number;
     age: number;
-    ageDays?: number; // Real API field
+    ageDays?: number;
     density: number;
     estimatedCost: number;
     notes?: string;
     pondId?: string;
     sourcePonds?: string[];
     receivingPonds?: string[];
-    status?: string; // 'InProgress', 'Active', 'Completed'
+    status?: string;
     doc?: number;
     transferInfo?: TransferInfo;
     warehouseItemId?: string;
-    pond?: any; // API returns pond object
+    pond?: any;
+}
+
+export interface CycleApiResponse {
+    id: string;
+    name?: string;
+    cycleName?: string;
+    breedSource?: string;
+    warehouseItemId?: string;
+    stockingDate?: string;
+    createdAt?: string;
+    season: SeasonData | string;
+    stockingQuantity?: number;
+    totalStocking?: number;
+    age?: number;
+    ageDays?: number;
+    density?: number;
+    estimatedCost?: number;
+    notes?: string;
+    status?: string;
+    pondId?: string;
+    [key: string]: any;
 }
 
 export interface CreateCycleCommand {
@@ -203,6 +224,7 @@ export interface BreedOption extends DropdownItem {
     materialCode?: string;
     price?: number;
     supplier?: string;
+    remainingQuantity?: number;
 }
 
 export interface ShrimpInspectionMeta {

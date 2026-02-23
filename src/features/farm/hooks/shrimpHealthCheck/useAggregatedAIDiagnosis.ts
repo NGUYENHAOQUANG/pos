@@ -69,11 +69,13 @@ export const useAggregatedAIDiagnosis = (
         }
 
         // Convert to percentages
-        const percentages = Object.entries(diagnosisCounts).map(([diagnosis, count]) => ({
-            diagnosis,
-            count,
-            percentage: parseFloat(((count / totalShrimp) * 100).toFixed(1)),
-        }));
+        const percentages = Object.entries(diagnosisCounts)
+            .filter(([diagnosis]) => diagnosis !== 'Khỏe mạnh')
+            .map(([diagnosis, count]) => ({
+                diagnosis,
+                count,
+                percentage: parseFloat(((count / totalShrimp) * 100).toFixed(1)),
+            }));
 
         // Sort by percentage descending
         percentages.sort((a, b) => b.percentage - a.percentage);

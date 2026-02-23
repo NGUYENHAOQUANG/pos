@@ -17,16 +17,20 @@ import {
     BreedOption,
     UpdateCycleCommand,
 } from '@/features/farm/types/farm.types';
-import { useCreateCycle, useUpdateCycle, useDeleteCycle } from '@/features/farm/hooks/useCycle';
+import {
+    useCreateCycle,
+    useUpdateCycle,
+    useDeleteCycle,
+    useCycleDetail,
+} from '@/features/farm/hooks/useCycle';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-// import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { normalizeApiError } from '@/core/api/errorHandler';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 import { IShrimpSeed } from '@/features/material/types/warehouse.types';
 import { useQuery } from '@tanstack/react-query';
-import { cycleApi } from '@/features/farm/api/cycleAPI';
+
 import { pondApi } from '@/features/farm/api/pondApi';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
@@ -37,10 +41,6 @@ export const CreateCycleScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
 
     // Lấy các hàm từ useFarmStore với selectors
-    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
-    const deleteActiveCycle = useFarmStore(state => state.deleteActiveCycle);
-    const deleteCycle = useFarmStore(state => state.deleteCycle);
-    const updateCycleStore = useFarmStore(state => state.updateCycle);
     const ponds = useFarmStore(state => state.ponds);
 
     const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
@@ -59,7 +59,6 @@ export const CreateCycleScreen: React.FC = () => {
     }, [aiCount]);
 
     // --- Data Fetching Logic (Lifted from CreateCycleForm) ---
-    // 1. Determine Context
     // 1. Determine Context
     // const ponds = useFarmStore(state => state.ponds); // Removed redeclaration
     const storePond = ponds.find(p => p.id === pondId);
@@ -86,9 +85,6 @@ export const CreateCycleScreen: React.FC = () => {
         PageSize: 100,
         ZoneId: effectiveZoneId,
     });
-
-    // Default to the first warehouse found for this zone (unused, replaced by all warehouses fetch)
-    // const defaultWarehouseId = warehouses?.[0]?.id;
 
     // 3. Fetch Shrimp Seeds from ALL warehouses to ensure we find the cycle's seed
     // (Cycle might use seed from a warehouse that isn't the first one)
@@ -176,9 +172,9 @@ export const CreateCycleScreen: React.FC = () => {
                 materialCode: seed.materialCode,
                 price: seed.averagePrice || 0,
                 supplier: seed.manufacturer || seed.supplier || 'N/A',
+                remainingQuantity: seed.quantity ?? 0,
             }));
         } else {
-            // options = [...storeBreedOptions]; // DISABLED MOCK DATA
             options = [];
         }
 
@@ -197,6 +193,7 @@ export const CreateCycleScreen: React.FC = () => {
                         materialCode: '', // Unknown if not in list
                         price: 0, // Unknown
                         supplier: '',
+                        remainingQuantity: 0,
                     },
                     ...options,
                 ];
@@ -256,21 +253,8 @@ export const CreateCycleScreen: React.FC = () => {
         );
     };
 
-    // Auto-select first breed REMOVED per user request
-    // Instead, try to fetch detail if ID exists (to handle missing fields in summary)
-    const { data: detailData } = useQuery({
-        queryKey: ['cycleDetail', pondId, initialData?.id],
-        queryFn: async () => {
-            if (!pondId || !initialData?.id) return null;
-            try {
-                return await cycleApi.getCycleDetail(pondId, initialData.id);
-            } catch (e) {
-                console.warn('EditScreen: Failed to fetch detail', e);
-                return null;
-            }
-        },
-        enabled: !!pondId && !!initialData?.id,
-    });
+    // Try to fetch detail if ID exists (to handle missing fields in summary)
+    const { data: detailData } = useCycleDetail(pondId, initialData?.id || '');
 
     // Update form when detail data arrives
     React.useEffect(() => {
@@ -340,22 +324,7 @@ export const CreateCycleScreen: React.FC = () => {
             updateCycle(
                 { pondId, cycleId: initialData.id, data: updateCommand },
                 {
-                    onSuccess: _result => {
-                        const selectedBreed = breedOptions.find(
-                            b => b.value === command.warehouseItemId
-                        );
-
-                        const updatedCycleData = (_result as any).data || _result;
-
-                        const fullCycleData: CycleData = {
-                            ...updatedCycleData,
-                            // Ensure fields are preserved/mapped if API returns partial
-                            breedName: selectedBreed?.label,
-                        };
-
-                        saveActiveCycle(pondId, fullCycleData);
-                        updateCycleStore(initialData.id, fullCycleData);
-
+                    onSuccess: () => {
                         Toast.show({
                             type: 'success',
                             text1: 'Đã cập nhật chu kỳ thành công',
@@ -380,29 +349,7 @@ export const CreateCycleScreen: React.FC = () => {
         createCycle(
             { pondId, data: command },
             {
-                onSuccess: result => {
-                    // Find breed name
-                    const selectedBreed = breedOptions.find(
-                        b => b.value === command.warehouseItemId
-                    );
-
-                    const fullCycleData: CycleData = {
-                        ...cycleData,
-                        id: result.id || `${pondId}-${Date.now()}`,
-                        cycleName: command.name,
-                        breedSource: command.warehouseItemId,
-                        breedName: selectedBreed?.label, // Save the breed name
-                        season: command.seasonId,
-                        stockingDate: cycleData.stockingDate || formatDateWithTime(new Date()),
-                        stockingQuantity: command.totalStocking,
-                        age: command.ageDays,
-                        density: cycleData.density || 0, // Should be calculated or returned by API
-                        estimatedCost: cycleData.estimatedCost || 0,
-                        sourcePonds: [pondId],
-                    } as CycleData;
-
-                    saveActiveCycle(pondId, fullCycleData);
-
+                onSuccess: () => {
                     Toast.show({
                         type: 'success',
                         text1: isEdit
@@ -434,8 +381,6 @@ export const CreateCycleScreen: React.FC = () => {
                     pondId,
                     cycleId: initialData.id,
                 });
-                deleteActiveCycle(pondId);
-                deleteCycle(initialData.id);
                 setShowDeleteModal(false);
                 const successMessage =
                     response?.success === true ||

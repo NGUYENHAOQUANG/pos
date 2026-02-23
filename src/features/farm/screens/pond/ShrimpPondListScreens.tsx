@@ -13,8 +13,6 @@ import { FarmData, POND_TYPES, PondData } from '@/features/farm/types/farm.types
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { PondListSkeleton } from '@/features/farm/components/skeleton/PondListSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
-import { cycleApi } from '@/features/farm/api/cycleAPI';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 
 interface ShrimpPondListScreensProps {}
 
@@ -164,104 +162,9 @@ export const ShrimpPondListScreens: React.FC<ShrimpPondListScreensProps> = () =>
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const setCycles = useFarmStore(state => state.setCycles);
-    const saveActiveCycle = useFarmStore(state => state.saveActiveCycle);
-
-    const fetchAndSyncCycles = useCallback(
-        async (pondsToFetch: PondData[]) => {
-            if (pondsToFetch.length === 0) return;
-
-            try {
-                // 1. Fetch summary list for all ponds
-                const cyclePromises = pondsToFetch.map(p => cycleApi.getCyclesByPond(p.id));
-                const cyclesResults = await Promise.all(cyclePromises);
-                const allCyclesFlat = cyclesResults.reduce(
-                    (acc: any[], val: any[]) => acc.concat(val),
-                    []
-                );
-
-                // 2. Fetch DETAILS only for ACTIVE cycles to avoid N+1 for history
-                const detailPromises = allCyclesFlat.map(async (c: any) => {
-                    // OPTIMIZATION: Only fetch detail for InProgress cycles
-                    if (c.id && c.pondId && c.status === 'InProgress') {
-                        try {
-                            const detail = await cycleApi.getCycleDetail(c.pondId, c.id);
-                            return { ...c, ...detail };
-                        } catch (_) {
-                            return c;
-                        }
-                    }
-                    return c;
-                });
-
-                const allCyclesDetailed = await Promise.all(detailPromises);
-
-                // 3. Map API response to internal CycleData structure
-                const mappedCycles = allCyclesDetailed.map((c: any) => ({
-                    ...c,
-                    cycleName: c.name || c.cycleName,
-                    sourcePonds: c.sourcePonds || (c.pondId ? [c.pondId] : []),
-                    receivingPonds: c.receivingPonds || [],
-                    stockingQuantity: c.stockingQuantity || c.totalStocking || 0,
-                    stockingDate: formatDate(new Date(c.createdAt || c.stockingDate || new Date())),
-                    status:
-                        c.status === 'InProgress'
-                            ? 'Chưa hoàn thành'
-                            : c.status === 'Completed'
-                            ? 'Hoàn thành'
-                            : c.status,
-                }));
-
-                // 4. Sync to store
-                setCycles(mappedCycles);
-
-                // 5. Update activeCycles
-                const deleteActiveCycle = useFarmStore.getState().deleteActiveCycle;
-
-                pondsToFetch.forEach(pond => {
-                    const activeForPond = mappedCycles.find(
-                        c =>
-                            (c.pondId === pond.id || c.sourcePonds?.includes(pond.id)) &&
-                            c.status !== 'Completed' &&
-                            c.status !== 'Canceled' &&
-                            c.status !== 'Hoàn thành'
-                    );
-
-                    if (activeForPond) {
-                        saveActiveCycle(pond.id, activeForPond);
-                    } else {
-                        deleteActiveCycle(pond.id);
-                    }
-                });
-            } catch (err) {
-                console.error('Failed to sync cycles', err);
-            }
-        },
-        [setCycles, saveActiveCycle]
-    );
-
     const handleRefresh = useCallback(async () => {
-        const { data: newPondsData } = await refetch();
-        const allItems = newPondsData?.pages
-            ? newPondsData.pages.reduce((acc: PondData[], page: any) => [...acc, ...page.items], [])
-            : [];
-        await fetchAndSyncCycles(allItems);
-    }, [refetch, fetchAndSyncCycles]);
-
-    // Track if we've done the initial fetch
-    const hasFetchedCycles = useRef(false);
-
-    // Refetch cycle details when screen gains focus (optional, but good for data freshness)
-    // Refetch cycle details when screen gains focus is removed to prevent N+1 loop causing lag
-    // Data is already synced via mutation onSuccess or initial load
-
-    useEffect(() => {
-        // Only run once when ponds are loaded for the first time
-        if (ponds.length > 0 && !hasFetchedCycles.current && !isLoadingPonds) {
-            hasFetchedCycles.current = true;
-            fetchAndSyncCycles(ponds);
-        }
-    }, [ponds, isLoadingPonds, fetchAndSyncCycles]);
+        await refetch();
+    }, [refetch]);
 
     const { isConnected } = useNetInfo();
 

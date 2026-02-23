@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '@/styles';
+import { formatNumber } from '@/features/farm/utils/numberUtils';
 
 interface Props {
     materialCode: string;
     price: number;
     supplier: string;
+    remainingQuantity?: number;
 }
 
-const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier }) => {
+const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier, remainingQuantity }) => {
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -25,13 +27,20 @@ const BreedInfoCard: React.FC<Props> = ({ materialCode, price, supplier }) => {
 
                 <View style={styles.row}>
                     <Text style={styles.label}>Giá tôm:</Text>
-                    <Text style={styles.value}>{price} VND/con</Text>
+                    <Text style={styles.value}>{formatNumber(price)} VND/con</Text>
                 </View>
 
                 <View style={styles.row}>
                     <Text style={styles.label}>Nhãn hiệu:</Text>
                     <Text style={styles.value}>{supplier}</Text>
                 </View>
+
+                {remainingQuantity !== undefined && (
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Số lượng còn lại:</Text>
+                        <Text style={styles.value}>{formatNumber(remainingQuantity)}</Text>
+                    </View>
+                )}
             </View>
         </View>
     );

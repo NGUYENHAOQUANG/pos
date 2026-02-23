@@ -163,12 +163,18 @@ export const useCreateStockTransfer = () => {
             zoneId?: string;
         }) => stockTransferApi.create(pondId, data),
         onSuccess: (_, variables) => {
-            showSuccessToast('Tạo phiếu sang ao thành công');
+            showSuccessToast('Đã sang ao thành công');
             queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
-            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({
                 queryKey: farmKeys.ponds.byZone(variables.zoneId || 'all'),
             });
+            // Invalidate cycles for receiving ponds
+            if (variables.data.toPonds) {
+                variables.data.toPonds.forEach(p => {
+                    queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(p.toPondId) });
+                    queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(p.toPondId) });
+                });
+            }
         },
         onError: error => {
             const message = getErrorMessage(error, 'Tạo phiếu sang ao thất bại');

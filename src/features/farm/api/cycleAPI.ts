@@ -4,6 +4,7 @@ import {
     CreateCycleCommand,
     CycleData,
     UpdateCycleCommand,
+    CycleApiResponse,
 } from '@/features/farm/types/farm.types';
 
 export const cycleApi = {
@@ -26,7 +27,15 @@ export const cycleApi = {
 
     getCycleDetail: async (pondId: string, cycleId: string): Promise<CycleData> => {
         const response = await apiClient.get(API_ENDPOINTS.POND.CYCLE.DETAIL(pondId, cycleId));
-        return response.data?.data || response.data;
+        const rawData = response.data?.data || response.data;
+        if (!rawData) return rawData;
+        return {
+            ...rawData,
+            cycleName: rawData.name || rawData.cycleName,
+            breedSource: rawData.breedSource || rawData.warehouseItemId,
+            stockingDate: rawData.stockingDate || rawData.createdAt,
+            season: rawData.season,
+        };
     },
 
     deleteCycle: async (
@@ -46,15 +55,18 @@ export const cycleApi = {
         });
 
         const responseDataObject = response.data?.data;
-        if (responseDataObject?.items && Array.isArray(responseDataObject.items)) {
-            return responseDataObject.items;
-        }
+        const items: CycleApiResponse[] =
+            responseDataObject?.items || (Array.isArray(response.data) ? response.data : []);
 
-        // Fallback for flat array if API changes
-        if (Array.isArray(response.data)) {
-            return response.data;
-        }
-
-        return [];
+        return items.map(
+            item =>
+                ({
+                    ...item,
+                    cycleName: item.name || item.cycleName || '',
+                    breedSource: item.breedSource || item.warehouseItemId || '',
+                    stockingDate: item.stockingDate || item.createdAt || '',
+                    season: item.season,
+                } as CycleData)
+        );
     },
 };

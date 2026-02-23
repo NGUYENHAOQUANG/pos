@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { CycleData } from '@/features/farm/types/farm.types';
 import {
@@ -40,54 +41,10 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     const currentPond = routePond;
 
-    // --- Active Cycle Logic ---
-
-    // 1. Try to get cycle from Store first
-    const initialActiveCycle = useFarmStore(
-        useCallback(
-            state => {
-                if (!currentPond?.id) return undefined;
-                return (
-                    state.activeCycles[currentPond.id] ||
-                    state
-                        .getCyclesByPondId(currentPond.id)
-                        .find(cycle => cycle.receivingPonds?.includes(currentPond.id)) ||
-                    state.getCyclesByPondId(currentPond.id)[0]
-                );
-            },
-            [currentPond?.id]
-        )
-    );
-
-    // 2. Fetch cycles if needed (using React Query)
-    const { data: cycles } = useQuery({
-        queryKey: ['cycles', currentPond?.id],
-        queryFn: async () => {
-            if (!currentPond?.id) return [];
-            try {
-                return await cycleApi.getCyclesByPond(currentPond.id);
-            } catch (error) {
-                console.log('Error fetching cycles:', error);
-                return [];
-            }
-        },
-        enabled: !!currentPond?.id && !initialActiveCycle,
-    });
-
-    // 3. Determine active cycle
-    const activeCycle = useMemo(() => {
-        if (initialActiveCycle) return initialActiveCycle;
-        if (cycles && cycles.length > 0) {
-            return (
-                cycles.find(
-                    c =>
-                        (c.status === 'InProgress' || c.status === 'Active') &&
-                        c.receivingPonds?.includes(currentPond?.id || '')
-                ) || cycles[0]
-            );
-        }
-        return undefined;
-    }, [initialActiveCycle, cycles, currentPond?.id]);
+    // Get stocking quantity from cycle data
+    // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
+    // Get initial active cycle from hook
+    const activeCycle = useActiveCycle(currentPond?.id || '');
 
     // 4. Fetch detailed cycle data
     const { data: fetchedCycleData } = useQuery({
@@ -111,7 +68,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             return null;
         },
         enabled: !!currentPond?.id && !!activeCycle?.id,
-        initialData: initialActiveCycle,
+        initialData: activeCycle,
         refetchOnMount: 'always',
         staleTime: 0,
     });
