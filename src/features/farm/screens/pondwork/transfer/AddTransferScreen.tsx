@@ -113,11 +113,10 @@ export const AddTransferScreen: React.FC = () => {
         // Determine source pond type (handle both string and object)
         const sourceType = typeof pond.type === 'string' ? pond.type : pond.type?.name;
 
-        let targetType = '';
-        if (sourceType === 'Ao vèo') {
-            targetType = 'Ao nuôi';
-        } else if (sourceType === 'Ao nuôi') {
-            targetType = 'Ao sẵn sàng';
+        // Determine allowed target pond types based on source pond type
+        let targetTypes: string[] = [];
+        if (sourceType === 'Ao vèo' || sourceType === 'Ao nuôi' || sourceType === 'Ao sẵn sàng') {
+            targetTypes = ['Ao nuôi', 'Ao sẵn sàng'];
         }
 
         return availablePonds
@@ -125,10 +124,10 @@ export const AddTransferScreen: React.FC = () => {
                 // Exclude current pond
                 if (p.id === pond.id) return false;
 
-                // Filter by type if logic applies
-                if (targetType) {
+                // Filter by allowed target types if logic applies
+                if (targetTypes.length > 0) {
                     const pType = typeof p.type === 'string' ? p.type : p.type?.name;
-                    return pType === targetType;
+                    return pType ? targetTypes.includes(pType) : false;
                 }
 
                 return true;
