@@ -183,9 +183,9 @@ export type AppStackParamList = {
     AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
     EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
     AddWarehouse: {
+        importReceiptId?: string;
         availableMaterials?: IMaterial[];
         onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
-        importReceiptId?: string;
     };
     AddExportWarehouse: {
         availableMaterials?: IMaterial[];

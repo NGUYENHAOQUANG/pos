@@ -7,9 +7,9 @@ import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMater
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing } from '@/styles';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { validateMaterialFormWithToast } from '@/features/material/utils/materialValidation';
 import {
     useCreateMaterial,
@@ -22,7 +22,8 @@ import { DropdownOption } from '@/features/material/components/material/Dropdown
 interface AddMaterialScreenProps {}
 
 export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const route = useRoute<RouteProp<AppStackParamList, 'AddMaterial'>>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { mutate: createMaterial, isPending: isCreatingMaterial } = useCreateMaterial();
 
     const { setTabBarVisible } = useTabBarVisibility();
@@ -75,7 +76,10 @@ export const AddMaterialScreen: React.FC<AddMaterialScreenProps> = () => {
                 isActive: isActive || false,
             },
             {
-                onSuccess: () => {
+                onSuccess: (response: any) => {
+                    if (response?.data && route.params?.onSave) {
+                        route.params.onSave(response.data);
+                    }
                     navigation.goBack();
                 },
             }

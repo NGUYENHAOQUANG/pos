@@ -1,93 +1,293 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { formatCurrency } from '@/features/material/utils/formatCurrency';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
+import { DocumentPickerResponse } from '@react-native-documents/picker';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { WarehouseInformation } from '@/features/material/components/warehouse/WarehouseInformation';
-import { AddWarehouseMaterial } from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import {
+    AddWarehouseMaterial,
+    MaterialItem,
+} from '@/features/material/components/warehouse/AddWarehouseMaterial';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
-import { useAddImportReceipt } from '@/features/material/hooks/importReceipt/useAddImportReceipt';
-import { FileUploader } from '@/shared/components/forms/FileUploader';
+import { WarehouseFooter } from '@/features/material/components/warehouse/WarehouseFooter';
+import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 
-interface AddWarehouseScreenProps {}
+import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useSuppliers } from '@/features/material/hooks/useSuppliers';
+import { useMaterialOptions } from '@/features/material/hooks/inventory';
+import {
+    useCreateImportReceipt,
+    useUpdateImportReceipt,
+    useImportReceiptDetail,
+    useImportReceiptItems,
+    useDeleteImportReceipt,
+    importReceiptKeys,
+} from '@/features/material/hooks/useImportReceipts';
+import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
+import { showValidationError } from '@/features/material/utils/validationToast';
+import { importReceiptService } from '@/features/material/services/importReceiptService';
+import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
+import {
+    warehouseFormSchema,
+    WarehouseFormValues,
+} from '@/features/material/schemas/warehouseFormSchema';
+import { useWarehouseMaterialActions } from '@/features/material/hooks/logic/useWarehouseMaterialActions';
 
-export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
+export const AddWarehouseScreen: React.FC = () => {
+    // Navigation
+    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const route = useRoute<RouteProp<AppStackParamList, 'AddWarehouse'>>();
+
+    // params can be undefined
+    const importReceiptId = route.params?.importReceiptId;
+    const isEditMode = !!importReceiptId;
+
+    // Stores & Hook Context
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
     const safeBottom = Math.max(insets.bottom, 12);
+    const queryClient = useQueryClient();
+    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    const {
-        // State
-        date,
-        setDate,
-        supplier,
-        setSupplier,
-        files,
-        setFiles,
-        warehouseItems,
-        isConfirmModalVisible,
-        setIsConfirmModalVisible,
+    // Data Fetching
+    const { data: warehouses = [] } = useWarehouses({
+        ZoneId: selectedZoneId || undefined,
+    });
+    const { data: materialsData = [] } = useMaterials({
+        PageSize: 1000,
+        OrderBy: 'CreatedAt desc',
+    });
+    const { data: suppliers = [] } = useSuppliers();
 
-        // Derived
-        supplierOptions,
-        materialOptions,
-        totalAmount,
-        isCreating,
-        isUploading,
-
-        // Handlers
-        handleAddMaterial,
-        handleUpdateMaterial,
-        handleRemoveMaterial,
-        handleSubmit,
-        handleConfirmSubmit,
-        handleSaveDraft,
-        handleDropdownOpen,
-
-        // Refs
-        fileUploaderRef,
-        scrollViewRef,
-
-        // Misc
-        navigation,
-        isEditMode,
-        isUpdating,
-
-        // Delete (from hook)
-        isDeleting,
-        canDelete,
-        deleteModalVisible,
-        handleDeletePress,
-        handleConfirmDelete,
-        handleCancelDelete,
-
-        // Loading
-        isLoadingDetail,
-    } = useAddImportReceipt();
-
-    // Delete Button Component
-    const deleteButton = (
-        <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDeletePress}
-            activeOpacity={0.7}
-        >
-            <IconTrashOutlined width={20} height={20} />
-        </TouchableOpacity>
+    // Derived Data
+    const availableMaterials = useMemo(
+        () => importReceiptService.mapMaterialsToOptions(materialsData),
+        [materialsData]
     );
 
+    const supplierOptions = useMemo(
+        () => importReceiptService.mapSuppliersToOptions(suppliers),
+        [suppliers]
+    );
+
+    const materialOptions = useMaterialOptions(availableMaterials);
+
+    // Fetch Details for Edit Mode
+    const { data: importReceiptDetail, isLoading: isLoadingDetailData } = useImportReceiptDetail(
+        importReceiptId || ''
+    );
+    const { data: importReceiptItems, isLoading: isLoadingItems } = useImportReceiptItems(
+        importReceiptId || '',
+        { PageSize: 1000 }
+    );
+    const isLoadingDetail = isEditMode && (isLoadingDetailData || isLoadingItems);
+
+    // Form setup
+    const { control, handleSubmit, setValue, getValues, reset } = useForm<WarehouseFormValues>({
+        resolver: zodResolver(warehouseFormSchema),
+        defaultValues: {
+            date: new Date(),
+            supplier: '',
+            files: [],
+            warehouseItems: [
+                {
+                    id: Date.now().toString(),
+                    materialId: '',
+                    materialName: '',
+                    quantity: '',
+                    price: '',
+                },
+            ],
+        },
+    });
+
+    const formValues = useWatch({
+        control,
+        name: ['date', 'supplier', 'files', 'warehouseItems'],
+    });
+
+    const [date, supplier, files, warehouseItems] = formValues as [
+        Date,
+        string,
+        DocumentPickerResponse[],
+        MaterialItem[]
+    ];
+
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    // UI Refs
+    const fileUploaderRef = useRef<FileUploaderRef>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
+    const initializedRef = useRef(false);
+
+    const totalAmount = useMemo(
+        () => warehouseFormUtils.calculateTotal(warehouseItems || []),
+        [warehouseItems]
+    );
+
+    // Mutations
+    const { submitWithFiles, isUploading } = useFileSubmit();
+    const { mutate: createImportReceipt, isPending: isCreating } = useCreateImportReceipt();
+    const { mutate: updateImportReceipt, isPending: isUpdating } = useUpdateImportReceipt();
+    const { mutate: deleteImportReceipt, isPending: isDeleting } = useDeleteImportReceipt();
+
+    const materialActions = useWarehouseMaterialActions(
+        control,
+        getValues,
+        setValue,
+        availableMaterials
+    );
+
+    const handleDropdownOpen = (itemIndex: number) => {
+        const HEADER_HEIGHT = 280;
+        const FILE_ROW_HEIGHT = 40;
+        const ITEM_HEIGHT = 280;
+
+        setTimeout(() => {
+            const fileSectionHeight = (files?.length || 0) * FILE_ROW_HEIGHT;
+            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
+            scrollViewRef.current?.scrollTo({
+                y: Math.max(0, scrollY - 50),
+                animated: true,
+            });
+        }, 100);
+    };
+
+    // Effects
     useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
+
+    // Populate Form Data for Edit Mode
+    useEffect(() => {
+        if (
+            isEditMode &&
+            importReceiptDetail &&
+            importReceiptItems &&
+            !initializedRef.current &&
+            suppliers.length > 0
+        ) {
+            const formState = importReceiptService.mapDetailToForm(importReceiptDetail, suppliers);
+            const itemsData = importReceiptItems.items || [];
+            const mappedItems = importReceiptService.mapItemsToForm(itemsData);
+
+            reset({
+                date: formState.date,
+                supplier: formState.supplier,
+                files: [], // Files hande via form state
+                warehouseItems:
+                    mappedItems.length > 0
+                        ? mappedItems
+                        : [
+                              {
+                                  id: Date.now().toString(),
+                                  materialId: '',
+                                  materialName: '',
+                                  quantity: '',
+                                  price: '',
+                              },
+                          ],
+            });
+
+            initializedRef.current = true;
+        }
+    }, [isEditMode, importReceiptDetail, importReceiptItems, suppliers, reset]);
+
+    const onError = (errors: any) =>
+        warehouseFormUtils.handleFormError(errors, showValidationError);
+
+    const onSubmit = async (data: WarehouseFormValues, isDraft: boolean) => {
+        const selectedSupplier = suppliers.find(s => s.name === data.supplier);
+        if (!selectedSupplier) {
+            showValidationError('Vui lòng chọn nhà cung cấp hợp lệ');
+            return;
+        }
+
+        await submitWithFiles(data.files || [], async documentIds => {
+            const payload = importReceiptService.mapFormToPayload(
+                selectedSupplier.id,
+                warehouses[0]?.id || '',
+                data.warehouseItems as MaterialItem[],
+                isDraft,
+                documentIds
+            );
+
+            if (isEditMode && importReceiptId) {
+                updateImportReceipt(
+                    { id: importReceiptId, data: payload },
+                    {
+                        onSuccess: () => {
+                            fileUploaderRef.current?.markAsSaved();
+                            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+                            queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+                            queryClient.invalidateQueries({
+                                queryKey: ['importReceipts', 'items', importReceiptId!],
+                            });
+                            queryClient.invalidateQueries({
+                                queryKey: importReceiptKeys.detail(importReceiptId!),
+                            });
+                            navigation.goBack();
+                        },
+                    }
+                );
+            } else {
+                createImportReceipt(payload, {
+                    onSuccess: () => {
+                        fileUploaderRef.current?.markAsSaved();
+                        queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+                        queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+                        navigation.goBack();
+                    },
+                });
+            }
+        });
+    };
+
+    const handleConfirmSubmit = () => {
+        setIsConfirmModalVisible(false);
+        setTimeout(() => {
+            handleSubmit(data => onSubmit(data, false), onError)();
+        }, 500);
+    };
+
+    const handleDeletePress = () => {
+        Keyboard.dismiss();
+        setDeleteModalVisible(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (!importReceiptId) return;
+        setDeleteModalVisible(false);
+        deleteImportReceipt(importReceiptId, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
+                queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+                navigation.goBack();
+            },
+        });
+    };
+
+    const handleSaveDraft = handleSubmit(data => onSubmit(data, true), onError);
+    const triggerSubmitValidation = handleSubmit(() => setIsConfirmModalVisible(true), onError);
 
     if (isLoadingDetail) {
         return (
@@ -95,9 +295,8 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                 <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
                 <View style={styles.container}>
                     <HeaderMeterial
-                        title={isEditMode ? 'Chỉnh sửa phiếu nhập kho' : 'Tạo Phiếu Nhập Kho'}
+                        title="Chỉnh Sửa Phiếu Nhập Kho"
                         onBackPress={() => navigation.goBack()}
-                        rightComponent={canDelete ? deleteButton : undefined}
                     />
                     <AddMaterialSkeleton />
                 </View>
@@ -105,15 +304,27 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
         );
     }
 
+    const deleteButton = isEditMode ? (
+        <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeletePress}
+            activeOpacity={0.7}
+        >
+            <IconTrashOutlined width={20} height={20} />
+        </TouchableOpacity>
+    ) : null;
+
+    const isLoading = isCreating || isUpdating || isUploading || isDeleting;
+
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
-            <Loading isLoading={isCreating || isUploading || isUpdating || isDeleting}>
+            <Loading isLoading={isLoading}>
                 <View style={styles.container}>
                     <HeaderMeterial
-                        title={isEditMode ? 'Chỉnh sửa phiếu nhập kho' : 'Tạo Phiếu Nhập Kho'}
+                        title={isEditMode ? 'Chỉnh Sửa Phiếu Nhập Kho' : 'Tạo Phiếu Nhập Kho'}
                         onBackPress={() => navigation.goBack()}
-                        rightComponent={canDelete ? deleteButton : undefined}
+                        rightComponent={deleteButton}
                     />
 
                     <SafeInputLayout>
@@ -127,62 +338,47 @@ export const AddWarehouseScreen: React.FC<AddWarehouseScreenProps> = () => {
                         >
                             <WarehouseInformation
                                 date={date}
-                                onDateChange={setDate}
+                                onDateChange={newDate => setValue('date', newDate)}
                                 supplier={supplier}
-                                onSupplierChange={setSupplier}
+                                onSupplierChange={newSupplier => setValue('supplier', newSupplier)}
                                 supplierOptions={supplierOptions}
                             >
                                 <FileUploader
                                     ref={fileUploaderRef}
-                                    files={files}
-                                    onFilesSelected={setFiles}
+                                    files={files || []}
+                                    onFilesSelected={newFiles => setValue('files', newFiles)}
                                     maxFiles={5}
                                 />
                             </WarehouseInformation>
 
                             <AddWarehouseMaterial
-                                materials={warehouseItems}
-                                onUpdateMaterial={handleUpdateMaterial}
-                                onAddMaterial={handleAddMaterial}
-                                onRemoveMaterial={handleRemoveMaterial}
+                                materials={warehouseItems || []}
+                                onUpdateMaterial={materialActions.update}
+                                onAddMaterial={materialActions.add}
+                                onRemoveMaterial={materialActions.remove}
                                 materialOptions={materialOptions}
                                 onDropdownOpen={handleDropdownOpen}
                             />
                         </ScrollView>
                     </SafeInputLayout>
 
-                    <View style={[styles.footer, { paddingBottom: safeBottom }]}>
-                        <View style={styles.totalRow}>
-                            <Text style={styles.totalLabel}>Tổng tiền:</Text>
-                            <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
-                        </View>
-                        <View style={styles.buttonRow}>
-                            <TouchableOpacity style={styles.draftButton} onPress={handleSaveDraft}>
-                                <Text style={styles.draftButtonText}>Lưu Nháp</Text>
-                            </TouchableOpacity>
-                            <View style={{ width: spacing.md }} />
-                            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                                <Text style={styles.submitButtonText}>Gửi Phiếu</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                    <WarehouseFooter
+                        safeBottom={safeBottom}
+                        totalAmount={totalAmount}
+                        onSaveDraft={handleSaveDraft}
+                        onSubmit={triggerSubmitValidation}
+                    />
 
                     <ConfirmSubmiss
                         visible={isConfirmModalVisible}
                         onClose={() => setIsConfirmModalVisible(false)}
-                        onConfirm={() => {
-                            setIsConfirmModalVisible(false);
-                            setTimeout(() => {
-                                handleConfirmSubmit();
-                            }, 500);
-                        }}
+                        onConfirm={handleConfirmSubmit}
                     />
 
-                    {/* Confirmation Delete Modal */}
                     <ConfirmationDeleteModal
                         visible={deleteModalVisible}
                         onConfirm={handleConfirmDelete}
-                        onCancel={handleCancelDelete}
+                        onCancel={() => setDeleteModalVisible(false)}
                         title="Xóa phiếu nhập kho"
                         message="Bạn có chắc chắn muốn xóa phiếu nhập kho này không?"
                         showSuccessToast={false}
@@ -204,60 +400,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         marginTop: spacing.sm,
         paddingBottom: 100,
-    },
-    footer: {
-        backgroundColor: colors.white,
-        paddingTop: 16,
-        paddingHorizontal: spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-    },
-    totalRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
-    totalLabel: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    totalValue: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.error,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    draftButton: {
-        flex: 1,
-        height: 40,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.blue[600],
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    draftButtonText: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.blue[600],
-    },
-    submitButton: {
-        flex: 1,
-        height: 40,
-        borderRadius: 8,
-        backgroundColor: colors.blue[600],
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    submitButtonText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.white,
     },
     deleteButton: {
         width: 40,
