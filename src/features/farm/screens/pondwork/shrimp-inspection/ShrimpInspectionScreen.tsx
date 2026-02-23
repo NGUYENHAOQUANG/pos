@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -39,7 +39,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
     const { pond, itemToEdit, aiHealthCheckResult } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const scrollViewRef = useRef<ScrollView>(null);
+
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
     const meta = useMemo(
         () => (itemToEdit?.meta as ShrimpInspectionMeta) || ({} as ShrimpInspectionMeta),
@@ -266,54 +266,46 @@ export const ShrimpInspectionScreen: React.FC = () => {
                 </View>
 
                 {/* Content */}
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        style={styles.scrollView}
-                        contentContainerStyle={[styles.scrollContent]}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        {/* Thông tin chung Box */}
-                        <GeneralInfoBox
-                            ref={generalInfoBoxRef}
-                            date={selectedDate}
-                            onDateChange={setSelectedDate}
-                            type="withImage"
-                            imageUris={imageUris}
-                            onImagesChange={setImageUris}
-                            documentIds={meta.documentIds}
-                            disabledDate={true}
-                        />
+                <SafeInputLayout
+                    contentContainerStyle={styles.scrollContent}
+                    extraScrollHeight={100}
+                >
+                    {/* Thông tin chung Box */}
+                    <GeneralInfoBox
+                        ref={generalInfoBoxRef}
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        type="withImage"
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        documentIds={meta.documentIds}
+                        disabledDate={true}
+                    />
 
-                        {/* Kiểm tra thức ăn Box */}
-                        <ShrimpInspectionFoodCheckBox
-                            foodAmount={foodAmount}
-                            onFoodAmountChange={setFoodAmount}
-                            leftoverFood={leftoverFood}
-                            onLeftoverFoodChange={setLeftoverFood}
-                        />
+                    {/* Kiểm tra thức ăn Box */}
+                    <ShrimpInspectionFoodCheckBox
+                        foodAmount={foodAmount}
+                        onFoodAmountChange={setFoodAmount}
+                        leftoverFood={leftoverFood}
+                        onLeftoverFoodChange={setLeftoverFood}
+                    />
 
-                        {/* Quan sát mẫu Box */}
-                        <ShrimpInspectionObservationBox
-                            intestine={intestine}
-                            onIntestineChange={setIntestine}
-                            intestineColor={intestineColor}
-                            onIntestineColorChange={setIntestineColor}
-                            stoolColor={stoolColor}
-                            onStoolColorChange={setStoolColor}
-                            liver={liver}
-                            onLiverChange={setLiver}
-                            onAICheckPress={handleAICheckPress}
-                            aiResult={displayAiResult}
-                        />
+                    {/* Quan sát mẫu Box */}
+                    <ShrimpInspectionObservationBox
+                        intestine={intestine}
+                        onIntestineChange={setIntestine}
+                        intestineColor={intestineColor}
+                        onIntestineColorChange={setIntestineColor}
+                        stoolColor={stoolColor}
+                        onStoolColorChange={setStoolColor}
+                        liver={liver}
+                        onLiverChange={setLiver}
+                        onAICheckPress={handleAICheckPress}
+                        aiResult={displayAiResult}
+                    />
 
-                        {/* Ghi chú Box */}
-                        <SelectionNotesBox
-                            notes={notes}
-                            onNotesChange={setNotes}
-                            scrollViewRef={scrollViewRef}
-                        />
-                    </ScrollView>
+                    {/* Ghi chú Box */}
+                    <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
                 </SafeInputLayout>
 
                 {/* Footer Buttons */}
@@ -374,9 +366,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    scrollView: {
-        flex: 1,
     },
     scrollContent: {
         padding: 0,

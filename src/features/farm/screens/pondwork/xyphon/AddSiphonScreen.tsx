@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -47,7 +47,6 @@ export const AddSiphonScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const scrollViewRef = useRef<ScrollView>(null);
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
     const createMutation = useCreateSiphonRecord();
@@ -313,38 +312,27 @@ export const AddSiphonScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        type="withImage"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        imageUris={imageUris}
-                        onImagesChange={setImageUris}
-                        documentIds={documentIds}
-                        disabledDate={true}
-                    />
+            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={80}>
+                <GeneralInfoBox
+                    ref={generalInfoBoxRef}
+                    type="withImage"
+                    date={selectedDate}
+                    onDateChange={setSelectedDate}
+                    imageUris={imageUris}
+                    onImagesChange={setImageUris}
+                    documentIds={documentIds}
+                    disabledDate={true}
+                />
 
-                    <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
+                <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
 
-                    <MaterialSelectionBox
-                        selectedMaterials={selectedMaterials}
-                        onMaterialsChange={setSelectedMaterials}
-                        materials={materials}
-                    />
+                <MaterialSelectionBox
+                    selectedMaterials={selectedMaterials}
+                    onMaterialsChange={setSelectedMaterials}
+                    materials={materials}
+                />
 
-                    <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </SafeInputLayout>
 
             {/* Footer Buttons */}
@@ -402,9 +390,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    scrollView: {
-        flex: 1,
     },
     scrollContent: {
         padding: 0,

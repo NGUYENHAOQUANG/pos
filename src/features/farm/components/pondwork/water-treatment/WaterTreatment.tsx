@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { IMaterial } from '@/features/material/types/material.types';
+import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 
 interface WaterTreatmentProps {
@@ -16,7 +16,6 @@ interface WaterTreatmentProps {
     note: string;
     onNoteChange: (note: string) => void;
     disabledDate?: boolean;
-    scrollViewRef?: React.RefObject<any>;
 }
 
 export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
@@ -29,14 +28,19 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
     note,
     onNoteChange,
     disabledDate = false,
-    scrollViewRef,
 }) => {
     const activityOptions = ['Đánh khoáng', 'Đánh vi sinh', 'Kiểm khuẩn'];
 
     // Mock materials for the modal
     const mockMaterials: IMaterial[] = [
-        { id: '1', name: 'BIKAP CP', group: 'Nuôi', unit: 'kg', remaining: 100 },
-        { id: '2', name: 'Super Mineral - Mebifood', group: 'Nuôi', unit: 'kg', remaining: 50 },
+        { id: '1', name: 'BIKAP CP', group: MaterialGroupType.FARMING, unit: 'kg', remaining: 100 },
+        {
+            id: '2',
+            name: 'Super Mineral - Mebifood',
+            group: MaterialGroupType.FARMING,
+            unit: 'kg',
+            remaining: 50,
+        },
     ];
 
     return (
@@ -60,12 +64,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
                 materials={mockMaterials}
             />
 
-            {/* Notes */}
-            <SelectionNotesBox
-                notes={note}
-                onNotesChange={onNoteChange}
-                scrollViewRef={scrollViewRef}
-            />
+            <SelectionNotesBox notes={note} onNotesChange={onNoteChange} />
         </View>
     );
 };
