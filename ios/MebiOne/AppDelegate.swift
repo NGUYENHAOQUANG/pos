@@ -6,6 +6,15 @@ import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+  static func main() {
+    UIApplicationMain(
+      CommandLine.argc,
+      CommandLine.unsafeArgv,
+      NSStringFromClass(NoScaleApplication.self),
+      NSStringFromClass(AppDelegate.self)
+    )
+  }
+
   var window: UIWindow?
 
   var reactNativeDelegate: ReactNativeDelegate?
@@ -25,7 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = UIWindow(frame: UIScreen.main.bounds)
+    window = NoScaleWindow(frame: UIScreen.main.bounds)
 
     factory.startReactNative(
       withModuleName: "Mebieco",
@@ -49,4 +58,10 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
   }
+}
+
+class NoScaleApplication: UIApplication {
+    override var preferredContentSizeCategory: UIContentSizeCategory {
+        return .large
+    }
 }
