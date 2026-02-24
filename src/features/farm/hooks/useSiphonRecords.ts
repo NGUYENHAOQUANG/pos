@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { siphonApi } from '@/features/farm/api/siphonApi';
 import { farmKeys } from './farmKeys';
@@ -8,63 +9,20 @@ import {
 } from '@/features/farm/types/siphon.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { handleError } from '@/shared/utils';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
-import { useMemo } from 'react';
-import { IMaterial } from '@/features/material/types/material.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
-export const useSiphonMaterials = (zoneId?: string) => {
-    // 1. Warehouses
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: zoneId });
-    const defaultWarehouseId = warehouses?.[0]?.id;
+export const useSiphonMaterials = (_zoneId?: string) => {
+    const { materials: allMaterials } = useFarmMaterials();
 
-    // 2. Materials & Groups
-    const { data: allMaterials = [] } = useMaterials();
-    const { data: groups = [] } = useMaterialGroups();
-
-    // 3. Warehouse Items
-    const { data: warehouseItemsData } = useWarehouseItems(
-        defaultWarehouseId,
-        {
-            PageSize: 1000,
-        },
-        { enabled: !!defaultWarehouseId }
-    );
-
-    // 4. Allowed Groups
-    const allowedGroupIds = useMemo(() => {
-        return groups
-            .filter(g => {
-                const name = g.name.toLowerCase();
-                return name.includes('thiết bị điện') || name.includes('công cụ');
-            })
-            .map(g => g.id);
-    }, [groups]);
-
-    // 5. Filter Logic
     const materials = useMemo(() => {
-        const items = warehouseItemsData?.items || [];
-        if (!items.length || !allMaterials.length) return [];
+        if (!allMaterials.length) return [];
 
-        return items
-            .filter((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-                const groupId = item.material?.materialGroup?.id || materialDef?.groupId;
-                return allowedGroupIds.includes(groupId);
-            })
-            .map((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-                return {
-                    id: item.id,
-                    name: item.materialName || materialDef?.name || '',
-                    group: item.material?.materialGroup?.name || '',
-                    unit: item.unitId,
-                    unitName: item.unitName || materialDef?.unitName,
-                    remaining: item.quantity,
-                } as IMaterial;
-            });
-    }, [warehouseItemsData, allMaterials, allowedGroupIds]);
+        return allMaterials.filter(m => {
+            if (!m.group) return false;
+            const name = m.group.toLowerCase();
+            return name.includes('thiết bị điện') || name.includes('công cụ');
+        });
+    }, [allMaterials]);
 
     return { materials };
 };
@@ -82,6 +40,7 @@ export const useSiphonRecords = (pondId: string, params?: ISiphonParams) => {
 
 export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) => {
     const { data, isLoading, error, refetch } = useSiphonRecords(pondId, params);
+    const { materialMap } = useFarmMaterials();
 
     const rawItems = data?.data?.items || [];
 
@@ -124,15 +83,18 @@ export const useSiphonRecordsAsJobs = (pondId: string, params?: ISiphonParams) =
                 : '00:00',
             note: item.siphonDetail?.notes || undefined,
             pondId: item.pondId,
-            materials: item.siphonDetail?.materials?.map(m => ({
-                material: {
-                    id: m.warehouseItemId,
-                    name: m.warehouseItemName || 'Vật tư',
-                    unitName: m.unitName || 'Đơn vị',
-                } as any,
-                quantity: m.quantity,
-                unit: m.unitName || '',
-            })),
+            materials: item.siphonDetail?.materials?.map(m => {
+                const mapItem = m.warehouseItemId ? materialMap[m.warehouseItemId] : undefined;
+                return {
+                    material: {
+                        id: m.warehouseItemId,
+                        name: mapItem?.name || m.warehouseItemName || 'Vật tư',
+                        unitName: mapItem?.unitName || m.unitName || 'Đơn vị',
+                    } as any,
+                    quantity: m.quantity,
+                    unit: mapItem?.unitName || m.unitName || '',
+                };
+            }),
             images: item.documentIds || [],
             meta: {
                 lossAmount: item.siphonDetail?.shrimpLossKg?.toString(),
