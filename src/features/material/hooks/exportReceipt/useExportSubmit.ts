@@ -79,17 +79,16 @@ export const useExportSubmit = ({
         });
     }, [exportReceiptId, deleteExportReceipt, navigation, setDeleteModalVisible]);
 
-    // Handler: Submit form (draft or final)
-    const handleSubmitFlow = useCallback(
-        async (isAutoSubmit: boolean) => {
-            // Validation
+    // Validation function
+    const validateForm = useCallback(
+        (isAutoSubmit: boolean) => {
             if (!selectedPond) {
                 showValidationError('Vui lòng chọn ao nuôi');
-                return;
+                return false;
             }
             if (formMaterials.length === 0 || !formMaterials[0].materialId) {
                 showValidationError('Vui lòng chọn ít nhất một vật tư');
-                return;
+                return false;
             }
             if (isAutoSubmit) {
                 const invalidItemIndex = formMaterials.findIndex(
@@ -99,8 +98,20 @@ export const useExportSubmit = ({
                     showValidationError(
                         `Vui lòng điền đầy đủ thông tin vật tư (Vật tư ${invalidItemIndex + 1})`
                     );
-                    return;
+                    return false;
                 }
+            }
+            return true;
+        },
+        [selectedPond, formMaterials]
+    );
+
+    // Handler: Submit form (draft or final)
+    const handleSubmitFlow = useCallback(
+        async (isAutoSubmit: boolean) => {
+            // Run validation
+            if (!validateForm(isAutoSubmit)) {
+                return;
             }
 
             await submitWithFiles(files, async documentIds => {
@@ -147,10 +158,11 @@ export const useExportSubmit = ({
             });
         },
         [
-            selectedPond,
-            formMaterials,
+            validateForm,
             files,
             warehouseId,
+            selectedPond,
+            formMaterials,
             note,
             date,
             isEditMode,
@@ -169,6 +181,7 @@ export const useExportSubmit = ({
         isSubmitting,
         handleDeletePress,
         handleConfirmDelete,
+        validateForm,
         handleSubmitFlow,
     };
 };
