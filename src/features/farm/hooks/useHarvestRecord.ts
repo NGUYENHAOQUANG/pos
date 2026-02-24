@@ -21,9 +21,9 @@ export const useHarvestRecords = (pondId: string, params?: IHarvestRecordParams)
 };
 
 /**
- * GET harvest records và map sang JobExecution[] cho màn công việc + nhật ký.
- * Logic "Lần x" giống useFeedingRecordsAsJobs: đếm theo từng ngày.
- * @param params - Optional filter (CreateAtFrom, CreateAtTo, ...); PageSize mặc định 1000.
+ * GET harvest records and map to JobExecution[] for work + log screens.
+ * "Lần x" logic similar to useFeedingRecordsAsJobs: count per day.
+ * @param params - Optional filter (CreateAtFrom, CreateAtTo, ...); PageSize defaults to 1000.
  */
 export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordParams) => {
     const { data, isLoading, error, refetch } = useHarvestRecords(pondId, {
@@ -33,7 +33,7 @@ export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordP
 
     const rawItems: IHarvestRecord[] = data?.data?.items ?? [];
 
-    // Sort theo createdAt tăng dần để Lần 1, 2... đúng thứ tự trong ngày
+    // Sort by createdAt ascending so Lần 1, 2... are in correct daily order
     const sortedItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;

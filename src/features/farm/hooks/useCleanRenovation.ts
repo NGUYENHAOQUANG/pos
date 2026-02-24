@@ -33,11 +33,19 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
             try {
                 const rawItems = data.data.items;
 
-                // Sort by createdAt ascending to ensure correct daily numbering
+                // Count daily items
+                const totalPerDay: Record<string, number> = {};
+                rawItems.forEach((item: any) => {
+                    const d = item.createdAt ? new Date(item.createdAt) : new Date();
+                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+                });
+
+                // Sort descending (newest first)
                 const sortedItems = [...rawItems].sort((a, b) => {
                     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                    return timeA - timeB;
+                    return timeB - timeA;
                 });
 
                 const dayCounts: Record<string, number> = {};
@@ -51,7 +59,8 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
                             dayCounts[dateKey] = 0;
                         }
                         dayCounts[dateKey]++;
-                        const dailyIndex = dayCounts[dateKey];
+                        const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
+                        const dailyIndex = total - dayCounts[dateKey] + 1;
 
                         let imageUrls: string[] = [];
 
