@@ -413,49 +413,38 @@ export const AddTransferScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <GeneralInfoBox
-                        type="default"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        disabledDate={true}
-                    />
+            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={150}>
+                <GeneralInfoBox
+                    type="default"
+                    date={selectedDate}
+                    onDateChange={setSelectedDate}
+                    disabledDate={true}
+                />
 
-                    <CurrentPondInfoBox
-                        shrimpBreed={shrimpBreed}
-                        actualStockingQuantity={actualStockingQuantity}
-                        shrimpSize={shrimpSize}
-                        onShrimpSizeChange={setShrimpSize}
-                        totalEstimatedShrimp={totalEstimatedShrimp}
-                    />
+                <CurrentPondInfoBox
+                    shrimpBreed={shrimpBreed}
+                    actualStockingQuantity={actualStockingQuantity}
+                    shrimpSize={shrimpSize}
+                    onShrimpSizeChange={setShrimpSize}
+                    totalEstimatedShrimp={totalEstimatedShrimp}
+                />
 
-                    <TransferInfoBox
-                        transferMethod={transferMethod}
-                        onTransferMethodPress={() => {
-                            console.log('Select transfer method');
-                        }}
-                        receivingPonds={receivingPonds}
-                        onReceivingPondsChange={setReceivingPonds}
-                        onReceivingPondPress={id => {
-                            console.log('Select receiving pond for id:', id);
-                        }}
-                        totalEstimatedShrimp={totalEstimatedShrimp}
-                        pondOptions={pondOptions}
-                        onDropdownOpen={handleDropdownOpen}
-                    />
+                <TransferInfoBox
+                    transferMethod={transferMethod}
+                    onTransferMethodPress={() => {
+                        console.log('Select transfer method');
+                    }}
+                    receivingPonds={receivingPonds}
+                    onReceivingPondsChange={setReceivingPonds}
+                    onReceivingPondPress={id => {
+                        console.log('Select receiving pond for id:', id);
+                    }}
+                    totalEstimatedShrimp={totalEstimatedShrimp}
+                    pondOptions={pondOptions}
+                    onDropdownOpen={handleDropdownOpen}
+                />
 
-                    <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </SafeInputLayout>
 
             {/* Footer Buttons */}
@@ -514,9 +503,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    scrollView: {
-        flex: 1,
     },
     scrollContent: {
         padding: 0,

@@ -50,7 +50,7 @@ export const useStockTransfersAsJobs = (pondId: string, params?: GetStockTransfe
             try {
                 const rawItems = data.items;
 
-                // Đếm tổng số lượt mỗi ngày
+                // Count occurrences per day
                 const totalPerDay: Record<string, number> = {};
                 rawItems.forEach((item: any) => {
                     const d = item.createdAt ? new Date(item.createdAt) : new Date();
@@ -58,7 +58,7 @@ export const useStockTransfersAsJobs = (pondId: string, params?: GetStockTransfe
                     totalPerDay[key] = (totalPerDay[key] || 0) + 1;
                 });
 
-                // Sắp xếp giảm dần (mới nhất trước)
+                // Sort descending (newest first)
                 const sortedItems = [...rawItems].sort((a, b) => {
                     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -102,7 +102,7 @@ export const useStockTransfersAsJobs = (pondId: string, params?: GetStockTransfe
                     };
                 });
 
-                // Hiển thị cũ→mới (mới nhất ở cuối cho giao diện thẻ)
+                // Display old->new (newest at the end for card UI)
                 const getItemTime = (x: JobExecution) => {
                     if (x.createdAt) return new Date(x.createdAt).getTime();
                     try {

@@ -1,37 +1,37 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 interface SafeInputLayoutProps {
     children: React.ReactNode;
     style?: ViewStyle;
-    keyboardVerticalOffset?: number;
+    contentContainerStyle?: ViewStyle;
+    extraScrollHeight?: number;
 }
 
 /**
- * A wrapper component that handles keyboard avoidance on both iOS and Android.
- * Use this to wrap your ScrollView or content containing inputs.
- *
- * Usage:
- * <SafeInputLayout>
- *   <ScrollView>
- *      ...inputs
- *   </ScrollView>
- * </SafeInputLayout>
+ * A wrapper component that uses react-native-keyboard-aware-scroll-view
+ * Configurations are set specifically to work correctly on both iOS and Android.
  */
 export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
     children,
     style,
-    keyboardVerticalOffset = 0,
+    contentContainerStyle,
+    extraScrollHeight = 20,
 }) => {
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            enabled={Platform.OS === 'ios'}
+        <KeyboardAwareScrollView
             style={[styles.container, style]}
-            keyboardVerticalOffset={keyboardVerticalOffset}
+            contentContainerStyle={contentContainerStyle}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            extraScrollHeight={extraScrollHeight}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            keyboardOpeningTime={0}
         >
             {children}
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
     );
 };
 

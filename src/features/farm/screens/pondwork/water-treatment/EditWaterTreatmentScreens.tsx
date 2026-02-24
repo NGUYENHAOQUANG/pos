@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { colors } from '@/styles';
@@ -32,7 +32,6 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const scrollViewRef = useRef<ScrollView>(null);
 
     // Load existing data
     useEffect(() => {
@@ -156,28 +155,23 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 rightAction={renderHeaderRight()}
             />
 
-            <SafeInputLayout style={styles.flex1}>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.flex1}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* Main Content Component */}
-                    <WaterTreatment
-                        executionDate={executionDate}
-                        onExecutionDateChange={setExecutionDate}
-                        disabledDate={true}
-                        activityType={activityType}
-                        onActivityTypeChange={setActivityType}
-                        selectedMaterials={selectedMaterials}
-                        onSelectedMaterialsChange={setSelectedMaterials}
-                        note={note}
-                        onNoteChange={setNote}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+            <SafeInputLayout
+                style={styles.container}
+                contentContainerStyle={styles.scrollContent}
+                extraScrollHeight={50}
+            >
+                {/* Main Content Component */}
+                <WaterTreatment
+                    executionDate={executionDate}
+                    onExecutionDateChange={setExecutionDate}
+                    disabledDate={true}
+                    activityType={activityType}
+                    onActivityTypeChange={setActivityType}
+                    selectedMaterials={selectedMaterials}
+                    onSelectedMaterialsChange={setSelectedMaterials}
+                    note={note}
+                    onNoteChange={setNote}
+                />
             </SafeInputLayout>
 
             {/* Footer Buttons */}
@@ -199,8 +193,14 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    flex1: {
+    container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
+    },
+    flex1: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 100,
     },
 });

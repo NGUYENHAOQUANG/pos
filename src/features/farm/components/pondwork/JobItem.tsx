@@ -171,8 +171,8 @@ export const JobCard: React.FC<JobCardProps> = ({
                     <View style={styles.listContent}>
                         {/* Always show total count */}
                         <Text style={styles.countText}>{items.length} lượt</Text>
-                        {/* Show only the last 3 items */}
-                        {items.slice(-3).map((item, index, arr) => (
+                        {/* Show only the first 3 items (latest ones) */}
+                        {items.slice(0, 3).map((item, index, arr) => (
                             <React.Fragment key={item.id || index}>
                                 <View style={styles.itemRow}>
                                     <View

@@ -16,30 +16,30 @@ import type {
 } from '@/features/farm/types/feedingRecord.types';
 
 /**
- * Lấy danh sách vật tư cho màn Cho ăn (dropdown chọn vật tư).
- * Dùng lại logic đã dùng trong useHandleProblemForm:
- * - Lấy selectedZoneId từ farmStore
- * - Lấy warehouse theo ZoneId
- * - Lấy warehouse items
- * - Map ra IMaterial[] với id = warehouseItemId
+ * Get list of materials for Feeding screen (material dropdown).
+ * Reuse logic from useHandleProblemForm:
+ * - Get selectedZoneId from farmStore
+ * - Get warehouse by ZoneId
+ * - Get warehouse items
+ * - Map to IMaterial[] with id = warehouseItemId
  */
 export const useFeeding = () => {
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    // Danh sách vật tư master
+    // Master material list
     const { data: allMaterials = [] } = useMaterials();
 
-    // Lấy danh sách nhóm vật tư để filter "Nuôi"
+    // Get material groups to filter "Nuôi" (Feeding)
     const { data: groups = [] } = useMaterialGroups();
     const feedGroupId = useMemo(() => {
         return groups.find(g => g.name.toLowerCase().includes('nuôi'))?.id;
     }, [groups]);
 
-    // Kho theo ZoneId
+    // Warehouse by ZoneId
     const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
     const defaultWarehouseId = warehouses?.[0]?.id;
 
-    // Items trong kho
+    // Warehouse items
     const { data: warehouseItemsData } = useWarehouseItems(
         defaultWarehouseId,
         {
@@ -49,7 +49,7 @@ export const useFeeding = () => {
         { enabled: !!defaultWarehouseId }
     );
 
-    // Map ra IMaterial[]
+    // Map to IMaterial[]
     const materials: IMaterial[] = useMemo(() => {
         return (warehouseItemsData?.items || []).map((item: any) => {
             const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
@@ -75,8 +75,8 @@ export const useFeeding = () => {
 };
 
 /**
- * GET /feeding-records và map sang JobExecution[] cho màn công việc + nhật ký.
- * Logic "Lần x" giống useIncidentsAsJobs: đếm theo từng ngày.
+ * GET /feeding-records and map to JobExecution[] for work + log screens.
+ * "Lần x" logic similar to useIncidentsAsJobs: count per day.
  */
 export const useFeedingRecords = (pondId: string) => {
     return useQuery({
@@ -99,20 +99,29 @@ export const useFeedingRecordsAsJobs = (pondId: string) => {
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];
 
-    // Sort theo createdAt tăng dần để Lần 1, 2... đúng thứ tự trong ngày
+    // Count daily items
+    const totalPerDay: Record<string, number> = {};
+    rawItems.forEach(item => {
+        const d = item.createdAt ? new Date(item.createdAt) : new Date();
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+    });
+
     const sortedItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeA - timeB;
+        return timeB - timeA;
     });
 
     const dayCounts: Record<string, number> = {};
     const jobs: JobExecution[] = sortedItems.map(item => {
         const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
         const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
+
         if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
         dayCounts[dateKey]++;
-        const dailyIndex = dayCounts[dateKey];
+        const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
+        const dailyIndex = total - dayCounts[dateKey] + 1;
 
         const timeStr = createdDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',

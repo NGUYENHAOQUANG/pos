@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { colors } from '@/styles';
@@ -30,7 +30,6 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
-    const scrollViewRef = useRef<ScrollView>(null);
 
     const handleBack = () => {
         navigation.goBack();
@@ -92,27 +91,23 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             {/* Header */}
             <HeaderFarm type="simple" title="Xử lý nước" onBack={handleBack} />
 
-            <SafeInputLayout style={styles.container}>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.flex1}
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    {/* Main Content Component */}
-                    <WaterTreatment
-                        executionDate={executionDate}
-                        onExecutionDateChange={setExecutionDate}
-                        activityType={activityType}
-                        onActivityTypeChange={setActivityType}
-                        selectedMaterials={selectedMaterials}
-                        onSelectedMaterialsChange={setSelectedMaterials}
-                        note={note}
-                        onNoteChange={setNote}
-                        disabledDate={true}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+            <SafeInputLayout
+                style={styles.container}
+                contentContainerStyle={styles.scrollContent}
+                extraScrollHeight={50}
+            >
+                {/* Main Content Component */}
+                <WaterTreatment
+                    executionDate={executionDate}
+                    onExecutionDateChange={setExecutionDate}
+                    activityType={activityType}
+                    onActivityTypeChange={setActivityType}
+                    selectedMaterials={selectedMaterials}
+                    onSelectedMaterialsChange={setSelectedMaterials}
+                    note={note}
+                    onNoteChange={setNote}
+                    disabledDate={true}
+                />
             </SafeInputLayout>
 
             {/* Footer Buttons */}

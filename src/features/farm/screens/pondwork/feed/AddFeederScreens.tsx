@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Toast from 'react-native-toast-message';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -32,7 +33,6 @@ export const AddFeederScreens = () => {
     const [note, setNote] = useState('');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
-    const scrollViewRef = useRef<ScrollView>(null);
 
     // Chế độ hoạt động & Lịch trình
     const [mode, setMode] = useState<'manual' | 'schedule'>('manual');
@@ -143,12 +143,7 @@ export const AddFeederScreens = () => {
 
             <Loading isLoading={createMutation.isPending || isSubmitting}>
                 <View style={styles.contentContainer}>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                    >
+                    <SafeInputLayout contentContainerStyle={styles.scrollContent}>
                         {/* General Info Section */}
                         <GeneralInfoBox
                             date={executionDate}
@@ -222,14 +217,10 @@ export const AddFeederScreens = () => {
                         )}
 
                         {/* Note Section */}
-                        <SelectionNotesBox
-                            notes={note}
-                            onNotesChange={setNote}
-                            scrollViewRef={scrollViewRef}
-                        />
+                        <SelectionNotesBox notes={note} onNotesChange={setNote} />
                         {/* Add extra padding at bottom to ensure content isn't hidden behind footer if keybaord is open or just for scroll space */}
                         <View style={styles.spacer} />
-                    </ScrollView>
+                    </SafeInputLayout>
                 </View>
             </Loading>
 

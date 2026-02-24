@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing } from '@/styles';
+import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
 
 export type ButtonBarMode = 'total' | 'single' | 'double';
 
@@ -47,6 +48,9 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     // Use actual safe area insets with minimum fallback
     const paddingBottom = Math.max(insets.bottom, 12);
 
+    const safePrimaryPress = usePreventDoubleTap(onPrimaryPress, 500);
+    const safeSecondaryPress = usePreventDoubleTap(onSecondaryPress, 500);
+
     const renderContent = () => {
         switch (mode) {
             case 'total':
@@ -62,7 +66,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                         </View>
                         <Button
                             title={primaryTitle}
-                            onPress={onPrimaryPress || (() => {})}
+                            onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}
@@ -77,7 +81,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                     <View style={styles.row}>
                         <Button
                             title={secondaryTitle}
-                            onPress={onSecondaryPress || (() => {})}
+                            onPress={safeSecondaryPress}
                             variant="outline"
                             size="medium"
                             style={StyleSheet.flatten([
@@ -94,7 +98,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                         <View style={styles.spacer} />
                         <Button
                             title={primaryTitle}
-                            onPress={onPrimaryPress || (() => {})}
+                            onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}
@@ -110,7 +114,7 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                     <View style={styles.row}>
                         <Button
                             title={primaryTitle}
-                            onPress={onPrimaryPress || (() => {})}
+                            onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
                             disabled={primaryButtonDisabled}

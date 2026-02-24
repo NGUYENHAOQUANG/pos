@@ -79,7 +79,7 @@ const convertToJobExecutions = async (
             // Use the already parsed date
             const createdDate = check.parsedDate;
 
-            // Dùng format dd/MM/yyyy cho UI & time HH:mm
+            // Format dd/MM/yyyy for UI & time HH:mm
             const dateStr = formatDate(createdDate);
             const timeStr = createdDate.toLocaleTimeString('en-GB', {
                 hour: '2-digit',
@@ -150,7 +150,7 @@ export const useShrimpHealthChecksAsJobs = (pondId: string) => {
                 }
 
                 let jobExecutions = await convertToJobExecutions(rawItems, pondId);
-                // Card: slice(-3) = 3 mới nhất, hiển thị cũ→mới (mới nhất ở cuối). Sắp xếp tăng dần.
+                // Card: slice(0, 3) = 3 newest, display old->new. Sort ascending.
                 const getItemTime = (x: JobExecution) => {
                     if (x.createdAt) return new Date(x.createdAt).getTime();
                     try {
@@ -165,10 +165,10 @@ export const useShrimpHealthChecksAsJobs = (pondId: string) => {
                         return 0;
                     }
                 };
-                const sortedAsc = [...jobExecutions].sort(
-                    (a, b) => getItemTime(a) - getItemTime(b)
+                const sortedDesc = [...jobExecutions].sort(
+                    (a, b) => getItemTime(b) - getItemTime(a)
                 );
-                setJobs(sortedAsc);
+                setJobs(sortedDesc);
             } catch {
                 setJobs([]);
             }
