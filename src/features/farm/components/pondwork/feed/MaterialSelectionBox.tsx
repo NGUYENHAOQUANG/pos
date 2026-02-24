@@ -60,8 +60,11 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                     <Text style={styles.materialName}>{item.material.name}</Text>
                                     <View style={styles.materialActions}>
                                         <View style={styles.quantityBox}>
-                                            <Text style={styles.quantityText}>
-                                                {item.quantity} {item.unit}
+                                            <Text style={styles.quantityText} numberOfLines={1}>
+                                                {item.quantity}
+                                            </Text>
+                                            <Text style={styles.unitText} numberOfLines={1}>
+                                                {item.unit}
                                             </Text>
                                         </View>
                                         <TouchableOpacity
@@ -103,7 +106,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 
 const styles = StyleSheet.create({
     title: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '700',
         lineHeight: 22,
         color: colors.text,
@@ -126,7 +129,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     materialName: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
         flex: 1,
         marginRight: spacing.md,
@@ -136,19 +139,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     quantityBox: {
+        flexDirection: 'row',
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: borderRadius.sm,
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: spacing.sm,
         height: 40,
         width: 110,
         marginRight: spacing.sm,
-        alignItems: 'flex-start',
-        justifyContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     quantityText: {
         fontSize: 16,
         color: colors.text,
+        flex: 1,
+        marginRight: 4,
+    },
+    unitText: {
+        fontSize: 16,
+        color: colors.textSecondary,
     },
     deleteButton: {
         width: 40,

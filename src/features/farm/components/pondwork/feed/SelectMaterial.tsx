@@ -129,10 +129,14 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                                     sanitized =
                                                         parts[0] + '.' + parts.slice(1).join('');
                                                 }
+                                                if (sanitized.length > 6) {
+                                                    sanitized = sanitized.substring(0, 6);
+                                                }
                                                 setQuantity(sanitized);
                                             }}
                                             keyboardType="decimal-pad"
                                             required
+                                            maxLength={6}
                                         />
                                     </View>
 
@@ -215,7 +219,7 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
     },
     label: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
         marginBottom: spacing.sm,
         lineHeight: 22,
