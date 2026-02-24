@@ -23,7 +23,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { useMeasureShrimpSizeForm } from '@/features/farm/hooks/sizeMeasurement/useMeasureShrimpSizeForm';
+import { useMeasureShrimpSizeForm } from '@/features/farm/hooks/pondwork/sizeMeasurement/useMeasureShrimpSizeForm';
 
 type MeasureShrimpSizeScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeScreen'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;

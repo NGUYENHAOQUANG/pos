@@ -8,6 +8,7 @@ import {
     IDryRenovationDetail,
 } from '@/features/farm/types/dryRenovation.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 export const useDryRenovations = (pondId: string, params?: IDryRenovationParams) => {
     return useQuery({
@@ -19,6 +20,7 @@ export const useDryRenovations = (pondId: string, params?: IDryRenovationParams)
 
 export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationParams) => {
     const { data, isLoading: isQueryLoading, error, refetch } = useDryRenovations(pondId, params);
+    const { materialMap } = useFarmMaterials();
     const [jobs, setJobs] = useState<JobExecution[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -89,16 +91,19 @@ export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationP
                                 images: imageUrls,
                                 documentIds: item.documentIds || [],
                             },
-                            materials: item.dryRenovationDetail?.materials?.map(m => ({
-                                material: {
-                                    id: m.warehouseItemId,
-                                    name: 'Vật tư', // Name resolution requires warehouse item lookup
-                                    group: '' as any,
-                                    unit: '',
-                                },
-                                quantity: m.quantity,
-                                unit: '',
-                            })),
+                            materials: item.dryRenovationDetail?.materials?.map(m => {
+                                const mat = materialMap[m.warehouseItemId];
+                                return {
+                                    material: {
+                                        id: m.warehouseItemId,
+                                        name: mat?.name,
+                                        group: (mat?.group as any) || '',
+                                        unit: mat?.unitName || '',
+                                    },
+                                    quantity: m.quantity,
+                                    unit: mat?.unitName || '',
+                                };
+                            }),
                         };
                     })
                 );
@@ -112,7 +117,7 @@ export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationP
         };
 
         processData();
-    }, [data]);
+    }, [data, materialMap]);
 
     return { jobs, isLoading: isQueryLoading || isProcessing, error, refetch };
 };
