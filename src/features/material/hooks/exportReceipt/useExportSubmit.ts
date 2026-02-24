@@ -81,7 +81,7 @@ export const useExportSubmit = ({
 
     // Validation function
     const validateForm = useCallback(
-        (isAutoSubmit: boolean) => {
+        (_isAutoSubmit: boolean) => {
             if (!selectedPond) {
                 showValidationError('Vui lòng chọn ao nuôi');
                 return false;
@@ -90,17 +90,7 @@ export const useExportSubmit = ({
                 showValidationError('Vui lòng chọn ít nhất một vật tư');
                 return false;
             }
-            if (isAutoSubmit) {
-                const invalidItemIndex = formMaterials.findIndex(
-                    m => !m.materialName || !m.quantity
-                );
-                if (invalidItemIndex !== -1) {
-                    showValidationError(
-                        `Vui lòng điền đầy đủ thông tin vật tư (Vật tư ${invalidItemIndex + 1})`
-                    );
-                    return false;
-                }
-            }
+
             return true;
         },
         [selectedPond, formMaterials]
