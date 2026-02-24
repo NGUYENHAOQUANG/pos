@@ -28,7 +28,7 @@ import {
 import { ShrimpInspectionMeta } from '@/features/farm/types/farm.types';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
-import { useShrimpHealthCheckForm } from '@/features/farm/hooks/shrimpHealthCheck/useShrimpHealthCheckForm';
+import { useShrimpHealthCheckForm } from '@/features/farm/hooks/pondwork/shrimpHealthCheck/useShrimpHealthCheckForm';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'ShrimpInspectionScreen'>;
