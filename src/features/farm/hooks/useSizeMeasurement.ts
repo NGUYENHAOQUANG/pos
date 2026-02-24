@@ -34,7 +34,7 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
             try {
                 const rawItems = data.data.items;
 
-                // Đếm tổng số lượt mỗi ngày (giống kiểm tra tôm)
+                // Count total occurrences per day
                 const totalPerDay: Record<string, number> = {};
                 rawItems.forEach((item: { createdAt?: string }) => {
                     const d = item.createdAt ? new Date(item.createdAt) : new Date();
@@ -42,7 +42,7 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                     totalPerDay[key] = (totalPerDay[key] || 0) + 1;
                 });
 
-                // Sắp xếp giảm dần (mới nhất trước), Lần 1 = cũ nhất, Lần N = mới nhất
+                // Sort descending (newest first), Lần 1 = oldest, Lần N = newest
                 const sortedItems = [...rawItems].sort((a, b) => {
                     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
                     const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -101,7 +101,7 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                     })
                 );
 
-                // Card: slice(-3) = 3 mới nhất, hiển thị cũ→mới (mới nhất ở cuối). Sắp xếp tăng dần.
+                // Card: slice(0, 3) = 3 newest, display old->new. Sort ascending.
                 const getItemTime = (x: JobExecution) => {
                     if (x.createdAt) return new Date(x.createdAt).getTime();
                     try {
@@ -117,11 +117,11 @@ export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurem
                         return 0;
                     }
                 };
-                const sortedAsc = [...processedJobs].sort(
-                    (a, b) => getItemTime(a) - getItemTime(b)
+                const sortedDesc = [...processedJobs].sort(
+                    (a, b) => getItemTime(b) - getItemTime(a)
                 );
 
-                setJobs(sortedAsc);
+                setJobs(sortedDesc);
             } catch (_err) {
                 setJobs([]);
             } finally {

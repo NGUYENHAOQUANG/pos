@@ -30,7 +30,7 @@ export const useCreateIncident = () => {
     });
 };
 
-/** Fetch incident detail by id (GET /pond/{pondId}/incident/{id}) – cho màn chỉnh sửa */
+/** Fetch incident detail by id (GET /pond/{pondId}/incident/{id}) – for edit screen */
 export const useIncidentDetail = (pondId: string, incidentId: string | undefined) => {
     return useQuery({
         queryKey: [...farmKeys.incident.byPond(pondId || ''), 'detail', incidentId],
@@ -39,7 +39,7 @@ export const useIncidentDetail = (pondId: string, incidentId: string | undefined
     });
 };
 
-/** Xóa incident (DELETE /pond/{pondId}/incident/{id}) */
+/** Delete incident (DELETE /pond/{pondId}/incident/{id}) */
 export const useDeleteIncident = () => {
     const queryClient = useQueryClient();
 
@@ -55,7 +55,7 @@ export const useDeleteIncident = () => {
     });
 };
 
-/** Cập nhật incident (PATCH /pond/{pondId}/incident/{id}) */
+/** Update incident (PATCH /pond/{pondId}/incident/{id}) */
 export const useUpdateIncident = () => {
     const queryClient = useQueryClient();
 
@@ -87,16 +87,25 @@ export const useIncidentList = (pondId: string, params?: GetIncidentListParams) 
     });
 };
 
-/** Map incident list API to JobExecution[] for card display (Xử lý sự cố) and log screen */
+/** Map incident list API to JobExecution[] for card display (Troubleshooting) and log screen */
 export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParams) => {
     const { data, isLoading, error, refetch, isRefetching } = useIncidentList(pondId, params);
 
     const rawItems: IncidentListItem[] = data?.data?.items ?? [];
-    // Sort by createdAt ascending so daily index is correct (Lần 1, 2, ... per day)
+
+    // Count daily items
+    const totalPerDay: Record<string, number> = {};
+    rawItems.forEach(item => {
+        const d = item.createdAt ? new Date(item.createdAt) : new Date();
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+    });
+
+    // Sort descending (newest first)
     const sortedItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return timeA - timeB;
+        return timeB - timeA;
     });
 
     const dayCounts: Record<string, number> = {};
@@ -105,7 +114,8 @@ export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParam
         const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
         if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
         dayCounts[dateKey]++;
-        const dailyIndex = dayCounts[dateKey];
+        const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
+        const dailyIndex = total - dayCounts[dateKey] + 1;
 
         const timeStr = createdDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',
