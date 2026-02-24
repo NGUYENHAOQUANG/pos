@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -41,7 +41,6 @@ export const AddEnvironmentScreen: React.FC = () => {
     // Decomposed useFarm() selectors
     const environmentSettings = useFarmStore(state => state.environmentSettings);
     const parameterSettings = useFarmStore(state => state.parameterSettings);
-    const scrollViewRef = useRef<ScrollView>(null);
     const generalInfoBoxRef = useRef<any>(null);
 
     // State for images when editing
@@ -193,79 +192,71 @@ export const AddEnvironmentScreen: React.FC = () => {
                 <EnvSkeleton />
             ) : (
                 <>
-                    <SafeInputLayout>
-                        <ScrollView
-                            ref={scrollViewRef}
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.scrollContent}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <GeneralInfoBox
-                                ref={generalInfoBoxRef}
-                                type="withImage"
-                                date={selectedDate}
-                                onDateChange={setSelectedDate}
-                                disabledDate={!!itemToEdit}
-                                imageUris={itemToEdit ? imageUris : undefined}
-                                documentIds={itemToEdit ? documentIds : undefined}
-                            />
+                    <SafeInputLayout
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={100}
+                    >
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            type="withImage"
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            disabledDate={!!itemToEdit}
+                            imageUris={itemToEdit ? imageUris : undefined}
+                            documentIds={itemToEdit ? documentIds : undefined}
+                        />
 
-                            <EnvironmentParametersBox
-                                pH={pH}
-                                onPHChange={value => {
-                                    setPH(value);
-                                    setShowParameterError(false);
-                                }}
-                                do={dissolvedOxygen}
-                                onDOChange={value => {
-                                    setDissolvedOxygen(value);
-                                    setShowParameterError(false);
-                                }}
-                                temperature={temperature}
-                                onTemperatureChange={value => {
-                                    setTemperature(value);
-                                    setShowParameterError(false);
-                                }}
-                                salinity={salinity}
-                                onSalinityChange={value => {
-                                    setSalinity(value);
-                                    setShowParameterError(false);
-                                }}
-                                alkalinity={alkalinity}
-                                onAlkalinityChange={value => {
-                                    setAlkalinity(value);
-                                    setShowParameterError(false);
-                                }}
-                                transparency={transparency}
-                                onTransparencyChange={value => {
-                                    setTransparency(value);
-                                    setShowParameterError(false);
-                                }}
-                                onSetupPress={() => {
-                                    navigation.navigate('SettingEnvironment', {
-                                        data: { advancedParameters },
-                                        onSave: handleSaveAdvancedParams,
-                                    });
-                                }}
-                                advancedParameters={advancedParameters}
-                                kali={kali}
-                                onKaliChange={setKali}
-                                tan={tan}
-                                onTanChange={setTan}
-                                magie={magie}
-                                onMagieChange={setMagie}
-                                no3={no3}
-                                onNo3Change={setNo3}
-                                showError={showParameterError}
-                                limits={limitsWithCodes}
-                            />
+                        <EnvironmentParametersBox
+                            pH={pH}
+                            onPHChange={value => {
+                                setPH(value);
+                                setShowParameterError(false);
+                            }}
+                            do={dissolvedOxygen}
+                            onDOChange={value => {
+                                setDissolvedOxygen(value);
+                                setShowParameterError(false);
+                            }}
+                            temperature={temperature}
+                            onTemperatureChange={value => {
+                                setTemperature(value);
+                                setShowParameterError(false);
+                            }}
+                            salinity={salinity}
+                            onSalinityChange={value => {
+                                setSalinity(value);
+                                setShowParameterError(false);
+                            }}
+                            alkalinity={alkalinity}
+                            onAlkalinityChange={value => {
+                                setAlkalinity(value);
+                                setShowParameterError(false);
+                            }}
+                            transparency={transparency}
+                            onTransparencyChange={value => {
+                                setTransparency(value);
+                                setShowParameterError(false);
+                            }}
+                            onSetupPress={() => {
+                                navigation.navigate('SettingEnvironment', {
+                                    data: { advancedParameters },
+                                    onSave: handleSaveAdvancedParams,
+                                });
+                            }}
+                            advancedParameters={advancedParameters}
+                            kali={kali}
+                            onKaliChange={setKali}
+                            tan={tan}
+                            onTanChange={setTan}
+                            magie={magie}
+                            onMagieChange={setMagie}
+                            no3={no3}
+                            onNo3Change={setNo3}
+                            showError={showParameterError}
+                            limits={limitsWithCodes}
+                        />
 
-                            <SelectionNotesBox
-                                notes={notes}
-                                onNotesChange={setNotes}
-                                scrollViewRef={scrollViewRef}
-                            />
-                        </ScrollView>
+                        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
                     </SafeInputLayout>
 
                     {/* Footer Buttons */}
@@ -325,9 +316,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    scrollView: {
-        flex: 1,
     },
     scrollContent: {
         padding: 0,

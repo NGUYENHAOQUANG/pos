@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
@@ -35,7 +36,6 @@ export const EditFeederScreens = () => {
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const scrollViewRef = useRef<ScrollView>(null);
 
     // Danh sách vật tư cho màn Cho ăn (dùng logic giống HandleProblem)
     const { materials } = useFeeding();
@@ -181,12 +181,7 @@ export const EditFeederScreens = () => {
 
             <Loading isLoading={isLoading}>
                 <View style={styles.contentContainer}>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                    >
+                    <SafeInputLayout contentContainerStyle={styles.scrollContent}>
                         {/* General Info Section */}
                         <GeneralInfoBox
                             date={executionDate}
@@ -202,13 +197,9 @@ export const EditFeederScreens = () => {
                         />
 
                         {/* Note Section */}
-                        <SelectionNotesBox
-                            notes={note}
-                            onNotesChange={setNote}
-                            scrollViewRef={scrollViewRef}
-                        />
+                        <SelectionNotesBox notes={note} onNotesChange={setNote} />
                         <View style={styles.spacer} />
-                    </ScrollView>
+                    </SafeInputLayout>
                 </View>
             </Loading>
 

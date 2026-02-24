@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -36,7 +36,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
     const insets = useSafeAreaInsets();
-    const scrollViewRef = useRef<ScrollView>(null);
+
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
     const currentPond = routePond;
@@ -170,46 +170,38 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 )}
             </View>
 
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        type="withImage"
-                        date={time}
-                        onDateChange={setTime}
-                        imageUris={images}
-                        documentIds={initialDocumentIds}
-                        disabledDate={true}
-                    />
-                    <MeasurementDataBox
-                        shrimpSize={shrimpSize}
-                        onShrimpSizeChange={setShrimpSize}
-                        remainingWeight={remainingWeight}
-                        onRemainingWeightChange={setRemainingWeight}
-                        stockingQuantity={stockingQuantity}
-                        onAIMeasurePress={() =>
-                            navigation.navigate('MeasureShrimpSizeAIScreen', {
-                                pondId: currentPond?.id || '',
-                            })
-                        }
-                        averageSizeCm={
-                            averageShrimpSize
-                                ? parseFloat(averageShrimpSize)
-                                : latestAIMeasurement?.averageSizeCm
-                        }
-                    />
-                    <SelectionNotesBox
-                        notes={notes}
-                        onNotesChange={setNotes}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+            <SafeInputLayout
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                extraScrollHeight={100}
+            >
+                <GeneralInfoBox
+                    ref={generalInfoBoxRef}
+                    type="withImage"
+                    date={time}
+                    onDateChange={setTime}
+                    imageUris={images}
+                    documentIds={initialDocumentIds}
+                    disabledDate={true}
+                />
+                <MeasurementDataBox
+                    shrimpSize={shrimpSize}
+                    onShrimpSizeChange={setShrimpSize}
+                    remainingWeight={remainingWeight}
+                    onRemainingWeightChange={setRemainingWeight}
+                    stockingQuantity={stockingQuantity}
+                    onAIMeasurePress={() =>
+                        navigation.navigate('MeasureShrimpSizeAIScreen', {
+                            pondId: currentPond?.id || '',
+                        })
+                    }
+                    averageSizeCm={
+                        averageShrimpSize
+                            ? parseFloat(averageShrimpSize)
+                            : latestAIMeasurement?.averageSizeCm
+                    }
+                />
+                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </SafeInputLayout>
 
             <View style={styles.footer}>

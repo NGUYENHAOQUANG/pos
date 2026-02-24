@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -426,11 +427,9 @@ export const CreateCycleScreen: React.FC = () => {
             />
 
             <View style={{ flex: 1 }}>
-                <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
+                <SafeInputLayout
                     contentContainerStyle={{ paddingBottom: 100 }}
-                    automaticallyAdjustKeyboardInsets={true}
+                    extraScrollHeight={100}
                 >
                     <CreateCycleForm
                         formData={cycleData}
@@ -442,7 +441,7 @@ export const CreateCycleScreen: React.FC = () => {
                         breedOptions={breedOptions}
                         seasonOptions={seasonOptions}
                     />
-                </ScrollView>
+                </SafeInputLayout>
             </View>
 
             <ButtonBarFarm

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
@@ -63,8 +63,6 @@ export const WaterSupplyScreen = () => {
     const deleteMutation = useDeleteWaterSupplyRecord();
 
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
-    const scrollViewRef = useRef<ScrollView>(null);
-
     // Initial Data
     const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
 
@@ -396,54 +394,46 @@ export const WaterSupplyScreen = () => {
             </View>
 
             <View style={styles.contentContainer}>
-                <SafeInputLayout>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                    >
-                        {/* 1. Thông tin chung */}
-                        <GeneralInfoBox
-                            ref={generalInfoBoxRef}
-                            type="withImage"
-                            date={selectedDate}
-                            onDateChange={setSelectedDate}
-                            imageUris={imageUris}
-                            onImagesChange={setImageUris}
-                            documentIds={documentIds}
-                            disabledDate={true}
-                        />
+                <SafeInputLayout
+                    contentContainerStyle={styles.scrollContent}
+                    extraScrollHeight={100}
+                >
+                    {/* 1. Thông tin chung */}
+                    <GeneralInfoBox
+                        ref={generalInfoBoxRef}
+                        type="withImage"
+                        date={selectedDate}
+                        onDateChange={setSelectedDate}
+                        imageUris={imageUris}
+                        onImagesChange={setImageUris}
+                        documentIds={documentIds}
+                        disabledDate={true}
+                    />
 
-                        {/* 2. Mực nước & Thể tích */}
-                        <WaterSupplyInfoBox
-                            targetLevel={targetLevel}
-                            onTargetLevelChange={setTargetLevel}
-                            supplyLevel={supplyLevel}
-                            onSupplyLevelChange={setSupplyLevel}
-                            // Truyền các giá trị đã tính toán
-                            drainLevel={calculateInfo.drainLevel}
-                            volumeAfterDrain={calculateInfo.volumeAfterDrain}
-                            volumeSupply={calculateInfo.volumeSupply}
-                            volumeAfterSupply={calculateInfo.volumeAfterSupply}
-                        />
+                    {/* 2. Mực nước & Thể tích */}
+                    <WaterSupplyInfoBox
+                        targetLevel={targetLevel}
+                        onTargetLevelChange={setTargetLevel}
+                        supplyLevel={supplyLevel}
+                        onSupplyLevelChange={setSupplyLevel}
+                        // Truyền các giá trị đã tính toán
+                        drainLevel={calculateInfo.drainLevel}
+                        volumeAfterDrain={calculateInfo.volumeAfterDrain}
+                        volumeSupply={calculateInfo.volumeSupply}
+                        volumeAfterSupply={calculateInfo.volumeAfterSupply}
+                    />
 
-                        {/* 3. Chọn vật tư */}
-                        <MaterialSelectionBox
-                            selectedMaterials={selectedMaterials}
-                            onMaterialsChange={setSelectedMaterials}
-                            materials={materials}
-                        />
+                    {/* 3. Chọn vật tư */}
+                    <MaterialSelectionBox
+                        selectedMaterials={selectedMaterials}
+                        onMaterialsChange={setSelectedMaterials}
+                        materials={materials}
+                    />
 
-                        {/* 4. Ghi chú */}
-                        <SelectionNotesBox
-                            notes={note}
-                            onNotesChange={setNote}
-                            scrollViewRef={scrollViewRef}
-                        />
+                    {/* 4. Ghi chú */}
+                    <SelectionNotesBox notes={note} onNotesChange={setNote} />
 
-                        <View style={styles.spacer} />
-                    </ScrollView>
+                    <View style={styles.spacer} />
                 </SafeInputLayout>
             </View>
 

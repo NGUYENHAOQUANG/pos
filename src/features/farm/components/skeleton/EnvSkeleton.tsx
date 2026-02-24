@@ -78,16 +78,12 @@ export const EnvSkeleton: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // Match AddEnvironmentScreen container padding if any, usually it has scrollview content container padding
-        padding: spacing.md,
     },
     card: {
         backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
         paddingVertical: 12,
         marginTop: 8,
-        borderRadius: 0,
-        marginBottom: spacing.md,
     },
     cardHeader: {
         marginBottom: 12,

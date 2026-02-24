@@ -1,48 +1,46 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
 import { colors, spacing } from '@/styles';
 
 interface SelectionNotesBoxProps {
     notes: string;
     onNotesChange: (value: string) => void;
-    scrollViewRef?: React.RefObject<any>;
 }
 
-export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({
-    notes,
-    onNotesChange,
-    scrollViewRef,
-}) => {
-    const containerRef = useRef<View>(null);
+export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onNotesChange }) => {
     const inputRef = useRef<TextInput>(null);
+    const [isFocused, setIsFocused] = useState(false);
 
     const handleFocus = () => {
-        if (Platform.OS === 'ios' && scrollViewRef?.current) {
-            // Delay để đảm bảo keyboard đã mở
-            setTimeout(() => {
-                // Scroll to end để đảm bảo input được hiển thị
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-            }, 300);
-        }
+        setIsFocused(true);
+    };
+
+    const handleBlur = () => {
+        setIsFocused(false);
     };
 
     return (
-        <View ref={containerRef} style={styles.container}>
-            <Text style={styles.title}>Ghi chú</Text>
-            <View style={styles.inputGroup}>
-                <TextInput
-                    ref={inputRef}
-                    style={styles.textArea}
-                    placeholder="Nhập ghi chú"
-                    placeholderTextColor={colors.borderSubtle}
-                    value={notes}
-                    onChangeText={onNotesChange}
-                    onFocus={handleFocus}
-                    multiline
-                    textAlignVertical="top"
-                />
+        <>
+            <View style={styles.container}>
+                <Text style={styles.title}>Ghi chú</Text>
+                <View style={styles.inputGroup}>
+                    <TextInput
+                        ref={inputRef}
+                        style={styles.textArea}
+                        placeholder="Nhập ghi chú"
+                        placeholderTextColor={colors.borderSubtle}
+                        value={notes}
+                        onChangeText={onNotesChange}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        multiline
+                        textAlignVertical="top"
+                    />
+                </View>
             </View>
-        </View>
+            {/* Dynamic spacer: placed outside the card so it doesn't stretch the white background */}
+            {isFocused && <View style={styles.keyboardSpacer} />}
+        </>
     );
 };
 
@@ -81,5 +79,8 @@ const styles = StyleSheet.create({
         letterSpacing: 0,
         color: colors.text,
         textAlignVertical: 'top',
+    },
+    keyboardSpacer: {
+        height: Platform.OS === 'android' ? 150 : 80,
     },
 });

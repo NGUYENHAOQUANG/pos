@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -47,7 +47,6 @@ export const AddHarvestScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
-    const scrollViewRef = useRef<ScrollView>(null);
 
     const createHarvestMutation = useCreateHarvestRecord();
     const updateHarvestMutation = useUpdateHarvestRecord();
@@ -208,45 +207,37 @@ export const AddHarvestScreen: React.FC = () => {
             </View>
 
             {/* Content */}
-            <SafeInputLayout>
-                <ScrollView
-                    ref={scrollViewRef}
-                    style={styles.scrollView}
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <GeneralInfoBox
-                        type="harvest"
-                        date={selectedDate}
-                        onDateChange={setSelectedDate}
-                        activityLabel="Chọn loại thu hoạch"
-                        activityOptions={harvestTypeOptions}
-                        selectedActivity={harvestType}
-                        onSelectActivity={value => {
-                            const apiType = getHarvestTypeFromDisplay(value);
-                            setValue('harvestType', apiType);
-                        }}
-                        disabledDate={true}
-                    />
+            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={150}>
+                <GeneralInfoBox
+                    type="harvest"
+                    date={selectedDate}
+                    onDateChange={setSelectedDate}
+                    activityLabel="Chọn loại thu hoạch"
+                    activityOptions={harvestTypeOptions}
+                    selectedActivity={harvestType}
+                    onSelectActivity={value => {
+                        const apiType = getHarvestTypeFromDisplay(value);
+                        setValue('harvestType', apiType);
+                    }}
+                    disabledDate={true}
+                />
 
-                    {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
-                    {/* {harvestType !== 'Đóng chu kỳ' && ( */}
-                    <HarvestDataBox
-                        yieldAmount={watch('totalWeightKg') || ''}
-                        onYieldAmountChange={value => setValue('totalWeightKg', value)}
-                        shrimpSize={watch('shrimpSize') || ''}
-                        onShrimpSizeChange={value => setValue('shrimpSize', value)}
-                        referencePrice={watch('referencePrice') || ''}
-                        onReferencePriceChange={value => setValue('referencePrice', value)}
-                    />
-                    {/* )} */}
+                {/* Chỉ hiển thị số liệu thu hoạch khi không phải "Đóng chu kỳ" */}
+                {/* {harvestType !== 'Đóng chu kỳ' && ( */}
+                <HarvestDataBox
+                    yieldAmount={watch('totalWeightKg') || ''}
+                    onYieldAmountChange={value => setValue('totalWeightKg', value)}
+                    shrimpSize={watch('shrimpSize') || ''}
+                    onShrimpSizeChange={value => setValue('shrimpSize', value)}
+                    referencePrice={watch('referencePrice') || ''}
+                    onReferencePriceChange={value => setValue('referencePrice', value)}
+                />
+                {/* )} */}
 
-                    <SelectionNotesBox
-                        notes={watch('notes') || ''}
-                        onNotesChange={value => setValue('notes', value)}
-                        scrollViewRef={scrollViewRef}
-                    />
-                </ScrollView>
+                <SelectionNotesBox
+                    notes={watch('notes') || ''}
+                    onNotesChange={value => setValue('notes', value)}
+                />
             </SafeInputLayout>
 
             {/* Footer Buttons */}
@@ -313,9 +304,6 @@ const styles = StyleSheet.create({
     },
     headerSpacer: {
         width: 40,
-    },
-    scrollView: {
-        flex: 1,
     },
     scrollContent: {
         padding: 0,
