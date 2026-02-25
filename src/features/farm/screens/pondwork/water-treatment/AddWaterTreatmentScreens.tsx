@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -28,6 +28,13 @@ export const AddWaterTreatmentScreens: React.FC = () => {
 
     // Fetch warehouse materials
     const { materials } = useFarmMaterials();
+
+    const filteredMaterials = useMemo(() => {
+        return materials.filter(m => {
+            const groupName = (m.group || '').toLowerCase();
+            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
+        });
+    }, [materials]);
     // Mutation
     const createMutation = useCreateWaterTreatment();
 
@@ -112,7 +119,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                     onExecutionDateChange={setExecutionDate}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
-                    materials={materials}
+                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}

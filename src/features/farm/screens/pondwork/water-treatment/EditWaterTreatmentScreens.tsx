@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -39,6 +39,13 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
     // Fetch warehouse materials
     const { materials } = useFarmMaterials();
+
+    const filteredMaterials = useMemo(() => {
+        return materials.filter(m => {
+            const groupName = (m.group || '').toLowerCase();
+            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
+        });
+    }, [materials]);
 
     // Local state
     const [executionDate, setExecutionDate] = useState<Date>(new Date());
@@ -216,7 +223,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     disabledDate={true}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
-                    materials={materials}
+                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}
