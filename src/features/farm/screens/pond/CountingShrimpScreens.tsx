@@ -58,7 +58,6 @@ const CountingShrimpScreen: React.FC = () => {
             Image.getSize(
                 uri,
                 (width, height) => {
-                    console.log(`DEBUG: Fallback Image.getSize: ${width}x${height}`);
                     setImageDimensions({ width, height });
                 },
                 error => console.error('Failed to get image size:', error)
@@ -76,7 +75,6 @@ const CountingShrimpScreen: React.FC = () => {
         if (!base64Image || !imageUri) return;
         setIsLoading(true);
         try {
-            console.log('DEBUG: Calling Base64 endpoint...');
             const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
             const payload = {
                 base64Content: base64Image,
@@ -97,9 +95,7 @@ const CountingShrimpScreen: React.FC = () => {
             }
 
             // Step 2: Call AI API with documentId
-            console.log('DEBUG: Calling AI API with documentId:', documentId);
             const aiResponse = await aiApi.countSeedstock({ documentId: documentId });
-            console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
 
             const count = aiResponse?.totalCount || 0;
             setCurrentImageCount(count);
@@ -109,7 +105,6 @@ const CountingShrimpScreen: React.FC = () => {
                 Array.isArray(aiResponse.detections) &&
                 aiResponse.detections.length > 0
             ) {
-                console.log(`DEBUG: Processing ${aiResponse.detections.length} detections...`);
                 try {
                     const newDetections: DetectionDot[] = aiResponse.detections
                         .map((d: any, index: number) => {
@@ -127,19 +122,18 @@ const CountingShrimpScreen: React.FC = () => {
                         .filter((d: any): d is DetectionDot => d !== null);
 
                     setDetections(newDetections);
-                } catch (mapError) {
-                    console.error('DEBUG: Error mapping detections:', mapError);
-                }
+                } catch (_mapError) {}
             } else {
                 setDetections([]);
             }
             setIsProcessed(true);
         } catch (error: any) {
             console.error('Base64 processing failed:', error);
+            const errorMessage = error?.response?.data?.message || 'Không thể xử lý ảnh này';
             Toast.show({
                 type: 'error',
                 text1: 'Lỗi',
-                text2: 'Không thể xử lý ảnh này',
+                text2: errorMessage,
             });
         } finally {
             setIsLoading(false);

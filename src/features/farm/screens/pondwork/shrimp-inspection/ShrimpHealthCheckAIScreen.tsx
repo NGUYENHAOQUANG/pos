@@ -137,7 +137,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
         _setIsLoading(true);
 
         try {
-            console.log('DEBUG: Calling Base64 endpoint for Shrimp Health...');
             const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
             const payload = {
                 base64Content: imageBase64,
@@ -159,8 +158,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             if (!documentIdStr) {
                 throw new Error('Could not retrieve document ID from uploaded image.');
             }
-
-            console.log('DEBUG: documentId retrieved for health check:', documentIdStr);
 
             predictHealth(
                 { documentId: documentIdStr },
@@ -210,12 +207,14 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                         setResults(prev => [...prev, newResult]);
                         setDetections(newDetections);
                     },
-                    onError: error => {
+                    onError: (error: any) => {
                         console.error('Predict Health AI Error:', error);
+                        const errorMessage =
+                            error?.response?.data?.message || 'Kiểm tra sức khỏe bằng AI thất bại';
                         Toast.show({
                             type: 'error',
                             text1: 'Lỗi',
-                            text2: 'Kiểm tra sức khỏe bằng AI thất bại',
+                            text2: errorMessage,
                         });
                     },
                     onSettled: () => {
@@ -223,12 +222,14 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                     },
                 }
             );
-        } catch (error) {
+        } catch (error: any) {
             console.error('Base64 processing failed:', error);
+            const errorMessage =
+                error?.response?.data?.message || 'Không thể upload hình ảnh để xử lý bệnh tôm';
             Toast.show({
                 type: 'error',
                 text1: 'Lỗi',
-                text2: 'Không thể upload hình ảnh để xử lý bệnh tôm',
+                text2: errorMessage,
             });
             _setIsLoading(false);
         }

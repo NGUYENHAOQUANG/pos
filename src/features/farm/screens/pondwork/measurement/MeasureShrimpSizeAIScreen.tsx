@@ -74,7 +74,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     const previousSizePcsPerKg = useMemo(() => {
         if (!previousMeasurement || previousMeasurement.weight <= 0) return 0;
-        console.log('previousMeasurement', previousMeasurement);
         return Math.round((1000 * previousMeasurement.count) / previousMeasurement.weight);
     }, [previousMeasurement]);
 
@@ -150,7 +149,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         _setIsLoading(true);
 
         try {
-            console.log('DEBUG: Calling Base64 endpoint length:', base64Image.length);
             const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
             const payload = {
                 base64Content: base64Image,
@@ -172,8 +170,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             if (!documentIdStr) {
                 throw new Error('Could not retrieve document ID from uploaded image.');
             }
-
-            console.log('DEBUG: documentId retrieved:', documentIdStr);
 
             estimateSize(
                 { documentId: documentIdStr },
@@ -238,12 +234,14 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                         setDetections(newDetections);
                         setMeasuredWeight('');
                     },
-                    onError: error => {
+                    onError: (error: any) => {
                         console.error('Estimate Size AI Error:', error);
+                        const errorMessage =
+                            error?.response?.data?.message || 'Đo kích thước bằng AI thất bại';
                         Toast.show({
                             type: 'error',
                             text1: 'Lỗi',
-                            text2: 'Đo kích thước bằng AI thất bại',
+                            text2: errorMessage,
                         });
                     },
                     onSettled: () => {
@@ -251,12 +249,14 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     },
                 }
             );
-        } catch (error) {
+        } catch (error: any) {
             console.error('Base64 processing failed:', error);
+            const errorMessage =
+                error?.response?.data?.message || 'Không thể upload hình ảnh để xử lý';
             Toast.show({
                 type: 'error',
                 text1: 'Lỗi',
-                text2: 'Không thể upload hình ảnh để xử lý',
+                text2: errorMessage,
             });
             _setIsLoading(false);
         }
