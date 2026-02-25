@@ -11,6 +11,8 @@ import { aiApi } from '@/features/farm/api/aiApi';
 import Toast from 'react-native-toast-message';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
 
 const CountingShrimpScreen: React.FC = () => {
     const navigation = useNavigation();
@@ -22,6 +24,8 @@ const CountingShrimpScreen: React.FC = () => {
 
     // Calculate count from current image to add later
     const [currentImageCount, setCurrentImageCount] = useState<number>(0);
+    const [base64Image, setBase64Image] = useState<string | null>(null);
+    const [isProcessed, setIsProcessed] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [detections, setDetections] = useState<DetectionDot[]>([]);
@@ -44,84 +48,101 @@ const CountingShrimpScreen: React.FC = () => {
         dimensions?: { width: number; height: number }
     ) => {
         _setImageUri(uri);
-        setIsLoading(true);
+        if (base64) setBase64Image(base64);
+
         // Set dimensions immediately if available from asset (best for mapping AI coords)
         if (dimensions && dimensions.width > 0 && dimensions.height > 0) {
             setImageDimensions(dimensions);
+        } else {
+            // If dimensions missing, fetch them for overlay scaling
+            Image.getSize(
+                uri,
+                (width, height) => {
+                    console.log(`DEBUG: Fallback Image.getSize: ${width}x${height}`);
+                    setImageDimensions({ width, height });
+                },
+                error => console.error('Failed to get image size:', error)
+            );
         }
 
         // Reset current image specific states
         setDetections([]);
         setCurrentImageCount(0);
         setIsCountAdded(false);
+        setIsProcessed(false);
+    };
 
-        if (uri && base64) {
-            try {
-                // Call AI API for counting
-                console.log('DEBUG: Calling AI API...');
-                console.log('BASE64_IMAGE_START');
-                console.log(base64);
-                console.log('BASE64_IMAGE_END');
-                const aiResponse = await aiApi.countSeedstock({ image_base: base64 });
-                console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
+    const handleStartCounting = async () => {
+        if (!base64Image || !imageUri) return;
+        setIsLoading(true);
+        try {
+            console.log('DEBUG: Calling Base64 endpoint...');
+            const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
+            const payload = {
+                base64Content: base64Image,
+                fileName: fileName,
+                contentType: 'image/jpeg',
+                storageType: 'Azure',
+            };
 
-                const count = aiResponse.total_count || 0;
-                setCurrentImageCount(count);
+            // Step 1: Upload to get document ID
+            const response = await apiClient.post(API_ENDPOINTS.DOCUMENT.UPLOAD_BASE64, payload);
+            const data = response.data as any;
 
-                // Process detections immediately (independent of image size fetching)
-                if (
-                    aiResponse.detections &&
-                    Array.isArray(aiResponse.detections) &&
-                    aiResponse.detections.length > 0
-                ) {
-                    console.log(`DEBUG: Processing ${aiResponse.detections.length} detections...`);
-                    try {
-                        const newDetections: DetectionDot[] = aiResponse.detections
-                            .map((d, index) => {
-                                if (!d || !d.center) {
-                                    return null;
-                                }
-                                return {
-                                    id: d.id || index,
-                                    center: {
-                                        x: d.center.x,
-                                        y: d.center.y,
-                                    },
-                                };
-                            })
-                            .filter((d): d is DetectionDot => d !== null);
+            // Get ID from Base64 response
+            const documentId = data?.data?.document?.id;
 
-                        setDetections(newDetections);
-                    } catch (mapError) {
-                        console.error('DEBUG: Error mapping detections:', mapError);
-                    }
-                } else {
-                    setDetections([]);
-                }
-
-                // If dimensions missing, fetch them for overlay scaling
-                if (!dimensions) {
-                    Image.getSize(
-                        uri,
-                        (width, height) => {
-                            console.log(`DEBUG: Fallback Image.getSize: ${width}x${height}`);
-                            setImageDimensions({ width, height });
-                        },
-                        error => console.error('Failed to get image size:', error)
-                    );
-                }
-
-                await new Promise<void>(resolve => setTimeout(() => resolve(), 1500));
-            } catch (error: any) {
-                console.error('AI processing failed:', error);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Không thể xử lý ảnh này',
-                });
-            } finally {
-                setIsLoading(false);
+            if (!documentId) {
+                throw new Error('Could not retrieve document ID from uploaded image.');
             }
+
+            // Step 2: Call AI API with documentId
+            console.log('DEBUG: Calling AI API with documentId:', documentId);
+            const aiResponse = await aiApi.countSeedstock({ documentId: documentId });
+            console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
+
+            const count = aiResponse?.total_count || 0;
+            setCurrentImageCount(count);
+
+            if (
+                aiResponse?.detections &&
+                Array.isArray(aiResponse.detections) &&
+                aiResponse.detections.length > 0
+            ) {
+                console.log(`DEBUG: Processing ${aiResponse.detections.length} detections...`);
+                try {
+                    const newDetections: DetectionDot[] = aiResponse.detections
+                        .map((d: any, index: number) => {
+                            if (!d || !d.center) {
+                                return null;
+                            }
+                            return {
+                                id: d.id || index,
+                                center: {
+                                    x: d.center.x,
+                                    y: d.center.y,
+                                },
+                            };
+                        })
+                        .filter((d: any): d is DetectionDot => d !== null);
+
+                    setDetections(newDetections);
+                } catch (mapError) {
+                    console.error('DEBUG: Error mapping detections:', mapError);
+                }
+            } else {
+                setDetections([]);
+            }
+            setIsProcessed(true);
+        } catch (error: any) {
+            console.error('Base64 processing failed:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Không thể xử lý ảnh này',
+            });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -213,9 +234,11 @@ const CountingShrimpScreen: React.FC = () => {
                                     onImageSelect={handleImageSelect}
                                     onImageRemove={() => {
                                         _setImageUri(null);
+                                        setBase64Image(null);
                                         setDetections([]);
                                         setCurrentImageCount(0);
                                         setIsCountAdded(false);
+                                        setIsProcessed(false);
                                         setImageDimensions({ width: 1, height: 1 });
                                     }}
                                     returnBase64={true}
@@ -258,31 +281,44 @@ const CountingShrimpScreen: React.FC = () => {
                                         Đếm lại
                                     </Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.actionButton,
-                                        (isCountAdded || currentImageCount === 0) &&
-                                            styles.disabledButton,
-                                    ]}
-                                    onPress={handleGetCount}
-                                    disabled={isCountAdded || currentImageCount === 0}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.actionButtonText,
-                                            (isCountAdded || currentImageCount === 0) &&
-                                                styles.disabledButtonText,
-                                        ]}
-                                    >
-                                        {countTimes === 0
-                                            ? `Lấy số lượng ${
-                                                  currentImageCount > 0
-                                                      ? `(${currentImageCount})`
-                                                      : ''
-                                              }`
-                                            : `Cộng dồn (${currentImageCount})`}
-                                    </Text>
-                                </TouchableOpacity>
+                                {(() => {
+                                    const isStartCountingMode = !!imageUri && !isProcessed;
+                                    const isDisabled =
+                                        !isStartCountingMode &&
+                                        (isCountAdded || currentImageCount === 0);
+
+                                    return (
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.actionButton,
+                                                isDisabled && styles.disabledButton,
+                                            ]}
+                                            onPress={
+                                                isStartCountingMode
+                                                    ? handleStartCounting
+                                                    : handleGetCount
+                                            }
+                                            disabled={isDisabled}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.actionButtonText,
+                                                    isDisabled && styles.disabledButtonText,
+                                                ]}
+                                            >
+                                                {isStartCountingMode
+                                                    ? 'Bắt đầu đếm'
+                                                    : countTimes === 0
+                                                    ? `Lấy số lượng ${
+                                                          currentImageCount > 0
+                                                              ? `(${currentImageCount})`
+                                                              : ''
+                                                      }`
+                                                    : `Cộng dồn (${currentImageCount})`}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })()}
                             </View>
 
                             <Text style={styles.countTimesText}>Số lần đếm: {countTimes}</Text>
@@ -355,7 +391,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.gray[200],
         borderRadius: borderRadius.md,
         overflow: 'hidden',
-        position: 'relative', // Ensure relative positioning for overlay
+        position: 'relative',
     },
     uploadPlaceholder: {
         flex: 1,
