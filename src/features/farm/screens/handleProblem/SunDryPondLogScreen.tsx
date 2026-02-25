@@ -60,12 +60,6 @@ export const SunDryPondLogScreen: React.FC = () => {
                     });
                 });
             }
-            if (item.note) {
-                data.push({
-                    label: 'Ghi chú',
-                    value: item.note,
-                });
-            }
             return data;
         },
         editRoute: 'HandleProblem',

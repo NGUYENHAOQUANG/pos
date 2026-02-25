@@ -45,6 +45,7 @@ export const AddEnvironmentScreen: React.FC = () => {
 
     // State for images when editing
     const [imageUris, setImageUris] = useState<string[]>([]);
+    const [initialImageUris, setInitialImageUris] = useState<string[]>([]);
     const [documentIds, setDocumentIds] = useState<string[]>([]);
 
     // 1. Resolve Zone
@@ -129,6 +130,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                 try {
                     const urls = await documentApi.getUrls(detail.documentIds);
                     setImageUris(urls);
+                    setInitialImageUris(urls);
                     setDocumentIds(detail.documentIds);
                 } catch (error) {
                     console.error('[AddEnvironmentScreen] Failed to fetch image URLs:', error);
@@ -138,6 +140,15 @@ export const AddEnvironmentScreen: React.FC = () => {
         fetchImageUrls();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemToEdit, detail]);
+
+    const hasImagesChanged = useMemo(() => {
+        if (!itemToEdit) return false;
+        if (imageUris.length !== initialImageUris.length) return true;
+        for (let i = 0; i < imageUris.length; i++) {
+            if (imageUris[i] !== initialImageUris[i]) return true;
+        }
+        return false;
+    }, [imageUris, initialImageUris, itemToEdit]);
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -203,6 +214,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                             onDateChange={setSelectedDate}
                             disabledDate={!!itemToEdit}
                             imageUris={itemToEdit ? imageUris : undefined}
+                            onImagesChange={setImageUris}
                             documentIds={itemToEdit ? documentIds : undefined}
                         />
 
@@ -266,7 +278,11 @@ export const AddEnvironmentScreen: React.FC = () => {
                             secondaryTitle="Huỷ"
                             onPrimaryPress={handleSavePress}
                             onSecondaryPress={handleCancel}
-                            primaryDisabled={itemToEdit ? isButtonDisabled : false || isSubmitting}
+                            primaryDisabled={
+                                itemToEdit
+                                    ? isButtonDisabled && !hasImagesChanged
+                                    : false || isSubmitting
+                            }
                         />
                     </View>
                 </>

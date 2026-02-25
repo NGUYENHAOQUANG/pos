@@ -7,7 +7,7 @@ import {
     CreateWaterSupplyCommand,
 } from '@/features/farm/types/waterChange.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 export const useWaterSupplyRecords = (pondId: string, params?: IWaterSupplyParams) => {
     return useQuery({
@@ -31,7 +31,7 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
         : responseData?.items || [];
 
     // Fetch Material Definitions for name lookup
-    const { data: materialsData } = useMaterials();
+    const { materialMap } = useFarmMaterials();
 
     // Count daily items
     const totalPerDay: Record<string, number> = {};
@@ -73,15 +73,15 @@ export const useWaterSupplyRecordsAsJobs = (pondId: string, params?: IWaterSuppl
             note: item.waterChangeDetail?.note || undefined,
             pondId: item.pondId,
             materials: item.waterChangeDetail?.materials?.map(m => {
-                const matDef = materialsData?.find(d => d.id === m.materialId);
+                const matDef = m.warehouseItemId ? materialMap[m.warehouseItemId] : undefined;
                 return {
                     material: {
-                        id: m.materialId,
-                        name: m.warehouseItemName || matDef?.name || 'Vật tư',
-                        unitName: m.unitName || matDef?.unitName || '',
+                        id: m.warehouseItemId,
+                        name: matDef?.name || m.warehouseItemName || 'Vật tư',
+                        unitName: matDef?.unitName || m.unitName || '',
                     } as any,
                     quantity: m.quantity,
-                    unit: m.unitName || matDef?.unitName || '',
+                    unit: matDef?.unitName || m.unitName || '',
                 };
             }),
             images: item.waterChangeDetail?.documentIds || item.documentIds || [],
