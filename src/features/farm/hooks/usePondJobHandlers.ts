@@ -205,6 +205,8 @@ export const usePondJobHandlers = (
                     navigation.navigate('EditWaterTreatmentScreens', {
                         pondId: pond.id,
                         jobId: item.id,
+                        pond,
+                        item,
                         itemToEdit: item,
                     });
                     break;
