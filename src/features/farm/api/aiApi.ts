@@ -1,6 +1,5 @@
-import { aiClient } from '@/core/api/client';
+import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { ENV } from '@/core/config/env';
 
 export interface SeedstockCountingResponse {
     status_code?: number;
@@ -17,37 +16,34 @@ export interface SeedstockCountingResponse {
 }
 
 export interface AIPredictRequest {
-    image_base: string;
+    documentId?: string;
+    image_base?: string;
 }
 
 export const aiApi = {
     countSeedstock: async (data: AIPredictRequest): Promise<SeedstockCountingResponse> => {
-        // Debug URL and Key
-        console.log(
-            '[AI API] Calling endpoint:',
-            ENV.API_URL_AI + API_ENDPOINTS.AI.SEEDSTOCK_COUNTING
-        );
-
-        const response = await aiClient.post<SeedstockCountingResponse>(
+        // Call backend API instead of direct AI server
+        const response = await apiClient.post<{ data: SeedstockCountingResponse }>(
             API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
             data
         );
 
-        return response.data;
+        // API client might wrap response in data field
+        return response.data?.data || (response.data as unknown as SeedstockCountingResponse);
     },
     estimateSize: async (data: AIPredictRequest): Promise<EstimatedSizeResponse> => {
-        const response = await aiClient.post<EstimatedSizeResponse>(
+        const response = await apiClient.post<{ data: EstimatedSizeResponse }>(
             API_ENDPOINTS.AI.ESTIMATED_SIZE,
             data
         );
-        return response.data;
+        return response.data?.data || (response.data as unknown as EstimatedSizeResponse);
     },
     predictHealth: async (data: AIPredictRequest): Promise<ShrimpHealthResponse> => {
-        const response = await aiClient.post<ShrimpHealthResponse>(
-            API_ENDPOINTS.AI.SHRIMP_HEALTH_PREDICT,
+        const response = await apiClient.post<{ data: ShrimpHealthResponse }>(
+            API_ENDPOINTS.AI.SHRIMP_HEALTH,
             data
         );
-        return response.data;
+        return response.data?.data || (response.data as unknown as ShrimpHealthResponse);
     },
 };
 
