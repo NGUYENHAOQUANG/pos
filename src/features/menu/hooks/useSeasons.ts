@@ -50,6 +50,7 @@ export const useSeasons = () => {
             queryKey: farmKeys.seasons(zone.id),
             queryFn: () => fetchSeasonsByZone(zone.id, zone.code),
             enabled: !!zone.id,
+            staleTime: 1000 * 60 * 5,
         })),
     });
 
