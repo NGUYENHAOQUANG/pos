@@ -75,7 +75,7 @@ export const EnvironmentLogScreen: React.FC = () => {
                 // Convert measurements array to activity data format
                 const activityData: ActivityData[] = [];
 
-                measurement.envMeasurementDetails?.forEach((m: any) => {
+                measurement.envMeasurementDetail?.envMeasurementDetails?.forEach((m: any) => {
                     const metric = metricTypes.find((mt: any) => mt.id === m.metricId);
                     if (!metric) return;
 
@@ -141,6 +141,7 @@ export const EnvironmentLogScreen: React.FC = () => {
                     time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
                     title: `Lần ${entryNumber}`,
                     data: activityData,
+                    note: measurement.envMeasurementDetail?.notes,
                     onEdit: () => {
                         if (pond) {
                             const itemToEdit = {

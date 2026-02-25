@@ -159,8 +159,9 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
 
             // Construct meta for warnings
             const meta: EnvironmentMeta = {};
-            if (item.envMeasurementDetails && metricTypes.length > 0) {
-                item.envMeasurementDetails.forEach((m: any) => {
+            const details = item.envMeasurementDetail?.envMeasurementDetails || [];
+            if (details.length > 0 && metricTypes.length > 0) {
+                details.forEach((m: any) => {
                     const metric = metricTypes.find(mt => mt.id === m.metricId);
                     if (metric) {
                         // Map code to warning field
@@ -173,12 +174,10 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
                                 meta.do = m.value.toString();
                                 meta.doWarning = m.isAlerted;
                                 break;
-                            // ... Add others if needed for strict type compliance
                             case ENVIRONMENT_METRIC_IDS.TEMPERATURE:
                                 meta.temperature = m.value.toString();
                                 meta.temperatureWarning = m.isAlerted;
                                 break;
-                            // etc.
                         }
                     }
                 });
@@ -190,6 +189,7 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
                 time: timeStr,
                 date: item.createdAt,
                 pondId: item.pondId,
+                note: item.envMeasurementDetail?.notes,
                 meta,
             };
         });

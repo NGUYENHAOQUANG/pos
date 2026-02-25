@@ -11,17 +11,19 @@ export interface IEnvMeasurementDetail {
 }
 
 export interface ICreateEnvMeasurementReq {
-    operationId?: string;
-    recordValue?: number;
-    envMeasurementDetails: IEnvMeasurementDetail[];
     documentIds?: string[];
+    envMeasurementDetail: {
+        envMeasurementDetails: IEnvMeasurementDetail[];
+        notes?: string;
+    };
 }
 
 export interface IUpdateEnvMeasurementReq {
-    operationId?: string;
-    recordValue?: number;
-    envMeasurementDetails: IEnvMeasurementDetail[];
     documentIds?: string[];
+    envMeasurementDetail: {
+        envMeasurementDetails: IEnvMeasurementDetail[];
+        notes?: string;
+    };
 }
 
 export interface IEnvMeasurementParams {
@@ -42,9 +44,11 @@ export interface EnvMeasurementResponse {
         editor: any;
         pondId: string;
         operationId: string;
-        recordValue: number;
-        envMeasurementDetails: IEnvMeasurementDetail[];
-        documentIds: string[];
+        documentIds?: string[];
+        envMeasurementDetail: {
+            envMeasurementDetails: IEnvMeasurementDetail[];
+            notes?: string;
+        };
     };
 }
 
@@ -54,5 +58,11 @@ export interface GetEnvMeasurementsResponse {
         pageNumber: number;
         totalPages: number;
         totalCount: number;
+    };
+}
+
+export interface EnvCreateUpdateResponse {
+    data: {
+        recordId: string;
     };
 }
