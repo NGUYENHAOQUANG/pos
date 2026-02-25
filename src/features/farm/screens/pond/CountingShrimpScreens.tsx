@@ -101,7 +101,7 @@ const CountingShrimpScreen: React.FC = () => {
             const aiResponse = await aiApi.countSeedstock({ documentId: documentId });
             console.log('DEBUG: AI Response:', JSON.stringify(aiResponse, null, 2));
 
-            const count = aiResponse?.total_count || 0;
+            const count = aiResponse?.totalCount || 0;
             setCurrentImageCount(count);
 
             if (
@@ -282,10 +282,10 @@ const CountingShrimpScreen: React.FC = () => {
                                     </Text>
                                 </TouchableOpacity>
                                 {(() => {
-                                    const isStartCountingMode = !!imageUri && !isProcessed;
-                                    const isDisabled =
-                                        !isStartCountingMode &&
-                                        (isCountAdded || currentImageCount === 0);
+                                    const isStartCountingMode = !isProcessed;
+                                    const isDisabled = isStartCountingMode
+                                        ? !imageUri
+                                        : isCountAdded || currentImageCount === 0;
 
                                     return (
                                         <TouchableOpacity

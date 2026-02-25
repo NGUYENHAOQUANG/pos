@@ -20,6 +20,8 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { usePredictShrimpHealth } from '@/features/farm/hooks/useAI';
 import {
     ShrimpHealthBoundingBoxOverlay,
@@ -81,10 +83,11 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const currentResult = results.length > 0 ? results[results.length - 1] : null;
     const previousResult = results.length > 1 ? results[results.length - 2] : null;
 
+    const [isLoading, _setIsLoading] = useState(false);
     const insets = useSafeAreaInsets();
     const countTimes = results.length;
 
-    const isScreenLoading = isPending;
+    const isScreenLoading = isLoading || isPending;
 
     const mapClassToStatus = (
         className: string
@@ -120,7 +123,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
         setDetections([]);
     };
 
-    const handleGetResult = () => {
+    const handleGetResult = async () => {
         if (!imageUri || !imageBase64) {
             Toast.show({
                 type: 'error',
@@ -131,53 +134,104 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             return;
         }
 
-        predictHealth(
-            { image_base: imageBase64 },
-            {
-                onSuccess: response => {
-                    const detailedItems: HealthCheckItem[] = response.results.map(r => {
-                        const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
-                        return {
-                            id: `${Date.now()}-${r.id}`,
-                            index: r.id,
-                            status,
-                            diagnosis,
-                            confidence: Math.round(r.prediction.top1_conf * 100),
-                        };
-                    });
+        _setIsLoading(true);
 
-                    const issuesCount = detailedItems.filter(i => i.status !== 'HEALTHY').length;
-                    const totalCount = detailedItems.length;
-                    const infectionRate =
-                        totalCount > 0
-                            ? parseFloat(((issuesCount / totalCount) * 100).toFixed(2))
-                            : 0;
+        try {
+            console.log('DEBUG: Calling Base64 endpoint for Shrimp Health...');
+            const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
+            const payload = {
+                base64Content: imageBase64,
+                fileName: fileName,
+                contentType: 'image/jpeg',
+                storageType: 'Azure',
+            };
 
-                    const newResult: HealthCheckResult = {
-                        id: Date.now(),
-                        totalCount,
-                        items: detailedItems,
-                        healthStatusSummary: issuesCount > 0 ? 'Phát hiện bệnh' : 'Tôm khỏe mạnh',
-                        infectionRate,
-                    };
+            // Step 1: Upload to get document ID
+            const uploadResponse = await apiClient.post(
+                API_ENDPOINTS.DOCUMENT.UPLOAD_BASE64,
+                payload
+            );
+            const data = uploadResponse.data as any;
 
-                    // Map to DetectionBox for bounding box overlay
-                    const newDetections: HealthDetectionBox[] = response.results.map(r => {
-                        const { status, diagnosis } = mapClassToStatus(r.prediction.top1_class);
-                        return {
-                            id: r.id,
-                            bbox: r.bbox,
-                            label: `${diagnosis} (${Math.round(r.prediction.top1_conf * 100)}%)`,
-                            confidence: r.seg_conf,
-                            color: getStatusColor(status),
-                        };
-                    });
+            // Get ID from Base64 response
+            const documentIdStr = data?.data?.document?.id;
 
-                    setResults(prev => [...prev, newResult]);
-                    setDetections(newDetections);
-                },
+            if (!documentIdStr) {
+                throw new Error('Could not retrieve document ID from uploaded image.');
             }
-        );
+
+            console.log('DEBUG: documentId retrieved for health check:', documentIdStr);
+
+            predictHealth(
+                { documentId: documentIdStr },
+                {
+                    onSuccess: response => {
+                        const detailedItems: HealthCheckItem[] = response.results.map(r => {
+                            const { status, diagnosis } = mapClassToStatus(r.prediction.top1Class);
+                            return {
+                                id: `${Date.now()}-${r.id}`,
+                                index: r.id,
+                                status,
+                                diagnosis,
+                                confidence: Math.round(r.prediction.top1Conf * 100),
+                            };
+                        });
+
+                        const issuesCount = detailedItems.filter(
+                            i => i.status !== 'HEALTHY'
+                        ).length;
+                        const totalCount = detailedItems.length;
+                        const infectionRate =
+                            totalCount > 0
+                                ? parseFloat(((issuesCount / totalCount) * 100).toFixed(2))
+                                : 0;
+
+                        const newResult: HealthCheckResult = {
+                            id: Date.now(),
+                            totalCount,
+                            items: detailedItems,
+                            healthStatusSummary:
+                                issuesCount > 0 ? 'Phát hiện bệnh' : 'Tôm khỏe mạnh',
+                            infectionRate,
+                        };
+
+                        // Map to DetectionBox for bounding box overlay
+                        const newDetections: HealthDetectionBox[] = response.results.map(r => {
+                            const { status, diagnosis } = mapClassToStatus(r.prediction.top1Class);
+                            return {
+                                id: r.id,
+                                bbox: r.bbox,
+                                label: `${diagnosis} (${Math.round(r.prediction.top1Conf * 100)}%)`,
+                                confidence: r.segConf,
+                                color: getStatusColor(status),
+                            };
+                        });
+
+                        setResults(prev => [...prev, newResult]);
+                        setDetections(newDetections);
+                    },
+                    onError: error => {
+                        console.error('Predict Health AI Error:', error);
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lỗi',
+                            text2: 'Kiểm tra sức khỏe bằng AI thất bại',
+                        });
+                    },
+                    onSettled: () => {
+                        _setIsLoading(false);
+                    },
+                }
+            );
+        } catch (error) {
+            console.error('Base64 processing failed:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: 'Không thể upload hình ảnh để xử lý bệnh tôm',
+            });
+            _setIsLoading(false);
+        }
     };
 
     const handleReset = () => {
