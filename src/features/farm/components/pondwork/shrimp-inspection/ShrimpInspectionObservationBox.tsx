@@ -193,9 +193,10 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                                                 <Text style={styles.diseasePercent}>
                                                     {(
                                                         ((count as number) /
-                                                            aiResult.items!.length) *
+                                                            (aiResult.totalCount ||
+                                                                aiResult.items!.length)) *
                                                         100
-                                                    ).toFixed(1)}
+                                                    ).toFixed(2)}
                                                     %
                                                 </Text>
                                             </View>
