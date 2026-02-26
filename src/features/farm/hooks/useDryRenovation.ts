@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { dryRenovationApi } from '@/features/farm/api/dryRenovationApi';
 import { documentApi } from '@/features/material/api/documentApi';
-import { farmKeys } from './farmKeys';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import {
     IDryRenovationParams,
     IDryRenovationDetail,
@@ -166,15 +166,7 @@ export const useUpdateDryRenovation = () => {
             id: string;
             detail: IDryRenovationDetail;
             documentIds?: string[];
-        }) => {
-            console.log('Update Dry Renovation Payload:', {
-                pondId,
-                id,
-                detail,
-                documentIds,
-            });
-            return dryRenovationApi.update(pondId, id, detail, documentIds);
-        },
+        }) => dryRenovationApi.update(pondId, id, detail, documentIds),
         onSuccess: (_, { pondId, id }) => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.dryRenovations.byPond(pondId),

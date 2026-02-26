@@ -71,8 +71,6 @@ export const createPondListStore: StateCreator<
             await store.fetchMasterData();
         }
 
-        // console.log('Current Pond Types in Store:', JSON.stringify(get().pondTypes, null, 2));
-
         try {
             const { items: ponds, total } = await pondApi.getPondsByZone(zoneId, {
                 PageSize: pageSize,
@@ -83,15 +81,12 @@ export const createPondListStore: StateCreator<
             set({ totalCount: total });
 
             const currentTypes = get().pondTypes;
-            // console.log(`Fetched ${ponds.length} ponds. Mapping types...`);
 
             // Map pondTypeId to type object
             const mappedPonds = ponds.map(pond => {
                 // @ts-ignore
                 const typeId = (pond as unknown as { pondCategoryId: string }).pondCategoryId;
                 const matchedType = currentTypes.find(t => t.id === typeId);
-
-                // console.log(`Pond ${pond.name} (ID: ${pond.id}) - Raw Category ID: ${typeId}`);
 
                 // If matched, assign it. If not, keeping undefined/partial is better than crashing.
                 if (matchedType) {
@@ -109,10 +104,6 @@ export const createPondListStore: StateCreator<
                 const currentPonds = get().ponds;
                 const currentIds = new Set(currentPonds.map(p => p.id));
                 const uniqueNewPonds = mappedPonds.filter(p => !currentIds.has(p.id));
-
-                console.log(
-                    `Load More: Received ${mappedPonds.length}, Unique ${uniqueNewPonds.length}`
-                );
 
                 // If we received data but all were duplicates, maybe we are looping pages or API is broken
                 // In that case, we should probably stop.

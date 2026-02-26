@@ -13,8 +13,6 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { warehouseApi } from '@/features/material/api/warehouseApi';
 import { stockTransferApi } from '@/features/farm/api/stockTransferApi';
 import { usePondsByZone } from '@/features/farm/hooks/usePonds';
-
-// Sử dụng HeaderFarm có sẵn
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
@@ -24,11 +22,7 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'CycleDetail'>;
 export const CycleDetailScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<ScreenRouteProp>();
-
-    // Lấy dữ liệu từ params truyền sang
     const { cycleData: initialCycleData, pondId } = route.params || {};
-
-    // Use React Query to fetch fresh detail data
     const {
         data: fetchedCycleData,
         refetch,
@@ -42,11 +36,10 @@ export const CycleDetailScreen: React.FC = () => {
         },
         enabled: !!pondId && !!initialCycleData?.id,
         initialData: initialCycleData,
-        refetchOnMount: 'always', // Always refetch when screen mounts
-        staleTime: 0, // Data is always stale, will refetch on focus 123
+        refetchOnMount: 'always',
+        staleTime: 0,
     });
 
-    // Refetch data when screen gains focus (e.g., after editing)
     useFocusEffect(
         useCallback(() => {
             refetch();
@@ -174,31 +167,19 @@ export const CycleDetailScreen: React.FC = () => {
         );
     }, [zonePondsData]);
 
-    // console.log('[CycleDetail] effectiveZoneId:', effectiveZoneId);
-    // console.log('[CycleDetail] zonePonds count:', zonePonds.length);
-
     // Fetch stock transfers from all zone ponds and find incoming transfer to current pond
     const { data: incomingTransfer } = useQuery({
         queryKey: ['incoming-stock-transfer', pondId, zonePonds.length],
         queryFn: async () => {
-            // console.log('[CycleDetail] Search for incoming transfers to pondId:', pondId, 'from zonePonds:', zonePonds.length);
-
             // Try fetching from current pond first (in case API returns incoming transfers or mixed)
             if (pondId) {
                 try {
-                    const response = await stockTransferApi.getList(pondId, {
+                    await stockTransferApi.getList(pondId, {
                         PageSize: 100,
                         OrderBy: 'CreatedAt desc',
                     });
-                    const transfers = response?.data?.items || [];
-                    // Check if any transfer is FROM another pond? (Usually getList(pondId) returns FROM pondId)
-                    // But let's log just in case
-                    console.log(
-                        '[CycleDetail] Transfers associated with current pond:',
-                        transfers.length
-                    );
-                } catch (e) {
-                    console.log('[CycleDetail] Error fetching current pond transfers:', e);
+                } catch (_e) {
+                    // ignore
                 }
             }
 
@@ -215,7 +196,6 @@ export const CycleDetailScreen: React.FC = () => {
                     });
 
                     const transfers = response?.data?.items || [];
-                    // console.log('[CycleDetail] Transfers from', zonePond.name, ':', transfers.length);
 
                     // Find transfer where current pond is in toPonds
                     for (const transfer of transfers) {
@@ -223,11 +203,6 @@ export const CycleDetailScreen: React.FC = () => {
                             (tp: { toPondId: string }) => tp.toPondId === pondId
                         );
                         if (matchingToPond) {
-                            // console.log('[CycleDetail] Found incoming transfer!', {
-                            //     fromPondId: transfer.fromPondId,
-                            //     fromPondName: zonePond.name,
-                            //     shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
-                            // });
                             return {
                                 fromPondId: transfer.fromPondId,
                                 fromPondName: zonePond.name,
@@ -236,11 +211,10 @@ export const CycleDetailScreen: React.FC = () => {
                             };
                         }
                     }
-                } catch (error) {
-                    console.log('[CycleDetail] Error fetching from', zonePond.name, ':', error);
+                } catch (_error) {
+                    // ignore
                 }
             }
-            // console.log('[CycleDetail] No incoming transfer found');
             return null;
         },
         enabled: !!pondId && zonePonds.length > 0,
@@ -261,7 +235,6 @@ export const CycleDetailScreen: React.FC = () => {
     const shrimpSize = useMemo(() => {
         // 1. Check shrimpSize from incoming stock transfer
         if (incomingTransfer?.shrimpSizePcsPerKg) {
-            // console.log('[CycleDetail] shrimpSize from stock transfer:', incomingTransfer.shrimpSizePcsPerKg);
             return `${incomingTransfer.shrimpSizePcsPerKg}`;
         }
         // 2. Check transferInfo fallback
@@ -324,7 +297,6 @@ export const CycleDetailScreen: React.FC = () => {
                     </View>
                 }
             />
-
             <ScrollView
                 contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
@@ -460,14 +432,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    // ... các styles khác giữ nguyên
     badgeWrapper: {
         height: 40,
-        minWidth: 110, // Ensure specific width for balance
+        minWidth: 110,
         justifyContent: 'center',
         alignItems: 'flex-end',
     },
-    // ... statusBadge style kept ...
     statusBadge: {
         backgroundColor: colors.yellow[50],
         paddingHorizontal: spacing.sm,
@@ -548,7 +518,7 @@ const styles = StyleSheet.create({
     },
     leftTitleContainer: {
         alignItems: 'flex-start',
-        marginLeft: 8, // Ensures ~16px total spacing from back button (8px from header + 8px here)
+        marginLeft: 8,
     },
     headerTitle: {
         fontSize: 14,
