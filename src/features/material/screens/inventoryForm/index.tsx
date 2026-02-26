@@ -54,8 +54,8 @@ export const AddInventoryScreen: React.FC = () => {
         undefined
     );
 
-    const warehouseId = inventoryDetail?.warehouseId || warehouses?.[0]?.id;
-    const warehouseName = inventoryDetail?.warehouseName || warehouses?.[0]?.name || '---';
+    const warehouseId = inventoryDetail?.warehouseId ?? warehouses?.[0]?.id;
+    const warehouseName = inventoryDetail?.warehouseName ?? warehouses?.[0]?.name ?? '---';
 
     const { data: warehouseItemsResponse } = useWarehouseItems(warehouseId, undefined, {
         enabled: !!warehouseId,
@@ -81,13 +81,13 @@ export const AddInventoryScreen: React.FC = () => {
                 inventoryItems: [
                     {
                         id: Date.now().toString(),
-                        materialId: initMat.materialId || '',
-                        materialName: initMat.materialName || '',
-                        oldStock: initMat.quantity || 0,
+                        materialId: initMat.materialId,
+                        materialName: initMat.materialName ?? '',
+                        oldStock: initMat.quantity ?? 0,
                         newStock: '',
                         difference: 0,
-                        unit: initMat.unitName || '',
-                        materialCode: initMat.materialCode || '',
+                        unit: initMat.unitName ?? '',
+                        materialCode: initMat.materialCode ?? '',
                     },
                 ],
             };

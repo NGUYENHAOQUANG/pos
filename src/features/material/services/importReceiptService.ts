@@ -28,8 +28,8 @@ export const importReceiptService = {
             const foundSupplier = suppliers.find(s => s.id === data.supplierId);
             if (foundSupplier) {
                 formState.supplier = foundSupplier.name;
-            } else {
-                formState.supplier = data.supplierName || '';
+            } else if (data.supplierName) {
+                formState.supplier = data.supplierName;
             }
         } else if (data.supplierName) {
             formState.supplier = data.supplierName;
@@ -42,11 +42,11 @@ export const importReceiptService = {
         if (!itemsData || itemsData.length === 0) return [];
 
         return itemsData.map(item => ({
-            id: item.id || Date.now().toString() + Math.random(),
-            materialName: item.materialName || '',
+            id: item.id,
+            materialName: item.materialName,
             materialId: item.materialId,
-            quantity: item.quantity?.toString() || '0',
-            price: item.unitPrice?.toString() || '0',
+            quantity: item.quantity.toString(),
+            price: item.unitPrice.toString(),
         }));
     },
 
@@ -60,11 +60,13 @@ export const importReceiptService = {
         return {
             supplierId,
             warehouseId,
-            items: items.map(m => ({
-                materialId: m.materialId || '',
-                quantity: parseFloat(m.quantity) || 0,
-                unitPrice: parseFloat(m.price) || 0,
-            })),
+            items: items
+                .filter(m => m.materialId)
+                .map(m => ({
+                    materialId: m.materialId as string,
+                    quantity: parseFloat(m.quantity) || 0,
+                    unitPrice: parseFloat(m.price) || 0,
+                })),
             notes: '',
             autoSubmit: status === ImportReceiptStatus.Pending,
             importSourceEnum: ImportSourceEnum.Supplier,

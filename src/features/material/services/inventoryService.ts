@@ -13,16 +13,16 @@ export const inventoryService = {
     ): InventoryFormValues => {
         return {
             date: detail.createdAt ? new Date(detail.createdAt) : new Date(),
-            note: detail.note || '',
+            note: detail.note,
             inventoryItems: items.map(item => ({
-                id: item.id || Date.now().toString() + Math.random(),
-                materialId: item.materialId || '',
-                materialName: item.materialName || '',
-                oldStock: item.expectedQty || 0,
-                newStock: item.actualQty?.toString() || '0',
-                difference: item.difference || 0,
-                unit: item.unitName || '',
-                materialCode: item.materialCode || '',
+                id: item.id,
+                materialId: item.materialId,
+                materialName: item.materialName,
+                oldStock: item.expectedQty ?? item.actualQty,
+                newStock: item.actualQty.toString(),
+                difference: item.difference,
+                unit: item.unitName,
+                materialCode: item.materialCode,
             })),
         };
     },
