@@ -7,7 +7,7 @@ import {
 } from '@/features/material/components/ButtonMaterial';
 import { HeadingMeterial } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
-import { ImportReceiptList } from '@/features/material/components/importReceipt/ImportReceiptList';
+import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
