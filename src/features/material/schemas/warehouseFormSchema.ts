@@ -12,7 +12,7 @@ export const warehouseFormSchema = z.object({
     date: z.date(),
     supplier: z.string().min(1, 'Vui lòng chọn nhà cung cấp'),
     files: z.array(z.any()).optional(),
-    warehouseItems: z.array(materialItemSchema).min(1, 'Vui lòng thêm ít nhất một vật tư'),
+    warehouseItems: z.array(materialItemSchema).optional(),
 });
 
 export type WarehouseFormValues = z.infer<typeof warehouseFormSchema>;

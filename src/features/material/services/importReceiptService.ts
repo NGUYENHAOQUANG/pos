@@ -54,7 +54,7 @@ export const importReceiptService = {
         supplierId: string,
         warehouseId: string,
         items: MaterialItem[],
-        isDraft: boolean,
+        status: ImportReceiptStatus,
         documentIds: string[]
     ): CreateImportReceiptRequest => {
         return {
@@ -66,10 +66,10 @@ export const importReceiptService = {
                 unitPrice: parseFloat(m.price) || 0,
             })),
             notes: '',
-            autoSubmit: !isDraft,
+            autoSubmit: status === ImportReceiptStatus.Pending,
             importSourceEnum: ImportSourceEnum.Supplier,
             documentIds,
-            status: isDraft ? ImportReceiptStatus.Draft : ImportReceiptStatus.Pending,
+            status,
         };
     },
 

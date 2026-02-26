@@ -111,20 +111,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
             reset({
                 date: initialData.date || new Date(),
                 note: initialData.note || '',
-                inventoryItems:
-                    initialData.inventoryItems && initialData.inventoryItems.length > 0
-                        ? initialData.inventoryItems
-                        : [
-                              {
-                                  id: Date.now().toString(),
-                                  materialId: '',
-                                  materialName: '',
-                                  oldStock: 0,
-                                  newStock: '',
-                                  difference: 0,
-                                  unit: '',
-                              },
-                          ],
+                inventoryItems: initialData.inventoryItems,
             });
             initializedRef.current = true;
         }
