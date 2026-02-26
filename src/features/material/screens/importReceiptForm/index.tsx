@@ -24,8 +24,7 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 import { importReceiptService } from '@/features/material/services/importReceiptService';
 import { WarehouseFormValues } from '@/features/material/schemas/warehouseFormSchema';
 import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-
-import ImportReceiptForm from './importReceiptForm';
+import ImportReceiptForm from '@/features/material/screens/importReceiptForm/ImportReceiptForm';
 
 export const ImportReceiptFormScreen: React.FC = () => {
     // Navigation

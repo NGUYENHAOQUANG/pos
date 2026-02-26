@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
     GetImportReceiptsParams,
     GetImportReceiptsResponse,
+    GetImportReceiptDetailResponse,
     CreateImportReceiptRequest,
     CreateImportReceiptResponse,
     GetImportReceiptItemsParams,
@@ -37,8 +38,8 @@ export const importReceiptApi = {
         return response.data;
     },
 
-    getDetail: async (id: string): Promise<GetImportReceiptsResponse> => {
-        const { data } = await apiClient.get<GetImportReceiptsResponse>(
+    getDetail: async (id: string): Promise<GetImportReceiptDetailResponse> => {
+        const { data } = await apiClient.get<GetImportReceiptDetailResponse>(
             API_ENDPOINTS.IMPORT_RECEIPT.DETAIL(id)
         );
         return data;

@@ -4,18 +4,21 @@ import {
     ImportReceiptStatus,
     ImportReceiptDetailItem,
     CreateImportReceiptRequest,
+    ImportReceipt,
 } from '@/features/material/types/importReceipt.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
+import { ISupplier } from '@/features/material/types/supplier.types';
+import { IMaterial } from '@/features/material/types/material.types';
 
 export const importReceiptService = {
-    mapDetailToForm: (detail: any, suppliers: any[]) => {
+    mapDetailToForm: (detail: ImportReceipt | { data: ImportReceipt }, suppliers: ISupplier[]) => {
         const formState = {
             date: new Date(),
             supplier: '',
             items: [] as MaterialItem[],
         };
 
-        const data = detail.data || detail;
+        const data = 'data' in detail ? detail.data : detail;
 
         if (data.createdAt) {
             formState.date = new Date(data.createdAt);
@@ -70,19 +73,19 @@ export const importReceiptService = {
         };
     },
 
-    mapMaterialsToOptions: (materialsData: any[]): IWarehouseItem[] => {
-        return materialsData.map((m: any) => ({
+    mapMaterialsToOptions: (materialsData: IMaterial[]): IWarehouseItem[] => {
+        return materialsData.map((m: IMaterial) => ({
             id: m.id,
             materialId: m.id,
             materialName: m.name,
-            unit: m.unitName,
+            unit: m.unitName || '',
             remaining: 0,
             quantity: 0,
-            unitId: m.unitId || '',
+            unitId: '',
         }));
     },
 
-    mapSuppliersToOptions: (suppliers: any[]) => {
+    mapSuppliersToOptions: (suppliers: ISupplier[]) => {
         return suppliers.map(s => ({
             label: s.name,
             value: s.name,

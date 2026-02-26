@@ -50,7 +50,7 @@ import { AddMaterialScreen } from '@/features/material/screens/material/AddMater
 import { EditMaterialScreen } from '@/features/material/screens/material/EditMaterialScreen';
 import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
 import { AddExportWarehouseScreen } from '@/features/material/screens/warehouse/AddExportWarehouseScreen';
-import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
+import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
 
 // Control screens
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';

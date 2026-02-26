@@ -11,7 +11,7 @@ import { ImportReceiptList } from '@/features/material/screens/importReceiptList
 import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
-import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
+import { InventoryScreen } from '@/features/material/screens/inventoryList/InventoryList';
 import { colors } from '@/styles';
 import { useMaterialScreenLogic } from '@/features/material/hooks/logic/useMaterialScreenLogic';
 
