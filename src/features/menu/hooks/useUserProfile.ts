@@ -20,7 +20,7 @@ export const useUserProfile = () => {
         queryKey: ['userProfile'],
         queryFn: async () => {
             const response = await authApi.getMe();
-            if (!response.success && !response.result) {
+            if (!response.success) {
                 throw new Error(response.message || 'Failed to fetch profile');
             }
             const data = response.data as any;

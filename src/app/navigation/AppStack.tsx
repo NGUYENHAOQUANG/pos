@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { EditPersonalInformationScreens } from '@/features/menu/screens/information/EditPersonalInformationScreens';
+import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/Formscreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
@@ -213,7 +213,7 @@ export type AppStackParamList = {
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
-    EditPersonalInformationScreens: undefined;
+    EditPersonalInformationScreen: undefined;
     AquacultureManagement: undefined;
     MemberManagement: undefined;
     AddAquaculture: undefined;
@@ -341,8 +341,8 @@ export const AppStack: React.FC = () => {
 
             <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
             <Stack.Screen
-                name="EditPersonalInformationScreens"
-                component={EditPersonalInformationScreens}
+                name="EditPersonalInformationScreen"
+                component={EditPersonalInformationScreen}
             />
         </Stack.Navigator>
     );

@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
-import { useQueries } from '@tanstack/react-query';
-import { useZones } from '@/features/farm/hooks/useZones';
+import { useUserFarmStats } from '@/features/menu/hooks/useUserFarmStats';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -12,8 +11,7 @@ import { FarmConnecter } from '@/features/menu/components/information/FarmConnec
 import { PondConnecter } from '@/features/menu/components/information/PondConnecter';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { Zone, PondData } from '@/features/farm/types/farm.types';
-import { pondApi } from '@/features/farm/api/pondApi';
+
 import EditOutlinedIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 
@@ -31,54 +29,13 @@ export const PersonalInformationScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    // 1. Fetch Zones using React Query
-    const { data: zones = [], isFetching: isFetchingZones, refetch: refetchZones } = useZones();
     const { setSelectedZoneId } = useFarmStore();
-
-    // 2. Fetch Ponds for each Zone using useQueries
-    // We map zones to query objects to fetch ponds in parallel
-    const pondQueries = useQueries({
-        queries: zones.map(zone => ({
-            queryKey: ['ponds', 'byZone', zone.id], // Use a consistent key pattern
-            queryFn: async () => {
-                const res = await pondApi.getPondsByZone(zone.id);
-                // Return ponds with their zoneId attached for easy grouping later
-                return (res.items || []).map(p => ({ ...p, tempZoneId: zone.id }));
-            },
-            staleTime: 1000 * 60 * 5, // 5 minutes
-        })),
-    });
-
-    // 3. Aggregate all ponds from the queries
-    const allPonds = React.useMemo(() => {
-        return pondQueries.reduce((acc, query) => {
-            if (query.data) {
-                return acc.concat(query.data);
-            }
-            return acc;
-        }, [] as PondData[]);
-    }, [pondQueries]);
-
-    // 4. Calculate connected farms (zones with pond counts)
-    const connectedFarms = React.useMemo(() => {
-        if (zones.length > 0) {
-            return zones.map((zone: Zone) => {
-                const pondCount = allPonds.filter((p: any) => p.tempZoneId === zone.id).length;
-                return {
-                    id: zone.id,
-                    name: zone.name,
-                    count: pondCount.toString(),
-                };
-            });
-        }
-        return [];
-    }, [zones, allPonds]);
-
-    const isRefreshing = isFetchingZones || pondQueries.some(q => q.isFetching);
+    const { allPonds, connectedFarms, totalFarms, totalPonds, isRefreshing, refetchAll } =
+        useUserFarmStats();
 
     // Calculate totals based on what's being displayed (Mock or Real)
-    const totalFarms = connectedFarms.length.toString();
-    const totalPonds = allPonds.length.toString();
+    const strTotalFarms = totalFarms.toString();
+    const strTotalPonds = totalPonds.toString();
 
     // Determine if user manages farms or ponds based on level text
     const isFarmManager = userData.level?.toLowerCase().includes('trại');
@@ -87,15 +44,12 @@ export const PersonalInformationScreens: React.FC = () => {
     const showFarms = isFarmManager || (!isPondManager && !isFarmManager);
 
     const handleRefresh = async () => {
-        try {
-            await Promise.all([refetch(), refetchZones(), ...pondQueries.map(q => q.refetch())]);
-        } catch (error) {
-            console.error('Refresh error:', error);
-        }
+        await refetch();
+        await refetchAll();
     };
 
     const handleEditPress = () => {
-        (navigation.navigate as any)('EditPersonalInformationScreens');
+        navigation.navigate('EditPersonalInformationScreen' as never);
     };
 
     const renderRightAction = (
@@ -135,7 +89,7 @@ export const PersonalInformationScreens: React.FC = () => {
                 {/* Connected Section */}
                 {showFarms ? (
                     <FarmConnecter
-                        totalFarms={totalFarms}
+                        totalFarms={strTotalFarms}
                         farms={connectedFarms}
                         onFarmPress={farm => {
                             setSelectedZoneId(farm.id);
@@ -145,7 +99,7 @@ export const PersonalInformationScreens: React.FC = () => {
                     />
                 ) : (
                     <PondConnecter
-                        totalPonds={totalPonds}
+                        totalPonds={strTotalPonds}
                         ponds={allPonds}
                         onPondPress={() => {
                             // Optional: Navigate to detail of pond if needed,
