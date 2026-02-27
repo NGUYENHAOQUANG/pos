@@ -12,7 +12,9 @@ interface CardHeaderProps {
 export const CardHeader: React.FC<CardHeaderProps> = ({ title, onEdit, style }) => {
     return (
         <View style={[styles.container, style]}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title} numberOfLines={1}>
+                {title}{' '}
+            </Text>
             {onEdit && (
                 <TouchableOpacity
                     onPress={onEdit}
@@ -39,6 +41,8 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.text,
         lineHeight: 22,
+        flexShrink: 1,
+        paddingRight: 4,
     },
     editIcon: {
         width: '100%',
