@@ -139,18 +139,7 @@ export const API_ENDPOINTS = {
             DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
         },
     },
-    // Material Group
-    MATERIAL_GROUP: {
-        LIST: '/materialgroup',
-    },
-    // Material Type
-    MATERIAL_TYPE: {
-        LIST: '/materialtype',
-    },
-    // Units
-    UNITS: {
-        LIST: '/unit',
-    },
+
     // Materials
     MATERIAL: {
         LIST: '/material',
@@ -158,6 +147,15 @@ export const API_ENDPOINTS = {
         CREATE: '/material',
         UPDATE: (id: string) => `/material/${id}`,
         DELETE: (id: string) => `/material/${id}`,
+        GROUP: {
+            LIST: '/materialgroup',
+        },
+        TYPE: {
+            LIST: '/materialtype',
+        },
+        UNITS: {
+            LIST: '/unit',
+        },
     },
 
     METRIC: {

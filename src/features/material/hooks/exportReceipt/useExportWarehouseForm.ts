@@ -68,10 +68,11 @@ export const useExportWarehouseForm = () => {
     );
 
     // Modal helpers
-    const openConfirmModal = useCallback(
-        () => setIsConfirmModalVisible(true),
-        [setIsConfirmModalVisible]
-    );
+    const openConfirmModal = useCallback(() => {
+        if (submit.validateForm(true)) {
+            setIsConfirmModalVisible(true);
+        }
+    }, [submit, setIsConfirmModalVisible]);
     const closeConfirmModal = useCallback(
         () => setIsConfirmModalVisible(false),
         [setIsConfirmModalVisible]

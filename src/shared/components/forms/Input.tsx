@@ -55,6 +55,8 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     inputContainerStyle?: ViewStyle;
     /** Content to display at the right end of the input (e.g., units) */
     suffix?: string | React.ReactNode;
+    /** Ellipsize mode for the text (only works when disabled) */
+    ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }
 
 /**
@@ -82,6 +84,7 @@ export function Input({
     multiline = false,
     numberOfLines = 1,
     suffix,
+    ellipsizeMode,
     ...restProps
 }: InputProps) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -149,57 +152,75 @@ export function Input({
                     />
                 )}
                 <View style={{ flex: 1 }}>
-                    <AntdInput
-                        value={value}
-                        onChangeText={onChangeText}
-                        placeholder={placeholder}
-                        placeholderTextColor={colors.textTertiary}
-                        editable={!disabled}
-                        type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
-                        keyboardType={keyboardType}
-                        autoCapitalize={autoCapitalize as any}
-                        multiline={multiline}
-                        textAlignVertical="center"
-                        numberOfLines={numberOfLines}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => {
-                            setIsFocused(false);
-                            onBlur?.();
-                        }}
-                        styles={{
-                            container: {
-                                borderBottomWidth: 0,
-                                marginLeft: 0,
-                                paddingLeft: 0,
-                                paddingRight: 0,
-                                minHeight: 0,
-                                height: '100%',
-                            },
-                            input: [
+                    {disabled && ellipsizeMode ? (
+                        <Text
+                            numberOfLines={1}
+                            ellipsizeMode={ellipsizeMode}
+                            style={[
                                 styles.input,
                                 inputStyle,
-                                multiline && styles.inputMultiline,
                                 {
-                                    height: '100%',
-                                    paddingVertical: 0,
-                                    paddingLeft: 0,
-                                    marginLeft: 0,
+                                    color: colors.textTertiary,
                                     fontSize: 16,
-                                    color: disabled ? colors.textTertiary : colors.text,
-                                    ...Platform.select({
-                                        ios: {
-                                            fontFamily: 'System',
-                                            lineHeight: 0,
-                                        },
-                                        android: {
-                                            lineHeight: 1.54 * 12,
-                                        },
-                                    }),
+                                    lineHeight: Platform.OS === 'ios' ? 0 : 1.54 * 12,
                                 },
-                            ],
-                        }}
-                        {...(restProps as any)}
-                    />
+                            ]}
+                        >
+                            {value || placeholder}
+                        </Text>
+                    ) : (
+                        <AntdInput
+                            value={value}
+                            onChangeText={onChangeText}
+                            placeholder={placeholder}
+                            placeholderTextColor={colors.textTertiary}
+                            editable={!disabled}
+                            type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
+                            keyboardType={keyboardType}
+                            autoCapitalize={autoCapitalize as any}
+                            multiline={multiline}
+                            textAlignVertical="center"
+                            numberOfLines={numberOfLines}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => {
+                                setIsFocused(false);
+                                onBlur?.();
+                            }}
+                            styles={{
+                                container: {
+                                    borderBottomWidth: 0,
+                                    marginLeft: 0,
+                                    paddingLeft: 0,
+                                    paddingRight: 0,
+                                    minHeight: 0,
+                                    height: '100%',
+                                },
+                                input: [
+                                    styles.input,
+                                    inputStyle,
+                                    multiline && styles.inputMultiline,
+                                    {
+                                        height: '100%',
+                                        paddingVertical: 0,
+                                        paddingLeft: 0,
+                                        marginLeft: 0,
+                                        fontSize: 16,
+                                        color: disabled ? colors.textTertiary : colors.text,
+                                        ...Platform.select({
+                                            ios: {
+                                                fontFamily: 'System',
+                                                lineHeight: 0,
+                                            },
+                                            android: {
+                                                lineHeight: 1.54 * 12,
+                                            },
+                                        }),
+                                    },
+                                ],
+                            }}
+                            {...(restProps as any)}
+                        />
+                    )}
                 </View>
 
                 {/* Suffix */}
