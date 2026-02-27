@@ -14,6 +14,7 @@ import { warehouseApi } from '@/features/material/api/warehouseApi';
 import { stockTransferApi } from '@/features/farm/api/stockTransferApi';
 import { usePondsByZone } from '@/features/farm/hooks/usePonds';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
@@ -29,7 +30,7 @@ export const CycleDetailScreen: React.FC = () => {
         isLoading,
         isRefetching,
     } = useQuery({
-        queryKey: ['cycleDetail', pondId, initialCycleData?.id],
+        queryKey: farmKeys.cycles.detail(pondId, initialCycleData?.id || ''),
         queryFn: async () => {
             if (!pondId || !initialCycleData?.id) return null;
             return await cycleApi.getCycleDetail(pondId, initialCycleData.id);

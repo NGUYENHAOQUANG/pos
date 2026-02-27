@@ -35,6 +35,9 @@ export const useUpdateCycle = () => {
         }) => cycleApi.updateCycle(pondId, cycleId, data),
         onSuccess: async (data, variables) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(variables.pondId) });
+            queryClient.invalidateQueries({
+                queryKey: farmKeys.cycles.detail(variables.pondId, variables.cycleId),
+            });
             // Refresh pond detail (status update)
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             // Refresh ALL pond lists
@@ -52,6 +55,9 @@ export const useDeleteCycle = () => {
             cycleApi.deleteCycle(pondId, cycleId),
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(variables.pondId) });
+            queryClient.invalidateQueries({
+                queryKey: farmKeys.cycles.detail(variables.pondId, variables.cycleId),
+            });
             // Refresh pond detail (status might change from Active -> Empty)
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(variables.pondId) });
             // Refresh ALL pond lists
@@ -95,7 +101,7 @@ export const useActiveCycle = (pondId: string) => {
     const activeCycleId = activeCycleSummary?.id;
 
     const { data: cycleDetail } = useQuery({
-        queryKey: farmKeys.cycles.detail(activeCycleId || ''),
+        queryKey: farmKeys.cycles.detail(pondId, activeCycleId || ''),
         queryFn: () => cycleApi.getCycleDetail(pondId, activeCycleId!),
         enabled: !!pondId && !!activeCycleId,
         staleTime: 1000 * 60 * 5, // Cache 5 minutes
@@ -106,7 +112,7 @@ export const useActiveCycle = (pondId: string) => {
 
 export const useCycleDetail = (pondId: string, cycleId: string) => {
     return useQuery({
-        queryKey: ['cycle', pondId, cycleId],
+        queryKey: farmKeys.cycles.detail(pondId, cycleId),
         queryFn: () => cycleApi.getCycleDetail(pondId, cycleId),
         enabled: !!pondId && !!cycleId,
     });
