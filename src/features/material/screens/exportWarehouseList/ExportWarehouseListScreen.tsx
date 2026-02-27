@@ -15,7 +15,7 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
     const searchText = useMaterialStore(state => state.searchText);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
     const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
-    const { data: warehouses } = useWarehouses({
+    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
         ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
     });
     const warehouseId = warehouses?.[0]?.id;
@@ -55,7 +55,8 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
     } = useInfiniteExportWarehouse(exportWarehouseParams);
 
     const { isConnected } = useNetInfo();
-    const showSkeleton = isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+    const showSkeleton =
+        isWarehousesLoading || isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
 
     return (
         <View style={styles.container}>

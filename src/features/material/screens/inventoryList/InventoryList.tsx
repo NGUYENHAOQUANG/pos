@@ -14,7 +14,7 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
-    const { data: warehouses } = useWarehouses({
+    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
         ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
     });
     const warehouseId = warehouses?.[0]?.id;
@@ -50,7 +50,8 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
     } = useInfiniteInventoryTickets(inventoryParams);
 
     const { isConnected } = useNetInfo();
-    const showSkeleton = isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+    const showSkeleton =
+        isWarehousesLoading || isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
 
     const handleLoadMore = () => {
         if (hasNextPage && !isFetchingNextPage) {

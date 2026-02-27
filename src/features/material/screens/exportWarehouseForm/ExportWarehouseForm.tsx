@@ -25,6 +25,8 @@ import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUpl
 import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
 import { useExportMaterialActions } from '@/features/material/hooks/logic/useExportMaterialActions';
 import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
+import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -34,8 +36,8 @@ export interface ExportWarehouseFormProps {
     isEditMode: boolean;
     initialData?: ExportWarehouseFormValues;
     creatorName?: string;
-    availableMaterials: any[];
-    materialOptions: DropdownOption[]; // Used for dropdown in AddWarehouseMaterial
+    availableMaterials: IWarehouseItem[];
+    materialOptions: DropdownOption[];
     fileUploaderRef: React.RefObject<FileUploaderRef | null>;
     onSubmit: (data: ExportWarehouseFormValues, isDraft: boolean) => void;
     onDelete?: () => void;
@@ -208,7 +210,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
                         </ExportWarehouseInformation>
 
                         <AddWarehouseMaterial
-                            materials={watchedForm.exportItems as any[]}
+                            materials={watchedForm.exportItems as MaterialItem[]}
                             onUpdateMaterial={update}
                             onAddMaterial={add}
                             onRemoveMaterial={remove}

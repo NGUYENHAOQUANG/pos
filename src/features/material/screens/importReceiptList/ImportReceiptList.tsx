@@ -14,7 +14,7 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
-    const { data: warehouses } = useWarehouses({
+    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
         ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
     });
     const warehouseId = warehouses?.[0]?.id;
@@ -58,7 +58,7 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
         }
     }, [onPressCreate]);
 
-    if (isLoading) {
+    if (isWarehousesLoading || isLoading) {
         return (
             <View style={styles.container}>
                 <MaterialLoadingState />
