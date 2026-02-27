@@ -17,6 +17,7 @@ import type { ActivityData } from '@/features/farm/components/ActivityCard';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { EnvMetricType } from '@/features/farm/api/environmentApi';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 // Display name mapping for operation types not in operationTypeMapping
 const OPERATION_DISPLAY_NAME: Record<string, string> = {
@@ -57,7 +58,8 @@ const convertReferenceDataToActivityData = (
     operationType: string,
     ref: IPondRecordReferenceData,
     materialMap: Record<string, any>,
-    metricTypes: EnvMetricType[] = []
+    metricTypes: EnvMetricType[] = [],
+    pondNameMap: Record<string, string> = {}
 ): ActivityData[] => {
     const data: ActivityData[] = [];
 
@@ -298,8 +300,23 @@ const convertReferenceDataToActivityData = (
         case 'StockTransfer':
             if (ref.shrimpSizePcsPerKg != null)
                 data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
-            if (ref.transferMethod)
-                data.push({ label: 'Hình thức chuyển', value: `${ref.transferMethod}` });
+            if (ref.totalStocking != null)
+                data.push({
+                    label: 'Tổng số lượng sang (con)',
+                    value: `${Number(ref.totalStocking).toLocaleString()}`,
+                });
+            if (ref.toPonds && ref.toPonds.length > 0) {
+                ref.toPonds.forEach((pond, index) => {
+                    const pondLabel =
+                        pondNameMap[pond.toPondId] ||
+                        pond.toPondName ||
+                        `Ao đích ${ref.toPonds!.length > 1 ? index + 1 : ''}`.trim();
+                    data.push({
+                        label: pondLabel,
+                        value: `${Number(pond.quantity).toLocaleString()} con`,
+                    });
+                });
+            }
             break;
 
         case 'Incident':
@@ -394,6 +411,16 @@ export const usePondRecordGroups = (
     const { data, isLoading, error, refetch } = usePondRecords(pondId, params);
     const { materialMap } = useFarmMaterials();
     const { metricTypes } = useEnvironmentInit();
+    const ponds = useFarmStore(state => state.ponds);
+
+    // Build pondNameMap from store: pondId -> pondName (for StockTransfer toPonds)
+    const pondNameMap = useMemo(() => {
+        const map: Record<string, string> = {};
+        ponds.forEach(p => {
+            if (p.id && p.name) map[p.id] = p.name;
+        });
+        return map;
+    }, [ponds]);
 
     const rawItems: IPondRecordItem[] = useMemo(() => data?.data?.items ?? [], [data]);
 
@@ -444,7 +471,8 @@ export const usePondRecordGroups = (
                           item.operationType || '',
                           item.referenceData || (item as any),
                           materialMap,
-                          metricTypes
+                          metricTypes,
+                          pondNameMap
                       )
                     : [];
             const jobType = getRecordJobType(item);
@@ -475,7 +503,7 @@ export const usePondRecordGroups = (
             date,
             activities: dateGroups[date],
         }));
-    }, [rawItems, options?.operationNameFilter, materialMap, metricTypes]);
+    }, [rawItems, options?.operationNameFilter, materialMap, metricTypes, pondNameMap]);
 
     return { groups, isLoading, error, refetch, rawItems };
 };
