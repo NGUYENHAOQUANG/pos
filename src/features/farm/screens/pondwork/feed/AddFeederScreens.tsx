@@ -18,7 +18,7 @@ import InfoCircleFilled from '@/assets/Icon/IconFarm/InfoCircleFilled.svg';
 import ActivitySchedule, {
     ScheduleItem,
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
-import { useFeeding, useCreateFeedingRecord } from '@/features/farm/hooks/feed/useFeeding';
+import { useFeeding, useCreateFeedingRecord } from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.types';
 import { useControl } from '@/features/control/store/controlStore';
 import { deviceApi } from '@/features/control/api/deviceApi';

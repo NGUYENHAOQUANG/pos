@@ -11,7 +11,7 @@ import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterChangeRecords';
-import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/feed/useFeeding';
+import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { useHarvestRecordsAsJobs } from './useHarvestRecord';
 import { useStockTransfersAsJobs } from './useStockTransfer';
 
