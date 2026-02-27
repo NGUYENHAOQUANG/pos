@@ -28,7 +28,6 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 // import { useFarmStore } from '@/features/farm/store/farmStore'; // Removed
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { WaterSupplyMeta } from '@/features/farm/types/farm.types';
-import { IMaterial } from '@/features/material/types/material.types';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
@@ -40,9 +39,7 @@ import {
     useDeleteWaterSupplyRecord,
 } from '@/features/farm/hooks/useWaterChangeRecords';
 import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.types';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 import { documentApi } from '@/features/material/api/documentApi';
 import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
@@ -91,60 +88,17 @@ export const WaterSupplyScreen = () => {
     }, [setTabBarVisible]);
 
     // --- Fetch Materials (Warehouse) ---
-    const { data: allMaterials = [] } = useMaterials();
-    const { data: groups = [] } = useMaterialGroups();
-
-    const allowedGroupIds = useMemo(() => {
-        return groups
-            .filter(g => {
-                const name = g.name.toLowerCase();
-                return name.includes('thiết bị điện') || name.includes('công cụ');
-            })
-            .map(g => g.id);
-    }, [groups]);
-
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: pond?.zoneId });
-    const warehouseId = warehouses?.[0]?.id; // Assume first warehouse
-
-    const { data: warehouseItemsData } = useWarehouseItems(
-        warehouseId,
-        {
-            PageSize: 1000,
-        },
-        {
-            enabled: !!warehouseId,
-        }
-    );
+    const { materials: allMaterials } = useFarmMaterials();
 
     const materials = useMemo(() => {
-        const items = warehouseItemsData?.items || [];
+        if (!allMaterials.length) return [];
 
-        if (!items.length || !allMaterials.length) return [];
-
-        return items
-            .filter((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-                const groupId = item.material?.materialGroup?.id || materialDef?.groupId;
-                return allowedGroupIds.includes(groupId);
-            })
-            .map((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-                return {
-                    id: item.id, // warehouseItemId
-                    materialDefId: item.materialId,
-                    name:
-                        item.materialName || item.material?.name || materialDef?.name || 'Unknown',
-                    group: item.material?.materialGroup?.name || '',
-                    unit: item.unitId || (materialDef as any)?.unit || '',
-                    unitName:
-                        item.unitName ||
-                        item.material?.unit?.name ||
-                        (materialDef as any)?.unitName ||
-                        '',
-                    remaining: item.quantity || 0,
-                } as IMaterial & { materialDefId: string };
-            });
-    }, [warehouseItemsData, allMaterials, allowedGroupIds]);
+        return allMaterials.filter(m => {
+            if (!m.group) return false;
+            const name = m.group.toLowerCase();
+            return name.includes('thiết bị điện') || name.includes('công cụ');
+        });
+    }, [allMaterials]);
 
     // --- Load Data khi Edit ---
     useEffect(() => {
@@ -344,12 +298,12 @@ export const WaterSupplyScreen = () => {
                 showAddJobSuccessToast('WATER_CHANGE');
             }
             navigation.goBack();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Save error', error);
             Toast.show({
                 type: 'error',
                 text1: 'Lưu thất bại',
-                text2: 'Vui lòng thử lại',
+                text2: error?.message || 'Vui lòng thử lại',
             });
         }
     };
@@ -365,9 +319,13 @@ export const WaterSupplyScreen = () => {
                 setShowDeleteModal(false);
                 navigation.goBack();
                 Toast.show({ type: 'success', text1: 'Xóa thành công' });
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Delete error', error);
-                Toast.show({ type: 'error', text1: 'Xóa thất bại' });
+                Toast.show({
+                    type: 'error',
+                    text1: 'Xóa thất bại',
+                    text2: error?.message || 'Vui lòng thử lại',
+                });
             }
         }
     };

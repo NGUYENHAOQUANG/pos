@@ -1,73 +1,25 @@
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import Toast from 'react-native-toast-message';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
-import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { feedingRecordApi } from '@/features/farm/api/feedingRecordApi';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { formatDate } from '@/features/farm/utils/dateUtils';
-import type { IMaterial } from '@/features/material/types/material.types';
 import type {
     FeedingRecordItem,
     CreateFeedingRecordPayload,
 } from '@/features/farm/types/feedingRecord.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 /**
  * Get list of materials for Feeding screen (material dropdown).
- * Reuse logic from useHandleProblemForm:
- * - Get selectedZoneId from farmStore
- * - Get warehouse by ZoneId
- * - Get warehouse items
- * - Map to IMaterial[] with id = warehouseItemId
  */
 export const useFeeding = () => {
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const { materials: allMaterials } = useFarmMaterials();
 
-    // Master material list
-    const { data: allMaterials = [] } = useMaterials();
-
-    // Get material groups to filter "Nuôi" (Feeding)
-    const { data: groups = [] } = useMaterialGroups();
-    const feedGroupId = useMemo(() => {
-        return groups.find(g => g.name.toLowerCase().includes('nuôi'))?.id;
-    }, [groups]);
-
-    // Warehouse by ZoneId
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
-    const defaultWarehouseId = warehouses?.[0]?.id;
-
-    // Warehouse items
-    const { data: warehouseItemsData } = useWarehouseItems(
-        defaultWarehouseId,
-        {
-            PageSize: 1000,
-            MaterialGroupId: feedGroupId,
-        },
-        { enabled: !!defaultWarehouseId }
-    );
-
-    // Map to IMaterial[]
-    const materials: IMaterial[] = useMemo(() => {
-        return (warehouseItemsData?.items || []).map((item: any) => {
-            const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-
-            return {
-                id: item.id,
-                name: item.materialName || item.material?.name || materialDef?.name || 'Unknown',
-                group: item.material?.materialGroup?.name || '',
-                unit: item.unitId || (materialDef as any)?.unit || '',
-                unitName:
-                    item.unitName ||
-                    item.material?.unit?.name ||
-                    (materialDef as any)?.unitName ||
-                    '',
-                remaining: item.quantity || 0,
-            } as IMaterial;
-        });
-    }, [warehouseItemsData, allMaterials]);
+    const materials = useMemo(() => {
+        return allMaterials.filter(m => m.group && m.group.toLowerCase().includes('nuôi'));
+    }, [allMaterials]);
 
     return {
         materials,
@@ -88,14 +40,7 @@ export const useFeedingRecords = (pondId: string) => {
 
 export const useFeedingRecordsAsJobs = (pondId: string) => {
     const { data, isLoading, error, refetch } = useFeedingRecords(pondId);
-    const { materials: availableMaterials } = useFeeding();
-
-    const materialMap = useMemo(() => {
-        return availableMaterials.reduce((acc, curr) => {
-            acc[curr.id] = curr;
-            return acc;
-        }, {} as Record<string, IMaterial>);
-    }, [availableMaterials]);
+    const { materialMap } = useFarmMaterials();
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];
 

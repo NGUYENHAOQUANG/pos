@@ -12,7 +12,7 @@ export const materialGroupApi = {
      */
     getAll: async (params?: GetMaterialGroupsV2Params): Promise<GetMaterialGroupsV2Response> => {
         const { data } = await apiClient.get<GetMaterialGroupsV2Response>(
-            API_ENDPOINTS.MATERIAL_GROUP.LIST,
+            API_ENDPOINTS.MATERIAL.GROUP.LIST,
             { params }
         );
         return data;

@@ -9,6 +9,7 @@ import type {
 } from '@/features/farm/types/incident.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { formatDate } from '@/features/farm/utils/dateUtils';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 export const useCreateIncident = () => {
     const queryClient = useQueryClient();
@@ -90,6 +91,7 @@ export const useIncidentList = (pondId: string, params?: GetIncidentListParams) 
 /** Map incident list API to JobExecution[] for card display (Troubleshooting) and log screen */
 export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParams) => {
     const { data, isLoading, error, refetch, isRefetching } = useIncidentList(pondId, params);
+    const { materialMap } = useFarmMaterials();
 
     const rawItems: IncidentListItem[] = data?.data?.items ?? [];
 
@@ -129,15 +131,18 @@ export const useIncidentsAsJobs = (pondId: string, params?: GetIncidentListParam
             date: dateStr,
             note: item.detail?.notes ?? undefined,
             pondId: item.pondId,
-            materials: item.detail?.materials?.map(m => ({
-                material: {
-                    id: m.warehouseItemId,
-                    name: 'Vật tư',
-                    unitName: '',
-                } as any,
-                quantity: m.quantity,
-                unit: '',
-            })),
+            materials: item.detail?.materials?.map(m => {
+                const mat = materialMap[m.warehouseItemId];
+                return {
+                    material: {
+                        id: m.warehouseItemId,
+                        name: mat?.name || 'Vật tư',
+                        unitName: mat?.unitName || '',
+                    } as any,
+                    quantity: m.quantity,
+                    unit: mat?.unitName || '',
+                };
+            }),
             documentIds: item.documentIds,
             images: item.documentIds ?? [],
             createdAt: item.createdAt,

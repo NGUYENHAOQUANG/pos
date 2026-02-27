@@ -15,7 +15,7 @@ export type GetMaterialTypesResponse = IApiResponse<IPaginate<IMaterialType>>;
 export const materialTypeApi = {
     getList: async (params?: GetMaterialTypesParams): Promise<GetMaterialTypesResponse> => {
         const { data } = await apiClient.get<GetMaterialTypesResponse>(
-            API_ENDPOINTS.MATERIAL_TYPE.LIST,
+            API_ENDPOINTS.MATERIAL.TYPE.LIST,
             { params }
         );
         return data;

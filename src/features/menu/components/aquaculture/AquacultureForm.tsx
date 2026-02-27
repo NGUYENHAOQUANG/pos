@@ -164,6 +164,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                             containerStyle={styles.noMarginBottom}
                             inputContainerStyle={styles.inputDisabledBox}
                             disabled
+                            ellipsizeMode="tail"
                         />
                     </View>
                 </View>

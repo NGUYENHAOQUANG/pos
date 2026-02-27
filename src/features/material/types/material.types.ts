@@ -19,6 +19,7 @@ export interface IMaterial {
     name: string;
     group: MaterialGroupType;
     groupId?: string;
+    materialDefId?: string;
     type?: string;
     typeId?: string;
     unit: string;

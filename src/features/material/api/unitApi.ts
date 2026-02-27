@@ -7,7 +7,7 @@ export type GetUnitsResponse = IApiResponse<IPaginate<IUnit>>;
 
 export const unitApi = {
     getUnits: async (): Promise<GetUnitsResponse> => {
-        const { data } = await apiClient.get<GetUnitsResponse>(API_ENDPOINTS.UNITS.LIST);
+        const { data } = await apiClient.get<GetUnitsResponse>(API_ENDPOINTS.MATERIAL.UNITS.LIST);
         return data;
     },
 };

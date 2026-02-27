@@ -133,23 +133,19 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     <Ionicons
                         name="search-outline"
                         size={20}
-                        color={colors.textSecondary || '#999'}
+                        color={colors.textSecondary}
                         style={styles.searchIcon}
                     />
                     <TextInput
                         style={styles.input}
-                        placeholder="Tìm kiếm tên vật tư"
-                        placeholderTextColor={colors.textSecondary || '#999'}
+                        placeholder="Tìm kiếm"
+                        placeholderTextColor={colors.textSecondary}
                         value={localSearchText}
                         onChangeText={setLocalSearchText}
                     />
                     {localSearchText.length > 0 && (
                         <TouchableOpacity onPress={handleClearSearch}>
-                            <Ionicons
-                                name="close-circle"
-                                size={18}
-                                color={colors.textSecondary || '#999'}
-                            />
+                            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -161,7 +157,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     <Ionicons
                         name="ellipsis-vertical"
                         size={20}
-                        color={isExpanded ? colors.primary : colors.text || '#333'}
+                        color={isExpanded ? colors.primary : colors.text}
                     />
                 </TouchableOpacity>
             </View>
