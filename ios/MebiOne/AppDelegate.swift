@@ -34,8 +34,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = NoScaleWindow(frame: UIScreen.main.bounds)
-
+    window = UIWindow(frame: UIScreen.main.bounds)
+    window?.makeKeyAndVisible()
     factory.startReactNative(
       withModuleName: "Mebieco",
       in: window,
