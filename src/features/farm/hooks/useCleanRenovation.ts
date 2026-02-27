@@ -8,6 +8,7 @@ import {
     ICleanRenovationDetail,
 } from '@/features/farm/types/cleanRenovation.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 export const useCleanRenovations = (pondId: string, params?: ICleanRenovationParams) => {
     return useQuery({
@@ -19,6 +20,7 @@ export const useCleanRenovations = (pondId: string, params?: ICleanRenovationPar
 
 export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovationParams) => {
     const { data, isLoading: isQueryLoading, error, refetch } = useCleanRenovations(pondId, params);
+    const { materialMap } = useFarmMaterials();
     const [jobs, setJobs] = useState<JobExecution[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -91,16 +93,19 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
                                 images: imageUrls,
                                 documentIds: item.documentIds || [],
                             },
-                            materials: item.detail?.materials?.map(m => ({
-                                material: {
-                                    id: m.warehouseItemId,
-                                    name: 'Vật tư',
-                                    group: '' as any,
-                                    unit: '',
-                                },
-                                quantity: m.quantity,
-                                unit: '',
-                            })),
+                            materials: item.detail?.materials?.map(m => {
+                                const mat = materialMap[m.warehouseItemId];
+                                return {
+                                    material: {
+                                        id: m.warehouseItemId,
+                                        name: mat?.name || 'Vật tư',
+                                        group: (mat?.group as any) || '',
+                                        unit: mat?.unitName || '',
+                                    },
+                                    quantity: m.quantity,
+                                    unit: mat?.unitName || '',
+                                };
+                            }),
                         };
                     })
                 );
@@ -114,7 +119,7 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
         };
 
         processData();
-    }, [data]);
+    }, [data, materialMap]);
 
     return { jobs, isLoading: isQueryLoading || isProcessing, error, refetch };
 };

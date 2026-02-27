@@ -10,9 +10,6 @@ import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { documentApi } from '@/features/material/api/documentApi';
 import { IDocument } from '@/shared/types/common.types';
 
@@ -38,6 +35,7 @@ import type {
     IncidentDetailMaterial,
 } from '@/features/farm/types/incident.types';
 import { IMaterial } from '@/features/material/types/material.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 interface UseHandleProblemFormProps {
     pond: any;
@@ -59,54 +57,16 @@ export const useHandleProblemForm = ({
 
     const currentJobType = jobType as JobType;
 
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
-
-    const { data: allMaterials = [] } = useMaterials();
-
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
-    const defaultWarehouseId = warehouses?.[0]?.id;
-
-    const { data: warehouseItemsData } = useWarehouseItems(
-        defaultWarehouseId,
-        {
-            PageSize: 1000,
-        },
-        { enabled: !!defaultWarehouseId }
-    );
-
-    const { data: groups = [] } = useMaterialGroups();
-
-    const allowedGroupIds = useMemo(() => {
-        return groups
-            .filter(g => {
-                const name = g.name.toLowerCase();
-                return name.includes('thiết bị điện') || name.includes('công cụ');
-            })
-            .map(g => g.id);
-    }, [groups]);
+    const { materials: allMaterials } = useFarmMaterials();
 
     const materials: IMaterial[] = useMemo(() => {
-        return (warehouseItemsData?.items || [])
-            .filter((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-                const groupId = item.material?.materialGroup?.id || materialDef?.groupId;
-                return allowedGroupIds.includes(groupId);
-            })
-            .map((item: any) => {
-                const materialDef = allMaterials.find((m: any) => m.id === item.materialId);
-
-                return {
-                    id: item.id,
-                    name:
-                        item.materialName || item.material?.name || materialDef?.name || 'Unknown',
-                    group: item.material?.materialGroup?.name || '',
-                    unit: item.unitId || materialDef?.unit || '',
-                    unitName:
-                        item.unitName || item.material?.unit?.name || materialDef?.unitName || '',
-                    remaining: item.quantity || 0,
-                };
-            });
-    }, [warehouseItemsData, allMaterials, allowedGroupIds]);
+        if (!allMaterials.length) return [];
+        return allMaterials.filter(m => {
+            if (!m.group) return false;
+            const name = m.group.toLowerCase();
+            return name.includes('thiết bị điện') || name.includes('công cụ');
+        });
+    }, [allMaterials]);
 
     const createCleanMutation = useCreateCleanRenovation();
     const updateCleanMutation = useUpdateCleanRenovation();

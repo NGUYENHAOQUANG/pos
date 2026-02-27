@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/Fontisto';
-import { TimePickerModal } from './TimePickerModal';
+import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
 import { colors } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 

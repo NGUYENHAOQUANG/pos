@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
+
 import {
     ENVIRONMENT_METRIC_IDS,
     PondData,
@@ -45,29 +45,14 @@ export const useAddEnvironment = ({
     const updateEnvMeasurement = useUpdateEnvMeasurement();
     const deleteEnvMeasurement = useDeleteEnvMeasurement();
 
-    // Get active cycle for operationId (Store only - Safe)
-    // Get active cycle for operationId
-    const activeCycle = useActiveCycle(pond?.id || '');
-    const { data: cycles } = useCyclesByPond(pond?.id || '');
-
-    const currentCycle = useMemo(() => {
-        if (!pond?.id) return null;
-        // Priority 1: Active cycle
-        if (activeCycle) return activeCycle;
-
-        // Priority 2: History (find open or first)
-        const pondCycles = cycles || [];
-        const found = pondCycles.find(c => c.status !== 'Hoàn thành') || pondCycles[0];
-
-        return found;
-    }, [pond?.id, activeCycle, cycles]);
-
     // Helper: Get metric value from measurements array
     const getMetricValue = (metricCode: string): string => {
-        if (!detail?.envMeasurementDetails) return '';
+        if (!detail?.envMeasurementDetail?.envMeasurementDetails) return '';
         const metric = metricTypes.find(m => m.code === metricCode);
         if (!metric) return '';
-        const measurement = detail.envMeasurementDetails.find(m => m.metricId === metric.id);
+        const measurement = detail.envMeasurementDetail.envMeasurementDetails.find(
+            m => m.metricId === metric.id
+        );
         return measurement ? measurement.value.toString() : '';
     };
 
@@ -108,6 +93,10 @@ export const useAddEnvironment = ({
             setTan(getMetricValue(ENVIRONMENT_METRIC_IDS.TAN));
             setMagie(getMetricValue(ENVIRONMENT_METRIC_IDS.MAGIE));
             setNo3(getMetricValue(ENVIRONMENT_METRIC_IDS.NO3));
+
+            if (detail.envMeasurementDetail?.notes) {
+                setNotes(detail.envMeasurementDetail.notes);
+            }
         } else if (itemToEdit && itemToEdit.meta) {
             const meta = itemToEdit.meta as any;
 
@@ -134,7 +123,7 @@ export const useAddEnvironment = ({
             setNo3(getVal('no3', 'NO3', 'No3'));
 
             // Notes
-            const noteVal = getVal('notes', 'Notes', 'Note', 'note');
+            const noteVal = getVal('notes', 'Notes', 'Note', 'note') || itemToEdit.note;
             if (noteVal) setNotes(noteVal);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,7 +232,7 @@ export const useAddEnvironment = ({
             magie: getMetricValue(ENVIRONMENT_METRIC_IDS.MAGIE),
             no3: getMetricValue(ENVIRONMENT_METRIC_IDS.NO3),
             date: detail.createdAt ? new Date(detail.createdAt).getTime() : 0,
-            notes: '', // Notes not currently supported by API detail response
+            notes: detail.envMeasurementDetail?.notes || '',
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemToEdit, detail, metricTypes]);
@@ -364,11 +353,11 @@ export const useAddEnvironment = ({
 
         const measurements = buildMeasurements();
         const commonData = {
-            operationId: currentCycle?.id,
-            envMeasurementDetails: measurements,
             documentIds,
-            createdAt: selectedDate ? selectedDate.toISOString() : new Date().toISOString(),
-            recordValue: 1,
+            envMeasurementDetail: {
+                envMeasurementDetails: measurements,
+                notes: notes,
+            },
         };
 
         if (itemToEdit) {
