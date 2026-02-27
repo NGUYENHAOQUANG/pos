@@ -21,7 +21,7 @@ import {
     useUpdateFeedingRecord,
     useDeleteFeedingRecord,
     useFeedingRecordDetail,
-} from '@/features/farm/hooks/feed/useFeeding';
+} from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditFeeder'>;

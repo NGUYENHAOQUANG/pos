@@ -70,7 +70,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
 
                 {/* Note Area - Bottom (default) */}
                 {data.length > MAX_VISIBLE_ITEMS && expanded && !noteOnTop && noteComponent}
-                {data.length < MAX_VISIBLE_ITEMS && !noteOnTop && noteComponent}
+                {data.length <= MAX_VISIBLE_ITEMS && !noteOnTop && noteComponent}
                 {/* 3. Footer Toggle (Xem thêm/Thu gọn) */}
                 {shouldCollapse && (
                     <TouchableOpacity

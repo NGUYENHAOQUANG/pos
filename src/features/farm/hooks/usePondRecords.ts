@@ -14,6 +14,7 @@ import type {
 import type { JobExecution } from '@/features/farm/types/farm.types';
 import type { TimelineActivity } from '@/features/farm/components/TrackingList';
 import type { ActivityData } from '@/features/farm/components/ActivityCard';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
 // Display name mapping for operation types not in operationTypeMapping
 const OPERATION_DISPLAY_NAME: Record<string, string> = {
@@ -52,7 +53,8 @@ export const usePondRecords = (pondId: string, params?: IPondRecordListParams) =
  */
 const convertReferenceDataToActivityData = (
     operationType: string,
-    ref: IPondRecordReferenceData
+    ref: IPondRecordReferenceData,
+    materialMap: Record<string, any>
 ): ActivityData[] => {
     const data: ActivityData[] = [];
 
@@ -73,10 +75,12 @@ const convertReferenceDataToActivityData = (
         case 'Feeding':
             if (ref.materials && ref.materials.length > 0) {
                 ref.materials.forEach(m => {
-                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                    const mat = materialMap[m.warehouseItemId];
+                    const matName = mat?.name || 'Vật tư';
+                    const matUnit = mat?.unitName || '';
+                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
                 });
             }
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'EnvMeasurement': {
@@ -119,8 +123,6 @@ const convertReferenceDataToActivityData = (
             const valNO3 = getVal('no3', 'NO3', 'No3');
             if (valNO3 != null) data.push({ label: 'NO3 (mg/L)', value: `${valNO3}` });
 
-            const valNotes = getVal('notes', 'Notes', 'Note', 'note');
-            if (valNotes) data.push({ label: 'Ghi chú', value: `${valNotes}` });
             break;
         }
 
@@ -143,7 +145,6 @@ const convertReferenceDataToActivityData = (
             if (uiState.stoolColor)
                 data.push({ label: 'Màu phân', value: `${uiState.stoolColor}` });
             if (uiState.liver) data.push({ label: 'Gan', value: `${uiState.liver}` });
-            if (uiState.notes) data.push({ label: 'Ghi chú', value: `${uiState.notes}` });
             break;
         }
 
@@ -172,7 +173,6 @@ const convertReferenceDataToActivityData = (
                     label: 'Tỉ lệ sống (%)',
                     value: `${Math.round(Number(ref.survivalRatePercentage))}`,
                 });
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'Siphon':
@@ -180,10 +180,12 @@ const convertReferenceDataToActivityData = (
                 data.push({ label: 'Hao hụt tôm (kg)', value: `${ref.shrimpLossKg}` });
             if (ref.materials && ref.materials.length > 0) {
                 ref.materials.forEach(m => {
-                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                    const mat = materialMap[m.warehouseItemId];
+                    const matName = mat?.name || 'Vật tư';
+                    const matUnit = mat?.unitName || '';
+                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
                 });
             }
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'WaterChange':
@@ -201,19 +203,23 @@ const convertReferenceDataToActivityData = (
                 data.push({ label: 'Thể tích sau cấp (m³)', value: `${ref.finalVolume}` });
             if (ref.materials && ref.materials.length > 0) {
                 ref.materials.forEach(m => {
-                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                    const mat = materialMap[m.warehouseItemId];
+                    const matName = mat?.name || 'Vật tư';
+                    const matUnit = mat?.unitName || '';
+                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
                 });
             }
-            if (ref.note) data.push({ label: 'Ghi chú', value: `${ref.note}` });
             break;
 
         case 'WaterTreatment':
             if (ref.materials && ref.materials.length > 0) {
                 ref.materials.forEach(m => {
-                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                    const mat = materialMap[m.warehouseItemId];
+                    const matName = mat?.name || 'Vật tư';
+                    const matUnit = mat?.unitName || '';
+                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
                 });
             }
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'Harvest':
@@ -227,7 +233,6 @@ const convertReferenceDataToActivityData = (
                 data.push({ label: 'Giá tham khảo (VNĐ/kg)', value: `${ref.referencePrice}` });
             if (ref.revenue != null)
                 data.push({ label: 'Doanh thu (VNĐ)', value: `${ref.revenue}` });
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'StockTransfer':
@@ -235,7 +240,6 @@ const convertReferenceDataToActivityData = (
                 data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
             if (ref.transferMethod)
                 data.push({ label: 'Hình thức chuyển', value: `${ref.transferMethod}` });
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         case 'Incident':
@@ -245,10 +249,12 @@ const convertReferenceDataToActivityData = (
         case 'DryRenovation':
             if (ref.materials && ref.materials.length > 0) {
                 ref.materials.forEach(m => {
-                    data.push({ label: 'Vật tư', value: `SL: ${m.quantity}` });
+                    const mat = materialMap[m.warehouseItemId];
+                    const matName = mat?.name || 'Vật tư';
+                    const matUnit = mat?.unitName || '';
+                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
                 });
             }
-            if (ref.notes) data.push({ label: 'Ghi chú', value: `${ref.notes}` });
             break;
 
         default: {
@@ -261,11 +267,6 @@ const convertReferenceDataToActivityData = (
             });
             break;
         }
-    }
-
-    // Fallback: if no data extracted but notes exist
-    if (data.length === 0 && ref.notes) {
-        data.push({ label: 'Ghi chú', value: ref.notes });
     }
 
     return data;
@@ -288,7 +289,6 @@ const getRecordTitle = (record: IPondRecordItem): string => {
     if (jobType && JOB_CONFIG[jobType]) {
         return JOB_CONFIG[jobType].defaultTitle;
     }
-
     return opType;
 };
 
@@ -332,6 +332,7 @@ export const usePondRecordGroups = (
     }
 
     const { data, isLoading, error, refetch } = usePondRecords(pondId, params);
+    const { materialMap } = useFarmMaterials();
 
     const rawItems: IPondRecordItem[] = useMemo(() => data?.data?.items ?? [], [data]);
 
@@ -374,7 +375,11 @@ export const usePondRecordGroups = (
 
             const title = getRecordTitle(item);
             const activityData = item.referenceData
-                ? convertReferenceDataToActivityData(item.operationType || '', item.referenceData)
+                ? convertReferenceDataToActivityData(
+                      item.operationType || '',
+                      item.referenceData,
+                      materialMap
+                  )
                 : [];
             const jobType = getRecordJobType(item);
 
@@ -399,7 +404,7 @@ export const usePondRecordGroups = (
             date,
             activities: dateGroups[date],
         }));
-    }, [rawItems, options?.operationNameFilter]);
+    }, [rawItems, options?.operationNameFilter, materialMap]);
 
     return { groups, isLoading, error, refetch, rawItems };
 };
