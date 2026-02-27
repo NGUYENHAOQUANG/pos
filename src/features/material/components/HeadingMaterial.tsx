@@ -2,8 +2,13 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { colors, spacing } from '@/styles';
 
-export type TabType = 'list' | 'history' | 'export' | 'inventory' | 'material';
-
+export enum TabType {
+    Warehouse = 'warehouse',
+    Import = 'import',
+    Export = 'export',
+    Inventory = 'inventory',
+    Material = 'material',
+}
 interface HeadingMeterialProps {
     selectedTab: TabType;
     onTabSelect: (tab: TabType) => void;
@@ -11,11 +16,11 @@ interface HeadingMeterialProps {
 
 export const HeadingMeterial: React.FC<HeadingMeterialProps> = ({ selectedTab, onTabSelect }) => {
     const tabs: { key: TabType; label: string }[] = [
-        { key: 'material', label: 'Danh sách vật tư' },
-        { key: 'list', label: 'Danh sách tồn kho' },
-        { key: 'history', label: 'Lịch sử nhập kho' },
-        { key: 'export', label: 'Lịch sử xuất kho' },
-        { key: 'inventory', label: 'Kiểm kê' },
+        { key: TabType.Material, label: 'Danh sách vật tư' },
+        { key: TabType.Warehouse, label: 'Danh sách tồn kho' },
+        { key: TabType.Import, label: 'Lịch sử nhập kho' },
+        { key: TabType.Export, label: 'Lịch sử xuất kho' },
+        { key: TabType.Inventory, label: 'Kiểm kê' },
     ];
 
     return (

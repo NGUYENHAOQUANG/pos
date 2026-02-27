@@ -9,11 +9,15 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPressCreate }) => {
+export const InventoryScreen: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
-    const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
+    const inventoryStatusFilter = useMaterialStore(state => state.inventoryStatusFilter);
     const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
         ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
     });
@@ -31,12 +35,12 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
             params.WarehouseId = warehouseId;
         }
 
-        if (importReceiptStatusFilter) {
-            params.Status = importReceiptStatusFilter;
+        if (inventoryStatusFilter) {
+            params.Status = inventoryStatusFilter;
         }
 
         return params;
-    }, [searchText, warehouseId, importReceiptStatusFilter]);
+    }, [searchText, warehouseId, inventoryStatusFilter]);
 
     // 3. Fetch Data with Infinite Scroll
     const {
@@ -73,7 +77,12 @@ export const InventoryScreen: React.FC<{ onPressCreate: () => void }> = ({ onPre
                 data={inventoryList}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => <InventoryCard data={item} />}
-                ListEmptyComponent={<MaterialEmptyState tab="inventory" onPress={onPressCreate} />}
+                ListEmptyComponent={
+                    <MaterialEmptyState
+                        tab="inventory"
+                        onPress={() => navigation.navigate('AddInventory', {})}
+                    />
+                }
                 contentContainerStyle={[
                     styles.listContent,
                     inventoryList.length === 0 && styles.emptyContent,

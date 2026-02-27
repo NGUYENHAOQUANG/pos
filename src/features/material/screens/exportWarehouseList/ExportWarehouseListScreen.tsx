@@ -8,13 +8,16 @@ import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useNetInfo } from '@react-native-community/netinfo';
 
-export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }> = ({
-    onPressCreate,
-}) => {
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+
+export const ExportWarehouseListScreen: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
-    const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
+    const exportReceiptStatusFilter = useMaterialStore(state => state.exportReceiptStatusFilter);
     const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
         ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
     });
@@ -36,12 +39,12 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
             params.WarehouseId = warehouseId;
         }
 
-        if (importReceiptStatusFilter) {
-            params.Status = importReceiptStatusFilter;
+        if (exportReceiptStatusFilter) {
+            params.Status = exportReceiptStatusFilter;
         }
 
         return params;
-    }, [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]);
+    }, [searchText, filterMaterialName, warehouseId, exportReceiptStatusFilter]);
 
     // 3. Fetch Data with Infinite Scroll
     const {
@@ -65,7 +68,7 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
                 isLoading={showSkeleton}
                 refreshing={isRefetching && !isFetchingNextPage}
                 onRefresh={refetch}
-                onPressCreate={onPressCreate}
+                onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
                 onLoadMore={fetchNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 hasNextPage={hasNextPage}

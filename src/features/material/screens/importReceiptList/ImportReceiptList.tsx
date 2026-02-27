@@ -10,7 +10,12 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 
-export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ onPressCreate }) => {
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+
+export const ImportReceiptList: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
@@ -53,10 +58,8 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
     const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
 
     const handleEmptyPress = useCallback(() => {
-        if (onPressCreate) {
-            onPressCreate();
-        }
-    }, [onPressCreate]);
+        navigation.navigate('ImportReceiptFormScreen', {});
+    }, [navigation]);
 
     if (isWarehousesLoading || isLoading) {
         return (

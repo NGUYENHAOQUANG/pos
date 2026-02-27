@@ -61,7 +61,7 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
         const params: any = {};
 
         if (searchText && searchText.trim()) {
-            params.Search = searchText.trim();
+            params.SearchText = searchText.trim();
         }
 
         if (filterGroup) {

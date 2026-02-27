@@ -7,10 +7,12 @@ import { spacing, colors } from '@/styles';
 import { useInfiniteMaterials } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const MaterialMasterListTab: React.FC<{
-    onPressCreate: () => void;
-}> = ({ onPressCreate }) => {
+export const MaterialMasterListTab: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const filterType = useMaterialStore(state => state.filterType);
@@ -92,7 +94,12 @@ export const MaterialMasterListTab: React.FC<{
                         </View>
                     ) : null
                 }
-                ListEmptyComponent={<MaterialEmptyState tab="material" onPress={onPressCreate} />}
+                ListEmptyComponent={
+                    <MaterialEmptyState
+                        tab="material"
+                        onPress={() => navigation.navigate('MaterialForm', {})}
+                    />
+                }
             />
         </View>
     );

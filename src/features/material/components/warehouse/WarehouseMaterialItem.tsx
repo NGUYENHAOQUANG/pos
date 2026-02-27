@@ -12,7 +12,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
 import { ButtonMaterialList } from '@/features/material/components/material/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
-import { MaterialGroupType } from '@/features/material/types/material.types';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
@@ -72,7 +71,7 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 {/* Header Row */}
                 <View style={styles.headerRow}>
                     <Text style={styles.name}>{detail?.name || item.materialName}</Text>
-                    <MaterialGroup group={detail?.group || MaterialGroupType.FARMING} />
+                    {detail?.group && <MaterialGroup group={detail.group} />}
                 </View>
 
                 <View style={styles.separator} />
