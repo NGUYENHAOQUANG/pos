@@ -6,6 +6,7 @@ import {
     IEnvMeasurementParams,
     EnvMeasurementResponse,
     GetEnvMeasurementsResponse,
+    EnvCreateUpdateResponse,
 } from '@/features/farm/types/envMeasurement.types';
 
 // --- Interfaces ---
@@ -176,8 +177,8 @@ export const environmentApi = {
     createEnvMeasurement: async (
         pondId: string,
         data: ICreateEnvMeasurementReq
-    ): Promise<EnvMeasurementResponse> => {
-        const response = await apiClient.post<EnvMeasurementResponse>(
+    ): Promise<EnvCreateUpdateResponse> => {
+        const response = await apiClient.post<EnvCreateUpdateResponse>(
             API_ENDPOINTS.POND.ENV_MEASUREMENT.CREATE(pondId),
             data
         );
@@ -188,8 +189,8 @@ export const environmentApi = {
         pondId: string,
         id: string,
         data: IUpdateEnvMeasurementReq
-    ): Promise<EnvMeasurementResponse> => {
-        const response = await apiClient.patch<EnvMeasurementResponse>(
+    ): Promise<EnvCreateUpdateResponse> => {
+        const response = await apiClient.patch<EnvCreateUpdateResponse>(
             API_ENDPOINTS.POND.ENV_MEASUREMENT.UPDATE(pondId, id),
             data
         );
