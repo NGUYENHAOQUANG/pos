@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
     View,
     Text,
@@ -14,6 +14,8 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { DropdownScrollContext } from '@/features/material/hooks/useDropdownScroll';
 
 export interface DropdownOption {
     label: string;
@@ -76,6 +78,9 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         ? allOptions
         : allOptions.filter(opt => opt.label !== 'Tất cả nhóm vật tư');
 
+    const scrollOffset = useContext(DropdownScrollContext);
+    const initialScrollY = useSharedValue(0);
+
     const buttonRef = useRef<View>(null);
     const flatListRef = useRef<FlatList<DropdownOption>>(null);
     const [dropdownCoords, setDropdownCoords] = useState({ top: 0, left: 0, width: 0 });
@@ -83,6 +88,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     useEffect(() => {
         if (!inline && isOpen && buttonRef.current) {
             buttonRef.current.measureInWindow((x, y, width, height) => {
+                initialScrollY.value = scrollOffset?.value || 0;
                 setDropdownCoords({
                     top: y + height + 4,
                     left: x,
@@ -90,7 +96,15 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                 });
             });
         }
-    }, [isOpen, inline]);
+    }, [isOpen, inline, scrollOffset, initialScrollY]);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        if (!scrollOffset) return {};
+        const deltaY = initialScrollY.value - scrollOffset.value;
+        return {
+            transform: [{ translateY: deltaY }],
+        };
+    });
 
     // Track previous isOpen state to detect when dropdown opens
     const prevIsOpenRef = useRef(isOpen);
@@ -170,10 +184,12 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
     };
 
     const dropdownList = (
-        <View
+        <Animated.View
             style={[
                 styles.dropdown,
-                inline ? styles.dropdownInline : [dropdownStyle, dynamicDropdownStyle],
+                inline
+                    ? styles.dropdownInline
+                    : [dropdownStyle, dynamicDropdownStyle, animatedStyle],
             ]}
         >
             {inline ? (
@@ -214,7 +230,7 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
                     }}
                 />
             )}
-        </View>
+        </Animated.View>
     );
 
     // Get display label for current value

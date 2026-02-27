@@ -48,7 +48,7 @@ import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shri
 // Material screens
 import { MaterialFormScreen } from '@/features/material/screens/materialForm';
 import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
-import { AddExportWarehouseScreen } from '@/features/material/screens/exportWarehouseForm/AddExportWarehouseScreen';
+import { ExportWarehouseFormScreen } from '@/features/material/screens/exportWarehouseForm';
 import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
 
 // Control screens
@@ -81,7 +81,7 @@ import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/typ
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
-import { IExportWarehouseReceipt, IWarehouseItem } from '@/features/material/types/warehouse.types';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
 // Wrapped Menu screens - Now using components directly
@@ -185,9 +185,9 @@ export type AppStackParamList = {
         availableMaterials?: IMaterial[];
         onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
     };
-    AddExportWarehouse: {
+    ExportWarehouseForm: {
         availableMaterials?: IMaterial[];
-        onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
+        onSave?: (data: any) => void;
         exportReceiptId?: string;
     };
     AddInventory: {
@@ -298,7 +298,7 @@ export const AppStack: React.FC = () => {
             {/* ============== Material Screens ============== */}
             <Stack.Screen name="MaterialForm" component={MaterialFormScreen} />
             <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
-            <Stack.Screen name="AddExportWarehouse" component={AddExportWarehouseScreen} />
+            <Stack.Screen name="ExportWarehouseForm" component={ExportWarehouseFormScreen} />
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 
             {/* ============== Control Screens ============== */}
