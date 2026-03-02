@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ZoneHeader } from '@/features/material/components/ZoneHeader';
+import { ZoneHeader } from '@/features/material/components/material/ZoneHeader';
 import {
     ButtonMetaerial,
     MaterialMenuOverlay,
 } from '@/features/material/components/material/ButtonMaterial';
 import { HeadingMeterial, TabType } from '@/features/material/components/material/HeadingMaterial';
-import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
+import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/exportWarehouseList/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';

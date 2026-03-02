@@ -15,7 +15,7 @@ import {
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
-import { WarehouseFooter } from '@/features/material/components/warehouse/WarehouseFooter';
+import { WarehouseFooter } from '@/features/material/components/importReceiptForm/WarehouseFooter';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
