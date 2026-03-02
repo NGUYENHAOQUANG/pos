@@ -1,11 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { CycleData } from '@/features/farm/types/farm.types';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '@/features/farm/utils/dateUtils';
@@ -16,11 +15,10 @@ import { usePondsByZone } from '@/features/farm/hooks/usePonds';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 
-import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
+import { EditCycleForm } from './EditCycleForm';
+type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditCycle'>;
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'CycleDetail'>;
-
-export const CycleDetailScreen: React.FC = () => {
+export const EditCycleScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<ScreenRouteProp>();
     const { cycleData: initialCycleData, pondId } = route.params || {};
@@ -72,13 +70,15 @@ export const CycleDetailScreen: React.FC = () => {
     });
 
     // Fetch Shrimp Seeds from ALL warehouses
-    const { data: shrimpSeeds } = useQuery({
+    const { data: shrimpSeeds, refetch: refetchShrimpSeeds } = useQuery({
         queryKey: ['shrimp-seeds-cycle-detail', effectiveZoneId, warehouses?.length],
         queryFn: async () => {
             if (!warehouses || warehouses.length === 0) return [];
             try {
                 const promises = warehouses.map(w =>
-                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                    warehouseApi
+                        .getShrimpSeeds(w.id, { _t: Date.now() } as any)
+                        .catch(() => ({ data: { items: [] } } as any))
                 );
                 const results = await Promise.all(promises);
                 const allItems = results.reduce<any[]>((acc, r: any) => {
@@ -101,6 +101,14 @@ export const CycleDetailScreen: React.FC = () => {
         enabled: !!warehouses && warehouses.length > 0,
         staleTime: 5 * 60 * 1000,
     });
+
+    useFocusEffect(
+        useCallback(() => {
+            if (refetchShrimpSeeds) {
+                refetchShrimpSeeds();
+            }
+        }, [refetchShrimpSeeds])
+    );
 
     const breedLabel = useMemo(() => {
         // 1. Prefer saved breedName from activeCycleData
@@ -245,7 +253,6 @@ export const CycleDetailScreen: React.FC = () => {
     }, [incomingTransfer, transferInfo]);
 
     const [refreshing, setRefreshing] = useState(false);
-    const [isCycleNameExpanded, setIsCycleNameExpanded] = useState(false);
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
@@ -298,138 +305,34 @@ export const CycleDetailScreen: React.FC = () => {
                     </View>
                 }
             />
-            <ScrollView
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing || (isLoading && !initialCycleData) || isRefetching}
-                        onRefresh={onRefresh}
-                        colors={[colors.black]}
-                    />
+            <EditCycleForm
+                activeCycleData={activeCycleData}
+                seasonLabel={seasonLabel}
+                breedLabel={breedLabel}
+                doc={doc}
+                sourcePondName={sourcePondName}
+                shrimpSize={shrimpSize}
+                displayStockingDate={displayStockingDate}
+                refreshing={refreshing || (isLoading && !initialCycleData) || isRefetching}
+                onRefresh={onRefresh}
+                onEditPress={() =>
+                    navigation.navigate('CreateCycle', {
+                        pondId,
+                        initialData: activeCycleData,
+                        zoneId: pond?.zoneId?.toString(),
+                    })
                 }
-            >
-                {/* Thông tin thả giống - Chu kỳ gốc của ao nhận */}
-                <View style={styles.card}>
-                    <View style={styles.cardHeaderWithBorder}>
-                        <Text style={styles.cardTitle}>Thông tin thả giống</Text>
-                        <View style={styles.headerActions}>
-                            <TouchableOpacity
-                                style={styles.iconBtn}
-                                onPress={() =>
-                                    navigation.navigate('CreateCycle', {
-                                        pondId,
-                                        initialData: activeCycleData,
-                                        zoneId: pond?.zoneId?.toString(),
-                                    })
-                                }
-                            >
-                                <EditIcon />
-                            </TouchableOpacity>
-                            <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
-                        </View>
-                    </View>
-
-                    {/* ... phần nội dung infoRow giữ nguyên */}
-                    <View style={styles.infoContainer}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Vụ nuôi:</Text>
-                            <Text style={styles.value}>{seasonLabel}</Text>
-                        </View>
-                        {/* Custom row for Tên chu kỳ with expand/collapse */}
-                        <View style={[styles.infoRow, styles.cycleNameRow]}>
-                            <Text style={[styles.label, styles.cycleNameLabel]}>Tên chu kỳ:</Text>
-                            <View style={styles.cycleNameValueContainer}>
-                                <Text
-                                    style={[styles.value, styles.cycleNameText]}
-                                    numberOfLines={isCycleNameExpanded ? undefined : 1}
-                                >
-                                    {activeCycleData?.cycleName || '---'}
-                                </Text>
-                                {(activeCycleData?.cycleName?.length || 0) > 25 && (
-                                    <TouchableOpacity
-                                        onPress={() => setIsCycleNameExpanded(!isCycleNameExpanded)}
-                                        style={styles.expandButton}
-                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                    >
-                                        <Ionicons
-                                            name={
-                                                isCycleNameExpanded ? 'chevron-up' : 'chevron-down'
-                                            }
-                                            size={18}
-                                            color={colors.gray[500]}
-                                        />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Tôm giống:</Text>
-                            <Text style={styles.value}>{breedLabel}</Text>
-                        </View>
-
-                        <View style={[styles.line]} />
-
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Ngày thả:</Text>
-                            <Text style={styles.value}>{displayStockingDate}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
-                            <Text style={styles.value}>{doc} ngày</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Số lượng thả (Pls):</Text>
-                            <Text style={styles.value}>
-                                {activeCycleData?.stockingQuantity?.toLocaleString() ||
-                                    activeCycleData?.totalStocking?.toLocaleString() ||
-                                    0}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Thông tin sang ao - Luôn hiển thị */}
-                <View style={[styles.card, { marginTop: spacing.sm }]}>
-                    <View style={styles.cardHeaderWithBorder}>
-                        <Text style={styles.cardTitle}>Thông tin sang ao</Text>
-                        <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
-                    </View>
-
-                    <View style={styles.infoContainer}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Ngày nhận ao:</Text>
-                            <Text style={styles.value}>{displayStockingDate}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Chuyển sang từ ao:</Text>
-                            <Text style={styles.value}>{sourcePondName}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Ngày nuôi (DOC):</Text>
-                            <Text style={styles.value}>{doc} ngày</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
-                            <Text style={styles.value}>{shrimpSize}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.label}>Số lượng tôm sang (con):</Text>
-                            <Text style={styles.value}>
-                                {activeCycleData?.stockingQuantity?.toLocaleString() ||
-                                    activeCycleData?.totalStocking?.toLocaleString() ||
-                                    0}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            </ScrollView>
+            />
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        backgroundColor: colors.backgroundPrimary,
+    },
+    infoContainer: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
@@ -453,70 +356,6 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.regular,
         lineHeight: 20,
     },
-    content: {
-        paddingVertical: spacing.sm,
-    },
-    card: {
-        backgroundColor: colors.white,
-        width: '100%',
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: colors.border,
-    },
-    cardHeaderWithBorder: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    cardTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.gray[900],
-    },
-    headerActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    // NÚT BỌC 32x32 THEO Ý BA
-    iconBtn: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.md,
-        backgroundColor: colors.gray[50],
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    line: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 4,
-    },
-    infoContainer: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        gap: 8,
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
-    value: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.regular,
-    },
     leftTitleContainer: {
         alignItems: 'flex-start',
         marginLeft: 8,
@@ -530,61 +369,5 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.textSecondary,
         fontWeight: typography.fontWeight.regular,
-    },
-    // Transfer Card Styles
-    transferCard: {
-        marginTop: spacing.sm,
-    },
-    receivingPondCard: {
-        backgroundColor: colors.backgroundPrimary,
-        borderRadius: 8,
-        padding: spacing.sm,
-        gap: 8,
-    },
-    subRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingLeft: spacing.md,
-    },
-    subLabel: {
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: typography.fontWeight.regular,
-    },
-    subValue: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.regular,
-    },
-    sectionTitle: {
-        fontSize: typography.fontSize.sm,
-        color: colors.primary,
-        fontWeight: typography.fontWeight.bold,
-        marginTop: spacing.xs,
-    },
-    cycleNameRow: {
-        alignItems: 'flex-start',
-    },
-    cycleNameLabel: {
-        marginTop: 2,
-    },
-    cycleNameValueContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    cycleNameText: {
-        textAlign: 'right',
-        flex: 1,
-    },
-    expandButton: {
-        marginLeft: 6,
-        paddingHorizontal: 2,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
     },
 });

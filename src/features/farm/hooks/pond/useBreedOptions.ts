@@ -17,14 +17,20 @@ export const useBreedOptions = (
     });
 
     // 2. Fetch Shrimp Seeds from ALL warehouses
-    const { data: shrimpSeeds, isLoading: isLoadingSeeds } = useQuery({
+    const {
+        data: shrimpSeeds,
+        isLoading: isLoadingSeeds,
+        refetch,
+    } = useQuery({
         queryKey: ['shrimp-seeds-all-warehouses', warehouses],
         queryFn: async () => {
             if (!warehouses || warehouses.length === 0) return [];
 
             try {
                 const promises = warehouses.map(w =>
-                    warehouseApi.getShrimpSeeds(w.id).catch(() => ({ data: { items: [] } } as any))
+                    warehouseApi
+                        .getShrimpSeeds(w.id, { _t: Date.now() } as any)
+                        .catch(() => ({ data: { items: [] } } as any))
                 );
 
                 const results = await Promise.all(promises);
@@ -49,6 +55,7 @@ export const useBreedOptions = (
             }
         },
         enabled: !!warehouses && warehouses.length > 0,
+        refetchInterval: 5000,
     });
 
     // 3. Map shrimp seeds to breed options with fallback
@@ -92,5 +99,6 @@ export const useBreedOptions = (
     return {
         options,
         isLoading: isLoadingSeeds,
+        refetch,
     };
 };
