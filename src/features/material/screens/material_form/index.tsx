@@ -19,7 +19,7 @@ import {
     useMaterial,
 } from '@/features/material/hooks';
 import { materialService } from '@/features/material/services/materialService';
-import { MaterialForm } from '@/features/material/screens/materialForm/MaterialForm';
+import { MaterialForm } from '@/features/material/screens/material_form/MaterialForm';
 import { MaterialFormValues } from '@/features/material/schemas/materialFormSchema';
 import { showValidationError } from '@/features/material/utils/validationToast';
 

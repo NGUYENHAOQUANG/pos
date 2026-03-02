@@ -7,11 +7,11 @@ import {
 } from '@/features/material/components/material/ButtonMaterial';
 import { HeadingMeterial, TabType } from '@/features/material/components/material/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
-import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
-import { ExportWarehouseListScreen } from '@/features/material/screens/exportWarehouseList/ExportWarehouseListScreen';
-import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
-import { MaterialMasterListTab } from '@/features/material/screens/materialList/MaterialMasterListTab';
-import { InventoryScreen } from '@/features/material/screens/inventoryList/InventoryList';
+import { ImportReceiptList } from '@/features/material/screens/import_receipt_list/ImportReceiptList';
+import { ExportWarehouseListScreen } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListScreen';
+import { WarehouseItemListScreen } from '@/features/material/screens/warehouse_item/WarehouseItemListScreen';
+import { MaterialMasterListTab } from '@/features/material/screens/material_list/MaterialMasterListTab';
+import { InventoryScreen } from '@/features/material/screens/inventory_list/InventoryList';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 

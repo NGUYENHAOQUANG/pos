@@ -46,7 +46,7 @@ import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/meas
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
 // Material screens
-import { MaterialFormScreen } from '@/features/material/screens/materialForm';
+import { MaterialFormScreen } from '@/features/material/screens/material_form';
 import { ImportReceiptFormScreen } from '@/features/material/screens/import_receipt_form';
 import { ExportWarehouseFormScreen } from '@/features/material/screens/export_warehouse_form';
 import { AddInventoryScreen } from '@/features/material/screens/inventory_form';
