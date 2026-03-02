@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
+import { InformationFormScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
@@ -74,7 +74,7 @@ import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesS
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
-import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
+import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 
 // Types
 import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
@@ -345,11 +345,8 @@ export const AppStack: React.FC = () => {
                 component={EditEquimentMaintenanceWithProvider}
             />
 
-            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
-            <Stack.Screen
-                name="EditPersonalInformationScreen"
-                component={EditPersonalInformationScreen}
-            />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
+            <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
         </Stack.Navigator>
     );
 };
