@@ -77,7 +77,7 @@ export const ShrimpPondListScreens: React.FC = () => {
     const ponds = useMemo(() => {
         if (!currentDataSlice) return [];
         const mappedPonds = pondListService.mapPondsWithCategories(currentDataSlice, categories);
-        return pondListService.filterAndSortPonds(mappedPonds, 'all');
+        return pondListService.sortPonds(mappedPonds);
     }, [currentDataSlice, categories]);
 
     useEffect(() => {

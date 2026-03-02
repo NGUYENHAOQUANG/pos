@@ -57,19 +57,8 @@ export const pondListService = {
         return undefined;
     },
 
-    filterAndSortPonds: (ponds: PondData[], selectedTab: string): PondData[] => {
-        let data = ponds;
-        if (selectedTab === 'active') {
-            data = ponds.filter(
-                (pond: PondData) => pondListService.getComputedStatus(pond) === 'active'
-            );
-        } else if (selectedTab === 'preparing') {
-            data = ponds.filter(
-                (pond: PondData) => pondListService.getComputedStatus(pond) === 'preparing'
-            );
-        }
-
-        return [...data].sort((a: PondData, b: PondData) => {
+    sortPonds: (ponds: PondData[]): PondData[] => {
+        return [...ponds].sort((a: PondData, b: PondData) => {
             const typeA = typeof a.type === 'string' ? a.type : a.type?.name;
             const typeB = typeof b.type === 'string' ? b.type : b.type?.name;
 
