@@ -20,7 +20,7 @@ import {
     InventoryCheckItem,
 } from '@/features/material/types/inventoryCheck.types';
 import { MaterialGroupType } from '@/features/material/types/material.types';
-import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
+import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { useInventoryItems } from '@/features/material/hooks/inventory';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;

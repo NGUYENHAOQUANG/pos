@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
-import { TabType } from '@/features/material/components/HeadingMaterial';
+import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -33,7 +33,7 @@ interface SearchBarMeterialProps {
 export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     onSearch,
     onFilterPress: _onFilterPress,
-    selectedTab = 'list',
+    selectedTab = TabType.Warehouse,
     onGroupChange,
     onStatusChange,
     currentStatus = '',
@@ -65,8 +65,8 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
     // Get dropdown options based on selectedTab
     const dropdownOptions = React.useMemo(() => {
-        if (selectedTab === 'list') {
-            // Use Material Groups for 'list' tab
+        if (selectedTab === TabType.Warehouse) {
+            // Use Material Groups for warehouse tab
             return [
                 { label: 'Tất cả nhóm vật tư', value: '' },
                 ...materialGroups.map(g => ({
@@ -113,10 +113,11 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
         []
     );
 
-    const isLoading = selectedTab === 'list' ? isLoadingMaterialGroups : isLoadingMaterialTypes;
+    const isLoading =
+        selectedTab === TabType.Warehouse ? isLoadingMaterialGroups : isLoadingMaterialTypes;
     const placeholder = isLoading
         ? 'Đang tải dữ liệu...'
-        : selectedTab === 'list'
+        : selectedTab === TabType.Warehouse
         ? 'Tất cả nhóm vật tư'
         : 'Tất cả loại vật tư';
 
@@ -163,9 +164,9 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 
             {isExpanded && (
                 <View style={styles.expandedContent}>
-                    {(selectedTab === 'history' ||
-                        selectedTab === 'export' ||
-                        selectedTab === 'inventory') && (
+                    {(selectedTab === TabType.Import ||
+                        selectedTab === TabType.Export ||
+                        selectedTab === TabType.Inventory) && (
                         <View style={styles.dropdownWrapper}>
                             <DropdownMaterial
                                 value={voteStatus}
@@ -182,7 +183,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                             />
                         </View>
                     )}
-                    {(selectedTab === 'list' || selectedTab === 'material') && (
+                    {(selectedTab === TabType.Warehouse || selectedTab === TabType.Material) && (
                         <View style={styles.dropdownWrapper}>
                             <DropdownMaterial
                                 value={isLoading || !isValueInOptions ? '' : currentFilterValue}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing } from '@/styles';
-import { DropdownMaterial, DropdownOption } from '../material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '../DropdownMaterial';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';

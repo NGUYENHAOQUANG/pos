@@ -9,10 +9,9 @@ import {
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
-import { ButtonMaterialList } from '@/features/material/components/material/ButtonMaterialList';
+import { MaterialGroup } from '@/features/material/components/MaterialTag';
+import { ButtonMaterialList } from '@/features/material/components/materialForm/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
-import { MaterialGroupType } from '@/features/material/types/material.types';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
@@ -22,13 +21,19 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 interface WarehouseMaterialItemProps {
     item: IWarehouseItem;
-    onEdit?: (item: IWarehouseItem) => void;
     onHistoryPress?: (item: IWarehouseItem) => void;
     onAdjustmentPress?: (item: IWarehouseItem) => void;
     hideRemaining?: boolean;
     alwaysExpanded?: boolean;
     showStatus?: boolean;
 }
+
+const DetailRow = ({ label, value }: { label: string; value?: string | number | null }) => (
+    <View style={styles.detailRow}>
+        <Text style={styles.detailLabel}>{label} </Text>
+        <Text style={styles.detailValue}>{value || '---'}</Text>
+    </View>
+);
 
 const arePropsEqual = (
     prevProps: WarehouseMaterialItemProps,
@@ -48,15 +53,7 @@ const arePropsEqual = (
 };
 
 export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
-    ({
-        item,
-        //onEdit,
-        onHistoryPress,
-        onAdjustmentPress,
-        hideRemaining,
-        alwaysExpanded,
-        showStatus,
-    }) => {
+    ({ item, onHistoryPress, onAdjustmentPress, hideRemaining, alwaysExpanded, showStatus }) => {
         const [isExpanded, setIsExpanded] = useState(alwaysExpanded || false);
 
         // Fetch details for this material item using the hook
@@ -72,7 +69,7 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 {/* Header Row */}
                 <View style={styles.headerRow}>
                     <Text style={styles.name}>{detail?.name || item.materialName}</Text>
-                    <MaterialGroup group={detail?.group || MaterialGroupType.FARMING} />
+                    {detail?.group && <MaterialGroup group={detail.group} />}
                 </View>
 
                 <View style={styles.separator} />
@@ -115,32 +112,9 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 {isExpanded && (
                     <View>
                         {!alwaysExpanded && <View style={styles.separatorCenter} />}
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                            <Text style={styles.detailValue}>{detail?.type || '---'}</Text>
-                        </View>
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailValue}>
-                                <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                                {detail?.manufacturer || '---'}
-                            </Text>
-                        </View>
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailValue}>
-                                <Text style={styles.detailLabel}>Mô tả:</Text>{' '}
-                                {detail?.usage || '---'}
-                            </Text>
-                        </View>
-
-                        {/* Edit Button */}
-                        {/* Edit Button */}
-                        {/* {onEdit && (
-                            <ButtonMaterialList
-                                title="Sửa thông tin"
-                                onPress={() => onEdit(item)}
-                                style={styles.editButton}
-                            />
-                        )} */}
+                        <DetailRow label="Loại vật tư:" value={detail?.type} />
+                        <DetailRow label="Nhãn Hàng:" value={detail?.manufacturer} />
+                        <DetailRow label="Mô tả:" value={detail?.usage} />
                     </View>
                 )}
 

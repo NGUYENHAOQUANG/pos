@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     View,
-    StyleSheet,
     FlatList,
     Platform,
     UIManager,
@@ -10,9 +9,10 @@ import {
 } from 'react-native';
 import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
 import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
+import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { spacing, colors } from '@/styles';
+import { colors } from '@/styles';
+import { materialListStyles } from '@/features/material/styles/materialListStyles';
 
 if (Platform.OS === 'android') {
     if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -49,21 +49,21 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
 
     if (isLoading) {
         return (
-            <View style={styles.container}>
+            <View style={materialListStyles.containerWithPadding}>
                 <MaterialLoadingState />
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={materialListStyles.containerWithPadding}>
             <FlatList
                 data={receipts}
                 renderItem={({ item }) => <ExportWarehouseReceiptCard item={item} />}
                 keyExtractor={item => item.id}
                 contentContainerStyle={[
-                    styles.listContainer,
-                    receipts.length === 0 && styles.emptyContent,
+                    materialListStyles.listContent,
+                    receipts.length === 0 && materialListStyles.emptyContent,
                 ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
@@ -75,32 +75,18 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={
                     isFetchingNextPage ? (
-                        <View style={styles.loaderFooter}>
+                        <View style={materialListStyles.loaderFooter}>
                             <ActivityIndicator color={colors.primary} />
                         </View>
                     ) : null
                 }
                 ListEmptyComponent={
-                    <MaterialEmptyState tab="export" onPress={onPressCreate || (() => {})} />
+                    <MaterialEmptyState
+                        tab={MaterialTabType.Export}
+                        onPress={onPressCreate || (() => {})}
+                    />
                 }
             />
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    listContainer: {
-        paddingBottom: 100,
-        flexGrow: 1,
-    },
-    emptyContent: {
-        flex: 1,
-    },
-    loaderFooter: {
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-    },
-});

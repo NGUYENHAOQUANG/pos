@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { Control, UseFormGetValues, UseFormSetValue, useFieldArray } from 'react-hook-form';
 import { ExportWarehouseFormValues } from '@/features/material/schemas/exportWarehouseFormSchema';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 export const useExportMaterialActions = (
     control: Control<ExportWarehouseFormValues>,
     getValues: UseFormGetValues<ExportWarehouseFormValues>,
     setValue: UseFormSetValue<ExportWarehouseFormValues>,
-    availableMaterials: any[]
+    availableMaterials: IWarehouseItem[]
 ) => {
     const { append, remove } = useFieldArray({
         control,
@@ -27,7 +28,7 @@ export const useExportMaterialActions = (
             },
             remove: (id: string) => {
                 const currentItems = getValues('exportItems') || [];
-                const index = currentItems.findIndex((i: any) => i.id === id);
+                const index = currentItems.findIndex((i: { id: string }) => i.id === id);
                 if (index !== -1) {
                     remove(index);
                 }
@@ -35,12 +36,12 @@ export const useExportMaterialActions = (
             update: (
                 id: string,
                 field: keyof NonNullable<ExportWarehouseFormValues['exportItems']>[number],
-                value: any
+                value: string | number
             ) => {
                 const currentItems = getValues('exportItems') || [];
-                const index = currentItems.findIndex((i: any) => i.id === id);
+                const index = currentItems.findIndex((i: { id: string }) => i.id === id);
                 if (index !== -1) {
-                    setValue(`exportItems.${index}.${field}` as any, value);
+                    setValue(`exportItems.${index}.${field}` as any, value as any);
                     if (field === 'materialId') {
                         const selectedMaterial = availableMaterials.find(
                             m => m.materialId === value
@@ -52,7 +53,11 @@ export const useExportMaterialActions = (
                         if (selectedMaterial) {
                             setValue(
                                 `exportItems.${index}.price` as any,
-                                selectedMaterial.costPrice?.toString() || '0'
+                                (
+                                    selectedMaterial.averagePrice ??
+                                    selectedMaterial.costPrice ??
+                                    0
+                                ).toString()
                             );
                             setValue(
                                 `exportItems.${index}.unit` as any,

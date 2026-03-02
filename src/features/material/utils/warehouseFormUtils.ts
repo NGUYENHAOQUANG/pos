@@ -1,4 +1,4 @@
-import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
 import { numericStringSchema } from '@/shared/utils/validation';
 
 export const warehouseFormUtils = {

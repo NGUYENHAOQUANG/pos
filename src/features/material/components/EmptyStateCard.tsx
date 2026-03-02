@@ -59,54 +59,67 @@ const styles = StyleSheet.create({
     },
 });
 
-export type MaterialTabType =
-    | 'list'
-    | 'history'
-    | 'inventory'
-    | 'shrimp-inspection'
-    | 'export'
-    | 'material';
+export enum MaterialTabType {
+    List = 'list',
+    Warehouse = 'warehouse',
+    History = 'history',
+    Import = 'import',
+    Inventory = 'inventory',
+    ShrimpInspection = 'shrimp-inspection',
+    Export = 'export',
+    Material = 'material',
+}
 
 interface MaterialEmptyStateProps {
     tab: MaterialTabType;
     onPress: () => void;
 }
 
-export const MaterialEmptyState: React.FC<MaterialEmptyStateProps> = ({ tab, onPress }) => {
-    const config = {
-        list: {
-            message: 'Chưa có vật tư nào trong kho.',
-            buttonTitle: 'Thêm vật tư vào kho',
-            buttonStyle: undefined,
-        },
-        material: {
-            message: 'Chưa có vật tư nào trong danh mục.',
-            buttonTitle: 'Tạo vật tư mới',
-            buttonStyle: undefined,
-        },
-        history: {
-            message: 'Chưa có phiếu nhập kho nào được tạo.',
-            buttonTitle: 'Tạo phiếu nhập kho',
-            buttonStyle: undefined,
-        },
-        export: {
-            message: 'Chưa có phiếu xuất kho nào được tạo.',
-            buttonTitle: 'Tạo phiếu xuất kho',
-            buttonStyle: undefined,
-        },
-        inventory: {
-            message: 'Chưa có phiếu điều chỉnh tồn kho nào được tạo.',
-            buttonTitle: 'Tạo Phiếu Điều Chỉnh Tồn Kho',
-            buttonStyle: { width: '100%' } as ViewStyle,
-        },
-        'shrimp-inspection': {
-            message: 'Chưa có dữ liệu kiểm tra tôm',
-            buttonTitle: 'Bắt đầu kiểm tra tôm',
-            buttonStyle: undefined,
-        },
-    };
+interface EmptyStateConfig {
+    message: string;
+    buttonTitle: string;
+    buttonStyle?: ViewStyle;
+}
 
-    const { message, buttonTitle, buttonStyle } = config[tab] || config.list;
+const EMPTY_STATE_CONFIG: Record<string, EmptyStateConfig> = {
+    list: {
+        message: 'Chưa có vật tư nào trong kho.',
+        buttonTitle: 'Thêm vật tư vào kho',
+    },
+    warehouse: {
+        message: 'Chưa có vật tư nào trong kho.',
+        buttonTitle: 'Thêm vật tư vào kho',
+    },
+    material: {
+        message: 'Chưa có vật tư nào trong danh mục.',
+        buttonTitle: 'Tạo vật tư mới',
+    },
+    history: {
+        message: 'Chưa có phiếu nhập kho nào được tạo.',
+        buttonTitle: 'Tạo phiếu nhập kho',
+    },
+    import: {
+        message: 'Chưa có phiếu nhập kho nào được tạo.',
+        buttonTitle: 'Tạo phiếu nhập kho',
+    },
+    export: {
+        message: 'Chưa có phiếu xuất kho nào được tạo.',
+        buttonTitle: 'Tạo phiếu xuất kho',
+    },
+    inventory: {
+        message: 'Chưa có phiếu điều chỉnh tồn kho nào được tạo.',
+        buttonTitle: 'Tạo Phiếu Điều Chỉnh Tồn Kho',
+        buttonStyle: { width: '100%' },
+    },
+    'shrimp-inspection': {
+        message: 'Chưa có dữ liệu kiểm tra tôm',
+        buttonTitle: 'Bắt đầu kiểm tra tôm',
+    },
+};
+
+export const MaterialEmptyState: React.FC<MaterialEmptyStateProps> = ({ tab, onPress }) => {
+    const { message, buttonTitle, buttonStyle } =
+        EMPTY_STATE_CONFIG[tab] || EMPTY_STATE_CONFIG.list;
 
     return (
         <EmptyStateCard

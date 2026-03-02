@@ -1,19 +1,18 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { MaterialMasterItem } from '../../components/inventory/MaterialMasterItem';
-import { MaterialItemSkeleton } from '@/features/material/components/material/MaterialListSkeleton';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { spacing, colors } from '@/styles';
+import { MaterialMasterList } from '@/features/material/components/materialForm/MaterialMasterList';
 import { useInfiniteMaterials } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const MaterialMasterListTab: React.FC<{
-    onPressCreate: () => void;
-}> = ({ onPressCreate }) => {
+export const MaterialMasterListTab: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const filterType = useMaterialStore(state => state.filterType);
+    const { getListState } = useMaterialListState();
 
     // 2. Prepare Params
     const masterListParams = React.useMemo(
@@ -35,82 +34,23 @@ export const MaterialMasterListTab: React.FC<{
         isFetchingNextPage,
     } = useInfiniteMaterials(masterListParams);
 
-    const { isConnected } = useNetInfo();
-    const showSkeleton =
-        isLoadingMasterMaterials ||
-        (!!isConnected &&
-            isRefetchingMasterMaterials &&
-            !isFetchingNextPage &&
-            masterMaterials.length === 0);
-
-    const handleLoadMore = () => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    };
-
-    if (showSkeleton) {
-        return (
-            <View style={styles.container}>
-                <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    renderItem={() => <MaterialItemSkeleton />}
-                    keyExtractor={item => item.toString()}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                />
-            </View>
-        );
-    }
+    const { showSkeleton, isRefreshing } = getListState({
+        isLoading: isLoadingMasterMaterials,
+        isRefetching: isRefetchingMasterMaterials,
+        isFetchingNextPage,
+        itemsCount: masterMaterials.length,
+    });
 
     return (
-        <View style={styles.container}>
-            <FlatList
-                data={masterMaterials}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <MaterialMasterItem
-                        item={item}
-                        hideRemaining={true}
-                        alwaysExpanded={true}
-                        showStatus={true}
-                    />
-                )}
-                contentContainerStyle={[
-                    styles.listContent,
-                    masterMaterials.length === 0 && styles.emptyContent,
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshing={isRefetchingMasterMaterials && !isFetchingNextPage}
-                onRefresh={refetchMasterMaterials}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <View style={styles.loaderFooter}>
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : null
-                }
-                ListEmptyComponent={<MaterialEmptyState tab="material" onPress={onPressCreate} />}
-            />
-        </View>
+        <MaterialMasterList
+            materials={masterMaterials}
+            isLoading={showSkeleton}
+            refreshing={isRefreshing}
+            onRefresh={refetchMasterMaterials}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+            onPressCreate={() => navigation.navigate('MaterialForm', {})}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    emptyContent: {
-        flex: 1,
-    },
-    listContent: {
-        paddingBottom: spacing.xl,
-        flexGrow: 1,
-    },
-    loaderFooter: {
-        padding: spacing.md,
-        alignItems: 'center',
-    },
-});

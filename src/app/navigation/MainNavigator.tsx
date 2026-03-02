@@ -20,7 +20,7 @@ import { SvgProps } from 'react-native-svg';
 import { ShrimpPondListScreens } from '@/features/farm/screens/pond/ShrimpPondListScreens';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
-import { MeterialScreen } from '@/features/material/screens/MaterialScreen';
+import { MaterialScreen } from '@/features/material/screens/material';
 // Note: MenuProvider removed - now using Zustand store (useMenuStore)
 import { MenuScreens } from '@/features/menu/screens/MenuScreens';
 
@@ -94,7 +94,7 @@ const navigationItems: NavigationItem[] = [
         label: 'Vật tư',
         Icon: IconMaterial,
         IconActive: IconMaterialActive,
-        component: MeterialScreen,
+        component: MaterialScreen,
     },
     {
         key: 'Menu',

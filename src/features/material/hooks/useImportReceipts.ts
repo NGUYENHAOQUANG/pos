@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { importReceiptApi } from '@/features/material/api/importReceiptApi';
-import { useImportReceiptStore } from '@/features/material/store/importReceiptStore';
 import { showSuccessToast } from '@/features/material/utils/validationToast';
 import { APP_CONFIG } from '@/shared/constants';
 
@@ -28,10 +27,7 @@ const STALE_TIME_SHORT = 2 * 60 * 1000; // 2 minutes
 
 // ============ Query Hooks ============
 export const useImportReceipts = (params?: GetImportReceiptsParams) => {
-    const storeParams = useImportReceiptStore(state => state.getQueryParams());
-
     const queryParams: GetImportReceiptsParams = {
-        ...storeParams,
         ...params,
     };
 
@@ -51,15 +47,13 @@ export const useImportReceipts = (params?: GetImportReceiptsParams) => {
 export const useInfiniteImportReceipts = (
     params?: Omit<GetImportReceiptsParams, 'Page' | 'PageSize'>
 ) => {
-    const storeParams = useImportReceiptStore(state => state.getQueryParams());
-    const key = importReceiptKeys.list({ ...storeParams, ...params });
+    const key = importReceiptKeys.list({ ...params });
 
     const query = useInfiniteQuery({
         queryKey: [...key, 'infinite'],
         queryFn: async ({ pageParam = 1 }) => {
             const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
             const currentParams = {
-                ...storeParams,
                 ...params,
                 Page: pageParam,
                 PageSize: pageSize,
@@ -158,9 +152,7 @@ export const useDeleteImportReceipt = () => {
             showSuccessToast('Xóa phiếu nhập kho thành công');
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.lists() });
         },
-        onError: error => {
-            handleError(error);
-        },
+        onError: error => handleError(error),
     });
 };
 
@@ -176,9 +168,7 @@ export const useAddImportReceiptItems = () => {
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
         },
-        onError: error => {
-            handleError(error);
-        },
+        onError: error => handleError(error),
     });
 };
 
@@ -193,8 +183,6 @@ export const useUpdateImportReceiptItems = () => {
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.items(id) });
             queryClient.invalidateQueries({ queryKey: importReceiptKeys.detail(id) });
         },
-        onError: error => {
-            handleError(error);
-        },
+        onError: error => handleError(error),
     });
 };

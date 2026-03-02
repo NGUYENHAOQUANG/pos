@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { TabType } from '@/features/material/components/HeadingMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
 
 interface MaterialsState {
     // UI State (for MaterialScreen)
@@ -11,6 +11,7 @@ interface MaterialsState {
     filterMaterialName: string | null;
     importReceiptStatusFilter: string;
     exportReceiptStatusFilter: string;
+    inventoryStatusFilter: string;
 
     // Actions - Filters
     setSelectedTab: (tab: TabType) => void;
@@ -20,19 +21,21 @@ interface MaterialsState {
     setFilterMaterialName: (name: string | null) => void;
     setImportReceiptStatusFilter: (status: string) => void;
     setExportReceiptStatusFilter: (status: string) => void;
+    setInventoryStatusFilter: (status: string) => void;
     resetFilters: () => void;
 }
 
 export const useMaterialsStore = create<MaterialsState>()(
     immer(set => ({
         // Initial state
-        selectedTab: 'material',
+        selectedTab: TabType.Material,
         searchText: '',
         filterGroup: '',
         filterType: '',
         filterMaterialName: null,
         importReceiptStatusFilter: '',
         exportReceiptStatusFilter: '',
+        inventoryStatusFilter: '',
 
         // Filter actions
         setSelectedTab: (tab: TabType) =>
@@ -70,6 +73,11 @@ export const useMaterialsStore = create<MaterialsState>()(
                 state.exportReceiptStatusFilter = status;
             }),
 
+        setInventoryStatusFilter: (status: string) =>
+            set(state => {
+                state.inventoryStatusFilter = status;
+            }),
+
         resetFilters: () =>
             set(state => {
                 state.searchText = '';
@@ -78,6 +86,7 @@ export const useMaterialsStore = create<MaterialsState>()(
                 state.filterMaterialName = null;
                 state.importReceiptStatusFilter = '';
                 state.exportReceiptStatusFilter = '';
+                state.inventoryStatusFilter = '';
             }),
     }))
 );

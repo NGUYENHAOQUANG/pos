@@ -1,24 +1,20 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ExportWarehouseMaterialList } from '@/features/material/components/exportwarehouse/ExportWarehouseMaterialList';
-import { spacing } from '@/styles';
+import { ExportWarehouseMaterialList } from '@/features/material/components/exportWarehouseList/ExportWarehouseMaterialList';
 import { useInfiniteExportWarehouse } from '@/features/material/hooks';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
-export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }> = ({
-    onPressCreate,
-}) => {
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
+
+export const ExportWarehouseListScreen: React.FC = () => {
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
-    const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
-    const { data: warehouses } = useWarehouses({
-        ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
-    });
-    const warehouseId = warehouses?.[0]?.id;
+    const exportReceiptStatusFilter = useMaterialStore(state => state.exportReceiptStatusFilter);
+    const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Prepare Params
     const exportWarehouseParams = React.useMemo(() => {
@@ -36,12 +32,12 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
             params.WarehouseId = warehouseId;
         }
 
-        if (importReceiptStatusFilter) {
-            params.Status = importReceiptStatusFilter;
+        if (exportReceiptStatusFilter) {
+            params.Status = exportReceiptStatusFilter;
         }
 
         return params;
-    }, [searchText, filterMaterialName, warehouseId, importReceiptStatusFilter]);
+    }, [searchText, filterMaterialName, warehouseId, exportReceiptStatusFilter]);
 
     // 3. Fetch Data with Infinite Scroll
     const {
@@ -54,28 +50,23 @@ export const ExportWarehouseListScreen: React.FC<{ onPressCreate?: () => void }>
         isFetchingNextPage,
     } = useInfiniteExportWarehouse(exportWarehouseParams);
 
-    const { isConnected } = useNetInfo();
-    const showSkeleton = isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+    const { showSkeleton, isRefreshing } = getListState({
+        isLoading,
+        isRefetching,
+        isFetchingNextPage,
+        itemsCount: receipts.length,
+    });
 
     return (
-        <View style={styles.container}>
-            <ExportWarehouseMaterialList
-                receipts={receipts}
-                isLoading={showSkeleton}
-                refreshing={isRefetching && !isFetchingNextPage}
-                onRefresh={refetch}
-                onPressCreate={onPressCreate}
-                onLoadMore={fetchNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                hasNextPage={hasNextPage}
-            />
-        </View>
+        <ExportWarehouseMaterialList
+            receipts={receipts}
+            isLoading={showSkeleton}
+            refreshing={isRefreshing}
+            onRefresh={refetch}
+            onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: spacing.md,
-    },
-});

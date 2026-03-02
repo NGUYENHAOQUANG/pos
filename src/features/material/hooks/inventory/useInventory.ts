@@ -93,9 +93,7 @@ export const useDeleteInventoryTicket = () => {
                 exact: false,
             });
         },
-        onError: (error: unknown) => {
-            handleError(error);
-        },
+        onError: error => handleError(error),
     });
 };
 
@@ -113,9 +111,7 @@ export const useCreateInventoryCheck = () => {
                 exact: false,
             });
         },
-        onError: (error: unknown) => {
-            handleError(error);
-        },
+        onError: error => handleError(error),
     });
 };
 
@@ -136,7 +132,8 @@ export const useUpdateInventoryCheck = () => {
                 exact: false,
             });
         },
-        onError: (error: unknown) => {
+        onError: error => {
+            console.log('error', error);
             handleError(error);
         },
     });

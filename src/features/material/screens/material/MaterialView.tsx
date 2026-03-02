@@ -4,38 +4,62 @@ import { ZoneHeader } from '@/features/material/components/ZoneHeader';
 import {
     ButtonMetaerial,
     MaterialMenuOverlay,
-} from '@/features/material/components/ButtonMaterial';
-import { HeadingMeterial } from '@/features/material/components/HeadingMaterial';
+} from '@/features/material/components/material/ButtonMaterial';
+import { HeadingMeterial, TabType } from '@/features/material/components/material/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/exportWarehouseList/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
 import { MaterialMasterListTab } from '@/features/material/screens/materialList/MaterialMasterListTab';
 import { InventoryScreen } from '@/features/material/screens/inventoryList/InventoryList';
-import { colors } from '@/styles';
-import { useMaterialScreenLogic } from '@/features/material/hooks/logic/useMaterialScreenLogic';
+import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
-export const MeterialScreen = () => {
-    const {
-        selectedTab,
-        dropdownData,
-        selectedDropdownItem,
-        menuOpen,
-        menuPosition,
-        currentStatus,
-        currentFilterValue,
-        handleDropdownSelect,
-        handleShowMenu,
-        handleCloseMenu,
-        handleSearch,
-        handleFilterType,
-        handleFilterStatus,
-        handleFilterPress,
-        handleTabSelect,
-        handleHistoryPress,
-        actions,
-    } = useMaterialScreenLogic();
+export interface MaterialViewProps {
+    selectedTab: TabType;
+    dropdownData: DropDownItem[];
+    selectedDropdownItem: DropDownItem;
+    menuOpen: boolean;
+    menuPosition: { x: number; y: number; width: number; height: number };
+    currentStatus?: string;
+    currentFilterValue?: string;
+    handleDropdownSelect: (item: DropDownItem) => void;
+    handleShowMenu: (position: { x: number; y: number; width: number; height: number }) => void;
+    handleCloseMenu: () => void;
+    handleSearch: (text: string) => void;
+    handleFilterType: (type: string) => void;
+    handleFilterStatus: (status: string) => void;
+    handleFilterPress: () => void;
+    handleTabSelect: (tab: TabType) => void;
+    handleHistoryPress: (item: IWarehouseItem) => void;
+    actions: {
+        createImport: () => void;
+        createExport: () => void;
+        createInventory: () => void;
+        createMaterial: () => void;
+        editMaterial: (item: IWarehouseItem) => void;
+    };
+}
 
+export const MaterialView: React.FC<MaterialViewProps> = ({
+    selectedTab,
+    dropdownData,
+    selectedDropdownItem,
+    menuOpen,
+    menuPosition,
+    currentStatus,
+    currentFilterValue,
+    handleDropdownSelect,
+    handleShowMenu,
+    handleCloseMenu,
+    handleSearch,
+    handleFilterType,
+    handleFilterStatus,
+    handleFilterPress,
+    handleTabSelect,
+    handleHistoryPress,
+    actions,
+}) => {
     return (
         <View style={styles.container}>
             <View style={{ zIndex: 1000, elevation: 10 }}>
@@ -56,30 +80,21 @@ export const MeterialScreen = () => {
                 onGroupChange={handleFilterType}
                 onStatusChange={handleFilterStatus}
                 selectedTab={selectedTab}
-                currentStatus={currentStatus || undefined}
-                currentFilterValue={currentFilterValue || undefined}
+                currentStatus={currentStatus}
+                currentFilterValue={currentFilterValue}
             />
 
             <View style={styles.content}>
-                {selectedTab === 'material' && (
-                    <MaterialMasterListTab onPressCreate={actions.createMaterial} />
-                )}
-                {selectedTab === 'list' && (
+                {selectedTab === TabType.Material && <MaterialMasterListTab />}
+                {selectedTab === TabType.Warehouse && (
                     <WarehouseItemListScreen
-                        onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
                         onPressCreate={actions.createMaterial}
                     />
                 )}
-                {selectedTab === 'history' && (
-                    <ImportReceiptList onPressCreate={actions.createImport} />
-                )}
-                {selectedTab === 'export' && (
-                    <ExportWarehouseListScreen onPressCreate={actions.createExport} />
-                )}
-                {selectedTab === 'inventory' && (
-                    <InventoryScreen onPressCreate={actions.createInventory} />
-                )}
+                {selectedTab === TabType.Import && <ImportReceiptList />}
+                {selectedTab === TabType.Export && <ExportWarehouseListScreen />}
+                {selectedTab === TabType.Inventory && <InventoryScreen />}
             </View>
 
             <MaterialMenuOverlay
@@ -96,18 +111,11 @@ export const MeterialScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
     container: {
         flex: 1,
         backgroundColor: '#F0F5FF',
     },
     content: {
         flex: 1,
-    },
-    fullWidthButton: {
-        width: '100%',
     },
 });

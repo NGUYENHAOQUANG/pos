@@ -2,7 +2,7 @@ import { IApiResponse as IAppResponse, IPaginate } from '@/shared/types/common.t
 
 export interface GetWarehouseItemsQueryParams {
     id?: string;
-    Search?: string;
+    SearchText?: string;
     MaterialGroupId?: string;
     Id?: string;
     CreatedAt?: string;

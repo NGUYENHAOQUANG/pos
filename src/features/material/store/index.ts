@@ -1,11 +1,4 @@
 export { useMaterialsStore } from '@/features/material/store/materialsStore';
-export { useWarehouseStore } from '@/features/material/store/warehouseStore';
-export { useInventoryStore } from '@/features/material/store/inventoryStore';
-
-export { useMaterialGroupsStore } from '@/features/material/store/materialGroupsStore';
-export { useMaterialTypesStore } from '@/features/material/store/materialTypesStore';
-export { useUnitsStore } from '@/features/material/store/unitsStore';
-export { useExportWarehouseStore } from '@/features/material/store/exportWarehouseStore';
 
 import { useMaterialsStore } from '@/features/material/store/materialsStore';
 
@@ -30,8 +23,10 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
     const setExportReceiptStatusFilter = useMaterialsStore(
         state => state.setExportReceiptStatusFilter
     );
+    const setInventoryStatusFilter = useMaterialsStore(state => state.setInventoryStatusFilter);
     const importReceiptStatusFilter = useMaterialsStore(state => state.importReceiptStatusFilter);
     const exportReceiptStatusFilter = useMaterialsStore(state => state.exportReceiptStatusFilter);
+    const inventoryStatusFilter = useMaterialsStore(state => state.inventoryStatusFilter);
 
     // Get actions from each store
 
@@ -44,6 +39,7 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
         selectedTab,
         importReceiptStatusFilter,
         exportReceiptStatusFilter,
+        inventoryStatusFilter,
         // Actions - Filters
         setSearchText,
         setFilterGroup,
@@ -53,6 +49,7 @@ export const useMaterialStore = <T = any>(selector?: (state: any) => T): T => {
         setSelectedTab,
         setImportReceiptStatusFilter,
         setExportReceiptStatusFilter,
+        setInventoryStatusFilter,
     };
 
     if (selector) {

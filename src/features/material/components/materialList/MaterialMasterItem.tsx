@@ -9,8 +9,8 @@ import {
     UIManager,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
-import { ButtonMaterialList } from '@/features/material/components/material/ButtonMaterialList';
+import { MaterialGroup } from '@/features/material/components/MaterialTag';
+import { ButtonMaterialList } from '@/features/material/components/materialForm/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 

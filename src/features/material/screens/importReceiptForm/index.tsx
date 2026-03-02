@@ -22,7 +22,7 @@ import { useFileSubmit } from '@/shared/hooks/useFileSubmit';
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { importReceiptService } from '@/features/material/services/importReceiptService';
 import { WarehouseFormValues } from '@/features/material/schemas/warehouseFormSchema';
-import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
 import ImportReceiptForm from '@/features/material/screens/importReceiptForm/ImportReceiptForm';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 

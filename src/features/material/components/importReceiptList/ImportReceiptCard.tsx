@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,87 +6,82 @@ import {
     TouchableOpacity,
     LayoutAnimation,
     Platform,
-    UIManager,
     ActivityIndicator,
+    UIManager,
 } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ImportReceipt, ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
+import { MaterialGroup } from '@/features/material/components/MaterialTag';
+import { MaterialGroupType } from '@/features/material/types/material.types';
+import { useImportReceiptItems } from '@/features/material/hooks/useImportReceipts';
+import { useSuppliers } from '@/features/material/hooks/useSuppliers';
+import { ImportReceiptItems } from '@/features/material/components/importReceiptList/ImportReceiptItems';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { MaterialGroupType } from '@/features/material/types/material.types';
-import { ExportWarehouseReceiptItems } from '@/features/material/components/exportwarehouse/ExportWarehouseReceiptItems';
-import { MaterialGroup } from '@/features/material/components/material/MaterialGroup';
-import { ExportReceipt, ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
-import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-interface ExportWarehouseReceiptCardProps {
-    item: ExportReceipt;
+interface ImportReceiptCardProps {
+    item: ImportReceipt;
 }
 
-export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProps> = ({ item }) => {
+const arePropsEqual = (prevProps: ImportReceiptCardProps, nextProps: ImportReceiptCardProps) => {
+    const { item: prevItem } = prevProps;
+    const { item: nextItem } = nextProps;
+
+    return (
+        prevItem.id === nextItem.id &&
+        prevItem.status === nextItem.status &&
+        prevItem.totalAmount === nextItem.totalAmount &&
+        prevItem.totalItems === nextItem.totalItems &&
+        prevItem.editedAt === nextItem.editedAt &&
+        prevItem.supplierName === nextItem.supplierName
+    );
+};
+
+export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const shouldFetch = isExpanded && (!item.materials || item.materials.length === 0);
-    const { data: fetchedItems, isLoading: isFetchingItems } = useExportReceiptItems(
-        shouldFetch ? item.id : undefined
+    const { data: fetchedItems, isLoading: isFetchingItems } = useImportReceiptItems(
+        isExpanded ? item.id : '',
+        { PageSize: 1000 }
     );
 
-    const isMaterialsArray = (materials: any): materials is ExportReceiptItem[] => {
-        return (
-            Array.isArray(materials) &&
-            materials.length > 0 &&
-            (typeof materials[0].costPrice === 'number' ||
-                typeof materials[0].quantity === 'number')
-        );
-    };
-
-    const finalItems = useMemo(
-        () =>
-            item.materials && isMaterialsArray(item.materials)
-                ? item.materials
-                : fetchedItems || [],
-        [item.materials, fetchedItems]
-    );
-
-    // Calculate total from items if main total is missing
-    const calculatedTotal = useMemo(() => {
-        if (!finalItems || finalItems.length === 0) return 0;
-        return finalItems.reduce((sum: number, curr: ExportReceiptItem) => {
-            const itemTotal = curr.totalAmount || (curr.quantity || 0) * (curr.costPrice || 0);
-            return sum + (itemTotal || 0);
-        }, 0);
-    }, [finalItems]);
-
-    const displayTotalAmount =
-        item.totalAmount && item.totalAmount > 0 ? item.totalAmount : calculatedTotal;
+    // Fetch suppliers to get supplier name from supplierId if not available
+    const { data: suppliers = [] } = useSuppliers();
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
     };
 
-    const getStatusLabel = (status?: string): MaterialGroupType => {
+    const getStatusLabel = (status?: ImportReceiptStatus | string): MaterialGroupType => {
         switch (status) {
-            case 'Draft':
+            case ImportReceiptStatus.Draft:
                 return MaterialGroupType.DRAFT;
-            case 'Pending':
+            case ImportReceiptStatus.Pending:
                 return MaterialGroupType.PENDING;
-            case 'Approved':
+            case ImportReceiptStatus.Approved:
                 return MaterialGroupType.COMPLETED;
-            case 'Rejected':
+            case ImportReceiptStatus.Rejected:
                 return MaterialGroupType.REJECTED;
             default:
                 return (status as MaterialGroupType) || MaterialGroupType.DRAFT;
         }
     };
+
+    const displayItems = fetchedItems?.items || [];
+
+    // Get supplier name: use supplierName from API if available, otherwise lookup from suppliers list
+    const supplierName =
+        item.supplierName || suppliers.find(s => s.id === item.supplierId)?.name || '---';
 
     return (
         <View style={styles.card}>
@@ -97,44 +92,46 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                     <MaterialGroup group={getStatusLabel(item.status)} />
                 </View>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Xuất kho:</Text>
-                    <Text style={styles.value}>{formatMaterialDateTime(item.createdAt || '')}</Text>
+                    <Text style={styles.label}>Nhập kho:</Text>
+                    <Text style={styles.value}>
+                        {item.createdAt ? formatMaterialDateTime(item.editedAt) : '---'}
+                    </Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Tạo phiếu:</Text>
-                    <Text style={styles.value}>{formatMaterialDateTime(item.createdAt || '')}</Text>
+                    <Text style={styles.value}>
+                        {item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
+                    </Text>
                 </View>
 
                 <View style={styles.divider} />
 
                 {/* Summary Info */}
                 <View style={styles.row}>
-                    <Text style={styles.label}>Tổng hàng hoá:</Text>
-                    <Text style={styles.value}>{item.totalItems ?? finalItems.length}</Text>
+                    <Text style={styles.label}>Tổng hàng hóa:</Text>
+                    <Text style={styles.value}>{item.totalItems ?? '---'}</Text>
                 </View>
                 <View style={styles.row}>
                     <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>{formatCurrency(displayTotalAmount || 0)}</Text>
+                    <Text style={styles.value}>{formatCurrency(item.totalAmount || 0)}</Text>
                 </View>
 
-                {/* Farm Info - Visible when Expanded */}
+                {/* Supplier Info - Visible when Expanded */}
                 {isExpanded && (
                     <View style={styles.row}>
-                        <Text style={styles.label}>Ao yêu cầu:</Text>
-                        <Text style={styles.value}>
-                            {item.pondName || item.warehouseName || '---'}
-                        </Text>
+                        <Text style={styles.label}>Nhà cung cấp:</Text>
+                        <Text style={styles.value}>{supplierName}</Text>
                     </View>
                 )}
 
-                {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
-                {(item.status === 'Draft' || !item.status) && (
+                {/* Edit Button (Only for Draft) */}
+                {item.status === ImportReceiptStatus.Draft && (
                     <TouchableOpacity
                         style={styles.editButton}
                         onPress={() => {
-                            navigation.navigate('ExportWarehouseForm', {
-                                exportReceiptId: item.id,
+                            navigation.navigate('ImportReceiptFormScreen', {
                                 availableMaterials: [],
+                                importReceiptId: item.id,
                             });
                         }}
                     >
@@ -153,7 +150,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                             style={{ margin: spacing.md }}
                         />
                     ) : (
-                        <ExportWarehouseReceiptItems materials={finalItems} />
+                        <ImportReceiptItems materials={displayItems} />
                     )}
                 </View>
             )}
@@ -169,14 +166,13 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
             </TouchableOpacity>
         </View>
     );
-};
+}, arePropsEqual);
 
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         marginBottom: spacing.md,
-        overflow: 'hidden',
         paddingBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
     },
     editButton: {
         marginTop: spacing.sm,
-        marginBottom: spacing.sm, // Add bottom spacing
+        marginBottom: spacing.sm,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: borderRadius.sm,

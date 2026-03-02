@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, Platform, UIManager } from 'react-native'
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
@@ -18,7 +18,7 @@ import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { IconTrashOutlined } from '@/assets/icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { AddMaterial } from '@/features/material/components/material/AddMaterial';
+import { AddMaterial } from '@/features/material/components/materialForm/AddMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);

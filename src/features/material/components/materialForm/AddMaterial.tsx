@@ -8,10 +8,7 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
-import {
-    DropdownMaterial,
-    DropdownOption,
-} from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';

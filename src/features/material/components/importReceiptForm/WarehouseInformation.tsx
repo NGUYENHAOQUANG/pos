@@ -3,10 +3,7 @@ import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-na
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import {
-    DropdownMaterial,
-    DropdownOption,
-} from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
