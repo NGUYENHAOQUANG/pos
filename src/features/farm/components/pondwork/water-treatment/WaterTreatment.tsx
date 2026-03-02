@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
+import { IMaterial } from '@/features/material/types/material.types';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 
 interface WaterTreatmentProps {
@@ -11,6 +11,7 @@ interface WaterTreatmentProps {
     onExecutionDateChange: (date: Date) => void;
     activityType: string;
     onActivityTypeChange: (type: string) => void;
+    materials: IMaterial[];
     selectedMaterials: SelectedMaterialItem[];
     onSelectedMaterialsChange: (materials: SelectedMaterialItem[]) => void;
     note: string;
@@ -23,6 +24,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
     onExecutionDateChange,
     activityType,
     onActivityTypeChange,
+    materials,
     selectedMaterials,
     onSelectedMaterialsChange,
     note,
@@ -30,18 +32,6 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
     disabledDate = false,
 }) => {
     const activityOptions = ['Đánh khoáng', 'Đánh vi sinh', 'Kiểm khuẩn'];
-
-    // Mock materials for the modal
-    const mockMaterials: IMaterial[] = [
-        { id: '1', name: 'BIKAP CP', group: MaterialGroupType.FARMING, unit: 'kg', remaining: 100 },
-        {
-            id: '2',
-            name: 'Super Mineral - Mebifood',
-            group: MaterialGroupType.FARMING,
-            unit: 'kg',
-            remaining: 50,
-        },
-    ];
 
     return (
         <View style={styles.container}>
@@ -61,7 +51,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
             <MaterialSelectionBox
                 selectedMaterials={selectedMaterials}
                 onMaterialsChange={onSelectedMaterialsChange}
-                materials={mockMaterials}
+                materials={materials}
             />
 
             <SelectionNotesBox notes={note} onNotesChange={onNoteChange} />

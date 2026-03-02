@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 import { colors } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { formatDate } from '@/features/farm/utils/dateUtils';
-import { showAddJobSuccessToast } from '@/features/farm/utils/toastMessages';
-import Toast from 'react-native-toast-message';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+
+import { useCreateWaterTreatment } from '@/features/farm/hooks/useWaterTreatmentRecords';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import {
+    CreateWaterTreatmentCommand,
+    TREATMENT_LABEL_TO_ENUM,
+} from '@/features/farm/types/waterTreatment.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
@@ -22,9 +26,17 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const { pond } = route.params || {};
     const pondId = pond?.id;
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    // Fetch warehouse materials
+    const { materials } = useFarmMaterials();
+
+    const filteredMaterials = useMemo(() => {
+        return materials.filter(m => {
+            const groupName = (m.group || '').toLowerCase();
+            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
+        });
+    }, [materials]);
+    // Mutation
+    const createMutation = useCreateWaterTreatment();
 
     const [executionDate, setExecutionDate] = useState<Date>(new Date());
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
@@ -35,7 +47,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
         navigation.goBack();
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (selectedMaterials.length === 0) {
             Toast.show({
                 type: 'error',
@@ -46,44 +58,49 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             return;
         }
 
-        if (pondId) {
-            // Save with key 'WATER_TREATMENT'
-            // Check key in context if needed
-            const currentItems = getPondJobItems(pondId, 'WATER_TREATMENT');
+        if (!pondId) return;
 
-            let maxIndex = 0;
-            currentItems.forEach(item => {
-                // Pattern label for water treatment might be different, using similar logic to create unique label
-                const match = item.label.match(/Lần (\d+)/);
-                if (match) {
-                    const index = parseInt(match[1], 10);
-                    if (index > maxIndex) maxIndex = index;
-                }
+        const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
+        if (!treatmentTypeEnum) {
+            Toast.show({
+                type: 'error',
+                text1: 'Loại hoạt động không hợp lệ',
+                position: 'top',
             });
-            const nextIndex = maxIndex + 1;
-
-            const timeString = executionDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-            const dateString = formatDate(executionDate);
-
-            const newItem = {
-                id: Date.now().toString(),
-                label: `Lần ${nextIndex}`,
-                time: timeString,
-                date: dateString,
-                pondId: pondId,
-                note: note || undefined,
-                waterTreatmentType: activityType,
-                materials: selectedMaterials,
-            };
-
-            updatePondJob(pondId, 'WATER_TREATMENT', [...currentItems, newItem]);
-            showAddJobSuccessToast('WATER_TREATMENT');
+            return;
         }
-        25;
-        navigation.goBack();
+
+        const payload: CreateWaterTreatmentCommand = {
+            documentIds: [],
+            waterTreatmentDetail: {
+                treatmentType: treatmentTypeEnum,
+                notes: note || undefined,
+                materials: selectedMaterials.map(m => ({
+                    warehouseItemId: m.material.id,
+                    quantity: m.quantity,
+                })),
+            },
+        };
+
+        try {
+            await createMutation.mutateAsync({
+                pondId,
+                data: payload,
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Thêm nhật ký thành công',
+            });
+            navigation.goBack();
+        } catch (error: unknown) {
+            console.error('Create water treatment error', error);
+            const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+            Toast.show({
+                type: 'error',
+                text1: 'Có lỗi xảy ra',
+                text2: message,
+            });
+        }
     };
 
     return (
@@ -102,6 +119,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                     onExecutionDateChange={setExecutionDate}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
+                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}
@@ -126,9 +144,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-    },
-    flex1: {
-        flex: 1,
     },
     scrollContent: {
         paddingBottom: 100,

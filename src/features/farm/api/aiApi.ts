@@ -1,67 +1,67 @@
-import { aiClient } from '@/core/api/client';
+import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { ENV } from '@/core/config/env';
 
 export interface SeedstockCountingResponse {
-    status_code?: number;
+    statusCode?: number;
     message?: string;
-    total_count: number;
-    execution_time_sec?: number;
+    totalCount: number;
+    executionTimeSec?: number;
     detections: Array<{
         id: number;
         center: { x: number; y: number };
         dimensions: { width: number; height: number };
-        angle_degree: number;
+        angleDegree: number;
         corners: number[][];
     }>;
 }
 
 export interface AIPredictRequest {
-    image_base: string;
+    documentId?: string;
+    image_base?: string;
 }
 
 export const aiApi = {
     countSeedstock: async (data: AIPredictRequest): Promise<SeedstockCountingResponse> => {
-        // Debug URL and Key
-        console.log(
-            '[AI API] Calling endpoint:',
-            ENV.API_URL_AI + API_ENDPOINTS.AI.SEEDSTOCK_COUNTING
-        );
-
-        const response = await aiClient.post<SeedstockCountingResponse>(
-            API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
-            data
-        );
-
-        return response.data;
+        try {
+            const response = await apiClient.post<{ data: SeedstockCountingResponse }>(
+                API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
+                data,
+                { timeout: 60000 }
+            );
+            return response.data?.data || (response.data as unknown as SeedstockCountingResponse);
+        } catch (error: any) {
+            throw error;
+        }
     },
     estimateSize: async (data: AIPredictRequest): Promise<EstimatedSizeResponse> => {
-        const response = await aiClient.post<EstimatedSizeResponse>(
+        const response = await apiClient.post<{ data: EstimatedSizeResponse }>(
             API_ENDPOINTS.AI.ESTIMATED_SIZE,
-            data
+            data,
+            { timeout: 60000 }
         );
-        return response.data;
+        return response.data?.data || (response.data as unknown as EstimatedSizeResponse);
     },
     predictHealth: async (data: AIPredictRequest): Promise<ShrimpHealthResponse> => {
-        const response = await aiClient.post<ShrimpHealthResponse>(
-            API_ENDPOINTS.AI.SHRIMP_HEALTH_PREDICT,
-            data
+        const response = await apiClient.post<{ data: ShrimpHealthResponse }>(
+            API_ENDPOINTS.AI.SHRIMP_HEALTH,
+            data,
+            { timeout: 60000 }
         );
-        return response.data;
+        return response.data?.data || (response.data as unknown as ShrimpHealthResponse);
     },
 };
 
 export interface EstimatedSizeResponse {
-    status_code?: number;
+    statusCode?: number;
     message?: string;
-    image_processed?: string;
-    average_size_cm?: number;
-    shrimp_count_per_kg?: number;
+    imageProcessed?: string;
+    averageSizeCm?: number;
+    shrimpCountPerKg?: number;
     results?: {
         count: number;
         objects: Array<{
             id: number;
-            length_cm: number;
+            lengthCm: number;
             confidence: number;
             bbox: number[];
         }>;
@@ -70,31 +70,31 @@ export interface EstimatedSizeResponse {
         id: number;
         box: number[];
         score: number;
-        class_id: number;
-        class_name: string;
+        classId: number;
+        className: string;
     }>;
 }
 
 export interface ShrimpHealthResponse {
-    status_code?: number;
+    statusCode?: number;
     message?: string;
     datetime?: string;
     device?: string;
-    execution_provider?: string[];
-    meta_data?: {
-        total_pipeline_time?: string;
-        segment_time?: string;
-        classifier_time?: string;
-        num_detections?: number;
+    executionProvider?: string[];
+    metaData?: {
+        totalPipelineTime?: string;
+        segmentTime?: string;
+        classifierTime?: string;
+        numDetections?: number;
     };
     results: Array<{
         id: number;
         bbox: number[];
-        seg_conf: number;
+        segConf: number;
         prediction: {
-            top1_class: string;
-            top1_conf: number;
-            all_classes: Record<string, number>;
+            top1Class: string;
+            top1Conf: number;
+            allClasses: Record<string, number>;
         };
     }>;
 }

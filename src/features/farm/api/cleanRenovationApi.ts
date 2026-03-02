@@ -37,7 +37,6 @@ export const cleanRenovationApi = {
                 documentIds,
             }
         );
-        console.log('create clean pond: ', data);
         return data;
     },
 
@@ -47,12 +46,6 @@ export const cleanRenovationApi = {
         detail: ICleanRenovationDetail,
         documentIds?: string[]
     ) => {
-        console.log('Update Clean Renovation Payload:', {
-            pondId,
-            id,
-            detail,
-            documentIds,
-        });
         const { data } = await apiClient.patch<ICleanRenovationUpdateResponse>(
             API_ENDPOINTS.POND.CLEAN_RENOVATION.UPDATE(pondId, id),
             {

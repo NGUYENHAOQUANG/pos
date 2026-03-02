@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     customButtonText: {
         fontSize: 15,
         fontWeight: '400',
+        lineHeight: 22,
     },
     divider: {
         height: 1,

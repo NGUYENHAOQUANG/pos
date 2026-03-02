@@ -66,6 +66,12 @@ export interface IPondRecordReferenceData {
     revenue?: number | null;
 
     // StockTransfer (operationType: "StockTransfer")
+    totalStocking?: number | null;
+    toPonds?: {
+        toPondId: string;
+        quantity: number;
+        toPondName?: string;
+    }[];
     transferMethod?: string | null;
     receivingPonds?: {
         id: string;

@@ -11,6 +11,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
+import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { CycleData } from '@/features/farm/types/farm.types';
 import {
     GeneralInfoBox,
@@ -48,7 +49,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     // 4. Fetch detailed cycle data
     const { data: fetchedCycleData } = useQuery({
-        queryKey: ['cycleDetail', currentPond?.id, activeCycle?.id],
+        queryKey: farmKeys.cycles.detail(currentPond?.id || '', activeCycle?.id || ''),
         queryFn: async () => {
             if (!currentPond?.id || !activeCycle?.id) return null;
             try {
@@ -62,8 +63,8 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                         season: rawData.season,
                     } as CycleData;
                 }
-            } catch (error) {
-                console.log('Error fetching cycle detail:', error);
+            } catch (_error) {
+                // Ignore silent error
             }
             return null;
         },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     launchCamera,
@@ -46,35 +46,44 @@ export function ImagePickerActionSheet({
                 });
             }
         }
+    };
+
+    const handleTakePhoto = () => {
         onClose();
+        setTimeout(
+            async () => {
+                if (onTakePhoto) {
+                    onTakePhoto();
+                } else {
+                    const result = await launchCamera({
+                        mediaType: 'photo',
+                        quality: 0.8,
+                        saveToPhotos: true,
+                    });
+                    handleResponse(result);
+                }
+            },
+            Platform.OS === 'ios' ? 400 : 0
+        );
     };
 
-    const handleTakePhoto = async () => {
-        if (onTakePhoto) {
-            onTakePhoto();
-            onClose();
-        } else {
-            const result = await launchCamera({
-                mediaType: 'photo',
-                quality: 0.8,
-                saveToPhotos: true,
-            });
-            handleResponse(result);
-        }
-    };
-
-    const handleChooseLibrary = async () => {
-        if (onChooseFromLibrary) {
-            onChooseFromLibrary();
-            onClose();
-        } else {
-            const result = await launchImageLibrary({
-                mediaType: 'photo',
-                quality: 0.8,
-                selectionLimit: 1, // Single image selection
-            });
-            handleResponse(result);
-        }
+    const handleChooseLibrary = () => {
+        onClose();
+        setTimeout(
+            async () => {
+                if (onChooseFromLibrary) {
+                    onChooseFromLibrary();
+                } else {
+                    const result = await launchImageLibrary({
+                        mediaType: 'photo',
+                        quality: 0.8,
+                        selectionLimit: 1, // Single image selection
+                    });
+                    handleResponse(result);
+                }
+            },
+            Platform.OS === 'ios' ? 400 : 0
+        );
     };
 
     return (

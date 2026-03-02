@@ -70,11 +70,7 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
-    useEffect(() => {
-        if (aiResult) {
-            console.log('ShrimpInspectionObservationBox received aiResult:', aiResult);
-        }
-    }, [aiResult]);
+    useEffect(() => {}, [aiResult]);
 
     const handleViewDetails = () => {
         setIsModalVisible(true);
@@ -193,9 +189,10 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                                                 <Text style={styles.diseasePercent}>
                                                     {(
                                                         ((count as number) /
-                                                            aiResult.items!.length) *
+                                                            (aiResult.totalCount ||
+                                                                aiResult.items!.length)) *
                                                         100
-                                                    ).toFixed(1)}
+                                                    ).toFixed(2)}
                                                     %
                                                 </Text>
                                             </View>
@@ -273,30 +270,30 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     statusBadgeGreen: {
-        backgroundColor: '#E8F5E9',
+        backgroundColor: colors.status.activeBg,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
     },
     statusTextGreen: {
-        color: '#4CAF50',
+        color: colors.status.activeText,
         fontSize: 12,
         fontWeight: '600',
     },
     statusBadgeRed: {
-        backgroundColor: '#FFEBEE',
+        backgroundColor: colors.status.warningBg,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
     },
     statusTextRed: {
-        color: '#F44336',
+        color: colors.status.warningText,
         fontSize: 12,
         fontWeight: '600',
     },
     viewDetailButton: {
         alignSelf: 'center',
-        backgroundColor: '#D32F2F',
+        backgroundColor: colors.status.warningText,
         paddingHorizontal: 16,
         paddingVertical: 6,
         borderRadius: 4,
@@ -372,7 +369,7 @@ const styles = StyleSheet.create({
     // Modal Styles
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: colors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
         padding: spacing.md,

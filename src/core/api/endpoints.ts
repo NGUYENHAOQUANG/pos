@@ -100,6 +100,13 @@ export const API_ENDPOINTS = {
             UPDATE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
             DELETE: (pondId: string, id: string) => `/pond/${pondId}/waterchange-record/${id}`,
         },
+        WATER_TREATMENT: {
+            LIST: (pondId: string) => `/pond/${pondId}/water-treatment`,
+            DETAIL: (pondId: string, id: string) => `/pond/${pondId}/water-treatment/${id}`,
+            CREATE: (pondId: string) => `/pond/${pondId}/water-treatment`,
+            UPDATE: (pondId: string, id: string) => `/pond/${pondId}/water-treatment/${id}`,
+            DELETE: (pondId: string, id: string) => `/pond/${pondId}/water-treatment/${id}`,
+        },
         HARVEST_RECORDS: {
             LIST: (pondId: string) => `/pond/${pondId}/harvest-records`,
             DETAIL: (pondId: string, id: string) => `/pond/${pondId}/harvest-records/${id}`,
@@ -229,8 +236,8 @@ export const API_ENDPOINTS = {
         UPLOAD_BASE64: '/document/upload-base64',
     },
     AI: {
-        SEEDSTOCK_COUNTING: '/api/v1/seedstock_counting/predict',
-        ESTIMATED_SIZE: '/api/v1/estimated_size/predict',
-        SHRIMP_HEALTH_PREDICT: '/api/v1/shrimp_health/predict',
+        SEEDSTOCK_COUNTING: '/seedstockcounting',
+        ESTIMATED_SIZE: '/estimatedsize',
+        SHRIMP_HEALTH: '/shrimphealth',
     },
 } as const;

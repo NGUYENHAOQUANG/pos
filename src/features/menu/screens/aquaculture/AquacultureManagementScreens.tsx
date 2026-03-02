@@ -104,15 +104,7 @@ export const AquacultureManagementScreens: React.FC = () => {
         { key: 'active', label: 'Đang nuôi', count: counts.active },
         { key: 'ended', label: 'Đã kết thúc', count: counts.ended },
     ];
-
-    // Only show skeleton on initial load.
-    // We DO NOT include isRefetching here to avoid the "loading forever" blocking UI.
-    // The RefreshControl spinner will show the update progress instead.
-    // UPDATE: User wants skeleton during transition to avoid "jerky" updates.
-    // We show skeleton if we are loading OR if we are refetching (but not pulling to refresh).
-    // isPulling check ensures we don't show skeleton + spinner at same time.
-    const { isRefetching } = useSeasons();
-    const showSkeleton = isLoading || (isRefetching && !isPulling);
+    const showSkeleton = isLoading;
 
     return (
         <View style={styles.container}>

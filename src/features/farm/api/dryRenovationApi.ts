@@ -46,12 +46,6 @@ export const dryRenovationApi = {
         detail: IDryRenovationDetail,
         documentIds?: string[]
     ) => {
-        console.log('Update Dry Renovation Payload:', {
-            pondId,
-            id,
-            detail,
-            documentIds,
-        });
         const { data } = await apiClient.patch<IDryRenovationUpdateResponse>(
             API_ENDPOINTS.POND.DRY_RENOVATION.UPDATE(pondId, id),
             {
@@ -59,7 +53,6 @@ export const dryRenovationApi = {
                 documentIds,
             }
         );
-        console.log(data);
         return data;
     },
 

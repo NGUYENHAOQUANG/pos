@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Modal, Dimensions, AppState, AppStateStatus } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, AppState, AppStateStatus } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -52,6 +52,16 @@ export const NetworkStatusModal = () => {
                         setVisible(true);
                         prevConnectedRef.current = false;
                     } else {
+                        if (prevConnectedRef.current === false) {
+                            setStatusType('restored');
+                            setVisible(true);
+                            setTimeout(() => {
+                                setVisible(false);
+                            }, 2000);
+                        } else {
+                            // Nếu đã có mạng và không phải khôi phục từ trạng thái mất mạng, đảm bảo modal đã tắt
+                            setVisible(false);
+                        }
                         prevConnectedRef.current = true;
                     }
                 });
@@ -63,7 +73,7 @@ export const NetworkStatusModal = () => {
     if (!visible) return null;
 
     return (
-        <Modal transparent animationType="fade" visible={visible}>
+        <View style={[StyleSheet.absoluteFill, { zIndex: 99999, elevation: 99999 }]}>
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     {statusType === 'lost' ? (
@@ -99,7 +109,7 @@ export const NetworkStatusModal = () => {
                     )}
                 </View>
             </View>
-        </Modal>
+        </View>
     );
 };
 
