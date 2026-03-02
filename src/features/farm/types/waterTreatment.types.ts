@@ -1,0 +1,131 @@
+/**
+ * @file waterTreatment.types.ts
+ * @description Types for Water Treatment API (Xử lý nước)
+ * Based on Swagger: /api/v1/pond/{pondId}/water-treatment
+ */
+
+// --- Enums ---
+
+/** Treatment type enum from backend */
+export enum TreatmentTypeEnum {
+    MineralTreatment = 'MineralTreatment',
+    ProbioticTreatment = 'ProbioticTreatment',
+    Disinfection = 'Disinfection',
+}
+
+/** Map TreatmentTypeEnum to Vietnamese display labels */
+export const TREATMENT_TYPE_LABELS: Record<TreatmentTypeEnum, string> = {
+    [TreatmentTypeEnum.MineralTreatment]: 'Đánh khoáng',
+    [TreatmentTypeEnum.ProbioticTreatment]: 'Đánh vi sinh',
+    [TreatmentTypeEnum.Disinfection]: 'Kiểm khuẩn',
+};
+
+/** Map Vietnamese display labels back to TreatmentTypeEnum */
+export const TREATMENT_LABEL_TO_ENUM: Record<string, TreatmentTypeEnum> = {
+    'Đánh khoáng': TreatmentTypeEnum.MineralTreatment,
+    'Đánh vi sinh': TreatmentTypeEnum.ProbioticTreatment,
+    'Kiểm khuẩn': TreatmentTypeEnum.Disinfection,
+};
+
+/** Get all treatment type options as string labels */
+export const TREATMENT_TYPE_OPTIONS = Object.values(TREATMENT_TYPE_LABELS);
+
+// --- Request DTOs ---
+
+/** Material item in create/update request */
+export interface IWaterTreatmentMaterialReq {
+    warehouseItemId: string;
+    quantity: number;
+}
+
+/** Detail payload for CreateWaterTreatment */
+export interface IWaterTreatmentDetailReq {
+    treatmentType: TreatmentTypeEnum;
+    materials: IWaterTreatmentMaterialReq[];
+    notes?: string;
+}
+
+/** Create water treatment command (POST body) */
+export interface CreateWaterTreatmentCommand {
+    documentIds?: string[];
+    waterTreatmentDetail: IWaterTreatmentDetailReq;
+}
+
+/** Detail payload for UpdateWaterTreatment */
+export interface IWaterTreatmentDetailUpdateReq {
+    treatmentType?: TreatmentTypeEnum;
+    materials?: IWaterTreatmentMaterialReq[];
+    notes?: string;
+}
+
+/** Update water treatment command (PATCH body) */
+export interface UpdateWaterTreatmentCommand {
+    documentIds?: string[];
+    waterTreatmentDetail: IWaterTreatmentDetailUpdateReq;
+}
+
+// --- Response DTOs ---
+
+/** Account creator info in response */
+export interface IAccountCreator {
+    fullName?: string;
+}
+
+/** Material item in response */
+export interface IWaterTreatmentMaterialRes {
+    warehouseItemId: string;
+    quantity: number;
+}
+
+/** Detail object in WaterTreatmentDto response */
+export interface IWaterTreatmentDetailRes {
+    treatmentType: TreatmentTypeEnum;
+    notes?: string;
+    materials?: IWaterTreatmentMaterialRes[];
+}
+
+/** Single water treatment record (GET response) */
+export interface IWaterTreatmentRecord {
+    id: string;
+    no?: number;
+    creatorId?: string;
+    editorId?: string;
+    createdAt?: string;
+    editedAt?: string;
+    creator?: IAccountCreator;
+    editor?: IAccountCreator;
+    pondId: string;
+    operationId?: string;
+    documentIds?: string[];
+    waterTreatmentDetail?: IWaterTreatmentDetailRes;
+}
+
+/** Paginated list response */
+export interface IWaterTreatmentListResponse {
+    items: IWaterTreatmentRecord[];
+    totalCount: number;
+    pageNumber?: number;
+    totalPages?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+}
+
+/** Query params for GET list */
+export interface IWaterTreatmentParams {
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+}
+
+/** Create result response */
+export interface ICreateWaterTreatmentResult {
+    recordId: string;
+}
+
+/** Update result response */
+export interface IUpdateWaterTreatmentResult {
+    recordId: string;
+}

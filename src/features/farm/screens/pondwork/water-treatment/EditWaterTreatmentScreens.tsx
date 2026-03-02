@@ -1,131 +1,175 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 import { colors } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { formatDate } from '@/features/farm/utils/dateUtils';
-import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
+
+import { waterTreatmentApi } from '@/features/farm/api/waterTreatmentApi';
+import {
+    useUpdateWaterTreatment,
+    useDeleteWaterTreatment,
+} from '@/features/farm/hooks/useWaterTreatmentRecords';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import {
+    UpdateWaterTreatmentCommand,
+    IWaterTreatmentRecord,
+    TREATMENT_TYPE_LABELS,
+    TREATMENT_LABEL_TO_ENUM,
+} from '@/features/farm/types/waterTreatment.types';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditWaterTreatmentScreens'>;
 
 export const EditWaterTreatmentScreens: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<ScreenRouteProp>();
-    // EditFeeder gets params: pondId, jobId. We do the same.
-    const { pondId, jobId, itemToEdit } = route.params || {};
+    const { pondId, jobId, item, pond } = route.params || {};
 
-    // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
+    // Mutations
+    const updateMutation = useUpdateWaterTreatment();
+    const deleteMutation = useDeleteWaterTreatment();
 
+    // Fetch warehouse materials
+    const { materials } = useFarmMaterials();
+
+    const filteredMaterials = useMemo(() => {
+        return materials.filter(m => {
+            const groupName = (m.group || '').toLowerCase();
+            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
+        });
+    }, [materials]);
+
+    // Local state
     const [executionDate, setExecutionDate] = useState<Date>(new Date());
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [detailData, setDetailData] = useState<IWaterTreatmentRecord | null>(null);
 
-    // Load existing data
+    const targetPondId = pondId || pond?.id || '';
+    const targetJobId = jobId || item?.id || '';
+
+    // --- Fetch detail from API ---
     useEffect(() => {
-        // Prioritize itemToEdit passed from navigation (WorkLog)
-        if (itemToEdit) {
-            setNote(itemToEdit.note || '');
-            if (itemToEdit.materials) {
-                // Ensure materials are cast correctly if needed
-                setSelectedMaterials(itemToEdit.materials as SelectedMaterialItem[]);
+        const fetchDetail = async () => {
+            if (targetPondId && targetJobId) {
+                try {
+                    const response = await waterTreatmentApi.getDetail(targetPondId, targetJobId);
+                    if (response?.data) {
+                        setDetailData(response.data);
+                    }
+                } catch (e) {
+                    console.error('Fetch water treatment detail error:', e);
+                }
             }
-            if (itemToEdit.waterTreatmentType) {
-                setActivityType(itemToEdit.waterTreatmentType);
+        };
+        fetchDetail();
+    }, [targetPondId, targetJobId]);
+
+    // --- Bind basic data from API detail ---
+    useEffect(() => {
+        if (!detailData) return;
+
+        if (detailData.createdAt) {
+            setExecutionDate(new Date(detailData.createdAt));
+        }
+
+        if (detailData.waterTreatmentDetail) {
+            const detail = detailData.waterTreatmentDetail;
+
+            // Map treatmentType enum to Vietnamese label
+            if (detail.treatmentType) {
+                const label = TREATMENT_TYPE_LABELS[detail.treatmentType];
+                if (label) setActivityType(label);
             }
 
-            // Parse date/time
-            if (itemToEdit.date && itemToEdit.time) {
-                const [day, month, year] = itemToEdit.date.split('/').map(Number);
-                const [hours, minutes] = itemToEdit.time.split(':').map(Number);
-                if (
-                    !isNaN(day) &&
-                    !isNaN(month) &&
-                    !isNaN(year) &&
-                    !isNaN(hours) &&
-                    !isNaN(minutes)
-                ) {
-                    const date = new Date(year, month - 1, day, hours, minutes);
-                    setExecutionDate(date);
-                }
-            } else if (itemToEdit.createdAt) {
-                setExecutionDate(new Date(itemToEdit.createdAt));
-            }
-        } else if (pondId && jobId) {
-            // Fallback to store lookup if itemToEdit is not passed (e.g. deep link or other nav)
-            const items = getPondJobItems(pondId, 'WATER_TREATMENT');
-            const foundItem = items.find(i => i.id === jobId);
-            if (foundItem) {
-                setNote(foundItem.note || '');
-                if (foundItem.materials) {
-                    setSelectedMaterials(foundItem.materials);
-                }
-                if (foundItem.waterTreatmentType) {
-                    setActivityType(foundItem.waterTreatmentType);
-                }
-                // Parse date/time for store item
-                if (foundItem.date && foundItem.time) {
-                    const [day, month, year] = foundItem.date.split('/').map(Number);
-                    const [hours, minutes] = foundItem.time.split(':').map(Number);
-                    if (
-                        !isNaN(day) &&
-                        !isNaN(month) &&
-                        !isNaN(year) &&
-                        !isNaN(hours) &&
-                        !isNaN(minutes)
-                    ) {
-                        const date = new Date(year, month - 1, day, hours, minutes);
-                        setExecutionDate(date);
-                    }
-                }
-            }
+            // Set notes
+            setNote(detail.notes || '');
         }
-    }, [pondId, jobId, itemToEdit, getPondJobItems]);
+    }, [detailData]);
+
+    // --- Bind materials (need to wait for materials from warehouse to load) ---
+    useEffect(() => {
+        if (!detailData?.waterTreatmentDetail?.materials || materials.length === 0) return;
+
+        const mapped = detailData.waterTreatmentDetail.materials
+            .map(m => {
+                const found = materials.find(
+                    mat => mat.id === m.warehouseItemId || mat.materialDefId === m.warehouseItemId
+                );
+                if (found) {
+                    return {
+                        material: found,
+                        quantity: m.quantity,
+                        unit: found.unitName || '',
+                    } as SelectedMaterialItem;
+                }
+                return null;
+            })
+            .filter(Boolean) as SelectedMaterialItem[];
+
+        if (mapped.length > 0) {
+            setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
+        }
+    }, [detailData, materials]);
 
     const handleBack = () => {
         navigation.goBack();
     };
 
-    const handleSave = () => {
-        if (pondId && jobId) {
-            const items = getPondJobItems(pondId, 'WATER_TREATMENT');
+    const handleSave = async () => {
+        if (!targetPondId || !targetJobId) return;
 
-            const timeString = executionDate.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
+        const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
+        if (!treatmentTypeEnum) {
+            Toast.show({
+                type: 'error',
+                text1: 'Loại hoạt động không hợp lệ',
+                position: 'top',
             });
-            const dateString = formatDate(executionDate);
+            return;
+        }
 
-            const updatedItems = items.map(item => {
-                if (item.id === jobId) {
-                    return {
-                        ...item,
-                        time: timeString,
-                        date: dateString,
-                        note: note || undefined,
-                        waterTreatmentType: activityType,
-                        materials: selectedMaterials,
-                    };
-                }
-                return item;
+        const payload: UpdateWaterTreatmentCommand = {
+            documentIds: detailData?.documentIds || [],
+            waterTreatmentDetail: {
+                treatmentType: treatmentTypeEnum,
+                notes: note || undefined,
+                materials: selectedMaterials.map(m => ({
+                    warehouseItemId: m.material.id,
+                    quantity: m.quantity,
+                })),
+            },
+        };
+
+        try {
+            await updateMutation.mutateAsync({
+                pondId: targetPondId,
+                id: targetJobId,
+                data: payload,
             });
-
-            updatePondJob(pondId, 'WATER_TREATMENT', updatedItems);
-            showEditJobSuccessToast('WATER_TREATMENT');
-
+            Toast.show({
+                type: 'success',
+                text1: 'Cập nhật nhật ký thành công',
+            });
             navigation.goBack();
+        } catch (error: unknown) {
+            console.error('Update water treatment error', error);
+            const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+            Toast.show({
+                type: 'error',
+                text1: 'Có lỗi xảy ra',
+                text2: message,
+            });
         }
     };
 
@@ -133,13 +177,25 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         setShowDeleteModal(true);
     };
 
-    const confirmDelete = () => {
-        setShowDeleteModal(false);
-        if (pondId && jobId) {
-            const items = getPondJobItems(pondId, 'WATER_TREATMENT');
-            const updatedItems = items.filter(item => item.id !== jobId);
-            updatePondJob(pondId, 'WATER_TREATMENT', updatedItems);
-            navigation.goBack();
+    const confirmDelete = async () => {
+        if (targetPondId && targetJobId) {
+            try {
+                await deleteMutation.mutateAsync({
+                    pondId: targetPondId,
+                    id: targetJobId,
+                });
+                setShowDeleteModal(false);
+                navigation.goBack();
+                Toast.show({ type: 'success', text1: 'Xóa thành công' });
+            } catch (error: unknown) {
+                console.error('Delete water treatment error', error);
+                const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+                Toast.show({
+                    type: 'error',
+                    text1: 'Xóa thất bại',
+                    text2: message,
+                });
+            }
         }
     };
 
@@ -167,6 +223,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     disabledDate={true}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
+                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}
@@ -196,9 +253,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-    },
-    flex1: {
-        flex: 1,
     },
     scrollContent: {
         paddingBottom: 100,

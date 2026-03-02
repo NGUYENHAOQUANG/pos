@@ -11,6 +11,7 @@ import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovation';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterChangeRecords';
+import { useWaterTreatmentRecordsAsJobs } from '@/features/farm/hooks/useWaterTreatmentRecords';
 import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { useHarvestRecordsAsJobs } from './useHarvestRecord';
 import { useStockTransfersAsJobs } from './useStockTransfer';
@@ -52,6 +53,8 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
     const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pond?.id || '');
     // Fetch water supply records from API
     const { jobs: apiWaterSupplyJobs } = useWaterSupplyRecordsAsJobs(pond?.id || '');
+    // Fetch water treatment records from API
+    const { jobs: apiWaterTreatmentJobs } = useWaterTreatmentRecordsAsJobs(pond?.id || '');
     // Fetch feeding records from API
     const { jobs: apiFeedingJobs } = useFeedingRecordsAsJobs(pond?.id || '');
     // Fetch harvest records from API
@@ -129,6 +132,11 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
                         items = apiWaterSupplyJobs;
                     }
 
+                    // Override with API data for WATER_TREATMENT
+                    if (jobType === JOB_TYPES.WATER_TREATMENT) {
+                        items = apiWaterTreatmentJobs;
+                    }
+
                     if (jobType === JOB_TYPES.HARVEST) {
                         items = apiHarvestJobs;
                     }
@@ -187,6 +195,7 @@ export const useAllPondJobs = (pond: PondData | undefined) => {
         apiCleanRenovationJobs,
         apiDryRenovationJobs,
         apiWaterSupplyJobs,
+        apiWaterTreatmentJobs,
         apiTransferJobs,
         environmentJobs,
         waterTreatmentJobs,

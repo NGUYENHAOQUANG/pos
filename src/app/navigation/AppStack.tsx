@@ -153,7 +153,13 @@ export type AppStackParamList = {
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
-    EditWaterTreatmentScreens: { pondId: string; jobId: string; itemToEdit?: JobExecution };
+    EditWaterTreatmentScreens: {
+        pondId: string;
+        jobId: string;
+        pond?: PondData;
+        item?: JobExecution;
+        itemToEdit?: JobExecution;
+    };
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: PondData; item?: JobExecution };
     WaterSupplyLog: { pond: PondData };
