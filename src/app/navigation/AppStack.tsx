@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/Formscreen';
+import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
