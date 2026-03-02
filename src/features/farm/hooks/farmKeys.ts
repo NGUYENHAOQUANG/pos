@@ -16,7 +16,8 @@ export const farmKeys = {
     cycles: {
         all: () => [...farmKeys.all, 'cycles'] as const,
         byPond: (pondId: string) => [...farmKeys.cycles.all(), 'byPond', pondId] as const,
-        detail: (id: string) => [...farmKeys.cycles.all(), 'detail', id] as const,
+        detail: (pondId: string, id: string) =>
+            [...farmKeys.cycles.all(), 'detail', pondId, id] as const,
     },
     sizeMeasurements: {
         all: () => [...farmKeys.all, 'sizeMeasurements'] as const,
