@@ -24,6 +24,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
+import { useQueryClient } from '@tanstack/react-query';
 
 const { width } = Dimensions.get('window');
 
@@ -55,6 +56,7 @@ export const MenuScreens: React.FC = () => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { userData } = useUserProfile();
+    const queryClient = useQueryClient();
 
     // Ref for scroll to top
     const scrollViewRef = React.useRef<ScrollView>(null);
@@ -70,6 +72,7 @@ export const MenuScreens: React.FC = () => {
 
     const onConfirmLogout = async () => {
         setIsLogoutModalVisible(false);
+        queryClient.clear();
         // Call store logout - this triggers AppNavigator state change
         await logout();
     };

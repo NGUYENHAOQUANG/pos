@@ -21,6 +21,7 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { Storage } from '@/core/services/storage.service';
 import { authApi } from '@/features/auth/api/authApi';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const DeleteAccountScreen = () => {
     const navigation = useNavigation();
@@ -37,6 +38,7 @@ export const DeleteAccountScreen = () => {
     const [otpError, setOtpError] = useState('');
 
     const { logout, user } = useAuthStore();
+    const queryClient = useQueryClient();
 
     const handleInputNext = async (phone: string, reasons: string[], otherReason: string) => {
         if (!phone) return;
@@ -100,6 +102,7 @@ export const DeleteAccountScreen = () => {
 
             await Storage.setItem('SKIP_ONBOARDING', 'true');
 
+            queryClient.clear();
             logout();
         } catch (error: any) {
             Toast.show({
