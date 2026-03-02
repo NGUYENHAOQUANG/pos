@@ -44,39 +44,35 @@ export const ShrimpFarmScreens: React.FC = () => {
     const getPondById = useFarmStore(state => state.getPondById);
     const ponds = useFarmStore(state => state.ponds);
 
-    const operationsByPondTypeRaw = useFarmStore(state => state.operationsByPondType);
-    const operationsByPondType = useMemo(
-        () => operationsByPondTypeRaw || {},
-        [operationsByPondTypeRaw]
-    );
-    const fetchMasterData = useFarmStore(state => state.fetchMasterData);
-    const isLoadingMasterData = useFarmStore(state => state.isLoadingMasterData);
-    // Fallback loading state if fetchMasterData is triggered but not reflected in store yet
-    const [localLoading, setLocalLoading] = useState(false);
+    // const operationsByPondTypeRaw = useFarmStore(state => state.operationsByPondType);
+    // const operationsByPondType = useMemo(
+    //     () => operationsByPondTypeRaw || {},
+    //     [operationsByPondTypeRaw]
+    // );
+    // const fetchMasterData = useFarmStore(state => state.fetchMasterData);
+    // const isLoadingMasterData = useFarmStore(state => state.isLoadingMasterData);
+    // // Fallback loading state if fetchMasterData is triggered but not reflected in store yet
+    // const [localLoading, setLocalLoading] = useState(false);
 
-    // Fetch master data (operation types) if not loaded yet
-    useEffect(() => {
-        if (Object.keys(operationsByPondType).length === 0) {
-            setLocalLoading(true);
-            fetchMasterData()
-                .then(() => setLocalLoading(false))
-                .catch(() => setLocalLoading(false));
-        }
-    }, [operationsByPondType, fetchMasterData]);
+    // // Fetch master data (operation types) if not loaded yet
+    // useEffect(() => {
+    //     if (Object.keys(operationsByPondType).length === 0) {
+    //         setLocalLoading(true);
+    //         fetchMasterData()
+    //             .then(() => setLocalLoading(false))
+    //             .catch(() => setLocalLoading(false));
+    //     }
+    // }, [operationsByPondType, fetchMasterData]);
 
-    const isLoading = isLoadingMasterData || localLoading;
+    const isLoading = false; // isLoadingMasterData || localLoading;
 
     // Get fresh pond data from context instead of stale params
     const pond = useMemo(() => {
         if (!pondFromParams?.id) return pondFromParams;
         const storePond = getPondById(pondFromParams.id);
 
-        // If store pond exists but has no type/invalid type, while params pond has it,
-        // we should prioritize params pond or merge them via fallback
         if (storePond) {
-            const hasValidStoreType =
-                storePond.type && (typeof storePond.type !== 'string' || storePond.type.length > 0);
-            if (!hasValidStoreType && pondFromParams.type) {
+            if (pondFromParams.type) {
                 // If store is missing type data but params has it, use store pond but patch the type from params
                 return { ...storePond, type: pondFromParams.type };
             }
@@ -197,13 +193,14 @@ export const ShrimpFarmScreens: React.FC = () => {
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         try {
-            await Promise.all([fetchMasterData(), refetchCycles()]);
+            // await Promise.all([fetchMasterData(), refetchCycles()]);
+            await refetchCycles();
         } catch (error) {
-            console.error('Refresh master data failed:', error);
+            console.error('Refresh failed:', error);
         } finally {
             setRefreshing(false);
         }
-    }, [fetchMasterData, refetchCycles]);
+    }, [refetchCycles]);
 
     return (
         <View style={styles.container}>

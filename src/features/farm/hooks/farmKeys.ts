@@ -10,6 +10,11 @@ export const farmKeys = {
         types: () => [...farmKeys.all, 'master', 'types'] as const,
         operations: () => [...farmKeys.all, 'master', 'operations'] as const,
     },
+    pondCategories: {
+        all: () => [...farmKeys.all, 'pondCategories'] as const,
+        list: (params?: any) =>
+            [...farmKeys.pondCategories.all(), 'list', ...(params ? [params] : [])] as const,
+    },
     seasons: (zoneId?: number | string) =>
         [...farmKeys.all, 'seasons', ...(zoneId ? [zoneId] : [])] as const,
     detail: (zoneId: string, id: string) => [...farmKeys.seasons(zoneId), 'detail', id] as const,

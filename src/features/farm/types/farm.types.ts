@@ -1,3 +1,6 @@
+import { PondData } from '@/features/farm/types/pond.types';
+import { IMaterial } from '@/features/material/types/material.types';
+
 export const POND_TYPES = {
     CULTIVATION: 'Ao nuôi',
     NURSERY: 'Ao vèo',
@@ -58,8 +61,6 @@ export interface PondTypeOperation {
     operationTypeName?: string; // We might need to map operationName to this or update usage
 }
 
-import { IMaterial } from '@/features/material/types/material.types';
-
 export interface Zone {
     id: string;
     zoneId?: string;
@@ -76,23 +77,7 @@ export interface Zone {
     editor?: string | null;
 }
 
-export interface PondData {
-    id: string;
-    name: string;
-    area?: string;
-    areaSqm?: number;
-    type: PondType | string;
-    lastUpdate?: string;
-    lastActivity?: string;
-    size?: string;
-    zone?: string;
-    zoneId?: string;
-    status?: string;
-    farmCode?: string;
-    shape?: string;
-    depth?: string | number;
-    maxDepth?: number;
-}
+export type { PondData };
 
 export interface CycleData {
     id: string;

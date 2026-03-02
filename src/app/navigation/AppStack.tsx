@@ -77,7 +77,8 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
 
 // Types
-import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
+import { JobExecution, FarmData, CycleData } from '@/features/farm/types/farm.types';
+import { PondData } from '@/features/farm/types/pond.types';
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';

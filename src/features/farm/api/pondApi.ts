@@ -1,11 +1,8 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import {
-    OperationType,
-    PondData,
-    PondType,
-    PondTypeOperation,
-} from '@/features/farm/types/farm.types';
+import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
+
+import { GetPondsParams, GetPondsResponse } from '@/features/farm/types/pond.types';
 
 // Helper function to parse paginated API response
 const parseApiResponse = <T>(responseData: unknown): T[] => {
@@ -31,55 +28,15 @@ const parseApiResponse = <T>(responseData: unknown): T[] => {
 };
 
 export const pondApi = {
-    getPondsByZone: async (
-        zoneId: number | string,
-        params?: { PageSize?: number; PageNumber?: number }
-    ): Promise<{ items: PondData[]; total: number }> => {
-        const response = await apiClient.get(API_ENDPOINTS.ZONE.PONDS(String(zoneId)), {
+    getPondsByZone: async (zoneId: string, params?: GetPondsParams): Promise<GetPondsResponse> => {
+        const { data } = await apiClient.get<GetPondsResponse>(API_ENDPOINTS.ZONE.PONDS(zoneId), {
             params: {
-                pageSize: params?.PageSize || 100,
-                page: params?.PageNumber || 1,
+                PageSize: 100,
+                Page: 1,
+                ...params,
             },
         });
-        const responseData = response.data;
-        let items: PondData[] = [];
-        let total = 0;
-
-        // Reuse the same response parsing logic but capture total
-        if (Array.isArray(responseData)) {
-            items = responseData;
-            total = items.length;
-        } else if (responseData?.data) {
-            // Check simple wrapper or paging wrapper
-            if (Array.isArray(responseData.data)) {
-                items = responseData.data;
-                total = items.length;
-            } else if (responseData.data.items && Array.isArray(responseData.data.items)) {
-                items = responseData.data.items;
-                total = responseData.data.total || items.length;
-            }
-        } else if (responseData?.result) {
-            if (Array.isArray(responseData.result)) {
-                items = responseData.result;
-                total = items.length;
-            } else if (responseData.result.items && Array.isArray(responseData.result.items)) {
-                items = responseData.result.items;
-                total = responseData.result.total || items.length;
-            }
-        } else if (responseData?.items && Array.isArray(responseData.items)) {
-            items = responseData.items;
-            total = responseData.total || items.length;
-        } else {
-            console.warn(
-                `Unknown Ponds by Zone API response structure for zone ${zoneId}:`,
-                responseData
-            );
-        }
-
-        return {
-            items: items.map(p => ({ ...p, zoneId: String(zoneId) })),
-            total,
-        };
+        return data;
     },
 
     // Get all pond types (Ao nuôi, Ao vèo, Ao xử lý, etc.)
