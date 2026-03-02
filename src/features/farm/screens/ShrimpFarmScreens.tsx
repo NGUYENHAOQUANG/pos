@@ -255,7 +255,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                 }
                                                 // Cho phép bấm vào thẻ để sửa
                                                 onPress={() =>
-                                                    navigation.navigate('CycleDetail', {
+                                                    navigation.navigate('EditCycle', {
                                                         pondId: pond.id,
                                                         cycleData: currentCycle,
                                                     })
@@ -295,7 +295,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                                                     }
                                                     status="Hoàn thành"
                                                     onPress={() =>
-                                                        navigation.navigate('CycleDetail', {
+                                                        navigation.navigate('EditCycle', {
                                                             pondId: pond.id,
                                                             cycleData: currentCycle,
                                                         })

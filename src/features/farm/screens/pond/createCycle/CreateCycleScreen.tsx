@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, borderRadius } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -101,10 +101,22 @@ export const CreateCycleScreen: React.FC = () => {
     // Fetch Options (Hooks)
     const breedSrcInitID =
         initialData?.breedSource || (initialData as { warehouseItemId?: string })?.warehouseItemId;
-    const { options: breedOptions, isLoading: isLoadingBreeds } = useBreedOptions(
+    const {
+        options: breedOptions,
+        isLoading: isLoadingBreeds,
+        refetch: refetchBreeds,
+    } = useBreedOptions(
         effectiveZoneId,
         breedSrcInitID,
         initialData?.breedName || detailData?.breedName
+    );
+
+    useFocusEffect(
+        useCallback(() => {
+            if (refetchBreeds) {
+                refetchBreeds();
+            }
+        }, [refetchBreeds])
     );
 
     const { data: seasons = [] } = useSeasonsByZone(
