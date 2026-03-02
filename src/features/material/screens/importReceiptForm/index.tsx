@@ -24,8 +24,8 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 import { importReceiptService } from '@/features/material/services/importReceiptService';
 import { WarehouseFormValues } from '@/features/material/schemas/warehouseFormSchema';
 import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-
-import ImportReceiptForm from './importReceiptForm';
+import ImportReceiptForm from '@/features/material/screens/importReceiptForm/ImportReceiptForm';
+import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 
 export const ImportReceiptFormScreen: React.FC = () => {
     // Navigation
@@ -121,7 +121,11 @@ export const ImportReceiptFormScreen: React.FC = () => {
     );
 
     const onSubmit = useCallback(
-        async (data: WarehouseFormValues, isDraft: boolean, onSuccessUpload: () => void) => {
+        async (
+            data: WarehouseFormValues,
+            status: ImportReceiptStatus,
+            onSuccessUpload: () => void
+        ) => {
             const selectedSupplier = suppliers.find(s => s.name === data.supplier);
 
             if (!selectedSupplier) {
@@ -134,7 +138,7 @@ export const ImportReceiptFormScreen: React.FC = () => {
                     selectedSupplier.id,
                     warehouses[0]?.id || '',
                     data.warehouseItems as MaterialItem[],
-                    isDraft,
+                    status,
                     documentIds
                 );
 

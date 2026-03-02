@@ -28,6 +28,7 @@ import {
     WarehouseFormValues,
 } from '@/features/material/schemas/warehouseFormSchema';
 import { useWarehouseMaterialActions } from '@/features/material/hooks/logic/useWarehouseMaterialActions';
+import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 
 export type AddImportReceiptUIProps = {
     isEditMode: boolean;
@@ -42,7 +43,11 @@ export type AddImportReceiptUIProps = {
     materialOptions: any[];
     availableMaterials: any[];
     onBackPress: () => void;
-    onSubmit: (data: WarehouseFormValues, isDraft: boolean, onSuccess: () => void) => void;
+    onSubmit: (
+        data: WarehouseFormValues,
+        status: ImportReceiptStatus,
+        onSuccess: () => void
+    ) => void;
     onDelete?: () => void;
 };
 
@@ -131,18 +136,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                 date: initialData.date,
                 supplier: initialData.supplier,
                 files: [],
-                warehouseItems:
-                    initialData.warehouseItems.length > 0
-                        ? initialData.warehouseItems
-                        : [
-                              {
-                                  id: Date.now().toString(),
-                                  materialId: '',
-                                  materialName: '',
-                                  quantity: '',
-                                  price: '',
-                              },
-                          ],
+                warehouseItems: initialData.warehouseItems,
             });
             initializedRef.current = true;
         }
@@ -157,7 +151,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
         setIsConfirmModalVisible(false);
         setTimeout(() => {
             handleSubmit(data => {
-                onSubmit(data, false, () => {
+                onSubmit(data, ImportReceiptStatus.Pending, () => {
                     fileUploaderRef.current?.markAsSaved();
                 });
             }, onError)();
@@ -177,7 +171,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     const handleSaveDraft = useMemo(
         () =>
             handleSubmit(data => {
-                onSubmit(data, true, () => {
+                onSubmit(data, ImportReceiptStatus.Draft, () => {
                     fileUploaderRef.current?.markAsSaved();
                 });
             }, onError),

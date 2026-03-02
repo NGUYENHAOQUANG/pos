@@ -46,11 +46,10 @@ import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/meas
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
 // Material screens
-import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
-import { EditMaterialScreen } from '@/features/material/screens/material/EditMaterialScreen';
+import { MaterialFormScreen } from '@/features/material/screens/materialForm';
 import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
-import { AddExportWarehouseScreen } from '@/features/material/screens/warehouse/AddExportWarehouseScreen';
-import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
+import { AddExportWarehouseScreen } from '@/features/material/screens/exportWarehouseForm/AddExportWarehouseScreen';
+import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
 
 // Control screens
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
@@ -186,8 +185,7 @@ export type AppStackParamList = {
     CountingShrimp: undefined;
 
     // ============== Material Screens (Tab Bar hidden) ==============
-    AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
-    EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
+    MaterialForm: { materialId?: string; onSave?: (data: any) => void };
     ImportReceiptFormScreen: {
         importReceiptId?: string;
         availableMaterials?: IMaterial[];
@@ -304,8 +302,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
 
             {/* ============== Material Screens ============== */}
-            <Stack.Screen name="AddMaterial" component={AddMaterialScreen} />
-            <Stack.Screen name="EditMaterial" component={EditMaterialScreen} />
+            <Stack.Screen name="MaterialForm" component={MaterialFormScreen} />
             <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
             <Stack.Screen name="AddExportWarehouse" component={AddExportWarehouseScreen} />
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />

@@ -45,6 +45,7 @@ export interface GetImportReceiptsParams {
 }
 
 export type GetImportReceiptsResponse = IApiResponse<IPaginate<ImportReceipt>>;
+export type GetImportReceiptDetailResponse = IApiResponse<ImportReceipt>;
 
 export interface ImportReceiptItem {
     materialId: string;
