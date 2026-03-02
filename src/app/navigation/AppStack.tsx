@@ -46,11 +46,10 @@ import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/meas
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
 // Material screens
-import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
-import { EditMaterialScreen } from '@/features/material/screens/material/EditMaterialScreen';
-import { AddWarehouseScreen } from '@/features/material/screens/warehouse/AddWarehouseScreen';
-import { AddExportWarehouseScreen } from '@/features/material/screens/warehouse/AddExportWarehouseScreen';
-import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
+import { MaterialFormScreen } from '@/features/material/screens/materialForm';
+import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
+import { ExportWarehouseFormScreen } from '@/features/material/screens/exportWarehouseForm';
+import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
 
 // Control screens
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
@@ -82,7 +81,7 @@ import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/typ
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Aquaculture, Member } from '@/features/menu/types/menu.types';
-import { IExportWarehouseReceipt, IWarehouseItem } from '@/features/material/types/warehouse.types';
+import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
 // Wrapped Menu screens - Now using components directly
@@ -153,7 +152,13 @@ export type AppStackParamList = {
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
     AddWaterTreatmentScreen: { pond: PondData; itemToEdit?: JobExecution };
-    EditWaterTreatmentScreens: { pondId: string; jobId: string; itemToEdit?: JobExecution };
+    EditWaterTreatmentScreens: {
+        pondId: string;
+        jobId: string;
+        pond?: PondData;
+        item?: JobExecution;
+        itemToEdit?: JobExecution;
+    };
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: PondData; item?: JobExecution };
     WaterSupplyLog: { pond: PondData };
@@ -180,16 +185,15 @@ export type AppStackParamList = {
     CountingShrimp: undefined;
 
     // ============== Material Screens (Tab Bar hidden) ==============
-    AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
-    EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
-    AddWarehouse: {
+    MaterialForm: { materialId?: string; onSave?: (data: any) => void };
+    ImportReceiptFormScreen: {
         importReceiptId?: string;
         availableMaterials?: IMaterial[];
         onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
     };
-    AddExportWarehouse: {
+    ExportWarehouseForm: {
         availableMaterials?: IMaterial[];
-        onSave?: (data: Omit<IExportWarehouseReceipt, 'id'>) => void;
+        onSave?: (data: any) => void;
         exportReceiptId?: string;
     };
     AddInventory: {
@@ -298,10 +302,9 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
 
             {/* ============== Material Screens ============== */}
-            <Stack.Screen name="AddMaterial" component={AddMaterialScreen} />
-            <Stack.Screen name="EditMaterial" component={EditMaterialScreen} />
-            <Stack.Screen name="AddWarehouse" component={AddWarehouseScreen} />
-            <Stack.Screen name="AddExportWarehouse" component={AddExportWarehouseScreen} />
+            <Stack.Screen name="MaterialForm" component={MaterialFormScreen} />
+            <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
+            <Stack.Screen name="ExportWarehouseForm" component={ExportWarehouseFormScreen} />
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 
             {/* ============== Control Screens ============== */}

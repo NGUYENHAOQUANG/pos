@@ -15,6 +15,9 @@ import type { JobExecution } from '@/features/farm/types/farm.types';
 import type { TimelineActivity } from '@/features/farm/components/TrackingList';
 import type { ActivityData } from '@/features/farm/components/ActivityCard';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
+import { EnvMetricType } from '@/features/farm/api/environmentApi';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 // Display name mapping for operation types not in operationTypeMapping
 const OPERATION_DISPLAY_NAME: Record<string, string> = {
@@ -54,7 +57,9 @@ export const usePondRecords = (pondId: string, params?: IPondRecordListParams) =
 const convertReferenceDataToActivityData = (
     operationType: string,
     ref: IPondRecordReferenceData,
-    materialMap: Record<string, any>
+    materialMap: Record<string, any>,
+    metricTypes: EnvMetricType[] = [],
+    pondNameMap: Record<string, string> = {}
 ): ActivityData[] => {
     const data: ActivityData[] = [];
 
@@ -85,43 +90,100 @@ const convertReferenceDataToActivityData = (
 
         case 'EnvMeasurement': {
             const r = ref as any;
-            // Helper to check multiple keys
-            const getVal = (...keys: string[]) => {
-                for (const k of keys) {
-                    if (r[k] != null) return r[k];
-                }
-                return null;
-            };
 
-            const valPH = getVal('pH', 'PH', 'Ph');
-            if (valPH != null) data.push({ label: 'pH', value: `${valPH}` });
+            const detailsList =
+                r.envMeasurements ||
+                r.EnvMeasurements ||
+                r.envMeasurementDetails ||
+                r.envMeasurementDetail?.envMeasurementDetails;
 
-            const valDO = getVal('dissolvedOxygen', 'DissolvedOxygen', 'DO', 'Do');
-            if (valDO != null) data.push({ label: 'DO (mg/L)', value: `${valDO}` });
+            if (detailsList && Array.isArray(detailsList) && detailsList.length > 0) {
+                detailsList.forEach((detail: any) => {
+                    const metricId = detail.metricId || detail.MetricId;
+                    const value = detail.value ?? detail.Value;
 
-            const valTemp = getVal('temperature', 'Temperature', 'Temp');
-            if (valTemp != null) data.push({ label: 'Nhiệt độ (°C)', value: `${valTemp}` });
+                    if (metricId && value != null) {
+                        const strMetricId = String(metricId).toLowerCase();
+                        const metric = metricTypes.find(
+                            m => String(m.id).toLowerCase() === strMetricId
+                        );
 
-            const valSal = getVal('salinity', 'Salinity');
-            if (valSal != null) data.push({ label: 'Độ mặn (ppt)', value: `${valSal}` });
+                        const isAlerted = detail.isAlerted === true || detail.IsAlerted === true;
 
-            const valAlk = getVal('alkalinity', 'Alkalinity');
-            if (valAlk != null) data.push({ label: 'Độ kiềm (mg/L)', value: `${valAlk}` });
+                        const warningFlag = isAlerted ? true : false;
 
-            const valTrans = getVal('transparency', 'Transparency');
-            if (valTrans != null) data.push({ label: 'Độ trong (cm)', value: `${valTrans}` });
+                        let finalLabel = metric
+                            ? metric.name
+                            : `Thông số (${strMetricId.substring(0, 4)})`;
+                        let finalUnit: string | undefined = undefined;
 
-            const valKali = getVal('kali', 'Kali', 'K');
-            if (valKali != null) data.push({ label: 'Kali (mg/L)', value: `${valKali}` });
+                        const nameMatch = finalLabel.match(/^(.*?)\s*\((.*?)\)$/);
+                        if (nameMatch) {
+                            finalLabel = nameMatch[1].trim();
+                            finalUnit = nameMatch[2].trim();
+                        }
 
-            const valTan = getVal('tan', 'Tan', 'TAN');
-            if (valTan != null) data.push({ label: 'TAN (mg/L)', value: `${valTan}` });
+                        data.push({
+                            label: finalLabel,
+                            value: `${value}`,
+                            unit: finalUnit,
+                            isWarning: warningFlag,
+                        });
+                    }
+                });
+            } else {
+                const objToScan =
+                    detailsList && typeof detailsList === 'object' && !Array.isArray(detailsList)
+                        ? detailsList
+                        : r;
 
-            const valMagie = getVal('magie', 'Magie', 'Mg');
-            if (valMagie != null) data.push({ label: 'Magie (mg/L)', value: `${valMagie}` });
+                Object.keys(objToScan).forEach(key => {
+                    const strKey = String(key).toLowerCase();
+                    if (['operationtype', 'operationid', 'pondid', 'notes'].includes(strKey))
+                        return;
 
-            const valNO3 = getVal('no3', 'NO3', 'No3');
-            if (valNO3 != null) data.push({ label: 'NO3 (mg/L)', value: `${valNO3}` });
+                    const val = objToScan[key];
+                    if (val != null && typeof val !== 'object' && val !== '') {
+                        const metric = metricTypes.find(
+                            m =>
+                                String(m.id).toLowerCase() === strKey ||
+                                String(m.code || '').toLowerCase() === strKey ||
+                                String(m.name).toLowerCase() === strKey
+                        );
+
+                        let label = key;
+                        let unit: string | undefined = undefined;
+
+                        if (metric) {
+                            label = metric.name;
+                        } else {
+                            const commonNames: Record<string, string> = {
+                                ph: 'pH',
+                                dissolvedoxygen: 'DO (mg/L)',
+                                do: 'DO (mg/L)',
+                                temperature: 'Nhiệt độ (°C)',
+                                temp: 'Nhiệt độ (°C)',
+                                salinity: 'Độ mặn (ppt)',
+                                alkalinity: 'Độ kiềm (mg/L)',
+                                transparency: 'Độ trong (cm)',
+                                kali: 'Kali (mg/L)',
+                                tan: 'TAN (mg/L)',
+                                magie: 'Magie (mg/L)',
+                                no3: 'NO3 (mg/L)',
+                            };
+                            if (commonNames[strKey]) label = commonNames[strKey];
+                        }
+
+                        const nameMatch = label.match(/^(.*?)\s*\((.*?)\)$/);
+                        if (nameMatch) {
+                            label = nameMatch[1].trim();
+                            unit = nameMatch[2].trim();
+                        }
+
+                        data.push({ label, value: String(val), unit });
+                    }
+                });
+            }
 
             break;
         }
@@ -238,8 +300,23 @@ const convertReferenceDataToActivityData = (
         case 'StockTransfer':
             if (ref.shrimpSizePcsPerKg != null)
                 data.push({ label: 'Cỡ tôm (con/kg)', value: `${ref.shrimpSizePcsPerKg}` });
-            if (ref.transferMethod)
-                data.push({ label: 'Hình thức chuyển', value: `${ref.transferMethod}` });
+            if (ref.totalStocking != null)
+                data.push({
+                    label: 'Tổng số lượng sang (con)',
+                    value: `${Number(ref.totalStocking).toLocaleString()}`,
+                });
+            if (ref.toPonds && ref.toPonds.length > 0) {
+                ref.toPonds.forEach((pond, index) => {
+                    const pondLabel =
+                        pondNameMap[pond.toPondId] ||
+                        pond.toPondName ||
+                        `Ao đích ${ref.toPonds!.length > 1 ? index + 1 : ''}`.trim();
+                    data.push({
+                        label: pondLabel,
+                        value: `${Number(pond.quantity).toLocaleString()} con`,
+                    });
+                });
+            }
             break;
 
         case 'Incident':
@@ -333,6 +410,17 @@ export const usePondRecordGroups = (
 
     const { data, isLoading, error, refetch } = usePondRecords(pondId, params);
     const { materialMap } = useFarmMaterials();
+    const { metricTypes } = useEnvironmentInit();
+    const ponds = useFarmStore(state => state.ponds);
+
+    // Build pondNameMap from store: pondId -> pondName (for StockTransfer toPonds)
+    const pondNameMap = useMemo(() => {
+        const map: Record<string, string> = {};
+        ponds.forEach(p => {
+            if (p.id && p.name) map[p.id] = p.name;
+        });
+        return map;
+    }, [ponds]);
 
     const rawItems: IPondRecordItem[] = useMemo(() => data?.data?.items ?? [], [data]);
 
@@ -374,21 +462,32 @@ export const usePondRecordGroups = (
             });
 
             const title = getRecordTitle(item);
-            const activityData = item.referenceData
-                ? convertReferenceDataToActivityData(
-                      item.operationType || '',
-                      item.referenceData,
-                      materialMap
-                  )
-                : [];
+            const isEnv = item.operationType === 'EnvMeasurement';
+
+            // Allow processing if referenceData is present OR it's EnvMeasurement (which might be flattened)
+            const activityData =
+                item.referenceData || isEnv
+                    ? convertReferenceDataToActivityData(
+                          item.operationType || '',
+                          item.referenceData || (item as any),
+                          materialMap,
+                          metricTypes,
+                          pondNameMap
+                      )
+                    : [];
             const jobType = getRecordJobType(item);
 
+            const refData = (item.referenceData || (isEnv ? item : {})) as any;
             const activity: TimelineActivity = {
                 id: item.id,
                 time: timeStr,
                 title,
                 data: activityData,
-                note: item.referenceData?.notes ?? undefined,
+                note:
+                    refData?.notes ??
+                    refData?.envMeasurementDetail?.notes ??
+                    refData?.EnvMeasurementDetail?.Notes ??
+                    undefined,
                 onEdit: undefined,
             };
 
@@ -404,7 +503,7 @@ export const usePondRecordGroups = (
             date,
             activities: dateGroups[date],
         }));
-    }, [rawItems, options?.operationNameFilter, materialMap]);
+    }, [rawItems, options?.operationNameFilter, materialMap, metricTypes, pondNameMap]);
 
     return { groups, isLoading, error, refetch, rawItems };
 };

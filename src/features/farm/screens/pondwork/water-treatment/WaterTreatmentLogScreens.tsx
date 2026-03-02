@@ -1,12 +1,15 @@
 import React from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import { ActivityIndicator, View } from 'react-native';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
 import { convertWaterTreatmentJobToActivityData } from '@/features/farm/utils/metaConverters';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
+import { useWaterTreatmentRecordsAsJobs } from '@/features/farm/hooks/useWaterTreatmentRecords';
+import { colors } from '@/styles';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterTreatmentLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -15,15 +18,33 @@ export const WaterTreatmentLogScreens = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId, pond } = route.params || {};
-    const targetPondId = pondId || pond?.id;
+    const targetPondId = pondId || pond?.id || '';
+
+    // Fetch data from API
+    const { jobs, isLoading, refetch } = useWaterTreatmentRecordsAsJobs(targetPondId);
+
+    // Auto refetch when screen is focused (e.g. back from Edit)
+    useFocusEffect(
+        React.useCallback(() => {
+            if (targetPondId) {
+                refetch();
+            }
+        }, [targetPondId, refetch])
+    );
 
     const config: LogScreenConfig = {
         jobType: 'WATER_TREATMENT',
-        pond: pond, // Pass pond object if available, otherwise use pondId
+        pond: pond,
         pondId: targetPondId,
         metaConverter: (item: JobExecution) => convertWaterTreatmentJobToActivityData(item),
         editRoute: 'EditWaterTreatmentScreens',
-        getEditParams: (_pond, item) => ({ pondId: targetPondId!, jobId: item.id }),
+        getEditParams: (_pond, item) => ({
+            pondId: targetPondId!,
+            jobId: item.id,
+            pond: pond,
+            item,
+        }),
+        externalData: jobs, // Use real API data instead of store
     };
 
     const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
@@ -31,10 +52,16 @@ export const WaterTreatmentLogScreens = () => {
     const handleStartActivity = () => {
         if (pond) {
             navigation.navigate('AddWaterTreatmentScreen', { pond });
-        } else if (targetPondId) {
-            // Handle case when only pondId is available
         }
     };
+
+    if (isLoading && !jobs.length) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
     return (
         <BaseLogScreen

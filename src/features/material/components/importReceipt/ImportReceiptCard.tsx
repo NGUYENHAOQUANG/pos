@@ -129,7 +129,7 @@ export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) =
                     <TouchableOpacity
                         style={styles.editButton}
                         onPress={() => {
-                            navigation.navigate('AddWarehouse', {
+                            navigation.navigate('ImportReceiptFormScreen', {
                                 availableMaterials: [],
                                 importReceiptId: item.id,
                             });

@@ -48,7 +48,6 @@ export const InventoryMaterialInput: React.FC<InventoryMaterialInputProps> = ({
                             onDropdownOpen?.();
                         }
                     }}
-                    inline={true}
                 />
             </View>
 

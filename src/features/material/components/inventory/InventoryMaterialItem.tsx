@@ -67,7 +67,6 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                                 showAllOption={false}
                                 isOpen={isDropdownOpen}
                                 onToggle={() => handleToggleDropdown(item.id, index)}
-                                inline={true}
                                 displayValue={item.materialName}
                             />
                         </View>

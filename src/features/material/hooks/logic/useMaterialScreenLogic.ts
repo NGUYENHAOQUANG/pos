@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { TabType } from '@/features/material/components/HeadingMaterial';
-import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { useMaterialStore } from '@/features/material/store';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -11,6 +9,7 @@ import { useMaterialHeaderLogic } from './useMaterialHeaderLogic';
 import { useMaterialFilterLogic } from './useMaterialFilterLogic';
 
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 interface UseMaterialScreenLogicReturn {
     selectedTab: TabType;
@@ -40,7 +39,7 @@ interface UseMaterialScreenLogicReturn {
 }
 
 export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute();
     const { setTabBarVisible } = useTabBarVisibility();
     const selectedTab = useMaterialStore(state => state.selectedTab);
@@ -90,24 +89,13 @@ export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
     // 5. Actions (Navigation)
     const actions = useMemo(
         () => ({
-            createImport: () => navigation.navigate('AddWarehouse', {}),
-            createExport: () => navigation.navigate('AddExportWarehouse', {}),
+            createImport: () => navigation.navigate('ImportReceiptFormScreen', {}),
+            createExport: () => navigation.navigate('ExportWarehouseForm', {}),
             createInventory: () => navigation.navigate('AddInventory', {}),
-            createMaterial: () => navigation.navigate('AddMaterial', {}),
+            createMaterial: () => navigation.navigate('MaterialForm', {}),
             editMaterial: (item: IWarehouseItem) =>
-                navigation.navigate('EditMaterial', {
-                    material: {
-                        id: item.materialId,
-                        name: item.materialName || '',
-                        group: MaterialGroupType.FARMING,
-                        unit: item.unitId,
-                        unitName: item.unitName,
-                        remaining: item.quantity,
-                        isActive: true,
-                        manufacturer: undefined,
-                        type: undefined,
-                        usage: undefined,
-                    } as IMaterial,
+                navigation.navigate('MaterialForm', {
+                    materialId: item.materialId,
                 }),
         }),
         [navigation]

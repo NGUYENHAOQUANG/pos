@@ -132,7 +132,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                     <TouchableOpacity
                         style={styles.editButton}
                         onPress={() => {
-                            navigation.navigate('AddExportWarehouse', {
+                            navigation.navigate('ExportWarehouseForm', {
                                 exportReceiptId: item.id,
                                 availableMaterials: [],
                             });

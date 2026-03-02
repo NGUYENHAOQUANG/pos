@@ -1,6 +1,6 @@
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
-import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
@@ -57,6 +57,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 : 'preparing'
         );
         const [note, setNote] = useState(initialValues?.note || '');
+        const [showFullCode, setShowFullCode] = useState(false);
 
         // Sync state with initialValues when they change (e.g. after refetch)
         React.useEffect(() => {
@@ -144,7 +145,7 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 </View>
 
                 {/* Cycle Name & Code */}
-                <View style={styles.row}>
+                <View style={[styles.row, { zIndex: 10 }]}>
                     <View style={styles.flex1}>
                         <FarmInput
                             label="Tên vụ nuôi"
@@ -155,17 +156,34 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                             containerStyle={{ marginBottom: 0 }}
                         />
                     </View>
-                    <View style={styles.flex1}>
-                        <Input
-                            label="Mã vụ nuôi"
-                            value={cycleCode}
-                            onChangeText={setCycleCode}
-                            placeholder="Mã tự động"
-                            containerStyle={styles.noMarginBottom}
-                            inputContainerStyle={styles.inputDisabledBox}
-                            disabled
-                            ellipsizeMode="tail"
-                        />
+                    <View style={[styles.flex1, { zIndex: 10 }]}>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={() => (cycleCode ? setShowFullCode(!showFullCode) : null)}
+                        >
+                            <View pointerEvents="none">
+                                <Input
+                                    label="Mã vụ nuôi"
+                                    value={cycleCode}
+                                    onChangeText={setCycleCode}
+                                    placeholder="Mã tự động"
+                                    containerStyle={styles.noMarginBottom}
+                                    inputContainerStyle={styles.inputDisabledBox}
+                                    disabled
+                                    ellipsizeMode="tail"
+                                />
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Full Code Display Popup */}
+                        {showFullCode && cycleCode ? (
+                            <View style={styles.fullCodeContainer}>
+                                <Text style={styles.fullCodeText} selectable>
+                                    Mã vụ nuôi:{' '}
+                                    <Text style={styles.fullCodeValue}>{cycleCode}</Text>
+                                </Text>
+                            </View>
+                        ) : null}
                     </View>
                 </View>
 
@@ -374,5 +392,35 @@ const styles = StyleSheet.create({
     },
     inputDisabledBox: {
         backgroundColor: colors.gray[100],
+    },
+    fullCodeContainer: {
+        position: 'absolute',
+        top: 72,
+        right: 0,
+        minWidth: 260,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        zIndex: 100,
+        elevation: 5,
+        shadowColor: colors.shadow,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+    },
+    fullCodeText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        lineHeight: 22,
+    },
+    fullCodeValue: {
+        fontWeight: '700',
+        color: colors.text,
     },
 });

@@ -7,11 +7,11 @@ import {
 } from '@/features/material/components/ButtonMaterial';
 import { HeadingMeterial } from '@/features/material/components/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
-import { ImportReceiptList } from '@/features/material/components/importReceipt/ImportReceiptList';
-import { ExportWarehouseListScreen } from '@/features/material/screens/warehouse/ExportWarehouseListScreen';
+import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
+import { ExportWarehouseListScreen } from '@/features/material/screens/exportWarehouseList/ExportWarehouseListScreen';
 import { WarehouseItemListScreen } from '@/features/material/screens/warehouseItem/WarehouseItemListScreen';
-import { MaterialMasterListTab } from '@/features/material/screens/material/MaterialMasterListTab';
-import { InventoryScreen } from '@/features/material/screens/inventory/InventoryScreen';
+import { MaterialMasterListTab } from '@/features/material/screens/materialList/MaterialMasterListTab';
+import { InventoryScreen } from '@/features/material/screens/inventoryList/InventoryList';
 import { colors } from '@/styles';
 import { useMaterialScreenLogic } from '@/features/material/hooks/logic/useMaterialScreenLogic';
 
