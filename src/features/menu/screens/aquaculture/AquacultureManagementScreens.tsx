@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -8,6 +8,7 @@ import {
     ScrollView,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -19,10 +20,11 @@ import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
-import { SeasonStatus } from '@/features/farm/types/farm.types';
+import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 export const AquacultureManagementScreens: React.FC = () => {
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Use new React Query hook
@@ -52,7 +54,7 @@ export const AquacultureManagementScreens: React.FC = () => {
     );
 
     // Prepare zone options
-    const zoneOptions = React.useMemo(() => {
+    const zoneOptions = useMemo(() => {
         const options = [{ id: 'all', label: 'Tất cả trại' }];
         if (!zones) return options;
 
@@ -63,7 +65,7 @@ export const AquacultureManagementScreens: React.FC = () => {
         return [...options, ...mappedZones];
     }, [zones]);
 
-    const activeData = React.useMemo(() => {
+    const activeData = useMemo(() => {
         let filtered = seasons || [];
 
         // Filter by zone
@@ -88,7 +90,7 @@ export const AquacultureManagementScreens: React.FC = () => {
         });
     }, [seasons, selectedTab, selectedZoneId]);
 
-    const counts = React.useMemo(
+    const counts = useMemo(
         () => ({
             all: seasons?.length || 0,
             preparing: seasons?.filter(i => i.status === SeasonStatus.Preparation).length || 0,
@@ -98,25 +100,58 @@ export const AquacultureManagementScreens: React.FC = () => {
         [seasons]
     );
 
-    const tabs = [
-        { key: 'all', label: 'Tất cả', count: counts.all },
-        { key: 'preparing', label: 'Chuẩn bị', count: counts.preparing },
-        { key: 'active', label: 'Đang nuôi', count: counts.active },
-        { key: 'ended', label: 'Đã kết thúc', count: counts.ended },
-    ];
+    const tabs = useMemo(
+        () => [
+            { key: 'all', label: 'Tất cả', count: counts.all },
+            { key: 'preparing', label: 'Chuẩn bị', count: counts.preparing },
+            { key: 'active', label: 'Đang nuôi', count: counts.active },
+            { key: 'ended', label: 'Đã kết thúc', count: counts.ended },
+        ],
+        [counts]
+    );
+
     const showSkeleton = isLoading;
+
+    // Memoized callbacks for navigation
+    const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
+    const handleAddNavigate = useCallback(
+        () => navigation.navigate('AddAquaculture'),
+        [navigation]
+    );
+
+    // Memoized renderItem for FlatList
+    const renderItem = useCallback(
+        ({ item }: { item: SeasonData }) => (
+            <AquacultureItem
+                item={item}
+                onEdit={editItem =>
+                    navigation.navigate('EditAquaculture', {
+                        aquaculture: editItem,
+                    })
+                }
+            />
+        ),
+        [navigation]
+    );
+
+    // Memoized dropdown value and handler
+    const selectedDropdownValue = useMemo(
+        () => zoneOptions.find(f => f.id === selectedZoneId) || zoneOptions[0],
+        [zoneOptions, selectedZoneId]
+    );
+    const handleZoneSelect = useCallback(
+        (item: { id: string | number }) => setSelectedZoneId(item.id.toString()),
+        []
+    );
 
     return (
         <View style={styles.container}>
             {/* Header with Add Button */}
             <HeaderMenu
                 title="Quản lý vụ nuôi"
-                onBack={() => navigation.goBack()}
+                onBack={handleGoBack}
                 rightAction={
-                    <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={() => navigation.navigate('AddAquaculture')}
-                    >
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
                         <Ionicons name="add" size={24} color={colors.primary} />
                     </TouchableOpacity>
                 }
@@ -129,8 +164,8 @@ export const AquacultureManagementScreens: React.FC = () => {
             <View style={styles.filterSection}>
                 <DropDownButton
                     data={zoneOptions}
-                    value={zoneOptions.find(f => f.id === selectedZoneId) || zoneOptions[0]}
-                    onSelect={item => setSelectedZoneId(item.id.toString())}
+                    value={selectedDropdownValue}
+                    onSelect={handleZoneSelect}
                     height={40}
                     borderRadius={6}
                 />
@@ -151,7 +186,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                             <EmptyStateCard
                                 message="Chưa có vụ nuôi nào"
                                 buttonTitle="Tạo vụ nuôi"
-                                onPress={() => navigation.navigate('AddAquaculture')}
+                                onPress={handleAddNavigate}
                             />
                         </View>
                     </ScrollView>
@@ -162,23 +197,14 @@ export const AquacultureManagementScreens: React.FC = () => {
                         refreshControl={
                             <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
                         }
-                        renderItem={({ item }) => (
-                            <AquacultureItem
-                                item={item}
-                                onEdit={editItem =>
-                                    navigation.navigate('EditAquaculture', {
-                                        aquaculture: editItem,
-                                    })
-                                }
-                            />
-                        )}
+                        renderItem={renderItem}
                         contentContainerStyle={styles.listContent}
                         ListEmptyComponent={
                             <View style={styles.cardContainer}>
                                 <EmptyStateCard
                                     message="Chưa có vụ nuôi nào"
                                     buttonTitle="Tạo vụ nuôi"
-                                    onPress={() => navigation.navigate('AddAquaculture')}
+                                    onPress={handleAddNavigate}
                                 />
                             </View>
                         }
@@ -196,7 +222,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        // padding: spacing.md,
         backgroundColor: colors.backgroundPrimary,
     },
     filterSection: {

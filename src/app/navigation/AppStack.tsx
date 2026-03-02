@@ -77,10 +77,16 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
 
 // Types
-import { JobExecution, PondData, FarmData, CycleData } from '@/features/farm/types/farm.types';
+import {
+    JobExecution,
+    PondData,
+    FarmData,
+    CycleData,
+    SeasonData,
+} from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
-import { Aquaculture, Member } from '@/features/menu/types/menu.types';
+import { Member } from '@/features/menu/types/menu.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
@@ -223,7 +229,7 @@ export type AppStackParamList = {
     AquacultureManagement: undefined;
     MemberManagement: undefined;
     AddAquaculture: undefined;
-    EditAquaculture: { aquaculture: Aquaculture };
+    EditAquaculture: { aquaculture: SeasonData };
     AddMember: undefined;
     EditMember: { member: Member };
     DeviceManagement: undefined;

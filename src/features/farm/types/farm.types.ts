@@ -213,6 +213,7 @@ export interface SeasonData {
     code?: string; // New API field
     cycleCount?: number;
     notes?: string;
+    no?: number; // Sequence number for sorting (from API)
 }
 
 export interface DropdownItem {

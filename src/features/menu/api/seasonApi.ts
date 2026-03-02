@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
+import { SeasonPayload } from '@/features/menu/services/aquacultureService';
 
 export const seasonApi = {
     getSeasons: async (zoneId: string): Promise<SeasonData[]> => {
@@ -37,11 +38,7 @@ export const seasonApi = {
         return resData;
     },
 
-    updateSeason: async (
-        zoneId: string,
-        id: string,
-        data: Partial<SeasonData>
-    ): Promise<SeasonData> => {
+    updateSeason: async (zoneId: string, id: string, data: SeasonPayload): Promise<SeasonData> => {
         const response = await apiClient.patch(API_ENDPOINTS.ZONE.SEASONS.UPDATE(zoneId, id), data);
 
         const resData = response.data;
@@ -92,7 +89,7 @@ export const seasonApi = {
         }
     },
 
-    createSeason: async (zoneId: string, data: Partial<SeasonData>): Promise<SeasonData> => {
+    createSeason: async (zoneId: string, data: SeasonPayload): Promise<SeasonData> => {
         const response = await apiClient.post(API_ENDPOINTS.ZONE.SEASONS.CREATE(zoneId), data);
 
         const resData = response.data;
