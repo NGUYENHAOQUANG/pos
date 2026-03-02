@@ -15,6 +15,8 @@ import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
+import { apiClient } from '@/core/api/client';
+import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { useEstimateShrimpSize } from '@/features/farm/hooks/useAI';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
@@ -72,7 +74,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     const previousSizePcsPerKg = useMemo(() => {
         if (!previousMeasurement || previousMeasurement.weight <= 0) return 0;
-        console.log('previousMeasurement', previousMeasurement);
         return Math.round((1000 * previousMeasurement.count) / previousMeasurement.weight);
     }, [previousMeasurement]);
 
@@ -133,83 +134,132 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         setDetections([]); // Clear previous detections
     };
 
-    const handleGetCount = () => {
+    const handleGetCount = async () => {
         const weightVal = parseFloat(measuredWeight);
         if (isNaN(weightVal) || weightVal <= 0) {
             Toast.show(ToastMessages.ShrimpMeasurement.WEIGHT_REQUIRED);
             return;
         }
 
-        if (!base64Image) {
+        if (!base64Image || !imageUri) {
             Toast.show(ToastMessages.ShrimpMeasurement.IMAGE_REQUIRED);
             return;
         }
 
-        estimateSize(
-            { image_base: base64Image },
-            {
-                onSuccess: data => {
-                    let count = 0;
-                    let sizes: number[] = [];
-                    let newDetections: MeasurementDetectionBox[] = [];
+        _setIsLoading(true);
 
-                    // New format with results object
-                    if (data.results && data.results.objects) {
-                        count = data.results.count;
-                        sizes = data.results.objects.map(obj => obj.length_cm);
+        try {
+            const fileName = imageUri.split('/').pop() || `image_${Date.now()}.jpg`;
+            const payload = {
+                base64Content: base64Image,
+                fileName: fileName,
+                contentType: 'image/jpeg',
+                storageType: 'Azure',
+            };
 
-                        // Map to MeasurementDetectionBox
-                        newDetections = data.results.objects.map(obj => ({
-                            id: obj.id,
-                            bbox: obj.bbox,
-                            label: `${obj.length_cm.toFixed(2)} cm`,
-                            confidence: obj.confidence,
-                        }));
-                    } else {
-                        // Old format or fallback
-                        if (data.detections) {
-                            count = data.detections.length;
-                            const avgSize = data.average_size_cm || 0;
-                            sizes = Array(count).fill(avgSize);
+            // Step 1: Upload to get document ID
+            const uploadResponse = await apiClient.post(
+                API_ENDPOINTS.DOCUMENT.UPLOAD_BASE64,
+                payload
+            );
+            const data = uploadResponse.data as any;
 
-                            if (data.detections.length > 0) {
-                                newDetections = data.detections.map(
-                                    (d: {
-                                        id: number;
-                                        box: number[];
-                                        score: number;
-                                        class_name: string;
-                                    }) => ({
-                                        id: d.id,
-                                        bbox: d.box,
-                                        confidence: d.score,
-                                        label: d.class_name,
-                                    })
-                                );
-                            }
-                        } else {
-                            // const _avgSize = data.average_size_cm || 0;
-                            // const _pcsPerKg = data.shrimp_count_per_kg || 0;
-                        }
-                    }
+            // Get ID from Base64 response
+            const documentIdStr = data?.data?.document?.id;
 
-                    // Calculate pcsPerKg locally
-                    const pcsPerKg = weightVal > 0 ? Math.round((1000 * count) / weightVal) : 0;
-
-                    const newMeasurement: Measurement = {
-                        id: Date.now(),
-                        count: count,
-                        weight: weightVal,
-                        sizes: sizes,
-                        pcsPerKg: pcsPerKg,
-                    };
-
-                    setMeasurements(prev => [...prev, newMeasurement]);
-                    setDetections(newDetections);
-                    setMeasuredWeight('');
-                },
+            if (!documentIdStr) {
+                throw new Error('Could not retrieve document ID from uploaded image.');
             }
-        );
+
+            estimateSize(
+                { documentId: documentIdStr },
+                {
+                    onSuccess: data => {
+                        let count = 0;
+                        let sizes: number[] = [];
+                        let newDetections: MeasurementDetectionBox[] = [];
+
+                        // New format with results object
+                        if (data.results && data.results.objects) {
+                            count = data.results.count;
+                            sizes = data.results.objects.map(obj => obj.lengthCm);
+
+                            // Map to MeasurementDetectionBox
+                            newDetections = data.results.objects.map(obj => ({
+                                id: obj.id,
+                                bbox: obj.bbox,
+                                label: `${obj.lengthCm.toFixed(2)} cm`,
+                                confidence: obj.confidence,
+                            }));
+                        } else {
+                            // Old format or fallback
+                            if (data.detections) {
+                                count = data.detections.length;
+                                const avgSize = data.averageSizeCm || 0;
+                                sizes = Array(count).fill(avgSize);
+
+                                if (data.detections.length > 0) {
+                                    newDetections = data.detections.map(
+                                        (d: {
+                                            id: number;
+                                            box: number[];
+                                            score: number;
+                                            className: string;
+                                        }) => ({
+                                            id: d.id,
+                                            bbox: d.box,
+                                            confidence: d.score,
+                                            label: d.className,
+                                        })
+                                    );
+                                }
+                            } else {
+                                // const _avgSize = data.averageSizeCm || 0;
+                                // const _pcsPerKg = data.shrimpCountPerKg || 0;
+                            }
+                        }
+
+                        // Calculate pcsPerKg locally
+                        const pcsPerKg = weightVal > 0 ? Math.round((1000 * count) / weightVal) : 0;
+
+                        const newMeasurement: Measurement = {
+                            id: Date.now(),
+                            count: count,
+                            weight: weightVal,
+                            sizes: sizes,
+                            pcsPerKg: pcsPerKg,
+                        };
+
+                        setMeasurements(prev => [...prev, newMeasurement]);
+                        setDetections(newDetections);
+                        setMeasuredWeight('');
+                    },
+                    onError: (error: any) => {
+                        console.error('Estimate Size AI Error:', error);
+                        const errorMessage =
+                            error?.response?.data?.message || 'Đo kích thước bằng AI thất bại';
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lỗi',
+                            text2: errorMessage,
+                        });
+                    },
+                    onSettled: () => {
+                        _setIsLoading(false);
+                    },
+                }
+            );
+        } catch (error: any) {
+            console.error('Base64 processing failed:', error);
+            const errorMessage =
+                error?.response?.data?.message || 'Không thể upload hình ảnh để xử lý';
+            Toast.show({
+                type: 'error',
+                text1: 'Lỗi',
+                text2: errorMessage,
+            });
+            _setIsLoading(false);
+        }
     };
 
     const handleReset = () => {

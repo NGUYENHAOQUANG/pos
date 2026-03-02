@@ -229,8 +229,8 @@ export const API_ENDPOINTS = {
         UPLOAD_BASE64: '/document/upload-base64',
     },
     AI: {
-        SEEDSTOCK_COUNTING: '/api/v1/seedstock_counting/predict',
-        ESTIMATED_SIZE: '/api/v1/estimated_size/predict',
-        SHRIMP_HEALTH_PREDICT: '/api/v1/shrimp_health/predict',
+        SEEDSTOCK_COUNTING: '/seedstockcounting',
+        ESTIMATED_SIZE: '/estimatedsize',
+        SHRIMP_HEALTH: '/shrimphealth',
     },
 } as const;
