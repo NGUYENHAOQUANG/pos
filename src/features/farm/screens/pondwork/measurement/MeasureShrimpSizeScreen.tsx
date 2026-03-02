@@ -62,8 +62,8 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                         season: rawData.season,
                     } as CycleData;
                 }
-            } catch (error) {
-                console.log('Error fetching cycle detail:', error);
+            } catch (_error) {
+                // Ignore silent error
             }
             return null;
         },

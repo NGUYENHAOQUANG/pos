@@ -391,13 +391,9 @@ export const AddTransferScreen: React.FC = () => {
 
                 updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
             } catch {
-                // Error is already handled in useCreateStockTransfer hook
                 return;
             }
         }
-
-        // Reset navigation stack: MainTabs -> PondDetail
-        // This way: user stays on PondDetail, but back button goes to MainTabs (farm list)
         navigation.goBack();
     };
 
@@ -431,14 +427,10 @@ export const AddTransferScreen: React.FC = () => {
 
                 <TransferInfoBox
                     transferMethod={transferMethod}
-                    onTransferMethodPress={() => {
-                        console.log('Select transfer method');
-                    }}
+                    onTransferMethodPress={() => {}}
                     receivingPonds={receivingPonds}
                     onReceivingPondsChange={setReceivingPonds}
-                    onReceivingPondPress={id => {
-                        console.log('Select receiving pond for id:', id);
-                    }}
+                    onReceivingPondPress={_id => {}}
                     totalEstimatedShrimp={totalEstimatedShrimp}
                     pondOptions={pondOptions}
                     onDropdownOpen={handleDropdownOpen}

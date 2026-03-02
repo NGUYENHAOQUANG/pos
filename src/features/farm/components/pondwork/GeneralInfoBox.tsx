@@ -152,10 +152,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                 isSaved.current = true;
             },
             getUploadedIds: () => {
-                // Return IDs corresponding to the current imageUris (in order)
-                // Filter out any undefineds, but maintain order integrity as much as possible for debugging
                 const ids = imageUris.map(uri => uploadedFilesMap.current[uri]).filter(id => !!id);
-                // console.log('[GeneralInfoBox] getUploadedIds:', ids, 'from uris:', imageUris, 'map:', uploadedFilesMap.current);
                 return ids;
             },
         }));
@@ -317,7 +314,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     const docId = uploadedDocs[0].id;
                     sessionUploadedFileIds.current.push(docId);
                     uploadedFilesMap.current[uri] = docId;
-                    console.log(`[GeneralInfoBox] Upload success: ${docId}`);
                     uploadSuccess = true;
                 }
             } catch (error) {
@@ -396,7 +392,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         id => id !== idToRemove
                     );
                     delete uploadedFilesMap.current[uriToRemove];
-                    console.log(`[GeneralInfoBox] Removed file: ${idToRemove}`);
 
                     // Update UI after successful delete
                     setImageUris(prev => prev.filter((_, i) => i !== index));

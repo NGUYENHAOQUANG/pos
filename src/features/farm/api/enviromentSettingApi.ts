@@ -18,7 +18,6 @@ export const environmentSettingApi = {
         zoneId: string,
         params?: GetEnvironmentSettingsParams
     ): Promise<IPaginate<EnvironmentSetting>> => {
-        console.log('zoneId', zoneId);
         const { data } = await apiClient.get<GetEnvironmentSettingsResponse>(
             API_ENDPOINTS.PARAMETER_SETTING.LIST(zoneId),
             { params }

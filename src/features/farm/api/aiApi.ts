@@ -22,11 +22,6 @@ export interface AIPredictRequest {
 
 export const aiApi = {
     countSeedstock: async (data: AIPredictRequest): Promise<SeedstockCountingResponse> => {
-        // Call backend API instead of direct AI server
-        console.log('--- DEBUG AXIOS REQUEST ---');
-        console.log('URL:', API_ENDPOINTS.AI.SEEDSTOCK_COUNTING);
-        console.log('Payload Data:', JSON.stringify(data));
-
         try {
             const response = await apiClient.post<{ data: SeedstockCountingResponse }>(
                 API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
@@ -35,9 +30,6 @@ export const aiApi = {
             );
             return response.data?.data || (response.data as unknown as SeedstockCountingResponse);
         } catch (error: any) {
-            console.log('--- DEBUG AXIOS ERROR ---');
-            console.log('Error Config Data:', error.config?.data);
-            console.log('Error Response Data:', error.response?.data);
             throw error;
         }
     },
