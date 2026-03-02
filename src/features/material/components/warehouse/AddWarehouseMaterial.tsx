@@ -169,7 +169,6 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                 onToggle={() =>
                                                     handleToggleDropdown(item.id, index)
                                                 }
-                                                inline={true}
                                             />
                                             {/* Show Available Quantity */}
                                             {item.materialId &&

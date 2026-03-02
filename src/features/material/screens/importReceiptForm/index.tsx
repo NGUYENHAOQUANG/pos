@@ -4,7 +4,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
@@ -29,7 +28,7 @@ import { ImportReceiptStatus } from '@/features/material/types/importReceipt.typ
 
 export const ImportReceiptFormScreen: React.FC = () => {
     // Navigation
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'ImportReceiptFormScreen'>>();
 
     const importReceiptId = route.params?.importReceiptId;

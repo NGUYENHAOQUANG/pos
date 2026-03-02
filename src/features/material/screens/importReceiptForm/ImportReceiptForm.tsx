@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
+import { View, StyleSheet, StatusBar, TouchableOpacity, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import Animated from 'react-native-reanimated';
 import { WarehouseInformation } from '@/features/material/components/warehouse/WarehouseInformation';
 import {
     AddWarehouseMaterial,
     MaterialItem,
 } from '@/features/material/components/warehouse/AddWarehouseMaterial';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
@@ -29,6 +29,8 @@ import {
 } from '@/features/material/schemas/warehouseFormSchema';
 import { useWarehouseMaterialActions } from '@/features/material/hooks/logic/useWarehouseMaterialActions';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
+import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
+import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 
 export type AddImportReceiptUIProps = {
     isEditMode: boolean;
@@ -100,7 +102,12 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const fileUploaderRef = useRef<FileUploaderRef>(null);
-    const scrollViewRef = useRef<ScrollView>(null);
+    const {
+        scrollRef: scrollViewRef,
+        scrollToDropdown,
+        scrollOffset,
+        onScroll,
+    } = useDropdownScroll();
     const initializedRef = useRef(false);
 
     const totalAmount = useMemo(
@@ -116,18 +123,13 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
     );
 
     const handleDropdownOpen = (itemIndex: number) => {
-        const HEADER_HEIGHT = 280;
-        const FILE_ROW_HEIGHT = 40;
-        const ITEM_HEIGHT = 280;
-
-        setTimeout(() => {
-            const fileSectionHeight = (files?.length || 0) * FILE_ROW_HEIGHT;
-            const scrollY = HEADER_HEIGHT + fileSectionHeight + itemIndex * ITEM_HEIGHT;
-            scrollViewRef.current?.scrollTo({
-                y: Math.max(0, scrollY - 50),
-                animated: true,
-            });
-        }, 100);
+        scrollToDropdown({
+            index: itemIndex,
+            headerHeight: 280,
+            itemHeight: 280,
+            fileCount: files?.length || 0,
+            fileRowHeight: 40,
+        });
     };
 
     useEffect(() => {
@@ -216,40 +218,46 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                         rightComponent={deleteButton}
                     />
 
-                    <SafeInputLayout>
-                        <ScrollView
-                            ref={scrollViewRef}
-                            style={styles.content}
-                            contentContainerStyle={styles.contentContainer}
-                            showsVerticalScrollIndicator={false}
-                            nestedScrollEnabled={true}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <WarehouseInformation
-                                date={date}
-                                onDateChange={newDate => setValue('date', newDate)}
-                                supplier={supplier}
-                                onSupplierChange={newSupplier => setValue('supplier', newSupplier)}
-                                supplierOptions={supplierOptions}
+                    <SafeInputLayoutMaterial>
+                        <DropdownScrollContext.Provider value={scrollOffset}>
+                            <Animated.ScrollView
+                                ref={scrollViewRef}
+                                onScroll={onScroll}
+                                scrollEventThrottle={16}
+                                style={styles.content}
+                                contentContainerStyle={styles.contentContainer}
+                                showsVerticalScrollIndicator={false}
+                                nestedScrollEnabled={true}
+                                keyboardShouldPersistTaps="handled"
                             >
-                                <FileUploader
-                                    ref={fileUploaderRef}
-                                    files={files || []}
-                                    onFilesSelected={newFiles => setValue('files', newFiles)}
-                                    maxFiles={5}
-                                />
-                            </WarehouseInformation>
+                                <WarehouseInformation
+                                    date={date}
+                                    onDateChange={newDate => setValue('date', newDate)}
+                                    supplier={supplier}
+                                    onSupplierChange={newSupplier =>
+                                        setValue('supplier', newSupplier)
+                                    }
+                                    supplierOptions={supplierOptions}
+                                >
+                                    <FileUploader
+                                        ref={fileUploaderRef}
+                                        files={files || []}
+                                        onFilesSelected={newFiles => setValue('files', newFiles)}
+                                        maxFiles={5}
+                                    />
+                                </WarehouseInformation>
 
-                            <AddWarehouseMaterial
-                                materials={warehouseItems || []}
-                                onUpdateMaterial={materialActions.update}
-                                onAddMaterial={materialActions.add}
-                                onRemoveMaterial={materialActions.remove}
-                                materialOptions={materialOptions}
-                                onDropdownOpen={handleDropdownOpen}
-                            />
-                        </ScrollView>
-                    </SafeInputLayout>
+                                <AddWarehouseMaterial
+                                    materials={warehouseItems || []}
+                                    onUpdateMaterial={materialActions.update}
+                                    onAddMaterial={materialActions.add}
+                                    onRemoveMaterial={materialActions.remove}
+                                    materialOptions={materialOptions}
+                                    onDropdownOpen={handleDropdownOpen}
+                                />
+                            </Animated.ScrollView>
+                        </DropdownScrollContext.Provider>
+                    </SafeInputLayoutMaterial>
 
                     <WarehouseFooter
                         safeBottom={safeBottom}

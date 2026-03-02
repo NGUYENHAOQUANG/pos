@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { TabType } from '@/features/material/components/HeadingMaterial';
 import { useMaterialStore } from '@/features/material/store';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
@@ -10,6 +9,7 @@ import { useMaterialHeaderLogic } from './useMaterialHeaderLogic';
 import { useMaterialFilterLogic } from './useMaterialFilterLogic';
 
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 interface UseMaterialScreenLogicReturn {
     selectedTab: TabType;
@@ -39,7 +39,7 @@ interface UseMaterialScreenLogicReturn {
 }
 
 export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute();
     const { setTabBarVisible } = useTabBarVisibility();
     const selectedTab = useMaterialStore(state => state.selectedTab);
@@ -90,7 +90,7 @@ export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
     const actions = useMemo(
         () => ({
             createImport: () => navigation.navigate('ImportReceiptFormScreen', {}),
-            createExport: () => navigation.navigate('AddExportWarehouse', {}),
+            createExport: () => navigation.navigate('ExportWarehouseForm', {}),
             createInventory: () => navigation.navigate('AddInventory', {}),
             createMaterial: () => navigation.navigate('MaterialForm', {}),
             editMaterial: (item: IWarehouseItem) =>

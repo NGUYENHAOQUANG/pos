@@ -27,3 +27,7 @@ export {
     useInfiniteImportReceipts,
 } from '@/features/material/hooks/useImportReceipts';
 export { materialKeys } from '@/features/material/hooks/materialKeys';
+export {
+    useDropdownScroll,
+    DropdownScrollContext,
+} from '@/features/material/hooks/useDropdownScroll';

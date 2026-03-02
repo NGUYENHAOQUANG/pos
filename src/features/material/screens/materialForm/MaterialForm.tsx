@@ -12,7 +12,7 @@ import {
     materialFormSchema,
 } from '@/features/material/schemas/materialFormSchema';
 import { showValidationError } from '@/features/material/utils/validationToast';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { IconTrashOutlined } from '@/assets/icons';
@@ -112,7 +112,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
                 }
             />
 
-            <SafeInputLayout>
+            <SafeInputLayoutMaterial>
                 <ScrollView
                     ref={scrollViewRef}
                     style={styles.contentScroll}
@@ -152,7 +152,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
                         }}
                     />
                 </ScrollView>
-            </SafeInputLayout>
+            </SafeInputLayoutMaterial>
 
             <ButtonBar
                 mode="double"

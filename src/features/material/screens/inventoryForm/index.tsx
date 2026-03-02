@@ -4,7 +4,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { MaterialStackParamList } from '@/features/material/navigation/MaterialNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useUserProfile } from '@/features/menu/hooks/useUserProfile';
 import { useFarmStore } from '@/features/farm/store/farmStore';
@@ -27,7 +26,7 @@ import { materialKeys } from '@/features/material/hooks/materialKeys';
 import InventoryForm from '@/features/material/screens/inventoryForm/InventoryForm';
 
 export const AddInventoryScreen: React.FC = () => {
-    const navigation = useNavigation<NativeStackNavigationProp<MaterialStackParamList>>();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<RouteProp<AppStackParamList, 'AddInventory'>>();
 
     const params = route.params;

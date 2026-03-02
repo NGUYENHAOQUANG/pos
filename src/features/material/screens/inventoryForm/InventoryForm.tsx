@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
+import Animated from 'react-native-reanimated';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
-import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
@@ -26,6 +27,7 @@ import {
 } from '@/features/material/schemas/inventoryFormSchema';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 import { useInventoryMaterialActions } from '@/features/material/hooks/logic/useInventoryMaterialActions';
+import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
 
 export type InventoryFormProps = {
     isEditMode: boolean;
@@ -83,7 +85,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
     const [isDatePickerVisible, setDatePickerVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-    const scrollViewRef = useRef<ScrollView>(null);
+    const {
+        scrollRef: scrollViewRef,
+        scrollToDropdown,
+        scrollOffset,
+        onScroll,
+    } = useDropdownScroll();
     const initializedRef = useRef(false);
 
     const materialActions = useInventoryMaterialActions(
@@ -93,17 +100,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         availableMaterials
     );
 
-    const HEADER_HEIGHT = 250;
-    const ITEM_HEIGHT = 380;
-
     const handleDropdownOpen = (itemIndex: number) => {
-        setTimeout(() => {
-            const scrollY = HEADER_HEIGHT + itemIndex * ITEM_HEIGHT;
-            scrollViewRef.current?.scrollTo({
-                y: Math.max(0, scrollY - 50),
-                animated: true,
-            });
-        }, 100);
+        scrollToDropdown({
+            index: itemIndex,
+            headerHeight: 300,
+            itemHeight: 400,
+        });
     };
 
     useEffect(() => {
@@ -182,36 +184,40 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                         rightComponent={deleteButton}
                     />
 
-                    <SafeInputLayout>
-                        <ScrollView
-                            ref={scrollViewRef}
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.contentContainer}
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <InventoryGeneralInfo
-                                date={formatMaterialDate(date)}
-                                createdDate={formatMaterialDateTime(date)}
-                                note={note}
-                                onDatePress={() => setDatePickerVisible(true)}
-                                onNoteChange={val => setValue('note', val)}
-                                warehouseName={warehouseName}
-                                creatorName={creatorName}
-                            />
-
-                            <View style={styles.dropdownSection}>
-                                <InventoryMaterialList
-                                    items={inventoryItems}
-                                    onUpdateItem={materialActions.update}
-                                    onAddItem={materialActions.add}
-                                    onRemoveItem={materialActions.remove}
-                                    materialOptions={materialOptions}
-                                    onDropdownOpen={handleDropdownOpen}
+                    <SafeInputLayoutMaterial>
+                        <DropdownScrollContext.Provider value={scrollOffset}>
+                            <Animated.ScrollView
+                                ref={scrollViewRef}
+                                onScroll={onScroll}
+                                scrollEventThrottle={16}
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.contentContainer}
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled"
+                            >
+                                <InventoryGeneralInfo
+                                    date={formatMaterialDate(date)}
+                                    createdDate={formatMaterialDateTime(date)}
+                                    note={note}
+                                    onDatePress={() => setDatePickerVisible(true)}
+                                    onNoteChange={val => setValue('note', val)}
+                                    warehouseName={warehouseName}
+                                    creatorName={creatorName}
                                 />
-                            </View>
-                        </ScrollView>
-                    </SafeInputLayout>
+
+                                <View style={styles.dropdownSection}>
+                                    <InventoryMaterialList
+                                        items={inventoryItems}
+                                        onUpdateItem={materialActions.update}
+                                        onAddItem={materialActions.add}
+                                        onRemoveItem={materialActions.remove}
+                                        materialOptions={materialOptions}
+                                        onDropdownOpen={handleDropdownOpen}
+                                    />
+                                </View>
+                            </Animated.ScrollView>
+                        </DropdownScrollContext.Provider>
+                    </SafeInputLayoutMaterial>
 
                     <ButtonBarMaterial
                         mode="double"
