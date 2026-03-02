@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
-import { InventoryCard } from '@/features/material/components/inventoryList/InventoryCard';
+import { InventoryCard } from '@/features/material/components/inventory_list/InventoryCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
 import { colors } from '@/styles';

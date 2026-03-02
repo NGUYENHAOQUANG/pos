@@ -23,7 +23,7 @@ import { useMaterialOptions } from '@/features/material/hooks/inventory/useMater
 import { inventoryService } from '@/features/material/services/inventoryService';
 import { InventoryFormValues } from '@/features/material/schemas/inventoryFormSchema';
 import { materialKeys } from '@/features/material/hooks/materialKeys';
-import InventoryForm from '@/features/material/screens/inventoryForm/InventoryForm';
+import InventoryForm from '@/features/material/screens/inventory_form/InventoryForm';
 
 export const AddInventoryScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();

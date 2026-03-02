@@ -1,72 +1,67 @@
 import React from 'react';
-import { ExportWarehouseMaterialList } from '@/features/material/components/exportWarehouseList/ExportWarehouseMaterialList';
-import { useInfiniteExportWarehouse } from '@/features/material/hooks';
+
+import { InventoryMaterialList } from '@/features/material/components/inventory_list/InventoryMaterialList';
+import { useInfiniteInventoryTickets } from '@/features/material/hooks/inventory/useInventory';
 import { useMaterialStore } from '@/features/material/store';
 import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
-
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
-export const ExportWarehouseListScreen: React.FC = () => {
+export const InventoryScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
-    const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
-    const exportReceiptStatusFilter = useMaterialStore(state => state.exportReceiptStatusFilter);
+    const inventoryStatusFilter = useMaterialStore(state => state.inventoryStatusFilter);
     const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Prepare Params
-    const exportWarehouseParams = React.useMemo(() => {
+    const inventoryParams = React.useMemo(() => {
         const params: any = {};
 
         if (searchText?.trim()) {
             params.Search = searchText.trim();
         }
 
-        if (filterMaterialName) {
-            params.MaterialName = filterMaterialName;
-        }
-
         if (warehouseId) {
             params.WarehouseId = warehouseId;
         }
 
-        if (exportReceiptStatusFilter) {
-            params.Status = exportReceiptStatusFilter;
+        if (inventoryStatusFilter) {
+            params.Status = inventoryStatusFilter;
         }
 
         return params;
-    }, [searchText, filterMaterialName, warehouseId, exportReceiptStatusFilter]);
+    }, [searchText, warehouseId, inventoryStatusFilter]);
 
     // 3. Fetch Data with Infinite Scroll
     const {
-        data: receipts = [],
+        data: inventoryList = [],
         refetch,
-        isRefetching,
         isLoading,
+        isRefetching,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-    } = useInfiniteExportWarehouse(exportWarehouseParams);
+    } = useInfiniteInventoryTickets(inventoryParams);
 
     const { showSkeleton, isRefreshing } = getListState({
         isLoading,
         isRefetching,
         isFetchingNextPage,
-        itemsCount: receipts.length,
+        itemsCount: inventoryList.length,
     });
 
     return (
-        <ExportWarehouseMaterialList
-            receipts={receipts}
+        <InventoryMaterialList
+            inventoryList={inventoryList}
             isLoading={showSkeleton}
             refreshing={isRefreshing}
             onRefresh={refetch}
-            onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
             onLoadMore={fetchNextPage}
             isFetchingNextPage={isFetchingNextPage}
             hasNextPage={hasNextPage}
+            onPressCreate={() => navigation.navigate('AddInventory', {})}
         />
     );
 };

@@ -10,7 +10,7 @@ import Animated, {
     runOnJS,
 } from 'react-native-reanimated';
 import { colors, spacing } from '@/styles';
-import { ButtonMaterialList } from '@/features/material/components/materialForm/ButtonMaterialList';
+import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

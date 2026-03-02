@@ -23,7 +23,7 @@ import { showValidationError } from '@/features/material/utils/validationToast';
 import { importReceiptService } from '@/features/material/services/importReceiptService';
 import { WarehouseFormValues } from '@/features/material/schemas/warehouseFormSchema';
 import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
-import ImportReceiptForm from '@/features/material/screens/importReceiptForm/ImportReceiptForm';
+import ImportReceiptForm from '@/features/material/screens/import_receipt_form/ImportReceiptForm';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 
 export const ImportReceiptFormScreen: React.FC = () => {

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
-import { ButtonMaterialList } from '@/features/material/components/materialForm/ButtonMaterialList';
+import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';

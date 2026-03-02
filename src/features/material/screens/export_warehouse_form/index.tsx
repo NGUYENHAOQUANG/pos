@@ -9,7 +9,7 @@ import { colors } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import { exportReceiptService } from '@/features/material/services/exportReceiptService';
-import { ExportWarehouseForm } from '@/features/material/screens/exportWarehouseForm/ExportWarehouseForm';
+import { ExportWarehouseForm } from '@/features/material/screens/export_warehouse_form/ExportWarehouseForm';
 import { ExportWarehouseFormValues } from '@/features/material/schemas/exportWarehouseFormSchema';
 import { showValidationError } from '@/features/material/utils/validationToast';
 import { DocumentPickerResponse } from '@react-native-documents/picker';

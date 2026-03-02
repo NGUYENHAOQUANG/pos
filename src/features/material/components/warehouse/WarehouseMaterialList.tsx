@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
 import { WarehouseMaterialItem } from '@/features/material/components/warehouse/WarehouseMaterialItem';
-import { MaterialItemSkeleton } from '@/features/material/components/materialList/MaterialListSkeleton';
+import { MaterialItemSkeleton } from '@/features/material/components/material_list/MaterialListSkeleton';
 import { colors } from '@/styles';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';

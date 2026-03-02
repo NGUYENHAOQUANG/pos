@@ -1,5 +1,5 @@
 import React from 'react';
-import { MaterialMasterList } from '@/features/material/components/materialList/MaterialMasterList';
+import { MaterialMasterList } from '@/features/material/components/material_list/MaterialMasterList';
 import { useInfiniteMaterials } from '@/features/material/hooks';
 import { useMaterialStore } from '@/features/material/store';
 import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';

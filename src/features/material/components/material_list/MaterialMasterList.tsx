@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
-import { MaterialMasterItem } from '@/features/material/components/materialList/MaterialMasterItem';
-import { MaterialItemSkeleton } from '@/features/material/components/materialList/MaterialListSkeleton';
+import { MaterialMasterItem } from '@/features/material/components/material_list/MaterialMasterItem';
+import { MaterialItemSkeleton } from '@/features/material/components/material_list/MaterialListSkeleton';
 import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
 import { colors } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';

@@ -47,9 +47,9 @@ import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shri
 
 // Material screens
 import { MaterialFormScreen } from '@/features/material/screens/materialForm';
-import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
-import { ExportWarehouseFormScreen } from '@/features/material/screens/exportWarehouseForm';
-import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
+import { ImportReceiptFormScreen } from '@/features/material/screens/import_receipt_form';
+import { ExportWarehouseFormScreen } from '@/features/material/screens/export_warehouse_form';
+import { AddInventoryScreen } from '@/features/material/screens/inventory_form';
 
 // Control screens
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
