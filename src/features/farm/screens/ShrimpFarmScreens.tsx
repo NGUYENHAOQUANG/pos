@@ -10,7 +10,7 @@ import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { POND_TYPES } from '@/features/farm/types/farm.types';
+import { POND_TYPES, JOB_TYPES } from '@/features/farm/types/farm.types';
 import { useCyclesByPond, useActiveCycle } from '@/features/farm/hooks/useCycle.ts';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -127,6 +127,25 @@ export const ShrimpFarmScreens: React.FC = () => {
     });
 
     const currentCycle = useActiveCycle(pond?.id || '');
+
+    const filteredJobs = useMemo(() => {
+        if (currentCycle) return jobs;
+
+        // When no cycle, only show:
+        // - Đo thông số môi trường (ENVIRONMENT)
+        // - Xử lý nước (WATER_TREATMENT)
+        // - Thay/Cấp nước (WATER_CHANGE)
+        // - Rửa ao (CLEAN_POND)
+        // - Phơi ao (SUN_DRY_POND)
+        const allowedWhenNoCycle: string[] = [
+            JOB_TYPES.ENVIRONMENT,
+            JOB_TYPES.WATER_TREATMENT,
+            JOB_TYPES.WATER_CHANGE,
+            JOB_TYPES.CLEAN_POND,
+            JOB_TYPES.SUN_DRY_POND,
+        ];
+        return jobs.filter(job => allowedWhenNoCycle.includes(job.type));
+    }, [jobs, currentCycle]);
 
     useEffect(() => {
         setTabBarVisible(false);
@@ -308,7 +327,7 @@ export const ShrimpFarmScreens: React.FC = () => {
                                     )}
 
                                     <JobListCard
-                                        jobs={jobs}
+                                        jobs={filteredJobs}
                                         onPressJob={handleJobPress}
                                         onPressAddJob={handleAddJobItem}
                                         onEditJobItem={handleEditJobItem}

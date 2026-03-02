@@ -10,6 +10,7 @@ import {
     Platform,
     Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
 import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
@@ -33,6 +34,9 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     onNext,
     currentUserPhone,
 }) => {
+    const insets = useSafeAreaInsets();
+    const paddingBottom = Math.max(insets.bottom, 16);
+
     const [phone, setPhone] = useState('');
     const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
     const [otherReasonText, setOtherReasonText] = useState('');
@@ -223,7 +227,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                 </ScrollView>
             </KeyboardAvoidingView>
 
-            <View style={styles.footer}>
+            <View style={[styles.footer, { paddingBottom }]}>
                 <TouchableOpacity style={styles.dangerButton} onPress={handleNext}>
                     <Text style={styles.dangerButtonText}>Tiếp tục</Text>
                 </TouchableOpacity>
