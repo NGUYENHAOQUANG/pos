@@ -28,7 +28,7 @@ import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchan
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
-import { CycleDetailScreen } from '@/features/farm/screens/pond/CycleDetailScreen';
+import { EditCycleScreen } from '@/features/farm/screens/pond/editCycle/EditCycleScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemScreen } from '@/features/farm/screens/handleProblem/HandleProblemScreen';
@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { EditPersonalInformationScreens } from '@/features/menu/screens/information/EditPersonalInformationScreens';
+import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/Formscreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
@@ -171,7 +171,7 @@ export type AppStackParamList = {
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
-    CycleDetail: { pondId: string; cycleData: CycleData };
+    EditCycle: { pondId: string; cycleData: CycleData };
     HandleProblem: {
         pond: PondData;
         item?: JobExecution;
@@ -219,7 +219,7 @@ export type AppStackParamList = {
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
-    EditPersonalInformationScreens: undefined;
+    EditPersonalInformationScreen: undefined;
     AquacultureManagement: undefined;
     MemberManagement: undefined;
     AddAquaculture: undefined;
@@ -295,7 +295,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
-            <Stack.Screen name="CycleDetail" component={CycleDetailScreen} />
+            <Stack.Screen name="EditCycle" component={EditCycleScreen} />
             <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
@@ -347,8 +347,8 @@ export const AppStack: React.FC = () => {
 
             <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
             <Stack.Screen
-                name="EditPersonalInformationScreens"
-                component={EditPersonalInformationScreens}
+                name="EditPersonalInformationScreen"
+                component={EditPersonalInformationScreen}
             />
         </Stack.Navigator>
     );

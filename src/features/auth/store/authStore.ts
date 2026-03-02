@@ -171,6 +171,7 @@ export const useAuthStore = create<AuthState>()(
                     accessTokenExpires: null,
                     isAuthenticated: false,
                     isSessionExpired: false,
+                    userProfile: null,
                 });
 
                 try {
