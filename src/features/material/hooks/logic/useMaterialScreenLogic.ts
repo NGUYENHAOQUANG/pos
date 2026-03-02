@@ -90,7 +90,7 @@ export const useMaterialScreenLogic = (): UseMaterialScreenLogicReturn => {
     // 5. Actions (Navigation)
     const actions = useMemo(
         () => ({
-            createImport: () => navigation.navigate('AddWarehouse', {}),
+            createImport: () => navigation.navigate('AddImportReceipt', {}),
             createExport: () => navigation.navigate('AddExportWarehouse', {}),
             createInventory: () => navigation.navigate('AddInventory', {}),
             createMaterial: () => navigation.navigate('AddMaterial', {}),

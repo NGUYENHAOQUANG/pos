@@ -75,6 +75,14 @@ export default function VerifyOTPScreen() {
         };
     }, []);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            otpInputRef.current?.focusFirst();
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     // Calculate remaining countdown based on real elapsed time
     const calculateRemainingTime = React.useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -245,7 +253,7 @@ export default function VerifyOTPScreen() {
             )}
 
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'android' ? 'padding' : undefined}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.keyboardView}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
             >

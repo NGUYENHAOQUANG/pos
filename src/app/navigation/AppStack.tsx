@@ -48,7 +48,7 @@ import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shri
 // Material screens
 import { AddMaterialScreen } from '@/features/material/screens/material/AddMaterialScreen';
 import { EditMaterialScreen } from '@/features/material/screens/material/EditMaterialScreen';
-import { AddWarehouseScreen } from '@/features/material/screens/warehouse/AddWarehouseScreen';
+import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
 import { AddExportWarehouseScreen } from '@/features/material/screens/warehouse/AddExportWarehouseScreen';
 import { AddInventoryScreen } from '@/features/material/screens/inventory/AddInventoryScreen';
 
@@ -188,7 +188,7 @@ export type AppStackParamList = {
     // ============== Material Screens (Tab Bar hidden) ==============
     AddMaterial: { onSave?: (data: Omit<IMaterial, 'id'>) => void };
     EditMaterial: { material: IMaterial; onSave?: (data: IMaterial) => void };
-    AddWarehouse: {
+    ImportReceiptFormScreen: {
         importReceiptId?: string;
         availableMaterials?: IMaterial[];
         onSave?: (data: Omit<ImportReceipt, 'id'>) => void;
@@ -306,7 +306,7 @@ export const AppStack: React.FC = () => {
             {/* ============== Material Screens ============== */}
             <Stack.Screen name="AddMaterial" component={AddMaterialScreen} />
             <Stack.Screen name="EditMaterial" component={EditMaterialScreen} />
-            <Stack.Screen name="AddWarehouse" component={AddWarehouseScreen} />
+            <Stack.Screen name="ImportReceiptFormScreen" component={ImportReceiptFormScreen} />
             <Stack.Screen name="AddExportWarehouse" component={AddExportWarehouseScreen} />
             <Stack.Screen name="AddInventory" component={AddInventoryScreen} />
 

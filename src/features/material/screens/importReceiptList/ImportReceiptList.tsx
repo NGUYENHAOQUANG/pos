@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { spacing, colors } from '@/styles';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { ImportReceiptCard } from './ImportReceiptCard';
+import { ImportReceiptCard } from '../../components/importReceipt/ImportReceiptCard';
 import { useInfiniteImportReceipts } from '@/features/material/hooks';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
@@ -20,7 +20,7 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
     const warehouseId = warehouses?.[0]?.id;
 
     // 2. Prepare Params
-    const warehouseParams = React.useMemo(
+    const warehouseParams = useMemo(
         () => ({
             ReceiptCode: searchText || undefined,
             WarehouseId: warehouseId || undefined,
@@ -40,11 +40,23 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
         isFetchingNextPage,
     } = useInfiniteImportReceipts(warehouseParams);
 
-    const handleLoadMore = () => {
+    const handleLoadMore = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
         }
-    };
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
+        return <ImportReceiptCard item={item} />;
+    }, []);
+
+    const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
+
+    const handleEmptyPress = useCallback(() => {
+        if (onPressCreate) {
+            onPressCreate();
+        }
+    }, [onPressCreate]);
 
     if (isLoading) {
         return (
@@ -54,16 +66,12 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
         );
     }
 
-    const renderItem = ({ item }: { item: ImportReceipt }) => {
-        return <ImportReceiptCard item={item} />;
-    };
-
     return (
         <View style={styles.container}>
             <FlatList
                 data={receipts}
                 renderItem={renderItem}
-                keyExtractor={item => item.id}
+                keyExtractor={keyExtractor}
                 contentContainerStyle={[
                     styles.listContainer,
                     receipts.length === 0 && styles.emptyContent,
@@ -80,9 +88,7 @@ export const ImportReceiptList: React.FC<{ onPressCreate?: () => void }> = ({ on
                         </View>
                     ) : null
                 }
-                ListEmptyComponent={
-                    <MaterialEmptyState tab="history" onPress={onPressCreate || (() => {})} />
-                }
+                ListEmptyComponent={<MaterialEmptyState tab="history" onPress={handleEmptyPress} />}
             />
         </View>
     );
