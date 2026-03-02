@@ -1,29 +1,24 @@
 import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
-import { WarehouseMaterialItem } from '@/features/material/components/warehouse/WarehouseMaterialItem';
+import { MaterialMasterItem } from '@/features/material/components/materialList/MaterialMasterItem';
 import { MaterialItemSkeleton } from '@/features/material/components/materialList/MaterialListSkeleton';
-import { colors } from '@/styles';
-import { materialListStyles } from '@/features/material/styles/materialListStyles';
-import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { colors } from '@/styles';
+import { IMaterial } from '@/features/material/types/material.types';
+import { materialListStyles } from '@/features/material/styles/materialListStyles';
 
-interface WarehouseMaterialListProps {
-    materials: IWarehouseItem[];
+interface MaterialMasterListProps {
+    materials: IMaterial[];
     isLoading?: boolean;
     refreshing?: boolean;
     onRefresh?: () => void;
     onLoadMore?: () => void;
     isFetchingNextPage?: boolean;
     hasNextPage?: boolean;
-    onHistoryPress?: (item: IWarehouseItem) => void;
-    onAdjustmentPress?: (item: IWarehouseItem) => void;
     onPressCreate?: () => void;
-    hideRemaining?: boolean;
-    alwaysExpanded?: boolean;
-    showStatus?: boolean;
 }
 
-export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
+export const MaterialMasterList: React.FC<MaterialMasterListProps> = ({
     materials,
     isLoading,
     refreshing,
@@ -31,12 +26,7 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
     onLoadMore,
     isFetchingNextPage,
     hasNextPage,
-    onHistoryPress,
-    onAdjustmentPress,
     onPressCreate,
-    hideRemaining,
-    alwaysExpanded,
-    showStatus,
 }) => {
     const handleLoadMore = () => {
         if (hasNextPage && !isFetchingNextPage && onLoadMore) {
@@ -64,13 +54,11 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
                 data={materials}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
-                    <WarehouseMaterialItem
+                    <MaterialMasterItem
                         item={item}
-                        onHistoryPress={onHistoryPress}
-                        onAdjustmentPress={onAdjustmentPress}
-                        hideRemaining={hideRemaining}
-                        alwaysExpanded={alwaysExpanded}
-                        showStatus={showStatus}
+                        hideRemaining={true}
+                        alwaysExpanded={true}
+                        showStatus={true}
                     />
                 )}
                 contentContainerStyle={[
@@ -91,7 +79,7 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
                 }
                 ListEmptyComponent={
                     <MaterialEmptyState
-                        tab={MaterialTabType.List}
+                        tab={MaterialTabType.Material}
                         onPress={onPressCreate || (() => {})}
                     />
                 }

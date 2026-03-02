@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { InventoryMaterialItem } from '@/features/material/components/inventory/InventoryMaterialItem';
+import { InventoryMaterialItem } from '@/features/material/components/inventoryList/InventoryMaterialItem';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);

@@ -15,18 +15,18 @@ import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLay
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ExportWarehouseFooter } from '@/features/material/components/exportwarehouse/ExportWarehouseFooter';
 import { ExportWarehouseInformation } from '@/features/material/components/exportwarehouse/ExportWarehouseInformation';
-import { AddWarehouseMaterial } from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import { AddWarehouseMaterial } from '@/features/material/components/AddWarehouseMaterial';
 import { IconTrashOutlined } from '@/assets/icons';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import Animated from 'react-native-reanimated';
-import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
+import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { Input } from '@/shared/components/forms/Input';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
-import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { useExportMaterialActions } from '@/features/material/hooks/logic/useExportMaterialActions';
 import { useDropdownScroll, DropdownScrollContext } from '@/features/material/hooks';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-import { MaterialItem } from '@/features/material/components/warehouse/AddWarehouseMaterial';
+import { MaterialItem } from '@/features/material/components/AddWarehouseMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);

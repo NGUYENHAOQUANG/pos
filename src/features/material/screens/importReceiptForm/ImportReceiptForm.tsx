@@ -7,14 +7,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import Animated from 'react-native-reanimated';
-import { WarehouseInformation } from '@/features/material/components/warehouse/WarehouseInformation';
+import { WarehouseInformation } from '@/features/material/components/importReceiptForm/WarehouseInformation';
 import {
     AddWarehouseMaterial,
     MaterialItem,
-} from '@/features/material/components/warehouse/AddWarehouseMaterial';
+} from '@/features/material/components/AddWarehouseMaterial';
 import { Loading } from '@/shared/components/ui/Loading';
 import { colors, spacing, borderRadius } from '@/styles';
-import { ConfirmSubmiss } from '@/features/material/components/warehouse/ConfirmSubmiss';
+import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { WarehouseFooter } from '@/features/material/components/warehouse/WarehouseFooter';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { IconTrashOutlined } from '@/assets/icons';

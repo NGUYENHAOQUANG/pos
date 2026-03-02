@@ -2,13 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import {
-    DropdownMaterial,
-    DropdownOption,
-} from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { Input } from '@/shared/components/forms/Input';
 import { numericStringSchema } from '@/shared/utils/validation';
-import { InventoryItem } from './InventoryMaterialList';
+import { InventoryItem } from '../inventory/InventoryMaterialList';
 
 interface InventoryMaterialItemProps {
     item: InventoryItem;

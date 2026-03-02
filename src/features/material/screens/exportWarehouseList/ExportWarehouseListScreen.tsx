@@ -1,12 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { ExportWarehouseMaterialList } from '@/features/material/components/exportwarehouse/ExportWarehouseMaterialList';
-import { spacing } from '@/styles';
+import { ExportWarehouseMaterialList } from '@/features/material/components/exportWarehouseList/ExportWarehouseMaterialList';
 import { useInfiniteExportWarehouse } from '@/features/material/hooks';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,10 +14,7 @@ export const ExportWarehouseListScreen: React.FC = () => {
     const searchText = useMaterialStore(state => state.searchText);
     const filterMaterialName = useMaterialStore(state => state.filterMaterialName);
     const exportReceiptStatusFilter = useMaterialStore(state => state.exportReceiptStatusFilter);
-    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
-        ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
-    });
-    const warehouseId = warehouses?.[0]?.id;
+    const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Prepare Params
     const exportWarehouseParams = React.useMemo(() => {
@@ -57,29 +50,23 @@ export const ExportWarehouseListScreen: React.FC = () => {
         isFetchingNextPage,
     } = useInfiniteExportWarehouse(exportWarehouseParams);
 
-    const { isConnected } = useNetInfo();
-    const showSkeleton =
-        isWarehousesLoading || isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+    const { showSkeleton, isRefreshing } = getListState({
+        isLoading,
+        isRefetching,
+        isFetchingNextPage,
+        itemsCount: receipts.length,
+    });
 
     return (
-        <View style={styles.container}>
-            <ExportWarehouseMaterialList
-                receipts={receipts}
-                isLoading={showSkeleton}
-                refreshing={isRefetching && !isFetchingNextPage}
-                onRefresh={refetch}
-                onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
-                onLoadMore={fetchNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                hasNextPage={hasNextPage}
-            />
-        </View>
+        <ExportWarehouseMaterialList
+            receipts={receipts}
+            isLoading={showSkeleton}
+            refreshing={isRefreshing}
+            onRefresh={refetch}
+            onPressCreate={() => navigation.navigate('ExportWarehouseForm', {})}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: spacing.md,
-    },
-});

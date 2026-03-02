@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { TabType } from '@/features/material/components/HeadingMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
 import { useMaterialStore } from '@/features/material/store';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';

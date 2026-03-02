@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { TabType } from '@/features/material/components/HeadingMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
 
 interface MaterialsState {
     // UI State (for MaterialScreen)

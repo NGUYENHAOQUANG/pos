@@ -4,8 +4,8 @@ import { ZoneHeader } from '@/features/material/components/ZoneHeader';
 import {
     ButtonMetaerial,
     MaterialMenuOverlay,
-} from '@/features/material/components/ButtonMaterial';
-import { HeadingMeterial, TabType } from '@/features/material/components/HeadingMaterial';
+} from '@/features/material/components/material/ButtonMaterial';
+import { HeadingMeterial, TabType } from '@/features/material/components/material/HeadingMaterial';
 import { SearchBarMeterial } from '@/features/material/components/SearchBarMaterial';
 import { ImportReceiptList } from '@/features/material/screens/importReceiptList/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/exportWarehouseList/ExportWarehouseListScreen';
@@ -88,7 +88,6 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                 {selectedTab === TabType.Material && <MaterialMasterListTab />}
                 {selectedTab === TabType.Warehouse && (
                     <WarehouseItemListScreen
-                        onEdit={actions.editMaterial}
                         onHistoryPress={handleHistoryPress}
                         onPressCreate={actions.createMaterial}
                     />

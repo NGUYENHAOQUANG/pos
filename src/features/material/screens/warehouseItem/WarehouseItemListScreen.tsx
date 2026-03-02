@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useCallback } from 'react';
 import { WarehouseMaterialList } from '@/features/material/components/warehouse/WarehouseMaterialList';
 
 import { useNavigation } from '@react-navigation/native';
@@ -8,16 +7,12 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
-import { useWarehouses, useInfiniteWarehouseItems } from '@/features/material/hooks/useWarehouses';
+import { useInfiniteWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useNetInfo } from '@react-native-community/netinfo';
-import { useCallback } from 'react';
+import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 interface WarehouseItemListScreenProps {
-    onEdit?: (item: IWarehouseItem) => void;
     onHistoryPress?: (item: IWarehouseItem) => void;
-    onAdjustmentPress?: (item: IWarehouseItem) => void;
     onPressCreate?: () => void;
     hideRemaining?: boolean;
     alwaysExpanded?: boolean;
@@ -25,9 +20,7 @@ interface WarehouseItemListScreenProps {
 }
 
 export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = ({
-    onEdit,
     onHistoryPress,
-    onAdjustmentPress,
     onPressCreate,
     hideRemaining,
     alwaysExpanded,
@@ -37,23 +30,16 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const searchText = useMaterialStore(state => state.searchText);
     const filterGroup = useMaterialStore(state => state.filterGroup);
-    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
-        ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
-    });
-    const warehouseId = warehouses?.[0]?.id;
+    const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Navigation Handlers
     const handleAdjustmentPress = useCallback(
         (item: IWarehouseItem) => {
-            if (onAdjustmentPress) {
-                onAdjustmentPress(item);
-            } else {
-                navigation.navigate('AddInventory', {
-                    initialMaterial: item,
-                });
-            }
+            navigation.navigate('AddInventory', {
+                initialMaterial: item,
+            });
         },
-        [onAdjustmentPress, navigation]
+        [navigation]
     );
 
     // 3. Prepare Params
@@ -82,34 +68,28 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
         isFetchingNextPage,
     } = useInfiniteWarehouseItems(warehouseId, materialParams, { enabled: !!warehouseId });
 
-    const { isConnected } = useNetInfo();
-    const showSkeleton =
-        isWarehousesLoading || isLoading || (!!isConnected && isRefetching && !isFetchingNextPage);
+    const { showSkeleton, isRefreshing } = getListState({
+        isLoading,
+        isRefetching,
+        isFetchingNextPage,
+        itemsCount: materials.length,
+    });
 
     return (
-        <View style={styles.container}>
-            <WarehouseMaterialList
-                materials={materials}
-                isLoading={showSkeleton}
-                refreshing={isRefetching && !isFetchingNextPage}
-                onRefresh={refetch}
-                onLoadMore={fetchNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                hasNextPage={hasNextPage}
-                onEdit={onEdit}
-                onHistoryPress={onHistoryPress}
-                onAdjustmentPress={handleAdjustmentPress}
-                onPressCreate={onPressCreate}
-                hideRemaining={hideRemaining}
-                alwaysExpanded={alwaysExpanded}
-                showStatus={showStatus}
-            />
-        </View>
+        <WarehouseMaterialList
+            materials={materials}
+            isLoading={showSkeleton}
+            refreshing={isRefreshing}
+            onRefresh={refetch}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+            onHistoryPress={onHistoryPress}
+            onAdjustmentPress={handleAdjustmentPress}
+            onPressCreate={onPressCreate}
+            hideRemaining={hideRemaining}
+            alwaysExpanded={alwaysExpanded}
+            showStatus={showStatus}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-});

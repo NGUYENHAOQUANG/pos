@@ -2,16 +2,8 @@
  * @file dropdownOptions.ts
  * @description Utilities for converting data to dropdown options
  */
-import { IMaterialType, IUnit } from '@/features/material/types/material.types';
-import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
-import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
-
-/**
- * Convert material groups to dropdown options
- */
-export const getMaterialGroupOptions = (groups: IMaterialGroupV2[]): string[] => {
-    return ['Tất cả nhóm vật tư', ...groups.map(g => g.name || '').filter(n => n)];
-};
+import { IMaterialType } from '@/features/material/types/material.types';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 
 /**
  * Convert material types to dropdown options
@@ -46,27 +38,4 @@ export const getMaterialTypeOptions = (
     }
 
     return options;
-};
-
-/**
- * Convert units to dropdown options
- */
-export const getUnitOptions = (units: IUnit[]): DropdownOption[] => {
-    return units.map(u => ({
-        label: u.name,
-        value: u.id,
-    }));
-};
-
-/**
- * Convert materials to dropdown options for selection
- */
-export const getMaterialOptions = (
-    materials: Array<{ name: string; unit?: string | number; unitName?: string }>
-): DropdownOption[] => {
-    return materials.map(m => ({
-        label: m.name,
-        value: m.name,
-        unit: typeof m.unit === 'number' ? String(m.unit) : m.unitName || String(m.unit || ''),
-    }));
 };

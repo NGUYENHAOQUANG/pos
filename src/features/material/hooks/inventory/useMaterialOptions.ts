@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { DropdownOption } from '@/features/material/components/material/DropdownMaterialGroup';
+import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 
 export const useMaterialOptions = (warehouseItems: IWarehouseItem[]): DropdownOption[] => {

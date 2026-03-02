@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { DropdownMaterial } from '@/features/material/components/material/DropdownMaterialGroup';
-import { TabType } from '@/features/material/components/HeadingMaterial';
+import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';

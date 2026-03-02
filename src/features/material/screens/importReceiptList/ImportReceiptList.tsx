@@ -1,14 +1,8 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { spacing, colors } from '@/styles';
-import { ImportReceipt } from '@/features/material/types/importReceipt.types';
-import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { MaterialEmptyState } from '@/features/material/components/EmptyStateCard';
-import { ImportReceiptCard } from '../../components/importReceipt/ImportReceiptCard';
+import { ImportReceiptMaterialList } from '@/features/material/components/importReceiptList/ImportReceiptMaterialList';
 import { useInfiniteImportReceipts } from '@/features/material/hooks';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useMaterialStore } from '@/features/material/store';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useMaterialListState } from '@/features/material/hooks/useMaterialListState';
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,10 +13,7 @@ export const ImportReceiptList: React.FC = () => {
     // 1. Get Filters from Store
     const searchText = useMaterialStore(state => state.searchText);
     const importReceiptStatusFilter = useMaterialStore(state => state.importReceiptStatusFilter);
-    const { data: warehouses, isLoading: isWarehousesLoading } = useWarehouses({
-        ZoneId: useFarmStore(state => state.selectedZoneId) || undefined,
-    });
-    const warehouseId = warehouses?.[0]?.id;
+    const { warehouseId, getListState } = useMaterialListState();
 
     // 2. Prepare Params
     const warehouseParams = useMemo(
@@ -45,72 +36,27 @@ export const ImportReceiptList: React.FC = () => {
         isFetchingNextPage,
     } = useInfiniteImportReceipts(warehouseParams);
 
-    const handleLoadMore = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
-    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-    const renderItem = useCallback(({ item }: { item: ImportReceipt }) => {
-        return <ImportReceiptCard item={item} />;
-    }, []);
-
-    const keyExtractor = useCallback((item: ImportReceipt) => item.id, []);
+    const { showSkeleton, isRefreshing } = getListState({
+        isLoading,
+        isRefetching,
+        isFetchingNextPage,
+        itemsCount: receipts.length,
+    });
 
     const handleEmptyPress = useCallback(() => {
         navigation.navigate('ImportReceiptFormScreen', {});
     }, [navigation]);
 
-    if (isWarehousesLoading || isLoading) {
-        return (
-            <View style={styles.container}>
-                <MaterialLoadingState />
-            </View>
-        );
-    }
-
     return (
-        <View style={styles.container}>
-            <FlatList
-                data={receipts}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
-                contentContainerStyle={[
-                    styles.listContainer,
-                    receipts.length === 0 && styles.emptyContent,
-                ]}
-                showsVerticalScrollIndicator={false}
-                refreshing={isRefetching && !isFetchingNextPage}
-                onRefresh={refetch}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <View style={styles.loaderFooter}>
-                            <ActivityIndicator color={colors.primary} />
-                        </View>
-                    ) : null
-                }
-                ListEmptyComponent={<MaterialEmptyState tab="history" onPress={handleEmptyPress} />}
-            />
-        </View>
+        <ImportReceiptMaterialList
+            receipts={receipts}
+            isLoading={showSkeleton}
+            refreshing={isRefreshing}
+            onRefresh={refetch}
+            onLoadMore={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+            onPressCreate={handleEmptyPress}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: spacing.md,
-    },
-    listContainer: {
-        paddingBottom: 100,
-        flexGrow: 1,
-    },
-    emptyContent: {
-        flex: 1,
-    },
-    loaderFooter: {
-        paddingVertical: spacing.md,
-        alignItems: 'center',
-    },
-});
