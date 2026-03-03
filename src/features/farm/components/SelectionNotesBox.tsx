@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
 import { colors, spacing } from '@/styles';
+import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 
 interface SelectionNotesBoxProps {
     notes: string;
@@ -19,6 +20,15 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
         setIsFocused(false);
     };
 
+    const handleChangeText = (text: string) => {
+        if (text.length > 1999) {
+            showLimitCharacterToast();
+            onNotesChange(text.substring(0, 1999));
+        } else {
+            onNotesChange(text);
+        }
+    };
+
     return (
         <>
             <View style={styles.container}>
@@ -30,11 +40,12 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
                         placeholder="Nhập ghi chú"
                         placeholderTextColor={colors.borderSubtle}
                         value={notes}
-                        onChangeText={onNotesChange}
+                        onChangeText={handleChangeText}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         multiline
                         textAlignVertical="top"
+                        maxLength={2000}
                     />
                 </View>
             </View>
@@ -66,6 +77,7 @@ const styles = StyleSheet.create({
     },
     textArea: {
         minHeight: 80,
+        maxHeight: 160,
         paddingVertical: 5,
         paddingHorizontal: 12,
         backgroundColor: colors.white,
