@@ -39,7 +39,6 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
             if (item.status === 'Framing') return 'active';
             if (item.status === 'Available') return 'preparing';
 
-            // Null or other values -> no tag
             return undefined;
         };
 
@@ -51,12 +50,16 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
             const displayActivity = latestActivity?.lastActivity || item.lastActivity;
             const computedStatus = getStatus(item);
 
-            const displayType = item.type;
+            const displayType = item.type!;
 
             return (
                 <ShrimpPond
                     name={item.name}
-                    area={item.areaSqm ? `${Number(item.areaSqm).toFixed(2)} m²` : item.area || ''}
+                    area={
+                        item.areaSqm
+                            ? `${Number(item.areaSqm).toFixed(2)} m²`
+                            : item.area?.toString() || ''
+                    }
                     type={displayType}
                     lastUpdate={latestActivity?.lastUpdate || item.lastUpdate}
                     lastActivity={displayActivity}

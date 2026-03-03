@@ -18,7 +18,8 @@ import {
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import type { TransferMeta, PondData } from '@/features/farm/types/farm.types';
+import type { TransferMeta } from '@/features/farm/types/farm.types';
+import { PondData } from '@/features/farm/types/pond.types';
 import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 import { useCreateStockTransfer } from '@/features/farm/hooks/useStockTransfer';
 import { usePondsByZone } from '@/features/farm/hooks/usePonds';
@@ -97,11 +98,8 @@ export const AddTransferScreen: React.FC = () => {
         let availablePonds: PondData[] = [];
 
         // Priority 1: API data (by zone)
-        if (pondsByZoneData?.pages) {
-            availablePonds = pondsByZoneData.pages.reduce<PondData[]>(
-                (acc, page) => [...acc, ...(page.items || [])],
-                []
-            );
+        if (pondsByZoneData && pondsByZoneData.length > 0) {
+            availablePonds = pondsByZoneData;
         }
         // Priority 2: Fallback to farmStore ponds
         else if (ponds && ponds.length > 0) {

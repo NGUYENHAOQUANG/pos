@@ -137,6 +137,7 @@ export const API_ENDPOINTS = {
         LIST: '/zone',
         DETAIL: (id: string) => `/zone/${id}`,
         PONDS: (id: string) => `/zone/${id}/ponds`,
+        POND_DETAIL: (zoneId: string, pondId: string) => `/zone/${zoneId}/ponds/${pondId}`,
         SEASONS: {
             LIST: (zoneId: string) => `/zone/${zoneId}/seasons`,
             DETAIL: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,

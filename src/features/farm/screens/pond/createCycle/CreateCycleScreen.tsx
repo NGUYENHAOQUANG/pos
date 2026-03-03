@@ -82,7 +82,8 @@ export const CreateCycleScreen: React.FC = () => {
         enabled: !storePond && !!effectiveZoneId,
     });
 
-    const pond = storePond || fetchedPondsData?.items?.find((p: { id: string }) => p.id === pondId);
+    const pond =
+        storePond || fetchedPondsData?.data?.items?.find((p: { id: string }) => p.id === pondId);
 
     // Fetch Details if in Edit Mode
     const { data: detailData, isLoading: isLoadingDetail } = useCycleDetail(

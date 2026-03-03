@@ -26,7 +26,7 @@ import {
 interface ShrimpPondProps {
     name: string;
     area: string;
-    type: PondType | string;
+    type: PondType;
     lastUpdate?: string;
     lastActivity?: string;
     onInfoPress?: () => void;

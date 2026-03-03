@@ -1,11 +1,8 @@
 import { StateCreator } from 'zustand';
-import {
-    OperationType,
-    PondData,
-    PondType,
-    PondTypeOperation,
-} from '@/features/farm/types/farm.types';
+import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
+import { PondData } from '@/features/farm/types/pond.types';
 import { pondApi } from '@/features/farm/api/pondApi';
+import { pondOperationApi } from '@/features/farm/api/pondOperationApi';
 
 export interface PondListStore {
     ponds: PondData[];
@@ -21,7 +18,7 @@ export interface PondListStore {
     isLoadingMasterData: boolean; // Loading state for master data
 
     fetchPondsByZone: (
-        zoneId: number | string,
+        zoneId: string,
         updates?: { isBackground?: boolean; isLoadMore?: boolean }
     ) => Promise<void>;
     fetchMasterData: () => Promise<void>;
@@ -72,10 +69,12 @@ export const createPondListStore: StateCreator<
         }
 
         try {
-            const { items: ponds, total } = await pondApi.getPondsByZone(zoneId, {
+            const response = await pondApi.getPondsByZone(zoneId, {
                 PageSize: pageSize,
-                PageNumber: currentPage,
+                Page: currentPage,
             });
+            const ponds = response.data?.items || [];
+            const total = response.data?.totalCount || ponds.length;
 
             // Update total count
             set({ totalCount: total });
@@ -93,6 +92,7 @@ export const createPondListStore: StateCreator<
                     pond.type = matchedType;
                 } else {
                     if (typeId) {
+                        // @ts-ignore
                         pond.type = typeId;
                     }
                 }
@@ -132,13 +132,22 @@ export const createPondListStore: StateCreator<
         set({ isLoadingMasterData: true });
         try {
             // Step 1: Fetch pond types and operation types
-            const [types, operationTypes] = await Promise.all([
+            // Step 1: Fetch pond types and operations
+            const [typesResp, allOpsResp] = await Promise.all([
                 pondApi.getPondTypes(),
-                pondApi.getOperationTypes(),
+                pondOperationApi.getPondOperations(),
             ]);
 
-            // Step 2: Fetch all operations for all pond types at once
-            const allOperations = await pondApi.getPondTypeOperations();
+            const types = typesResp || [];
+            const allOperations = allOpsResp.data || [];
+
+            // For backward compatibility, map allOperations to operationTypes if needed
+            const operationTypes: OperationType[] = allOperations.map(op => ({
+                id: Number(op.operationId) || 0,
+                name: op.operationName || '',
+                createdAt: op.createdAt,
+                lastModifiedAt: op.lastModifiedAt,
+            }));
 
             // operationsByPondType: Record<string, PondTypeOperation[]>
             const operationsByPondType: Record<string, PondTypeOperation[]> = {};
@@ -174,7 +183,7 @@ export const createPondListStore: StateCreator<
     // Get available operations for a pond based on its type
     getOperationsForPond: (pondId: string) => {
         const pond = get().ponds.find(p => p.id === pondId);
-        if (!pond || typeof pond.type === 'string') return [];
+        if (!pond || !pond.type || typeof pond.type === 'string') return [];
 
         const pondTypeId = pond.type.id;
         return get().operationsByPondType[pondTypeId] || [];
