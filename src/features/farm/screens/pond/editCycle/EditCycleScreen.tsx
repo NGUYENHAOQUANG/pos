@@ -14,6 +14,7 @@ import { stockTransferApi } from '@/features/farm/api/stockTransferApi';
 import { usePondsByZone } from '@/features/farm/hooks/usePonds';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 
 import { EditCycleForm } from './EditCycleForm';
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditCycle'>;
@@ -51,7 +52,7 @@ export const EditCycleScreen: React.FC = () => {
     const breedOptions = useFarmStore(state => state.breedOptions);
     // Remove season store dependency, verify API season object directly first
 
-    const calculateDOC = useFarmStore(state => state.calculateDOC);
+    const calculateDOC = pondDetailService.calculateDOC;
     const getPondById = useFarmStore(state => state.getPondById);
     const pond = getPondById(pondId);
 

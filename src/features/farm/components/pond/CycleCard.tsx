@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { formatDate } from '@/features/farm/utils/dateUtils';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 
 interface CycleCardProps {
     cycle: any;
@@ -20,8 +20,6 @@ export const CycleCard: React.FC<CycleCardProps> = ({
     status = 'Chưa hoàn thành',
     onPress,
 }) => {
-    const calculateDOC = useFarmStore(state => state.calculateDOC);
-
     if (!cycle) return null;
 
     const isCompleted = status === 'Hoàn thành';
@@ -35,7 +33,8 @@ export const CycleCard: React.FC<CycleCardProps> = ({
         ? `${startDate} - nay`
         : '- nay';
 
-    const doc = cycle.doc !== undefined ? cycle.doc : calculateDOC(stockingDateStr ?? '');
+    const doc =
+        cycle.doc !== undefined ? cycle.doc : pondDetailService.calculateDOC(stockingDateStr ?? '');
     const stockingQuantity = cycle.stockingQuantity ?? cycle.totalStocking ?? 0;
     const breed = breedName || cycle.breedName || cycle.breedSource || '-';
 

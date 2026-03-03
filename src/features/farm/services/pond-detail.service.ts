@@ -5,6 +5,63 @@ import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMa
 import { parseDate } from '@/features/farm/utils/dateUtils';
 
 export const pondDetailService = {
+    getJobName: (typeStr: string): string => {
+        if (!typeStr) return '-';
+        const typeUpper = typeStr.toUpperCase();
+        const jobNames: Record<string, string> = {
+            FEED: 'Cho ăn',
+            ENVIRONMENT: 'Đo môi trường',
+            WATER_TREATMENT: 'Xử lý nước',
+            WATER_CHANGE: 'Thay nước',
+            CLEAN_POND: 'Rửa ao',
+            SUN_DRY_POND: 'Phơi ao',
+            SHRIMP_INSPECTION: 'Kiểm tra tôm',
+            MEASURE_SIZE: 'Đo kích thước',
+            SIPHON: 'Xi-phông',
+            TROUBLESHOOTING: 'Xử lý sự cố',
+            TRANSFER_POND: 'Sang ao',
+            HARVEST: 'Thu hoạch',
+        };
+        return jobNames[typeUpper] || jobNames[typeStr] || typeStr;
+    },
+
+    getLatestPondActivity: (pondId: string, state: any) => {
+        const allJobsRecords: Record<Exclude<JobType, 'MEASURE_SIZE'>, JobExecution[]> = {
+            FEED: state.feedJobs[pondId] || [],
+            SHRIMP_INSPECTION: state.shrimpInspectionJobs[pondId] || [],
+            ENVIRONMENT: state.environmentJobs[pondId] || [],
+            WATER_TREATMENT: state.waterTreatmentJobs[pondId] || [],
+            WATER_CHANGE: state.waterChangeJobs[pondId] || [],
+            SIPHON: state.siphonJobs[pondId] || [],
+            TROUBLESHOOTING: state.troubleshootingJobs[pondId] || [],
+            TRANSFER_POND: state.transferPondJobs[pondId] || [],
+            CLEAN_POND: state.cleanPondJobs[pondId] || [],
+            SUN_DRY_POND: state.sunDryJobs[pondId] || [],
+            HARVEST: state.harvestJobs[pondId] || [],
+        };
+
+        let maxDate = new Date(0);
+        let latestActivityStr = '';
+        let latestUpdateStr = '';
+
+        Object.entries(allJobsRecords).forEach(([type, items]) => {
+            (items as JobExecution[]).forEach(item => {
+                const [hours, minutes] = item.time.split(':').map(Number);
+                const date = item.date ? parseDate(item.date) : new Date();
+                date.setHours(hours, minutes, 0, 0);
+                if (date > maxDate) {
+                    maxDate = date;
+                    latestUpdateStr = `${date.toLocaleDateString('vi-VN')}, ${item.time}`;
+                    latestActivityStr = pondDetailService.getJobName(type);
+                }
+            });
+        });
+
+        return latestActivityStr
+            ? { lastUpdate: latestUpdateStr, lastActivity: latestActivityStr }
+            : null;
+    },
+
     calculateDOC: (startDateString: string | null | undefined): number => {
         if (!startDateString) return 0;
         const start =
