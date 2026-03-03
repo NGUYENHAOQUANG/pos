@@ -14,7 +14,7 @@ export const useFarmMaterials = () => {
     const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
     const defaultWarehouseId = warehouses?.[0]?.id;
 
-    const { data: warehouseItemsData } = useWarehouseItems(
+    const { data: warehouseItemsData, isLoading: warehouseItemsLoading } = useWarehouseItems(
         defaultWarehouseId,
         {
             PageSize: 1000,
@@ -53,5 +53,6 @@ export const useFarmMaterials = () => {
     return {
         materials,
         materialMap,
+        isLoading: warehouseItemsLoading,
     };
 };

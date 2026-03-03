@@ -1,0 +1,307 @@
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { colors } from '@/styles';
+import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
+import {
+    MaterialSelectionBox,
+    SelectedMaterialItem,
+} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
+import InfoCircleFilled from '@/assets/Icon/IconFarm/InfoCircleFilled.svg';
+import ActivitySchedule, {
+    ScheduleItem,
+} from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
+import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
+import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
+import { IMaterial } from '@/features/material/types/material.types';
+
+export interface FeedingFormProps {
+    isEditMode: boolean;
+    isLoadingDetail: boolean;
+    isSubmitting: boolean;
+    initialData: FeedingFormValues | undefined;
+    materialsList: IMaterial[];
+    onSubmit: (data: FeedingFormValues) => void;
+}
+
+export interface FeedingFormRef {
+    submit: () => void;
+}
+
+export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
+    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, materialsList, onSubmit }, ref) => {
+        const initializedRef = useRef(false);
+
+        const { control, handleSubmit, reset, watch } = useForm<FeedingFormValues>({
+            resolver: zodResolver(feedingFormSchema),
+            defaultValues: {
+                executionDate: new Date(),
+                materials: [],
+                mode: 'manual',
+                schedules: [],
+                note: '',
+            },
+        });
+
+        const currentMode = watch('mode');
+
+        useEffect(() => {
+            if (initialData && !initializedRef.current) {
+                reset(initialData);
+                initializedRef.current = true;
+            }
+        }, [initialData, reset]);
+
+        React.useImperativeHandle(
+            ref,
+            () => ({
+                submit: () => {
+                    handleSubmit((data: FeedingFormValues) => {
+                        onSubmit(data);
+                    }, handleFeedingFormError)();
+                },
+            }),
+            [handleSubmit, onSubmit]
+        );
+
+        return (
+            <View
+                pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
+                style={{ opacity: isSubmitting ? 0.7 : 1 }}
+            >
+                {/* General Info Section */}
+                <Controller
+                    name="executionDate"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                        <GeneralInfoBox date={value} onDateChange={onChange} disabledDate={true} />
+                    )}
+                />
+
+                {/* material selection */}
+                <Controller
+                    name="materials"
+                    control={control}
+                    render={({ field: { value, onChange } }) => {
+                        // Map internal form array to SelectedMaterialItem[] for component
+                        const selectedItems: SelectedMaterialItem[] = value
+                            .filter(m => m.rawMaterial !== undefined && m.rawMaterial !== null)
+                            .map(m => ({
+                                material: m.rawMaterial as IMaterial,
+                                quantity: m.quantity,
+                                unit: m.unit,
+                            }));
+
+                        const handleMaterialsChange = (newMats: SelectedMaterialItem[]) => {
+                            onChange(
+                                newMats.map(m => ({
+                                    materialId: m.material.id,
+                                    materialName: m.material.name,
+                                    quantity: m.quantity,
+                                    unit: m.unit,
+                                    rawMaterial: m.material,
+                                }))
+                            );
+                        };
+
+                        return (
+                            <MaterialSelectionBox
+                                selectedMaterials={selectedItems}
+                                onMaterialsChange={handleMaterialsChange}
+                                materials={materialsList}
+                            />
+                        );
+                    }}
+                />
+
+                {/* Machine control logic (Only in Add mode typically) */}
+                {!isEditMode && (
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
+                        <View style={styles.fullWidthDivider} />
+
+                        <View style={styles.infoBox}>
+                            <InfoCircleFilled width={16} height={16} style={styles.infoIcon} />
+                            <Text style={styles.infoText}>
+                                Chọn Thủ công để chạy ngay, hoặc Lịch trình để thiết lập nhiều lượt
+                                hoạt động trong ngày
+                            </Text>
+                        </View>
+
+                        <Controller
+                            name="mode"
+                            control={control}
+                            render={({ field: { value, onChange } }) => (
+                                <View style={styles.radioGroup}>
+                                    <TouchableOpacity
+                                        style={styles.radioItem}
+                                        onPress={() => onChange('manual')}
+                                        activeOpacity={0.8}
+                                    >
+                                        <View
+                                            style={[
+                                                styles.radioOuter,
+                                                value === 'manual' && styles.radioOuterSelected,
+                                            ]}
+                                        >
+                                            {value === 'manual' && (
+                                                <View style={styles.radioInner} />
+                                            )}
+                                        </View>
+                                        <Text style={styles.radioLabel}>Thủ công</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.radioItem}
+                                        onPress={() => onChange('schedule')}
+                                        activeOpacity={0.8}
+                                    >
+                                        <View
+                                            style={[
+                                                styles.radioOuter,
+                                                value === 'schedule' && styles.radioOuterSelected,
+                                            ]}
+                                        >
+                                            {value === 'schedule' && (
+                                                <View style={styles.radioInner} />
+                                            )}
+                                        </View>
+                                        <Text style={styles.radioLabel}>Lịch trình</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        />
+                    </View>
+                )}
+
+                {/* Activity schedule when Mode is Schedule */}
+                {!isEditMode && currentMode === 'schedule' && (
+                    <Controller
+                        name="schedules"
+                        control={control}
+                        render={({ field: { value, onChange } }) => {
+                            const valMapped: ScheduleItem[] = value.map(s => ({
+                                startTime: s.startTime || null,
+                                endTime: s.endTime || null,
+                                id: s.id,
+                            })) as ScheduleItem[];
+
+                            const handleScheduleChange = (items: ScheduleItem[]) => {
+                                onChange(
+                                    items.map(i => ({
+                                        startTime: i.startTime,
+                                        endTime: i.endTime,
+                                        id: i.id,
+                                    }))
+                                );
+                            };
+
+                            return (
+                                <ActivitySchedule
+                                    schedules={valMapped}
+                                    onUpdateSchedules={handleScheduleChange}
+                                    style={styles.activitySchedule}
+                                    titleStyle={styles.activityScheduleTitle}
+                                />
+                            );
+                        }}
+                    />
+                )}
+
+                {/* Note Selection */}
+                <Controller
+                    name="note"
+                    control={control}
+                    render={({ field: { value, onChange } }) => (
+                        <SelectionNotesBox notes={value || ''} onNotesChange={onChange} />
+                    )}
+                />
+
+                <View style={styles.spacer} />
+            </View>
+        );
+    }
+);
+
+const styles = StyleSheet.create({
+    card: {
+        backgroundColor: colors.white,
+        padding: 16,
+        marginTop: 8,
+        marginHorizontal: 0,
+        width: '100%',
+    },
+    sectionTitle: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: 12,
+    },
+    fullWidthDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+        marginBottom: 16,
+    },
+    radioGroup: {
+        flexDirection: 'row',
+        gap: 24,
+    },
+    radioItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    radioOuter: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: colors.gray[300],
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 8,
+    },
+    radioOuterSelected: {
+        borderColor: colors.primary,
+    },
+    radioInner: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: colors.primary,
+    },
+    radioLabel: {
+        fontSize: 14,
+        color: colors.text,
+    },
+    infoBox: {
+        backgroundColor: colors.backgroundPrimary,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.geekblue[300],
+        marginBottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    infoIcon: {
+        marginRight: 8,
+    },
+    infoText: {
+        flex: 1,
+        fontSize: 14,
+        color: colors.text,
+        lineHeight: 18,
+    },
+    activitySchedule: {
+        marginTop: 8,
+    },
+    activityScheduleTitle: {
+        fontSize: 14,
+    },
+    spacer: {
+        height: 80,
+    },
+});

@@ -34,9 +34,8 @@ import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measur
 import { HandleProblemScreen } from '@/features/farm/screens/handleProblem/HandleProblemScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
 import { SunDryPondLogScreen } from '@/features/farm/screens/handleProblem/SunDryPondLogScreen';
-import { AddFeederScreens } from '@/features/farm/screens/pondwork/feed/AddFeederScreens';
-import { EditFeederScreens } from '@/features/farm/screens/pondwork/feed/EditFeederScreens';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
@@ -112,10 +111,14 @@ export type AppStackParamList = {
     MainTabs: { screen: string; params?: any } | undefined;
 
     // ============== Farm Screens (Tab Bar hidden) ==============
+    ReportView: undefined;
+
+    // Feeding Module
+    FeedingLog: { pondId: string; title?: string };
+    FeedingManagement: { pondId: string; jobId?: string; itemToEdit?: JobExecution }; // Màn hình Container gộp
+
+    // Job/Task Module
     PondDetail: { pondId: string; zoneId: string };
-    FeedTheShrimp: { pondId: string };
-    EditFeeder: { pondId: string; jobId?: string; itemToEdit?: JobExecution };
-    FeedingLog: { pondId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
     ShrimpInspectionScreen: {
@@ -272,8 +275,7 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Farm Screens ============== */}
             <Stack.Screen name="PondDetail" component={PondDetailScreen} />
-            <Stack.Screen name="FeedTheShrimp" component={AddFeederScreens} />
-            <Stack.Screen name="EditFeeder" component={EditFeederScreens} />
+            <Stack.Screen name="FeedingManagement" component={FeedingManagementScreens} />
             <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
             <Stack.Screen name="PondInfo" component={PondInfoScreen} />
             <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />

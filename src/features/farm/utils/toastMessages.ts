@@ -1,12 +1,14 @@
 import Toast from 'react-native-toast-message';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
+import { FieldErrors } from 'react-hook-form';
+import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 
 /**
  * Toast message configurations for different job types
  */
 const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>> = {
     FEED: {
-        add: 'Đã thêm cho ăn thành công',
+        add: 'Đã cho ăn thành công',
         edit: 'Đã cập nhật cho ăn thành công',
     },
     SHRIMP_INSPECTION: {
@@ -91,4 +93,30 @@ export const showEditJobSuccessToast = (jobType: JobType) => {
         position: 'top',
         visibilityTime: 3000,
     });
+};
+
+//feeding
+export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) => {
+    if (errors.materials?.root?.message || errors.materials?.message) {
+        Toast.show({
+            type: 'error',
+            text1: 'Vui lòng chọn vật tư',
+            position: 'top',
+            visibilityTime: 3000,
+        });
+    } else if (errors.executionDate) {
+        Toast.show({
+            type: 'error',
+            text1: 'Vui lòng chọn thời gian',
+            position: 'top',
+            visibilityTime: 3000,
+        });
+    } else {
+        Toast.show({
+            type: 'error',
+            text1: 'Vui lòng kiểm tra lại dữ liệu nhập',
+            position: 'top',
+            visibilityTime: 3000,
+        });
+    }
 };
