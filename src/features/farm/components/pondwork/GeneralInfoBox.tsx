@@ -162,14 +162,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             return () => {
                 if (!isSaved.current && sessionUploadedFileIds.current.length > 0) {
                     sessionUploadedFileIds.current.forEach(id => {
-                        documentApi
-                            .delete(id)
-                            .catch(err =>
-                                console.error(
-                                    `[GeneralInfoBox] Delete failed (cleanup): ${id}`,
-                                    err
-                                )
-                            );
+                        documentApi.delete(id).catch(() => {});
                     });
                 }
             };
@@ -179,15 +172,25 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         useEffect(() => {
             if (initialDate) {
                 initialDateValue.current = initialDate;
-                setSelectedDate(initialDate);
-                setHasDateChanged(false);
+                setSelectedDate(prev => {
+                    if (prev.getTime() !== initialDate.getTime()) {
+                        setHasDateChanged(false);
+                        return initialDate;
+                    }
+                    return prev;
+                });
             }
         }, [initialDate]);
 
         // Sync with external imageUris prop (for edit mode)
         useEffect(() => {
             if (initialImageUris !== undefined) {
-                setImageUris(initialImageUris);
+                setImageUris(prev => {
+                    if (JSON.stringify(prev) !== JSON.stringify(initialImageUris)) {
+                        return initialImageUris;
+                    }
+                    return prev;
+                });
             }
 
             // Pre-fill uploadedFilesMap for existing images when document IDs are provided.
@@ -243,8 +246,9 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                     !isMounted.current ||
                                     !uploadedDocs?.length ||
                                     !uploadedDocs[0].id
-                                )
+                                ) {
                                     return;
+                                }
                                 const docId = uploadedDocs[0].id;
                                 sessionUploadedFileIds.current.push(docId);
                                 uploadedFilesMap.current[uri] = docId;
@@ -272,8 +276,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         }
                     );
                     return granted === PermissionsAndroid.RESULTS.GRANTED;
-                } catch (err) {
-                    console.warn(err);
+                } catch {
                     return false;
                 }
             }
@@ -282,8 +285,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
 
         const uploadFile = async (asset: Asset) => {
             if (!asset.uri) return;
-
-            let uploadSuccess = false;
 
             try {
                 // Optimistically update UI
@@ -314,16 +315,10 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     const docId = uploadedDocs[0].id;
                     sessionUploadedFileIds.current.push(docId);
                     uploadedFilesMap.current[uri] = docId;
-                    uploadSuccess = true;
+                    setUploadingUris(prev => prev.filter(u => u !== uri));
                 }
-            } catch (error) {
-                console.error('[GeneralInfoBox] Upload failed', error);
-                // Khi mất mạng: không hiện Alert, giữ loading spinner trên ô ảnh (NetworkStatusModal sẽ thông báo khi quay lại app)
-            } finally {
-                // Chỉ ẩn loading khi upload thành công
-                if (isMounted.current && asset.uri && uploadSuccess) {
-                    setUploadingUris(prev => prev.filter(u => u !== asset.uri));
-                }
+            } catch {
+                // Keep image in UI but silent fail
             }
         };
 
@@ -395,8 +390,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
 
                     // Update UI after successful delete
                     setImageUris(prev => prev.filter((_, i) => i !== index));
-                } catch (error) {
-                    console.error(`[GeneralInfoBox] Failed to remove file: ${idToRemove}`, error);
+                } catch {
                     Alert.alert('Lỗi', 'Không thể xóa ảnh. Vui lòng thử lại.');
                 } finally {
                     setDeletingUris(prev => prev.filter(u => u !== uriToRemove)); // Stop deleting loading
