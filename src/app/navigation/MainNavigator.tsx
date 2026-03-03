@@ -17,7 +17,7 @@ import { colors } from '@/styles';
 import { SvgProps } from 'react-native-svg';
 
 // Main screens only (no nested stacks)
-import { ShrimpPondListScreens } from '@/features/farm/screens/pond_list';
+import { ShrimpPondListScreens } from '@/features/farm/screens/pond_list/ShrimpPondListScreens';
 import { DeviceControlScreens } from '@/features/control/screens/DeviceControlScreens';
 import { DevicesInPondScreens } from '@/features/control/screens/devices/DeviceInPondScreens'; // Import Control Detail
 import { MaterialScreen } from '@/features/material/screens/material';

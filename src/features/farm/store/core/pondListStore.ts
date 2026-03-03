@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand';
 import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
 import { pondApi } from '@/features/farm/api/pondApi';
+import { pondOperationApi } from '@/features/farm/api/pondOperationApi';
 
 export interface PondListStore {
     ponds: PondData[];
@@ -91,6 +92,7 @@ export const createPondListStore: StateCreator<
                     pond.type = matchedType;
                 } else {
                     if (typeId) {
+                        // @ts-ignore
                         pond.type = typeId;
                     }
                 }
@@ -130,17 +132,22 @@ export const createPondListStore: StateCreator<
         set({ isLoadingMasterData: true });
         try {
             // Step 1: Fetch pond types and operation types
-            const [typesResp, opTypesResp] = await Promise.all([
+            // Step 1: Fetch pond types and operations
+            const [typesResp, allOpsResp] = await Promise.all([
                 pondApi.getPondTypes(),
-                pondApi.getOperationTypes(),
+                pondOperationApi.getPondOperations(),
             ]);
 
-            const types = typesResp.data || [];
-            const operationTypes = opTypesResp.data || [];
-
-            // Step 2: Fetch all operations for all pond types at once
-            const allOpsResp = await pondApi.getPondTypeOperations();
+            const types = typesResp || [];
             const allOperations = allOpsResp.data || [];
+
+            // For backward compatibility, map allOperations to operationTypes if needed
+            const operationTypes: OperationType[] = allOperations.map(op => ({
+                id: Number(op.operationId) || 0,
+                name: op.operationName || '',
+                createdAt: op.createdAt,
+                lastModifiedAt: op.lastModifiedAt,
+            }));
 
             // operationsByPondType: Record<string, PondTypeOperation[]>
             const operationsByPondType: Record<string, PondTypeOperation[]> = {};

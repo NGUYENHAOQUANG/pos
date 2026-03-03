@@ -1,307 +1,270 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
-import { JOB_TYPES, PondData, JobExecution } from '@/features/farm/types/farm.types';
-import { parseDate } from '@/features/farm/utils/dateUtils';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+
+import { AppStackParamList } from '@/app/navigation/AppStack';
+import { PondData, JOB_TYPES, JobExecution } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 
-type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
-export const usePondJobHandlers = (
-    pond: PondData | undefined,
-    setIsMeasureSizeModalVisible: (visible: boolean) => void,
-    apiMeasureSizeJobs: JobExecution[]
-) => {
+export type JobHandler = () => void;
+export type JobEditHandler = (item: JobExecution) => void;
+export type JobLogHandler = () => void;
+
+interface UsePondJobNavigateHandlersParams {
+    pond?: PondData;
+    handleTransferPond?: JobHandler;
+}
+
+/**
+ * Tạo sẵn map handler điều hướng theo JobType cho màn hồ tôm.
+ * Giúp ShrimpFarmScreens (và màn khác) dùng lại logic điều hướng một cách gọn gàng.
+ */
+export const usePondJobNavigateHandlers = ({
+    pond,
+    handleTransferPond,
+}: UsePondJobNavigateHandlersParams): Partial<Record<JobType, JobHandler>> => {
     const navigation = useNavigation<NavigationProp>();
 
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
+    return useMemo(
+        () => ({
+            [JOB_TYPES.FEED]: () => {
+                if (!pond?.id) return;
+                navigation.navigate('FeedTheShrimp', { pondId: pond.id });
+            },
 
-    // Use hooks to get cycle data
-    const activeCycle = useActiveCycle(pond?.id || '');
-    const { data: cyclesData } = useCyclesByPond(pond?.id || '');
-    const cycles = useMemo(() => cyclesData || [], [cyclesData]);
+            [JOB_TYPES.SHRIMP_INSPECTION]: () => {
+                if (!pond) return;
+                navigation.navigate('ShrimpInspectionScreen', { pond });
+            },
 
-    const handleAddJobItem = useCallback(
-        (type: JobType) => {
-            if (!pond?.id) return;
+            [JOB_TYPES.MEASURE_SIZE]: () => {
+                if (!pond) return;
+                navigation.navigate('MeasureShrimpSizeScreen', { pond });
+            },
 
-            switch (type) {
-                case JOB_TYPES.FEED:
-                    navigation.navigate('FeedTheShrimp', { pondId: pond.id });
-                    break;
+            [JOB_TYPES.ENVIRONMENT]: () => {
+                if (!pond) return;
+                navigation.navigate('AddEnvironmentScreen', { pond });
+            },
 
-                case JOB_TYPES.SHRIMP_INSPECTION:
-                    navigation.navigate('ShrimpInspectionScreen', { pond });
-                    break;
+            [JOB_TYPES.SIPHON]: () => {
+                if (!pond) return;
+                navigation.navigate('AddSiphonScreen', { pond });
+            },
 
-                case JOB_TYPES.MEASURE_SIZE:
-                    navigation.navigate('MeasureShrimpSizeScreen', { pond });
-                    break;
+            [JOB_TYPES.WATER_TREATMENT]: () => {
+                if (!pond) return;
+                navigation.navigate('AddWaterTreatmentScreen', { pond });
+            },
 
-                case JOB_TYPES.ENVIRONMENT:
-                    navigation.navigate('AddEnvironmentScreen', { pond });
-                    break;
+            [JOB_TYPES.WATER_CHANGE]: () => {
+                if (!pond) return;
+                navigation.navigate('WaterSupply', { pond });
+            },
 
-                case JOB_TYPES.SIPHON:
-                    navigation.navigate('AddSiphonScreen', { pond });
-                    break;
+            [JOB_TYPES.TRANSFER_POND]: () => {
+                if (!handleTransferPond) return;
+                handleTransferPond();
+            },
 
-                case JOB_TYPES.WATER_TREATMENT:
-                    navigation.navigate('AddWaterTreatmentScreen', { pond });
-                    break;
+            [JOB_TYPES.HARVEST]: () => {
+                if (!pond) return;
+                navigation.navigate('AddHarvestScreen', { pond });
+            },
 
-                case JOB_TYPES.WATER_CHANGE:
-                    navigation.navigate('WaterSupply', { pond });
-                    break;
+            [JOB_TYPES.CLEAN_POND]: () => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
+            },
 
-                case JOB_TYPES.TRANSFER_POND: {
-                    // Get latest shrimp size from MEASURE_SIZE jobs
-                    const measureSizeItems = apiMeasureSizeJobs;
+            [JOB_TYPES.SUN_DRY_POND]: () => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+            },
 
-                    // Check if there is no measure size data, show warning modal
-                    if (measureSizeItems.length === 0) {
-                        setIsMeasureSizeModalVisible(true);
-                        return;
-                    }
-
-                    let latestShrimpSize: string | undefined;
-
-                    // Sort by date (newest first), then by time (newest first)
-                    const sorted = [...measureSizeItems].sort((a, b) => {
-                        const dateA = a.date ? parseDate(a.date) : new Date(0);
-                        const dateB = b.date ? parseDate(b.date) : new Date(0);
-
-                        if (dateA.getTime() !== dateB.getTime()) {
-                            return dateB.getTime() - dateA.getTime(); // Newest first
-                        }
-
-                        // If same date, sort by time (newest first)
-                        const timeA = a.time || '00:00';
-                        const timeB = b.time || '00:00';
-                        const [hoursA, minutesA] = timeA.split(':').map(Number);
-                        const [hoursB, minutesB] = timeB.split(':').map(Number);
-                        const totalMinutesA = hoursA * 60 + minutesA;
-                        const totalMinutesB = hoursB * 60 + minutesB;
-
-                        return totalMinutesB - totalMinutesA; // Newest first
-                    });
-
-                    const latestItem = sorted[0];
-                    const latestMeta = latestItem?.meta as { shrimpSize?: string } | undefined;
-                    latestShrimpSize = latestMeta?.shrimpSize;
-
-                    // Get cycle data for current pond
-                    const cycleData =
-                        activeCycle ||
-                        cycles.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
-                        cycles[0] ||
-                        null;
-
-                    navigation.navigate('AddTransferScreen', {
-                        pond,
-                        latestShrimpSize,
-                        cycleData,
-                    });
-                    break;
-                }
-
-                case JOB_TYPES.HARVEST:
-                    navigation.navigate('AddHarvestScreen', { pond });
-                    break;
-
-                case JOB_TYPES.CLEAN_POND:
-                    navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
-                    break;
-
-                case JOB_TYPES.SUN_DRY_POND:
-                    navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
-                    break;
-
-                case JOB_TYPES.TROUBLESHOOTING:
-                    navigation.navigate('HandleProblem', {
-                        pond,
-                        jobType: 'TROUBLESHOOTING' as any,
-                    });
-                    break;
-
-                default: {
-                    const currentItems = getPondJobItems(pond.id, type);
-
-                    // Calculate next index based on max existing label
-                    let maxIndex = 0;
-                    currentItems.forEach(item => {
-                        const match = item.label.match(/Lần (\d+)/);
-                        if (match) {
-                            const index = parseInt(match[1], 10);
-                            if (index > maxIndex) maxIndex = index;
-                        }
-                    });
-                    const nextIndex = maxIndex + 1;
-
-                    const now = new Date();
-                    const timeString = now.toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    });
-
-                    const newItem: JobExecution = {
-                        id: Date.now().toString(),
-                        label: `Lần ${nextIndex}`,
-                        time: timeString,
-                        pondId: pond.id,
-                    };
-
-                    updatePondJob(pond.id, type, [...currentItems, newItem]);
-                    break;
-                }
-            }
-        },
-        [
-            pond,
-            navigation,
-            apiMeasureSizeJobs,
-            setIsMeasureSizeModalVisible,
-            activeCycle,
-            cycles,
-            getPondJobItems,
-            updatePondJob,
-        ]
+            [JOB_TYPES.TROUBLESHOOTING]: () => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', {
+                    pond,
+                    jobType: 'TROUBLESHOOTING',
+                });
+            },
+        }),
+        [navigation, pond, handleTransferPond]
     );
+};
 
-    const handleEditJobItem = useCallback(
-        (type: JobType, item: JobExecution) => {
-            if (!pond?.id) return;
+interface UsePondJobEditHandlersParams {
+    pond?: PondData;
+}
 
-            switch (type) {
-                case JOB_TYPES.FEED:
-                    navigation.navigate('EditFeeder', {
-                        pondId: pond.id,
-                        jobId: item.id,
-                        itemToEdit: item,
-                    });
-                    break;
+/**
+ * Map handler chỉnh sửa job theo JobType.
+ */
+export const usePondJobEditHandlers = ({
+    pond,
+}: UsePondJobEditHandlersParams): Partial<Record<JobType, JobEditHandler>> => {
+    const navigation = useNavigation<NavigationProp>();
 
-                case JOB_TYPES.SHRIMP_INSPECTION:
-                    navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
-                    break;
+    return useMemo(
+        () => ({
+            [JOB_TYPES.FEED]: item => {
+                if (!pond?.id) return;
+                navigation.navigate('EditFeeder', {
+                    pondId: pond.id,
+                    jobId: item.id,
+                    itemToEdit: item,
+                });
+            },
 
-                case JOB_TYPES.MEASURE_SIZE:
-                    navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
-                    break;
+            [JOB_TYPES.SHRIMP_INSPECTION]: item => {
+                if (!pond) return;
+                navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.ENVIRONMENT:
-                    navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
-                    break;
+            [JOB_TYPES.MEASURE_SIZE]: item => {
+                if (!pond) return;
+                navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.SIPHON:
-                    navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
-                    break;
+            [JOB_TYPES.ENVIRONMENT]: item => {
+                if (!pond) return;
+                navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.WATER_TREATMENT:
-                    navigation.navigate('EditWaterTreatmentScreens', {
-                        pondId: pond.id,
-                        jobId: item.id,
-                        pond,
-                        item,
-                        itemToEdit: item,
-                    });
-                    break;
+            [JOB_TYPES.SIPHON]: item => {
+                if (!pond) return;
+                navigation.navigate('AddSiphonScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.WATER_CHANGE:
-                    navigation.navigate('WaterSupply', { pond, item });
-                    break;
+            [JOB_TYPES.WATER_TREATMENT]: item => {
+                if (!pond?.id) return;
+                navigation.navigate('EditWaterTreatmentScreens', {
+                    pondId: pond.id,
+                    jobId: item.id,
+                    pond,
+                    item,
+                    itemToEdit: item,
+                });
+            },
 
-                case JOB_TYPES.TRANSFER_POND:
-                    navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
-                    break;
+            [JOB_TYPES.WATER_CHANGE]: item => {
+                if (!pond) return;
+                navigation.navigate('WaterSupply', { pond, item });
+            },
 
-                case JOB_TYPES.HARVEST:
-                    navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
-                    break;
+            [JOB_TYPES.TRANSFER_POND]: item => {
+                if (!pond) return;
+                navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.CLEAN_POND:
-                    navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
-                    break;
+            [JOB_TYPES.HARVEST]: item => {
+                if (!pond) return;
+                navigation.navigate('AddHarvestScreen', { pond, itemToEdit: item });
+            },
 
-                case JOB_TYPES.SUN_DRY_POND:
-                    navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
-                    break;
+            [JOB_TYPES.CLEAN_POND]: item => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
+            },
 
-                case JOB_TYPES.TROUBLESHOOTING:
-                    navigation.navigate('HandleProblem', {
-                        pond,
-                        item,
-                        jobType: 'TROUBLESHOOTING' as any,
-                    });
-                    break;
+            [JOB_TYPES.SUN_DRY_POND]: item => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
+            },
 
-                default: {
-                    const itemToEdit = item;
-                    const currentItems = getPondJobItems(pond.id, type);
-                    const newItems = currentItems.filter(i => i.id !== itemToEdit.id);
-                    updatePondJob(pond.id, type, newItems);
-                    break;
-                }
-            }
-        },
-        [pond, navigation, getPondJobItems, updatePondJob]
+            [JOB_TYPES.TROUBLESHOOTING]: item => {
+                if (!pond) return;
+                navigation.navigate('HandleProblem', {
+                    pond,
+                    item,
+                    jobType: 'TROUBLESHOOTING',
+                });
+            },
+        }),
+        [navigation, pond]
     );
+};
 
-    const handleJobPress = useCallback(
-        (type: JobType) => {
-            if (!pond?.id) return;
-            switch (type) {
-                case JOB_TYPES.FEED:
-                    navigation.navigate('FeedingLog', { pondId: pond.id });
-                    break;
-                case JOB_TYPES.WATER_TREATMENT:
-                    navigation.navigate('WaterTreatmentLog', { pond });
-                    break;
-                case JOB_TYPES.SHRIMP_INSPECTION:
-                    navigation.navigate('PondworkLogScreen', { pond });
-                    break;
-                case JOB_TYPES.MEASURE_SIZE:
-                    navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
-                    break;
-                case JOB_TYPES.ENVIRONMENT:
-                    navigation.navigate('EnvironmentLogScreen', { pond });
-                    break;
-                case JOB_TYPES.SIPHON:
-                    navigation.navigate('SiphonLog', { pond });
-                    break;
-                case JOB_TYPES.HARVEST:
-                    navigation.navigate('HarvestLog', { pond });
-                    break;
-                case JOB_TYPES.TRANSFER_POND:
-                    navigation.navigate('TransferLog', { pond });
-                    break;
-                case JOB_TYPES.WATER_CHANGE:
-                    navigation.navigate('WaterSupplyLog', { pond });
-                    break;
-                case JOB_TYPES.CLEAN_POND:
-                    navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
-                    break;
-                case JOB_TYPES.SUN_DRY_POND:
-                    navigation.navigate('SunDryPondLog', { pond });
-                    break;
-                case JOB_TYPES.TROUBLESHOOTING:
-                    navigation.navigate('HandleProblemLog', {
-                        pond,
-                        jobType: 'TROUBLESHOOTING' as any,
-                    });
-                    break;
-            }
-        },
-        [pond, navigation]
+interface UsePondJobLogHandlersParams {
+    pond?: PondData;
+}
+
+/**
+ * Map handler xem nhật ký job theo JobType.
+ */
+export const usePondJobLogHandlers = ({
+    pond,
+}: UsePondJobLogHandlersParams): Partial<Record<JobType, JobLogHandler>> => {
+    const navigation = useNavigation<NavigationProp>();
+
+    return useMemo(
+        () => ({
+            [JOB_TYPES.FEED]: () => {
+                if (!pond?.id) return;
+                navigation.navigate('FeedingLog', { pondId: pond.id });
+            },
+
+            [JOB_TYPES.WATER_TREATMENT]: () => {
+                if (!pond?.id) return;
+                navigation.navigate('WaterTreatmentLog', { pondId: pond.id, pond });
+            },
+
+            [JOB_TYPES.SHRIMP_INSPECTION]: () => {
+                if (!pond) return;
+                navigation.navigate('PondworkLogScreen', { pond });
+            },
+
+            [JOB_TYPES.MEASURE_SIZE]: () => {
+                if (!pond) return;
+                navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+            },
+
+            [JOB_TYPES.ENVIRONMENT]: () => {
+                if (!pond) return;
+                navigation.navigate('EnvironmentLogScreen', { pond });
+            },
+
+            [JOB_TYPES.SIPHON]: () => {
+                if (!pond) return;
+                navigation.navigate('SiphonLog', { pond });
+            },
+
+            [JOB_TYPES.HARVEST]: () => {
+                if (!pond) return;
+                navigation.navigate('HarvestLog', { pond });
+            },
+
+            [JOB_TYPES.TRANSFER_POND]: () => {
+                if (!pond) return;
+                navigation.navigate('TransferLog', { pond });
+            },
+
+            [JOB_TYPES.WATER_CHANGE]: () => {
+                if (!pond) return;
+                navigation.navigate('WaterSupplyLog', { pond });
+            },
+
+            [JOB_TYPES.CLEAN_POND]: () => {
+                if (!pond) return;
+                navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
+            },
+
+            [JOB_TYPES.SUN_DRY_POND]: () => {
+                if (!pond) return;
+                navigation.navigate('SunDryPondLog', { pond });
+            },
+
+            [JOB_TYPES.TROUBLESHOOTING]: () => {
+                if (!pond) return;
+                navigation.navigate('HandleProblemLog', {
+                    pond,
+                    jobType: 'TROUBLESHOOTING',
+                });
+            },
+        }),
+        [navigation, pond]
     );
-
-    return {
-        handleAddJobItem,
-        handleEditJobItem,
-        handleJobPress,
-    };
 };

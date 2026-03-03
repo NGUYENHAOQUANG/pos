@@ -1,8 +1,12 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
+import { PondType } from '@/features/farm/types/farm.types';
 
-import { GetPondsParams, GetPondsResponse } from '@/features/farm/types/pond.types';
+import {
+    GetPondByIdResponse,
+    GetPondsParams,
+    GetPondsResponse,
+} from '@/features/farm/types/pond.types';
 
 // Helper function to parse paginated API response
 const parseApiResponse = <T>(responseData: unknown): T[] => {
@@ -39,24 +43,16 @@ export const pondApi = {
         return data;
     },
 
+    getPondById: async (zoneId: string, pondId: string): Promise<GetPondByIdResponse> => {
+        const { data } = await apiClient.get<GetPondByIdResponse>(
+            API_ENDPOINTS.ZONE.POND_DETAIL(zoneId, pondId)
+        );
+        return data;
+    },
+
     // Get all pond types (Ao nuôi, Ao vèo, Ao xử lý, etc.)
     getPondTypes: async (): Promise<PondType[]> => {
         const response = await apiClient.get(API_ENDPOINTS.POND_TYPES.LIST);
         return parseApiResponse<PondType>(response.data);
-    },
-
-    // Get all operation types (Cho ăn, Đo môi trường, Xi phông, etc.)
-    getOperationTypes: async (): Promise<OperationType[]> => {
-        const response = await apiClient.get(API_ENDPOINTS.POND_OPERATION.LIST);
-        const operations = parseApiResponse<OperationType>(response.data);
-
-        return operations;
-    },
-
-    // Get all pond type operations (mapping of operations for all pond types)
-    getPondTypeOperations: async (): Promise<PondTypeOperation[]> => {
-        // Use POND_OPERATION.LIST (/pondoperation) instead of POND_TYPE_OPERATIONS.LIST (/pond-type-operations)
-        const response = await apiClient.get(API_ENDPOINTS.POND_OPERATION.LIST);
-        return parseApiResponse<PondTypeOperation>(response.data);
     },
 };

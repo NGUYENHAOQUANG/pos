@@ -108,7 +108,7 @@ export const ShrimpPondListScreens: React.FC = () => {
 
     const handlePondPress = useCallback(
         (pond: PondData) => {
-            navigation.navigate('PondDetail', { pond });
+            navigation.navigate('PondDetail', { pondId: pond.id, zoneId: pond.zoneId! });
         },
         [navigation]
     );

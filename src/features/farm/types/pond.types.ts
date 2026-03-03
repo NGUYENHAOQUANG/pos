@@ -52,3 +52,4 @@ export type GetPondsResponse = IApiResponse<IPaginate<PondData>>;
 export type GetPondTypesResponse = IApiResponse<PondType[]>;
 export type GetPondOperationTypesResponse = IApiResponse<OperationType[]>;
 export type GetPondTypeOperationsResponse = IApiResponse<PondTypeOperation[]>;
+export type GetPondByIdResponse = IApiResponse<PondData>;

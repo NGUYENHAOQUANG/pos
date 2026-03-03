@@ -1,18 +1,21 @@
 import React from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { pondApi } from '@/features/farm/api/pondApi';
+import { pondOperationApi } from '@/features/farm/api/pondOperationApi';
 import { farmKeys } from './farmKeys';
 import { APP_CONFIG } from '@/shared/constants';
 import { PondData, PondStatus } from '@/features/farm/types/pond.types';
+import { PondTypeOperation } from '@/features/farm/types/farm.types';
 
 export const usePondMasterData = () => {
     const query = useQuery({
         queryKey: farmKeys.masterData.types(),
         queryFn: async () => {
             const types = await pondApi.getPondTypes();
-            let operations: any[] = [];
+            let operations: PondTypeOperation[] = [];
             try {
-                operations = await pondApi.getPondTypeOperations();
+                const res = await pondOperationApi.getPondOperations();
+                operations = res?.data || [];
             } catch {}
 
             return { types, operations };
@@ -79,4 +82,22 @@ export const usePondsByZone = (zoneId: string | null, status?: PondStatus | null
         total: query.data?.pages[0]?.totalCount || 0,
         isLoading: query.isLoading,
     };
+};
+
+export const usePondDetail = (zoneId: string, pondId: string) => {
+    const enabled = !!zoneId && !!pondId;
+
+    const query = useQuery({
+        queryKey: farmKeys.ponds.detail(zoneId, pondId),
+        queryFn: async () => {
+            const response = await pondApi.getPondById(zoneId, pondId);
+            if (!response.success || !response.data) {
+                throw new Error(response.message || 'Không thể tải thông tin ao');
+            }
+            return response.data as PondData;
+        },
+        enabled,
+    });
+
+    return query;
 };

@@ -25,15 +25,6 @@ export interface PondType {
     lastModifiedAt?: string;
 }
 
-// OperationType - represents types of operations/tasks in the system
-export interface OperationType {
-    id: number;
-    name: string;
-    associatedTable?: string;
-    createdAt?: string;
-    lastModifiedAt?: string;
-}
-
 export interface IStatus {
     id: number;
     name: string;
@@ -41,26 +32,7 @@ export interface IStatus {
     color?: string;
 }
 
-// PondTypeOperation - mapping between PondType and OperationType
-// Defines which operations are available for each pond type
-export interface PondTypeOperation {
-    id: string;
-    pondCategoryId: string;
-    operationId: string;
-    operationName: string;
-    pondName?: string;
-    no?: number;
-    // Old fields for backward compatibility if needed, or remove if unused
-    isMandatory?: boolean;
-    defaultScheduleDay?: number;
-    priority?: number;
-    createdAt?: string;
-    lastModifiedAt?: string;
-    code?: string; // Added to support Tag mapping
-    // Map old usage to new
-    operationTypeName?: string; // We might need to map operationName to this or update usage
-}
-
+export * from './pondOperation.types';
 export interface Zone {
     id: string;
     zoneId?: string;
@@ -138,22 +110,20 @@ export interface CreateCycleCommand {
 
 export type UpdateCycleCommand = Partial<CreateCycleCommand>;
 
-// Thông tin sang ao - lưu dữ liệu từ ao vèo khi chuyển sang ao nuôi
 export interface TransferInfo {
-    transferDate: string; // Ngày sang ao
-    shrimpSize: string; // Cỡ tôm (con/kg)
-    totalEstimatedShrimp: number; // Tổng số tôm dự kiến (con)
-    sourcePondId: string; // Ao nguồn (ao vèo)
-    sourcePondName: string; // Tên ao nguồn
-    quantity: number; // Số lượng tôm nhận được
-    // Thông tin chu kỳ gốc từ ao vèo
+    transferDate: string;
+    shrimpSize: string;
+    totalEstimatedShrimp: number;
+    sourcePondId: string;
+    sourcePondName: string;
+    quantity: number;
     originalCycle: {
         cycleName: string;
         season: string;
         breedSource: string;
         stockingDate: string;
         stockingQuantity: number;
-        doc: number; // Số ngày nuôi (DOC) tại ao vèo
+        doc: number;
     };
 }
 
@@ -185,17 +155,17 @@ export const getSeasonStatusName = (status: string | SeasonStatus): string => {
 };
 
 export interface SeasonData {
-    id: string | number; // Mã vụ nuôi
-    name: string; // Tên vụ nuôi
-    farmCode: string; // Mã trại (mapped from Zone or SeasonCode)
-    startDate: string; // Ngày khởi tạo
-    endDate: string; // Ngày kết thúc
-    status: SeasonStatus; // Trạng thái
-    statusName?: string; // Tên trạng thái hiển thị
-    zoneId?: string | number; // ID of the zone this season belongs to
+    id: string | number;
+    name: string;
+    farmCode: string;
+    startDate: string;
+    endDate: string;
+    status: SeasonStatus;
+    statusName?: string;
+    zoneId?: string | number;
     seasonName?: string;
     seasonCode?: string;
-    code?: string; // New API field
+    code?: string;
     cycleCount?: number;
     notes?: string;
 }
@@ -220,16 +190,14 @@ export interface ShrimpInspectionMeta {
     stoolColor?: string;
     liver?: string;
     images?: string[];
-    // Keep associated document IDs so edits can preserve existing images
     documentIds?: string[];
-    // AI Health Check mapping
     averageInfectionRate?: number;
     isHealthy?: boolean;
     diagnosisDetails?: Array<{
         diseaseType: string;
         probabilityPercent: number;
     }> | null;
-    aiItems?: any[]; // Array of detailed AI check items
+    aiItems?: any[];
 }
 
 export interface EnvironmentMeta {
