@@ -33,7 +33,7 @@ import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/mea
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feedlog/FeedingLogScreens';
 import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';

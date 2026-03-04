@@ -19,7 +19,7 @@ import {
     useDeleteFeedingRecord,
     useFeedingRecordDetail,
 } from '@/features/farm/hooks/pondwork/feed/useFeeding';
-import { FeedingForm, FeedingFormRef } from '@/features/farm/components/pondwork/feed/FeedingForm';
+import { FeedingForm, FeedingFormRef } from '@/features/farm/screens/pondwork/feed/FeedingForm';
 import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { feedingService } from '@/features/farm/services/feeding.service';
 import {
