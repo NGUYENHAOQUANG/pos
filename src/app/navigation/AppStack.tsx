@@ -31,9 +31,8 @@ import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/Harve
 import { CycleDetailScreen } from '@/features/farm/screens/pond/cycle-detail/CycleDetailScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
-import { HandleProblemScreen } from '@/features/farm/screens/handleProblem/HandleProblemScreen';
+import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { SunDryPondLogScreen } from '@/features/farm/screens/handleProblem/SunDryPondLogScreen';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
 import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
@@ -304,9 +303,8 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
             <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
-            <Stack.Screen name="HandleProblem" component={HandleProblemScreen} />
+            <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
-            <Stack.Screen name="SunDryPondLog" component={SunDryPondLogScreen} />
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
 
             {/* ============== Material Screens ============== */}
