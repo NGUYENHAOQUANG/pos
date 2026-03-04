@@ -5,7 +5,7 @@ import { materialListStyles } from '@/features/material/styles/materialListStyle
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
-import { ImportReceiptCard } from '@/features/material/components/importReceiptList/ImportReceiptCard';
+import { ImportReceiptCard } from '@/features/material/components/import_receipt_list/ImportReceiptCard';
 
 interface ImportReceiptMaterialListProps {
     receipts: ImportReceipt[];

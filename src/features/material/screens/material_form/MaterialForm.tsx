@@ -18,7 +18,7 @@ import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { IconTrashOutlined } from '@/assets/icons';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { AddMaterial } from '@/features/material/components/materialForm/AddMaterial';
+import { AddMaterial } from '@/features/material/components/material_form/AddMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);

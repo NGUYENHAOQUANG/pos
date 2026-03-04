@@ -46,10 +46,10 @@ import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/meas
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
 // Material screens
-import { MaterialFormScreen } from '@/features/material/screens/materialForm';
-import { ImportReceiptFormScreen } from '@/features/material/screens/importReceiptForm';
-import { ExportWarehouseFormScreen } from '@/features/material/screens/exportWarehouseForm';
-import { AddInventoryScreen } from '@/features/material/screens/inventoryForm';
+import { MaterialFormScreen } from '@/features/material/screens/material_form';
+import { ImportReceiptFormScreen } from '@/features/material/screens/import_receipt_form';
+import { ExportWarehouseFormScreen } from '@/features/material/screens/export_warehouse_form';
+import { AddInventoryScreen } from '@/features/material/screens/inventory_form';
 
 // Control screens
 import { ConnectDeviceScreens } from '@/features/control/screens/devices/ConnectDeviceScreens';
@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/Formscreen';
+import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
