@@ -1,4 +1,5 @@
-import { CycleData, JobExecution, JOB_TYPES } from '@/features/farm/types/farm.types';
+import { JobExecution, JOB_TYPES } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { PondTypeOperation } from '@/features/farm/types/pondOperation.types';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
@@ -75,36 +76,24 @@ export const pondDetailService = {
 
     getBreedName: (
         currentCycle: CycleData | null | undefined,
-        shrimpSeeds: any[] | undefined,
-        breedOptions: { value: string; label: string }[]
+        shrimpSeeds: any[] | undefined
     ): string => {
         if (!currentCycle) return 'N/A';
 
         return (
-            currentCycle.breedName ||
-            shrimpSeeds?.find(
-                (s: any) =>
-                    s.id === currentCycle.breedSource ||
-                    s.id === (currentCycle as any).warehouseItemId
-            )?.materialName ||
-            breedOptions.find(
-                b =>
-                    b.value === currentCycle.breedSource ||
-                    b.value === (currentCycle as any).warehouseItemId
-            )?.label ||
-            'N/A'
+            shrimpSeeds?.find((s: any) => s.id === (currentCycle as any).warehouseItemId)
+                ?.materialName || 'N/A'
         );
     },
 
     getTransferBreedName: (
         currentCycle: CycleData | null | undefined,
-        breedOptions: { value: string; label: string }[]
+        shrimpSeeds: any[] | undefined
     ): string => {
-        if (!currentCycle?.transferInfo?.originalCycle) return 'N/A';
-        return (
-            breedOptions.find(b => b.value === currentCycle.transferInfo?.originalCycle.breedSource)
-                ?.label || 'N/A'
-        );
+        if (!(currentCycle as any)?.transferInfo?.originalCycle) return 'N/A';
+        const originalCycle = (currentCycle as any).transferInfo.originalCycle;
+        const sourceId = originalCycle.breedSource || originalCycle.warehouseItemId;
+        return shrimpSeeds?.find((s: any) => s.id === sourceId)?.materialName || 'N/A';
     },
 
     getLatestShrimpSize: (apiMeasureSizeJobs: JobExecution[]): string | undefined => {
