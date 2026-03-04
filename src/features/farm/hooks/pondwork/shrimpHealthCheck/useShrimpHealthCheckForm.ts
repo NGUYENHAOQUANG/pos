@@ -272,7 +272,7 @@ export const useShrimpHealthCheckForm = ({
                         onSaved?.();
                         Toast.show({
                             type: 'success',
-                            text1: 'Đã tạo kiểm tra tôm',
+                            text1: 'Đã kiểm tra tôm thành công',
                             position: 'top',
                             visibilityTime: 3000,
                         });

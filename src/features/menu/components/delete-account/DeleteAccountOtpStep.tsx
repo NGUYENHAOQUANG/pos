@@ -10,6 +10,7 @@ import {
     KeyboardAvoidingView,
     ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
@@ -29,6 +30,9 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
     onResend,
     error,
 }) => {
+    const insets = useSafeAreaInsets();
+    const paddingBottom = Math.max(insets.bottom, 16);
+
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
     const [countdown, setCountdown] = useState(59);
     const [errorMessage, setErrorMessage] = useState('');
@@ -134,7 +138,7 @@ export const DeleteAccountOtpStep: React.FC<DeleteAccountOtpStepProps> = ({
                     </ScrollView>
 
                     {/* FOOTER */}
-                    <View style={styles.footer}>
+                    <View style={[styles.footer, { paddingBottom }]}>
                         <View style={styles.buttonRow}>
                             {/* Nút Ngừng Xóa */}
                             <TouchableOpacity

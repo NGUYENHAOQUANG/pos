@@ -1,8 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
-import { ToastMessages } from '@/features/menu/utils/toastMessages';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -11,32 +10,34 @@ import {
     AquacultureForm,
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { seasonApi } from '@/features/menu/api/seasonApi';
-import { SeasonStatus } from '@/features/farm/types/farm.types';
 import { Loading } from '@/shared/components/ui/Loading';
-import { useQueryClient } from '@tanstack/react-query';
-import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { useZones } from '@/features/farm/hooks/useZones';
+import { useCreateSeason } from '@/features/menu/hooks/useAquacultureMutations';
+import { AquacultureFormValues } from '@/features/menu/schemas/aquacultureFormSchema';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 export const AddAquacultureScreens: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { setTabBarVisible } = useTabBarVisibility();
-    const zones = useFarmStore(state => state.zones);
-    const fetchZones = useFarmStore(state => state.fetchZones);
-    const seasons = useFarmStore(state => state.seasons);
     const formRef = useRef<AquacultureFormRef>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const queryClient = useQueryClient();
 
-    React.useEffect(() => {
-        if (zones.length === 0) {
-            fetchZones();
-        }
-    }, [zones.length, fetchZones]);
+    // Data fetching via TanStack Query
+    const { data: zones = [] } = useZones();
 
+    // Mutation hook
+    const createSeasonMutation = useCreateSeason();
+
+    // Map zones to dropdown options
+    const zoneOptions = useMemo(() => {
+        return zones.map(z => ({
+            id: z.id.toString(),
+            label: z.name,
+        }));
+    }, [zones]);
+
+    // Tab bar visibility
     useFocusEffect(
         React.useCallback(() => {
-            // Use a timeout to ensure this runs after the previous screen's cleanup
             const timeout = setTimeout(() => {
                 setTabBarVisible(false);
             }, 100);
@@ -48,73 +49,49 @@ export const AddAquacultureScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    const handleCreate = async () => {
-        const data = formRef.current?.submit();
-        if (data && data.zoneId) {
-            try {
-                setIsLoading(true);
-
-                // Frontend validation for duplicate name
-                const normalizeName = (name: string) => name.trim().toLowerCase();
-                const newName = normalizeName(data.name || '');
-
-                const isDuplicate = seasons.some(
-                    s =>
-                        String(s.zoneId) === String(data.zoneId) &&
-                        normalizeName(s.name) === newName
-                );
-
-                if (isDuplicate) {
-                    throw new Error('Tên vụ nuôi đã tồn tại trong vùng nuôi này');
+    // Submit handler - uses mutation hook
+    const handleSubmit = useCallback(
+        (formData: AquacultureFormValues) => {
+            createSeasonMutation.mutate(
+                {
+                    zoneId: formData.zoneId,
+                    formData,
+                },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
                 }
+            );
+        },
+        [createSeasonMutation, navigation]
+    );
 
-                // Call create API
-                // Call create API
-                let newStatus: SeasonStatus | undefined;
-                if (data.status === 'preparing') newStatus = SeasonStatus.Preparation;
-                else if (data.status === 'active') newStatus = SeasonStatus.Active;
-
-                await seasonApi.createSeason(data.zoneId, {
-                    seasonName: data.name,
-                    startDate: data.startDate?.toISOString(),
-                    endDate: data.endDate?.toISOString(),
-                    status: newStatus,
-                });
-                Toast.show(ToastMessages.Aquaculture.CREATE_SUCCESS);
-                // Invalidate seasons query to trigger background refetch
-                queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
-                navigation.goBack();
-            } catch (error: any) {
-                const errorMessage =
-                    error?.response?.data?.message || error?.message || 'Không thể tạo vụ nuôi';
-
-                Toast.show({
-                    type: 'error',
-                    text1: 'Lỗi',
-                    text2: errorMessage,
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
+    const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
+    const handlePrimaryPress = useCallback(() => formRef.current?.submit(), []);
 
     return (
-        <Loading isLoading={isLoading}>
+        <Loading isLoading={createSeasonMutation.isPending}>
             <View style={styles.container}>
-                <HeaderMenu title="Tạo vụ nuôi" onBack={() => navigation.goBack()} />
+                <HeaderMenu title="Tạo vụ nuôi" onBack={handleGoBack} />
 
                 <View style={styles.content}>
-                    <AquacultureForm ref={formRef} zones={zones} />
+                    <AquacultureForm
+                        ref={formRef}
+                        isEditMode={false}
+                        isLoadingDetail={false}
+                        isSubmitting={createSeasonMutation.isPending}
+                        initialData={undefined}
+                        zoneOptions={zoneOptions}
+                        onSubmit={handleSubmit}
+                    />
                 </View>
 
                 <ButtonBarMenu
                     primaryTitle="Tạo vụ nuôi"
                     secondaryTitle="Huỷ"
-                    onPrimaryPress={handleCreate}
-                    onSecondaryPress={() => {
-                        navigation.goBack();
-                    }}
+                    onPrimaryPress={handlePrimaryPress}
+                    onSecondaryPress={handleGoBack}
                     secondaryType="default"
                 />
             </View>
