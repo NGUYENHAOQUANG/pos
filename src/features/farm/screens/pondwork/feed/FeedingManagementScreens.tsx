@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, useMemo } from 'react';
-import Toast from 'react-native-toast-message';
+
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -176,11 +176,6 @@ export const FeedingManagementScreens = () => {
                 { pondId, id: jobId },
                 {
                     onSuccess: () => {
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Tác vụ đã được xóa',
-                            position: 'top',
-                        });
                         navigation.goBack();
                     },
                 }
