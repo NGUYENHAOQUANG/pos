@@ -4,11 +4,17 @@ export const farmKeys = {
     ponds: {
         all: () => [...farmKeys.all, 'ponds'] as const,
         byZone: (zoneId: number | string) => [...farmKeys.ponds.all(), 'byZone', zoneId] as const,
-        detail: (id: string) => [...farmKeys.ponds.all(), 'detail', id] as const,
+        detail: (zoneId: string, id: string) =>
+            [...farmKeys.ponds.all(), 'detail', zoneId, id] as const,
     },
     masterData: {
         types: () => [...farmKeys.all, 'master', 'types'] as const,
         operations: () => [...farmKeys.all, 'master', 'operations'] as const,
+    },
+    pondCategories: {
+        all: () => [...farmKeys.all, 'pondCategories'] as const,
+        list: (params?: any) =>
+            [...farmKeys.pondCategories.all(), 'list', ...(params ? [params] : [])] as const,
     },
     seasons: (zoneId?: number | string) =>
         [...farmKeys.all, 'seasons', ...(zoneId ? [zoneId] : [])] as const,

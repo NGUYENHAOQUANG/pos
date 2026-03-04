@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useZones } from '@/features/farm/hooks/useZones';
 import { pondApi } from '@/features/farm/api/pondApi';
-import { PondData, Zone } from '@/features/farm/types/farm.types';
+import { Zone } from '@/features/farm/types/farm.types';
+import { PondData } from '@/features/farm/types/pond.types';
 
 export const useUserFarmStats = () => {
     const { data: zones = [], isFetching: isFetchingZones, refetch: refetchZones } = useZones();
@@ -12,7 +13,10 @@ export const useUserFarmStats = () => {
             queryKey: ['ponds', 'byZone', zone.id],
             queryFn: async () => {
                 const res = await pondApi.getPondsByZone(zone.id);
-                return (res.items || []).map((p: PondData) => ({ ...p, tempZoneId: zone.id }));
+                return (res.data?.items || []).map((p: PondData) => ({
+                    ...p,
+                    tempZoneId: zone.id,
+                }));
             },
             staleTime: 1000 * 60 * 5,
         })),

@@ -4,6 +4,8 @@
  * @author Kindy
  * @created 2025-11-16
  */
+import { JOB_TYPES } from '@/features/farm/types/farm.types';
+
 export const APP_CONFIG = {
     APP_NAME: 'BaseStructure',
     VERSION: '0.0.1',
@@ -11,3 +13,11 @@ export const APP_CONFIG = {
     MAX_UPLOAD_SIZE: 10 * 1024 * 1024, // 10MB
     DEFAULT_PAGE_SIZE: 20,
 } as const;
+
+export const ALLOWED_JOBS_WHEN_NO_CYCLE: string[] = [
+    JOB_TYPES.ENVIRONMENT,
+    JOB_TYPES.WATER_TREATMENT,
+    JOB_TYPES.WATER_CHANGE,
+    JOB_TYPES.CLEAN_POND,
+    JOB_TYPES.SUN_DRY_POND,
+];

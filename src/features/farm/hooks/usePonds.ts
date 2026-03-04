@@ -1,21 +1,22 @@
-import { useMemo } from 'react';
+import React from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { pondApi } from '@/features/farm/api/pondApi';
+import { pondOperationApi } from '@/features/farm/api/pondOperationApi';
 import { farmKeys } from './farmKeys';
-import { PondData } from '@/features/farm/types/farm.types';
+import { APP_CONFIG } from '@/shared/constants';
+import { PondData, PondStatus } from '@/features/farm/types/pond.types';
+import { PondTypeOperation } from '@/features/farm/types/farm.types';
 
 export const usePondMasterData = () => {
     const query = useQuery({
         queryKey: farmKeys.masterData.types(),
         queryFn: async () => {
-            // Execute sequentially to handle errors independently
             const types = await pondApi.getPondTypes();
-            let operations: any[] = [];
+            let operations: PondTypeOperation[] = [];
             try {
-                operations = await pondApi.getPondTypeOperations();
-            } catch {
-                // Ignore failure
-            }
+                const res = await pondOperationApi.getPondOperations();
+                operations = res?.data || [];
+            } catch {}
 
             return { types, operations };
         },
@@ -25,70 +26,78 @@ export const usePondMasterData = () => {
     return query;
 };
 
-export const usePondsByZone = (zoneId: number | string | null) => {
-    const { data: masterData, isLoading: isLoadingMaster } = usePondMasterData();
+export const usePondsByZone = (zoneId: string | null, status?: PondStatus | null) => {
+    const key = farmKeys.ponds.byZone(zoneId || 'all');
+    const statusKey = status || 'all';
 
     const query = useInfiniteQuery({
-        queryKey: farmKeys.ponds.byZone(zoneId || 'all'),
+        queryKey: [...key, statusKey, 'infinite'],
         queryFn: async ({ pageParam = 1 }) => {
-            if (!zoneId) return { items: [], total: 0 };
+            if (!zoneId) {
+                return {
+                    items: [],
+                    pageNumber: 1,
+                    totalPages: 1,
+                    totalCount: 0,
+                    pageSize: APP_CONFIG.DEFAULT_PAGE_SIZE,
+                    hasPreviousPage: false,
+                    hasNextPage: false,
+                };
+            }
 
-            // Fetch raw data
-            const response = await pondApi.getPondsByZone(zoneId, {
-                PageNumber: pageParam,
-            });
-
-            return {
-                items: response.items || [],
-                total: response.total,
+            const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
+            const currentParams = {
+                PageSize: pageSize,
+                Page: pageParam,
+                ...(status ? { Status: status } : {}),
             };
+
+            const response = await pondApi.getPondsByZone(zoneId, currentParams);
+
+            if (response.success && response.data?.items) {
+                return response.data;
+            }
+            throw new Error(response.message || 'Không thể tải danh sách ao');
         },
         initialPageParam: 1,
-        getNextPageParam: (lastPage, allPages) => {
-            const loadedCount = allPages.reduce((acc, page) => acc + page.items.length, 0);
-            if (loadedCount < lastPage.total) {
-                return allPages.length + 1;
-            }
-            return undefined;
+        getNextPageParam: lastPage => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.pageNumber + 1;
         },
         enabled: !!zoneId,
         staleTime: 5 * 60 * 1000, // 5 mins
     });
 
-    // Reactive Mapping: Map pond types whenever masterData or query data changes
-    const mappedData = useMemo(() => {
-        if (!query.data) return query.data;
-
-        const newPages = query.data.pages.map(page => ({
-            ...page,
-            items: page.items.map((pond: any) => {
-                const mappedPond = { ...pond };
-                if (masterData?.types) {
-                    // Try to find type by ID first (API usually returns pondCategoryId)
-                    const typeId = (pond as any).pondCategoryId;
-                    if (typeId) {
-                        const matchedType = masterData.types.find(t => t.id === typeId);
-                        if (matchedType) {
-                            mappedPond.type = matchedType;
-                        } else {
-                            // Fallback if type not found in master data but ID exists
-                            mappedPond.type = typeId;
-                        }
-                    }
-                }
-                return mappedPond as PondData;
-            }),
-        }));
-
-        return {
-            ...query.data,
-            pages: newPages,
-        };
-    }, [query.data, masterData]);
+    const ponds = React.useMemo(() => {
+        if (!query.data) return [];
+        return query.data.pages.reduce((acc: PondData[], page) => {
+            return [...acc, ...(page.items || [])];
+        }, []);
+    }, [query.data]);
 
     return {
         ...query,
-        data: mappedData, // Return the mapped data
-        isLoading: query.isLoading || isLoadingMaster,
+        data: ponds,
+        rawQueryData: query.data,
+        total: query.data?.pages[0]?.totalCount || 0,
+        isLoading: query.isLoading,
     };
+};
+
+export const usePondDetail = (zoneId: string, pondId: string) => {
+    const enabled = !!zoneId && !!pondId;
+
+    const query = useQuery({
+        queryKey: farmKeys.ponds.detail(zoneId, pondId),
+        queryFn: async () => {
+            const response = await pondApi.getPondById(zoneId, pondId);
+            if (!response.success || !response.data) {
+                throw new Error(response.message || 'Không thể tải thông tin ao');
+            }
+            return response.data as PondData;
+        },
+        enabled,
+    });
+
+    return query;
 };

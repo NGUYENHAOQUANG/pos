@@ -2,30 +2,42 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { formatDate } from '@/features/farm/utils/dateUtils';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 interface CycleCardProps {
-    cycleName: string;
-    startDate: string;
+    cycle: any;
+    breedName?: string;
     endDate?: string;
-    doc: number;
-    stockingQuantity: number;
-    breed: string;
     status?: 'Chưa hoàn thành' | 'Hoàn thành';
     onPress?: () => void;
 }
 
 export const CycleCard: React.FC<CycleCardProps> = ({
-    cycleName,
-    startDate,
+    cycle,
+    breedName,
     endDate,
-    doc,
-    stockingQuantity,
-    breed,
     status = 'Chưa hoàn thành',
     onPress,
 }) => {
+    const calculateDOC = useFarmStore(state => state.calculateDOC);
+
+    if (!cycle) return null;
+
     const isCompleted = status === 'Hoàn thành';
-    const dateDisplay = endDate ? `${startDate} - ${endDate}` : `${startDate} - nay`;
+    const cycleName = cycle.cycleName || cycle.name || 'Chưa đặt tên';
+
+    const stockingDateStr = cycle.stockingDate || cycle.startDate;
+    const startDate = stockingDateStr ? formatDate(new Date(stockingDateStr)) : '';
+    const dateDisplay = endDate
+        ? `${startDate} - ${endDate}`
+        : startDate
+        ? `${startDate} - nay`
+        : '- nay';
+
+    const doc = cycle.doc !== undefined ? cycle.doc : calculateDOC(stockingDateStr ?? '');
+    const stockingQuantity = cycle.stockingQuantity ?? cycle.totalStocking ?? 0;
+    const breed = breedName || cycle.breedName || cycle.breedSource || '-';
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>

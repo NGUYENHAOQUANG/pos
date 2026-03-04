@@ -163,17 +163,11 @@ export const EditCycleScreen: React.FC = () => {
 
     // Flatten zone ponds
     const zonePonds = useMemo(() => {
-        if (!zonePondsData?.pages) return [];
-        return zonePondsData.pages.reduce<{ id: string; name: string }[]>(
-            (acc, page) => [
-                ...acc,
-                ...(page.items || []).map((p: { id: string; name: string }) => ({
-                    id: p.id,
-                    name: p.name,
-                })),
-            ],
-            []
-        );
+        if (!zonePondsData) return [];
+        return zonePondsData.map((p: { id: string; name: string }) => ({
+            id: p.id,
+            name: p.name,
+        }));
     }, [zonePondsData]);
 
     // Fetch stock transfers from all zone ponds and find incoming transfer to current pond
