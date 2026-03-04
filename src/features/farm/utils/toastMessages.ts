@@ -1,10 +1,11 @@
 import Toast from 'react-native-toast-message';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
+import { APP_CONFIG } from '@/shared/constants/config';
 
 /**
  * Toast message configurations for different job types
  */
-const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>> = {
+const JOB_TOAST_MESSAGES_CONFIG: Partial<Record<JobType, { add: string; edit: string }>> = {
     FEED: {
         add: 'Đã thêm cho ăn thành công',
         edit: 'Đã cập nhật cho ăn thành công',
@@ -51,6 +52,18 @@ const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>
     },
 };
 
+const TOAST_MESSAGES_CONFIG = {
+    JOB: JOB_TOAST_MESSAGES_CONFIG,
+    IMAGE: {
+        SIZE_EXCEEDED: {
+            type: 'error' as const,
+            text1: 'Thông báo',
+            getText2: (limitMb: number) =>
+                `Tổng dung lượng ảnh vượt quá ${limitMb}MB. Vui lòng xóa bớt ảnh trước khi thêm.`,
+        },
+    },
+} as const;
+
 /**
  * Get harvest success message based on harvest type
  */
@@ -71,7 +84,7 @@ export const getHarvestSuccessMessage = (harvestType?: string): string => {
  * Show success toast message for adding a job
  */
 export const showAddJobSuccessToast = (jobType: JobType) => {
-    const message = JOB_TOAST_MESSAGES[jobType]?.add || 'Đã thêm thành công';
+    const message = TOAST_MESSAGES_CONFIG.JOB[jobType]?.add || 'Đã thêm thành công';
     Toast.show({
         type: 'success',
         text1: message,
@@ -84,10 +97,21 @@ export const showAddJobSuccessToast = (jobType: JobType) => {
  * Show success toast message for editing a job
  */
 export const showEditJobSuccessToast = (jobType: JobType) => {
-    const message = JOB_TOAST_MESSAGES[jobType]?.edit || 'Đã cập nhật thành công';
+    const message = TOAST_MESSAGES_CONFIG.JOB[jobType]?.edit || 'Đã cập nhật thành công';
     Toast.show({
         type: 'success',
         text1: message,
+        position: 'top',
+        visibilityTime: 3000,
+    });
+};
+
+export const showImageSizeExceededToast = () => {
+    const config = TOAST_MESSAGES_CONFIG.IMAGE.SIZE_EXCEEDED;
+    Toast.show({
+        type: config.type,
+        text1: config.text1,
+        text2: config.getText2(APP_CONFIG.IMAGE_SIZE_LIMIT_MB),
         position: 'top',
         visibilityTime: 3000,
     });
