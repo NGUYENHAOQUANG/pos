@@ -10,12 +10,12 @@ import {
     ViewStyle,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { colors, spacing, borderRadius, shadows } from '@/styles';
+import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
 
 export interface DropDownItem {
     id: string | number;
     label: string;
-    value?: any;
+    value?: string | number;
 }
 
 interface DropDownButtonProps {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     buttonText: {
-        fontSize: 14,
+        fontSize: typography.fontSize.sm,
         color: colors.text,
         flex: 1,
         marginRight: spacing.sm,
@@ -196,11 +196,11 @@ const styles = StyleSheet.create({
         backgroundColor: colors.blue[50], // Light blue bg for selected
     },
     dropdownItemText: {
-        fontSize: 14,
+        fontSize: typography.fontSize.sm,
         color: colors.text,
     },
     dropdownItemTextSelected: {
-        fontWeight: '400',
+        fontWeight: typography.fontWeight.regular,
         color: colors.primary,
     },
 });

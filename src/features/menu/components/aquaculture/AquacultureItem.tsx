@@ -1,14 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography } from '@/styles';
-import { Aquaculture } from '@/features/menu/types/menu.types';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { Tag } from '@/features/menu/components/Tag';
 import EditIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
 
 interface AquacultureItemProps {
-    item: Aquaculture | SeasonData;
-    onEdit?: (item: Aquaculture | SeasonData) => void;
+    item: SeasonData;
+    onEdit?: (item: SeasonData) => void;
 }
 
 export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }) => {
@@ -26,9 +25,8 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
         item.endDate ? formatDate(item.endDate) : '...'
     }`;
 
-    // Map status from SeasonData to Tag status if needed
-    // Map status from SeasonData to Tag status if needed
-    const getStatus = (status: string | number): 'active' | 'ended' | 'preparing' => {
+    // Map status from SeasonData to Tag status
+    const getStatus = (status: string | SeasonStatus): 'active' | 'ended' | 'preparing' => {
         if (status === SeasonStatus.Active) return 'active';
         if (status === SeasonStatus.Closed) return 'ended';
         if (status === SeasonStatus.Preparation) return 'preparing';
@@ -93,7 +91,7 @@ const styles = StyleSheet.create({
         padding: spacing.xs,
         borderWidth: 1,
         borderColor: colors.borderDark,
-        borderRadius: 6,
+        borderRadius: borderRadius.xs + 2,
         width: 32,
         height: 32,
         alignItems: 'center',
