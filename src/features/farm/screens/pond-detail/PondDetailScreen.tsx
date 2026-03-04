@@ -44,6 +44,11 @@ export const PondDetailScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pondId, zoneId } = route.params || {};
 
+    useEffect(() => {
+        console.log('pondId', pondId);
+        console.log('zoneId', zoneId);
+    }, [pondId, zoneId]);
+
     const [selectedTab, setSelectedTab] = useState<string>('work');
     const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);

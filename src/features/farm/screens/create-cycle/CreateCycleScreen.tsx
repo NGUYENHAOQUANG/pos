@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, borderRadius } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import CreateCycleForm from '@/features/farm/screens/pond/createCycle/CreateCycleForm';
+import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleForm';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -46,6 +46,7 @@ export const CreateCycleScreen: React.FC = () => {
         control,
         handleSubmit,
         reset,
+        setValue,
         formState: { isSubmitting },
     } = useForm<CreateCycleFormValues>({
         resolver: zodResolver(createCycleSchema),
@@ -160,6 +161,18 @@ export const CreateCycleScreen: React.FC = () => {
         }
     };
 
+    const onAIPress = useCallback(() => {
+        navigation.navigate('CountingShrimp', { pondId, zoneId });
+    }, [navigation, pondId, zoneId]);
+
+    useEffect(() => {
+        const aiCount = route.params?.aiCount;
+        if (aiCount != null && !isEditMode) {
+            setValue('stockingQuantity', String(aiCount));
+            navigation.setParams({ aiCount: undefined } as any);
+        }
+    }, [route.params?.aiCount, isEditMode, setValue, navigation]);
+
     return (
         <View style={styles.container}>
             <HeaderFarm
@@ -190,6 +203,7 @@ export const CreateCycleScreen: React.FC = () => {
                         isEdit={isEditMode}
                         breedOptions={breedOptions}
                         seasonOptions={seasonOptions}
+                        onPressCountingShrimp={onAIPress}
                     />
                 </SafeInputLayout>
             </View>
