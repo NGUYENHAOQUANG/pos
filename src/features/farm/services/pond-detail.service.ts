@@ -1,10 +1,68 @@
-import { CycleData, JobExecution, JOB_TYPES } from '@/features/farm/types/farm.types';
+import { JobExecution, JOB_TYPES } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { PondTypeOperation } from '@/features/farm/types/pondOperation.types';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 
 export const pondDetailService = {
+    getJobName: (typeStr: string): string => {
+        if (!typeStr) return '-';
+        const typeUpper = typeStr.toUpperCase();
+        const jobNames: Record<string, string> = {
+            FEED: 'Cho ăn',
+            ENVIRONMENT: 'Đo môi trường',
+            WATER_TREATMENT: 'Xử lý nước',
+            WATER_CHANGE: 'Thay nước',
+            CLEAN_POND: 'Rửa ao',
+            SUN_DRY_POND: 'Phơi ao',
+            SHRIMP_INSPECTION: 'Kiểm tra tôm',
+            MEASURE_SIZE: 'Đo kích thước',
+            SIPHON: 'Xi-phông',
+            TROUBLESHOOTING: 'Xử lý sự cố',
+            TRANSFER_POND: 'Sang ao',
+            HARVEST: 'Thu hoạch',
+        };
+        return jobNames[typeUpper] || jobNames[typeStr] || typeStr;
+    },
+
+    getLatestPondActivity: (pondId: string, state: any) => {
+        const allJobsRecords: Record<Exclude<JobType, 'MEASURE_SIZE'>, JobExecution[]> = {
+            FEED: state.feedJobs[pondId] || [],
+            SHRIMP_INSPECTION: state.shrimpInspectionJobs[pondId] || [],
+            ENVIRONMENT: state.environmentJobs[pondId] || [],
+            WATER_TREATMENT: state.waterTreatmentJobs[pondId] || [],
+            WATER_CHANGE: state.waterChangeJobs[pondId] || [],
+            SIPHON: state.siphonJobs[pondId] || [],
+            TROUBLESHOOTING: state.troubleshootingJobs[pondId] || [],
+            TRANSFER_POND: state.transferPondJobs[pondId] || [],
+            CLEAN_POND: state.cleanPondJobs[pondId] || [],
+            SUN_DRY_POND: state.sunDryJobs[pondId] || [],
+            HARVEST: state.harvestJobs[pondId] || [],
+        };
+
+        let maxDate = new Date(0);
+        let latestActivityStr = '';
+        let latestUpdateStr = '';
+
+        Object.entries(allJobsRecords).forEach(([type, items]) => {
+            (items as JobExecution[]).forEach(item => {
+                const [hours, minutes] = item.time.split(':').map(Number);
+                const date = item.date ? parseDate(item.date) : new Date();
+                date.setHours(hours, minutes, 0, 0);
+                if (date > maxDate) {
+                    maxDate = date;
+                    latestUpdateStr = `${date.toLocaleDateString('vi-VN')}, ${item.time}`;
+                    latestActivityStr = pondDetailService.getJobName(type);
+                }
+            });
+        });
+
+        return latestActivityStr
+            ? { lastUpdate: latestUpdateStr, lastActivity: latestActivityStr }
+            : null;
+    },
+
     calculateDOC: (startDateString: string | null | undefined): number => {
         if (!startDateString) return 0;
         const start =
@@ -18,36 +76,24 @@ export const pondDetailService = {
 
     getBreedName: (
         currentCycle: CycleData | null | undefined,
-        shrimpSeeds: any[] | undefined,
-        breedOptions: { value: string; label: string }[]
+        shrimpSeeds: any[] | undefined
     ): string => {
         if (!currentCycle) return 'N/A';
 
         return (
-            currentCycle.breedName ||
-            shrimpSeeds?.find(
-                (s: any) =>
-                    s.id === currentCycle.breedSource ||
-                    s.id === (currentCycle as any).warehouseItemId
-            )?.materialName ||
-            breedOptions.find(
-                b =>
-                    b.value === currentCycle.breedSource ||
-                    b.value === (currentCycle as any).warehouseItemId
-            )?.label ||
-            'N/A'
+            shrimpSeeds?.find((s: any) => s.id === (currentCycle as any).warehouseItemId)
+                ?.materialName || 'N/A'
         );
     },
 
     getTransferBreedName: (
         currentCycle: CycleData | null | undefined,
-        breedOptions: { value: string; label: string }[]
+        shrimpSeeds: any[] | undefined
     ): string => {
-        if (!currentCycle?.transferInfo?.originalCycle) return 'N/A';
-        return (
-            breedOptions.find(b => b.value === currentCycle.transferInfo?.originalCycle.breedSource)
-                ?.label || 'N/A'
-        );
+        if (!(currentCycle as any)?.transferInfo?.originalCycle) return 'N/A';
+        const originalCycle = (currentCycle as any).transferInfo.originalCycle;
+        const sourceId = originalCycle.breedSource || originalCycle.warehouseItemId;
+        return shrimpSeeds?.find((s: any) => s.id === sourceId)?.materialName || 'N/A';
     },
 
     getLatestShrimpSize: (apiMeasureSizeJobs: JobExecution[]): string | undefined => {

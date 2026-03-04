@@ -1,72 +1,75 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import {
-    CreateCycleCommand,
-    CycleData,
-    UpdateCycleCommand,
-    CycleApiResponse,
-} from '@/features/farm/types/farm.types';
+    ICycleDetailResponse,
+    ICycleListParams,
+    ICycleListResponse,
+    ICreateCyclePayload,
+    IUpdateCyclePayload,
+} from '@/features/farm/types/cycle.types';
+import { IApiResponse } from '@/shared/types/common.types';
 
 export const cycleApi = {
-    createCycle: async (pondId: string, data: CreateCycleCommand): Promise<CycleData> => {
-        const response = await apiClient.post(API_ENDPOINTS.POND.CYCLE.CREATE(pondId), data);
+    /**
+     * Get cycles for a pond
+     */
+    getCyclesByPond: async (
+        pondId: string,
+        params?: ICycleListParams
+    ): Promise<ICycleListResponse> => {
+        const url = API_ENDPOINTS.POND.CYCLE.LIST(pondId);
+        const response = await apiClient.get<ICycleListResponse>(url, {
+            params,
+        });
         return response.data;
     },
 
+    /**
+     * Create a new cycle
+     */
+    createCycle: async (
+        pondId: string,
+        data: ICreateCyclePayload
+    ): Promise<ICycleDetailResponse> => {
+        const response = await apiClient.post<ICycleDetailResponse>(
+            API_ENDPOINTS.POND.CYCLE.CREATE(pondId),
+            data
+        );
+        return response.data;
+    },
+
+    /**
+     * Update an existing cycle
+     */
     updateCycle: async (
         pondId: string,
         cycleId: string,
-        data: UpdateCycleCommand
-    ): Promise<CycleData> => {
-        const response = await apiClient.patch(
+        data: IUpdateCyclePayload
+    ): Promise<ICycleDetailResponse> => {
+        const response = await apiClient.patch<ICycleDetailResponse>(
             API_ENDPOINTS.POND.CYCLE.UPDATE(pondId, cycleId),
             data
         );
         return response.data;
     },
 
-    getCycleDetail: async (pondId: string, cycleId: string): Promise<CycleData> => {
-        const response = await apiClient.get(API_ENDPOINTS.POND.CYCLE.DETAIL(pondId, cycleId));
-        const rawData = response.data?.data || response.data;
-        if (!rawData) return rawData;
-        return {
-            ...rawData,
-            cycleName: rawData.name || rawData.cycleName,
-            breedSource: rawData.breedSource || rawData.warehouseItemId,
-            stockingDate: rawData.stockingDate || rawData.createdAt,
-            season: rawData.season,
-        };
-    },
-
-    deleteCycle: async (
-        pondId: string,
-        cycleId: string
-    ): Promise<{ success?: boolean; message?: string }> => {
-        const response = await apiClient.delete(API_ENDPOINTS.POND.CYCLE.DELETE(pondId, cycleId));
-        return response.data || {};
-    },
-
-    getCyclesByPond: async (pondId: string): Promise<CycleData[]> => {
-        const url = API_ENDPOINTS.POND.CYCLE.LIST(pondId);
-        const response = await apiClient.get(url, {
-            params: {
-                PageSize: 100,
-            },
-        });
-
-        const responseDataObject = response.data?.data;
-        const items: CycleApiResponse[] =
-            responseDataObject?.items || (Array.isArray(response.data) ? response.data : []);
-
-        return items.map(
-            item =>
-                ({
-                    ...item,
-                    cycleName: item.name || item.cycleName || '',
-                    breedSource: item.breedSource || item.warehouseItemId || '',
-                    stockingDate: item.stockingDate || item.createdAt || '',
-                    season: item.season,
-                } as CycleData)
+    /**
+     * Get cycle detail
+     */
+    getCycleDetail: async (pondId: string, cycleId: string): Promise<ICycleDetailResponse> => {
+        const response = await apiClient.get<ICycleDetailResponse>(
+            API_ENDPOINTS.POND.CYCLE.DETAIL(pondId, cycleId)
         );
+        return response.data;
+    },
+
+    /**
+     * Delete a cycle
+     */
+    deleteCycle: async (pondId: string, cycleId: string): Promise<IApiResponse<boolean>> => {
+        const response = await apiClient.delete<IApiResponse<boolean>>(
+            API_ENDPOINTS.POND.CYCLE.DELETE(pondId, cycleId)
+        );
+        return response.data;
     },
 };

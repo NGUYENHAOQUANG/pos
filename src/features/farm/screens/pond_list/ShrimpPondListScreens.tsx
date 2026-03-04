@@ -9,8 +9,8 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { ShrimpPondList } from '@/features/farm/screens/pond_list/ShrimpPondList';
 import { pondListService } from '@/features/farm/services/pondListService';
+import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -175,7 +175,7 @@ export const ShrimpPondListScreens: React.FC = () => {
         (!!isConnected && currentIsRefetching && !currentIsFetchingNext);
 
     return (
-        <ShrimpPondList
+        <ShrimpPondListContent
             farmOptions={farmOptions}
             selectedFarm={selectedFarm}
             selectedZoneId={selectedZoneId ? String(selectedZoneId) : undefined}

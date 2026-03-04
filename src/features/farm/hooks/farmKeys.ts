@@ -4,8 +4,8 @@ export const farmKeys = {
     ponds: {
         all: () => [...farmKeys.all, 'ponds'] as const,
         byZone: (zoneId: number | string) => [...farmKeys.ponds.all(), 'byZone', zoneId] as const,
-        detail: (zoneId: string, id: string) =>
-            [...farmKeys.ponds.all(), 'detail', zoneId, id] as const,
+        detail: (zoneId: string, id: string, params?: any) =>
+            [...farmKeys.ponds.all(), 'detail', zoneId, id, ...(params ? [params] : [])] as const,
     },
     masterData: {
         types: () => [...farmKeys.all, 'master', 'types'] as const,

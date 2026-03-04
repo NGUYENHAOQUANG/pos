@@ -11,9 +11,6 @@ import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { Input } from '@/shared/components/forms/Input';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppStackParamList } from '@/app/navigation/AppStack';
 
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
@@ -25,6 +22,7 @@ interface Props {
     isEdit?: boolean;
     breedOptions: BreedOption[];
     seasonOptions: { label: string; value: string }[];
+    onPressCountingShrimp?: () => void;
 }
 
 const CreateCycleForm: React.FC<Props> = ({
@@ -34,9 +32,8 @@ const CreateCycleForm: React.FC<Props> = ({
     isEdit = false,
     breedOptions,
     seasonOptions,
+    onPressCountingShrimp,
 }) => {
-    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-
     // Watch values to calculate derived states (density, cost)
     const activeBreedSource = useWatch({ control, name: 'breedSource' });
     const activeStockingQuantity = useWatch({ control, name: 'stockingQuantity' });
@@ -295,10 +292,7 @@ const CreateCycleForm: React.FC<Props> = ({
                         </View>
                     </View>
 
-                    <TouchableOpacity
-                        style={styles.aiButton}
-                        onPress={() => navigation.navigate('CountingShrimp')}
-                    >
+                    <TouchableOpacity style={styles.aiButton} onPress={onPressCountingShrimp}>
                         <Text style={styles.aiButtonText}>Kiểm đếm tôm giống bằng AI</Text>
                     </TouchableOpacity>
                 </View>

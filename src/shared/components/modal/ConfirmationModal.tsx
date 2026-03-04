@@ -16,13 +16,16 @@ export type ConfirmationModalType =
     | 'harvest_close_cycle'
     | 'measure_size_required'
     | 'reset_check'
-    | 'measure_reset';
+    | 'measure_reset'
+    | 'counting_reset';
 
 interface ConfirmationConfig {
     title: string;
     message: string;
     confirmText: string;
     cancelText: string;
+    /** Optional prefix rendered in red (e.g. "* ") */
+    messagePrefix?: string;
 }
 
 const CONFIRMATION_CONFIGS: Record<ConfirmationModalType, ConfirmationConfig> = {
@@ -67,6 +70,13 @@ Bạn có chắc chắn muốn đóng chu kỳ không?`,
         confirmText: 'Đồng ý',
         cancelText: 'Hủy',
     },
+    counting_reset: {
+        title: 'Xác nhận đếm lại',
+        messagePrefix: '* ',
+        message: 'Đếm lại sẽ ghi đè lên TẤT CẢ các lần đếm trước đó, bạn có chắc chắn muốn đếm lại',
+        confirmText: 'Đồng ý',
+        cancelText: 'Hủy',
+    },
 };
 
 interface ConfirmationModalProps {
@@ -92,10 +102,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     cancelText,
 }) => {
     const config = CONFIRMATION_CONFIGS[type];
-    const finalTitle = title || config.title;
-    const finalMessage = message || config.message;
-    const finalConfirmText = confirmText || config.confirmText;
-    const finalCancelText = cancelText || config.cancelText;
+    const finalTitle = title ?? config.title;
+    const finalConfirmText = confirmText ?? config.confirmText;
+    const finalCancelText = cancelText ?? config.cancelText;
+    const hasMessageOverride = message !== undefined && message !== null;
+    const finalMessage = hasMessageOverride ? message : config.message;
+    const useConfigMessageWithPrefix =
+        !hasMessageOverride && config.messagePrefix != null && config.messagePrefix !== '';
+
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
             <TouchableWithoutFeedback onPress={onCancel}>
@@ -119,7 +133,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
                                 {/* Message */}
                                 <View style={styles.messageContainer}>
-                                    {typeof finalMessage === 'string' ? (
+                                    {useConfigMessageWithPrefix ? (
+                                        <Text style={styles.message}>
+                                            <Text style={styles.messageRequired}>
+                                                {config.messagePrefix}
+                                            </Text>
+                                            {finalMessage}
+                                        </Text>
+                                    ) : typeof finalMessage === 'string' ? (
                                         <Text style={styles.message}>{finalMessage}</Text>
                                     ) : (
                                         finalMessage
@@ -198,6 +219,9 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: colors.text,
         lineHeight: 22,
+    },
+    messageRequired: {
+        color: colors.red[500],
     },
     footer: {
         flexDirection: 'row',

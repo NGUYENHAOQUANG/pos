@@ -12,7 +12,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
@@ -45,7 +45,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     // Get stocking quantity from cycle data
     // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
     // Get initial active cycle from hook
-    const activeCycle = useActiveCycle(currentPond?.id || '');
+    const { data: activeCycle } = useActiveCycle(currentPond?.id || '');
 
     // 4. Fetch detailed cycle data
     const { data: fetchedCycleData } = useQuery({
@@ -54,13 +54,10 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             if (!currentPond?.id || !activeCycle?.id) return null;
             try {
                 const rawData = await cycleApi.getCycleDetail(currentPond.id, activeCycle.id);
-                if (rawData) {
+                if (rawData?.data) {
+                    const data = rawData.data;
                     return {
-                        ...rawData,
-                        cycleName: rawData.name || (rawData as any).cycleName,
-                        breedSource: rawData.breedSource || (rawData as any).warehouseItemId,
-                        stockingDate: (rawData as any).createdAt || rawData.stockingDate,
-                        season: rawData.season,
+                        ...data,
                     } as CycleData;
                 }
             } catch (_error) {
@@ -82,9 +79,9 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
         // Optimized check sequence
         return (
-            activeCycleData.transferInfo?.originalCycle?.stockingQuantity ??
-            activeCycleData.stockingQuantity ??
-            (activeCycleData as any).totalStocking
+            (activeCycleData as any).transferInfo?.originalCycle?.totalStocking ??
+            (activeCycleData as any).stockingQuantity ??
+            activeCycleData.totalStocking
         );
     }, [activeCycleData]);
 

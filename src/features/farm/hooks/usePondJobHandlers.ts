@@ -31,7 +31,7 @@ export const usePondJobNavigateHandlers = ({
         () => ({
             [JOB_TYPES.FEED]: () => {
                 if (!pond?.id) return;
-                navigation.navigate('FeedTheShrimp', { pondId: pond.id });
+                navigation.navigate('FeedingManagement', { pondId: pond.id });
             },
 
             [JOB_TYPES.SHRIMP_INSPECTION]: () => {
@@ -112,7 +112,7 @@ export const usePondJobEditHandlers = ({
         () => ({
             [JOB_TYPES.FEED]: item => {
                 if (!pond?.id) return;
-                navigation.navigate('EditFeeder', {
+                navigation.navigate('FeedingManagement', {
                     pondId: pond.id,
                     jobId: item.id,
                     itemToEdit: item,

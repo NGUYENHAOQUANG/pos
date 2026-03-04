@@ -16,27 +16,21 @@ export const FeedingLogScreens = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId } = route.params || {};
-
-    // Fetch data from API
     const { jobs: apiJobs } = useFeedingRecordsAsJobs(pondId || '');
-
     const config: LogScreenConfig = {
         jobType: 'FEED',
         pondId,
         metaConverter: (item: JobExecution) => convertFeedJobToActivityData(item),
-        editRoute: 'EditFeeder',
-        getEditParams: (_pond, item) => ({ pondId: pondId!, jobId: item.id }),
+        editRoute: 'FeedingManagement',
+        getEditParams: (_pond, item) => ({ pondId: pondId!, jobId: item.id, itemToEdit: item }),
         externalData: apiJobs,
     };
-
     const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
-
     const handleStartFeeding = () => {
         if (pondId) {
-            navigation.navigate('FeedTheShrimp', { pondId });
+            navigation.navigate('FeedingManagement', { pondId });
         }
     };
-
     return (
         <BaseLogScreen
             title="Nhật ký cho ăn"

@@ -52,6 +52,17 @@ export const usePondRecords = (pondId: string, params?: IPondRecordListParams) =
 };
 
 /**
+ * Hook to fetch only the latest pond record activity
+ */
+export const useLatestPondActivity = (pondId: string) => {
+    return useQuery({
+        queryKey: farmKeys.pondRecords.list(pondId, { PageSize: 1, OrderBy: 'CreatedAt desc' }),
+        queryFn: () => pondRecordApi.list(pondId, { PageSize: 1, OrderBy: 'CreatedAt desc' }),
+        enabled: !!pondId,
+    });
+};
+
+/**
  * Convert referenceData to ActivityData[] based on operationType
  */
 const convertReferenceDataToActivityData = (
