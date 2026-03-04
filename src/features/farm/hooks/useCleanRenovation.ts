@@ -77,6 +77,7 @@ export const useCleanRenovationsAsJobs = (pondId: string, params?: ICleanRenovat
                         }
                         return {
                             id: item.id,
+                            createdAt: item.createdAt,
                             label: `Lần ${dailyIndex}`,
                             date: item.createdAt,
                             time: item.createdAt

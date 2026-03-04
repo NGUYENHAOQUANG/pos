@@ -75,6 +75,7 @@ export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationP
                         }
                         return {
                             id: item.id,
+                            createdAt: item.createdAt,
                             label: `Lần ${dailyIndex}`,
                             date: item.createdAt,
                             time: item.createdAt
