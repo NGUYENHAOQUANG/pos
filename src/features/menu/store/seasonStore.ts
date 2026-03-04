@@ -6,6 +6,7 @@ import {
     getSeasonStatusName,
 } from '@/features/farm/types/farm.types';
 import { seasonApi } from '@/features/menu/api/seasonApi';
+import { SeasonPayload } from '@/features/menu/services/aquacultureService';
 
 export interface SeasonStore {
     seasons: SeasonData[];
@@ -108,7 +109,15 @@ export const createSeasonStore: StateCreator<
                 }
             }
 
-            const resData = await seasonApi.updateSeason(zoneId.toString(), seasonId, data);
+            // Build payload matching SeasonPayload type
+            const payload: SeasonPayload = {
+                seasonName: data.seasonName || data.name || '',
+                startDate: data.startDate?.toString(),
+                endDate: data.endDate?.toString(),
+                status: data.status,
+                notes: data.notes,
+            };
+            const resData = await seasonApi.updateSeason(zoneId.toString(), seasonId, payload);
             // Update local state
             set(state => {
                 const season = state.seasons.find(s => s.id.toString() === seasonId);
@@ -118,7 +127,7 @@ export const createSeasonStore: StateCreator<
             });
 
             // Normalize backend success message for UI
-            const backendMessage = (resData as any)?.message as string | undefined;
+            const backendMessage = (resData as { message?: string })?.message;
             let uiMessage: string | undefined = backendMessage;
             if (backendMessage && backendMessage.toLowerCase() === 'success') {
                 uiMessage = `Cập nhật vụ nuôi thành công`;
@@ -143,7 +152,7 @@ export const createSeasonStore: StateCreator<
                 }
             });
             // Chuẩn hoá message success từ backend cho UI
-            const backendMessage = (res as any)?.message as string | undefined;
+            const backendMessage = res?.message;
             let uiMessage: string | undefined = backendMessage;
             if (backendMessage && backendMessage.toLowerCase() === 'success') {
                 uiMessage = 'Đóng vụ nuôi thành công';

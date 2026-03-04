@@ -1,186 +1,214 @@
-import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
-import { RadioButton } from '@/shared/components/forms/RadioButton';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import {
     DropDownButton,
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
-import { Aquaculture } from '@/features/menu/types/menu.types';
-import { Zone } from '@/features/farm/types/farm.types';
-import Toast from 'react-native-toast-message';
-import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import {
+    aquacultureFormSchema,
+    AquacultureFormValues,
+    AquacultureFormStatus,
+} from '@/features/menu/schemas/aquacultureFormSchema';
 
-interface AquacultureFormProps {
-    initialValues?: Partial<Aquaculture> & { zoneId?: number | string };
-    zones?: Zone[];
-    isEdit?: boolean;
+// ================================================================
+// Props Interface (Presenter Pattern)
+// ================================================================
+interface ZoneOption {
+    id: string;
+    label: string;
 }
 
+export interface AquacultureFormProps {
+    isEditMode: boolean;
+    isLoadingDetail: boolean;
+    isSubmitting: boolean;
+    initialData: AquacultureFormValues | undefined;
+    zoneOptions: ZoneOption[];
+    onSubmit: (data: AquacultureFormValues) => void;
+}
+
+// ================================================================
+// Ref Interface for triggering form submit from Container
+// ================================================================
 export interface AquacultureFormRef {
-    submit: () => (Omit<Aquaculture, 'id' | 'createdAt'> & { zoneId?: string }) | null;
+    submit: () => void;
 }
 
-export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormProps>(
-    ({ initialValues, zones = [], isEdit = false }, ref) => {
-        // Map zones to dropdown options
-        const farmOptions = useMemo(() => {
-            return zones.map(z => ({
-                id: z.id.toString(),
-                label: z.name,
-            }));
-        }, [zones]);
+// Radio option type with optional disabled
+interface StatusOption {
+    label: string;
+    value: string;
+    disabled?: boolean;
+}
 
-        // State
-        const [farm, setFarm] = useState<DropDownItem | undefined>(() => {
-            if (initialValues?.zoneId) {
-                return farmOptions.find(f => f.id === initialValues.zoneId?.toString());
-            }
-            return undefined;
-        });
-        const [cycleName, setCycleName] = useState(initialValues?.name || '');
-        const [cycleCode, setCycleCode] = useState(initialValues?.code || '');
-        const [startDate, setStartDate] = useState<Date | null>(
-            initialValues?.startDate ? new Date(initialValues.startDate) : null
-        );
-        const [endDate, setEndDate] = useState<Date | null>(
-            initialValues?.endDate ? new Date(initialValues.endDate) : null
-        );
-        const [status, setStatus] = useState<'preparing' | 'active' | 'ended'>(
-            initialValues?.status === 'active' ||
-                initialValues?.status === 'ended' ||
-                initialValues?.status === 'preparing'
-                ? initialValues.status
-                : 'preparing'
-        );
-        const [note, setNote] = useState(initialValues?.note || '');
+// ================================================================
+// Presenter Component (forwardRef for Container submit trigger)
+// ================================================================
+export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureFormProps>(
+    ({ isEditMode, initialData, zoneOptions, onSubmit }, ref) => {
+        const initializedRef = useRef(false);
         const [showFullCode, setShowFullCode] = useState(false);
 
-        // Sync state with initialValues when they change (e.g. after refetch)
-        React.useEffect(() => {
-            if (initialValues) {
-                if (initialValues.name) setCycleName(initialValues.name);
-                if (initialValues.code) setCycleCode(initialValues.code);
-                if (initialValues.startDate) setStartDate(new Date(initialValues.startDate));
-                if (initialValues.endDate) setEndDate(new Date(initialValues.endDate));
-                if (initialValues.status) {
-                    const newStatus =
-                        initialValues.status === 'active' ||
-                        initialValues.status === 'preparing' ||
-                        initialValues.status === 'ended'
-                            ? initialValues.status
-                            : 'active';
-                    setStatus(newStatus);
-                }
-                if (initialValues.note !== undefined) setNote(initialValues.note);
-                if (initialValues.zoneId && zones.length > 0) {
-                    const foundFarm = farmOptions.find(
-                        f => f.id === initialValues.zoneId?.toString()
-                    );
-                    if (foundFarm) setFarm(foundFarm);
-                }
-            }
-        }, [initialValues, zones, farmOptions]);
-
-        useImperativeHandle(ref, () => ({
-            submit: () => {
-                // Validation
-                if (!farm) {
-                    Toast.show(ToastMessages.Aquaculture.FARM_REQUIRED);
-                    return null;
-                }
-                if (!cycleName.trim()) {
-                    Toast.show(ToastMessages.Aquaculture.CYCLE_NAME_REQUIRED);
-                    return null;
-                }
-                if (!startDate) {
-                    Toast.show(ToastMessages.Aquaculture.START_DATE_REQUIRED);
-                    return null;
-                }
-
-                return {
-                    farmId: String(farm.id),
-                    farmName: farm.label,
-                    zoneId: farm.id.toString(), // Zone ID for API
-                    name: cycleName,
-                    code: cycleCode,
-                    startDate: startDate,
-                    endDate: endDate || undefined,
-                    status: status,
-                    note: note,
-                };
+        const {
+            control,
+            handleSubmit,
+            reset,
+            watch,
+            formState: { errors },
+        } = useForm<AquacultureFormValues>({
+            resolver: zodResolver(aquacultureFormSchema),
+            defaultValues: {
+                zoneId: '',
+                zoneName: '',
+                name: '',
+                code: '',
+                startDate: new Date(),
+                endDate: null,
+                status: 'preparing',
+                note: '',
             },
-        }));
+        });
+
+        // Reset form when initialData changes (edit mode)
+        useEffect(() => {
+            if (initialData && !initializedRef.current) {
+                reset(initialData);
+                initializedRef.current = true;
+            }
+        }, [initialData, reset]);
+
+        const currentCode = watch('code');
+
+        // Build radio options based on edit mode and initial status
+        const statusOptions = useMemo((): StatusOption[] => {
+            const initialStatus = initialData?.status;
+            const options: StatusOption[] = [
+                {
+                    label: 'Chuẩn bị',
+                    value: 'preparing',
+                    disabled: isEditMode && initialStatus === 'active',
+                },
+                { label: 'Đang nuôi', value: 'active' },
+            ];
+
+            if (initialStatus === 'ended') {
+                options.push({ label: 'Đã kết thúc', value: 'ended', disabled: false });
+            }
+
+            return options;
+        }, [isEditMode, initialData?.status]);
+
+        // Expose submit function via ref for Container to trigger
+        React.useImperativeHandle(
+            ref,
+            () => ({
+                submit: () => {
+                    handleSubmit((data: AquacultureFormValues) => {
+                        onSubmit(data);
+                    })();
+                },
+            }),
+            [handleSubmit, onSubmit]
+        );
 
         return (
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-                {/* Farm Selection */}
+                {/* Zone Selection */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>
                         <Text style={styles.required}>* </Text>
-                        {isEdit ? 'Trại nuôi' : 'Chọn trại nuôi'}
+                        {isEditMode ? 'Trại nuôi' : 'Chọn trại nuôi'}
                     </Text>
-                    {isEdit ? (
-                        <Input
-                            value={farm?.label || ''}
-                            editable={false}
-                            placeholder="Trại nuôi"
-                            containerStyle={styles.noMarginBottom}
-                            inputContainerStyle={styles.inputDisabledBox}
-                        />
-                    ) : (
-                        <DropDownButton
-                            data={farmOptions}
-                            value={farm}
-                            onSelect={setFarm}
-                            placeholder="Chọn trại nuôi"
-                            style={styles.dropdown}
-                            height={40}
-                            borderRadius={6}
-                        />
-                    )}
+                    <Controller
+                        name="zoneId"
+                        control={control}
+                        render={({ field: { onChange, value } }) => {
+                            const selectedZone = zoneOptions.find(z => z.id === value);
+                            if (isEditMode) {
+                                return (
+                                    <Input
+                                        value={selectedZone?.label || ''}
+                                        editable={false}
+                                        placeholder="Trại nuôi"
+                                        containerStyle={styles.noMarginBottom}
+                                        inputContainerStyle={styles.inputDisabledBox}
+                                    />
+                                );
+                            }
+                            return (
+                                <DropDownButton
+                                    data={zoneOptions}
+                                    value={selectedZone}
+                                    onSelect={(item: DropDownItem) => {
+                                        onChange(item.id.toString());
+                                    }}
+                                    placeholder="Chọn trại nuôi"
+                                    style={styles.dropdown}
+                                    height={40}
+                                    borderRadius={6}
+                                />
+                            );
+                        }}
+                    />
+                    {errors.zoneId && <Text style={styles.errorText}>{errors.zoneId.message}</Text>}
                 </View>
 
                 {/* Cycle Name & Code */}
-                <View style={[styles.row, { zIndex: 10 }]}>
+                <View style={[styles.row, styles.zIndex10]}>
                     <View style={styles.flex1}>
-                        <FarmInput
-                            label="Tên vụ nuôi"
-                            required
-                            value={cycleName}
-                            onChangeText={setCycleName}
-                            placeholder="Nhập"
-                            containerStyle={{ marginBottom: 0 }}
+                        <Controller
+                            name="name"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <FarmInput
+                                    label="Tên vụ nuôi"
+                                    required
+                                    value={value}
+                                    onChangeText={onChange}
+                                    placeholder="Nhập"
+                                    containerStyle={styles.noMarginBottom}
+                                    error={errors.name?.message}
+                                />
+                            )}
                         />
                     </View>
-                    <View style={[styles.flex1, { zIndex: 10 }]}>
+                    <View style={[styles.flex1, styles.zIndex10]}>
                         <TouchableOpacity
                             activeOpacity={0.7}
-                            onPress={() => (cycleCode ? setShowFullCode(!showFullCode) : null)}
+                            onPress={() => (currentCode ? setShowFullCode(!showFullCode) : null)}
                         >
                             <View pointerEvents="none">
-                                <Input
-                                    label="Mã vụ nuôi"
-                                    value={cycleCode}
-                                    onChangeText={setCycleCode}
-                                    placeholder="Mã tự động"
-                                    containerStyle={styles.noMarginBottom}
-                                    inputContainerStyle={styles.inputDisabledBox}
-                                    disabled
-                                    ellipsizeMode="tail"
+                                <Controller
+                                    name="code"
+                                    control={control}
+                                    render={({ field: { value } }) => (
+                                        <Input
+                                            label="Mã vụ nuôi"
+                                            value={value || ''}
+                                            placeholder="Mã tự động"
+                                            containerStyle={styles.noMarginBottom}
+                                            inputContainerStyle={styles.inputDisabledBox}
+                                            disabled
+                                            ellipsizeMode="tail"
+                                        />
+                                    )}
                                 />
                             </View>
                         </TouchableOpacity>
 
                         {/* Full Code Display Popup */}
-                        {showFullCode && cycleCode ? (
+                        {showFullCode && currentCode ? (
                             <View style={styles.fullCodeContainer}>
                                 <Text style={styles.fullCodeText} selectable>
                                     Mã vụ nuôi:{' '}
-                                    <Text style={styles.fullCodeValue}>{cycleCode}</Text>
+                                    <Text style={styles.fullCodeValue}>{currentCode}</Text>
                                 </Text>
                             </View>
                         ) : null}
@@ -190,28 +218,43 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Start & End Date */}
                 <View style={styles.row}>
                     <View style={styles.flex1}>
-                        <DateInputButton
-                            label="Ngày bắt đầu"
-                            date={startDate}
-                            onDateChange={setStartDate}
-                            required
-                            height={40}
-                            dateOnly
-                            formatOptions={{
-                                showCurrentLabel: false,
-                            }}
+                        <Controller
+                            name="startDate"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <DateInputButton
+                                    label="Ngày bắt đầu"
+                                    date={value}
+                                    onDateChange={onChange}
+                                    required
+                                    height={40}
+                                    dateOnly
+                                    formatOptions={{
+                                        showCurrentLabel: false,
+                                    }}
+                                />
+                            )}
                         />
+                        {errors.startDate && (
+                            <Text style={styles.errorText}>{errors.startDate.message}</Text>
+                        )}
                     </View>
                     <View style={styles.flex1}>
-                        <DateInputButton
-                            label="Ngày kết thúc"
-                            date={endDate}
-                            onDateChange={setEndDate}
-                            height={40}
-                            dateOnly
-                            formatOptions={{
-                                showCurrentLabel: false,
-                            }}
+                        <Controller
+                            name="endDate"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <DateInputButton
+                                    label="Ngày kết thúc"
+                                    date={value}
+                                    onDateChange={onChange}
+                                    height={40}
+                                    dateOnly
+                                    formatOptions={{
+                                        showCurrentLabel: false,
+                                    }}
+                                />
+                            )}
                         />
                     </View>
                 </View>
@@ -219,21 +262,19 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 {/* Status */}
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>Chọn trạng thái</Text>
-                    <RadioButton
-                        options={[
-                            {
-                                label: 'Chuẩn bị',
-                                value: 'preparing',
-                                disabled: isEdit && initialValues?.status === 'active',
-                            },
-                            { label: 'Đang nuôi', value: 'active' },
-                            ...(initialValues?.status === 'ended'
-                                ? [{ label: 'Đã kết thúc', value: 'ended' }]
-                                : []),
-                        ]}
-                        value={status}
-                        onValueChange={val => setStatus(val as 'preparing' | 'active' | 'ended')}
-                        disabled={initialValues?.status === 'ended'}
+                    <Controller
+                        name="status"
+                        control={control}
+                        render={({ field: { onChange, value } }) => (
+                            <RadioButton
+                                options={statusOptions}
+                                value={value}
+                                onValueChange={(val: string) =>
+                                    onChange(val as AquacultureFormStatus)
+                                }
+                                disabled={initialData?.status === 'ended'}
+                            />
+                        )}
                     />
                 </View>
 
@@ -241,14 +282,20 @@ export const AquacultureForm = forwardRef<AquacultureFormRef, AquacultureFormPro
                 <View style={styles.fieldContainer}>
                     <Text style={styles.label}>Ghi chú</Text>
                     <View style={styles.inputGroup}>
-                        <TextInput
-                            style={styles.textArea}
-                            placeholder="Nhập ghi chú"
-                            placeholderTextColor={colors.borderSubtle}
-                            value={note}
-                            onChangeText={setNote}
-                            multiline
-                            textAlignVertical="top"
+                        <Controller
+                            name="note"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    style={styles.textArea}
+                                    placeholder="Nhập ghi chú"
+                                    placeholderTextColor={colors.borderSubtle}
+                                    value={value || ''}
+                                    onChangeText={onChange}
+                                    multiline
+                                    textAlignVertical="top"
+                                />
+                            )}
                         />
                     </View>
                 </View>
@@ -273,7 +320,7 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: spacing.md,
-        paddingVertical: 12,
+        paddingVertical: spacing.sm + 4,
         backgroundColor: colors.white,
         flexGrow: 0,
         gap: spacing.md,
@@ -289,10 +336,13 @@ const styles = StyleSheet.create({
     flex1: {
         flex: 1,
     },
+    zIndex10: {
+        zIndex: 10,
+    },
     label: {
-        fontFamily: 'Nunito Sans',
-        fontSize: 14,
-        fontWeight: '400',
+        fontFamily: typography.fontFamily.regular,
+        fontSize: typography.fontSize.sm,
+        fontWeight: typography.fontWeight.regular,
         fontStyle: 'normal',
         lineHeight: 22,
         color: colors.text,
@@ -306,89 +356,24 @@ const styles = StyleSheet.create({
     inputGroup: {
         gap: spacing.sm,
     },
-    inputContainer: {
-        marginBottom: 0,
-    },
-    inputBoxRadius: {
-        borderRadius: 6,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: spacing.xl,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 22,
-        gap: spacing.sm,
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    radioOuterSelected: {
-        borderColor: colors.primary,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primary,
-    },
-    radioLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-        lineHeight: 22,
-    },
     noMarginBottom: {
         marginBottom: 0,
     },
     textArea: {
         minHeight: 80,
-        paddingVertical: 5,
-        paddingHorizontal: 12,
+        paddingVertical: spacing.xs + 1,
+        paddingHorizontal: spacing.md - 4,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 6,
-        fontSize: 16,
-        fontWeight: '400',
+        borderRadius: borderRadius.xs + 2,
+        fontSize: typography.fontSize.base,
+        fontWeight: typography.fontWeight.regular,
         fontStyle: 'normal',
         lineHeight: 24,
         letterSpacing: 0,
         color: colors.text,
         textAlignVertical: 'top',
-    },
-    checkboxContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-    checkboxChecked: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
-    },
-    checkboxLabel: {
-        fontSize: 14,
-        color: colors.text,
-        lineHeight: 22,
     },
     inputDisabledBox: {
         backgroundColor: colors.gray[100],
@@ -401,9 +386,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        borderRadius: borderRadius.sm,
+        paddingHorizontal: spacing.sm + 4,
+        paddingVertical: spacing.sm + 2,
         zIndex: 100,
         elevation: 5,
         shadowColor: colors.shadow,
@@ -415,12 +400,17 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     fullCodeText: {
-        fontSize: 14,
+        fontSize: typography.fontSize.sm,
         color: colors.textSecondary,
         lineHeight: 22,
     },
     fullCodeValue: {
-        fontWeight: '700',
+        fontWeight: typography.fontWeight.bold,
         color: colors.text,
+    },
+    errorText: {
+        fontSize: typography.fontSize.xs,
+        color: colors.error,
+        marginTop: 2,
     },
 });
