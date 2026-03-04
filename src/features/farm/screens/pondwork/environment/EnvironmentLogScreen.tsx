@@ -35,16 +35,46 @@ export const EnvironmentLogScreen: React.FC = () => {
     });
     const [endDate, setEndDate] = useState<Date>(new Date());
 
+    const params = useMemo(() => {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+
+        // Convert to local time string (YYYY-MM-DDTHH:mm:ss) to avoid backend UTC parsing issues
+        const formatLocalISO = (d: Date) => {
+            const pad = (n: number) => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+                d.getHours()
+            )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        };
+
+        return {
+            CreateAtFrom: formatLocalISO(start),
+            CreateAtTo: formatLocalISO(end),
+            PageSize: 1000,
+        };
+    }, [startDate, endDate]);
+
     // Fetch environment measurements from API
-    const { data: envMeasurementsData, isLoading } = useEnvMeasurements(pond?.id || '', {
-        // You can add date filtering params here if the API supports it
-    });
+    const { data: envMeasurementsData, isLoading } = useEnvMeasurements(pond?.id || '', params);
 
     // Transform API data to TrackingGroup[] format expected by BaseLogScreen
     const groupedData: TrackingGroup[] = useMemo(() => {
         if (!envMeasurementsData?.data?.items || metricTypes.length === 0) return [];
 
-        const measurements = envMeasurementsData.data.items;
+        const startTS = new Date(startDate);
+        startTS.setHours(0, 0, 0, 0);
+        const endTS = new Date(endDate);
+        endTS.setHours(23, 59, 59, 999);
+
+        // Filter valid measurements strictly based on local calendar dates for reliability
+        const measurements = envMeasurementsData.data.items.filter((m: any) => {
+            if (!m.createdAt) return false;
+            const createdTime = new Date(m.createdAt).getTime();
+            return createdTime >= startTS.getTime() && createdTime <= endTS.getTime();
+        });
 
         // 1. Group raw measurements by date
         const rawGrouped = new Map<string, any[]>();
@@ -186,7 +216,7 @@ export const EnvironmentLogScreen: React.FC = () => {
             const dateB = new Date(b.date);
             return dateB.getTime() - dateA.getTime();
         });
-    }, [envMeasurementsData, metricTypes, pond, navigation]);
+    }, [envMeasurementsData, metricTypes, pond, navigation, startDate, endDate]);
 
     const handleStartEnvironment = () => {
         if (pond) {
