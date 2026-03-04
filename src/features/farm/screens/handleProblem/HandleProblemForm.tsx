@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,7 @@ import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationD
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 import { handleProblemSchema, HandleProblemFormValues } from '../../schemas/handleProblemSchema';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -38,11 +39,12 @@ export const HandleProblemForm = ({
     onSubmit,
     onDelete,
 }: HandleProblemFormProps) => {
-    const { control, handleSubmit, reset } = useForm<HandleProblemFormValues>({
+    const { control, handleSubmit, reset, watch } = useForm<HandleProblemFormValues>({
         resolver: zodResolver(handleProblemSchema),
         defaultValues: initialData,
     });
 
+    const currentValues = watch();
     const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
@@ -51,6 +53,30 @@ export const HandleProblemForm = ({
             setIsInitialized(true);
         }
     }, [initialData, isInitialized, reset]);
+
+    const hasChanges = useMemo(() => {
+        if (!isInitialized) return false;
+        if (!isEditMode) {
+            return !!(
+                (currentValues.note && currentValues.note.length > 0) ||
+                (currentValues.selectedMaterials && currentValues.selectedMaterials.length > 0) ||
+                (currentValues.imageUris && currentValues.imageUris.length > 0)
+            );
+        }
+
+        const dateChanged =
+            currentValues.selectedDate.getTime() !== initialData.selectedDate.getTime();
+        const noteChanged = currentValues.note !== initialData.note;
+        const materialsChanged =
+            JSON.stringify(currentValues.selectedMaterials) !==
+            JSON.stringify(initialData.selectedMaterials);
+        const imagesChanged =
+            JSON.stringify(currentValues.imageUris) !== JSON.stringify(initialData.imageUris);
+
+        return !!(dateChanged || noteChanged || materialsChanged || imagesChanged);
+    }, [currentValues, initialData, isInitialized, isEditMode]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const scrollViewRef = useRef<ScrollView>(null);
@@ -64,7 +90,14 @@ export const HandleProblemForm = ({
         } else {
             docIds = initialData.documentIds || [];
         }
+        allowNavigation();
         onSubmit(data, docIds);
+    };
+
+    const handleConfirmDelete = () => {
+        setShowDeleteModal(false);
+        allowNavigation();
+        onDelete();
     };
 
     return (
@@ -149,16 +182,15 @@ export const HandleProblemForm = ({
                     onPrimaryPress={handleSubmit(handleFormSubmit)}
                     onSecondaryPress={onBack}
                     style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                    primaryDisabled={isEditMode && !hasChanges}
                 />
 
                 <ConfirmationDeleteModal
                     visible={showDeleteModal}
-                    onConfirm={() => {
-                        setShowDeleteModal(false);
-                        onDelete();
-                    }}
+                    onConfirm={handleConfirmDelete}
                     onCancel={() => setShowDeleteModal(false)}
                 />
+                {UnsavedChangesModal}
             </View>
         </Loading>
     );

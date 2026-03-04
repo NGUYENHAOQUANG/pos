@@ -12,6 +12,7 @@ import { useCleanRenovationsAsJobs } from '@/features/farm/hooks/useCleanRenovat
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblemLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -19,7 +20,11 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 export const HandleProblemLogScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const { pond, jobType = 'CLEAN_POND' } = route.params || {};
+    const { pondId: routePondId, jobType = 'CLEAN_POND' } = route.params || {};
+    const pondId = String(routePondId || '');
+
+    // Get pond from store
+    const pond = useFarmStore(state => state.getPondById(pondId));
 
     const [startDate, setStartDate] = useState(() => {
         const date = new Date();
@@ -29,7 +34,6 @@ export const HandleProblemLogScreen = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const currentJobType: JobType = jobType as JobType;
-    const pondId = pond?.id || '';
 
     const cleanDryDateParams = useMemo(() => {
         const start = new Date(startDate);
@@ -123,6 +127,7 @@ export const HandleProblemLogScreen = () => {
     const config: LogScreenConfig<any> = {
         jobType: currentJobType,
         pond,
+        pondId,
         externalData: jobs,
         startDate,
         endDate,
@@ -142,8 +147,8 @@ export const HandleProblemLogScreen = () => {
             return data;
         },
         editRoute: 'HandleProblem',
-        getEditParams: (pondData, item) => ({
-            pond: pondData,
+        getEditParams: (_, item) => ({
+            pondId,
             item,
             jobType: currentJobType as any,
         }),
@@ -182,7 +187,8 @@ export const HandleProblemLogScreen = () => {
     const buttonTitle = getButtonTitle();
 
     const handleCreateNew = () => {
-        if (pond) navigation.navigate('HandleProblem', { pond, jobType: currentJobType as any });
+        if (pondId)
+            navigation.navigate('HandleProblem', { pondId, jobType: currentJobType as any });
     };
 
     return (

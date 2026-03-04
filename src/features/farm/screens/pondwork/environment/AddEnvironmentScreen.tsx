@@ -17,6 +17,7 @@ import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddEnvironmentScreen'>;
@@ -39,7 +40,6 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Decomposed useFarm() selectors
-    const environmentSettings = useFarmStore(state => state.environmentSettings);
     const parameterSettings = useFarmStore(state => state.parameterSettings);
     const generalInfoBoxRef = useRef<any>(null);
 
@@ -120,7 +120,13 @@ export const AddEnvironmentScreen: React.FC = () => {
         currentZone,
         metricTypes,
         parameterSettings,
-        environmentSettings,
+        onSaveSuccess: () => {
+            generalInfoBoxRef.current?.markAsSaved?.();
+            allowNavigation();
+        },
+        onDeleteSuccess: () => {
+            allowNavigation();
+        },
     });
 
     // Fetch image URLs from documentIds when editing
@@ -178,10 +184,47 @@ export const AddEnvironmentScreen: React.FC = () => {
     };
 
     const handleSavePress = () => {
-        const documentIds = generalInfoBoxRef.current?.getUploadedIds?.() || [];
-        const markAsSaved = () => generalInfoBoxRef.current?.markAsSaved?.();
-        handleSave(documentIds, markAsSaved);
+        const documentIdsArray = generalInfoBoxRef.current?.getUploadedIds?.() || [];
+        handleSave(documentIdsArray);
     };
+
+    const hasChanges = useMemo(() => {
+        if (!itemToEdit) {
+            return !!(
+                pH ||
+                dissolvedOxygen ||
+                temperature ||
+                salinity ||
+                alkalinity ||
+                transparency ||
+                kali ||
+                tan ||
+                magie ||
+                no3 ||
+                notes ||
+                imageUris.length > 0
+            );
+        }
+        return !isButtonDisabled || hasImagesChanged;
+    }, [
+        itemToEdit,
+        pH,
+        dissolvedOxygen,
+        temperature,
+        salinity,
+        alkalinity,
+        transparency,
+        kali,
+        tan,
+        magie,
+        no3,
+        notes,
+        imageUris,
+        isButtonDisabled,
+        hasImagesChanged,
+    ]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     return (
         <View style={styles.container}>
@@ -294,6 +337,8 @@ export const AddEnvironmentScreen: React.FC = () => {
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
             />
+
+            {UnsavedChangesModal}
         </View>
     );
 };

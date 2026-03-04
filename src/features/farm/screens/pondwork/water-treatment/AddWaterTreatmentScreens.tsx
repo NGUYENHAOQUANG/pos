@@ -19,6 +19,8 @@ import {
     TREATMENT_LABEL_TO_ENUM,
 } from '@/features/farm/types/waterTreatment.types';
 
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
+
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
 export const AddWaterTreatmentScreens: React.FC = () => {
@@ -43,6 +45,12 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
+
+    const hasChanges = useMemo(() => {
+        return activityType !== 'Đánh khoáng' || selectedMaterials.length > 0 || note !== '';
+    }, [activityType, selectedMaterials, note]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const handleBack = () => {
         navigation.goBack();
@@ -88,6 +96,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 pondId,
                 data: payload,
             });
+            allowNavigation();
             Toast.show({
                 type: 'success',
                 text1: 'Thêm nhật ký thành công',
@@ -146,6 +155,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 onSecondaryPress={handleBack}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
+            {UnsavedChangesModal}
         </>
     );
 };

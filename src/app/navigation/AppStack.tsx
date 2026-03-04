@@ -182,15 +182,15 @@ export type AppStackParamList = {
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string };
     HandleProblem: {
-        pond: PondData;
+        pondId: string;
         item?: JobExecution;
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
     HandleProblemLog: {
-        pond: PondData;
+        pondId: string;
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
-    SunDryPondLog: { pond: PondData };
+    SunDryPondLog: { pondId: string };
     CountingShrimp: { pondId: string; zoneId: string };
 
     // ============== Material Screens (Tab Bar hidden) ==============

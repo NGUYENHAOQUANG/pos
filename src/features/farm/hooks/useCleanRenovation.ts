@@ -9,7 +9,7 @@ import {
 } from '@/features/farm/types/cleanRenovation.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { cleanRenovationService } from '@/features/farm/services/handleProblem_Service/cleanRenovationService';
+import { cleanRenovationService } from '@/features/farm/services/handleproblem-service/cleanRenovation.service';
 
 export const useCleanRenovations = (pondId: string, params?: ICleanRenovationParams) => {
     return useQuery({

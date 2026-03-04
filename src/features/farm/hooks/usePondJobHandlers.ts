@@ -75,19 +75,19 @@ export const usePondJobNavigateHandlers = ({
             },
 
             [JOB_TYPES.CLEAN_POND]: () => {
-                if (!pond) return;
-                navigation.navigate('HandleProblem', { pond, jobType: 'CLEAN_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblem', { pondId: pond.id, jobType: 'CLEAN_POND' });
             },
 
             [JOB_TYPES.SUN_DRY_POND]: () => {
-                if (!pond) return;
-                navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblem', { pondId: pond.id, jobType: 'SUN_DRY_POND' });
             },
 
             [JOB_TYPES.TROUBLESHOOTING]: () => {
-                if (!pond) return;
+                if (!pond?.id) return;
                 navigation.navigate('HandleProblem', {
-                    pond,
+                    pondId: pond.id,
                     jobType: 'TROUBLESHOOTING',
                 });
             },
@@ -166,19 +166,27 @@ export const usePondJobEditHandlers = ({
             },
 
             [JOB_TYPES.CLEAN_POND]: item => {
-                if (!pond) return;
-                navigation.navigate('HandleProblem', { pond, item, jobType: 'CLEAN_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblem', {
+                    pondId: pond.id,
+                    item,
+                    jobType: 'CLEAN_POND',
+                });
             },
 
             [JOB_TYPES.SUN_DRY_POND]: item => {
-                if (!pond) return;
-                navigation.navigate('HandleProblem', { pond, item, jobType: 'SUN_DRY_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblem', {
+                    pondId: pond.id,
+                    item,
+                    jobType: 'SUN_DRY_POND',
+                });
             },
 
             [JOB_TYPES.TROUBLESHOOTING]: item => {
-                if (!pond) return;
+                if (!pond?.id) return;
                 navigation.navigate('HandleProblem', {
-                    pond,
+                    pondId: pond.id,
                     item,
                     jobType: 'TROUBLESHOOTING',
                 });
@@ -248,19 +256,22 @@ export const usePondJobLogHandlers = ({
             },
 
             [JOB_TYPES.CLEAN_POND]: () => {
-                if (!pond) return;
-                navigation.navigate('HandleProblemLog', { pond, jobType: 'CLEAN_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblemLog', { pondId: pond.id, jobType: 'CLEAN_POND' });
             },
 
             [JOB_TYPES.SUN_DRY_POND]: () => {
-                if (!pond) return;
-                navigation.navigate('HandleProblemLog', { pond, jobType: 'SUN_DRY_POND' });
+                if (!pond?.id) return;
+                navigation.navigate('HandleProblemLog', {
+                    pondId: pond.id,
+                    jobType: 'SUN_DRY_POND',
+                });
             },
 
             [JOB_TYPES.TROUBLESHOOTING]: () => {
-                if (!pond) return;
+                if (!pond?.id) return;
                 navigation.navigate('HandleProblemLog', {
-                    pond,
+                    pondId: pond.id,
                     jobType: 'TROUBLESHOOTING',
                 });
             },
