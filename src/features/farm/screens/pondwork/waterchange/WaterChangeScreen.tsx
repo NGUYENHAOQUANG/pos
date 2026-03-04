@@ -221,7 +221,7 @@ export const WaterSupplyScreen = () => {
 
         return {
             // Mực nước xả xuống (cm)
-            drainLevel: H_base >= 0 ? H_base.toString() : '0',
+            drainLevel: H_base >= 0 ? parseFloat(H_base.toFixed(5)).toString() : '0',
 
             // Thể tích sau xả (m3)
             volumeAfterDrain: V_base > 0 ? V_base.toFixed(0) : '0',

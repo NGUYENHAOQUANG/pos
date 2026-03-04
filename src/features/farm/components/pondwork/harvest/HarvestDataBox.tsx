@@ -5,11 +5,11 @@ import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
 interface HarvestDataBoxProps {
-    yieldAmount?: string; // Sản lượng (kg)
+    yieldAmount?: string | number;
     onYieldAmountChange?: (value: string) => void;
-    shrimpSize?: string; // Cỡ tôm (con/kg)
+    shrimpSize?: string | number;
     onShrimpSizeChange?: (value: string) => void;
-    referencePrice?: string; // Giá tôm tham khảo (VNĐ/kg)
+    referencePrice?: string | number;
     onReferencePriceChange?: (value: string) => void;
     containerStyle?: ViewStyle;
 }
@@ -25,8 +25,8 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
 }) => {
     // Calculate revenue: yieldAmount * referencePrice
     const revenue = useMemo(() => {
-        const yieldValue = parseFloat(yieldAmount.replace(/\D/g, '')) || 0;
-        const price = parseFloat(referencePrice.replace(/\D/g, '')) || 0;
+        const yieldValue = parseFloat(String(yieldAmount).replace(/[^\d.]/g, '')) || 0;
+        const price = parseFloat(String(referencePrice).replace(/[^\d.]/g, '')) || 0;
         if (yieldValue > 0 && price > 0) {
             return yieldValue * price;
         }
@@ -50,6 +50,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             cleaned = parts[0] + '.' + parts.slice(1).join('');
         }
 
+        // 4. Limit to 10 characters
+        if (cleaned.length > 20) {
+            cleaned = cleaned.substring(0, 20);
+        }
+
         callback(cleaned);
     };
 
@@ -70,10 +75,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 <View style={[styles.col, { paddingRight: spacing.xs }]}>
                     <Input
                         label="Sản lượng (kg)"
-                        value={yieldAmount}
+                        value={String(yieldAmount)}
                         onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
                         keyboardType="numeric"
                         required
+                        maxLength={20}
                         containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
@@ -82,10 +88,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 <View style={[styles.col, { paddingLeft: spacing.xs }]}>
                     <Input
                         label="Cỡ tôm (con/kg)"
-                        value={shrimpSize}
+                        value={String(shrimpSize)}
                         onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
                         keyboardType="numeric"
                         required
+                        maxLength={20}
                         containerStyle={{ marginBottom: 0 }}
                     />
                 </View>
@@ -94,10 +101,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             {/* Second Row: Giá tôm tham khảo */}
             <Input
                 label="Giá tôm tham khảo (VNĐ/kg)"
-                value={referencePrice}
+                value={String(referencePrice)}
                 onChangeText={text => handleNumericInput(text, onReferencePriceChange)}
                 keyboardType="numeric"
                 required
+                maxLength={20}
                 containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>
