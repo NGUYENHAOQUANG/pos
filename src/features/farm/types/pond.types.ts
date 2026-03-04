@@ -3,12 +3,12 @@ import { OperationType, PondType, PondTypeOperation } from '@/features/farm/type
 
 export interface PondData {
     id: string;
-    code?: string | null;
+    code?: string;
     name: string;
     no?: number;
     area?: number | string;
     areaSqm?: number;
-    shape?: string | number;
+    shape?: string;
     depth?: string | number;
     maxDepth?: number;
     pondPhase?: string;
@@ -20,7 +20,7 @@ export interface PondData {
     zone?: string;
     lastUpdate?: string;
     lastActivity?: string;
-    creatorId?: string | null;
+    creatorId?: string;
     editorId?: string | null;
     createdAt?: string;
     editedAt?: string;

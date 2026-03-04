@@ -23,6 +23,9 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
             cleaned = parts[0] + '.' + parts.slice(1).join('');
         }
 
+        if (cleaned.length > 20) {
+            cleaned = cleaned.substring(0, 20);
+        }
         callback(cleaned);
     };
 
@@ -35,6 +38,7 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
                 keyboardType="numeric"
                 required
                 containerStyle={{ marginBottom: 0 }}
+                maxLength={20}
             />
         </SelectionInfoBox>
     );

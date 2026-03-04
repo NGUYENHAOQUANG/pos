@@ -20,7 +20,7 @@ import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspe
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
 import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
-import { CreateCycleScreen } from '@/features/farm/screens/pond/createCycle/CreateCycleScreen';
+import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
@@ -28,19 +28,18 @@ import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchan
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
-import { EditCycleScreen } from '@/features/farm/screens/pond/editCycle/EditCycleScreen';
+import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { AddFeederScreens } from '@/features/farm/screens/pondwork/feed/AddFeederScreens';
-import { EditFeederScreens } from '@/features/farm/screens/pondwork/feed/EditFeederScreens';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
-import CountingShrimpScreen from '@/features/farm/screens/pond/CountingShrimpScreens';
+import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeAIScreen';
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
@@ -111,10 +110,14 @@ export type AppStackParamList = {
     MainTabs: { screen: string; params?: any } | undefined;
 
     // ============== Farm Screens (Tab Bar hidden) ==============
+    ReportView: undefined;
+
+    // Feeding Module
+    FeedingLog: { pondId: string; title?: string };
+    FeedingManagement: { pondId: string; jobId?: string; itemToEdit?: JobExecution }; // Màn hình Container gộp
+
+    // Job/Task Module
     PondDetail: { pondId: string; zoneId: string };
-    FeedTheShrimp: { pondId: string };
-    EditFeeder: { pondId: string; jobId?: string; itemToEdit?: JobExecution };
-    FeedingLog: { pondId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
     ShrimpInspectionScreen: {
@@ -150,8 +153,9 @@ export type AppStackParamList = {
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: {
         pondId: string;
-        zoneId?: string;
-        initialData?: CycleData | null;
+        zoneId: string;
+        cycleId?: string;
+        isEditMode?: boolean;
         aiCount?: number;
     };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
@@ -176,7 +180,7 @@ export type AppStackParamList = {
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
-    EditCycle: { pondId: string; cycleData: CycleData };
+    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string };
     HandleProblem: {
         pondId: string;
         item?: JobExecution;
@@ -187,7 +191,7 @@ export type AppStackParamList = {
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
     SunDryPondLog: { pondId: string };
-    CountingShrimp: undefined;
+    CountingShrimp: { pondId: string; zoneId: string };
 
     // ============== Material Screens (Tab Bar hidden) ==============
     MaterialForm: { materialId?: string; onSave?: (data: any) => void };
@@ -271,8 +275,7 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Farm Screens ============== */}
             <Stack.Screen name="PondDetail" component={PondDetailScreen} />
-            <Stack.Screen name="FeedTheShrimp" component={AddFeederScreens} />
-            <Stack.Screen name="EditFeeder" component={EditFeederScreens} />
+            <Stack.Screen name="FeedingManagement" component={FeedingManagementScreens} />
             <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
             <Stack.Screen name="PondInfo" component={PondInfoScreen} />
             <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
@@ -300,7 +303,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
-            <Stack.Screen name="EditCycle" component={EditCycleScreen} />
+            <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
             <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />

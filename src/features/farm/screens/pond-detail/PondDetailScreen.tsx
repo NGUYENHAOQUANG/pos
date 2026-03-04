@@ -44,13 +44,16 @@ export const PondDetailScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pondId, zoneId } = route.params || {};
 
+    useEffect(() => {
+        console.log('pondId', pondId);
+        console.log('zoneId', zoneId);
+    }, [pondId, zoneId]);
+
     const [selectedTab, setSelectedTab] = useState<string>('work');
     const [isMeasureSizeModalVisible, setIsMeasureSizeModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
 
     const { setTabBarVisible } = useTabBarVisibility();
-
-    const breedOptions = useFarmStore(state => state.breedOptions);
 
     const getPondJobItems = useFarmStore(state => state.getPondJobItems);
     const updatePondJob = useFarmStore(state => state.updatePondJob);
@@ -141,15 +144,14 @@ export const PondDetailScreen: React.FC = () => {
 
     const { data: shrimpSeeds } = useShrimpSeeds(warehouses?.[0]?.id);
 
-    const activeCycle = useActiveCycle(pond?.id || '');
-    const currentCycle = activeCycle;
+    const { data: currentCycle } = useActiveCycle(pond?.id || '');
 
     const {
         refetch: refetchCycles,
         isRefetching: isRefetchingCycles,
         data: cyclesData,
     } = useCyclesByPond(pond?.id || '');
-    const cycles = useMemo(() => cyclesData || [], [cyclesData]);
+    const cycles = useMemo(() => cyclesData?.data?.items || [], [cyclesData]);
 
     const filteredJobs = useMemo(() => {
         if (currentCycle) return jobs;
@@ -191,18 +193,14 @@ export const PondDetailScreen: React.FC = () => {
 
         const latestShrimpSize = pondDetailService.getLatestShrimpSize(apiMeasureSizeJobs);
 
-        const cycleData =
-            activeCycle ||
-            cycles.find(cycle => cycle.receivingPonds?.includes(pond.id)) ||
-            cycles[0] ||
-            null;
+        const cycleData = currentCycle || cycles[0] || null;
 
         navigation.navigate('AddTransferScreen', {
             pond,
             latestShrimpSize,
             cycleData,
         });
-    }, [pond, apiMeasureSizeJobs, setIsMeasureSizeModalVisible, activeCycle, cycles, navigation]);
+    }, [pond, apiMeasureSizeJobs, setIsMeasureSizeModalVisible, currentCycle, cycles, navigation]);
 
     const navigateHandlers = usePondJobNavigateHandlers({
         pond,
@@ -272,12 +270,13 @@ export const PondDetailScreen: React.FC = () => {
         navigation.navigate('PondInfo', { pond });
     }, [navigation, pond]);
 
-    const onEditCycle = useCallback(
-        (cycle: any) => {
-            navigation.navigate('EditCycle', { pondId: pond?.id || '', cycleData: cycle });
-        },
-        [navigation, pond]
-    );
+    const onEditCycle = useCallback(() => {
+        navigation.navigate('CycleDetailScreen', {
+            pondId: pond?.id || '',
+            zoneId: pond?.zoneId?.toString() ?? '',
+            warehouseId: warehouses?.[0]?.id ?? '',
+        });
+    }, [navigation, pond, warehouses]);
 
     const onGoToMeasureSizeScreen = useCallback(() => {
         if (!pond) return;
@@ -289,7 +288,7 @@ export const PondDetailScreen: React.FC = () => {
         if (pond?.id) {
             navigation.navigate('CreateCycle', {
                 pondId: pond.id,
-                zoneId: pond.zoneId?.toString(),
+                zoneId: pond.zoneId!,
             });
         }
     }, [navigation, pond]);
@@ -309,16 +308,15 @@ export const PondDetailScreen: React.FC = () => {
             onGoToPondInfo={onGoToPondInfo}
             onStartCycle={handleStartCycle}
             onEditCycle={onEditCycle}
-            breedName={pondDetailService.getBreedName(currentCycle, shrimpSeeds, breedOptions)}
-            transferBreedName={pondDetailService.getTransferBreedName(currentCycle, breedOptions)}
+            breedName={pondDetailService.getBreedName(currentCycle, shrimpSeeds)}
+            transferBreedName={pondDetailService.getTransferBreedName(currentCycle, shrimpSeeds)}
             handleJobPress={handleJobPress}
             handleAddJobItem={handleAddJobItem}
             handleEditJobItem={handleEditJobItem}
             isMeasureSizeModalVisible={isMeasureSizeModalVisible}
             setIsMeasureSizeModalVisible={setIsMeasureSizeModalVisible}
-            onGoToMeasureSizeScreen={() => {
-                onGoToMeasureSizeScreen();
-            }}
+            onGoToMeasureSizeScreen={onGoToMeasureSizeScreen}
+            jobs={jobs}
         />
     );
 };

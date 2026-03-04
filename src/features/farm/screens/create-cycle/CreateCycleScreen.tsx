@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, borderRadius } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import CreateCycleForm from '@/features/farm/screens/pond/createCycle/CreateCycleForm';
-import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleForm';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
 import Toast from 'react-native-toast-message';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     useCreateCycle,
     useUpdateCycle,
@@ -18,30 +17,28 @@ import {
     useCycleDetail,
 } from '@/features/farm/hooks/useCycle';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
-import { normalizeApiError } from '@/core/api/errorHandler';
-import { useQuery } from '@tanstack/react-query';
-import { pondApi } from '@/features/farm/api/pondApi';
-import { useBreedOptions } from '@/features/farm/hooks/pond/useBreedOptions';
+import { useSeasonList } from '@/features/menu/hooks/useSeason';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
+import { usePondDetail } from '@/features/farm/hooks/usePonds';
 
-// Forms & Services
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     createCycleSchema,
     CreateCycleFormValues,
 } from '@/features/farm/schemas/createCycleSchema';
-import { cycleService } from '@/features/farm/services/cycleService';
+import { cycleService } from '@/features/farm/services/cycle.service';
 
-type ScreenRouteProp = RouteProp<FarmStackParamList, 'CreateCycle'>;
-type Nav = NativeStackNavigationProp<FarmStackParamList, 'CreateCycle'>;
+type ScreenRouteProp = RouteProp<AppStackParamList, 'CreateCycle'>;
+type Nav = NativeStackNavigationProp<AppStackParamList, 'CreateCycle'>;
 
 export const CreateCycleScreen: React.FC = () => {
     const navigation = useNavigation<Nav>();
     const route = useRoute<ScreenRouteProp>();
 
-    const { pondId, initialData, zoneId, aiCount } = route.params;
-    const isEditMode = !!initialData;
+    const { pondId, zoneId, cycleId, isEditMode: isEditModeParam } = route.params;
+    const isEditMode: boolean = isEditModeParam ?? !!cycleId;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // --- State & Form Hook Init ---
@@ -53,77 +50,39 @@ export const CreateCycleScreen: React.FC = () => {
         formState: { isSubmitting },
     } = useForm<CreateCycleFormValues>({
         resolver: zodResolver(createCycleSchema),
-        defaultValues: cycleService.mapDetailToForm(initialData),
+        defaultValues: cycleService.mapDetailToForm(null),
         mode: 'onChange',
     });
 
-    // Listen for AI Count from CountingShrimpScreen
+    const { data: pond } = usePondDetail(zoneId, pondId);
+
+    const { data: detailData, isLoading: isLoadingDetail } = useCycleDetail(pondId, cycleId || '');
+
     useEffect(() => {
-        if (aiCount !== undefined) {
-            setValue('stockingQuantity', String(aiCount), { shouldValidate: true });
-        }
-    }, [aiCount, setValue]);
-
-    // --- Data Fetching Logic (Container Responsibilities) ---
-    const ponds = useFarmStore(state => state.ponds);
-    const storePond = ponds.find(p => p.id === pondId);
-
-    const pondZoneIdFromDetail = (initialData?.pond as { zoneId?: string | number })?.zoneId;
-    const seasonZoneIdFromDetail = (initialData?.season as { zoneId?: string | number })?.zoneId;
-
-    const rawEffectiveZoneId =
-        zoneId || storePond?.zoneId || pondZoneIdFromDetail || seasonZoneIdFromDetail;
-
-    const effectiveZoneId = rawEffectiveZoneId ? String(rawEffectiveZoneId) : undefined;
-
-    const { data: fetchedPondsData } = useQuery({
-        queryKey: ['ponds', effectiveZoneId],
-        queryFn: () => pondApi.getPondsByZone(effectiveZoneId!, { PageSize: 100 }),
-        enabled: !storePond && !!effectiveZoneId,
-    });
-
-    const pond =
-        storePond || fetchedPondsData?.data?.items?.find((p: { id: string }) => p.id === pondId);
-
-    // Fetch Details if in Edit Mode
-    const { data: detailData, isLoading: isLoadingDetail } = useCycleDetail(
-        pondId,
-        initialData?.id || ''
-    );
-
-    // Reset form when Detail API returns fresh data
-    useEffect(() => {
-        if (detailData && isEditMode) {
-            // Keep existing form values, but update with incoming server detail
-            reset(cycleService.mapDetailToForm(detailData));
+        if (detailData?.data && isEditMode) {
+            reset(cycleService.mapDetailToForm(detailData.data));
         }
     }, [detailData, reset, isEditMode]);
 
-    // Fetch Options (Hooks)
-    const breedSrcInitID =
-        initialData?.breedSource || (initialData as { warehouseItemId?: string })?.warehouseItemId;
-    const {
-        options: breedOptions,
-        isLoading: isLoadingBreeds,
-        refetch: refetchBreeds,
-    } = useBreedOptions(
-        effectiveZoneId,
-        breedSrcInitID,
-        initialData?.breedName || detailData?.breedName
+    const { data: warehouses } = useWarehouses({
+        PageSize: 1,
+        ZoneId: zoneId,
+    });
+
+    const primaryWarehouseId = warehouses?.[0]?.id;
+
+    const { data: shrimpSeeds = [], isLoading: isLoadingShrimpSeeds } =
+        useShrimpSeeds(primaryWarehouseId);
+
+    const breedSrcInitID = detailData?.data?.warehouseItemId;
+
+    const breedOptions = React.useMemo(
+        () => cycleService.mapShrimpSeedsToBreedOptions(shrimpSeeds, breedSrcInitID, undefined),
+        [shrimpSeeds, breedSrcInitID]
     );
 
-    useFocusEffect(
-        useCallback(() => {
-            if (refetchBreeds) {
-                refetchBreeds();
-            }
-        }, [refetchBreeds])
-    );
-
-    const { data: seasons = [] } = useSeasonsByZone(
-        effectiveZoneId,
-        (pond as { zone?: { code?: string } })?.zone?.code
-    );
+    const { data: seasonsResponse } = useSeasonList(zoneId);
+    const seasons = React.useMemo(() => seasonsResponse?.data?.items ?? [], [seasonsResponse]);
 
     // Map seasons for dropdown
     const seasonOptions = React.useMemo(() => {
@@ -132,9 +91,9 @@ export const CreateCycleScreen: React.FC = () => {
             value: s.id.toString(),
         }));
 
-        // Edit mode fallback for season
-        if (isEditMode && initialData?.season) {
-            const seasonObjectOrStr = initialData.season;
+        // Edit mode fallback cho season hiện tại (nếu không còn trong list)
+        if (isEditMode && detailData?.data?.season) {
+            const seasonObjectOrStr = detailData.data.season as any;
             const initSeasonId =
                 typeof seasonObjectOrStr === 'object'
                     ? String((seasonObjectOrStr as { id: string | number }).id)
@@ -152,7 +111,7 @@ export const CreateCycleScreen: React.FC = () => {
             }
         }
         return opts;
-    }, [seasons, isEditMode, initialData]);
+    }, [seasons, isEditMode, detailData]);
 
     // --- Mutations ---
     const { mutate: createCycle, isPending: isCreating } = useCreateCycle();
@@ -165,27 +124,14 @@ export const CreateCycleScreen: React.FC = () => {
             return;
         }
 
-        if (isEditMode && initialData?.id) {
+        if (isEditMode && cycleId) {
             const updatePayload = cycleService.mapFormToUpdatePayload(formData);
 
             updateCycle(
-                { pondId, cycleId: initialData.id, data: updatePayload },
+                { pondId, cycleId, data: updatePayload },
                 {
                     onSuccess: () => {
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Đã cập nhật chu kỳ thành công',
-                            topOffset: 0,
-                        });
                         navigation.goBack();
-                    },
-                    onError: error => {
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Có lỗi xảy ra',
-                            text2: normalizeApiError(error).message,
-                            position: 'top',
-                        });
                     },
                 }
             );
@@ -196,20 +142,7 @@ export const CreateCycleScreen: React.FC = () => {
                 { pondId, data: createPayload },
                 {
                     onSuccess: () => {
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Đã tạo chu kỳ nuôi thành công',
-                            topOffset: 0,
-                        });
                         navigation.goBack();
-                    },
-                    onError: error => {
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Có lỗi xảy ra',
-                            text2: normalizeApiError(error).message,
-                            position: 'top',
-                        });
                     },
                 }
             );
@@ -217,23 +150,28 @@ export const CreateCycleScreen: React.FC = () => {
     };
 
     const onDelete = async () => {
-        if (pondId && initialData?.id) {
+        if (pondId && cycleId) {
             try {
-                await deleteCycleMutation.mutateAsync({ pondId, cycleId: initialData.id });
+                await deleteCycleMutation.mutateAsync({ pondId, cycleId });
                 setShowDeleteModal(false);
-                Toast.show({ type: 'success', text1: 'Đã xóa chu kỳ thành công', position: 'top' });
                 navigation.navigate('MainTabs' as never);
-            } catch (error: unknown) {
+            } catch (_error) {
                 setShowDeleteModal(false);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Xóa thất bại',
-                    text2: normalizeApiError(error).message,
-                    visibilityTime: 4000,
-                });
             }
         }
     };
+
+    const onAIPress = useCallback(() => {
+        navigation.navigate('CountingShrimp', { pondId, zoneId });
+    }, [navigation, pondId, zoneId]);
+
+    useEffect(() => {
+        const aiCount = route.params?.aiCount;
+        if (aiCount != null && !isEditMode) {
+            setValue('stockingQuantity', String(aiCount));
+            navigation.setParams({ aiCount: undefined } as any);
+        }
+    }, [route.params?.aiCount, isEditMode, setValue, navigation]);
 
     return (
         <View style={styles.container}>
@@ -265,6 +203,7 @@ export const CreateCycleScreen: React.FC = () => {
                         isEdit={isEditMode}
                         breedOptions={breedOptions}
                         seasonOptions={seasonOptions}
+                        onPressCountingShrimp={onAIPress}
                     />
                 </SafeInputLayout>
             </View>
@@ -275,7 +214,11 @@ export const CreateCycleScreen: React.FC = () => {
                 onPrimaryPress={handleSubmit(onSubmit)}
                 onSecondaryPress={() => navigation.goBack()}
                 primaryDisabled={
-                    isCreating || isUpdating || isSubmitting || isLoadingDetail || isLoadingBreeds
+                    isCreating ||
+                    isUpdating ||
+                    isSubmitting ||
+                    isLoadingDetail ||
+                    isLoadingShrimpSeeds
                 }
             />
 

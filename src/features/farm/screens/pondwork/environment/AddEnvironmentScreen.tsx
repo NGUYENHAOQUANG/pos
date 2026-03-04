@@ -255,7 +255,7 @@ export const AddEnvironmentScreen: React.FC = () => {
                             type="withImage"
                             date={selectedDate}
                             onDateChange={setSelectedDate}
-                            disabledDate={!!itemToEdit}
+                            disabledDate={true}
                             imageUris={itemToEdit ? imageUris : undefined}
                             onImagesChange={setImageUris}
                             documentIds={itemToEdit ? documentIds : undefined}

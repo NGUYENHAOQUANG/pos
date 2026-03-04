@@ -16,6 +16,7 @@ import {
     AquacultureFormValues,
     AquacultureFormStatus,
 } from '@/features/menu/schemas/aquacultureFormSchema';
+import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 
 // ================================================================
 // Props Interface (Presenter Pattern)
@@ -291,9 +292,17 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                     placeholder="Nhập ghi chú"
                                     placeholderTextColor={colors.borderSubtle}
                                     value={value || ''}
-                                    onChangeText={onChange}
+                                    onChangeText={text => {
+                                        if (text.length > 1999) {
+                                            showLimitCharacterToast();
+                                            onChange(text.substring(0, 1999));
+                                        } else {
+                                            onChange(text);
+                                        }
+                                    }}
                                     multiline
                                     textAlignVertical="top"
+                                    maxLength={2000}
                                 />
                             )}
                         />
@@ -361,6 +370,7 @@ const styles = StyleSheet.create({
     },
     textArea: {
         minHeight: 80,
+        maxHeight: 160,
         paddingVertical: spacing.xs + 1,
         paddingHorizontal: spacing.md - 4,
         backgroundColor: colors.white,

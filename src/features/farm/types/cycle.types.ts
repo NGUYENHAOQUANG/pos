@@ -1,31 +1,31 @@
-import type { IApiResponse, ICreatorEditor } from '@/shared/types/common.types';
+import type { IApiResponse, ICreatorEditor, IPaginate } from '@/shared/types/common.types';
 import type { PondData } from '@/features/farm/types/pond.types';
 
 export interface ICycleSeason {
     zoneId: string;
     name: string;
-    code: string | null;
+    code?: string;
     startDate: string;
-    endDate: string | null;
+    endDate?: string;
     status: string;
-    notes: string | null;
+    notes?: string;
     id: string;
     no: number;
-    creatorId: string | null;
-    editorId: string | null;
+    creatorId?: string;
+    editorId?: string;
     createdAt: string;
     editedAt: string;
     creator?: ICreatorEditor | null;
     editor?: ICreatorEditor | null;
 }
 
-export interface ICycleItem {
-    warehouseItemId: string | null;
-    code: string | null;
-    name: string | null;
-    endDate: string | null;
+export interface CycleData {
+    warehouseItemId?: string;
+    code?: string;
+    name?: string;
+    endDate?: string;
     status: string;
-    notes: string | null;
+    notes?: string;
     density: number;
     totalStocking: number;
     ageDays: number;
@@ -33,12 +33,44 @@ export interface ICycleItem {
     pond: PondData;
     id: string;
     no: number;
-    creatorId: string | null;
-    editorId: string | null;
+    creatorId?: string;
+    editorId?: string;
     createdAt: string;
     editedAt: string;
     creator?: ICreatorEditor | null;
     editor?: ICreatorEditor | null;
 }
 
-export type ICycleDetailResponse = IApiResponse<ICycleItem>;
+export interface ICycleListParams {
+    PondId?: string;
+    Code?: string;
+    Name?: string;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
+}
+
+export interface ICreateCyclePayload {
+    seasonId: string;
+    warehouseItemId: string;
+    name: string;
+    totalStocking: number;
+    ageDays: number;
+    notes?: string;
+}
+
+export interface IUpdateCyclePayload {
+    seasonId?: string;
+    warehouseItemId?: string;
+    name?: string;
+    totalStocking?: number;
+    ageDays?: number;
+    notes?: string;
+}
+
+export type ICycleDetailResponse = IApiResponse<CycleData>;
+export type ICycleListResponse = IApiResponse<IPaginate<CycleData>>;

@@ -6,7 +6,7 @@ import { borderRadius, colors, spacing } from '@/styles';
 import { PondData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
@@ -14,7 +14,6 @@ import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 
 interface PondDetailProps {
     pond: PondData | undefined;
@@ -25,12 +24,12 @@ interface PondDetailProps {
     refreshing: boolean;
     onRefresh: () => void;
     currentCycle: CycleData | undefined | null;
-    filteredJobs: any[];
+    filteredJobs: { type: JobType; items: JobExecution[] }[];
 
     onBack: () => void;
     onGoToPondInfo: () => void;
     onStartCycle: () => void;
-    onEditCycle: (cycle: CycleData) => void;
+    onEditCycle: () => void;
     breedName: string;
     transferBreedName: string;
     // Job Handlers
@@ -41,6 +40,7 @@ interface PondDetailProps {
     isMeasureSizeModalVisible: boolean;
     setIsMeasureSizeModalVisible: (visible: boolean) => void;
     onGoToMeasureSizeScreen: () => void;
+    jobs: { type: JobType; items: JobExecution[] }[];
 }
 
 export const PondDetail: React.FC<PondDetailProps> = ({
@@ -59,16 +59,16 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     onStartCycle,
     onEditCycle,
     breedName,
-    transferBreedName,
     handleJobPress,
     handleAddJobItem,
     handleEditJobItem,
     isMeasureSizeModalVisible,
     setIsMeasureSizeModalVisible,
     onGoToMeasureSizeScreen,
+    jobs,
 }) => {
     const insets = useSafeAreaInsets();
-    const availableJobTypes = filteredJobs.map(j => j.type);
+    const availableJobTypes = jobs.map(j => j.type);
 
     return (
         <View style={styles.container}>
@@ -110,21 +110,8 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                                             <CycleCard
                                                 cycle={currentCycle}
                                                 breedName={breedName}
-                                                onPress={() => onEditCycle(currentCycle as any)}
+                                                onPress={onEditCycle}
                                             />
-                                            {currentCycle.transferInfo && (
-                                                <CycleCard
-                                                    cycle={currentCycle.transferInfo.originalCycle}
-                                                    breedName={transferBreedName}
-                                                    endDate={formatDate(
-                                                        new Date(
-                                                            currentCycle.transferInfo.transferDate
-                                                        )
-                                                    )}
-                                                    status="Hoàn thành"
-                                                    onPress={() => onEditCycle(currentCycle as any)}
-                                                />
-                                            )}
                                         </View>
                                     ) : (
                                         <PondCycleEmptyState />
