@@ -13,7 +13,7 @@ const fetchSeasonsByZone = async (zoneId: number | string, zoneCode?: string) =>
     const zoneIdStr = String(zoneId);
     const results = await seasonApi.getSeasons(zoneIdStr);
     // Map API raw data to Domain SeasonData
-    return results.map((item: any) => ({
+    return results.map((item: SeasonData) => ({
         ...item,
         name: item.seasonName || item.name,
         // Inject farmCode from zone if missing, or use seasonCode as fallback
