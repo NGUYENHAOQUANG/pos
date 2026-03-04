@@ -98,7 +98,9 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                 isVisible={isModalVisible}
                 onClose={() => setModalVisible(false)}
                 onSave={handleAddMaterial}
-                materials={materials}
+                materials={materials.filter(
+                    m => !selectedMaterials.some(sm => sm.material.id === m.id)
+                )}
             />
         </>
     );

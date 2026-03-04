@@ -9,7 +9,7 @@ import {
 } from '@/features/farm/types/dryRenovation.types';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { dryRenovationService } from '@/features/farm/services/handleProblem_Service/dryRenovationService';
+import { dryRenovationService } from '@/features/farm/services/handleproblem-service/dryRenovation.service';
 
 export const useDryRenovations = (pondId: string, params?: IDryRenovationParams) => {
     return useQuery({

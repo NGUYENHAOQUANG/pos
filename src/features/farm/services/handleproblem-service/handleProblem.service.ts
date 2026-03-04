@@ -76,7 +76,7 @@ export const handleProblemService = {
             .filter(m => m.material?.id)
             .map(m => ({
                 warehouseItemId: m.material.id,
-                quantity: Number(m.quantity) || 0,
+                quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
             }));
 
         const documentIdsForApi = formData.documentIds || [];

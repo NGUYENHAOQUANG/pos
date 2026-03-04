@@ -24,7 +24,7 @@ interface PondDetailProps {
     refreshing: boolean;
     onRefresh: () => void;
     currentCycle: CycleData | undefined | null;
-    filteredJobs: any[];
+    filteredJobs: { type: JobType; items: JobExecution[] }[];
 
     onBack: () => void;
     onGoToPondInfo: () => void;
@@ -40,6 +40,7 @@ interface PondDetailProps {
     isMeasureSizeModalVisible: boolean;
     setIsMeasureSizeModalVisible: (visible: boolean) => void;
     onGoToMeasureSizeScreen: () => void;
+    jobs: { type: JobType; items: JobExecution[] }[];
 }
 
 export const PondDetail: React.FC<PondDetailProps> = ({
@@ -64,9 +65,10 @@ export const PondDetail: React.FC<PondDetailProps> = ({
     isMeasureSizeModalVisible,
     setIsMeasureSizeModalVisible,
     onGoToMeasureSizeScreen,
+    jobs,
 }) => {
     const insets = useSafeAreaInsets();
-    const availableJobTypes = filteredJobs.map(j => j.type);
+    const availableJobTypes = jobs.map(j => j.type);
 
     return (
         <View style={styles.container}>

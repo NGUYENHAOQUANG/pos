@@ -8,6 +8,7 @@ import { JobExecution } from '@/features/farm/types/farm.types';
 import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
@@ -15,7 +16,10 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
 export const SunDryPondLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const { params } = useRoute<ScreenRouteProp>();
-    const { pond } = params || {};
+    const { pondId } = params || {};
+
+    // Get pond from store
+    const pond = useFarmStore(state => state.getPondById(pondId));
 
     const [startDate, setStartDate] = useState(() => {
         const date = new Date();
@@ -25,7 +29,7 @@ export const SunDryPondLogScreen: React.FC = () => {
 
     const [refreshing, setRefreshing] = useState(false);
 
-    const { jobs, isLoading, refetch } = useDryRenovationsAsJobs(pond?.id || '', {
+    const { jobs, isLoading, refetch } = useDryRenovationsAsJobs(pondId, {
         createAtFrom: startDate.toISOString(),
         createAtTo: endDate.toISOString(),
         page: 1,
@@ -44,6 +48,7 @@ export const SunDryPondLogScreen: React.FC = () => {
     const config: LogScreenConfig<any> = {
         jobType: 'SUN_DRY_POND',
         pond,
+        pondId,
         externalData: jobs,
         startDate,
         endDate,
@@ -63,14 +68,14 @@ export const SunDryPondLogScreen: React.FC = () => {
             return data;
         },
         editRoute: 'HandleProblem',
-        getEditParams: (pondData, item) => ({ pond: pondData, item, jobType: 'SUN_DRY_POND' }),
+        getEditParams: (_, item) => ({ pondId, item, jobType: 'SUN_DRY_POND' }),
     };
 
     const { groupedData } = useLogScreenData(config);
 
     const handleNavigateToCreate = () => {
-        if (pond) {
-            navigation.navigate('HandleProblem', { pond, jobType: 'SUN_DRY_POND' });
+        if (pondId) {
+            navigation.navigate('HandleProblem', { pondId, jobType: 'SUN_DRY_POND' });
         }
     };
 

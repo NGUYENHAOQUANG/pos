@@ -33,9 +33,8 @@ import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/mea
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { AddFeederScreens } from '@/features/farm/screens/pondwork/feed/AddFeederScreens';
-import { EditFeederScreens } from '@/features/farm/screens/pondwork/feed/EditFeederScreens';
 import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
@@ -111,10 +110,14 @@ export type AppStackParamList = {
     MainTabs: { screen: string; params?: any } | undefined;
 
     // ============== Farm Screens (Tab Bar hidden) ==============
+    ReportView: undefined;
+
+    // Feeding Module
+    FeedingLog: { pondId: string; title?: string };
+    FeedingManagement: { pondId: string; jobId?: string; itemToEdit?: JobExecution }; // Màn hình Container gộp
+
+    // Job/Task Module
     PondDetail: { pondId: string; zoneId: string };
-    FeedTheShrimp: { pondId: string };
-    EditFeeder: { pondId: string; jobId?: string; itemToEdit?: JobExecution };
-    FeedingLog: { pondId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
     ShrimpInspectionScreen: {
@@ -179,15 +182,15 @@ export type AppStackParamList = {
     HarvestLog: { pond: PondData };
     CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string };
     HandleProblem: {
-        pond: PondData;
+        pondId: string;
         item?: JobExecution;
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
     HandleProblemLog: {
-        pond: PondData;
+        pondId: string;
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
-    SunDryPondLog: { pond: PondData };
+    SunDryPondLog: { pondId: string };
     CountingShrimp: { pondId: string; zoneId: string };
 
     // ============== Material Screens (Tab Bar hidden) ==============
@@ -272,8 +275,7 @@ export const AppStack: React.FC = () => {
 
             {/* ============== Farm Screens ============== */}
             <Stack.Screen name="PondDetail" component={PondDetailScreen} />
-            <Stack.Screen name="FeedTheShrimp" component={AddFeederScreens} />
-            <Stack.Screen name="EditFeeder" component={EditFeederScreens} />
+            <Stack.Screen name="FeedingManagement" component={FeedingManagementScreens} />
             <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
             <Stack.Screen name="PondInfo" component={PondInfoScreen} />
             <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
