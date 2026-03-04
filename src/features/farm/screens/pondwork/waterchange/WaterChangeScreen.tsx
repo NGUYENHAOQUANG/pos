@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius } from '@/styles';
 // import { HeaderFarm } from '@/features/farm/components/HeaderFarm'; // Replaced with custom header like Siphon
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
@@ -299,11 +300,20 @@ export const WaterSupplyScreen = () => {
             }
             navigation.goBack();
         } catch (error: any) {
-            console.error('Save error', error);
+            let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Lưu thất bại',
-                text2: error?.message || 'Vui lòng thử lại',
+                text2: message,
             });
         }
     };

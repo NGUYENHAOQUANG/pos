@@ -3,7 +3,7 @@ import { IMaterial } from '@/features/material/types/material.types';
 
 export const handleProblemMaterialSchema = z.object({
     material: z.any() as unknown as z.ZodType<IMaterial>,
-    quantity: z.number().min(0, 'Số lượng phải lớn hơn hoặc bằng 0'),
+    quantity: z.any(),
     unit: z.string().min(1, 'Vui lòng chọn đơn vị'),
 });
 

@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -77,7 +78,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 notes: note || undefined,
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
-                    quantity: m.quantity,
+                    quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
                 })),
             },
         };
@@ -92,9 +93,18 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 text1: 'Thêm nhật ký thành công',
             });
             navigation.goBack();
-        } catch (error: unknown) {
+        } catch (error: any) {
             console.error('Create water treatment error', error);
-            const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+            let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Có lỗi xảy ra',

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Toast from 'react-native-toast-message';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -129,7 +131,9 @@ export const EditFeederScreens = () => {
                     notes: note,
                     materials: selectedMaterials.map(m => ({
                         warehouseItemId: m.material.id, // Ensure we access material.id
-                        quantity: m.quantity,
+                        quantity: Number.isNaN(Number(m.quantity))
+                            ? m.quantity
+                            : Number(m.quantity),
                     })),
                 },
             };
@@ -139,6 +143,22 @@ export const EditFeederScreens = () => {
                 {
                     onSuccess: () => {
                         navigation.goBack();
+                    },
+                    onError: (error: any) => {
+                        let message = getErrorMessage(error, 'Vui lòng thử lại');
+                        if (
+                            message.includes('invalid start of a value') ||
+                            message.includes('converted to System.Decimal') ||
+                            message.includes('System.Decimal')
+                        ) {
+                            message = 'Số lượng vật tư không hợp lệ';
+                        }
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Lưu thất bại',
+                            text2: message,
+                            position: 'top',
+                        });
                     },
                 }
             );
