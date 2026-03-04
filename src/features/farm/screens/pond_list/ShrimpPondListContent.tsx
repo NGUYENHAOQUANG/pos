@@ -2,14 +2,14 @@ import React, { useRef } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useScrollToTop } from '@react-navigation/native';
 import { colors } from '@/styles';
-import { ShrimpPondList as ShrimpPondListComponent } from '@/features/farm/components/pond/ShrimpPondList';
+import { ShrimpPondList } from '@/features/farm/components/pond-list/ShrimpPondList';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
 import { PondListSkeleton } from '@/features/farm/components/skeleton/PondListSkeleton';
 import { PondData } from '@/features/farm/types/farm.types';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
-export interface ShrimpPondListProps {
+export interface ShrimpPondListContentProps {
     farmOptions: DropDownItem[];
     selectedFarm: DropDownItem | undefined;
     selectedZoneId: string | undefined;
@@ -28,7 +28,7 @@ export interface ShrimpPondListProps {
     onRefresh: () => void;
 }
 
-export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
+export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
     farmOptions,
     selectedFarm,
     selectedZoneId,
@@ -76,7 +76,7 @@ export const ShrimpPondList: React.FC<ShrimpPondListProps> = ({
             {showSkeleton ? (
                 <PondListSkeleton />
             ) : (
-                <ShrimpPondListComponent
+                <ShrimpPondList
                     ref={flatListRef}
                     data={filteredData}
                     onPondPress={onPondPress}

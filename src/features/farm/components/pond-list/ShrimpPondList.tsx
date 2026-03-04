@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
 
 import { spacing } from '@/styles';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { ShrimpPond } from '@/features/farm/components/pond/ShrimpPond';
+import { ShrimpPond } from '@/features/farm/components/pond-list/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';
+import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
 
 interface ShrimpPondListProps {
     data: PondData[];
@@ -16,7 +16,7 @@ interface ShrimpPondListProps {
     ListFooterComponent?: React.ComponentType | React.ReactElement | null;
     refreshing?: boolean;
     onRefresh?: () => void;
-    zoneId?: string; // Add prop to pass selected zone
+    zoneId?: string;
 }
 
 export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
@@ -35,21 +35,14 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
         ref
     ) => {
         const getStatus = (item: PondData): TagStatus | undefined => {
-            // Strict mapping based on Backend PondStatusEnum
             if (item.status === 'Framing') return 'active';
             if (item.status === 'Available') return 'preparing';
 
             return undefined;
         };
 
-        // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
-        const getLatestPondActivity = useFarmStore(state => state.getLatestPondActivity);
-
         const renderItem: ListRenderItem<PondData> = ({ item }) => {
-            const latestActivity = getLatestPondActivity(item.id);
-            const displayActivity = latestActivity?.lastActivity || item.lastActivity;
             const computedStatus = getStatus(item);
-
             const displayType = item.type!;
 
             return (
@@ -61,8 +54,10 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                             : item.area?.toString() || ''
                     }
                     type={displayType}
-                    lastUpdate={latestActivity?.lastUpdate || item.lastUpdate}
-                    lastActivity={displayActivity}
+                    lastUpdate={
+                        item.lastUpdate ? formatDateWithTime(new Date(item.lastUpdate)) : '-'
+                    }
+                    lastActivity={item.lastActivity || '-'}
                     status={computedStatus}
                     style={styles.item}
                     pondId={item.id || ''}
