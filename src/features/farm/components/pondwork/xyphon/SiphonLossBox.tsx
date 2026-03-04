@@ -27,7 +27,7 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
     };
 
     return (
-        <SelectionInfoBox title="Số tôm hao (kg)">
+        <SelectionInfoBox title="Hao hụt trong ao">
             <Input
                 label="Số tôm hao (kg)"
                 value={lossAmount}
