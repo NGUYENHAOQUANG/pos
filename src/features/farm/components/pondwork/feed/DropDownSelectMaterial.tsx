@@ -41,8 +41,9 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
 
     // Filter data based on search text
     const filteredData = useMemo(() => {
-        if (!searchText) return data;
-        const lowerSearch = searchText.toLowerCase();
+        const trimmedSearch = searchText.trim();
+        if (!trimmedSearch) return data;
+        const lowerSearch = trimmedSearch.toLowerCase();
         return data.filter(item => item.name.toLowerCase().includes(lowerSearch));
     }, [data, searchText]);
 
