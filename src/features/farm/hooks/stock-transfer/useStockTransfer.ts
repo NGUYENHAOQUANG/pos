@@ -18,17 +18,6 @@ export function useIncomingStockTransfer(pondId: string | undefined, zonePonds: 
     return useQuery({
         queryKey: ['incoming-stock-transfer', pondId, zonePonds.length],
         queryFn: async (): Promise<IncomingStockTransfer | null> => {
-            if (pondId) {
-                try {
-                    await stockTransferApi.getList(pondId, {
-                        PageSize: 100,
-                        OrderBy: 'CreatedAt desc',
-                    });
-                } catch {
-                    // ignore
-                }
-            }
-
             if (!pondId || zonePonds.length === 0) return null;
 
             for (const zonePond of zonePonds) {

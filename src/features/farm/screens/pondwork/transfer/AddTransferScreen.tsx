@@ -253,7 +253,7 @@ export const AddTransferScreen: React.FC = () => {
     useEffect(() => {
         if (!hasInitialized.current && totalEstimatedShrimp > 0) {
             setReceivingPonds(prev => {
-                if (prev.length === 1 && prev[0].quantity === '') {
+                if (prev.length === 1 && (prev[0].quantity === '' || prev[0].quantity === '0')) {
                     hasInitialized.current = true;
                     return [{ ...prev[0], quantity: totalEstimatedShrimp.toString() }];
                 }

@@ -48,8 +48,10 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     }, [receivingPonds]);
 
     // Check if total quantity matches expected shrimp
+    // Only show error when user has entered quantity (totalQuantity > 0)
     const showError = useMemo(() => {
         if (!totalEstimatedShrimp || totalEstimatedShrimp === 0) return false;
+        if (totalQuantity === 0) return false;
         return totalQuantity !== totalEstimatedShrimp;
     }, [totalQuantity, totalEstimatedShrimp]);
 
