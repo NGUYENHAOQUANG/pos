@@ -316,9 +316,8 @@ export const PondDetailScreen: React.FC = () => {
             handleEditJobItem={handleEditJobItem}
             isMeasureSizeModalVisible={isMeasureSizeModalVisible}
             setIsMeasureSizeModalVisible={setIsMeasureSizeModalVisible}
-            onGoToMeasureSizeScreen={() => {
-                onGoToMeasureSizeScreen();
-            }}
+            onGoToMeasureSizeScreen={onGoToMeasureSizeScreen}
+            jobs={jobs}
         />
     );
 };

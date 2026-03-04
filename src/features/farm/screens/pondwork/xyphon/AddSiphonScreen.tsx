@@ -60,9 +60,7 @@ export const AddSiphonScreen: React.FC = () => {
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
     const [documentIds, setDocumentIds] = useState<string[]>(itemToEdit?.images || []);
-    const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>(
-        itemToEdit?.materials || []
-    );
+    const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     // Store initial data for comparison when editing
