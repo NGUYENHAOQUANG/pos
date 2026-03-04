@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
-interface EditCycleFormProps {
-    activeCycleData?: CycleData | null;
+interface CycleDetailContentProps {
+    activeCycleData?: CycleData;
     seasonLabel: string;
     breedLabel: string;
     doc: number;
@@ -18,7 +18,7 @@ interface EditCycleFormProps {
     onEditPress: () => void;
 }
 
-export const EditCycleForm: React.FC<EditCycleFormProps> = ({
+export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     activeCycleData,
     seasonLabel,
     breedLabel,
@@ -69,9 +69,9 @@ export const EditCycleForm: React.FC<EditCycleFormProps> = ({
                                 style={[styles.value, styles.cycleNameText]}
                                 numberOfLines={isCycleNameExpanded ? undefined : 1}
                             >
-                                {activeCycleData?.cycleName || '---'}
+                                {activeCycleData?.name || '---'}
                             </Text>
-                            {(activeCycleData?.cycleName?.length || 0) > 25 && (
+                            {(activeCycleData?.name?.length || 0) > 25 && (
                                 <TouchableOpacity
                                     onPress={() => setIsCycleNameExpanded(!isCycleNameExpanded)}
                                     style={styles.expandButton}
@@ -104,9 +104,7 @@ export const EditCycleForm: React.FC<EditCycleFormProps> = ({
                     <View style={styles.infoRow}>
                         <Text style={styles.label}>Số lượng thả (Pls):</Text>
                         <Text style={styles.value}>
-                            {activeCycleData?.stockingQuantity?.toLocaleString() ||
-                                activeCycleData?.totalStocking?.toLocaleString() ||
-                                0}
+                            {activeCycleData?.totalStocking?.toLocaleString() || 0}
                         </Text>
                     </View>
                 </View>
@@ -139,9 +137,7 @@ export const EditCycleForm: React.FC<EditCycleFormProps> = ({
                     <View style={styles.infoRow}>
                         <Text style={styles.label}>Số lượng tôm sang (con):</Text>
                         <Text style={styles.value}>
-                            {activeCycleData?.stockingQuantity?.toLocaleString() ||
-                                activeCycleData?.totalStocking?.toLocaleString() ||
-                                0}
+                            {activeCycleData?.totalStocking?.toLocaleString() || 0}
                         </Text>
                     </View>
                 </View>

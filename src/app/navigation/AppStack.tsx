@@ -28,7 +28,7 @@ import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchan
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
-import { EditCycleScreen } from '@/features/farm/screens/pond/editCycle/EditCycleScreen';
+import { CycleDetailScreen } from '@/features/farm/screens/pond/cycle-detail/CycleDetailScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
@@ -153,9 +153,9 @@ export type AppStackParamList = {
     EnvironmentLogScreen: { pond: PondData };
     CreateCycle: {
         pondId: string;
-        zoneId?: string;
-        initialData?: CycleData | null;
-        aiCount?: number;
+        zoneId: string;
+        cycleId?: string;
+        isEditMode?: boolean;
     };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
@@ -179,7 +179,7 @@ export type AppStackParamList = {
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
-    EditCycle: { pondId: string; cycleData: CycleData };
+    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string };
     HandleProblem: {
         pond: PondData;
         item?: JobExecution;
@@ -302,7 +302,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
-            <Stack.Screen name="EditCycle" component={EditCycleScreen} />
+            <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
             <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />

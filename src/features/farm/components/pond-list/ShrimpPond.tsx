@@ -76,7 +76,7 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
     const { getBreedLabel } = usePondBreedInfo(effectiveZoneId);
 
-    const activeCycle = useActiveCycle(pondId || '');
+    const { data: activeCycle } = useActiveCycle(pondId || '');
 
     const cycleData = useMemo(() => {
         if (!pondId) return null;
@@ -104,18 +104,16 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         return lastActivity;
     }, [latestRecord, lastActivity]);
 
-    // Calculate DOC - check both possible field names
-    const effectiveStockingDate = cycleData?.stockingDate || cycleData?.startDate;
+    const effectiveStockingDate = cycleData?.createdAt;
     const doc = useMemo(() => {
         return calculateDOC(effectiveStockingDate);
     }, [effectiveStockingDate, calculateDOC]);
 
     const breedLabel = useMemo(() => {
-        const breedId = cycleData?.breedSource || cycleData?.warehouseItemId;
-        return getBreedLabel(breedId, cycleData?.breedName);
+        const breedId = cycleData?.warehouseItemId;
+        return getBreedLabel(breedId);
     }, [cycleData, getBreedLabel]);
 
-    // Display Logic Override: REMOVED as per request.
     const displayType = type;
 
     const [menuVisible, setMenuVisible] = useState(false);
