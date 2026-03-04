@@ -12,8 +12,8 @@ import {
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
 import { documentApi } from '@/features/material/api/documentApi';
-import { NormalizedError } from '@/core/api/errorHandler';
 import { Loading } from '@/shared/components/ui/Loading';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 import {
     useCreateCleanRenovation,
@@ -98,23 +98,23 @@ export const HandleProblemFormScreen = () => {
     };
 
     const handleError = (err: unknown) => {
-        const error = err as NormalizedError;
-        if (error.type === 'VALIDATION_ERROR') {
-            const firstFieldKey = Object.keys(error.fields)[0];
-            if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
-                Toast.show({
-                    type: 'error',
-                    text1: error.fields[firstFieldKey][0],
-                    visibilityTime: 4000,
-                });
-                return;
-            }
+        let message = getErrorMessage(err, 'Có lỗi xảy ra');
+
+        if (
+            message.includes('invalid start of a value') ||
+            message.includes('converted to System.Decimal') ||
+            message.includes('System.Decimal')
+        ) {
+            message = 'Số lượng vật tư không hợp lệ';
         }
-        if (error.type === 'NOT_FOUND_ERROR') {
-            Toast.show({ type: 'error', text1: error.message, visibilityTime: 4000 });
-            return;
-        }
-        Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
+
+        Toast.show({
+            type: 'error',
+            text1: 'Lưu thất bại',
+            text2: message,
+            visibilityTime: 4000,
+            position: 'top',
+        });
     };
 
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -156,7 +156,7 @@ export const HandleProblemFormScreen = () => {
         return handleProblemService.mapDetailToForm(item, materials, imageUrls);
     }, [item, materials, imageUrls]);
 
-    const onSubmit = (data: HandleProblemFormValues, documentIds: string[]) => {
+    const onSubmit = async (data: HandleProblemFormValues, documentIds: string[]) => {
         if (!pond?.id) return;
 
         if (data.selectedMaterials.length === 0) {
@@ -180,28 +180,48 @@ export const HandleProblemFormScreen = () => {
         }
 
         if (currentJobType === 'CLEAN_POND') {
-            if (isEditMode) {
-                updateCleanMutation.mutate(
-                    { pondId: pond.id, id: item.id, ...(payload as any) },
-                    {
-                        onSuccess: () => {
-                            showEditJobSuccessToast(currentJobType);
-                            navigation.goBack();
-                        },
-                        onError: handleError,
+            try {
+                if (isEditMode) {
+                    const res: any = await updateCleanMutation.mutateAsync({
+                        pondId: pond.id,
+                        id: item.id,
+                        ...(payload as any),
+                    });
+
+                    // Backend may return success flag even on 200
+                    if (!res?.success) {
+                        Toast.show({
+                            type: 'error',
+                            text1: res?.message || 'Cập nhật nhật ký cải tạo ao thất bại',
+                            position: 'top',
+                            visibilityTime: 4000,
+                        });
+                        return;
                     }
-                );
-            } else {
-                createCleanMutation.mutate(
-                    { pondId: pond.id, ...(payload as any) },
-                    {
-                        onSuccess: () => {
-                            showAddJobSuccessToast(currentJobType);
-                            navigation.goBack();
-                        },
-                        onError: handleError,
+
+                    showEditJobSuccessToast(currentJobType);
+                    navigation.goBack();
+                } else {
+                    const res: any = await createCleanMutation.mutateAsync({
+                        pondId: pond.id,
+                        ...(payload as any),
+                    });
+
+                    if (!res?.success) {
+                        Toast.show({
+                            type: 'error',
+                            text1: res?.message || 'Tạo nhật ký cải tạo ao thất bại',
+                            position: 'top',
+                            visibilityTime: 4000,
+                        });
+                        return;
                     }
-                );
+
+                    showAddJobSuccessToast(currentJobType);
+                    navigation.goBack();
+                }
+            } catch (error) {
+                handleError(error);
             }
             return;
         }
@@ -269,7 +289,10 @@ export const HandleProblemFormScreen = () => {
         const dateString = formatDate(data.selectedDate);
 
         const jobData = {
-            materials: data.selectedMaterials,
+            materials: data.selectedMaterials.map(m => ({
+                ...m,
+                quantity: Number.isNaN(Number(m.quantity)) ? 0 : Number(m.quantity),
+            })),
             note: data.note || undefined,
             images: data.imageUris && data.imageUris.length > 0 ? data.imageUris : undefined,
             meta: { ...item?.meta, documentIds },
