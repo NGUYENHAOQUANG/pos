@@ -1,30 +1,40 @@
-import { IApiResponse, IPaginate } from '@/shared/types/common.types';
-import { IStatus } from '@/features/farm/types/farm.types';
+import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+
+// Enum for stock transfer status - matches backend StatusRecordEnum
+export enum StockTransferStatus {
+    Success = 'Success',
+    Error = 'Error',
+    Pending = 'Pending',
+    Cancel = 'Cancel',
+}
 
 export interface IStockTransferToPond {
     toPondId: string;
     quantity: number;
-    // Optional fields for display if needed, based on UI requirements
-    toPondName?: string;
 }
 
 export interface IStockTransfer {
     id: string;
     no: number;
+    creatorId?: string;
+    editorId?: string;
     createdAt: string;
-    createdBy?: string;
+    editedAt?: string;
+    creator?: ICreatorEditor | null;
+    editor?: ICreatorEditor | null;
     fromPondId: string;
-    fromPondName?: string; // If available in DTO
+    fromCycleId?: string;
     toPonds: IStockTransferToPond[];
     totalStocking: number;
     shrimpSizePcsPerKg: number;
     notes?: string;
-    status: IStatus;
+    status: StockTransferStatus;
 }
 
 export interface IStockTransferDetail extends IStockTransfer {
-    // Add additional fields returned by Detail API if any
-    fromCycleId?: string;
+    // Detail API returns full pond and cycle objects
+    pond?: Record<string, unknown>;
+    cycle?: Record<string, unknown>;
 }
 
 export interface CreateStockTransferRequest {
@@ -38,11 +48,14 @@ export interface CreateStockTransferRequest {
 }
 
 export interface GetStockTransfersParams {
+    PondId?: string;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
     Page?: number;
     PageSize?: number;
     OrderBy?: string;
-    FromDate?: string;
-    ToDate?: string;
 }
 
 export type GetStockTransfersResponse = IApiResponse<IPaginate<IStockTransfer>>;

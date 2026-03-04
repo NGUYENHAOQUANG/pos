@@ -29,4 +29,15 @@ export const stockTransferApi = {
         );
         return response.data;
     },
+    delete: async (pondId: string, id: string): Promise<boolean> => {
+        try {
+            const response = await apiClient.delete(
+                API_ENDPOINTS.POND.STOCK_TRANSFER.DELETE(pondId, id)
+            );
+            return response.data?.success || false;
+        } catch (error) {
+            console.error('Delete stock transfer error:', error);
+            throw error;
+        }
+    },
 };
