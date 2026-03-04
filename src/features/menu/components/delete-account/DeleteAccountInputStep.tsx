@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,24 +11,23 @@ import {
     Keyboard,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { colors, spacing, borderRadius } from '@/styles';
-import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';
+import { DeleteAccountWarningBox } from '@/features/menu/components/delete-account/DeleteAccountWarningStep';
 import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
+import {
+    deleteAccountSchema,
+    DeleteAccountFormData,
+    DELETE_REASONS,
+    OTHER_REASON_KEY,
+} from '../../schemas/deleteAccountSchema';
 
 interface DeleteAccountInputStepProps {
     onNext: (phone: string, selectedReasons: string[], otherReason: string) => void;
     currentUserPhone?: string;
 }
-
-const OTHER_REASON_KEY = 'Lý do khác';
-
-const DELETE_REASONS = [
-    'Không còn sử dụng ứng dụng nữa',
-    'Ứng dụng khó sử dụng',
-    'Ứng dụng hay bị lỗi / chạy không ổn định',
-    'Không đáp ứng đúng nhu cầu công việc',
-    OTHER_REASON_KEY,
-];
 
 export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     onNext,
@@ -37,14 +36,26 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     const insets = useSafeAreaInsets();
     const paddingBottom = Math.max(insets.bottom, 16);
 
-    const [phone, setPhone] = useState('');
-    const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
-    const [otherReasonText, setOtherReasonText] = useState('');
-    const [errors, setErrors] = useState({ phone: '', reason: '' });
+    const {
+        control,
+        handleSubmit,
+        watch,
+        setValue,
+        setError,
+        formState: { errors },
+    } = useForm<DeleteAccountFormData>({
+        resolver: zodResolver(deleteAccountSchema),
+        defaultValues: {
+            phoneNumber: '',
+            selectedReasons: [],
+            otherReasonNote: '',
+        },
+    });
 
-    // Ref cho ScrollView để điều khiển cuộn
+    const watchSelectedReasons = watch('selectedReasons');
+    const hasOtherReason = watchSelectedReasons.includes(OTHER_REASON_KEY);
+
     const scrollViewRef = useRef<ScrollView>(null);
-    // Ref cho TextInput "Lý do khác" để kiểm tra focus
     const otherReasonInputRef = useRef<TextInput>(null);
 
     useEffect(() => {
@@ -65,49 +76,25 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     }, []);
 
     const toggleReason = (reason: string) => {
-        setSelectedReasons(prev => {
-            if (prev.includes(reason)) {
-                return prev.filter(item => item !== reason);
-            } else {
-                return [...prev, reason];
-            }
-        });
-        if (errors.reason) setErrors(e => ({ ...e, reason: '' }));
+        const currentReasons = watchSelectedReasons;
+        if (currentReasons.includes(reason)) {
+            setValue(
+                'selectedReasons',
+                currentReasons.filter(r => r !== reason)
+            );
+        } else {
+            setValue('selectedReasons', [...currentReasons, reason]);
+        }
     };
 
-    const validate = () => {
-        let isValid = true;
-        const newErrors = { phone: '', reason: '' };
-
-        const phoneRegex = /^(03|05|07|08|09)+([0-9]{8})\b/;
-        if (!phone.trim()) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại.';
-            isValid = false;
-        } else if (!phoneRegex.test(phone)) {
-            newErrors.phone = 'Số điện thoại không chính xác';
-            isValid = false;
-        } else if (currentUserPhone && phone !== currentUserPhone) {
-            newErrors.phone = 'Số điện thoại không chính xác.';
-            isValid = false;
+    const onSubmit = (data: DeleteAccountFormData) => {
+        if (currentUserPhone && data.phoneNumber !== currentUserPhone) {
+            setError('phoneNumber', { message: 'Số điện thoại không chính xác.' });
+            return;
         }
 
-        if (selectedReasons.length === 0) {
-            newErrors.reason = 'Vui lòng chọn một lý do.';
-            isValid = false;
-        } else if (selectedReasons.includes(OTHER_REASON_KEY) && !otherReasonText.trim()) {
-            newErrors.reason = 'Vui lòng nhập chi tiết lý do khác.';
-            isValid = false;
-        }
-
-        setErrors(newErrors);
-        return isValid;
-    };
-
-    const handleNext = () => {
-        if (validate()) {
-            const cleanSelectedReasons = selectedReasons.filter(r => r !== OTHER_REASON_KEY);
-            onNext(phone, cleanSelectedReasons, otherReasonText.trim());
-        }
+        const cleanSelectedReasons = data.selectedReasons.filter(r => r !== OTHER_REASON_KEY);
+        onNext(data.phoneNumber, cleanSelectedReasons, (data.otherReasonNote || '').trim());
     };
 
     return (
@@ -141,21 +128,30 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                                 <Text style={styles.required}>* </Text>
                                 Số điện thoại của tài khoản hiện tại
                             </Text>
-                            <TextInput
-                                style={[styles.input, errors.phone ? styles.inputError : null]}
-                                placeholder="Nhập số điện thoại"
-                                placeholderTextColor={colors.textTertiary}
-                                value={phone}
-                                maxLength={10}
-                                onChangeText={text => {
-                                    setPhone(text);
-                                    if (errors.phone) setErrors(e => ({ ...e, phone: '' }));
-                                }}
-                                keyboardType="number-pad"
+
+                            <Controller
+                                control={control}
+                                name="phoneNumber"
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        style={[
+                                            styles.input,
+                                            errors.phoneNumber ? styles.inputError : null,
+                                        ]}
+                                        placeholder="Nhập số điện thoại"
+                                        placeholderTextColor={colors.textTertiary}
+                                        value={value}
+                                        maxLength={10}
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        keyboardType="number-pad"
+                                    />
+                                )}
                             />
-                            {errors.phone ? (
-                                <Text style={styles.errorText}>{errors.phone}</Text>
-                            ) : null}
+
+                            {errors.phoneNumber && (
+                                <Text style={styles.errorText}>{errors.phoneNumber.message}</Text>
+                            )}
                         </View>
 
                         {/* Reason Selection */}
@@ -167,7 +163,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
 
                             <View style={styles.checkboxContainer}>
                                 {DELETE_REASONS.map((reason, index) => {
-                                    const isSelected = selectedReasons.includes(reason);
+                                    const isSelected = watchSelectedReasons.includes(reason);
                                     return (
                                         <TouchableOpacity
                                             key={index}
@@ -189,46 +185,53 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
                             </View>
 
                             {/* Input nhập thêm */}
-                            {selectedReasons.includes(OTHER_REASON_KEY) && (
+                            {hasOtherReason && (
                                 <View style={{ marginTop: spacing.sm }}>
-                                    <TextInput
-                                        ref={otherReasonInputRef}
-                                        style={[
-                                            styles.input,
-                                            styles.textArea,
-                                            errors.reason ? styles.inputError : null,
-                                        ]}
-                                        placeholder="Nhập lý do khác"
-                                        placeholderTextColor={colors.textTertiary}
-                                        value={otherReasonText}
-                                        onChangeText={text => {
-                                            setOtherReasonText(text);
-                                            if (errors.reason)
-                                                setErrors(e => ({ ...e, reason: '' }));
-                                        }}
-                                        multiline
-                                        textAlignVertical="top"
-                                        onFocus={() => {
-                                            setTimeout(() => {
-                                                scrollViewRef.current?.scrollToEnd({
-                                                    animated: true,
-                                                });
-                                            }, 100);
-                                        }}
+                                    <Controller
+                                        control={control}
+                                        name="otherReasonNote"
+                                        render={({ field: { onChange, onBlur, value } }) => (
+                                            <TextInput
+                                                ref={otherReasonInputRef}
+                                                style={[
+                                                    styles.input,
+                                                    styles.textArea,
+                                                    errors.selectedReasons
+                                                        ? styles.inputError
+                                                        : null,
+                                                ]}
+                                                placeholder="Nhập lý do khác"
+                                                placeholderTextColor={colors.textTertiary}
+                                                value={value}
+                                                onChangeText={onChange}
+                                                onBlur={onBlur}
+                                                multiline
+                                                textAlignVertical="top"
+                                                onFocus={() => {
+                                                    setTimeout(() => {
+                                                        scrollViewRef.current?.scrollToEnd({
+                                                            animated: true,
+                                                        });
+                                                    }, 100);
+                                                }}
+                                            />
+                                        )}
                                     />
                                 </View>
                             )}
 
-                            {errors.reason ? (
-                                <Text style={styles.errorText}>{errors.reason}</Text>
-                            ) : null}
+                            {errors.selectedReasons && (
+                                <Text style={styles.errorText}>
+                                    {errors.selectedReasons.message}
+                                </Text>
+                            )}
                         </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
 
             <View style={[styles.footer, { paddingBottom }]}>
-                <TouchableOpacity style={styles.dangerButton} onPress={handleNext}>
+                <TouchableOpacity style={styles.dangerButton} onPress={handleSubmit(onSubmit)}>
                     <Text style={styles.dangerButtonText}>Tiếp tục</Text>
                 </TouchableOpacity>
             </View>

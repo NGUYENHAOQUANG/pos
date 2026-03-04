@@ -5,7 +5,7 @@ import { IntroScreen } from '@/features/onboarding/screens/IntroScreen';
 import OnboardingScreen from '@/features/onboarding/screens/OnboardingScreen';
 import AuthScreen from '@/features/auth/screens/AuthScreen';
 import VerifyOtpScreen from '@/features/auth/screens/VerifyOtpScreen';
-import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
+import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 import RegisterScreen from '@/features/auth/screens/RegisterScreen';
 import InfoScreen from '@/features/auth/screens/InfoScreen';
 
@@ -38,7 +38,7 @@ export function AuthNavigator() {
             <Stack.Screen name="Verify-otp" component={VerifyOtpScreen} />
             <Stack.Screen name="Login" component={AuthScreen} />
             <Stack.Screen name="Info" component={InfoScreen} />
-            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
         </Stack.Navigator>
     );
