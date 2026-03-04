@@ -1,6 +1,7 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { CreateSiphonCommand } from '@/features/farm/types/siphon.types';
+import { handleError } from '@/shared/utils/errorHandler';
 
 export const siphonApi = {
     create: async (pondId: string, data: CreateSiphonCommand): Promise<boolean> => {
@@ -9,7 +10,7 @@ export const siphonApi = {
             const response = await apiClient.post(url, data);
             return response.data?.success || false;
         } catch (error) {
-            console.error('Create siphon error:', error);
+            handleError(error);
             throw error;
         }
     },
@@ -20,7 +21,7 @@ export const siphonApi = {
             const response = await apiClient.patch(url, data);
             return response.data?.success || false;
         } catch (error) {
-            console.error('Update siphon error:', error);
+            handleError(error);
             throw error;
         }
     },
@@ -31,7 +32,7 @@ export const siphonApi = {
             const response = await apiClient.delete(url);
             return response.data?.success || false;
         } catch (error) {
-            console.error('Delete siphon error:', error);
+            handleError(error);
             throw error;
         }
     },
@@ -42,7 +43,7 @@ export const siphonApi = {
             const response = await apiClient.get(url, { params });
             return response.data;
         } catch (error) {
-            console.error('Get all siphon error:', error);
+            handleError(error);
             throw error;
         }
     },
@@ -53,7 +54,7 @@ export const siphonApi = {
             const response = await apiClient.get(url);
             return response.data;
         } catch (error) {
-            console.error('Get detail siphon error:', error);
+            handleError(error);
             throw error;
         }
     },

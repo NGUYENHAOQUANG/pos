@@ -25,7 +25,6 @@ export interface CycleStore {
     // Data Options
     breedOptions: BreedOption[];
 
-    calculateDOC: (stockingDate: string | null | undefined) => number;
     calculateTotalEstimatedShrimp: (
         actualStockingQuantity: number,
         shrimpSize: string,
@@ -43,19 +42,6 @@ export const createCycleStore: StateCreator<
     CycleStore
 > = (set, get) => ({
     breedOptions: INITIAL_BREED_OPTIONS,
-
-    calculateDOC: stockingDate => {
-        if (!stockingDate) return 0;
-        const start =
-            typeof stockingDate === 'string' && stockingDate.includes('/')
-                ? parseDate(stockingDate)
-                : new Date(stockingDate);
-        start.setHours(0, 0, 0, 0);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const diffTime = Math.abs(now.getTime() - start.getTime());
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    },
 
     calculateTotalEstimatedShrimp: (actualStockingQuantity, shrimpSize, pondId) => {
         if (!actualStockingQuantity || !shrimpSize || !pondId) return 0;

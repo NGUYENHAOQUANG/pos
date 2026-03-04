@@ -254,7 +254,7 @@ export const usePondJobLogHandlers = ({
 
             [JOB_TYPES.SUN_DRY_POND]: () => {
                 if (!pond) return;
-                navigation.navigate('SunDryPondLog', { pond });
+                navigation.navigate('HandleProblemLog', { pond, jobType: 'SUN_DRY_POND' });
             },
 
             [JOB_TYPES.TROUBLESHOOTING]: () => {
