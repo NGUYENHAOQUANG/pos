@@ -24,6 +24,7 @@ import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.
 import { useControl } from '@/features/control/store/controlStore';
 import { deviceApi } from '@/features/control/api/deviceApi';
 import { DeviceData } from '@/features/control/types/control.types';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'FeedTheShrimp'>;
 
 export const AddFeederScreens = () => {
@@ -70,6 +71,13 @@ export const AddFeederScreens = () => {
     }
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const hasChanges =
+        note.length > 0 ||
+        selectedMaterials.length > 0 ||
+        mode !== 'manual' ||
+        schedules.length > 0;
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const handleSaveInfo = async () => {
         if (selectedMaterials.length === 0) {
@@ -131,6 +139,7 @@ export const AddFeederScreens = () => {
             { pondId, payload },
             {
                 onSuccess: () => {
+                    allowNavigation();
                     navigation.goBack();
                 },
                 onError: (error: any) => {
@@ -249,6 +258,8 @@ export const AddFeederScreens = () => {
                 onSecondaryPress={() => navigation.goBack()}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
+
+            {UnsavedChangesModal}
         </View>
     );
 };

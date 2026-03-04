@@ -32,7 +32,7 @@ import {
 } from '@/features/farm/hooks/useIncidentData';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 
-import { handleProblemService } from '../../services/handleProblem_Service/handleProblemService';
+import { handleProblemService } from '../../services/handleproblem-service/handleProblem.service';
 import { HandleProblemForm } from './HandleProblemForm';
 import { HandleProblemFormValues } from '../../schemas/handleProblemSchema';
 
@@ -43,7 +43,7 @@ export const HandleProblemFormScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
 
-    const { pond, item, jobType = 'CLEAN_POND' } = route.params || {};
+    const { pondId, item, jobType = 'CLEAN_POND' } = route.params || {};
     const currentJobType = jobType as JobType;
     const isEditMode = !!item;
 
@@ -157,7 +157,7 @@ export const HandleProblemFormScreen = () => {
     }, [item, materials, imageUrls]);
 
     const onSubmit = async (data: HandleProblemFormValues, documentIds: string[]) => {
-        if (!pond?.id) return;
+        if (!pondId) return;
 
         if (data.selectedMaterials.length === 0) {
             Toast.show({
@@ -183,7 +183,7 @@ export const HandleProblemFormScreen = () => {
             try {
                 if (isEditMode) {
                     const res: any = await updateCleanMutation.mutateAsync({
-                        pondId: pond.id,
+                        pondId,
                         id: item.id,
                         ...(payload as any),
                     });
@@ -203,7 +203,7 @@ export const HandleProblemFormScreen = () => {
                     navigation.goBack();
                 } else {
                     const res: any = await createCleanMutation.mutateAsync({
-                        pondId: pond.id,
+                        pondId,
                         ...(payload as any),
                     });
 
@@ -229,7 +229,7 @@ export const HandleProblemFormScreen = () => {
         if (currentJobType === 'SUN_DRY_POND') {
             if (isEditMode) {
                 updateDryMutation.mutate(
-                    { pondId: pond.id, id: item.id, ...(payload as any) },
+                    { pondId, id: item.id, ...(payload as any) },
                     {
                         onSuccess: () => {
                             showEditJobSuccessToast(currentJobType);
@@ -240,7 +240,7 @@ export const HandleProblemFormScreen = () => {
                 );
             } else {
                 createDryMutation.mutate(
-                    { pondId: pond.id, ...(payload as any) },
+                    { pondId, ...(payload as any) },
                     {
                         onSuccess: () => {
                             showAddJobSuccessToast(currentJobType);
@@ -256,7 +256,7 @@ export const HandleProblemFormScreen = () => {
         if (currentJobType === 'TROUBLESHOOTING') {
             if (isEditMode) {
                 updateIncidentMutation.mutate(
-                    { pondId: pond.id, id: item.id, payload: payload as any },
+                    { pondId, id: item.id, payload: payload as any },
                     {
                         onSuccess: () => {
                             showEditJobSuccessToast(currentJobType);
@@ -267,7 +267,7 @@ export const HandleProblemFormScreen = () => {
                 );
             } else {
                 createIncidentMutation.mutate(
-                    { pondId: pond.id, payload: payload as any },
+                    { pondId, payload: payload as any },
                     {
                         onSuccess: () => {
                             showAddJobSuccessToast(currentJobType);
@@ -281,7 +281,7 @@ export const HandleProblemFormScreen = () => {
         }
 
         // Fallback for Local Store (if needed)
-        const currentItems = getPondJobItems(pond.id, currentJobType);
+        const currentItems = getPondJobItems(pondId, currentJobType);
         const timeString = data.selectedDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',
             minute: '2-digit',
@@ -302,7 +302,7 @@ export const HandleProblemFormScreen = () => {
             const updatedItems = currentItems.map((i: any) =>
                 i.id === item.id ? { ...i, time: timeString, date: dateString, ...jobData } : i
             );
-            updatePondJob(pond.id, currentJobType, updatedItems);
+            updatePondJob(pondId, currentJobType, updatedItems);
             showEditJobSuccessToast(currentJobType);
         } else {
             let maxIndex = 0;
@@ -320,37 +320,37 @@ export const HandleProblemFormScreen = () => {
                 label: `Lần ${nextIndex}`,
                 time: timeString,
                 date: dateString,
-                pondId: pond.id,
+                pondId,
                 ...jobData,
             };
-            updatePondJob(pond.id, currentJobType, [...currentItems, newItem]);
+            updatePondJob(pondId, currentJobType, [...currentItems, newItem]);
             showAddJobSuccessToast(currentJobType);
         }
         navigation.goBack();
     };
 
     const onDelete = async () => {
-        if (!pond?.id || !item?.id) return;
+        if (!pondId || !item?.id) return;
         try {
             if (currentJobType === 'CLEAN_POND') {
-                await deleteCleanMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                await deleteCleanMutation.mutateAsync({ pondId, id: item.id });
                 navigation.goBack();
                 return;
             }
             if (currentJobType === 'SUN_DRY_POND') {
-                await deleteDryMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                await deleteDryMutation.mutateAsync({ pondId, id: item.id });
                 navigation.goBack();
                 return;
             }
             if (currentJobType === 'TROUBLESHOOTING') {
-                await deleteIncidentMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                await deleteIncidentMutation.mutateAsync({ pondId, id: item.id });
                 navigation.goBack();
                 return;
             }
 
-            const currentItems = getPondJobItems(pond.id, currentJobType);
+            const currentItems = getPondJobItems(pondId, currentJobType);
             const updatedItems = currentItems.filter((i: any) => i.id !== item.id);
-            updatePondJob(pond.id, currentJobType, updatedItems);
+            updatePondJob(pondId, currentJobType, updatedItems);
             navigation.goBack();
         } catch (error) {
             handleError(error);

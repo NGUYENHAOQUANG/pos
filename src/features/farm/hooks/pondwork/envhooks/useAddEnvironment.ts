@@ -23,9 +23,8 @@ interface UseAddEnvironmentProps {
     currentZone?: Zone | null;
     metricTypes: EnvMetricType[];
     parameterSettings: Record<string, ParameterSetting[]>;
-    environmentSettings: {
-        advancedParameters: Array<{ id: string; name: string; isChecked: boolean }>;
-    };
+    onSaveSuccess?: () => void;
+    onDeleteSuccess?: () => void;
 }
 
 export const useAddEnvironment = ({
@@ -34,6 +33,8 @@ export const useAddEnvironment = ({
     currentZone,
     metricTypes,
     parameterSettings,
+    onSaveSuccess,
+    onDeleteSuccess,
 }: UseAddEnvironmentProps) => {
     const navigation = useNavigation();
 
@@ -238,7 +239,12 @@ export const useAddEnvironment = ({
     }, [itemToEdit, detail, metricTypes]);
 
     const hasChanges = useMemo(() => {
-        if (!itemToEdit || !initialData) return true;
+        if (!itemToEdit) {
+            // For new items, check if any field has been modified from default
+            return !!(hasAtLeastOneParameter || notes !== '');
+        }
+
+        if (!initialData) return true;
 
         // Check Date Change
         if (selectedDate.getTime() !== initialData.date) return true;
@@ -272,6 +278,7 @@ export const useAddEnvironment = ({
         tan,
         magie,
         no3,
+        hasAtLeastOneParameter,
     ]);
 
     const handleSaveAdvancedParams = (data: {
@@ -333,7 +340,7 @@ export const useAddEnvironment = ({
         return measurements;
     };
 
-    const handleSave = (documentIds: string[], onSaveSuccess?: () => void) => {
+    const handleSave = (documentIds: string[]) => {
         if (!hasAtLeastOneParameter) {
             setShowParameterError(true);
             Toast.show({
@@ -408,6 +415,7 @@ export const useAddEnvironment = ({
             { pondId: pond.id, id: itemToEdit.id },
             {
                 onSuccess: () => {
+                    onDeleteSuccess?.();
                     setDeleteModalVisible(false);
                     Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
                     navigation.goBack();

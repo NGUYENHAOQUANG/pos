@@ -16,7 +16,8 @@ export type ConfirmationModalType =
     | 'harvest_close_cycle'
     | 'measure_size_required'
     | 'reset_check'
-    | 'measure_reset';
+    | 'measure_reset'
+    | 'unsaved_changes';
 
 interface ConfirmationConfig {
     title: string;
@@ -66,6 +67,12 @@ Bạn có chắc chắn muốn đóng chu kỳ không?`,
         message: 'Bạn có chắc chắn muốn đo lại không? Dữ liệu hiện tại sẽ bị xóa.',
         confirmText: 'Đồng ý',
         cancelText: 'Hủy',
+    },
+    unsaved_changes: {
+        title: 'Thay đổi chưa lưu',
+        message: 'Bạn có thay đổi chưa lưu,\nBạn có chắc chắn muốn thoát?',
+        confirmText: 'Có',
+        cancelText: 'Không',
     },
 };
 

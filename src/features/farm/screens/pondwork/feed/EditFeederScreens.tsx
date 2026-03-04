@@ -25,6 +25,7 @@ import {
     useFeedingRecordDetail,
 } from '@/features/farm/hooks/pondwork/feed/useFeeding';
 import { CreateFeedingRecordPayload } from '@/features/farm/types/feedingRecord.types';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EditFeeder'>;
 
@@ -38,6 +39,9 @@ export const EditFeederScreens = () => {
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [executionDate, setExecutionDate] = useState(new Date());
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    const [initialNote, setInitialNote] = useState('');
+    const [initialMaterialsJSON, setInitialMaterialsJSON] = useState('[]');
 
     // Danh sách vật tư cho màn Cho ăn (dùng logic giống HandleProblem)
     const { materials } = useFeeding();
@@ -88,10 +92,16 @@ export const EditFeederScreens = () => {
     useEffect(() => {
         if (itemToEdit?.meta) {
             const meta = itemToEdit.meta as any;
-            if (meta.notes) setNote(meta.notes);
+            if (meta.notes) {
+                setNote(meta.notes);
+                setInitialNote(meta.notes);
+            }
             if (meta.materials) {
                 const mapped = mapMaterials(meta.materials);
-                if (mapped.length > 0) setSelectedMaterials(mapped);
+                if (mapped.length > 0) {
+                    setSelectedMaterials(mapped);
+                    setInitialMaterialsJSON(JSON.stringify(mapped));
+                }
             }
             if (itemToEdit.createdAt) {
                 setExecutionDate(new Date(itemToEdit.createdAt));
@@ -109,11 +119,14 @@ export const EditFeederScreens = () => {
         if (detailData?.data) {
             const item = detailData.data;
             if (item.feedingDetail) {
-                setNote(item.feedingDetail.notes || '');
+                const fetchedNote = item.feedingDetail.notes || '';
+                setNote(fetchedNote);
+                setInitialNote(fetchedNote);
 
                 if (item.feedingDetail.materials) {
                     const mapped = mapMaterials(item.feedingDetail.materials);
                     setSelectedMaterials(mapped);
+                    setInitialMaterialsJSON(JSON.stringify(mapped));
                 }
             }
             // Parse createdAt string to Date object
@@ -122,6 +135,10 @@ export const EditFeederScreens = () => {
             }
         }
     }, [detailData, materials, mapMaterials]);
+
+    const hasChanges =
+        note !== initialNote || JSON.stringify(selectedMaterials) !== initialMaterialsJSON;
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const handleSaveInfo = () => {
         if (pondId && jobId) {
@@ -142,6 +159,7 @@ export const EditFeederScreens = () => {
                 { pondId, id: jobId, payload },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         navigation.goBack();
                     },
                     onError: (error: any) => {
@@ -176,6 +194,7 @@ export const EditFeederScreens = () => {
                 { pondId, id: jobId },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         navigation.goBack();
                     },
                 }
@@ -238,6 +257,8 @@ export const EditFeederScreens = () => {
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
             />
+
+            {UnsavedChangesModal}
         </View>
     );
 };

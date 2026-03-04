@@ -20,6 +20,7 @@ import {
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/waterchange/WaterChangeInfoBox';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
     MaterialSelectionBox,
@@ -234,6 +235,69 @@ export const WaterSupplyScreen = () => {
         };
     }, [targetLevel, supplyLevel, pond]);
 
+    const hasChanges = useMemo(() => {
+        if (!item) {
+            // Creation mode
+            return (
+                targetLevel !== '' ||
+                supplyLevel !== '' ||
+                selectedMaterials.length > 0 ||
+                note !== '' ||
+                imageUris.length > 0
+            );
+        }
+
+        if (!detailData) return false;
+
+        // Edit mode comparison
+        const detailAny = detailData.waterChangeDetail as any;
+        const originalTarget =
+            detailAny?.targetWaterLevel?.toString() ||
+            detailAny?.TargetWaterLevel?.toString() ||
+            '';
+        const originalSupply =
+            detailAny?.waterAdded?.toString() || detailAny?.WaterAdded?.toString() || '';
+        const originalNote = detailAny?.note || detailAny?.notes || '';
+
+        if (targetLevel !== originalTarget) return true;
+        if (supplyLevel !== originalSupply) return true;
+        if (note !== originalNote) return true;
+
+        // Materials comparison
+        const originalMaterials = detailData.waterChangeDetail?.materials || [];
+        if (selectedMaterials.length !== originalMaterials.length) return true;
+
+        const materialsChanged = selectedMaterials.some(sm => {
+            const om = originalMaterials.find(
+                (o: any) =>
+                    (o.warehouseItemId || o.materialId) === sm.material.id ||
+                    (o.warehouseItemId || o.materialId) === sm.material.materialDefId
+            );
+            if (!om) return true;
+            return parseFloat(sm.quantity.toString()) !== parseFloat(om.quantity.toString());
+        });
+
+        if (materialsChanged) return true;
+
+        // Image check (simplified comparison)
+        const originalDocIds =
+            detailData.waterChangeDetail?.documentIds || detailData.documentIds || [];
+        if (documentIds.length !== originalDocIds.length) return true;
+
+        return false;
+    }, [
+        item,
+        detailData,
+        targetLevel,
+        supplyLevel,
+        selectedMaterials,
+        note,
+        imageUris,
+        documentIds,
+    ]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
+
     const handleSave = async () => {
         if (!targetLevel || !supplyLevel) {
             Toast.show({
@@ -298,6 +362,7 @@ export const WaterSupplyScreen = () => {
                 generalInfoBoxRef.current?.markAsSaved();
                 showAddJobSuccessToast('WATER_CHANGE');
             }
+            allowNavigation();
             navigation.goBack();
         } catch (error: any) {
             let message = getErrorMessage(error, 'Vui lòng thử lại');
@@ -326,6 +391,7 @@ export const WaterSupplyScreen = () => {
         if (pond?.id && item?.id) {
             try {
                 await deleteMutation.mutateAsync({ pondId: pond.id, id: item.id });
+                allowNavigation();
                 setShowDeleteModal(false);
                 navigation.goBack();
                 Toast.show({ type: 'success', text1: 'Xóa thành công' });
@@ -413,6 +479,8 @@ export const WaterSupplyScreen = () => {
                 onSecondaryPress={() => navigation.goBack()}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
+
+            {UnsavedChangesModal}
 
             <ConfirmationDeleteModal
                 visible={showDeleteModal}

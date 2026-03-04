@@ -20,6 +20,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { SettingEnvSkeleton } from '@/features/farm/components/skeleton/SettingEnvSkeleton';
 import { useEnvironmentSettingLogic } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentSettingLogic';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type NavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<AppStackParamList>,
@@ -86,6 +87,13 @@ export const SettingEnvironmentScreens: React.FC = () => {
         ? { id: activeLocation.id, label: activeLocation.name }
         : undefined;
 
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(isDirty);
+
+    const handleSaveWithBypass = async () => {
+        allowNavigation();
+        await handleSave();
+    };
+
     return (
         <View style={styles.container}>
             {/* Header */}
@@ -142,10 +150,11 @@ export const SettingEnvironmentScreens: React.FC = () => {
             <ButtonBarFarm
                 primaryTitle="Lưu"
                 secondaryTitle="Thiết lập lại"
-                onPrimaryPress={handleSave}
+                onPrimaryPress={handleSaveWithBypass}
                 onSecondaryPress={handleReset}
                 primaryDisabled={!isDirty}
             />
+            {UnsavedChangesModal}
         </View>
     );
 };

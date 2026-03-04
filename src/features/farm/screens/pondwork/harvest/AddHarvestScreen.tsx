@@ -14,6 +14,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { HarvestMeta } from '@/features/farm/types/farm.types';
@@ -74,7 +75,12 @@ export const AddHarvestScreen: React.FC = () => {
         return typeMap[meta.harvestType || 'Thu hết'] || 'PartialHarvest';
     };
 
-    const { handleSubmit, watch, setValue } = useForm<HarvestFormData>({
+    const {
+        handleSubmit,
+        watch,
+        setValue,
+        formState: { isDirty: formIsDirty },
+    } = useForm<HarvestFormData>({
         defaultValues: {
             harvestType: getInitialHarvestType(),
             totalWeightKg: meta.yieldAmount || '',
@@ -83,6 +89,21 @@ export const AddHarvestScreen: React.FC = () => {
             notes: itemToEdit?.note || '',
         },
     });
+
+    const totalWeightKg = watch('totalWeightKg');
+    const shrimpSizeVal = watch('shrimpSize');
+    const referencePrice = watch('referencePrice');
+    const formNotes = watch('notes');
+
+    const hasChanges = useMemo(() => {
+        // For new form, check if any value is not default (empty)
+        if (!itemToEdit) {
+            return !!(totalWeightKg || shrimpSizeVal || referencePrice || formNotes);
+        }
+        return formIsDirty;
+    }, [itemToEdit, formIsDirty, totalWeightKg, shrimpSizeVal, referencePrice, formNotes]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const watchedHarvestType = watch('harvestType');
     const harvestType = getHarvestTypeDisplay(watchedHarvestType);
@@ -116,6 +137,7 @@ export const AddHarvestScreen: React.FC = () => {
             id: itemToEdit.id,
         });
 
+        allowNavigation();
         Toast.show({
             type: 'success',
             text1: 'Đã xóa thông tin thu hoạch',
@@ -188,6 +210,7 @@ export const AddHarvestScreen: React.FC = () => {
             });
         }
 
+        allowNavigation();
         navigation.goBack();
     };
 
@@ -249,6 +272,8 @@ export const AddHarvestScreen: React.FC = () => {
                     onSecondaryPress={handleCancel}
                 />
             </View>
+
+            {UnsavedChangesModal}
 
             {/* Confirmation Modal for "Thu hết" and "Đóng chu kỳ" */}
             {confirmationModalType && (
