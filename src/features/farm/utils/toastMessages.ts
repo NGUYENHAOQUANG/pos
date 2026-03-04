@@ -145,3 +145,13 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
         });
     }
 };
+
+/**
+ * Show error toast message when text length exceeds the limit
+ */
+export const showLimitCharacterToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Không được vượt quá 2000 kí tự',
+    });
+};
