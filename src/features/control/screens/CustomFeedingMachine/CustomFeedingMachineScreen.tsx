@@ -328,9 +328,25 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         }
     };
 
+    const getHeaderTitle = () => {
+        if (!currentDevice?.type) return 'Tuỳ Chỉnh Máy';
+        switch (currentDevice.type) {
+            case 'feeder':
+                return 'Tùy chỉnh máy cho ăn';
+            case 'oxy':
+                return 'Tùy chỉnh máy Oxy';
+            case 'syphon':
+                return 'Tùy chỉnh máy Syphon';
+            case 'fan':
+                return 'Tùy chỉnh quạt nước';
+            default:
+                return 'Tuỳ Chỉnh Máy';
+        }
+    };
+
     return (
         <View style={styles.container}>
-            <HeaderDevices title="Tuỳ Chỉnh Máy" onBackPress={handleCancel} />
+            <HeaderDevices title={getHeaderTitle()} onBackPress={handleCancel} />
 
             <ConfirmModal
                 visible={showConfirmModal}
