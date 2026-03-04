@@ -9,6 +9,7 @@ import {
     PermissionsAndroid,
     Alert,
     ActivityIndicator,
+    Dimensions,
 } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -20,6 +21,8 @@ import {
     Asset,
 } from 'react-native-image-picker';
 import { documentApi } from '@/features/material/api/documentApi';
+import { APP_CONFIG } from '@/shared/constants/config';
+import { showImageSizeExceededToast } from '@/features/farm/utils/toastMessages';
 
 export interface GeneralInfoBoxRef {
     markAsSaved: () => void;
@@ -133,6 +136,11 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         // Loading states
         const [uploadingUris, setUploadingUris] = useState<string[]>([]);
         const [deletingUris, setDeletingUris] = useState<string[]>([]);
+
+        // Track total size of images (bytes) to enforce global limit
+        const [totalImageSize, setTotalImageSize] = useState(0);
+        const imageSizesRef = useRef<Record<string, number>>({});
+        const MAX_TOTAL_IMAGE_SIZE_BYTES = APP_CONFIG.IMAGE_SIZE_LIMIT_BYTES;
 
         // Track uploaded files
         const sessionUploadedFileIds = useRef<string[]>([]);
@@ -286,11 +294,21 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         const uploadFile = async (asset: Asset) => {
             if (!asset.uri) return;
 
+            const sizeBytes = asset.fileSize ?? 0;
+            if (sizeBytes > 0 && totalImageSize + sizeBytes > MAX_TOTAL_IMAGE_SIZE_BYTES) {
+                showImageSizeExceededToast();
+                return;
+            }
+
             try {
                 // Optimistically update UI
                 const uri = asset.uri;
                 setImageUris(prev => [...prev, uri]);
                 setUploadingUris(prev => [...prev, uri]); // Start loading
+                if (sizeBytes > 0) {
+                    imageSizesRef.current[uri] = sizeBytes;
+                    setTotalImageSize(prev => prev + sizeBytes);
+                }
 
                 // Formatted file for upload
                 const fileToUpload = {
@@ -334,6 +352,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     mediaType: 'photo' as MediaType,
                     quality: 0.8,
                     saveToPhotos: true,
+                    includeExtra: true,
                 },
                 (response: ImagePickerResponse) => {
                     if (response.didCancel) return;
@@ -353,6 +372,8 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                 {
                     mediaType: 'photo' as MediaType,
                     quality: 0.8,
+                    selectionLimit: 0,
+                    includeExtra: true,
                 },
                 (response: ImagePickerResponse) => {
                     if (response.didCancel) return;
@@ -360,8 +381,10 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         Alert.alert('Lỗi', response.errorMessage);
                         return;
                     }
-                    if (response.assets && response.assets[0]) {
-                        uploadFile(response.assets[0]);
+                    if (response.assets && response.assets.length > 0) {
+                        response.assets.forEach(asset => {
+                            uploadFile(asset);
+                        });
                     }
                 }
             );
@@ -378,6 +401,15 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             // If currently uploading, prevent removal or handle gracefully (simplest is to block)
             if (uploadingUris.includes(uriToRemove)) return;
 
+            const removeLocalOnly = () => {
+                setImageUris(prev => prev.filter((_, i) => i !== index));
+                const removedSize = imageSizesRef.current[uriToRemove] ?? 0;
+                if (removedSize > 0) {
+                    setTotalImageSize(prev => Math.max(0, prev - removedSize));
+                    delete imageSizesRef.current[uriToRemove];
+                }
+            };
+
             if (idToRemove) {
                 setDeletingUris(prev => [...prev, uriToRemove]); // Start deleting loading
                 try {
@@ -389,7 +421,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     delete uploadedFilesMap.current[uriToRemove];
 
                     // Update UI after successful delete
-                    setImageUris(prev => prev.filter((_, i) => i !== index));
+                    removeLocalOnly();
                 } catch {
                     Alert.alert('Lỗi', 'Không thể xóa ảnh. Vui lòng thử lại.');
                 } finally {
@@ -397,7 +429,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                 }
             } else {
                 // If no ID (local only or error), just remove from UI
-                setImageUris(prev => prev.filter((_, i) => i !== index));
+                removeLocalOnly();
             }
         };
 
@@ -573,7 +605,12 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         onTakePhoto={handleTakePhoto}
                         onChooseFromLibrary={handleChooseFromLibrary}
                         onImageSelected={(uri, asset) =>
-                            uploadFile({ uri, fileName: asset?.fileName, type: asset?.type })
+                            uploadFile({
+                                uri,
+                                fileName: asset?.fileName,
+                                type: asset?.type,
+                                fileSize: (asset as Asset | undefined)?.fileSize,
+                            } as Asset)
                         }
                     />
                 )}
@@ -591,6 +628,11 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
     }
 );
 
+const CONTENT_HORIZONTAL_PADDING = spacing.md * 2;
+const IMAGE_GAP = spacing.md;
+const IMAGE_SIZE =
+    (Dimensions.get('window').width - CONTENT_HORIZONTAL_PADDING - IMAGE_GAP * 3) / 4;
+
 const styles = StyleSheet.create({
     inputGroup: {
         gap: spacing.sm,
@@ -607,8 +649,8 @@ const styles = StyleSheet.create({
         gap: spacing.md,
     },
     imageUploadArea: {
-        width: 60,
-        height: 60,
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
         borderWidth: 1,
         borderStyle: 'dashed',
         borderColor: colors.border,
@@ -618,8 +660,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     imageItem: {
-        width: 60,
-        height: 60,
+        width: IMAGE_SIZE,
+        height: IMAGE_SIZE,
         borderRadius: borderRadius.sm,
         overflow: 'visible',
         position: 'relative',

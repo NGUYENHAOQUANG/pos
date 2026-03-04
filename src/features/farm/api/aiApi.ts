@@ -22,16 +22,12 @@ export interface AIPredictRequest {
 
 export const aiApi = {
     countSeedstock: async (data: AIPredictRequest): Promise<SeedstockCountingResponse> => {
-        try {
-            const response = await apiClient.post<{ data: SeedstockCountingResponse }>(
-                API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
-                data,
-                { timeout: 60000 }
-            );
-            return response.data?.data || (response.data as unknown as SeedstockCountingResponse);
-        } catch (error: any) {
-            throw error;
-        }
+        const response = await apiClient.post<{ data: SeedstockCountingResponse }>(
+            API_ENDPOINTS.AI.SEEDSTOCK_COUNTING,
+            data,
+            { timeout: 60000 }
+        );
+        return response.data?.data || [];
     },
     estimateSize: async (data: AIPredictRequest): Promise<EstimatedSizeResponse> => {
         const response = await apiClient.post<{ data: EstimatedSizeResponse }>(
@@ -39,7 +35,7 @@ export const aiApi = {
             data,
             { timeout: 60000 }
         );
-        return response.data?.data || (response.data as unknown as EstimatedSizeResponse);
+        return response.data?.data || [];
     },
     predictHealth: async (data: AIPredictRequest): Promise<ShrimpHealthResponse> => {
         const response = await apiClient.post<{ data: ShrimpHealthResponse }>(
@@ -47,7 +43,7 @@ export const aiApi = {
             data,
             { timeout: 60000 }
         );
-        return response.data?.data || (response.data as unknown as ShrimpHealthResponse);
+        return response.data?.data || [];
     },
 };
 

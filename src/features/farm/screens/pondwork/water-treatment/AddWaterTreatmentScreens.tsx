@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -17,6 +18,8 @@ import {
     CreateWaterTreatmentCommand,
     TREATMENT_LABEL_TO_ENUM,
 } from '@/features/farm/types/waterTreatment.types';
+
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddWaterTreatmentScreen'>;
 
@@ -42,6 +45,12 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const [activityType, setActivityType] = useState<string>('Đánh khoáng');
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [note, setNote] = useState('');
+
+    const hasChanges = useMemo(() => {
+        return activityType !== 'Đánh khoáng' || selectedMaterials.length > 0 || note !== '';
+    }, [activityType, selectedMaterials, note]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const handleBack = () => {
         navigation.goBack();
@@ -77,7 +86,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 notes: note || undefined,
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
-                    quantity: m.quantity,
+                    quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
                 })),
             },
         };
@@ -87,14 +96,24 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 pondId,
                 data: payload,
             });
+            allowNavigation();
             Toast.show({
                 type: 'success',
                 text1: 'Thêm nhật ký thành công',
             });
             navigation.goBack();
-        } catch (error: unknown) {
+        } catch (error: any) {
             console.error('Create water treatment error', error);
-            const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+            let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Có lỗi xảy ra',
@@ -136,6 +155,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 onSecondaryPress={handleBack}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
+            {UnsavedChangesModal}
         </>
     );
 };

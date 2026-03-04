@@ -113,6 +113,7 @@ export const useCreateSiphonRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
         onError: error => handleError(error),
     });
@@ -133,6 +134,7 @@ export const useUpdateSiphonRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };
@@ -145,6 +147,7 @@ export const useDeleteSiphonRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.siphon.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };

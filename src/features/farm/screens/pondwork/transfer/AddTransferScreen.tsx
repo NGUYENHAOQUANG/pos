@@ -17,6 +17,7 @@ import {
     ReceivingPondItem,
 } from '@/features/farm/components/pondwork/transfer/TransferInfoBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import type { TransferMeta } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
@@ -227,7 +228,17 @@ export const AddTransferScreen: React.FC = () => {
 
     // Check if data has changed from initial (when editing)
     const hasChanges = useMemo(() => {
-        if (!itemToEdit || !initialData) return true;
+        if (!itemToEdit) {
+            // Creation mode: check if any meaningful data is entered
+            return (
+                notes !== '' ||
+                receivingPonds.some(
+                    p => p.quantity !== '' && p.quantity !== totalEstimatedShrimp.toString()
+                )
+            );
+        }
+
+        if (!initialData) return false;
 
         const currentDateStr = selectedDate.toDateString();
         const initialDateStr = initialData.date.toDateString();
@@ -239,7 +250,18 @@ export const AddTransferScreen: React.FC = () => {
             return true;
 
         return false;
-    }, [itemToEdit, initialData, selectedDate, notes, shrimpSize, transferMethod, receivingPonds]);
+    }, [
+        itemToEdit,
+        initialData,
+        selectedDate,
+        notes,
+        shrimpSize,
+        transferMethod,
+        receivingPonds,
+        totalEstimatedShrimp,
+    ]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const isButtonDisabled = itemToEdit && !hasChanges;
 
@@ -401,10 +423,12 @@ export const AddTransferScreen: React.FC = () => {
                 };
 
                 updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
+                allowNavigation();
             } catch {
                 return;
             }
         }
+        allowNavigation();
         navigation.goBack();
     };
 
@@ -461,6 +485,7 @@ export const AddTransferScreen: React.FC = () => {
                 />
             </View>
 
+            {UnsavedChangesModal}
             {/* Confirmation Modal */}
             <ConfirmationModal
                 visible={isConfirmationModalVisible}

@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -60,9 +61,7 @@ export const AddSiphonScreen: React.FC = () => {
     const [notes, setNotes] = useState<string>(itemToEdit?.note || '');
     const [imageUris, setImageUris] = useState<string[]>(meta.images || []);
     const [documentIds, setDocumentIds] = useState<string[]>(itemToEdit?.images || []);
-    const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>(
-        itemToEdit?.materials || []
-    );
+    const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     // Store initial data for comparison when editing
@@ -263,7 +262,7 @@ export const AddSiphonScreen: React.FC = () => {
                 notes: notes,
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
-                    quantity: m.quantity,
+                    quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
                 })),
             },
         };
@@ -291,8 +290,22 @@ export const AddSiphonScreen: React.FC = () => {
                 showAddJobSuccessToast('SIPHON');
                 navigation.goBack();
             }
-        } catch (_error) {
-            // Error handled by mutation onError
+        } catch (error: any) {
+            let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: 'Lưu thất bại',
+                text2: message,
+            });
         }
     };
 
