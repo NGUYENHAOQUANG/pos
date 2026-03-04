@@ -58,8 +58,7 @@ const TOAST_MESSAGES_CONFIG = {
         SIZE_EXCEEDED: {
             type: 'error' as const,
             text1: 'Thông báo',
-            getText2: (limitMb: number) =>
-                `Tổng dung lượng ảnh vượt quá ${limitMb}MB. Vui lòng xóa bớt ảnh trước khi thêm.`,
+            getText2: (limitMb: number) => `Tổng giới hạn các ảnh là ${limitMb}MB`,
         },
     },
 } as const;
