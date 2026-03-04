@@ -8,6 +8,10 @@ import { JobExecution } from '@/features/farm/types/farm.types';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 
 export const feedingService = {
+    filterFeedingMaterials: (materials: IMaterial[]): IMaterial[] => {
+        return materials.filter(m => m.group && m.group.toLowerCase().includes('nuôi'));
+    },
+
     mapDetailToForm: (item: FeedingRecordItem, materialsList: IMaterial[]): FeedingFormValues => {
         const mappedMaterials = (item.feedingDetail?.materials || [])
             .map(apiMat => {
@@ -118,8 +122,6 @@ export const feedingService = {
             pondId: item.pondId,
             materials: item.feedingDetail?.materials?.map(m => {
                 const mat = materialMap[m.warehouseItemId];
-                // Disable type verify for inline object map equivalent to hook's previous version
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return {
                     material: {
                         id: m.warehouseItemId,
@@ -140,7 +142,6 @@ export const feedingService = {
         rawItems: FeedingRecordItem[],
         materialMap: Record<string, IMaterial>
     ): JobExecution[] => {
-        // Count daily items
         const totalPerDay: Record<string, number> = {};
         rawItems.forEach(item => {
             const d = item.createdAt ? new Date(item.createdAt) : new Date();

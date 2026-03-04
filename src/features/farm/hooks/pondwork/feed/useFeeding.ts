@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Toast from 'react-native-toast-message';
 import { feedingRecordApi } from '@/features/farm/api/feedingRecordApi';
+import {
+    showAddJobSuccessToast,
+    showEditJobSuccessToast,
+    showDeleteJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import type {
@@ -10,15 +14,13 @@ import type {
 } from '@/features/farm/types/feedingRecord.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { feedingService } from '@/features/farm/services/feeding.service';
+import { handleError } from '@/shared/utils';
 
-/**
- * Get list of materials for Feeding screen (material dropdown).
- */
 export const useFeeding = () => {
     const { materials: allMaterials, isLoading } = useFarmMaterials();
 
     const materials = useMemo(() => {
-        return allMaterials.filter(m => m.group && m.group.toLowerCase().includes('nuôi'));
+        return feedingService.filterFeedingMaterials(allMaterials);
     }, [allMaterials]);
 
     return {
@@ -27,10 +29,6 @@ export const useFeeding = () => {
     };
 };
 
-/**
- * GET /feeding-records and map to JobExecution[] for work + log screens.
- * "Lần x" logic similar to useIncidentsAsJobs: count per day.
- */
 export const useFeedingRecords = (pondId: string) => {
     return useQuery({
         queryKey: farmKeys.feedingRecords.list(pondId),
@@ -48,39 +46,6 @@ export const useFeedingRecordsAsJobs = (pondId: string) => {
     const jobs: JobExecution[] = feedingService.mapRecordsToJobs(rawItems, materialMap);
 
     return { jobs, isLoading, error, refetch };
-};
-
-interface NormalizedError {
-    type: string;
-    message: string;
-    fields: Record<string, string[]>;
-}
-
-const handleError = (err: unknown) => {
-    const error = err as NormalizedError;
-
-    if (error.type === 'VALIDATION_ERROR') {
-        const firstFieldKey = Object.keys(error.fields)[0];
-        if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
-            Toast.show({
-                type: 'error',
-                text1: error.fields[firstFieldKey][0],
-                visibilityTime: 4000,
-            });
-            return;
-        }
-    }
-
-    if (error.type === 'NOT_FOUND_ERROR') {
-        Toast.show({
-            type: 'error',
-            text1: error.message,
-            visibilityTime: 4000,
-        });
-        return;
-    }
-
-    Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
 };
 
 export const useCreateFeedingRecord = () => {
@@ -101,11 +66,7 @@ export const useCreateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: ['warehouse-items'],
             });
-            Toast.show({
-                type: 'success',
-                text1: 'Đã cho ăn thành công',
-                position: 'top',
-            });
+            showAddJobSuccessToast('FEED');
         },
         onError: (error: any) => {
             handleError(error);
@@ -136,11 +97,7 @@ export const useUpdateFeedingRecord = () => {
             queryClient.invalidateQueries({
                 queryKey: ['warehouse-items'],
             });
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật hồ sơ thành công',
-                position: 'top',
-            });
+            showEditJobSuccessToast('FEED');
         },
         onError: (error: any) => {
             handleError(error);
@@ -162,11 +119,7 @@ export const useDeleteFeedingRecord = () => {
                 queryKey: farmKeys.feedingRecords.detail(id),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
-            Toast.show({
-                type: 'success',
-                text1: 'Xóa hồ sơ thành công',
-                position: 'top',
-            });
+            showDeleteJobSuccessToast('FEED');
         },
         onError: (error: any) => {
             handleError(error);
