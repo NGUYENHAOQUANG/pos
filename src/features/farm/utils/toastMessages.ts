@@ -127,6 +127,6 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
 export const showLimitCharacterToast = () => {
     Toast.show({
         type: 'error',
-        text1: 'Không vượt quá giới hạn kí tự',
+        text1: 'Không được vượt quá 2000 kí tự',
     });
 };
