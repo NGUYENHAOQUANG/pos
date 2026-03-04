@@ -71,7 +71,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
                 style={{ opacity: isSubmitting ? 0.7 : 1 }}
             >
-                {/* General Info Section */}
                 <Controller
                     name="executionDate"
                     control={control}
@@ -80,12 +79,10 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     )}
                 />
 
-                {/* material selection */}
                 <Controller
                     name="materials"
                     control={control}
                     render={({ field: { value, onChange } }) => {
-                        // Map internal form array to SelectedMaterialItem[] for component
                         const selectedItems: SelectedMaterialItem[] = value
                             .filter(m => m.rawMaterial !== undefined && m.rawMaterial !== null)
                             .map(m => ({
@@ -116,7 +113,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     }}
                 />
 
-                {/* Machine control logic (Only in Add mode typically) */}
                 {!isEditMode && (
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
@@ -176,7 +172,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     </View>
                 )}
 
-                {/* Activity schedule when Mode is Schedule */}
                 {!isEditMode && currentMode === 'schedule' && (
                     <Controller
                         name="schedules"
@@ -210,7 +205,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     />
                 )}
 
-                {/* Note Selection */}
                 <Controller
                     name="note"
                     control={control}

@@ -6,52 +6,64 @@ import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 /**
  * Toast message configurations for different job types
  */
-const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string }>> = {
-    FEED: {
-        add: 'Đã cho ăn thành công',
-        edit: 'Đã cập nhật cho ăn thành công',
-    },
-    SHRIMP_INSPECTION: {
-        add: 'Đã kiểm tra tôm thành công',
-        edit: 'Đã cập nhật kiểm tra tôm thành công',
-    },
-    ENVIRONMENT: {
-        add: 'Đã đo thông số thành công',
-        edit: 'Đã cập nhật đo thông số thành công',
-    },
-    WATER_TREATMENT: {
-        add: 'Đã xử lý nước thành công',
-        edit: 'Đã cập nhật xử lý nước thành công',
-    },
-    WATER_CHANGE: {
-        add: 'Đã thay/cấp nước thành công',
-        edit: 'Đã cập nhật thay/cấp nước thành công',
-    },
-    SIPHON: {
-        add: 'Đã xi-phông thành công',
-        edit: 'Đã cập nhật xi-phông thành công',
-    },
-    TRANSFER_POND: {
-        add: 'Đã sang ao thành công',
-        edit: 'Đã cập nhật sang ao thành công',
-    },
-    CLEAN_POND: {
-        add: 'Đã thêm rửa ao thành công',
-        edit: 'Đã cập nhật rửa ao thành công',
-    },
-    SUN_DRY_POND: {
-        add: 'Đã thêm phơi ao thành công',
-        edit: 'Đã cập nhật phơi ao thành công',
-    },
-    TROUBLESHOOTING: {
-        add: 'Đã ghi sự cố thành công',
-        edit: 'Đã cập nhật sự cố thành công',
-    },
-    HARVEST: {
-        add: 'Đã thêm thu hoạch thành công',
-        edit: 'Đã cập nhật thu hoạch thành công',
-    },
-};
+const JOB_TOAST_MESSAGES: Partial<Record<JobType, { add: string; edit: string; delete: string }>> =
+    {
+        FEED: {
+            add: 'Đã cho ăn thành công',
+            edit: 'Đã cập nhật cho ăn thành công',
+            delete: 'Xóa hồ sơ thành công',
+        },
+        SHRIMP_INSPECTION: {
+            add: 'Đã kiểm tra tôm thành công',
+            edit: 'Đã cập nhật kiểm tra tôm thành công',
+            delete: 'Đã xóa kiểm tra tôm thành công',
+        },
+        ENVIRONMENT: {
+            add: 'Đã đo thông số thành công',
+            edit: 'Đã cập nhật đo thông số thành công',
+            delete: 'Đã xóa đo thông số thành công',
+        },
+        WATER_TREATMENT: {
+            add: 'Đã xử lý nước thành công',
+            edit: 'Đã cập nhật xử lý nước thành công',
+            delete: 'Đã xóa xử lý nước thành công',
+        },
+        WATER_CHANGE: {
+            add: 'Đã thay/cấp nước thành công',
+            edit: 'Đã cập nhật thay/cấp nước thành công',
+            delete: 'Đã xóa thay/cấp nước thành công',
+        },
+        SIPHON: {
+            add: 'Đã xi-phông thành công',
+            edit: 'Đã cập nhật xi-phông thành công',
+            delete: 'Đã xóa xi-phông thành công',
+        },
+        TRANSFER_POND: {
+            add: 'Đã sang ao thành công',
+            edit: 'Đã cập nhật sang ao thành công',
+            delete: 'Đã xóa sang ao thành công',
+        },
+        CLEAN_POND: {
+            add: 'Đã thêm rửa ao thành công',
+            edit: 'Đã cập nhật rửa ao thành công',
+            delete: 'Đã xóa rửa ao thành công',
+        },
+        SUN_DRY_POND: {
+            add: 'Đã thêm phơi ao thành công',
+            edit: 'Đã cập nhật phơi ao thành công',
+            delete: 'Đã xóa phơi ao thành công',
+        },
+        TROUBLESHOOTING: {
+            add: 'Đã ghi sự cố thành công',
+            edit: 'Đã cập nhật sự cố thành công',
+            delete: 'Đã xóa sự cố thành công',
+        },
+        HARVEST: {
+            add: 'Đã thêm thu hoạch thành công',
+            edit: 'Đã cập nhật thu hoạch thành công',
+            delete: 'Đã xóa thu hoạch thành công',
+        },
+    };
 
 /**
  * Get harvest success message based on harvest type
@@ -87,6 +99,19 @@ export const showAddJobSuccessToast = (jobType: JobType) => {
  */
 export const showEditJobSuccessToast = (jobType: JobType) => {
     const message = JOB_TOAST_MESSAGES[jobType]?.edit || 'Đã cập nhật thành công';
+    Toast.show({
+        type: 'success',
+        text1: message,
+        position: 'top',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show success toast message for deleting a job
+ */
+export const showDeleteJobSuccessToast = (jobType: JobType) => {
+    const message = JOB_TOAST_MESSAGES[jobType]?.delete || 'Đã xóa thành công';
     Toast.show({
         type: 'success',
         text1: message,
