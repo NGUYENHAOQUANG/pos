@@ -69,10 +69,6 @@ interface FarmProxyActions {
         startDate: Date,
         endDate: Date
     ) => Map<string, JobExecution[]>;
-    getLatestPondActivity: (pondId: string) => {
-        lastUpdate: string;
-        lastActivity: string;
-    } | null;
 }
 
 export type FarmState = PondListStore &
@@ -219,59 +215,6 @@ export const useFarmStore = create<FarmState>()(
                     items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'))
                 );
                 return grouped;
-            },
-
-            getLatestPondActivity: pondId => {
-                const state = a[1]();
-                const allJobsRecords: Record<Exclude<JobType, 'MEASURE_SIZE'>, JobExecution[]> = {
-                    FEED: state.feedJobs[pondId] || [],
-                    SHRIMP_INSPECTION: state.shrimpInspectionJobs[pondId] || [],
-                    ENVIRONMENT: state.environmentJobs[pondId] || [],
-                    WATER_TREATMENT: state.waterTreatmentJobs[pondId] || [],
-                    WATER_CHANGE: state.waterChangeJobs[pondId] || [],
-                    SIPHON: state.siphonJobs[pondId] || [],
-                    TROUBLESHOOTING: state.troubleshootingJobs[pondId] || [],
-                    TRANSFER_POND: state.transferPondJobs[pondId] || [],
-                    CLEAN_POND: state.cleanPondJobs[pondId] || [],
-                    SUN_DRY_POND: state.sunDryJobs[pondId] || [],
-                    HARVEST: state.harvestJobs[pondId] || [],
-                };
-
-                const jobNames: Record<string, string> = {
-                    FEED: 'Cho ăn',
-                    ENVIRONMENT: 'Đo môi trường',
-                    WATER_TREATMENT: 'Xử lý nước',
-                    WATER_CHANGE: 'Thay nước',
-                    CLEAN_POND: 'Rửa ao',
-                    SUN_DRY_POND: 'Phơi ao',
-                    SHRIMP_INSPECTION: 'Kiểm tra tôm',
-                    MEASURE_SIZE: 'Đo kích thước',
-                    SIPHON: 'Xi-phông',
-                    TROUBLESHOOTING: 'Xử lý sự cố',
-                    TRANSFER_POND: 'Sang ao',
-                    HARVEST: 'Thu hoạch',
-                };
-
-                let maxDate = new Date(0);
-                let latestActivityStr = '';
-                let latestUpdateStr = '';
-
-                Object.entries(allJobsRecords).forEach(([type, items]) => {
-                    items.forEach(item => {
-                        const [hours, minutes] = item.time.split(':').map(Number);
-                        const date = item.date ? parseDate(item.date) : new Date();
-                        date.setHours(hours, minutes, 0, 0);
-                        if (date > maxDate) {
-                            maxDate = date;
-                            latestUpdateStr = `${date.toLocaleDateString('vi-VN')}, ${item.time}`;
-                            latestActivityStr = jobNames[type] || type;
-                        }
-                    });
-                });
-
-                return latestActivityStr
-                    ? { lastUpdate: latestUpdateStr, lastActivity: latestActivityStr }
-                    : null;
             },
         })),
         {

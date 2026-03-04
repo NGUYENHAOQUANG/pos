@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { formatDate } from '@/features/farm/utils/dateUtils';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+import { pondDetailService } from '@/features/farm/services/pond-detail.service';
+import { CycleData } from '@/features/farm/types/cycle.types';
 
 interface CycleCardProps {
-    cycle: any;
+    cycle: CycleData;
     breedName?: string;
     endDate?: string;
     status?: 'Chưa hoàn thành' | 'Hoàn thành';
@@ -20,14 +21,12 @@ export const CycleCard: React.FC<CycleCardProps> = ({
     status = 'Chưa hoàn thành',
     onPress,
 }) => {
-    const calculateDOC = useFarmStore(state => state.calculateDOC);
-
     if (!cycle) return null;
 
     const isCompleted = status === 'Hoàn thành';
-    const cycleName = cycle.cycleName || cycle.name || 'Chưa đặt tên';
+    const cycleName = cycle.name || 'Chưa đặt tên';
 
-    const stockingDateStr = cycle.stockingDate || cycle.startDate;
+    const stockingDateStr = cycle.createdAt;
     const startDate = stockingDateStr ? formatDate(new Date(stockingDateStr)) : '';
     const dateDisplay = endDate
         ? `${startDate} - ${endDate}`
@@ -35,21 +34,18 @@ export const CycleCard: React.FC<CycleCardProps> = ({
         ? `${startDate} - nay`
         : '- nay';
 
-    const doc = cycle.doc !== undefined ? cycle.doc : calculateDOC(stockingDateStr ?? '');
-    const stockingQuantity = cycle.stockingQuantity ?? cycle.totalStocking ?? 0;
-    const breed = breedName || cycle.breedName || cycle.breedSource || '-';
+    const doc = pondDetailService.calculateDOC(stockingDateStr ?? '');
+    const stockingQuantity = cycle.totalStocking;
+    const breed = breedName || '--';
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
-            {/* Header chia làm 2 cột */}
             <View style={styles.header}>
-                {/* Cột trái: Tên và Ngày thả */}
                 <View style={styles.leftColumn}>
                     <Text style={styles.cycleName}>{cycleName}</Text>
                     <Text style={styles.dateText}>{dateDisplay}</Text>
                 </View>
 
-                {/* Cột phải: Badge trạng thái & Mũi tên */}
                 <View style={styles.rightColumn}>
                     <View style={[styles.statusBadge, isCompleted && styles.statusBadgeCompleted]}>
                         <Text
@@ -67,10 +63,8 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                 </View>
             </View>
 
-            {/* Borderline tách biệt Header và Body */}
             <View style={styles.divider} />
 
-            {/* Body: Thông tin chi tiết */}
             <View style={styles.body}>
                 <View style={styles.row}>
                     <Text style={styles.label}>Ngày nuôi (DOC):</Text>
@@ -79,7 +73,11 @@ export const CycleCard: React.FC<CycleCardProps> = ({
 
                 <View style={styles.row}>
                     <Text style={styles.label}>Số lượng thả (Pls):</Text>
-                    <Text style={styles.value}>{stockingQuantity.toLocaleString()}</Text>
+                    <Text style={styles.value}>
+                        {typeof stockingQuantity === 'number'
+                            ? stockingQuantity.toLocaleString()
+                            : '-'}
+                    </Text>
                 </View>
 
                 <View style={styles.row}>

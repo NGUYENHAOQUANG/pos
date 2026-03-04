@@ -1,5 +1,23 @@
 import type { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 
+export enum PondRecordOperationType {
+    ReleaseShrimp = 'ReleaseShrimp',
+    Feeding = 'Feeding',
+    ShrimpHealthCheck = 'ShrimpHealthCheck',
+    SizeMeasurement = 'SizeMeasurement',
+    EnvMeasurement = 'EnvMeasurement',
+    WaterTreatment = 'WaterTreatment',
+    WaterChange = 'WaterChange',
+    Siphon = 'Siphon',
+    Incident = 'Incident',
+    StockTransfer = 'StockTransfer',
+    CleanPond = 'CleanPond',
+    CleanRenovation = 'CleanRenovation',
+    SunDryPond = 'SunDryPond',
+    DryRenovation = 'DryRenovation',
+    Harvest = 'Harvest',
+}
+
 /**
  * referenceData is a generic object whose fields depend on operationType.
  * Each operationType has its own set of fields inside referenceData.
@@ -93,7 +111,7 @@ export interface IPondRecordItem {
     editedAt?: string;
     creator?: ICreatorEditor;
     editor?: ICreatorEditor | null;
-    operationType?: string;
+    operationType?: PondRecordOperationType | string;
     referenceData?: IPondRecordReferenceData | null;
 }
 

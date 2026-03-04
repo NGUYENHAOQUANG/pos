@@ -8,7 +8,6 @@ import {
     GetPondsResponse,
 } from '@/features/farm/types/pond.types';
 
-// Helper function to parse paginated API response
 const parseApiResponse = <T>(responseData: unknown): T[] => {
     if (Array.isArray(responseData)) return responseData;
 
