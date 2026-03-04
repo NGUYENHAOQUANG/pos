@@ -22,7 +22,7 @@ import type { TransferMeta } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/pond.types';
 import { showEditJobSuccessToast } from '@/features/farm/utils/toastMessages';
 import { useCreateStockTransfer } from '@/features/farm/hooks/useStockTransfer';
-import { usePondsByZone } from '@/features/farm/hooks/usePonds';
+import { usePondsByZone, usePondMasterData } from '@/features/farm/hooks/usePonds';
 import { useCyclesByPond } from '@/features/farm/hooks/useCycle';
 import { useSizeMeasurements } from '@/features/farm/hooks/useSizeMeasurement';
 import type { CreateStockTransferRequest } from '@/features/farm/types/stockTransfer.types';
@@ -59,6 +59,9 @@ export const AddTransferScreen: React.FC = () => {
 
     // Fetch ponds by zone from API for dropdown
     const { data: pondsByZoneData } = usePondsByZone(pond?.zoneId || null);
+
+    // Fetch pond master data to map category IDs to types
+    const { data: pondMasterData } = usePondMasterData();
 
     // Fetch cycle data from API
     const { data: cyclesData } = useCyclesByPond(pond?.id || '');
@@ -117,6 +120,14 @@ export const AddTransferScreen: React.FC = () => {
             targetTypes = ['Ao nuôi', 'Ao sẵn sàng'];
         }
 
+        // Map pond types by ID for easier lookup
+        const pondTypesMap = new Map<string, string>();
+        if (pondMasterData?.types) {
+            pondMasterData.types.forEach(t => {
+                if (t.id) pondTypesMap.set(t.id, t.name);
+            });
+        }
+
         return availablePonds
             .filter(p => {
                 // Exclude current pond
@@ -124,7 +135,11 @@ export const AddTransferScreen: React.FC = () => {
 
                 // Filter by allowed target types if logic applies
                 if (targetTypes.length > 0) {
-                    const pType = typeof p.type === 'string' ? p.type : p.type?.name;
+                    let pType = typeof p.type === 'string' ? p.type : p.type?.name;
+                    // Fallback to pondCategoryId mapping if type is missing
+                    if (!pType && p.pondCategoryId) {
+                        pType = pondTypesMap.get(p.pondCategoryId);
+                    }
                     return pType ? targetTypes.includes(pType) : false;
                 }
 
@@ -134,7 +149,7 @@ export const AddTransferScreen: React.FC = () => {
                 id: p.id,
                 label: p.name,
             }));
-    }, [pondsByZoneData, pond?.id, pond?.type, ponds]);
+    }, [pondsByZoneData, pond?.id, pond?.type, ponds, pondMasterData]);
 
     // Get cycle data with priority: 1. params (from navigation), 2. API, 3. local store
     const cycleData = useMemo(() => {
@@ -384,8 +399,6 @@ export const AddTransferScreen: React.FC = () => {
                     label: `Lần ${nextIndex}`,
                     pondId: pondId,
                 };
-
-                updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
 
                 updatePondJob(pondId, 'TRANSFER_POND', [...currentItems, newItem]);
             } catch {

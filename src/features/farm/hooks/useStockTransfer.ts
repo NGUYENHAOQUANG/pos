@@ -172,12 +172,31 @@ export const useCreateStockTransfer = () => {
             if (variables.data.toPonds) {
                 variables.data.toPonds.forEach(p => {
                     queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(p.toPondId) });
-                    queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(p.toPondId) });
                 });
+                // Invalidate all pond queries to refresh pond list
+                queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             }
         },
         onError: error => {
             const message = getErrorMessage(error, 'Tạo phiếu sang ao thất bại');
+            showErrorToast(message);
+        },
+    });
+};
+
+export const useDeleteStockTransfer = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ pondId, id }: { pondId: string; id: string }) =>
+            stockTransferApi.delete(pondId, id),
+        onSuccess: (_, variables) => {
+            showSuccessToast('Đã xoá phiếu sang ao');
+            queryClient.invalidateQueries({ queryKey: KEYS.list(variables.pondId) });
+            queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+        },
+        onError: error => {
+            const message = getErrorMessage(error, 'Xoá phiếu sang ao thất bại');
             showErrorToast(message);
         },
     });
