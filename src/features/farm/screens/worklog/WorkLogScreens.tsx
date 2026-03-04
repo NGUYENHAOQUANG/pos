@@ -105,7 +105,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                                       id: recordItem.id,
                                       label: activity.title,
                                       time: timeStr,
-                                      date: activity.time,
+                                      date: group.date,
                                       pondId: pond?.id || '',
 
                                       // Map fields to match "Work Tab" structure (syncing Log -> Work)

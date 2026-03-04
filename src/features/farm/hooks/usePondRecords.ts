@@ -295,9 +295,16 @@ const convertReferenceDataToActivityData = (
             }
             break;
 
-        case 'Harvest':
-            if (ref.harvestType)
-                data.push({ label: 'Loại thu hoạch', value: `${ref.harvestType}` });
+        case 'Harvest': {
+            const harvestMap: Record<string, string> = {
+                FullHarvest: 'Thu hết',
+                PartialHarvest: 'Thu tỉa',
+                CloseCycle: 'Đóng chu kỳ',
+            };
+            const displayType = ref.harvestType
+                ? harvestMap[String(ref.harvestType)] || ref.harvestType
+                : undefined;
+            if (displayType) data.push({ label: 'Loại thu hoạch', value: `${displayType}` });
             if (ref.totalWeightKg != null)
                 data.push({ label: 'Sản lượng (kg)', value: `${ref.totalWeightKg}` });
             if (ref.shrimpSizePcsPerKg != null)
@@ -307,6 +314,7 @@ const convertReferenceDataToActivityData = (
             if (ref.revenue != null)
                 data.push({ label: 'Doanh thu (VNĐ)', value: `${ref.revenue}` });
             break;
+        }
 
         case 'StockTransfer':
             if (ref.shrimpSizePcsPerKg != null)
@@ -447,6 +455,18 @@ export const usePondRecordGroups = (
             });
         }
 
+        // Filter by date range (client-side fallback to ensure consistency)
+        if (options?.startDate || options?.endDate) {
+            filteredItems = filteredItems.filter(item => {
+                if (!item.createdAt) return false;
+                const createdDate = new Date(item.createdAt);
+
+                if (options.startDate && createdDate < options.startDate) return false;
+                if (options.endDate && createdDate > options.endDate) return false;
+                return true;
+            });
+        }
+
         // Sort by createdAt desc
         const sortedItems = [...filteredItems].sort((a, b) => {
             const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -514,7 +534,15 @@ export const usePondRecordGroups = (
             date,
             activities: dateGroups[date],
         }));
-    }, [rawItems, options?.operationNameFilter, materialMap, metricTypes, pondNameMap]);
+    }, [
+        rawItems,
+        options?.operationNameFilter,
+        options?.startDate,
+        options?.endDate,
+        materialMap,
+        metricTypes,
+        pondNameMap,
+    ]);
 
     return { groups, isLoading, error, refetch, rawItems };
 };
