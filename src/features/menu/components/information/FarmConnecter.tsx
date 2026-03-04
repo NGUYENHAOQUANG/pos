@@ -20,9 +20,10 @@ export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms,
         <View style={styles.container}>
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Trang trại đã kết nối</Text>
-                <Text style={styles.farmCount}>{totalFarms} trại</Text>
+                <View style={styles.countBadge}>
+                    <Text style={styles.farmCount}>{totalFarms}</Text>
+                </View>
             </View>
-            <View style={styles.divider} />
 
             <View style={styles.farmsContainer}>
                 {farms.map(farm => (
@@ -31,11 +32,11 @@ export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms,
                         style={styles.farmCard}
                         onPress={() => onFarmPress && onFarmPress(farm)}
                     >
-                        <View>
+                        <View style={styles.farmInfo}>
                             <Text style={styles.farmName}>{farm.name}</Text>
                             <Text style={styles.farmPondCount}>{farm.count} ao</Text>
                         </View>
-                        <AntDesign name="right" size={20} color={colors.text} />
+                        <AntDesign name="right" size={16} color={colors.gray[400]} />
                     </TouchableOpacity>
                 ))}
             </View>
@@ -45,53 +46,61 @@ export const FarmConnecter: React.FC<FarmConnecterProps> = ({ totalFarms, farms,
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
-        marginTop: 12,
-        paddingBottom: 12,
+        gap: 12,
     },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
     },
     sectionTitle: {
-        fontSize: 14,
-        lineHeight: 22,
-        fontWeight: '700',
-        color: colors.text,
+        fontSize: 16,
+        fontWeight: '600',
+        lineHeight: 20,
+        color: colors.gray[950],
+    },
+    countBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 9999,
+        backgroundColor: colors.blue[25],
+        borderWidth: 1,
+        borderColor: colors.blue[200],
     },
     farmCount: {
         fontSize: 14,
-        color: colors.text,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.blue[600],
     },
     farmsContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
+        gap: 8,
     },
     farmCard: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        borderRadius: 12,
+        backgroundColor: colors.white,
+        padding: 12,
+        borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: 12,
+        borderColor: colors.gray[200],
+        gap: 16,
+    },
+    farmInfo: {
+        flex: 1,
+        gap: 8,
     },
     farmName: {
         fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 4,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
     },
     farmPondCount: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: '400',
         color: colors.gray[500],
+        lineHeight: 20,
     },
 });

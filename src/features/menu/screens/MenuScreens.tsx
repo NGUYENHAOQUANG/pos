@@ -1,23 +1,14 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    Dimensions,
-    TouchableOpacity,
-    Image,
-} from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, colors } from '@/styles';
-import BackgroundMenu from '@/assets/backgrounds/BackgroundMenu.svg';
-import LogoutIcon from '@/assets/Icon/IconMenu/LogoutOutlined.svg';
-import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
+import { colors } from '@/styles';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
+import SignOutIcon from '@/assets/Icon/IconMenu/SignOut.svg';
+import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
 import { FarmOperation } from '@/features/menu/components/FarmOperation';
 import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
-import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,9 +17,12 @@ import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 import { useQueryClient } from '@tanstack/react-query';
 
-const { width } = Dimensions.get('window');
+interface ProfileCardProps {
+    onPress: () => void;
+    userData: UserProfileData;
+}
 
-const ProfileCard = ({ onPress, userData }: { onPress: () => void; userData: UserProfileData }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ onPress, userData }) => {
     const { name, role, avatarUri } = userData;
 
     return (
@@ -82,50 +76,58 @@ export const MenuScreens: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
-            {/* Background Header */}
-            <View style={styles.headerBackground}>
-                <BackgroundMenu
-                    width={width}
-                    height={width * 0.6}
-                    style={StyleSheet.absoluteFillObject}
-                />
+        <View style={[styles.container, { paddingTop: insets.top }]}>
+            {/* Header title */}
+            <View style={styles.headerTitleContainer}>
+                <Text style={styles.headerTitle}>Tài khoản</Text>
             </View>
 
-            <View style={[styles.safeArea, { paddingTop: insets.top + 22 }]}>
-                <View style={styles.headerTitleContainer}>
-                    <Text style={styles.headerTitle}>Menu</Text>
-                </View>
+            {/* Scrollable content */}
+            <ScrollView
+                ref={scrollViewRef}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Profile card */}
+                <ProfileCard onPress={handleProfilePress} userData={userData} />
 
-                <View style={styles.fixedContent}>
-                    <ProfileCard onPress={handleProfilePress} userData={userData} />
-                </View>
+                {/* Content Container (wrapping all menu sections and actions) */}
+                <View style={styles.contentContainer}>
+                    <FarmOperation />
+                    <RecordManagement />
+                    <SecurityManagement />
 
-                <View style={styles.scrollWrapper}>
-                    <ScrollView
-                        ref={scrollViewRef}
-                        contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <View style={styles.sectionContainer}>
-                            <FarmOperation />
-                            <RecordManagement />
-                            <SecurityManagement />
-                            <DeleteAccountButton />
+                    {/* Bottom Actions Group */}
+                    <View style={styles.actionsContainer}>
+                        {/* Delete Account */}
+                        <View style={styles.actionCard}>
+                            <TouchableOpacity
+                                style={styles.actionRow}
+                                onPress={() => navigation.navigate('DeleteAccount')}
+                            >
+                                <View style={styles.actionIconWrapper}>
+                                    <TrashIcon width={18} height={18} />
+                                </View>
+                                <Text style={styles.actionText}>Xóa tài khoản</Text>
+                                <AntDesign name="right" size={16} color={colors.textSecondary} />
+                            </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                            <LogoutIcon width={16} height={16} />
-                            <Text style={styles.logoutText}>Đăng xuất</Text>
-                        </TouchableOpacity>
-                        {/* Version */}
-                        <Text style={styles.versionText}>Phiên bản {DeviceInfo.getVersion()}</Text>
-
-                        {/* Bottom spacer for tab bar */}
-                        <View style={styles.bottomSpacer} />
-                    </ScrollView>
+                        {/* Logout */}
+                        <View style={styles.actionCard}>
+                            <TouchableOpacity style={styles.actionRow} onPress={handleLogout}>
+                                <View style={styles.actionIconWrapper}>
+                                    <SignOutIcon width={18} height={18} />
+                                </View>
+                                <Text style={styles.actionText}>Đăng xuất</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-            </View>
+
+                {/* Bottom spacer for tab bar */}
+                <View style={styles.bottomSpacer} />
+            </ScrollView>
 
             <ConfirmationDeleteModal
                 visible={isLogoutModalVisible}
@@ -146,62 +148,35 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    headerBackground: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 300,
-    },
-    safeArea: {
-        flex: 1,
-    },
     headerTitleContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 18,
-    },
-    headerTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.white,
-    },
-    scrollWrapper: {
-        flex: 1,
-        marginTop: 16,
-        marginHorizontal: 16,
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
-        overflow: 'hidden',
-    },
-    scrollContent: {
-        paddingHorizontal: 0,
-        paddingTop: 0,
-        paddingBottom: 100,
-    },
-    fixedContent: {
-        paddingHorizontal: 16,
-        zIndex: 1,
-        paddingBottom: 0,
-    },
-    profileCard: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 0,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        paddingHorizontal: 16,
+        marginTop: 16,
     },
-    avatarContainer: {
-        marginRight: 16,
+    headerTitle: {
+        fontSize: 18,
+        lineHeight: 28,
+        fontWeight: '600',
+        color: colors.text,
     },
+    scrollContent: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 100,
+        gap: 24,
+    },
+    profileCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+    },
+    avatarContainer: {},
     avatar: {
         width: 64,
         height: 64,
-        borderRadius: 32,
-        // backgroundColor: colors.gray[200], // SVG handles background or should be transparent
+        borderRadius: 200,
+        backgroundColor: colors.gray[100],
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
@@ -209,59 +184,67 @@ const styles = StyleSheet.create({
     avatarImage: {
         width: 64,
         height: 64,
-        borderRadius: 32,
+        borderRadius: 200,
     },
     profileInfo: {
         flex: 1,
     },
     profileName: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '500',
+        lineHeight: 20,
         color: colors.text,
         marginBottom: 4,
     },
     roleTag: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 200,
+        alignSelf: 'flex-start',
         borderWidth: 1,
         borderColor: colors.blue[200],
-        alignSelf: 'flex-start',
-        backgroundColor: colors.blue[50],
+        backgroundColor: colors.blue[25],
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 28,
     },
     roleText: {
         color: colors.blue[600],
-        fontSize: 12,
-        fontWeight: '400',
+        fontSize: 14,
+        fontWeight: '500',
+        lineHeight: 20,
     },
-    sectionContainer: {
-        gap: 16,
-        marginBottom: 16,
+    contentContainer: {
+        gap: 32,
     },
-    logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.red[600],
-        borderRadius: borderRadius.md,
-        paddingVertical: 12,
+    actionsContainer: {
         gap: 8,
     },
-    logoutText: {
-        fontSize: 14,
-        color: colors.red[600], // Adjust specific red if needed
+    actionCard: {
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+    },
+    actionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 44,
+        paddingHorizontal: 12,
+        gap: 16,
+    },
+    actionIconWrapper: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionText: {
+        flex: 1,
+        fontSize: 15,
+        lineHeight: 20,
+        color: colors.gray[950],
         fontWeight: '400',
     },
     bottomSpacer: {
         height: 8,
-    },
-    versionText: {
-        textAlign: 'center',
-        marginTop: 25,
-        fontSize: 13,
-        color: colors.textSecondary,
-        fontWeight: '400',
     },
 });
