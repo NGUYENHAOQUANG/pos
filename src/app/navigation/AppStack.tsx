@@ -61,7 +61,7 @@ import { HistoryActivitieScreens } from '@/features/control/screens/schedule/His
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
-import { InformationFormScreen as EditPersonalInformationScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
+import { InformationFormScreen } from '@/features/menu/screens/informationForm/InformationFormScreen';
 import { AquacultureManagementScreens } from '@/features/menu/screens/aquaculture/AquacultureManagementScreens';
 import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAquacultureScreens';
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
@@ -74,15 +74,19 @@ import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesS
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
-import { DeleteAccountScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountScreen';
+import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 
 // Types
-import { JobExecution, FarmData } from '@/features/farm/types/farm.types';
-import { CycleData } from '@/features/farm/types/cycle.types';
-import { PondData } from '@/features/farm/types/pond.types';
+import {
+    JobExecution,
+    PondData,
+    FarmData,
+    CycleData,
+    SeasonData,
+} from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
-import { Aquaculture, Member } from '@/features/menu/types/menu.types';
+import { Member } from '@/features/menu/types/menu.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 
@@ -225,7 +229,7 @@ export type AppStackParamList = {
     AquacultureManagement: undefined;
     MemberManagement: undefined;
     AddAquaculture: undefined;
-    EditAquaculture: { aquaculture: Aquaculture };
+    EditAquaculture: { aquaculture: SeasonData };
     AddMember: undefined;
     EditMember: { member: Member };
     DeviceManagement: undefined;
@@ -347,11 +351,8 @@ export const AppStack: React.FC = () => {
                 component={EditEquimentMaintenanceWithProvider}
             />
 
-            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
-            <Stack.Screen
-                name="EditPersonalInformationScreen"
-                component={EditPersonalInformationScreen}
-            />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountFormScreen} />
+            <Stack.Screen name="EditPersonalInformationScreen" component={InformationFormScreen} />
         </Stack.Navigator>
     );
 };

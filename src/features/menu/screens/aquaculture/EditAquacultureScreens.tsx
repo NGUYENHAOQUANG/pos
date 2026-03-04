@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
@@ -10,14 +10,20 @@ import {
     AquacultureForm,
     AquacultureFormRef,
 } from '@/features/menu/components/aquaculture/AquacultureForm';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
-import { useQueryClient } from '@tanstack/react-query';
-import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { useSeasonDetail, useSeasonErrorHandler } from '@/features/menu/hooks/useSeasons';
+import { useZones } from '@/features/farm/hooks/useZones';
+import { useSeasonDetail } from '@/features/menu/hooks/useSeasons';
+import {
+    useUpdateSeason,
+    useDeleteSeason,
+    useCloseSeason,
+} from '@/features/menu/hooks/useAquacultureMutations';
+import { aquacultureService } from '@/features/menu/services/aquacultureService';
+import { AquacultureFormValues } from '@/features/menu/schemas/aquacultureFormSchema';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 
 type EditAquacultureRouteProp = RouteProp<
     { EditAquaculture: { aquaculture: SeasonData } },
@@ -25,37 +31,54 @@ type EditAquacultureRouteProp = RouteProp<
 >;
 
 export const EditAquacultureScreens: React.FC = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const route = useRoute<EditAquacultureRouteProp>();
     const { aquaculture: initialAquaculture } = route.params;
     const { setTabBarVisible } = useTabBarVisibility();
-    const updateSeasonApi = useFarmStore(state => state.updateSeasonApi);
-    const updateSeasonStatusApi = useFarmStore(state => state.updateSeasonStatusApi);
-    const deleteSeasonApi = useFarmStore(state => state.deleteSeasonApi);
-    const zones = useFarmStore(state => state.zones);
-    const fetchZones = useFarmStore(state => state.fetchZones);
     const formRef = useRef<AquacultureFormRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [closeModalVisible, setCloseModalVisible] = useState(false);
-    // Remove local isLoading state and use query's isLoading or mutation's isLoading if needed
-    // But keeping it for manual API calls is fine, just be careful not to conflict
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const queryClient = useQueryClient();
-    const { handleError } = useSeasonErrorHandler();
 
-    // Fetch fresh details to ensure status is up-to-date
-    const { data: aquaculture, isLoading: isFetching } = useSeasonDetail(
+    // ================================================================
+    // Data Fetching (TanStack Query)
+    // ================================================================
+    const { data: zones = [] } = useZones();
+    const { data: aquaculture, isLoading: isFetchingDetail } = useSeasonDetail(
         initialAquaculture.zoneId,
         initialAquaculture.id,
         initialAquaculture
     );
 
-    React.useEffect(() => {
-        if (zones.length === 0) {
-            fetchZones();
-        }
-    }, [zones.length, fetchZones]);
+    // ================================================================
+    // Mutations
+    // ================================================================
+    const updateSeasonMutation = useUpdateSeason();
+    const deleteSeasonMutation = useDeleteSeason();
+    const closeSeasonMutation = useCloseSeason();
 
+    const isSubmitting =
+        updateSeasonMutation.isPending ||
+        deleteSeasonMutation.isPending ||
+        closeSeasonMutation.isPending;
+
+    // ================================================================
+    // Mapped Data (useMemo to prevent unnecessary re-renders)
+    // ================================================================
+    const zoneOptions = useMemo(() => {
+        return zones.map(z => ({
+            id: z.id.toString(),
+            label: z.name,
+        }));
+    }, [zones]);
+
+    const initialData = useMemo(() => {
+        if (!aquaculture) return undefined;
+        return aquacultureService.mapDetailToForm(aquaculture);
+    }, [aquaculture]);
+
+    // ================================================================
+    // Tab bar visibility
+    // ================================================================
     useFocusEffect(
         React.useCallback(() => {
             const timeout = setTimeout(() => {
@@ -69,122 +92,95 @@ export const EditAquacultureScreens: React.FC = () => {
         }, [setTabBarVisible])
     );
 
-    const handleUpdate = async () => {
-        const data = formRef.current?.submit();
-        if (data && aquaculture?.zoneId) {
-            try {
-                setIsSubmitting(true);
-                // Map status
-                let newStatus: SeasonStatus | undefined;
-                if (data.status === 'preparing') newStatus = SeasonStatus.Preparation;
-                else if (data.status === 'active') newStatus = SeasonStatus.Active;
-                // We typically don't set Closed here, that's what the "Close Season" button is for.
+    // ================================================================
+    // Handlers
+    // ================================================================
+    const handleSubmit = useCallback(
+        (formData: AquacultureFormValues) => {
+            if (!aquaculture?.zoneId) return;
 
-                const { success, message } = await updateSeasonApi(
-                    aquaculture.zoneId.toString(),
-                    aquaculture.id.toString(),
-                    {
-                        seasonName: data.name,
-                        startDate: data.startDate?.toISOString(),
-                        endDate: data.endDate?.toISOString(),
-                        status: newStatus,
-                        notes: data.note,
-                    }
-                );
-
-                if (success) {
-                    if (message) {
-                        Toast.show({
-                            type: 'success',
-                            text1: message,
-                        });
-                    }
-                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
-                    navigation.goBack();
+            updateSeasonMutation.mutate(
+                {
+                    zoneId: aquaculture.zoneId.toString(),
+                    seasonId: aquaculture.id.toString(),
+                    formData,
+                },
+                {
+                    onSuccess: () => {
+                        navigation.goBack();
+                    },
                 }
-            } catch (error: any) {
-                handleError(error);
-            } finally {
-                setIsSubmitting(false);
-            }
-        }
-    };
+            );
+        },
+        [aquaculture, updateSeasonMutation, navigation]
+    );
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         setDeleteModalVisible(true);
-    };
+    }, []);
 
-    const handleConfirmDelete = async () => {
-        if (aquaculture?.zoneId) {
-            try {
-                setIsSubmitting(true);
-                const success = await deleteSeasonApi(
-                    aquaculture.zoneId.toString(),
-                    aquaculture.id.toString()
-                );
-                if (success) {
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Đã xóa vụ nuôi thành công',
-                    });
-                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
+    const handleConfirmDelete = useCallback(() => {
+        if (!aquaculture?.zoneId) return;
+
+        deleteSeasonMutation.mutate(
+            {
+                zoneId: aquaculture.zoneId.toString(),
+                seasonId: aquaculture.id.toString(),
+            },
+            {
+                onSuccess: () => {
+                    setDeleteModalVisible(false);
                     navigation.goBack();
-                }
-            } catch (error: any) {
-                handleError(error);
-            } finally {
-                setIsSubmitting(false);
-                setDeleteModalVisible(false);
+                },
+                onSettled: () => {
+                    setDeleteModalVisible(false);
+                },
             }
-        }
-    };
+        );
+    }, [aquaculture, deleteSeasonMutation, navigation]);
 
-    const handleCloseSeason = () => {
+    const handleCloseSeason = useCallback(() => {
         setCloseModalVisible(true);
-    };
+    }, []);
 
-    const handleConfirmClose = async () => {
-        if (aquaculture?.zoneId) {
-            try {
-                setIsSubmitting(true);
-                const { success, message } = await updateSeasonStatusApi(
-                    aquaculture.zoneId.toString(),
-                    aquaculture.id.toString(),
-                    SeasonStatus.Closed
-                );
-                setCloseModalVisible(false);
+    const handleConfirmClose = useCallback(() => {
+        if (!aquaculture?.zoneId) return;
 
-                if (success) {
-                    if (message) {
-                        Toast.show({
-                            type: 'success',
-                            text1: message,
-                        });
-                    }
-                    queryClient.invalidateQueries({ queryKey: farmKeys.seasons() });
+        closeSeasonMutation.mutate(
+            {
+                zoneId: aquaculture.zoneId.toString(),
+                seasonId: aquaculture.id.toString(),
+            },
+            {
+                onSuccess: () => {
+                    setCloseModalVisible(false);
                     navigation.goBack();
-                }
-            } catch (error: any) {
-                handleError(error);
-            } finally {
-                setIsSubmitting(false);
+                },
+                onSettled: () => {
+                    setCloseModalVisible(false);
+                },
             }
-        }
-    };
+        );
+    }, [aquaculture, closeSeasonMutation, navigation]);
 
-    // Helper to determine form status
-    const getFormStatus = (status: SeasonStatus) => {
-        if (status === SeasonStatus.Preparation) return 'preparing';
-        if (status === SeasonStatus.Active) return 'active';
-        return 'ended';
-    };
+    const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
+    const handlePrimaryPress = useCallback(() => formRef.current?.submit(), []);
+    const handleSecondaryPress = useCallback(() => {
+        if (aquaculture?.status === SeasonStatus.Closed) {
+            navigation.goBack();
+        } else {
+            handleCloseSeason();
+        }
+    }, [aquaculture?.status, navigation, handleCloseSeason]);
+    const handleCancelDelete = useCallback(() => setDeleteModalVisible(false), []);
+    const handleCancelClose = useCallback(() => setCloseModalVisible(false), []);
 
     return (
-        <Loading isLoading={isSubmitting || isFetching}>
+        <Loading isLoading={isSubmitting || isFetchingDetail}>
             <View style={styles.container}>
                 <HeaderMenu
                     title="Chỉnh sửa vụ nuôi"
-                    onBack={() => navigation.goBack()}
+                    onBack={handleGoBack}
                     rightAction={
                         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
                             <DeleteIcon width={20} height={20} color={colors.error} />
@@ -196,17 +192,12 @@ export const EditAquacultureScreens: React.FC = () => {
                     <View style={styles.content}>
                         <AquacultureForm
                             ref={formRef}
-                            initialValues={{
-                                ...aquaculture,
-                                id: aquaculture.id?.toString() || '',
-                                code: aquaculture.code,
-                                startDate: new Date(aquaculture.startDate),
-                                endDate: new Date(aquaculture.endDate),
-                                status: getFormStatus(aquaculture.status),
-                                note: aquaculture.notes || '',
-                            }}
-                            zones={zones}
-                            isEdit={true}
+                            isEditMode={true}
+                            isLoadingDetail={isFetchingDetail}
+                            isSubmitting={isSubmitting}
+                            initialData={initialData}
+                            zoneOptions={zoneOptions}
+                            onSubmit={handleSubmit}
                         />
                     </View>
                 )}
@@ -217,14 +208,8 @@ export const EditAquacultureScreens: React.FC = () => {
                         secondaryTitle={
                             aquaculture.status === SeasonStatus.Closed ? 'Huỷ' : 'Đóng vụ nuôi'
                         }
-                        onPrimaryPress={handleUpdate}
-                        onSecondaryPress={() => {
-                            if (aquaculture.status === SeasonStatus.Closed) {
-                                navigation.goBack();
-                            } else {
-                                handleCloseSeason();
-                            }
-                        }}
+                        onPrimaryPress={handlePrimaryPress}
+                        onSecondaryPress={handleSecondaryPress}
                         secondaryType={
                             aquaculture.status === SeasonStatus.Closed ? 'default' : 'danger'
                         }
@@ -234,7 +219,7 @@ export const EditAquacultureScreens: React.FC = () => {
                 <ConfirmationDeleteModal
                     visible={deleteModalVisible}
                     onConfirm={handleConfirmDelete}
-                    onCancel={() => setDeleteModalVisible(false)}
+                    onCancel={handleCancelDelete}
                     title="Xoá vụ nuôi"
                     message="Bạn có chắc chắn muốn xoá vụ nuôi này?"
                     successMessage="Đã xóa vụ nuôi thành công"
@@ -244,7 +229,7 @@ export const EditAquacultureScreens: React.FC = () => {
                 <ConfirmationDeleteModal
                     visible={closeModalVisible}
                     onConfirm={handleConfirmClose}
-                    onCancel={() => setCloseModalVisible(false)}
+                    onCancel={handleCancelClose}
                     title="Đóng vụ nuôi"
                     message="Bạn có chắc chắn muốn đóng vụ nuôi này?"
                     confirmText="Đồng ý"
