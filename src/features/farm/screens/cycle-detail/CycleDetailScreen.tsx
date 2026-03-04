@@ -5,12 +5,11 @@ import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navig
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
-import { usePondsByZone } from '@/features/farm/hooks/usePonds';
 import { useIncomingStockTransfer } from '@/features/farm/hooks/stock-transfer/useStockTransfer';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 
-import { CycleDetailContent } from '@/features/farm/screens/pond/cycle-detail/CycleDetailContent';
+import { CycleDetailContent } from '@/features/farm/screens/cycle-detail/CycleDetailContent';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'CycleDetailScreen'>;
@@ -28,17 +27,7 @@ export const CycleDetailScreen: React.FC = () => {
 
     const { data: shrimpSeeds, refetch: refetchShrimpSeeds } = useShrimpSeeds(warehouseId);
 
-    const { data: zonePondsData } = usePondsByZone(zoneId ?? null);
-
-    const zonePonds = useMemo(() => {
-        if (!zonePondsData) return [];
-        return zonePondsData.map((p: { id: string; name: string }) => ({
-            id: p.id,
-            name: p.name,
-        }));
-    }, [zonePondsData]);
-
-    const { data: incomingTransfer } = useIncomingStockTransfer(pondId, zonePonds);
+    const { data: incomingTransfer } = useIncomingStockTransfer(pondId);
 
     // --- Effects ---
     useFocusEffect(
@@ -53,8 +42,6 @@ export const CycleDetailScreen: React.FC = () => {
     );
 
     const [refreshing, setRefreshing] = useState(false);
-
-    const transferInfo = activeCycleData?.notes;
 
     const breedLabel = useMemo(
         () => pondDetailService.getBreedName(activeCycleData, shrimpSeeds),
@@ -76,16 +63,15 @@ export const CycleDetailScreen: React.FC = () => {
         [activeCycleData?.createdAt]
     );
     const sourcePondName = useMemo(() => {
-        if (transferInfo) return transferInfo;
         if (incomingTransfer?.fromPondName) return incomingTransfer.fromPondName;
         return '--';
-    }, [transferInfo, incomingTransfer]);
+    }, [incomingTransfer]);
 
     const shrimpSize = useMemo(() => {
         return incomingTransfer?.shrimpSizePcsPerKg
             ? `${incomingTransfer.shrimpSizePcsPerKg}`
-            : transferInfo ?? '--';
-    }, [incomingTransfer?.shrimpSizePcsPerKg, transferInfo]);
+            : '--';
+    }, [incomingTransfer?.shrimpSizePcsPerKg]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);

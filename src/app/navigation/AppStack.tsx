@@ -20,7 +20,7 @@ import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspe
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
 import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
-import { CreateCycleScreen } from '@/features/farm/screens/pond/createCycle/CreateCycleScreen';
+import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
@@ -28,7 +28,7 @@ import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchan
 import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
-import { CycleDetailScreen } from '@/features/farm/screens/pond/cycle-detail/CycleDetailScreen';
+import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
@@ -39,7 +39,7 @@ import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
-import CountingShrimpScreen from '@/features/farm/screens/pond/CountingShrimpScreens';
+import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeAIScreen';
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
 
@@ -156,6 +156,7 @@ export type AppStackParamList = {
         zoneId: string;
         cycleId?: string;
         isEditMode?: boolean;
+        aiCount?: number;
     };
     AddSiphonScreen: { pond: PondData; itemToEdit?: JobExecution };
     SiphonLog: { pond: PondData };
@@ -190,7 +191,7 @@ export type AppStackParamList = {
         jobType?: 'CLEAN_POND' | 'SUN_DRY_POND' | 'TROUBLESHOOTING';
     };
     SunDryPondLog: { pond: PondData };
-    CountingShrimp: undefined;
+    CountingShrimp: { pondId: string; zoneId: string };
 
     // ============== Material Screens (Tab Bar hidden) ==============
     MaterialForm: { materialId?: string; onSave?: (data: any) => void };
