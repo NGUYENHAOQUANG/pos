@@ -1,37 +1,36 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
-// import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
-// import WarningIcon from '@/assets/Icon/IconFarm/Warning.svg';
+import { colors, spacing } from '@/styles';
+import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
+import WarningCircle from '@/assets/Icon/IconMenu/WarningCircle.svg';
 
 interface EditEnvironmentCardProps {
     name: string;
     lowerLimit: string;
     upperLimit: string;
-    // isAlertEnabled: boolean;
+    isAlertEnabled: boolean;
     onNameChange: (text: string) => void;
     onLowerLimitChange: (text: string) => void;
     onUpperLimitChange: (text: string) => void;
-    // onAlertToggle: (enabled: boolean) => void;
+    onAlertToggle: (enabled: boolean) => void;
 }
 
 export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     name,
     lowerLimit,
     upperLimit,
-    // isAlertEnabled,
+    isAlertEnabled,
     onNameChange,
     onLowerLimitChange,
     onUpperLimitChange,
-    // onAlertToggle,
+    onAlertToggle,
 }) => {
     return (
         <View style={styles.container}>
             {/* Parameter Name */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>
-                    <Text style={styles.required}>* </Text>
-                    Tên thông số
+                    Tên <Text style={styles.required}>*</Text>
                 </Text>
                 <TextInput
                     style={styles.input}
@@ -42,80 +41,81 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 />
             </View>
 
-            {/* Limits Row */}
-            <View style={styles.row}>
-                <View style={[styles.inputGroup, styles.flex1, { marginRight: spacing.sm }]}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>
-                        Giới hạn dưới
-                    </Text>
-                    <TextInput
-                        style={styles.input}
-                        value={lowerLimit}
-                        onChangeText={onLowerLimitChange}
-                        keyboardType="default"
-                        placeholderTextColor={colors.textSecondary}
-                    />
-                </View>
-
-                <View style={[styles.inputGroup, styles.flex1, { marginLeft: spacing.sm }]}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>
-                        Giới hạn trên
-                    </Text>
-                    <TextInput
-                        style={styles.input}
-                        value={upperLimit}
-                        onChangeText={onUpperLimitChange}
-                        keyboardType="default"
-                        placeholderTextColor={colors.textSecondary}
-                    />
-                </View>
+            {/* Lower Limit Row -> Vertical */}
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>
+                    Giới hạn dưới <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                    style={styles.input}
+                    value={lowerLimit}
+                    onChangeText={onLowerLimitChange}
+                    keyboardType="default"
+                    placeholderTextColor={colors.textSecondary}
+                />
             </View>
 
-            {/* Alert Config Card - Hidden per user request */}
-            {/* <View style={styles.alertCard}>
-                <View style={styles.alertHeader}>
-                    <View style={styles.alertTitleWrapper}>
-                        <View style={styles.iconWrapper}>
-                            <WarningIcon width={24} height={24} />
-                        </View>
-                        <Text style={styles.alertTitle}>Bật cảnh báo</Text>
-                    </View>
-                    <ButtonDevices value={isAlertEnabled} onValueChange={onAlertToggle} />
-                </View>
-
-                <View style={styles.divider} />
-
-                <Text style={styles.alertDescription}>
-                    Hệ thống sẽ cảnh báo khi kết quả đo nằm ngoài khoảng giới hạn đã thiết lập.
+            {/* Upper Limit Row -> Vertical */}
+            <View style={styles.inputGroup}>
+                <Text style={styles.label}>
+                    Giới hạn trên <Text style={styles.required}>*</Text>
                 </Text>
-            </View> */}
+                <TextInput
+                    style={styles.input}
+                    value={upperLimit}
+                    onChangeText={onUpperLimitChange}
+                    keyboardType="default"
+                    placeholderTextColor={colors.textSecondary}
+                />
+            </View>
+
+            {/* Alert Config Card */}
+            <View style={styles.alertCard}>
+                <View style={styles.alertContentRow}>
+                    <View style={styles.alertTextContent}>
+                        <WarningCircle
+                            width={20}
+                            height={20}
+                            color={colors.primaryOrange}
+                            style={{ marginBottom: 8 }}
+                        />
+                        <Text style={styles.alertTitle}>Bật cảnh báo</Text>
+                        <Text style={styles.alertDescription}>
+                            Hệ thống sẽ cảnh báo khi kết quả đo nằm ngoài khoảng giới hạn đã thiết
+                            lập.
+                        </Text>
+                    </View>
+                    <View style={styles.alertAction}>
+                        <ButtonDevices
+                            value={isAlertEnabled}
+                            onValueChange={onAlertToggle}
+                            trackColor={colors.primaryOrange}
+                        />
+                    </View>
+                </View>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: spacing.md,
+        padding: 16,
         backgroundColor: colors.white,
-        borderRadius: 0,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+        gap: 16,
     },
     inputGroup: {
-        marginBottom: spacing.md,
-    },
-    row: {
-        flexDirection: 'row',
-        marginBottom: spacing.md,
-    },
-    flex1: {
-        flex: 1,
+        // gap: 6 managed by marginBottom if gap isn't fully supported, but using gap usually works in RN >= 0.71.
+        gap: 6,
     },
     label: {
         fontSize: 14,
-        color: colors.text,
-        marginBottom: spacing.xs,
-        fontWeight: '400',
+        color: colors.gray[950],
+        fontWeight: '500',
+        lineHeight: 20,
     },
     required: {
         color: colors.red[600],
@@ -123,52 +123,45 @@ const styles = StyleSheet.create({
     input: {
         height: 44,
         borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.gray[200],
+        borderRadius: 8,
         paddingHorizontal: spacing.md,
-        fontSize: 14,
-        color: colors.text,
+        fontSize: 16,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
         backgroundColor: colors.white,
     },
-    // Alert styles - Hidden per user request
-    // alertCard: {
-    //     borderWidth: 1,
-    //     borderColor: colors.border,
-    //     borderRadius: borderRadius.md,
-    //     overflow: 'hidden',
-    // },
-    // alertHeader: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    //     justifyContent: 'space-between',
-    //     padding: spacing.md,
-    // },
-    // alertTitleWrapper: {
-    //     flexDirection: 'row',
-    //     alignItems: 'center',
-    // },
-    // iconWrapper: {
-    //     width: 32,
-    //     height: 32,
-    //     borderRadius: 16,
-    //     backgroundColor: colors.yellow[50],
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     marginRight: spacing.sm,
-    // },
-    // alertTitle: {
-    //     fontSize: 14,
-    //     fontWeight: '600',
-    //     color: colors.text,
-    // },
-    // divider: {
-    //     height: 1,
-    //     backgroundColor: colors.borderLight,
-    // },
-    // alertDescription: {
-    //     padding: spacing.md,
-    //     fontSize: 14,
-    //     color: colors.textSecondary,
-    //     lineHeight: 20,
-    // },
+    // Alert styles
+    alertCard: {
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        borderRadius: 8,
+        padding: 16,
+    },
+    alertContentRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    alertTextContent: {
+        flex: 1,
+        marginRight: 16,
+    },
+    alertTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.gray[950],
+        marginBottom: 4,
+        lineHeight: 20,
+    },
+    alertDescription: {
+        fontSize: 14,
+        color: colors.gray[600],
+        lineHeight: 20,
+        fontWeight: '400',
+    },
+    alertAction: {
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
 });

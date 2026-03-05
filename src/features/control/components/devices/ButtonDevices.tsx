@@ -30,7 +30,7 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = ({
 
     const translateX = animatedValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, 22], // 0 (start at padding) -> 22 (travel distance: 44 - 4 - 18)
+        outputRange: [0, 20], // 0 (start at padding) -> 20 (travel distance: 44 - 4 - 20)
     });
 
     const backgroundColor = animatedValue.interpolate({
@@ -62,15 +62,15 @@ export const ButtonDevices: React.FC<ButtonDevicesProps> = ({
 const styles = StyleSheet.create({
     track: {
         width: 44,
-        height: 22,
-        borderRadius: 11,
+        height: 24,
+        borderRadius: 12,
         justifyContent: 'center',
         padding: 2, // gap between thumb and track border
     },
     thumb: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
         backgroundColor: colors.white,
         // Shadow for thumb
         shadowColor: colors.black,

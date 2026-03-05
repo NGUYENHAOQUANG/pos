@@ -59,6 +59,8 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }
 
+export const RequiredDot = () => <View style={styles.requiredDot} />;
+
 /**
  * Input component with Ant Design styling and system colors
  * Supports labels, icons, validation, password toggle, and error states
@@ -125,7 +127,7 @@ export function Input({
                         {label}
                     </Text>
                     {/* Small required dot 4x4 displayed to the right of label */}
-                    {required && <View style={styles.requiredDot} />}
+                    {required && <RequiredDot />}
                 </View>
             )}
             {/* Input Container */}
@@ -271,24 +273,23 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: 12,
     },
+    requiredDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 3,
+        backgroundColor: colors.error,
+        marginLeft: 6,
+    },
     labelWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: spacing.sm,
     },
-    requiredDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.error,
-        marginLeft: 4,
-        marginBottom: 2,
-    },
     label: {
-        fontSize: 14,
-        fontWeight: '400',
+        fontSize: typography.fontSize.base,
+        fontWeight: '500',
         color: colors.text,
-        lineHeight: 22,
+        lineHeight: 20,
     },
     required: {
         color: colors.error,
@@ -318,8 +319,10 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: 16,
+        fontSize: typography.fontSize.base,
+        fontWeight: '500',
         color: colors.text,
+        lineHeight: 20,
         letterSpacing: 0,
         paddingVertical: 0,
         height: '100%',

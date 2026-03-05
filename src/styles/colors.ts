@@ -10,6 +10,7 @@ export const colors = {
     primary: '#006AFF',
     primaryDark: '#0051D5',
     primaryLight: '#5AC8FA',
+    primaryOrange: '#FD6900',
 
     // Secondary colors
     secondary: '#5856D6',
@@ -32,6 +33,7 @@ export const colors = {
         700: '#374151',
         800: '#1F2937',
         900: '#111827',
+        950: '#0B1117',
     },
     volcano: {
         200: '#FFFCF5',
@@ -52,11 +54,12 @@ export const colors = {
         800: '#08979C',
     },
     blue: {
+        25: '#F5FAFF',
         50: '#E6F4FF',
-        200: '#C3E6FF',
+        200: '#B2DDFF',
         300: '#BAE0FF',
         400: '#91CAFF',
-        600: '#1677FF',
+        600: '#1570EF',
         700: '#003EB3',
         800: '#061178',
     },
@@ -73,6 +76,7 @@ export const colors = {
         600: '#FA541C',
         700: '#FF7A45',
         900: '#FD6900',
+        800: '#FD6900',
     },
     green: {
         25: '#F6FEF9',

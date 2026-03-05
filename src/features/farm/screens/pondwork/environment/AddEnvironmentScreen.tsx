@@ -14,7 +14,7 @@ import { EnvironmentParametersBox } from '@/features/farm/components/pondwork/en
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { EnvSkeleton } from '@/features/farm/components/skeleton/EnvSkeleton';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
@@ -332,7 +332,7 @@ export const AddEnvironmentScreen: React.FC = () => {
             )}
 
             {/* Delete Confirmation Modal */}
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}

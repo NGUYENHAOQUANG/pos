@@ -15,9 +15,10 @@ export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds,
         <View style={styles.container}>
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Ao đã kết nối</Text>
-                <Text style={styles.pondCount}>{totalPonds} ao</Text>
+                <View style={styles.countBadge}>
+                    <Text style={styles.pondCount}>{totalPonds}</Text>
+                </View>
             </View>
-            <View style={styles.divider} />
 
             <View style={styles.pondsContainer}>
                 {ponds.map((pond, index) => {
@@ -32,13 +33,13 @@ export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds,
                             style={styles.pondCard}
                             onPress={() => onPondPress && onPondPress(pond)}
                         >
-                            <View>
+                            <View style={styles.pondInfo}>
                                 <Text style={styles.pondName}>{pond.name}</Text>
                                 <Text style={styles.pondDetail}>
                                     {typeName} - {status}
                                 </Text>
                             </View>
-                            <AntDesign name="right" size={20} color={colors.text} />
+                            <AntDesign name="right" size={16} color={colors.gray[400]} />
                         </TouchableOpacity>
                     );
                 })}
@@ -49,53 +50,61 @@ export const PondConnecter: React.FC<PondConnecterProps> = ({ totalPonds, ponds,
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
-        marginTop: 12,
-        paddingBottom: 12,
+        gap: 12,
     },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
     },
     sectionTitle: {
-        fontSize: 14,
-        lineHeight: 22,
-        fontWeight: '700',
-        color: colors.text,
+        fontSize: 16,
+        fontWeight: '600',
+        lineHeight: 20,
+        color: colors.gray[950],
+    },
+    countBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 9999,
+        backgroundColor: colors.blue[25],
+        borderWidth: 1,
+        borderColor: colors.blue[200],
     },
     pondCount: {
         fontSize: 14,
-        color: colors.text,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.blue[600],
     },
     pondsContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.border,
+        gap: 8,
     },
     pondCard: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: colors.white,
+        padding: 12,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: colors.border,
-        marginBottom: 12,
+        borderColor: colors.gray[200],
+        gap: 16,
+    },
+    pondInfo: {
+        flex: 1,
+        gap: 8,
     },
     pondName: {
         fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 4,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
     },
     pondDetail: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: '400',
         color: colors.gray[500],
+        lineHeight: 20,
     },
 });
