@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
@@ -13,7 +13,7 @@ import {
 import { Loading } from '@/shared/components/ui/Loading';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useZones } from '@/features/farm/hooks/useZones';
 import { useSeasonDetail } from '@/features/menu/hooks/useSeasons';
 import {
@@ -181,11 +181,8 @@ export const EditAquacultureScreens: React.FC = () => {
                 <HeaderMenu
                     title="Chỉnh sửa vụ nuôi"
                     onBack={handleGoBack}
-                    rightAction={
-                        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-                            <DeleteIcon width={20} height={20} color={colors.error} />
-                        </TouchableOpacity>
-                    }
+                    rightIcon={<DeleteIcon width={20} height={20} color={colors.text} />}
+                    onRightPress={handleDelete}
                 />
 
                 {aquaculture && (
@@ -216,7 +213,7 @@ export const EditAquacultureScreens: React.FC = () => {
                     />
                 )}
 
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={deleteModalVisible}
                     onConfirm={handleConfirmDelete}
                     onCancel={handleCancelDelete}
@@ -226,7 +223,7 @@ export const EditAquacultureScreens: React.FC = () => {
                     showSuccessToast={false}
                 />
 
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={closeModalVisible}
                     onConfirm={handleConfirmClose}
                     onCancel={handleCancelClose}
@@ -248,15 +245,5 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
     },
 });

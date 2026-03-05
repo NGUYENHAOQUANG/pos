@@ -59,6 +59,8 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }
 
+export const RequiredDot = () => <View style={styles.requiredDot} />;
+
 /**
  * Input component with Ant Design styling and system colors
  * Supports labels, icons, validation, password toggle, and error states
@@ -125,7 +127,7 @@ export function Input({
                         {label}
                     </Text>
                     {/* Small required dot 4x4 displayed to the right of label */}
-                    {required && <View style={styles.requiredDot} />}
+                    {required && <RequiredDot />}
                 </View>
             )}
             {/* Input Container */}

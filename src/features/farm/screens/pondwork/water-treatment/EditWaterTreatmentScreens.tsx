@@ -11,7 +11,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 
@@ -292,7 +292,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
             {UnsavedChangesModal}
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={showDeleteModal}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}

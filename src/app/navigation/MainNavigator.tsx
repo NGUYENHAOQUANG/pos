@@ -7,13 +7,20 @@
  * @created 2025-11-16
  * @updated 2025-01-07
  */
-import React, { useEffect, useRef } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, Animated } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    Text,
+    Animated,
+    LayoutChangeEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
-import { colors } from '@/styles';
+import { colors, borderRadius } from '@/styles';
 import { SvgProps } from 'react-native-svg';
 
 // Main screens only (no nested stacks)
@@ -55,9 +62,6 @@ import {
     IconSetting,
     IconSettingActive,
 } from '@/assets/icons';
-
-const TAB_HEIGHT = 70;
-const PADDING_BOTTOM = 12;
 
 interface NavigationItem {
     key: string;
@@ -120,10 +124,10 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     // Animate active indicator when tab becomes focused
     useEffect(() => {
         if (isFocused) {
-            indicatorScale.setValue(0);
+            indicatorScale.setValue(0.8); // Start slightly smaller for pop effect
             Animated.spring(indicatorScale, {
                 toValue: 1,
-                friction: 5,
+                friction: 8,
                 tension: 100,
                 useNativeDriver: true,
             }).start();
@@ -135,26 +139,23 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
     return (
         <TouchableOpacity
             key={route.key}
-            style={styles.tabItem}
+            style={[styles.tabItem]}
             onPress={onPress}
             activeOpacity={0.7}
         >
-            <View style={styles.tabItemContent}>
-                {/* Active indicator with scale animation */}
-                {isFocused && (
-                    <Animated.View
-                        style={[
-                            styles.activeIndicator,
-                            {
-                                transform: [{ scaleX: indicatorScale }],
-                            },
-                        ]}
+            <View style={[styles.tabItemContent]}>
+                <View style={[styles.iconContainer, isFocused && styles.iconActiveContainer]}>
+                    <IconComponent
+                        width={20}
+                        height={20}
+                        fill={isFocused ? colors.white : undefined}
+                        color={isFocused ? colors.white : undefined}
                     />
-                )}
-                <View style={styles.iconContainer}>
-                    <IconComponent width={24} height={24} />
                 </View>
-                <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]}>
+                <Text
+                    numberOfLines={1}
+                    style={[styles.tabLabel, isFocused && styles.tabLabelActive]}
+                >
                     {item.label}
                 </Text>
             </View>
@@ -168,21 +169,57 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
  */
 const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
-    const safeBottom = Math.max(insets.bottom, PADDING_BOTTOM);
-    const totalHeight = TAB_HEIGHT + safeBottom;
+    const [barWidth, setBarWidth] = useState(0);
+    const slideAnim = useRef(new Animated.Value(state.index)).current;
 
     const currentRoute = state.routes[state.index];
 
+    useEffect(() => {
+        Animated.spring(slideAnim, {
+            toValue: state.index,
+            friction: 7,
+            tension: 50,
+            useNativeDriver: true,
+        }).start();
+    }, [state.index, slideAnim]);
+
+    const handleLayout = (e: LayoutChangeEvent) => {
+        setBarWidth(e.nativeEvent.layout.width);
+    };
+    const innerWidth = Math.max(0, barWidth - 10);
+    const tabWidth = innerWidth > 0 ? innerWidth / state.routes.length : 0;
+
     return (
         <View
+            onLayout={handleLayout}
             style={[
                 styles.bottomContainer,
                 {
-                    height: totalHeight,
-                    paddingBottom: safeBottom,
+                    marginBottom: insets.bottom + 4,
                 },
             ]}
         >
+            {barWidth > 0 && (
+                <Animated.View
+                    style={[
+                        styles.slidingIndicator,
+                        {
+                            width: tabWidth,
+                            transform: [
+                                {
+                                    translateX: slideAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, tabWidth],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                >
+                    <View style={styles.slidingIndicatorInner} />
+                </Animated.View>
+            )}
+
             {state.routes.map(route => {
                 const item = navigationItems.find(i => i.key === route.name);
                 const isFocused = route.name === currentRoute.name;
@@ -238,24 +275,30 @@ export function MainNavigator() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.backgroundPrimary, // Change from white to backgroundPrimary to show rounded corners
     },
     bottomContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
         backgroundColor: 'white',
-        borderTopWidth: 0,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        borderColor: colors.defaultBorder,
+        borderRadius: borderRadius.full,
+        borderColor: colors.border,
         borderWidth: 1,
-        overflow: 'hidden',
+        marginHorizontal: 16,
+        padding: 4,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: borderRadius.full,
+        elevation: 1,
     },
     tabItem: {
         flex: 1,
+        height: 64,
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100%',
-        position: 'relative',
     },
     tabItemContent: {
         alignItems: 'center',
@@ -263,27 +306,32 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
-    activeIndicator: {
+    slidingIndicator: {
         position: 'absolute',
-        bottom: 0,
-        width: '80%',
-        height: 3,
-        backgroundColor: colors.primary,
-        borderTopLeftRadius: 3,
-        borderTopRightRadius: 3,
+        top: 4,
+        bottom: 4,
+        left: 4,
+        zIndex: 0,
+    },
+    slidingIndicatorInner: {
+        flex: 1,
+        backgroundColor: colors.orange[800],
+        borderRadius: borderRadius.full,
     },
     iconContainer: {
-        marginBottom: 4,
-        marginTop: 8,
+        marginBottom: 2,
+    },
+    iconActiveContainer: {
+        // Add subtle bounce for icon when selected
+        transform: [{ scale: 1.1 }],
     },
     tabLabel: {
         fontSize: 12,
-        color: colors.text,
+        color: colors.textMuted,
         fontWeight: '400',
-        marginBottom: 4,
     },
     tabLabelActive: {
-        color: colors.primary,
-        fontWeight: '600',
+        color: colors.white,
+        fontWeight: '500',
     },
 });

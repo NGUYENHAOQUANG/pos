@@ -3,15 +3,14 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { EquipmentMaintenance } from '@/features/menu/components/devices/EquipmentMaintenance';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { useMenuContext } from '@/features/menu/store/menuStore';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { IconTrashOutlined } from '@/assets/icons';
-import { TouchableOpacity } from 'react-native';
 
 type EditEquimentMaintenanceScreenRouteProp = RouteProp<
     MenuStackParamList,
@@ -125,11 +124,8 @@ export const EditEquimentMaintenanceScreens = () => {
             <HeaderMenu
                 title="Bảo trì thiết bị"
                 onBack={() => navigation.goBack()}
-                rightAction={
-                    <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-                        <IconTrashOutlined width={20} height={20} color={colors.red[600]} />
-                    </TouchableOpacity>
-                }
+                rightIcon={<IconTrashOutlined width={20} height={20} color={colors.text} />}
+                onRightPress={handleDelete}
             />
             <ScrollView contentContainerStyle={styles.content}>
                 <EquipmentMaintenance
@@ -151,7 +147,7 @@ export const EditEquimentMaintenanceScreens = () => {
                 />
             </View>
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={isDeleteModalVisible}
                 onConfirm={confirmDelete}
                 onCancel={() => setDeleteModalVisible(false)}
@@ -179,14 +175,5 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.red[600],
-        borderRadius: borderRadius.sm,
     },
 });

@@ -19,7 +19,7 @@ import {
     GeneralInfoBoxRef,
 } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { WaterSupplyInfoBox } from '@/features/farm/components/pondwork/waterchange/WaterChangeInfoBox';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
@@ -482,7 +482,7 @@ export const WaterSupplyScreen = () => {
 
             {UnsavedChangesModal}
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={showDeleteModal}
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}

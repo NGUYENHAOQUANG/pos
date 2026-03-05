@@ -16,7 +16,7 @@ import {
     useDeleteCycle,
     useCycleDetail,
 } from '@/features/farm/hooks/useCycle';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useSeasonList } from '@/features/menu/hooks/useSeason';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
@@ -222,7 +222,7 @@ export const CreateCycleScreen: React.FC = () => {
                 }
             />
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={showDeleteModal}
                 onConfirm={onDelete}
                 onCancel={() => setShowDeleteModal(false)}

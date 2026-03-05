@@ -11,7 +11,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
@@ -198,7 +198,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
             )}
 
             {/* Delete Confirmation Modal */}
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
