@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { colors } from '@/styles';
+import { View, StyleSheet, Text } from 'react-native';
+import { colors, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
-import { Legend, getProfitChartLegendItems } from '@/features/reports/components/Legend';
 import { MetricsRow } from '@/features/reports/components/profit-chart/MetricsRow';
 import {
     CHART_WIDTH,
@@ -17,6 +16,7 @@ import {
 } from '@/features/reports/components/profit-chart/chartData';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
+import CostArrow from '@/assets/Icon/IconReport/CostArrow.svg';
 
 interface CompilationProfitChartProps {
     /**
@@ -64,7 +64,10 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}
                         <>
                             <MetricsRow />
                             <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                            <Legend items={getProfitChartLegendItems()} />
+                            <View style={styles.breakEvenRow}>
+                                <CostArrow width={72} height={8} />
+                                <Text style={styles.breakEvenText}>Điểm hòa vốn</Text>
+                            </View>
                         </>
                     )}
                 </>
@@ -98,5 +101,19 @@ const styles = StyleSheet.create({
         minHeight: 300,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    breakEvenRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 12,
+        backgroundColor: colors.white,
+        gap: 8,
+    },
+    breakEvenText: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        fontFamily: typography.fontFamily.regular,
     },
 });
