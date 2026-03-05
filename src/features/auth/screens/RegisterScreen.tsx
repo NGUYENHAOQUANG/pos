@@ -1,34 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-    Platform,
     ScrollView,
     StyleSheet,
     Text,
     View,
-    KeyboardAvoidingView,
     TouchableOpacity,
-    Keyboard,
     AppState,
     AppStateStatus,
+    KeyboardAvoidingView,
+    Platform,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/app/navigation/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/styles';
-import { Button, Logo } from '@/shared/components';
+import { colors, spacing, typography } from '@/styles';
+import { Button } from '@/shared/components';
+import OTPIcon from '@/assets/Icon/OTP.svg';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import OTPInput, { OTPInputHandle } from '../components/OTPInput';
-import { spacing } from '@/styles';
 import Toast from 'react-native-toast-message';
 import { formatAuthPhoneDisplay } from '@/features/auth/utils/phone';
+import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 import { authApi } from '@/features/auth/api/authApi';
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
-import { NormalizedError } from '@/core/api/errorHandler';
-// Countdown duration in seconds
+import { handleError } from '@/shared/utils';
+
 const COUNTDOWN_DURATION = 60;
 
 type RegisterScreenRouteProp = RouteProp<AuthStackParamList, 'Register'>;
@@ -41,306 +42,216 @@ export default function RegisterScreen() {
     const verifyOtp = useAuthStore(state => state.verifyOtp);
 
     const [otp, setOtp] = useState<string[]>(['', '', '', '']);
-
-    // Removed programmatic auto-fill as per user request to rely on native keyboard autofill
-    // useEffect(() => {
-    //     if (otpCode) {
-    //          setOtp(String(otpCode).split('').slice(0, 4));
-    //     }
-    // }, [otpCode]);
     const [errorMessage, setErrorMessage] = useState('');
     const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
-    // Store the timestamp when countdown started (for real-time calculation)
     const [countdownStartTime, setCountdownStartTime] = useState<number>(Date.now());
 
     const otpInputRef = useRef<OTPInputHandle>(null);
-
     const isError = !!errorMessage;
-    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-    useEffect(() => {
-        const keyboardShowListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-            () => {
-                setKeyboardVisible(true);
-            }
-        );
-        const keyboardHideListener = Keyboard.addListener(
-            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-            () => {
-                setKeyboardVisible(false);
-            }
-        );
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
 
-        return () => {
-            keyboardHideListener.remove();
-            keyboardShowListener.remove();
-        };
-    }, []);
-
-    // Calculate remaining countdown based on real elapsed time
-    const calculateRemainingTime = React.useCallback(() => {
+    const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
         const remaining = COUNTDOWN_DURATION - elapsed;
         return remaining > 0 ? remaining : 0;
     }, [countdownStartTime]);
 
-    // Countdown timer with AppState support for background handling
     useEffect(() => {
-        // Update countdown based on real time
+        if (Platform.OS !== 'android') return;
+
+        const showSub = Keyboard.addListener('keyboardDidShow', event => {
+            setKeyboardOffset(event.endCoordinates.height);
+        });
+
+        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardOffset(0);
+        });
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
+
+    useEffect(() => {
         const updateCountdown = () => {
             const remaining = calculateRemainingTime();
             setCountdown(remaining);
         };
-
-        // Handle app state changes (background/foreground)
         const handleAppStateChange = (nextAppState: AppStateStatus) => {
-            if (nextAppState === 'active') {
-                // App came to foreground, recalculate countdown
-                updateCountdown();
-            }
+            if (nextAppState === 'active') updateCountdown();
         };
-
-        // Subscribe to app state changes
         const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
-
-        // Set up interval for countdown (only updates when app is active)
-        let timer: ReturnType<typeof setInterval> | undefined;
-        const remaining = calculateRemainingTime();
-        if (remaining > 0) {
-            timer = setInterval(updateCountdown, 1000);
-        }
-
+        let timer = setInterval(updateCountdown, 1000);
         return () => {
             appStateSubscription.remove();
-            if (timer) {
-                clearInterval(timer);
-            }
+            if (timer) clearInterval(timer);
         };
     }, [calculateRemainingTime]);
 
-    // Flag to prevent auto-submit loop when OTP is wrong
     const hasAutoSubmittedRef = useRef(false);
-
-    // Local loading state - don't use store loading to avoid blocking UI
     const [isVerifying, setIsVerifying] = useState(false);
 
     const handleOtpChange = (newCode: string[]) => {
         setOtp(newCode);
         if (errorMessage) setErrorMessage('');
-        // Reset auto-submit flag when user changes OTP
         hasAutoSubmittedRef.current = false;
     };
 
-    const handleVerifyOTP = React.useCallback(async () => {
+    const handleVerifyOTP = useCallback(async () => {
         const otpString = otp.join('');
-
-        if (otpString.length === 0) {
-            setErrorMessage('Vui lòng nhập mã để tiếp tục');
-            return;
-        }
-
         if (otpString.length < 4) {
             setErrorMessage('Vui lòng nhập đủ 4 số.');
             return;
         }
-
         setIsVerifying(true);
         try {
             const status = await verifyOtp(contact, otpString);
-
             if (status === 'REQUIRE_UPDATE_PROFILE') {
-                // Register successful & verified, now update profile
                 navigation.replace('Info', {
                     phone: contact,
                     userId: useAuthStore.getState().user?.id,
                 } as any);
             } else {
-                Toast.show({
-                    type: 'success',
-                    text1: 'Đăng ký thành công',
-                    visibilityTime: 2000,
-                });
+                Toast.show({ type: 'success', text1: 'Đăng ký thành công' });
             }
-        } catch (error) {
+        } catch (_error) {
             setErrorMessage('Mã không chính xác, vui lòng kiểm tra và thử lại.');
-            console.error(error);
         } finally {
             setIsVerifying(false);
         }
     }, [otp, contact, verifyOtp, navigation]);
 
-    // Auto-submit effect - only triggers once per OTP entry
     useEffect(() => {
         if (otp.join('').length === 4 && !hasAutoSubmittedRef.current) {
             hasAutoSubmittedRef.current = true;
             handleVerifyOTP();
         }
     }, [otp, handleVerifyOTP]);
-    const [isResending, setIsResending] = useState(false);
 
     const handleResendOTP = async () => {
-        if (isResending) return;
-
         setIsResending(true);
         try {
-            let phoneNumber = contact.replace(/\s+/g, ''); // Remove spaces
-            if (phoneNumber.startsWith('+84')) {
-                phoneNumber = '0' + phoneNumber.slice(3);
-            }
-
-            // Call API to resend OTP
+            let phone = contact.replace(/\s+/g, '');
+            if (phone.startsWith('+84')) phone = '0' + phone.slice(3);
             const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_OTP, {
-                phoneNumber: phoneNumber,
+                phoneNumber: phone,
             });
-
-            // Extract OTP from response (for test/dev notification)
-            const otpCode =
-                response.data?.testOtp ||
-                response.data?.data?.testOtp ||
-                response.data?.data?.otpCode ||
-                response.data?.otpCode;
-
-            if (otpCode) {
-                notificationHelper.displayOtpNotification(String(otpCode));
-            }
-
-            // Reset countdown and UI
+            const otpCode = response.data?.testOtp || response.data?.otpCode;
+            if (otpCode) notificationHelper.displayOtpNotification(String(otpCode));
             setCountdownStartTime(Date.now());
             setCountdown(COUNTDOWN_DURATION);
             setOtp(['', '', '', '']);
             setErrorMessage('');
             otpInputRef.current?.focusFirst();
-
-            Toast.show({
-                type: 'success',
-                text1: 'Đã gửi lại mã OTP',
-                visibilityTime: 2000,
-            });
+            Toast.show({ type: 'success', text1: 'Đã gửi lại mã OTP' });
         } catch (err) {
-            const error = err as NormalizedError;
-            Toast.show({
-                type: 'error',
-                text1: error.message || 'Gửi lại mã thất bại',
-                visibilityTime: 3000,
-            });
+            handleError(err);
         } finally {
             setIsResending(false);
         }
     };
+    const [_isResending, setIsResending] = useState(false);
 
-    // Register and get OTP on mount
     useEffect(() => {
-        const registerAndGetOtp = async () => {
+        const register = async () => {
             if (!phoneNumber) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Lỗi',
-                    text2: 'Không có số điện thoại',
-                });
                 navigation.goBack();
                 return;
             }
-
             try {
                 const response = await authApi.register({ phoneNumber });
-                const devOtp = response?.data?.testOtp;
-
-                if (devOtp) {
-                    await notificationHelper.displayOtpNotification(String(devOtp));
-                }
-
-                Toast.show({
-                    type: 'success',
-                    text1: 'Đăng ký thành công',
-                    text2: 'Vui lòng nhập mã OTP để xác thực',
-                });
-            } catch (err: any) {
-                Toast.show({
-                    type: 'error',
-                    text1: 'Lỗi',
-                    text2: err?.message || 'Không thể đăng ký. Vui lòng thử lại.',
-                });
+                if (response?.data?.testOtp)
+                    notificationHelper.displayOtpNotification(String(response.data.testOtp));
+            } catch (_err) {
                 navigation.goBack();
             }
         };
-
-        registerAndGetOtp();
+        register();
     }, [phoneNumber, navigation]);
 
     const displayContact = formatAuthPhoneDisplay(contact);
 
     return (
-        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-            {!isKeyboardVisible && (
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
-            )}
-
+        <SafeAreaView style={styles.container} edges={['top']}>
+            <FloatingBubblesBackground />
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'android' ? 'padding' : undefined}
-                style={styles.keyboardView}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+                enabled={Platform.OS === 'ios'}
+                behavior="padding"
+                style={styles.keyboardInner}
+                keyboardVerticalOffset={0}
             >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                    bounces={false}
-                >
-                    <View style={styles.card}>
-                        <View style={styles.logoWrapper}>
-                            <Logo size="medium" />
+                <View style={styles.mainContentContainer}>
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.backButtonSection}>
+                            <TouchableOpacity
+                                style={styles.backButton}
+                                onPress={() => navigation.goBack()}
+                            >
+                                <Ionicons name="arrow-back" size={20} color={colors.text} />
+                            </TouchableOpacity>
                         </View>
-                        <View style={styles.spacer} />
-                        <Text style={styles.title}>Tạo tài khoản</Text>
-                        <Text style={styles.subtitle}>Nhập mã được gửi đến số điện thoại</Text>
-                        <Text style={styles.phoneNumber}>{displayContact}</Text>
-
-                        <View style={styles.otpInputSection}>
-                            <OTPInput
-                                ref={otpInputRef}
-                                code={otp}
-                                onCodeChanged={handleOtpChange}
-                                isError={isError}
-                                length={4}
-                            />
+                        <View style={styles.logoSection}>
+                            <OTPIcon width={60} height={40} />
                         </View>
-
-                        {isError ? (
-                            <Text style={styles.errorText} numberOfLines={1} adjustsFontSizeToFit>
-                                {errorMessage}
+                        <View style={styles.contentSection}>
+                            <Text style={styles.title}>Tạo tài khoản</Text>
+                            <Text style={styles.subtitle}>
+                                Nhập mã được gửi đến số điện thoại{'\n'}
+                                <Text style={styles.phoneNumber}>{displayContact}</Text>
                             </Text>
-                        ) : (
-                            <View style={styles.errorPlaceholder} />
-                        )}
-
-                        <View style={styles.resendContainer}>
-                            <Text style={styles.resendLabel}>Không nhận được mã? </Text>
-                            {countdown > 0 ? (
-                                <Text style={styles.timerText}>
-                                    <Text style={styles.disabledLink}>Gửi lại mã</Text> (chờ sau 0:
-                                    {countdown.toString().padStart(2, '0')})
-                                </Text>
+                            <View style={styles.otpInputSection}>
+                                <OTPInput
+                                    ref={otpInputRef}
+                                    code={otp}
+                                    onCodeChanged={handleOtpChange}
+                                    isError={isError}
+                                    length={4}
+                                />
+                            </View>
+                            {isError ? (
+                                <Text style={styles.errorText}>{errorMessage}</Text>
                             ) : (
-                                <TouchableOpacity onPress={handleResendOTP}>
-                                    <Text style={styles.activeLink}>Gửi lại mã</Text>
-                                </TouchableOpacity>
+                                <View style={styles.errorPlaceholder} />
                             )}
+                            <View style={styles.resendContainer}>
+                                <Text style={styles.resendLabel}>Không nhận được mã? </Text>
+                                {countdown > 0 ? (
+                                    <Text style={styles.timerText}>
+                                        <Text style={styles.disabledLink}>Gửi lại mã</Text>
+                                        (chờ sau 0:{countdown.toString().padStart(2, '0')})
+                                    </Text>
+                                ) : (
+                                    <TouchableOpacity onPress={handleResendOTP}>
+                                        <Text style={styles.activeLink}>Gửi lại mã</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
                         </View>
-
-                        <View style={styles.buttonWrapper}>
-                            <Button
-                                title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
-                                onPress={handleVerifyOTP}
-                                variant="primary"
-                                fullWidth
-                                disabled={isVerifying}
-                                style={styles.submitButton}
-                            />
-                        </View>
+                    </ScrollView>
+                    <View
+                        style={[
+                            styles.footer,
+                            Platform.OS === 'android' && {
+                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardOffset,
+                            },
+                        ]}
+                    >
+                        <Button
+                            title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
+                            onPress={handleVerifyOTP}
+                            variant="primary"
+                            fullWidth
+                            disabled={isVerifying}
+                            style={styles.submitButton}
+                        />
                     </View>
-                </ScrollView>
+                </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -351,110 +262,99 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    backButton: {
-        position: 'absolute',
-        top: Platform.OS === 'ios' ? 45 : 50,
-        left: 20,
-        zIndex: 10,
-        padding: 8,
-        backgroundColor: colors.white,
-        borderRadius: 20,
+    keyboardInner: {
+        flex: 1,
     },
-    keyboardView: {
+    mainContentContainer: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    scrollView: {
         flex: 1,
     },
     scrollContent: {
         flexGrow: 1,
+    },
+    backButtonSection: {
+        height: 64,
         justifyContent: 'center',
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: spacing.md,
     },
-    card: {
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         backgroundColor: colors.white,
-        borderRadius: 16,
-        paddingVertical: spacing.md,
+        justifyContent: 'center',
         alignItems: 'center',
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
+        elevation: 2,
     },
-    spacer: {
-        width: '100%',
-        marginBottom: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        alignSelf: 'stretch',
+    logoSection: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.lg,
+        alignItems: 'flex-start',
     },
-    logoWrapper: {
-        marginBottom: spacing.md,
-        paddingHorizontal: 24,
+    contentSection: {
+        paddingHorizontal: spacing.md,
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.gray[800],
-        marginBottom: 16,
-        paddingHorizontal: 24,
+        fontSize: typography.fontSize['2xl'],
+        fontWeight: '600',
+        color: '#0B1117',
+        paddingVertical: spacing.md,
     },
     subtitle: {
-        fontSize: 15,
-        color: colors.text,
-        textAlign: 'center',
-        marginBottom: 4,
-        paddingHorizontal: 24,
+        fontSize: typography.fontSize.lg,
+        color: colors.gray[500],
+        lineHeight: 24,
     },
     phoneNumber: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: '700',
         color: colors.text,
-        marginBottom: 32,
-        paddingHorizontal: 24,
+        lineHeight: 28,
     },
     otpInputSection: {
         width: '100%',
         alignItems: 'center',
-        marginBottom: 8,
-        paddingHorizontal: 24,
+        paddingVertical: spacing.md,
     },
     errorText: {
         color: colors.error,
-        fontSize: 13,
-        marginBottom: 16,
-        marginTop: 4,
-        textAlign: 'center',
-        paddingHorizontal: 4,
+        fontSize: typography.fontSize.sm,
+        marginBottom: spacing.md,
+    },
+    errorPlaceholder: {
+        height: spacing.md,
     },
     resendContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 32,
-        paddingHorizontal: 24,
     },
     resendLabel: {
-        color: colors.gray[700],
+        color: colors.gray[500],
         fontSize: 14,
     },
     timerText: {
-        color: colors.gray[700],
+        color: colors.gray[500],
         fontSize: 14,
     },
     disabledLink: {
-        textDecorationLine: 'underline',
-        color: colors.textTertiary,
+        color: colors.gray[400],
     },
     activeLink: {
         color: colors.primary,
-        fontWeight: '600',
+        fontWeight: '500',
         textDecorationLine: 'underline',
-    },
-    buttonWrapper: {
-        width: '100%',
-        paddingHorizontal: 24,
     },
     submitButton: {
         backgroundColor: colors.primary,
         borderRadius: 25,
-        height: 50,
+        height: 52,
     },
-    errorPlaceholder: {
-        height: 24,
+    footer: {
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.xl + spacing.sm + 12,
+        paddingTop: spacing.xs,
     },
 });
