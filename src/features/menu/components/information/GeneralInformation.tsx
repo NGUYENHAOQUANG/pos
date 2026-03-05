@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     },
     cardContainer: {
         backgroundColor: colors.white,
-        borderRadius: 8,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor: colors.gray[200],
         padding: 12,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
         lineHeight: 20,
-        color: colors.volcano[600], // Red color for asterisk
+        color: colors.volcano[600],
     },
     inputBox: {
         height: 44,
