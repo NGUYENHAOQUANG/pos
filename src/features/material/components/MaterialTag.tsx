@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 
 interface MaterialGroupProps {
@@ -11,6 +11,11 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
     const getStyle = (type: MaterialGroupType) => {
         switch (type) {
             case MaterialGroupType.FARMING:
+                return {
+                    backgroundColor: colors.volcano[200],
+                    color: colors.volcano[900],
+                    borderColor: colors.volcano[300],
+                };
             case MaterialGroupType.FEED:
                 return {
                     backgroundColor: colors.volcano[200],
@@ -24,6 +29,11 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
                     borderColor: colors.geekblue[300],
                 };
             case MaterialGroupType.TOOLS:
+                return {
+                    backgroundColor: colors.green[50],
+                    color: colors.green[600],
+                    borderColor: colors.green[300],
+                };
             case MaterialGroupType.CCDC:
                 return {
                     backgroundColor: colors.green[50],
@@ -92,9 +102,9 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: spacing.sm,
-        paddingVertical: 1,
-        borderRadius: 4,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         alignSelf: 'flex-start', // Wrap content
         alignItems: 'center',
@@ -102,7 +112,7 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 12,
-        fontWeight: '400',
-        lineHeight: 22,
+        fontWeight: '500',
+        lineHeight: 20,
     },
 });

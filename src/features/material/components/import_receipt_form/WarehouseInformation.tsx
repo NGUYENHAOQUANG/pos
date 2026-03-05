@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 
@@ -78,25 +78,18 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
 
 const styles = StyleSheet.create({
     cardContainer: {
+        margin: spacing.md,
         backgroundColor: colors.white,
-        marginBottom: spacing.sm,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        zIndex: 10,
     },
 
     content: {
-        padding: spacing.md,
-        gap: 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
+        gap: spacing.md,
+        paddingHorizontal: 12,
+        paddingTop: spacing.md,
+        paddingBottom: 12,
     },
 });

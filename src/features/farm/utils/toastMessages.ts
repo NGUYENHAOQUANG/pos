@@ -67,13 +67,33 @@ const JOB_TOAST_MESSAGES_CONFIG: Partial<
     },
 };
 
-const TOAST_MESSAGES_CONFIG = {
+export const TOAST_MESSAGES_CONFIG = {
     JOB: JOB_TOAST_MESSAGES_CONFIG,
     IMAGE: {
         SIZE_EXCEEDED: {
-            type: 'error' as const,
+            type: 'error',
             text1: 'Thông báo',
             getText2: (limitMb: number) => `Tổng giới hạn các ảnh là ${limitMb}MB`,
+        },
+    },
+    SHRIMP_HEALTH_AI: {
+        HEALTHY: {
+            type: 'success',
+            text1: 'Tôm khỏe mạnh',
+        },
+        SICK: {
+            type: 'error',
+            text1: 'Phát hiện tôm bệnh !',
+        },
+        NO_IMAGE: {
+            type: 'error',
+            text1: 'Chưa có hình ảnh',
+            text2: 'Vui lòng chọn hoặc chụp ảnh để kiểm tra.',
+        },
+        NO_DATA: {
+            type: 'error',
+            text1: 'Chưa có dữ liệu',
+            text2: 'Vui lòng lấy kết quả kiểm tra trước khi xem chi tiết.',
         },
     },
 } as const;
@@ -143,7 +163,21 @@ export const showDeleteJobSuccessToast = (jobType: JobType) => {
         visibilityTime: 3000,
     });
 };
+type BasicToastConfig = {
+    type: string;
+    text1: string;
+    text2?: string;
+    position?: 'top' | 'bottom';
+    visibilityTime?: number;
+};
 
+export const AppToast = (config: BasicToastConfig) => {
+    Toast.show({
+        position: 'top',
+        visibilityTime: 3000,
+        ...config,
+    });
+};
 //feeding
 export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) => {
     if (errors.materials?.root?.message || errors.materials?.message) {

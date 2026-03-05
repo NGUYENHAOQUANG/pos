@@ -226,7 +226,7 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
         );
 
         return (
-            <View style={{ marginBottom: 16 }}>
+            <View>
                 <Text style={styles.label}>{title}</Text>
 
                 {(files.length > 0 || uploadingFiles.length > 0) && (

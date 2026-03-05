@@ -4,6 +4,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ImportReceiptDetailItem } from '@/features/material/types/importReceipt.types';
 import { formatCurrencyValue } from '@/shared/utils';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 interface ImportReceiptItemsProps {
     materials: ImportReceiptDetailItem[];
@@ -16,48 +17,21 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
                 {materials.map((item, index) => {
                     return (
                         <View key={item.id || index} style={styles.materialCard}>
-                            {/* Header */}
                             <View style={styles.materialHeader}>
                                 <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
                             </View>
 
                             <View style={styles.content}>
-                                {/* Material Name - No Label */}
-                                <View style={styles.nameRow}>
-                                    <Text style={styles.materialName}>{item.materialName}</Text>
-                                </View>
-
-                                <View style={styles.separatorFull} />
-
-                                {/* Quantity and Price */}
-                                <View style={styles.detailsRow}>
-                                    <View style={styles.detailItem}>
-                                        <View style={styles.detailContent}>
-                                            <Text style={styles.label}>Số lượng: </Text>
-                                            <Text style={styles.value}>{item.quantity}</Text>
-                                        </View>
-                                    </View>
-                                    <View style={styles.detailItem}>
-                                        <View
-                                            style={[styles.detailContent, styles.detailContentEnd]}
-                                        >
-                                            <Text style={styles.priceLabel}>Đơn giá: </Text>
-                                            <Text style={styles.priceValue}>
-                                                {formatCurrency(item.unitPrice || 0)}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </View>
-
-                                <View style={styles.separatorInset} />
-
-                                {/* Total Amount */}
-                                <View style={styles.footer}>
-                                    <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                    <Text style={styles.footerValue}>
-                                        {formatCurrencyValue(item.totalPrice)}
-                                    </Text>
-                                </View>
+                                <Text style={styles.materialName}>{item.materialName}</Text>
+                                <DetailRow label="Số lượng:" value={item.quantity} />
+                                <DetailRow
+                                    label="Đơn giá:"
+                                    value={formatCurrency(item.unitPrice || 0)}
+                                />
+                                <DetailRow
+                                    label="Thành tiền:"
+                                    value={formatCurrencyValue(item.totalPrice)}
+                                />
                             </View>
                         </View>
                     );
@@ -69,23 +43,21 @@ export const ImportReceiptItems: React.FC<ImportReceiptItemsProps> = ({ material
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 12,
         paddingHorizontal: spacing.md,
     },
     materialCard: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
+        borderRadius: borderRadius.sm,
         borderWidth: 1,
         borderColor: colors.border,
         marginBottom: spacing.md,
-        marginRight: spacing.xs,
     },
     materialHeader: {
-        paddingVertical: spacing.sm,
+        paddingVertical: 12,
         paddingHorizontal: spacing.md,
         backgroundColor: colors.gray[100],
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
+        borderTopLeftRadius: borderRadius.sm,
+        borderTopRightRadius: borderRadius.sm,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
     },
@@ -95,24 +67,22 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     content: {
-        paddingBottom: spacing.md,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        gap: spacing.sm,
     },
     nameRow: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingVertical: 4,
     },
     materialName: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.text,
-        fontWeight: '400',
+        fontWeight: '500',
     },
     detailsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
-        paddingTop: spacing.sm,
     },
     detailItem: {
         flex: 1,
@@ -136,7 +106,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingTop: spacing.sm,
     },
     footerLabel: {
         fontSize: 14,
@@ -170,5 +139,22 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: colors.border,
         marginHorizontal: spacing.md,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        marginBottom: 12,
+        flexWrap: 'wrap',
+        marginTop: spacing.sm,
+    },
+    detailLabel: {
+        fontWeight: '400',
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+    },
+    detailValue: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
     },
 });

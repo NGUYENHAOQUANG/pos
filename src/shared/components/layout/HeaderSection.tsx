@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingHorizontal: 16, // using standard 16 instead of spacing.md to ensure consistency if spacing.md changes
         backgroundColor: colors.white,
-        borderBottomWidth: 1,
         borderBottomColor: colors.border,
         zIndex: 1000,
         overflow: 'visible',
