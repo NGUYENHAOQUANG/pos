@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
 
 export type ButtonBarMode = 'total' | 'single' | 'double';
@@ -163,12 +163,14 @@ const styles = StyleSheet.create({
     primaryButton: {
         minWidth: 120,
         height: 40,
+        borderRadius: borderRadius.full,
     },
     secondaryButton: {
         minWidth: 100,
         height: 40,
         backgroundColor: colors.white,
         borderColor: colors.border,
+        borderRadius: borderRadius.full,
     },
     flexButton: {
         flex: 1,

@@ -48,8 +48,10 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     }, [receivingPonds]);
 
     // Check if total quantity matches expected shrimp
+    // Only show error when user has entered quantity (totalQuantity > 0)
     const showError = useMemo(() => {
         if (!totalEstimatedShrimp || totalEstimatedShrimp === 0) return false;
+        if (totalQuantity === 0) return false;
         return totalQuantity !== totalEstimatedShrimp;
     }, [totalQuantity, totalEstimatedShrimp]);
 
@@ -117,8 +119,8 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     };
 
     const handleQuantityChange = (id: string, text: string) => {
-        // Remove all non-numeric characters
-        const numericValue = text.replace(/\D/g, '');
+        // Remove all non-numeric characters and limit to 9 digits
+        const numericValue = text.replace(/\D/g, '').substring(0, 9);
         onReceivingPondsChange(
             receivingPonds.map(pond =>
                 pond.id === id ? { ...pond, quantity: numericValue } : pond

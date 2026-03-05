@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { borderRadius, colors, spacing, typography } from '@/styles';
 import { Tag } from '@/features/menu/components/Tag';
-import { IconWarningOutlined } from '@/assets/icons';
-import Feather from 'react-native-vector-icons/Feather';
+import WarningCircleIcon from '@/assets/Icon/IconDevices/WarningCircle.svg';
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
 
 import { DeviceData } from '@/features/menu/types/menu.types';
 
@@ -30,12 +30,10 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                 <View style={styles.headerRight}>
                     <Tag status={device.status} type="device" style={{ alignSelf: 'center' }} />
                     <View collapsable={false}>
-                        <TouchableOpacity
+                        <MoreButton
                             style={styles.moreButton}
                             onPress={event => onMorePress?.(event)}
-                        >
-                            <Feather name="more-vertical" size={20} color={colors.text} />
-                        </TouchableOpacity>
+                        />
                     </View>
                 </View>
             </View>
@@ -73,7 +71,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                             {device.maintenance.operatingTime.limit} giờ
                         </Text>
                         {device.status === 'maintenance' && (
-                            <IconWarningOutlined width={16} height={16} />
+                            <WarningCircleIcon width={16} height={16} />
                         )}
                     </View>
                 </View>
@@ -91,7 +89,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
                             {device.maintenance.usageTime.limit} ngày
                         </Text>
                         {device.status === 'maintenance' && (
-                            <IconWarningOutlined width={16} height={16} />
+                            <WarningCircleIcon width={16} height={16} />
                         )}
                     </View>
                 </View>
@@ -103,8 +101,12 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({ device, onPress, onMor
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        padding: spacing.md,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.md,
         marginBottom: spacing.sm,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     header: {
         flexDirection: 'row',
@@ -133,13 +135,6 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     moreButton: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
         marginLeft: spacing.xs,
     },
     divider: {

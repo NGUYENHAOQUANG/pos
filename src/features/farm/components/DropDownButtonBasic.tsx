@@ -243,6 +243,6 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     placeholderText: {
-        color: colors.textSecondary,
+        color: colors.text,
     },
 });

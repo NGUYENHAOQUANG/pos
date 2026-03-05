@@ -33,7 +33,7 @@ import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/mea
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
 import { HandleProblemLogScreen } from '@/features/farm/screens/handleProblem/HandleProblemLogScreen';
-import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feed/FeedingLogScreens';
+import { FeedingLogScreens } from '@/features/farm/screens/pondwork/feedlog/FeedingLogScreens';
 import { FeedingManagementScreens } from '@/features/farm/screens/pondwork/feed/FeedingManagementScreens';
 import { AddWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/AddWaterTreatmentScreens';
 import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/water-treatment/EditWaterTreatmentScreens';
@@ -68,7 +68,6 @@ import { AddMemberScreens } from '@/features/menu/screens/member/AddMemberScreen
 import { EditMemberScreens } from '@/features/menu/screens/member/EditMemberScreens';
 import { DeviceManagement } from '@/features/menu/screens/devices/DeviceManagement';
 import { AddDeviceScreens } from '@/features/menu/screens/devices/AddDeviceScreens';
-import { EditDevicesScreens } from '@/features/menu/screens/devices/EditDevicesScreens';
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
 import { EquipmentMaintenanceScreens } from '@/features/menu/screens/devices/EquipmentMaintenanceScreens';
 import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/EditEquimentMaintenanceScreens';
@@ -98,7 +97,6 @@ const AddMemberWithProvider = AddMemberScreens;
 const EditMemberWithProvider = EditMemberScreens;
 const DeviceManagementWithProvider = DeviceManagement;
 const AddDeviceWithProvider = AddDeviceScreens;
-const EditDeviceWithProvider = EditDevicesScreens;
 const HistoryDevicesWithProvider = HistoryDevicesScreens;
 const EquipmentMaintenanceWithProvider = EquipmentMaintenanceScreens;
 const EditEquimentMaintenanceWithProvider = EditEquimentMaintenanceScreens;
@@ -341,7 +339,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="EditMember" component={EditMemberWithProvider} />
             <Stack.Screen name="DeviceManagement" component={DeviceManagementWithProvider} />
             <Stack.Screen name="AddDevice" component={AddDeviceWithProvider} />
-            <Stack.Screen name="EditDevice" component={EditDeviceWithProvider} />
+            <Stack.Screen name="EditDevice" component={AddDeviceWithProvider} />
             <Stack.Screen name="HistoryDevices" component={HistoryDevicesWithProvider} />
             <Stack.Screen
                 name="EquipmentMaintenance"

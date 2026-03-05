@@ -9,8 +9,8 @@ import {
     TextStyle,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, borderRadius } from '@/styles';
+import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
+import { colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 
 export interface HeaderSectionProps {
@@ -62,7 +62,8 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
         if (showBackButton) {
             return (
                 <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    {/* Use ArrowLeft SVG icon for back navigation */}
+                    <ArrowLeftIcon width={20} height={20} />
                 </TouchableOpacity>
             );
         }
@@ -130,9 +131,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingBottom: 12,
         paddingTop: 12,
-        paddingHorizontal: 16, // using standard 16 instead of spacing.md to ensure consistency if spacing.md changes
-        backgroundColor: colors.white,
-        borderBottomColor: colors.border,
+        paddingHorizontal: 16,
+        backgroundColor: colors.transparent,
         zIndex: 1000,
         overflow: 'visible',
     },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     iconButton: {
         width: 40,
         height: 40,
-        borderRadius: borderRadius.sm,
+        borderRadius: '100%',
         backgroundColor: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: '700',
+        fontWeight: '600',
         color: colors.text,
     },
     titleCenter: {

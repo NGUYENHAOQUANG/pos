@@ -28,7 +28,6 @@ export function useIncomingStockTransfer(pondId: string | undefined) {
                     // ignore
                 }
             }
-
             return null;
         },
         enabled: !!pondId,
