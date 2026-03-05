@@ -73,7 +73,7 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
 
 const styles = StyleSheet.create({
     backgroundWrapper: {
-        height: 40,
+        height: 44,
         backgroundColor: colors.gray[200],
         borderRadius: borderRadius.full,
         marginHorizontal: spacing.md,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     // Separate inner view that does the actual clip of scrollable content
     scrollClip: {
         flex: 1,
-        height: 32,
+        height: 36,
         borderRadius: borderRadius.full,
         overflow: 'hidden',
     },
@@ -97,19 +97,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     tab: {
-        height: 32,
-        paddingHorizontal: spacing.md,
+        height: 36,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
         borderRadius: borderRadius.full,
         justifyContent: 'center',
         alignItems: 'center',
     },
     activeTab: {
         backgroundColor: colors.white,
-        borderWidth: 1,
+        borderWidth: 0.5,
         borderColor: colors.border,
     },
     tabText: {
         fontSize: 14,
+        lineHeight: 20,
         color: colors.gray[500],
         fontWeight: '400',
     },
