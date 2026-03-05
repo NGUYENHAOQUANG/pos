@@ -34,19 +34,19 @@ export const DetailRow: React.FC<DetailRowProps> = ({
 const styles = StyleSheet.create({
     detailRow: {
         flexDirection: 'row',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        alignItems: 'center',
     },
     detailLabel: {
         fontWeight: '400',
         fontSize: 14,
-        color: colors.text,
-        flex: 1,
+        color: colors.gray[500],
+        lineHeight: 20,
     },
     detailValue: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[950],
         fontWeight: '500',
+        lineHeight: 20,
     },
 });

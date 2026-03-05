@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
+import { RequiredDot } from '@/shared/components/forms/Input';
 import WarningCircle from '@/assets/Icon/IconMenu/WarningCircle.svg';
 
 interface EditEnvironmentCardProps {
@@ -29,9 +30,10 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
         <View style={styles.container}>
             {/* Parameter Name */}
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                    Tên <Text style={styles.required}>*</Text>
-                </Text>
+                <View style={styles.labelRow}>
+                    <Text style={styles.label}>Tên</Text>
+                    <RequiredDot />
+                </View>
                 <TextInput
                     style={styles.input}
                     value={name}
@@ -43,9 +45,10 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
 
             {/* Lower Limit Row -> Vertical */}
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                    Giới hạn dưới <Text style={styles.required}>*</Text>
-                </Text>
+                <View style={styles.labelRow}>
+                    <Text style={styles.label}>Giới hạn dưới</Text>
+                    <RequiredDot />
+                </View>
                 <TextInput
                     style={styles.input}
                     value={lowerLimit}
@@ -57,9 +60,10 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
 
             {/* Upper Limit Row -> Vertical */}
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                    Giới hạn trên <Text style={styles.required}>*</Text>
-                </Text>
+                <View style={styles.labelRow}>
+                    <Text style={styles.label}>Giới hạn trên</Text>
+                    <RequiredDot />
+                </View>
                 <TextInput
                     style={styles.input}
                     value={upperLimit}
@@ -110,6 +114,10 @@ const styles = StyleSheet.create({
     inputGroup: {
         // gap: 6 managed by marginBottom if gap isn't fully supported, but using gap usually works in RN >= 0.71.
         gap: 6,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     label: {
         fontSize: 14,

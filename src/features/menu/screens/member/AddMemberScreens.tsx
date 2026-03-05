@@ -14,10 +14,9 @@ import { FeaturePermissions } from '@/features/menu/components/member/FeaturePer
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { Button } from '@/shared/components/buttons/Button';
 
-import { WorkUnit } from '@/features/menu/components/member/WorkUnit';
+import { SelectedModal } from '@/shared/components/modal/SelectedModal';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';
 import { unitsData } from '@/features/menu/data/memberData';
 
 const FARM_DATA = unitsData.filter(u => u.type === 'Trại');
@@ -59,6 +58,7 @@ export const AddMemberScreens: React.FC = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [suspendModalVisible, setSuspendModalVisible] = useState(false);
+    const [resendModalVisible, setResendModalVisible] = useState(false);
     const [activateModalVisible, setActivateModalVisible] = useState(false);
 
     // Load member data if in edit mode
@@ -236,14 +236,23 @@ export const AddMemberScreens: React.FC = () => {
 
                 {isEditMode && !isPaused && (
                     <View style={styles.actionContainer}>
-                        {isPending ? null : (
+                        {isPending ? (
+                            <Button
+                                title="Gửi lại lời mời"
+                                onPress={() => setResendModalVisible(true)}
+                                variant="outline"
+                                fullWidth
+                                style={styles.actionButton}
+                                textStyle={styles.actionButtonText}
+                            />
+                        ) : (
                             <Button
                                 title="Tạm ngưng tài khoản"
                                 onPress={() => setSuspendModalVisible(true)}
                                 variant="outline"
                                 fullWidth
-                                style={styles.suspendButton}
-                                textStyle={styles.suspendText}
+                                style={styles.actionButton}
+                                textStyle={styles.actionButtonText}
                             />
                         )}
                     </View>
@@ -266,7 +275,7 @@ export const AddMemberScreens: React.FC = () => {
                 style={isEditMode ? styles.footerEdit : styles.footer}
             />
 
-            <WorkUnit
+            <SelectedModal
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 onSave={setSelectedUnitIds}
@@ -297,13 +306,28 @@ export const AddMemberScreens: React.FC = () => {
                         successMessage="Đã tạm ngưng tài khoản"
                     />
 
-                    <ResendComfirmCard
+                    <ConfirmationModalUI
+                        visible={resendModalVisible}
+                        onConfirm={() => {
+                            setResendModalVisible(false);
+                        }}
+                        onCancel={() => setResendModalVisible(false)}
+                        title="Gửi lại lời mời"
+                        message="Bạn có chắc chắn muốn gửi lại lời mời cho thành viên này không?"
+                        confirmText="Đồng ý"
+                        cancelText="Huỷ"
+                        successMessage="Đã gửi lại lời mời thành công"
+                    />
+
+                    <ConfirmationModalUI
                         visible={activateModalVisible}
-                        onClose={() => setActivateModalVisible(false)}
                         onConfirm={handleConfirmActivate}
+                        onCancel={() => setActivateModalVisible(false)}
                         title="Kích hoạt lại"
                         message="Bạn có chắc chắn muốn kích hoạt lại tài khoản này không?"
                         confirmText="Kích hoạt lại"
+                        cancelText="Huỷ"
+                        successMessage="Đã kích hoạt lại tài khoản thành công"
                     />
                 </>
             )}
@@ -345,11 +369,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 0,
         marginTop: spacing.sm,
     },
-    suspendButton: {
+    actionButton: {
         borderWidth: 1,
         borderColor: colors.border,
+        backgroundColor: colors.white,
     },
-    suspendText: {
+    actionButtonText: {
         color: colors.text,
     },
 });

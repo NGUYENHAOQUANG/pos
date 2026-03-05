@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles';
+import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import SignOutIcon from '@/assets/Icon/IconMenu/SignOut.svg';
@@ -48,6 +49,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onPress, userData }) => {
 
 export const MenuScreens: React.FC = () => {
     const insets = useSafeAreaInsets();
+    const bottomBarHeight = useBottomTabBarHeight();
     const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
     const { userData } = useUserProfile();
     const queryClient = useQueryClient();
@@ -85,7 +87,7 @@ export const MenuScreens: React.FC = () => {
             {/* Scrollable content */}
             <ScrollView
                 ref={scrollViewRef}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomBarHeight }]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Profile card */}
@@ -163,7 +165,6 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: 16,
         paddingTop: 16,
-        paddingBottom: 100,
         gap: 24,
     },
     profileCard: {
