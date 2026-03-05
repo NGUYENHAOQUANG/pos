@@ -14,8 +14,7 @@ export function useKeyboard() {
     useEffect(() => {
         const showSubscription = Keyboard.addListener('keyboardDidShow', (e: KeyboardEvent) => {
             setKeyboardVisible(true);
-            const raw = e.endCoordinates.height;
-            setKeyboardHeight(Math.max(0, raw - 24));
+            setKeyboardHeight(e.endCoordinates.height);
         });
 
         const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
