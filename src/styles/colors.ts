@@ -5,8 +5,9 @@
  * @created 2025-11-16
  */
 export const colors = {
+    transparent: 'transparent',
     // Primary colors
-    primary: '#007AFF',
+    primary: '#006AFF',
     primaryDark: '#0051D5',
     primaryLight: '#5AC8FA',
 
@@ -75,11 +76,12 @@ export const colors = {
         700: '#FF7A45',
     },
     green: {
+        25: '#F6FEF9',
         50: '#F6FFED',
         100: '#D9F7BE',
         300: '#B7EB8F',
         500: '#4dff00a2',
-        600: '#389E0D',
+        600: '#16A34A',
         800: '#237804',
     },
     purple: {
@@ -100,9 +102,11 @@ export const colors = {
         900: '#FF4D4F',
     },
     yellow: {
+        25: '#FFFCF5',
         50: '#FFFBE6',
+        200: '#FEDF89',
         300: '#FFE58F',
-        600: '#FFD700',
+        600: '#DC6803',
         700: '#FFC107',
         800: '#876800',
     },
@@ -118,7 +122,8 @@ export const colors = {
 
     // Background colors
     background: '#FFFFFF',
-    backgroundPrimary: '#F0F5FF', // Light blue background for screens
+    backgroundPrimary: '#F0F5FF',
+    //backgroundPrimary: '#FAFAF9',
     backgroundSecondary: '#F9FAFB',
     backgroundTertiary: '#F3F4F6',
     backgroundButton: '#F9FAFB',

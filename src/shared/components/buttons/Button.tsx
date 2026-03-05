@@ -43,6 +43,8 @@ export interface ButtonProps {
     iconLeft?: string;
     /** Icon name from Ionicons (right side) */
     iconRight?: string;
+    /** Custom React node to render as left icon (overrides iconLeft) */
+    renderLeftIcon?: React.ReactNode;
     /** Custom styles */
     style?: StyleProp<ViewStyle>;
     /** Custom text styles */
@@ -63,6 +65,7 @@ export function Button({
     fullWidth = false,
     iconLeft,
     iconRight,
+    renderLeftIcon,
     style,
     textStyle,
 }: ButtonProps) {
@@ -138,13 +141,18 @@ export function Button({
                 />
             ) : (
                 <View style={styles.content}>
-                    {iconLeft && (
-                        <Ionicons
-                            name={iconLeft as any}
-                            size={iconSize}
-                            color={iconColor}
-                            style={styles.iconLeft}
-                        />
+                    {/* Custom SVG icon takes priority over Ionicons iconLeft */}
+                    {renderLeftIcon ? (
+                        <View style={styles.iconLeft}>{renderLeftIcon}</View>
+                    ) : (
+                        iconLeft && (
+                            <Ionicons
+                                name={iconLeft as any}
+                                size={iconSize}
+                                color={iconColor}
+                                style={styles.iconLeft}
+                            />
+                        )
                     )}
                     <Text
                         style={textStyles}
@@ -173,7 +181,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: borderRadius.md,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: 'transparent',
     },
