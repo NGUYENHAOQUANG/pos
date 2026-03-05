@@ -3,7 +3,9 @@ import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
+import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
@@ -122,6 +124,43 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         }
     }, [detailData, materials]);
 
+    const hasChanges = useMemo(() => {
+        if (!detailData) return false;
+
+        // Check if activityType changed
+        let originalActivityType = 'Đánh khoáng';
+        if (detailData.waterTreatmentDetail?.treatmentType) {
+            originalActivityType =
+                TREATMENT_TYPE_LABELS[detailData.waterTreatmentDetail.treatmentType] ||
+                'Đánh khoáng';
+        }
+        if (activityType !== originalActivityType) return true;
+
+        // Check if note changed
+        const originalNote = detailData.waterTreatmentDetail?.notes || '';
+        if (note !== originalNote) return true;
+
+        // Check if materials changed
+        const originalMaterials = detailData.waterTreatmentDetail?.materials || [];
+        if (selectedMaterials.length !== originalMaterials.length) return true;
+
+        const materialsChanged = selectedMaterials.some(sm => {
+            const om = originalMaterials.find(
+                o =>
+                    o.warehouseItemId === sm.material.id ||
+                    o.warehouseItemId === sm.material.materialDefId
+            );
+            if (!om) return true;
+            return parseFloat(sm.quantity.toString()) !== parseFloat(om.quantity.toString());
+        });
+
+        if (materialsChanged) return true;
+
+        return false;
+    }, [detailData, activityType, note, selectedMaterials]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
+
     const handleBack = () => {
         navigation.goBack();
     };
@@ -146,7 +185,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 notes: note || undefined,
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
-                    quantity: m.quantity,
+                    quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
                 })),
             },
         };
@@ -157,14 +196,24 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 id: targetJobId,
                 data: payload,
             });
+            allowNavigation();
             Toast.show({
                 type: 'success',
                 text1: 'Cập nhật nhật ký thành công',
             });
             navigation.goBack();
-        } catch (error: unknown) {
+        } catch (error: any) {
             console.error('Update water treatment error', error);
-            const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
+            let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Có lỗi xảy ra',
@@ -184,6 +233,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     pondId: targetPondId,
                     id: targetJobId,
                 });
+                allowNavigation();
                 setShowDeleteModal(false);
                 navigation.goBack();
                 Toast.show({ type: 'success', text1: 'Xóa thành công' });
@@ -239,6 +289,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 onSecondaryPress={handleBack}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
+
+            {UnsavedChangesModal}
 
             <ConfirmationDeleteModal
                 visible={showDeleteModal}

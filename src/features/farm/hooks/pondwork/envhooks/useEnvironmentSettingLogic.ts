@@ -74,6 +74,7 @@ export const useEnvironmentSettingLogic = ({
 
     const pendingChanges = useEnvironmentSettingStore(state => state.pendingChanges);
     const addChange = useEnvironmentSettingStore(state => state.addChange);
+    const removeChange = useEnvironmentSettingStore(state => state.removeChange);
     const clearChanges = useEnvironmentSettingStore(state => state.clearChanges);
 
     const [parameters, setParameters] = useState<EnvironmentParameter[]>([]);
@@ -120,9 +121,21 @@ export const useEnvironmentSettingLogic = ({
         if (!param) return;
 
         const existingSetting = parameterSettings.find(s => s.metricId === id);
-
         const currentIsActive = param.isChecked;
         const newIsActive = !currentIsActive;
+
+        // Check if the new state matches the original state
+        const originalIsActive = existingSetting ? existingSetting.isActive : false;
+
+        // Similarly for min/max - though currently toggle only changes isActive
+        // In a more robust implementation, we'd check all fields.
+        // But for toggle specifically, we check isActive.
+
+        if (newIsActive === originalIsActive) {
+            // If we toggled back to original state, remove from pending changes
+            removeChange(id);
+            return;
+        }
 
         const currentMin = parseFloat(param.min || '0');
         const currentMax = parseFloat(param.max || '0');

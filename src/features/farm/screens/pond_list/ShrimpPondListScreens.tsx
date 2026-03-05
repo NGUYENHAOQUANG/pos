@@ -9,10 +9,8 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
 import { pondListService } from '@/features/farm/services/pondListService';
-import { pondDetailService } from '@/features/farm/services/pond-detail.service';
-import { pondRecordService } from '@/features/farm/services/pond-record.service';
+import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -78,30 +76,8 @@ export const ShrimpPondListScreens: React.FC = () => {
 
     const ponds = useMemo(() => {
         if (!currentDataSlice) return [];
-        const state = useFarmStore.getState();
         const mappedPonds = pondListService.mapPondsWithCategories(currentDataSlice, categories);
-        const mappedWithActivity = mappedPonds.map(pond => {
-            if (!pond.id) return pond;
-            const activity = pondDetailService.getLatestPondActivity(pond.id, state);
-            if (activity) {
-                return {
-                    ...pond,
-                    lastUpdate: activity.lastUpdate,
-                    lastActivity: activity.lastActivity,
-                };
-            }
-
-            // Translate the backend lastActivity if it exists
-            if (pond.lastActivity) {
-                return {
-                    ...pond,
-                    lastActivity: pondRecordService.getOperationTypeName(pond.lastActivity),
-                };
-            }
-
-            return pond;
-        });
-        return pondListService.sortPonds(mappedWithActivity);
+        return pondListService.sortPonds(mappedPonds);
     }, [currentDataSlice, categories]);
 
     useEffect(() => {
@@ -132,7 +108,6 @@ export const ShrimpPondListScreens: React.FC = () => {
 
     const handlePondPress = useCallback(
         (pond: PondData) => {
-            console.log(pond.id);
             navigation.navigate('PondDetail', { pondId: pond.id, zoneId: pond.zoneId! });
         },
         [navigation]

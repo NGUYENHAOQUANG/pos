@@ -108,6 +108,7 @@ export const useCreateWaterSupplyRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };
@@ -127,6 +128,7 @@ export const useUpdateWaterSupplyRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };
@@ -139,6 +141,7 @@ export const useDeleteWaterSupplyRecord = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterSupply.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };

@@ -121,6 +121,7 @@ export const useCreateWaterTreatment = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };
@@ -141,6 +142,7 @@ export const useUpdateWaterTreatment = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };
@@ -154,6 +156,7 @@ export const useDeleteWaterTreatment = () => {
         onSuccess: (_, { pondId }) => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
         },
     });
 };

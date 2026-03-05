@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import { formatDate } from '@/features/farm/utils/dateUtils';
-import { CycleData } from '@/features/farm/types/farm.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 
 interface ShrimpPondCycleInfoProps {
     cycleData: CycleData;
@@ -22,15 +22,11 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
     return (
         <View style={styles.cycleSection}>
             <View style={styles.cycleHeader}>
-                <Text style={styles.cycleName}>
-                    {cycleData.name || cycleData.cycleName || 'Chưa đặt tên'}
-                </Text>
+                <Text style={styles.cycleName}>{cycleData.name || '---'}</Text>
                 <Text style={styles.cycleDate}>
-                    {cycleData.stockingDate || cycleData.startDate
-                        ? `${formatDate(
-                              new Date((cycleData.stockingDate || cycleData.startDate) as string)
-                          )} - nay`
-                        : '- - nay'}
+                    {cycleData.createdAt
+                        ? `${formatDate(new Date(cycleData.createdAt))} - nay`
+                        : '-- nay'}
                 </Text>
             </View>
             <View style={styles.cycleInfo}>

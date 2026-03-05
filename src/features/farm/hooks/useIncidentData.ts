@@ -10,7 +10,7 @@ import type {
 import { JobExecution } from '@/features/farm/types/farm.types';
 
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { incidentService } from '@/features/farm/services/handleProblem_Service/incidentService';
+import { incidentService } from '@/features/farm/services/handleproblem-service/incident.service';
 
 export const useCreateIncident = () => {
     const queryClient = useQueryClient();
