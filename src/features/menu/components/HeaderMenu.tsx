@@ -11,6 +11,7 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({ title, onBack, rightActi
     return (
         <HeaderSection
             title={title}
+            titleStyle={{ fontSize: 18, fontWeight: '600', lineHeight: 28 }}
             onBack={onBack}
             rightComponent={rightAction}
             showBackButton={true}
