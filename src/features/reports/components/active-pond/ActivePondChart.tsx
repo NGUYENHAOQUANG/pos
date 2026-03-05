@@ -35,7 +35,7 @@ const parseDate = (dateStr: string): Date => {
 
 // --- COLORS ---
 const CHART_COLORS = {
-    activeFill: '#FFEDD5', // Light orange
+    activeFill: colors.orange[300],
     activeStroke: colors.orange[500],
     grid: colors.gray[100],
     text: colors.textSecondary,
