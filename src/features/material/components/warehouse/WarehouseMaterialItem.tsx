@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, UIManager } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
+import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -27,13 +21,6 @@ interface WarehouseMaterialItemProps {
     alwaysExpanded?: boolean;
     showStatus?: boolean;
 }
-
-const DetailRow = ({ label, value }: { label: string; value?: string | number | null }) => (
-    <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>{label} </Text>
-        <Text style={styles.detailValue}>{value || '---'}</Text>
-    </View>
-);
 
 const arePropsEqual = (
     prevProps: WarehouseMaterialItemProps,
@@ -59,11 +46,6 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
         // Fetch details for this material item using the hook
         const { data: detail } = useMaterial(item.materialId);
 
-        const toggleExpand = () => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setIsExpanded(!isExpanded);
-        };
-
         return (
             <View style={styles.container}>
                 {/* Header Row */}
@@ -77,44 +59,46 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 {/* Status Field */}
                 {showStatus && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Trạng thái: </Text>
-                        <Text
-                            style={[
-                                styles.detailValue,
-                                {
-                                    color:
-                                        detail?.isActive !== false
-                                            ? colors.green[600]
-                                            : colors.red[500],
-                                },
-                            ]}
-                        >
-                            {detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
-                        </Text>
+                        <DetailRow
+                            label="Trạng thái:"
+                            value={detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
+                        />
                     </View>
                 )}
 
                 {/* Basic Info Row */}
-                <View style={styles.infoRow}>
+                <View
+                    style={[
+                        styles.infoRow,
+                        isExpanded ? { marginBottom: 0 } : { marginBottom: 12 },
+                    ]}
+                >
                     <Text style={styles.infoText}>
                         <Text style={styles.label}>Đơn vị tính: </Text>
-                        {detail?.unitName || item.unitName}
+                        <Text style={styles.detailValue}>{detail?.unitName || item.unitName}</Text>
                     </Text>
                     {!hideRemaining && (
                         <Text style={styles.infoText}>
                             <Text style={styles.label}>Còn: </Text>
-                            {item.quantity}
+                            <Text style={styles.detailValue}>{item.quantity}</Text>
                         </Text>
                     )}
                 </View>
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                    <View>
+                    <View style={styles.detailRow}>
                         {!alwaysExpanded && <View style={styles.separatorCenter} />}
                         <DetailRow label="Loại vật tư:" value={detail?.type} />
-                        <DetailRow label="Nhãn Hàng:" value={detail?.manufacturer} />
-                        <DetailRow label="Mô tả:" value={detail?.usage} />
+                        <DetailRow label="Nhà sản xuất:" value={detail?.manufacturer} />
+                        <DetailRow label="Công dụng:" value={detail?.usage} />
+                        <DetailRow label="Đơn vị sử dụng:" value={detail?.unitName} />
+                        <DetailRow label="Liều dùng:" value={detail?.unitOfUse} />
+                        <ButtonMaterialList
+                            title="Sửa thông tin"
+                            icon={<EditIcon />}
+                            style={styles.editButton}
+                        />
                     </View>
                 )}
 
@@ -122,7 +106,7 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 {!alwaysExpanded && (
                     <TouchableOpacity
                         style={styles.expandToggle}
-                        onPress={toggleExpand}
+                        onPress={() => setIsExpanded(!isExpanded)}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
@@ -170,10 +154,11 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 12,
         marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
         padding: spacing.md,
         borderWidth: 1,
         borderColor: colors.border,
@@ -181,11 +166,12 @@ const styles = StyleSheet.create({
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.md,
+        alignItems: 'center',
+        marginBottom: 12,
     },
     name: {
-        fontSize: 18,
+        fontSize: 14,
+        fontWeight: '500',
         color: colors.text,
         flex: 1,
         marginRight: spacing.sm,
@@ -193,45 +179,52 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: spacing.sm,
+        marginTop: spacing.md,
     },
     infoText: {
         fontSize: 14,
         color: colors.text,
     },
     label: {
-        fontWeight: '600',
-    },
-    detailRow: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-        flexWrap: 'wrap',
-        marginTop: spacing.sm,
-    },
-    detailLabel: {
+        fontWeight: '400',
         fontSize: 14,
-        fontWeight: '600',
         color: colors.text,
     },
-    detailValue: {
+    detailRow: {
+        marginBottom: 12,
+        gap: 12,
+    },
+    detailLabel: {
+        fontWeight: '400',
         fontSize: 14,
         color: colors.text,
         flex: 1,
     },
+    detailValue: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+    },
     editButton: {
         marginTop: spacing.sm,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        alignSelf: 'stretch',
     },
     expandToggle: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginVertical: spacing.sm,
+        marginTop: spacing.sm,
+        marginBottom: spacing.md,
     },
     expandText: {
-        fontSize: 14,
+        fontSize: 12,
         color: colors.primary,
         marginRight: 4,
-        fontWeight: '600',
+        fontWeight: '500',
     },
     actionRow: {
         flexDirection: 'row',
@@ -249,7 +242,6 @@ const styles = StyleSheet.create({
         marginHorizontal: -spacing.md,
     },
     separatorCenter: {
-        height: 1,
         backgroundColor: colors.borderLight,
     },
 });

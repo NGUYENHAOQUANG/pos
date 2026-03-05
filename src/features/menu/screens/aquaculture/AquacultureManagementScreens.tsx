@@ -16,7 +16,7 @@ import { SeasonListSkeleton } from '@/features/menu/components/aquaculture/Seaso
 import { useSeasons } from '@/features/menu/hooks/useSeasons';
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
-import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
@@ -158,7 +158,7 @@ export const AquacultureManagementScreens: React.FC = () => {
             />
 
             {/* Tabs */}
-            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
+            <HeadingBar tabs={tabs} selectedTab={selectedTab} onTabSelect={setSelectedTab} />
 
             {/* Dropdown Filter Section (White Background) */}
             <View style={styles.filterSection}>
@@ -220,12 +220,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
+    headingBar: {
+        backgroundColor: colors.white,
+        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
     content: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
     filterSection: {
-        backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
         paddingTop: spacing.md,
         paddingBottom: spacing.md,

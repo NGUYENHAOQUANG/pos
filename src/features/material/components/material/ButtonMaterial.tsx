@@ -75,8 +75,9 @@ export const ButtonMetaerial: React.FC<ButtonMetaerialProps> = React.memo(
                 onPress={handlePress}
                 activeOpacity={0.7}
             >
+                <Text style={styles.buttonText}>Thêm</Text>
                 <Animated.View style={animatedIconStyle}>
-                    <Ionicons name="add" size={24} color={colors.text} />
+                    <Ionicons name="add" size={20} color={colors.text} />
                 </Animated.View>
             </TouchableOpacity>
         );
@@ -182,14 +183,22 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     button: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
+        flexDirection: 'row',
+        height: 32,
+        paddingHorizontal: 12,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.border,
+    },
+    buttonText: {
+        fontSize: 14,
+        lineHeight: 22,
+        fontWeight: '500',
+        color: colors.text,
+        marginRight: spacing.xs,
     },
     absoluteOverlay: {
         ...StyleSheet.absoluteFillObject,

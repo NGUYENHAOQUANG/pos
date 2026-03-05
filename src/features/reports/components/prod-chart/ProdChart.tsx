@@ -6,6 +6,8 @@ import { spacing } from '@/styles/spacing';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { prodChartData, prodChartSummary, ProdDataPoint } from './prodData';
 import { Loading } from '@/shared/components/ui/Loading';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import ProdChartIcon from '@/assets/Icon/IconReport/ProdChartIcon.svg';
 
 // ----------------------------------------------------------------------
 // TYPES
@@ -299,8 +301,9 @@ export const ProdChart = () => {
     const chartHeight = useMemo(() => Math.max(200, yMax * 55), [yMax]);
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             <BasicDropDownButton
+                prefixIcon={<ProdChartIcon width={16} height={16} />}
                 label="BIỂU ĐỒ SẢN LƯỢNG"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
@@ -381,13 +384,6 @@ export const ProdChart = () => {
 // ----------------------------------------------------------------------
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: colors.gray[100],
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',

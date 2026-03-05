@@ -22,6 +22,9 @@ import { ImportReceiptItems } from '@/features/material/components/import_receip
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -87,56 +90,45 @@ export const ImportReceiptCard = React.memo<ImportReceiptCardProps>(({ item }) =
         <View style={styles.card}>
             <View style={styles.cardContent}>
                 {/* Header Info */}
-                <View style={styles.row}>
-                    <Text style={styles.label}>Trạng thái:</Text>
-                    <MaterialGroup group={getStatusLabel(item.status)} />
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Nhập kho:</Text>
-                    <Text style={styles.value}>
-                        {item.createdAt ? formatMaterialDateTime(item.editedAt) : '---'}
-                    </Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tạo phiếu:</Text>
-                    <Text style={styles.value}>
-                        {item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
-                    </Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Summary Info */}
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tổng hàng hóa:</Text>
-                    <Text style={styles.value}>{item.totalItems ?? '---'}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>{formatCurrency(item.totalAmount || 0)}</Text>
-                </View>
-
-                {/* Supplier Info - Visible when Expanded */}
-                {isExpanded && (
+                <View style={styles.detailRow}>
                     <View style={styles.row}>
-                        <Text style={styles.label}>Nhà cung cấp:</Text>
-                        <Text style={styles.value}>{supplierName}</Text>
+                        <Text style={styles.detailLabel}>Trạng thái:</Text>
+                        <MaterialGroup group={getStatusLabel(item.status)} />
                     </View>
-                )}
-
+                    <DetailRow
+                        label="Nhập kho:"
+                        value={item.createdAt ? formatMaterialDateTime(item.editedAt) : '---'}
+                    />
+                    <DetailRow
+                        label="Tạo phiếu:"
+                        value={item.createdAt ? formatMaterialDateTime(item.createdAt) : '---'}
+                    />
+                    <DetailRow label="Tổng hàng hóa:" value={item.totalItems ?? '---'} />
+                    <DetailRow
+                        label="Tổng giá trị:"
+                        value={formatCurrency(item.totalAmount ?? 0)}
+                    />
+                </View>
                 {/* Edit Button (Only for Draft) */}
                 {item.status === ImportReceiptStatus.Draft && (
-                    <TouchableOpacity
+                    <ButtonMaterialList
+                        title="Sửa thông tin"
+                        icon={<EditIcon />}
                         style={styles.editButton}
                         onPress={() => {
                             navigation.navigate('ImportReceiptFormScreen', {
-                                availableMaterials: [],
                                 importReceiptId: item.id,
+                                availableMaterials: [],
                             });
                         }}
-                    >
-                        <Text style={styles.editButtonText}>Sửa thông tin</Text>
-                    </TouchableOpacity>
+                    />
+                )}
+                {isExpanded && (
+                    <DetailRow
+                        label="Nhà cung cấp:"
+                        value={supplierName}
+                        style={styles.detailRowItem}
+                    />
                 )}
             </View>
 
@@ -184,7 +176,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs,
+        alignItems: 'center',
     },
     label: {
         fontSize: 14,
@@ -220,18 +212,32 @@ const styles = StyleSheet.create({
     },
     editButton: {
         marginTop: spacing.sm,
-        marginBottom: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        alignItems: 'center',
+        flexDirection: 'row',
         justifyContent: 'center',
-        backgroundColor: colors.white,
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        alignSelf: 'stretch',
     },
     editButtonText: {
         fontSize: 14,
         color: colors.text,
         fontWeight: '400',
+    },
+    detailRow: {
+        gap: 12,
+    },
+    detailRowItem: {
+        marginVertical: 12,
+    },
+    detailLabel: {
+        fontWeight: '400',
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+    },
+    detailValue: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
     },
 });

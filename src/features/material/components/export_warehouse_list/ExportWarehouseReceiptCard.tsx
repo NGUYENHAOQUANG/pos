@@ -21,6 +21,9 @@ import { ExportWarehouseReceiptItems } from '@/features/material/components/expo
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ExportReceipt, ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
 import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
+import { DetailRow } from '../DetailRow';
+import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -96,40 +99,41 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                     <Text style={styles.label}>Trạng thái:</Text>
                     <MaterialGroup group={getStatusLabel(item.status)} />
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Xuất kho:</Text>
-                    <Text style={styles.value}>{formatMaterialDateTime(item.createdAt || '')}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tạo phiếu:</Text>
-                    <Text style={styles.value}>{formatMaterialDateTime(item.createdAt || '')}</Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Summary Info */}
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tổng hàng hoá:</Text>
-                    <Text style={styles.value}>{item.totalItems ?? finalItems.length}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Tổng giá trị:</Text>
-                    <Text style={styles.value}>{formatCurrency(displayTotalAmount || 0)}</Text>
+                <View style={styles.detailRow}>
+                    <DetailRow
+                        label="Xuất kho:"
+                        value={formatMaterialDateTime(item.createdAt || '')}
+                    />
+                    <DetailRow
+                        label="Tạo phiếu:"
+                        value={formatMaterialDateTime(item.createdAt || '')}
+                    />
+                    <DetailRow
+                        label="Tổng hàng hoá:"
+                        value={item.totalItems ?? finalItems.length}
+                    />
+                    <DetailRow
+                        label="Tổng giá trị:"
+                        value={formatCurrency(displayTotalAmount || 0)}
+                    />
                 </View>
 
                 {/* Farm Info - Visible when Expanded */}
                 {isExpanded && (
                     <View style={styles.row}>
-                        <Text style={styles.label}>Ao yêu cầu:</Text>
-                        <Text style={styles.value}>
-                            {item.pondName || item.warehouseName || '---'}
-                        </Text>
+                        <DetailRow
+                            label="Ao yêu cầu:"
+                            value={item.pondName || item.warehouseName || '---'}
+                            style={{ marginTop: 12 }}
+                        />
                     </View>
                 )}
 
                 {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}
                 {(item.status === 'Draft' || !item.status) && (
-                    <TouchableOpacity
+                    <ButtonMaterialList
+                        title="Sửa thông tin"
+                        icon={<EditIcon />}
                         style={styles.editButton}
                         onPress={() => {
                             navigation.navigate('ExportWarehouseForm', {
@@ -137,9 +141,7 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
                                 availableMaterials: [],
                             });
                         }}
-                    >
-                        <Text style={styles.editButtonText}>Sửa thông tin</Text>
-                    </TouchableOpacity>
+                    />
                 )}
             </View>
 
@@ -188,12 +190,12 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs,
+        alignItems: 'center',
+        marginBottom: 12,
     },
     label: {
         fontSize: 14,
         color: colors.text,
-        fontWeight: '600',
     },
     value: {
         fontSize: 14,
@@ -224,18 +226,13 @@ const styles = StyleSheet.create({
     },
     editButton: {
         marginTop: spacing.sm,
-        marginBottom: spacing.sm, // Add bottom spacing
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        alignItems: 'center',
+        flexDirection: 'row',
         justifyContent: 'center',
-        backgroundColor: colors.white,
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        alignSelf: 'stretch',
     },
-    editButtonText: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
+    detailRow: {
+        gap: 12,
     },
 });

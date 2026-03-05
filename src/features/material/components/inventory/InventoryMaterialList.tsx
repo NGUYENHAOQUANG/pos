@@ -116,24 +116,15 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
 const styles = StyleSheet.create({
     mainMaterialCard: {
         backgroundColor: colors.white,
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.black,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        margin: spacing.md,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
         zIndex: 1,
     },
     mainContent: {
         padding: spacing.md,
         zIndex: 2,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
     },
     addButton: {
         flexDirection: 'row',

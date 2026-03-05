@@ -5,7 +5,8 @@ import {
     ButtonMetaerial,
     MaterialMenuOverlay,
 } from '@/features/material/components/material/ButtonMaterial';
-import { HeadingMeterial, TabType } from '@/features/material/components/material/HeadingMaterial';
+import { TabType } from '@/features/material/components/material/HeadingMaterial';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { ImportReceiptList } from '@/features/material/screens/import_receipt_list/ImportReceiptList';
 import { ExportWarehouseListScreen } from '@/features/material/screens/export_warehouse_list/ExportWarehouseListScreen';
@@ -14,6 +15,7 @@ import { MaterialMasterListTab } from '@/features/material/screens/material_list
 import { InventoryScreen } from '@/features/material/screens/inventory_list/InventoryList';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
+import { colors } from '@/styles';
 
 export interface MaterialViewProps {
     selectedTab: TabType;
@@ -73,7 +75,18 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
                     }
                 />
             </View>
-            <HeadingMeterial selectedTab={selectedTab} onTabSelect={handleTabSelect} />
+            <HeadingBar
+                tabs={[
+                    { key: TabType.Material, label: 'Danh sách vật tư' },
+                    { key: TabType.Warehouse, label: 'Danh sách tồn kho' },
+                    { key: TabType.Import, label: 'Lịch sử nhập kho' },
+                    { key: TabType.Export, label: 'Lịch sử xuất kho' },
+                    { key: TabType.Inventory, label: 'Kiểm kê' },
+                ]}
+                selectedTab={selectedTab}
+                onTabSelect={key => handleTabSelect(key as TabType)}
+                flexTabs={false}
+            />
             <SearchBarMeterial
                 onSearch={handleSearch}
                 onFilterPress={handleFilterPress}
@@ -113,7 +126,7 @@ export const MaterialView: React.FC<MaterialViewProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.backgroundPrimary,
     },
     content: {
         flex: 1,
