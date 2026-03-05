@@ -114,11 +114,11 @@ export const EditEnvironmentScreens: React.FC = () => {
                     name={name}
                     lowerLimit={lowerLimit}
                     upperLimit={upperLimit}
-                    // isAlertEnabled={isAlertEnabled}
+                    isAlertEnabled={isAlertEnabled}
                     onNameChange={setName}
                     onLowerLimitChange={text => setLowerLimit(text.replace(/,/g, ''))}
                     onUpperLimitChange={text => setUpperLimit(text.replace(/,/g, ''))}
-                    // onAlertToggle={setIsAlertEnabled}
+                    onAlertToggle={setIsAlertEnabled}
                 />
             </ScrollView>
 
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingTop: 8,
-        paddingHorizontal: 0,
+        paddingHorizontal: 16,
         paddingBottom: 16,
     },
     footer: {

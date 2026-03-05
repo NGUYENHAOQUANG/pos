@@ -1,12 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CompositeNavigationProp } from '@react-navigation/native';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -15,7 +13,8 @@ import {
     EnvironmentParameterSection,
     EnvironmentParameter,
 } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import { ButtonBar } from '@/shared/components/layout/ButtonBar';
+import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { SettingEnvSkeleton } from '@/features/farm/components/skeleton/SettingEnvSkeleton';
 import { useEnvironmentSettingLogic } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentSettingLogic';
@@ -29,7 +28,6 @@ type NavigationProp = CompositeNavigationProp<
 
 export const SettingEnvironmentScreens: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
-    const insets = useSafeAreaInsets();
 
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
     const zones = useFarmStore(state => state.zones);
@@ -97,13 +95,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Thiết lập thông số môi trường</Text>
-                <View style={[styles.backButton, { opacity: 0 }]} />
-            </View>
+            <HeaderMenu title="Thiết lập thông số môi trường" onBack={handleBack} />
 
             {/* Content */}
             {showSkeleton ? (
@@ -128,8 +120,8 @@ export const SettingEnvironmentScreens: React.FC = () => {
                         contentContainerStyle={styles.scrollContent}
                     >
                         <EnvironmentParameterSection
-                            title="Nhóm cơ bản"
-                            subtitle="Bộ thông số phổ biến để theo dõi."
+                            title="Nhóm mặc định"
+                            subtitle="Bộ thông số chuẩn khi đo môi trường."
                             parameters={parameters}
                             onToggleParameter={handleToggleParameter}
                             onEdit={handleEdit}
@@ -147,12 +139,14 @@ export const SettingEnvironmentScreens: React.FC = () => {
             )}
 
             {/* Footer */}
-            <ButtonBarFarm
+            <ButtonBar
+                mode="double"
                 primaryTitle="Lưu"
                 secondaryTitle="Thiết lập lại"
                 onPrimaryPress={handleSaveWithBypass}
                 onSecondaryPress={handleReset}
-                primaryDisabled={!isDirty}
+                primaryButtonDisabled={!isDirty}
+                secondaryButtonStyle={{ flex: 1, minWidth: 0 }}
             />
             {UnsavedChangesModal}
         </View>
@@ -163,31 +157,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
     },
     content: {
         flex: 1,
@@ -208,7 +177,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.md,
+        padding: 16,
+        gap: 8,
+        paddingBottom: 20,
     },
 });
