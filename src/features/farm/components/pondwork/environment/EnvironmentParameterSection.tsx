@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography } from '@/styles';
-import { IconEditOutlined, IconCheckActive, IconCheckUnactive } from '@/assets/icons';
+import { colors } from '@/styles';
+import { Checkbox } from '@/shared/components/forms/Checkbox';
+import PencilSimpleLine from '@/assets/Icon/IconMenu/PencilSimpleLine.svg';
 
 export interface EnvironmentParameter {
     id: string;
@@ -30,161 +30,119 @@ export const EnvironmentParameterSection: React.FC<EnvironmentParameterSectionPr
     onToggleParameter,
     onEdit,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
     return (
-        <View style={styles.container}>
+        <View style={styles.outerCard}>
             {/* Section Header */}
-            <TouchableOpacity
-                style={[styles.sectionHeader, !isExpanded && styles.sectionHeaderCollapsed]}
-                onPress={() => setIsExpanded(!isExpanded)}
-                activeOpacity={0.7}
-            >
-                <View style={styles.sectionHeaderContent}>
-                    <Text style={styles.sectionTitle}>{title}</Text>
-                    <Text style={styles.sectionSubtitle}>{subtitle}</Text>
-                </View>
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color={colors.textSecondary}
-                />
-            </TouchableOpacity>
+            <View style={styles.headerWrapper}>
+                <Text style={styles.sectionTitle}>{title}</Text>
+                <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+            </View>
 
-            {/* Child Content */}
-            {isExpanded &&
-                parameters.map((param, index) => (
-                    <React.Fragment key={param.id}>
-                        <View style={styles.childRowWrapper}>
-                            <View style={styles.childRow}>
-                                {/* Checkbox */}
-                                <TouchableOpacity
-                                    onPress={() => onToggleParameter(param.id)}
-                                    activeOpacity={0.7}
-                                >
-                                    {param.isChecked ? (
-                                        <IconCheckActive width={16} height={16} />
-                                    ) : (
-                                        <IconCheckUnactive width={16} height={16} />
-                                    )}
-                                </TouchableOpacity>
-
-                                {/* Column with title and subtitle */}
-                                <View style={styles.childColumn}>
-                                    <Text style={styles.childTitle}>{param.name}</Text>
-                                    <View style={styles.subtitleRow}>
-                                        <Text style={styles.subtitleLabel}>Giới hạn:</Text>
-                                        <Text style={styles.childSubtitle}>{param.limit}</Text>
-                                    </View>
-                                </View>
-
-                                {/* Edit Button */}
-                                <TouchableOpacity
-                                    style={styles.editButton}
-                                    activeOpacity={0.7}
-                                    onPress={() => onEdit && onEdit(param)}
-                                >
-                                    <IconEditOutlined width={16} height={16} />
-                                </TouchableOpacity>
+            {/* Parameter Items */}
+            <View style={styles.itemsList}>
+                {parameters.map(param => (
+                    <View key={param.id} style={styles.itemCard}>
+                        {/* Checkbox */}
+                        <Checkbox
+                            checked={param.isChecked}
+                            onToggle={() => onToggleParameter(param.id)}
+                            size="md"
+                            activeColor={colors.primaryOrange}
+                        />
+                        {/* Column with title and subtitle */}
+                        <View style={styles.childColumn}>
+                            <Text style={styles.childTitle}>{param.name}</Text>
+                            <View style={styles.subtitleRow}>
+                                <Text style={styles.subtitleLabel}>Giới hạn:</Text>
+                                <Text style={styles.childSubtitle}>{param.limit}</Text>
                             </View>
-
-                            {index < parameters.length - 1 && <View style={styles.divider} />}
                         </View>
-                    </React.Fragment>
+
+                        {/* Edit Button */}
+                        <TouchableOpacity
+                            style={styles.editButton}
+                            activeOpacity={0.7}
+                            onPress={() => onEdit && onEdit(param)}
+                        >
+                            <PencilSimpleLine width={16} height={16} color={colors.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
                 ))}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        marginBottom: spacing.sm,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+    outerCard: {
         backgroundColor: colors.white,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        padding: 12,
+        gap: 16,
     },
-    sectionHeaderCollapsed: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    sectionHeaderContent: {
-        flex: 1,
+    headerWrapper: {
+        gap: 4,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: colors.text,
-        lineHeight: 22,
+        color: colors.gray[950],
+        lineHeight: 20,
     },
     sectionSubtitle: {
         fontSize: 14,
         fontWeight: '400',
-        color: colors.textMuted,
-        lineHeight: 22,
+        color: colors.gray[500],
+        lineHeight: 20,
     },
-    childRowWrapper: {
-        width: '100%',
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
+    itemsList: {
+        gap: 8,
     },
-    childRow: {
+    itemCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.sm,
-        backgroundColor: colors.white,
-        gap: spacing.md,
+        gap: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        paddingVertical: 8,
+        paddingHorizontal: 12,
     },
-
     childColumn: {
         flex: 1,
     },
     childTitle: {
-        fontWeight: typography.fontWeight.bold,
+        fontWeight: '500',
         fontSize: 14,
-        lineHeight: 22,
-        color: colors.text,
+        lineHeight: 20,
+        color: colors.gray[950],
     },
     subtitleRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: spacing.sm,
+        gap: 8,
     },
     subtitleLabel: {
         fontWeight: '400',
-        fontStyle: 'normal',
         fontSize: 14,
-        lineHeight: 22,
-        color: colors.textMuted,
+        lineHeight: 20,
+        color: colors.gray[500],
     },
     childSubtitle: {
         fontWeight: '400',
-        fontStyle: 'normal',
         fontSize: 14,
-        lineHeight: 22,
-        color: colors.textMuted,
+        lineHeight: 20,
+        color: colors.gray[500],
     },
     editButton: {
         width: 32,
         height: 32,
-        borderRadius: 6,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        borderColor: colors.gray[200],
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 8,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
     },
 });
