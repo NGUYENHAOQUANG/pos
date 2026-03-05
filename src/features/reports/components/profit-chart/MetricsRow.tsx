@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
+import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 
 interface MetricsRowProps {
     revenue?: string;
@@ -17,35 +16,48 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     totalCost = '3.53 tỉ',
     estimatedProfit = '1.92 tỉ',
 }) => {
+    const items = [
+        {
+            id: 'revenue',
+            name: 'Doanh thu',
+            value: revenue,
+            color: colors.green[600],
+        },
+        {
+            id: 'estimatedRevenue',
+            name: 'Tổng doanh thu ước tính',
+            value: estimatedRevenue,
+            color: colors.blue[600],
+        },
+        {
+            id: 'totalCost',
+            name: 'Tổng chi phí',
+            value: totalCost,
+            color: colors.volcano[900],
+        },
+        {
+            id: 'estimatedProfit',
+            name: 'Tổng lợi nhuận ước tính',
+            value: estimatedProfit,
+            color: colors.green[600],
+        },
+    ];
+
     return (
         <View style={styles.container}>
             <View style={styles.metricsTopRow}>
-                <View style={styles.metricItem}>
-                    <Text style={styles.metricLabel} numberOfLines={1}>
-                        Doanh thu
-                    </Text>
-                    <Text style={styles.metricValue}>{revenue}</Text>
-                </View>
-                <View style={styles.metricItem}>
-                    <Text style={styles.metricLabel} numberOfLines={1}>
-                        Tổng doanh thu ước tính
-                    </Text>
-                    <Text style={styles.metricValue}>{estimatedRevenue}</Text>
-                </View>
+                {items.slice(0, 2).map(item => (
+                    <View key={item.id} style={styles.metricItem}>
+                        <PondIndexCard item={item} variant="prodSummary" />
+                    </View>
+                ))}
             </View>
             <View style={styles.metricsBottomRow}>
-                <View style={styles.metricItem}>
-                    <Text style={styles.metricLabel} numberOfLines={1}>
-                        Tổng chi phí
-                    </Text>
-                    <Text style={styles.metricValue}>{totalCost}</Text>
-                </View>
-                <View style={styles.metricItem}>
-                    <Text style={styles.metricLabel} numberOfLines={1}>
-                        Tổng lợi nhuận ước tính
-                    </Text>
-                    <Text style={styles.metricValue}>{estimatedProfit}</Text>
-                </View>
+                {items.slice(2, 4).map(item => (
+                    <View key={item.id} style={styles.metricItem}>
+                        <PondIndexCard item={item} variant="prodSummary" />
+                    </View>
+                ))}
             </View>
         </View>
     );
@@ -59,30 +71,16 @@ const styles = StyleSheet.create({
     },
     metricsTopRow: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         marginBottom: spacing.md,
     },
     metricsBottomRow: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
     },
     metricItem: {
-        alignItems: 'center',
-        width: (SCREEN_WIDTH - 32) / 2, // Screen width minus container padding, divided by 2
+        flex: 1,
+        alignItems: 'stretch',
         paddingHorizontal: spacing.xs,
-    },
-    metricLabel: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-        marginBottom: spacing.xs,
-        textAlign: 'center',
-    },
-    metricValue: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: colors.text,
-        lineHeight: 28,
     },
 });

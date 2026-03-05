@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: spacing.md, 
+        paddingHorizontal: spacing.md,
     },
     iconContainer: {
         alignItems: 'center',

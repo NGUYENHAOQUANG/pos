@@ -7,7 +7,7 @@
  * @created 2025-11-16
  * @updated 2025-01-07
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
     StyleSheet,
     TouchableOpacity,
@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
 
 import { ReportsScreen } from '@/features/reports/screens/ReportsScreen';
 import { colors, borderRadius } from '@/styles';
@@ -171,6 +172,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
     const [barWidth, setBarWidth] = useState(0);
     const slideAnim = useRef(new Animated.Value(state.index)).current;
+    const { onBarLayout } = useContext(BottomBarContext);
 
     const currentRoute = state.routes[state.index];
 
@@ -191,7 +193,10 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
 
     return (
         <View
-            onLayout={handleLayout}
+            onLayout={e => {
+                handleLayout(e);
+                onBarLayout(e);
+            }}
             style={[
                 styles.bottomContainer,
                 {
@@ -256,19 +261,21 @@ const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
 
 export function MainNavigator() {
     return (
-        <View style={styles.container}>
-            <Tab.Navigator
-                initialRouteName="Farm"
-                screenOptions={{
-                    headerShown: false,
-                }}
-                tabBar={renderTabBar}
-            >
-                {navigationItems.map(item => (
-                    <Tab.Screen key={item.key} name={item.key} component={item.component} />
-                ))}
-            </Tab.Navigator>
-        </View>
+        <BottomBarProvider>
+            <View style={styles.container}>
+                <Tab.Navigator
+                    initialRouteName="Farm"
+                    screenOptions={{
+                        headerShown: false,
+                    }}
+                    tabBar={renderTabBar}
+                >
+                    {navigationItems.map(item => (
+                        <Tab.Screen key={item.key} name={item.key} component={item.component} />
+                    ))}
+                </Tab.Navigator>
+            </View>
+        </BottomBarProvider>
     );
 }
 
@@ -278,7 +285,7 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 4,
         left: 0,
         right: 0,
         flexDirection: 'row',

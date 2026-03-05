@@ -14,6 +14,7 @@ import {
     Platform,
     UIManager,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -88,6 +89,13 @@ export const PondTransfer = () => {
                                     <Text style={styles.seeAllText}>
                                         {showAll ? 'Thu gọn' : 'Xem tất cả'}
                                     </Text>
+                                    {!showAll && (
+                                        <Ionicons
+                                            name="arrow-forward"
+                                            size={16}
+                                            color={colors.textSecondary}
+                                        />
+                                    )}
                                 </TouchableOpacity>
                             )}
                         </>
@@ -117,18 +125,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     seeAllButton: {
-        marginTop: 4,
-        alignSelf: 'center',
+        marginTop: 8,
+        alignSelf: 'stretch',
         paddingVertical: 8,
-        paddingHorizontal: 20,
+        paddingHorizontal: 24,
         borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 6,
+        borderColor: colors.gray[200],
+        borderRadius: 10,
         backgroundColor: colors.white,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
     },
     seeAllText: {
-        fontSize: 13,
-        color: colors.text,
+        fontSize: 14,
+        color: colors.textSecondary,
         fontWeight: '500',
     },
 });
