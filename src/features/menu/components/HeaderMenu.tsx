@@ -19,6 +19,7 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({
     return (
         <HeaderSection
             title={title}
+            titleStyle={{ fontSize: 18, fontWeight: '600', lineHeight: 28 }}
             onBack={onBack}
             rightComponent={rightAction}
             rightIcon={rightIcon}

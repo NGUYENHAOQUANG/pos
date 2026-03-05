@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { colors } from '@/styles';
-import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
+import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
 
 interface GeneralInformationProps {
     data: {
@@ -22,19 +22,16 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
 }) => {
     return (
         <View style={styles.container}>
-            <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Thông tin chung</Text>
-            </View>
-            <View style={styles.headerDivider} />
+            <Text style={styles.sectionTitle}>Thông tin chung</Text>
 
-            <View style={styles.formContent}>
-                {/* Avatar */}
+            <View style={styles.cardContainer}>
+                {/* Avatar Row */}
                 <View style={styles.avatarContainer}>
                     <View style={styles.avatar}>
                         {avatarUri ? (
                             <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
                         ) : (
-                            <AvatarIcon width={80} height={80} />
+                            <AvatarIcon width={64} height={64} />
                         )}
                     </View>
                     {onChangePhoto && (
@@ -44,98 +41,138 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                     )}
                 </View>
 
-                <View style={styles.divider} />
-
-                {/* Form Fields */}
-                <InfoRow label="Tên:" value={data.name} />
-                <InfoRow label="Số điện thoại:" value={data.phone} />
-                <InfoRow label="Email:" value={data.email} />
-                <InfoRow label="Địa chỉ:" value={data.address} />
-                <InfoRow label="Chức vụ" value={data.role} />
-                <InfoRow label="Cấp quản lý" value={data.level} />
+                {/* Form Fields grouped to prevent 32px gap from affecting them */}
+                <View style={styles.formFieldsWrapper}>
+                    <InputField label="Tên" value={data.name} required placeholder="Nguyễn Văn A" />
+                    <InputField
+                        label="Số điện thoại"
+                        value={data.phone}
+                        required
+                        placeholder="0908 123 456"
+                    />
+                    <InputField
+                        label="Email"
+                        value={data.email}
+                        required
+                        placeholder="email@gmail.com"
+                    />
+                    <InputField
+                        label="Chức vụ"
+                        value={data.role}
+                        required
+                        placeholder="{chức vụ}"
+                    />
+                    <InputField
+                        label="Cấp quản lý"
+                        value={data.level}
+                        required
+                        placeholder="{cấp quản lý}"
+                    />
+                </View>
             </View>
         </View>
     );
 };
 
-// Helper Component for Info Row (Local to this file or could be shared)
-const InfoRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <View style={styles.infoRow}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
+// Helper Component for Form Input Field
+const InputField: React.FC<{
+    label: string;
+    value: string;
+    required?: boolean;
+    placeholder?: string;
+}> = ({ label, value, required, placeholder }) => (
+    <View style={styles.inputWrapper}>
+        <View style={styles.labelWrapper}>
+            <Text style={styles.inputLabel}>{label}</Text>
+            {required && <Text style={styles.requiredAsterisk}>*</Text>}
+        </View>
+        <View style={styles.inputBox}>
+            <Text style={[styles.inputValue, !value && styles.placeholderValue]}>
+                {value || placeholder}
+            </Text>
+        </View>
     </View>
 );
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
-        marginTop: 12,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: colors.white,
+        gap: 12,
     },
     sectionTitle: {
-        fontSize: 14,
-        lineHeight: 22,
-        fontWeight: '700',
-        color: colors.text,
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '600',
+        color: colors.gray[950],
     },
-    formContent: {
-        paddingBottom: 24,
-        paddingHorizontal: 16,
+    cardContainer: {
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        padding: 12,
+        gap: 24,
     },
     avatarContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 24,
+        gap: 16,
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: colors.gray[300],
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: colors.gray[100],
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
         overflow: 'hidden',
     },
     avatarImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
     },
     changePhotoText: {
         color: colors.blue[600],
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
+        textDecorationLine: 'underline',
     },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: 16,
+    formFieldsWrapper: {
+        gap: 16,
     },
-    infoRow: {
+    inputWrapper: {
+        gap: 6,
+    },
+    labelWrapper: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 16,
+        alignItems: 'center',
+        gap: 4,
     },
-    label: {
+    inputLabel: {
         fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
     },
-    value: {
+    requiredAsterisk: {
         fontSize: 14,
-        color: colors.text,
-        textAlign: 'right',
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.volcano[600],
     },
-    headerDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginBottom: 16,
+    inputBox: {
+        height: 44,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        justifyContent: 'center',
+    },
+    inputValue: {
+        fontSize: 14,
+        color: colors.gray[950],
+    },
+    placeholderValue: {
+        color: colors.gray[400],
     },
 });
