@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Platform } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { View, StyleSheet, TextInput, Platform } from 'react-native';
+import { colors } from '@/styles';
 import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 
 interface SelectionNotesBoxProps {
     notes: string;
@@ -31,65 +32,39 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
 
     return (
         <>
-            <View style={styles.container}>
-                <Text style={styles.title}>Ghi chú</Text>
-                <View style={styles.inputGroup}>
-                    <TextInput
-                        ref={inputRef}
-                        style={styles.textArea}
-                        placeholder="Nhập ghi chú"
-                        placeholderTextColor={colors.borderSubtle}
-                        value={notes}
-                        onChangeText={handleChangeText}
-                        onFocus={handleFocus}
-                        onBlur={handleBlur}
-                        multiline
-                        textAlignVertical="top"
-                        maxLength={2000}
-                    />
-                </View>
-            </View>
-            {/* Dynamic spacer: placed outside the card so it doesn't stretch the white background */}
+            <SelectionInfoBox title="Ghi chú">
+                <TextInput
+                    ref={inputRef}
+                    style={styles.textArea}
+                    placeholder="Nhập ghi chú"
+                    placeholderTextColor={colors.borderSubtle}
+                    value={notes}
+                    onChangeText={handleChangeText}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={2000}
+                />
+            </SelectionInfoBox>
             {isFocused && <View style={styles.keyboardSpacer} />}
         </>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        padding: spacing.md,
-        marginTop: 12,
-        borderRadius: 12,
-        gap: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.borderSubtle || colors.gray[100],
-    },
-    title: {
-        fontSize: 14,
-        fontWeight: '400',
-        fontStyle: 'normal',
-        lineHeight: 22,
-        letterSpacing: 0,
-        color: colors.text,
-    },
-    inputGroup: {
-        gap: spacing.sm,
-    },
     textArea: {
         minHeight: 80,
         maxHeight: 160,
-        paddingVertical: 5,
+        paddingVertical: 8,
         paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 6,
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: '400',
-        fontStyle: 'normal',
         lineHeight: 24,
-        letterSpacing: 0,
         color: colors.text,
         textAlignVertical: 'top',
     },

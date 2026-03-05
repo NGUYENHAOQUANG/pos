@@ -1,13 +1,13 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
-import { borderRadius, colors, spacing } from '@/styles';
+import { Text, StyleSheet, ViewStyle, TextStyle, View, StyleProp } from 'react-native';
+import { borderRadius, colors } from '@/styles';
 
 interface CollapseHeadProps {
     title: string;
     isExpanded: boolean;
     onToggle: () => void;
-    style?: ViewStyle;
-    titleStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    titleStyle?: StyleProp<TextStyle>;
     showIcon?: boolean;
 }
 
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: 12,
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderTopLeftRadius: borderRadius.md,

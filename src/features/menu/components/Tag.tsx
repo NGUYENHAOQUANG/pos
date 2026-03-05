@@ -134,16 +134,24 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: spacing.sm,
         height: 32,
         borderRadius: borderRadius.full,
         borderWidth: 1,
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.xs,
         alignSelf: 'flex-start',
-        alignItems: 'center',
         justifyContent: 'center',
+        alignItems: 'center',
     },
     text: {
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: '400',
+        color: colors.white,
+    },
+    green: {
+        backgroundColor: colors.green[600],
+    },
+    orange: {
+        backgroundColor: colors.orange[500],
     },
 });
