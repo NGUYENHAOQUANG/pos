@@ -33,22 +33,17 @@ const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
-        marginTop: 8,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 1,
+        marginTop: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle || colors.gray[100],
         paddingVertical: 12,
     },
     titleContainer: {
         marginBottom: 12,
     },
     sectionTitle: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '700',
         lineHeight: 22,
         color: colors.text,

@@ -59,10 +59,11 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
-        marginTop: 8,
+        marginTop: 12,
+        borderRadius: 12,
         gap: spacing.sm,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        borderColor: colors.borderSubtle || colors.gray[100],
     },
     title: {
         fontSize: 14,

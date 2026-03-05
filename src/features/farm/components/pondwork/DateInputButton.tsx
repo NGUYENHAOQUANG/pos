@@ -4,6 +4,7 @@ import { colors, spacing } from '@/styles';
 import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { formatDateTime, FormatDateTimeOptions } from '@/features/farm/utils/dateUtils';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
 /**
  * DateInputButton Component
@@ -132,7 +133,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
                     <View style={styles.labelWrapper}>
                         <Text style={styles.label}>{label}</Text>
                         {/* Small required dot 4x4 displayed to the right of label */}
-                        {required && <View style={styles.requiredDot} />}
+                        {required && <RequiredDot />}
                     </View>
                 )}
                 <TouchableOpacity
@@ -164,13 +165,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    requiredDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: colors.error,
-        marginLeft: 4,
-    },
+
     label: {
         fontSize: 14,
         fontWeight: '400',
