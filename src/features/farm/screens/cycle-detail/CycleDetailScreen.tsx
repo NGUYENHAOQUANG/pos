@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { colors, spacing, typography } from '@/styles';
+import { colors, typography, borderRadius } from '@/styles';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { formatDate } from '@/features/farm/utils/dateUtils';
@@ -153,16 +153,16 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     statusBadge: {
-        backgroundColor: colors.yellow[50],
-        paddingHorizontal: spacing.sm,
+        backgroundColor: colors.volcano[200],
+        paddingHorizontal: 12,
         paddingVertical: 4,
-        borderRadius: 4,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.yellow[300],
+        borderColor: colors.yellow[200],
     },
     statusText: {
         fontSize: typography.fontSize.xs,
-        color: colors.orange[500],
+        color: colors.yellow[600],
         fontWeight: typography.fontWeight.regular,
         lineHeight: 20,
     },
