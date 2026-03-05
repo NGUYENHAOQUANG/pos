@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 
 interface WarehouseFooterProps {
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     draftButton: {
         flex: 1,
         height: 40,
-        borderRadius: 8,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.blue[600],
         backgroundColor: colors.white,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     submitButton: {
         flex: 1,
         height: 40,
-        borderRadius: 8,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.blue[600],
         justifyContent: 'center',
         alignItems: 'center',

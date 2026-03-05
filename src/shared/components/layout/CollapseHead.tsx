@@ -1,7 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing } from '@/styles';
+import { Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
+import { borderRadius, colors, spacing } from '@/styles';
 
 interface CollapseHeadProps {
     title: string;
@@ -12,28 +11,13 @@ interface CollapseHeadProps {
     showIcon?: boolean;
 }
 
-export const CollapseHead: React.FC<CollapseHeadProps> = ({
-    title,
-    isExpanded,
-    onToggle,
-    style,
-    titleStyle,
-    showIcon = true,
-}) => {
+export const CollapseHead: React.FC<CollapseHeadProps> = ({ title, style, titleStyle }) => {
     return (
-        <TouchableOpacity style={[styles.container, style]} onPress={onToggle} activeOpacity={0.7}>
+        <View style={[styles.container, style]}>
             <Text style={[styles.title, titleStyle]} numberOfLines={1}>
                 {title}
             </Text>
-
-            {showIcon && (
-                <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={18}
-                    color={colors.textSecondary}
-                />
-            )}
-        </TouchableOpacity>
+        </View>
     );
 };
 
@@ -42,9 +26,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 12,
+        paddingTop: 12,
         paddingHorizontal: spacing.md,
         backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        borderTopLeftRadius: borderRadius.md,
+        borderTopRightRadius: borderRadius.md,
+        borderColor: colors.border,
     },
     title: {
         fontSize: 14,

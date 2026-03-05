@@ -143,8 +143,6 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
                         onManufacturerChange={val =>
                             setValue('manufacturer', val, { shouldValidate: true })
                         }
-                        isActive={watchedForm.isActive ?? true}
-                        onIsActiveChange={val => setValue('isActive', val)}
                         onUnitDropdownOpen={() => {
                             setTimeout(() => {
                                 scrollViewRef.current?.scrollToEnd({ animated: true });

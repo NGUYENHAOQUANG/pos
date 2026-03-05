@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-native';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import { DropdownMaterial, DropdownOption } from '../DropdownMaterial';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
@@ -104,73 +104,65 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
                 onToggle={toggleExpand}
             />
 
-            {isExpanded && (
-                <View style={styles.content}>
-                    {/* Date Input */}
-                    <DateInputButton
-                        label="Ngày xuất"
-                        date={date}
-                        dateText={formatMaterialDate(date)}
-                        onDateChange={onDateChange}
-                        required
-                    />
+            <View style={styles.content}>
+                {/* Date Input */}
+                <DateInputButton
+                    label="Ngày xuất"
+                    date={date}
+                    dateText={formatMaterialDate(date)}
+                    onDateChange={onDateChange}
+                    required
+                />
 
-                    <DropdownMaterial
-                        label="Trại nuôi"
-                        value={selectedZone}
-                        options={zoneOptions}
-                        onChange={newValue => {
-                            onZoneChange(newValue);
-                            onPondChange('');
-                        }}
-                        placeholder="Chọn trại nuôi"
-                        showAllOption={false}
-                        isOpen={activeDropdown === 'zone'}
-                        onToggle={() => handleToggleDropdown('zone')}
-                        disabled={isLoadingZones}
-                        inline={false}
-                        required
-                    />
-                    <DropdownMaterial
-                        label="Ao nuôi"
-                        value={selectedPond}
-                        options={pondOptions}
-                        onChange={onPondChange}
-                        placeholder={isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'}
-                        showAllOption={false}
-                        isOpen={activeDropdown === 'pond'}
-                        onToggle={() => handleToggleDropdown('pond')}
-                        disabled={!selectedZone || isLoadingPonds}
-                        inline={false}
-                        required
-                    />
-                    {/* Children Content (e.g., File Uploader) */}
-                    {children}
-                </View>
-            )}
+                <DropdownMaterial
+                    label="Trại nuôi"
+                    value={selectedZone}
+                    options={zoneOptions}
+                    onChange={newValue => {
+                        onZoneChange(newValue);
+                        onPondChange('');
+                    }}
+                    placeholder="Chọn trại nuôi"
+                    showAllOption={false}
+                    isOpen={activeDropdown === 'zone'}
+                    onToggle={() => handleToggleDropdown('zone')}
+                    disabled={isLoadingZones}
+                    inline={false}
+                    required
+                />
+                <DropdownMaterial
+                    label="Ao nuôi"
+                    value={selectedPond}
+                    options={pondOptions}
+                    onChange={onPondChange}
+                    placeholder={isLoadingPonds ? 'Đang tải danh sách ao...' : 'Chọn ao nuôi'}
+                    showAllOption={false}
+                    isOpen={activeDropdown === 'pond'}
+                    onToggle={() => handleToggleDropdown('pond')}
+                    disabled={!selectedZone || isLoadingPonds}
+                    inline={false}
+                    required
+                />
+                {children}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     cardContainer: {
+        margin: spacing.md,
         backgroundColor: colors.white,
-        marginBottom: spacing.sm,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        zIndex: 10,
     },
 
     content: {
-        padding: spacing.md,
+        paddingHorizontal: 12,
+        paddingTop: spacing.md,
+        paddingBottom: 12,
         gap: 12,
         borderTopWidth: 1,
         borderTopColor: colors.gray[100],
