@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingHorizontal: spacing.md,
         paddingBottom: 40,
     },
     container: {
@@ -183,16 +182,19 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: 'row',
         gap: spacing.sm,
+        marginTop: spacing.md,
     },
     cancelButton: {
         flex: 1,
     },
     // Override blue outline to gray for cancel button
     cancelButtonOverride: {
-        borderColor: colors.gray[300],
+        borderColor: colors.border,
+        backgroundColor: colors.white,
     },
     cancelButtonTextOverride: {
-        color: colors.text,
+        color: colors.textSecondary,
+        fontSize: 14,
     },
     confirmButton: {
         flex: 1,
