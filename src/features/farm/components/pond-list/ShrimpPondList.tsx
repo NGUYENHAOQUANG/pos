@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
+import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 
 import { spacing } from '@/styles';
 import { ShrimpPond } from '@/features/farm/components/pond-list/ShrimpPond';
@@ -34,6 +35,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
         },
         ref
     ) => {
+        const bottomBarHeight = useBottomTabBarHeight();
         const getStatus = (item: PondData): TagStatus | undefined => {
             if (item.status === 'Framing') return 'active';
             if (item.status === 'Available') return 'preparing';
@@ -75,7 +77,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[styles.listContent, { paddingBottom: bottomBarHeight }]}
                 showsVerticalScrollIndicator={false}
                 onEndReached={onEndReached}
                 onEndReachedThreshold={onEndReachedThreshold}

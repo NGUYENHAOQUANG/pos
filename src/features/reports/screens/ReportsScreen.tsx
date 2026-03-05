@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
 import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
 import { GrowthChart } from '@/features/reports/components/growth-chart/GrowthChart';
@@ -36,7 +36,7 @@ interface FarmData {
 }
 
 export const ReportsScreen = ({ navigation }: Props) => {
-    const insets = useSafeAreaInsets();
+    const bottomBarHeight = useBottomTabBarHeight();
     // Ref for scroll to top
     const scrollViewRef = useRef<ScrollView>(null);
     useScrollToTop(scrollViewRef as any);
@@ -172,7 +172,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 <ScrollView
                     ref={scrollViewRef}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: insets.bottom + 20, gap: 6 }}
+                    contentContainerStyle={{ paddingBottom: bottomBarHeight, gap: 6 }}
                 >
                     {selectedPondType.label === 'Ao vèo'
                         ? renderAoVeoContent()

@@ -1,33 +1,31 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, LayoutChangeEvent, ScrollView } from 'react-native';
-import Svg, {
-    Path,
-    Line,
-    Text as SvgText,
-    Circle,
-    G,
-    Defs,
-    Filter,
-    FeDropShadow,
-} from 'react-native-svg';
-import { area, curveStepAfter } from 'd3-shape';
-import { scaleLinear, scaleTime } from 'd3-scale';
-import { colors } from '@/styles/colors';
+import {
+    View,
+    Text,
+    StyleSheet,
+    LayoutChangeEvent,
+    ScrollView,
+    TouchableOpacity,
+} from 'react-native';
+import Svg, { Line, Text as SvgText, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { scaleLinear } from 'd3-scale';
+import { colors, borderRadius } from '@/styles';
 import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
+import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
+import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
 
 // --- IMPORT MOCK DATA ---
 import { POND_STATISTICS } from './MockData';
 
 // --- CẤU HÌNH ---
-const ITEM_WIDTH = 50;
-const CHART_HEIGHT = 250;
-const HEADER_HEIGHT = 70;
+const ITEM_WIDTH = 40;
+const CHART_HEIGHT = 200;
 const Y_AXIS_WIDTH = 35;
 const VERTICAL_PADDING = { top: 20, bottom: 20 };
 
 // CẤU HÌNH TRỤC Y CỐ ĐỊNH THEO THIẾT KẾ
-const FIXED_Y_TICKS = [0, 8, 16, 24, 32];
-const Y_DOMAIN_MAX = 32; // Giá trị lớn nhất trên trục Y
+const FIXED_Y_TICKS = [0, 8, 16, 24, 32, 40];
+const Y_DOMAIN_MAX = 40;
 
 // --- HELPER ---
 const parseDate = (dateStr: string): Date => {
@@ -37,21 +35,17 @@ const parseDate = (dateStr: string): Date => {
 
 // --- COLORS ---
 const CHART_COLORS = {
-    activeFill: colors.green[300],
-    activeStroke: colors.green[800],
-    prep: colors.orange[200],
-    functional: colors.gray[200],
-    functionalStroke: colors.gray[400],
-    grid: colors.border,
+    activeFill: '#FFEDD5', // Light orange
+    activeStroke: colors.orange[500],
+    grid: colors.gray[100],
     text: colors.textSecondary,
-    indicator: colors.textTertiary,
+    indicator: colors.orange[700],
     white: colors.white,
     border: colors.border,
     black: colors.black,
 };
 
 import { Loading } from '@/shared/components/ui/Loading';
-import { BasicDropDownButton } from '../BasicDropDownButton';
 import chartStyles from '@/features/reports/styles/chart.styles';
 
 export const ActivePondChart = () => {
@@ -96,29 +90,12 @@ export const ActivePondChart = () => {
     }, [expanded, containerWidth, isLoading]);
 
     // --- 3. TÍNH TOÁN D3 ---
-    const {
-        pathActive,
-        pathFunctional,
-        pathPrep,
-        yTicks,
-        xTicks,
-        xScale,
-        yScale,
-        currentX,
-        targetDataPoint,
-        chartContentWidth,
-    } = useMemo(() => {
+    const { yTicks, xTicks, yScale, chartContentWidth } = useMemo(() => {
         if (containerWidth === 0 || processedData.length === 0) {
             return {
                 yTicks: [],
                 xTicks: [],
-                xScale: null,
                 yScale: null,
-                currentX: 0,
-                targetDataPoint: { active: 0, functional: 0, prep: 0 },
-                pathActive: '',
-                pathFunctional: '',
-                pathPrep: '',
                 chartContentWidth: 0,
             };
         }
@@ -133,42 +110,16 @@ export const ActivePondChart = () => {
         // Scale Y
         const yScale = scaleLinear().domain([0, Y_DOMAIN_MAX]).range([chartHeight, 0]);
 
-        // Scale X
-        const minDate = processedData[0].date;
-        const maxDate = processedData[processedData.length - 1].date;
-        const xRangeMax = processedData.length * ITEM_WIDTH;
-        const xScale = scaleTime()
-            .domain([minDate, maxDate])
-            .range([ITEM_WIDTH / 2, xRangeMax - ITEM_WIDTH / 2]);
-
-        // Generators
-        const areaGenerator = (key: 'total' | 'prep_active' | 'active') =>
-            area<any>()
-                .x(d => xScale(d.date))
-                .y0(_ => yScale(0))
-                .y1(d => {
-                    if (key === 'total') return yScale(d.active + d.prep + d.functional);
-                    if (key === 'prep_active') return yScale(d.active + d.prep);
-                    return yScale(d.active);
-                })
-                .curve(curveStepAfter);
-
-        const lastItem = processedData[processedData.length - 1];
-        const currentX = xScale(lastItem.date);
-
-        const yTicks = FIXED_Y_TICKS; // [0, 8, 16, 24, 32]
-        const xTicks = processedData.map(d => d.date);
+        const yTicks = FIXED_Y_TICKS;
+        const xTicks = processedData.map((d, index) => ({
+            date: d.date,
+            x: index * ITEM_WIDTH + ITEM_WIDTH / 2 + 1,
+        }));
 
         return {
-            pathFunctional: areaGenerator('total')(processedData) || '',
-            pathPrep: areaGenerator('prep_active')(processedData) || '',
-            pathActive: areaGenerator('active')(processedData) || '',
             yTicks,
             xTicks,
-            xScale,
             yScale,
-            currentX,
-            targetDataPoint: lastItem,
             chartContentWidth,
         };
     }, [containerWidth, processedData]);
@@ -179,18 +130,57 @@ export const ActivePondChart = () => {
         return `${d}/${m}`;
     };
 
-    const currentActiveTotal =
-        processedData.length > 0 ? processedData[processedData.length - 1].active : 0;
+    const lastItem = processedData[processedData.length - 1] || {
+        active: 0,
+        prep: 0,
+        functional: 0,
+    };
+    const currentActiveTotal = lastItem.active;
+    const currentPrepTotal = lastItem.prep;
+    const currentFunctionalTotal = lastItem.functional;
+
+    const pondIndexData = useMemo(
+        () => [
+            {
+                id: '1',
+                name: 'Đang hoạt động',
+                value: `${currentActiveTotal} ao`,
+                color: colors.orange[500],
+            },
+            {
+                id: '2',
+                name: 'Đang chuẩn bị',
+                value: `${currentPrepTotal} ao`,
+                color: colors.green[500],
+            },
+            {
+                id: '3',
+                name: 'Ao chức năng',
+                value: `${currentFunctionalTotal} ao`,
+                color: colors.yellow[600],
+            },
+        ],
+        [currentActiveTotal, currentPrepTotal, currentFunctionalTotal]
+    );
 
     return (
         <View style={chartStyles.container} onLayout={onLayout}>
-            <BasicDropDownButton
-                prefixIcon={<ActivePondChartIcon width={16} height={16} />}
-                label={`TỔNG SỐ AO HOẠT ĐỘNG (${currentActiveTotal})`}
-                onPress={handleToggle}
+            <TouchableOpacity
                 style={styles.headerButton}
-                isExpanded={expanded}
-            />
+                onPress={handleToggle}
+                activeOpacity={0.7}
+            >
+                <View style={styles.headerTitleRow}>
+                    <ActivePondChartIcon width={16} height={16} color={colors.text} />
+                    <Text style={styles.headerTitleText}>Tổng số ao hoạt động</Text>
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{currentActiveTotal}</Text>
+                    </View>
+                </View>
+                <View style={[styles.expandedIcon, expanded && styles.expandedIconRotate]}>
+                    <ExpandedIcon width={10} height={6} />
+                </View>
+            </TouchableOpacity>
 
             {expanded && (
                 <>
@@ -200,7 +190,6 @@ export const ActivePondChart = () => {
                         </View>
                     ) : (
                         containerWidth > 0 &&
-                        xScale &&
                         yScale && (
                             <View
                                 style={[
@@ -208,14 +197,21 @@ export const ActivePondChart = () => {
                                     isLoading ? styles.loadingContainer : undefined,
                                 ]}
                             >
+                                {/* --- VÙNG THỐNG KÊ POND INDEX --- */}
+                                <View style={styles.pondIndexWrapper}>
+                                    <PondIndex data={pondIndexData} isEqualWidth={true} />
+                                </View>
+
+                                <Text style={styles.yAxisUnitLabel}>Số ao</Text>
+
                                 <View style={styles.mainWrapper}>
                                     {/* --- CỘT TRÁI: TRỤC Y (CỐ ĐỊNH) --- */}
                                     <View
                                         style={{
                                             width: Y_AXIS_WIDTH,
-                                            paddingTop: HEADER_HEIGHT,
                                             backgroundColor: colors.white,
                                             zIndex: 2,
+                                            // marginTop: 10,
                                         }}
                                     >
                                         <Svg width={Y_AXIS_WIDTH} height={CHART_HEIGHT}>
@@ -237,38 +233,15 @@ export const ActivePondChart = () => {
                                                     y1={yScale(0) + 4}
                                                     x2={0}
                                                     y2={0}
-                                                    stroke={colors.border}
-                                                    strokeWidth={1}
+                                                    stroke={colors.white}
+                                                    strokeWidth={0}
                                                 />
                                             </G>
                                         </Svg>
                                     </View>
 
-                                    {/* --- CỘT PHẢI: HEADER CỐ ĐỊNH + BIỂU ĐỒ CUỘN --- */}
+                                    {/* --- CỘT PHẢI: BIỂU ĐỒ CUỘN --- */}
                                     <View style={{ flex: 1 }}>
-                                        {/* 1. TOP LABELS (CỐ ĐỊNH) */}
-                                        <View
-                                            style={[
-                                                styles.fixedHeaderLabels,
-                                                { height: HEADER_HEIGHT },
-                                            ]}
-                                        >
-                                            <View style={styles.labelGroupLeft}>
-                                                <Text style={styles.labelTitle}>Ao vèo</Text>
-                                                <View style={styles.labelRow}>
-                                                    <Text style={styles.labelTextBig}>A1V1</Text>
-                                                    <View style={styles.divider} />
-                                                    <Text style={styles.labelTextBig}>A1V2</Text>
-                                                </View>
-                                            </View>
-
-                                            <View style={styles.labelGroupRight}>
-                                                <Text style={styles.labelTitle}>Ao nuôi</Text>
-                                                <Text style={styles.labelTextBig}>A1N1</Text>
-                                            </View>
-                                        </View>
-
-                                        {/* 2. BIỂU ĐỒ (CÓ THỂ CUỘN) */}
                                         <ScrollView
                                             ref={scrollViewRef}
                                             horizontal
@@ -278,23 +251,25 @@ export const ActivePondChart = () => {
                                         >
                                             <Svg width={chartContentWidth} height={CHART_HEIGHT}>
                                                 <Defs>
-                                                    <Filter
-                                                        id="lightShadow"
-                                                        x="-50%"
-                                                        y="-50%"
-                                                        width="200%"
-                                                        height="200%"
+                                                    <LinearGradient
+                                                        id="barGradient"
+                                                        x1="0"
+                                                        y1="0"
+                                                        x2="0"
+                                                        y2="1"
                                                     >
-                                                        <FeDropShadow
-                                                            dx="0"
-                                                            dy="2"
-                                                            stdDeviation="2"
-                                                            floodColor={CHART_COLORS.black}
-                                                            floodOpacity="0.25"
+                                                        <Stop
+                                                            offset="0"
+                                                            stopColor={CHART_COLORS.activeFill}
+                                                            stopOpacity="1"
                                                         />
-                                                    </Filter>
+                                                        <Stop
+                                                            offset="1"
+                                                            stopColor={CHART_COLORS.activeFill}
+                                                            stopOpacity="0.2"
+                                                        />
+                                                    </LinearGradient>
                                                 </Defs>
-
                                                 <G y={VERTICAL_PADDING.top}>
                                                     {/* Grid lines cho các tick cố định */}
                                                     {yTicks.map(tick => (
@@ -309,96 +284,61 @@ export const ActivePondChart = () => {
                                                         />
                                                     ))}
 
-                                                    <Path
-                                                        d={pathFunctional}
-                                                        fill={CHART_COLORS.functional}
-                                                        stroke={CHART_COLORS.functionalStroke}
-                                                    />
-                                                    <Path
-                                                        d={pathPrep}
-                                                        fill={CHART_COLORS.prep}
-                                                        stroke={colors.orange[600]}
-                                                        strokeWidth={1}
-                                                    />
-                                                    <Path
-                                                        d={pathActive}
-                                                        fill={CHART_COLORS.activeFill}
-                                                        stroke={CHART_COLORS.activeStroke}
-                                                        strokeWidth={1}
-                                                    />
-
-                                                    <Line
-                                                        x1={currentX}
-                                                        y1={0}
-                                                        x2={currentX}
-                                                        y2={yScale(0)}
-                                                        stroke={CHART_COLORS.indicator}
-                                                        strokeWidth={0.5}
-                                                        strokeDasharray="3 1"
-                                                    />
-
-                                                    <Circle
-                                                        cx={currentX}
-                                                        cy={yScale(
-                                                            targetDataPoint.active +
-                                                                targetDataPoint.prep +
-                                                                targetDataPoint.functional
-                                                        )}
-                                                        r={4}
-                                                        fill={CHART_COLORS.functional}
-                                                        stroke={CHART_COLORS.white}
-                                                        strokeWidth={1}
-                                                        filter="url(#lightShadow)"
-                                                    />
-                                                    <Circle
-                                                        cx={currentX}
-                                                        cy={yScale(
-                                                            targetDataPoint.active +
-                                                                targetDataPoint.prep
-                                                        )}
-                                                        r={4}
-                                                        fill={CHART_COLORS.prep}
-                                                        stroke={CHART_COLORS.white}
-                                                        strokeWidth={1}
-                                                        filter="url(#lightShadow)"
-                                                    />
-                                                    <Circle
-                                                        cx={currentX}
-                                                        cy={yScale(targetDataPoint.active)}
-                                                        r={4}
-                                                        fill={CHART_COLORS.activeFill}
-                                                        stroke={CHART_COLORS.white}
-                                                        strokeWidth={1}
-                                                        filter="url(#lightShadow)"
-                                                    />
+                                                    {processedData.map((d, index) => {
+                                                        const x = index * ITEM_WIDTH;
+                                                        const width = ITEM_WIDTH;
+                                                        const y = yScale(d.active);
+                                                        const height = yScale(0) - y;
+                                                        return (
+                                                            <G key={index}>
+                                                                <Rect
+                                                                    x={x}
+                                                                    y={y}
+                                                                    width={width}
+                                                                    height={height}
+                                                                    fill="url(#barGradient)"
+                                                                />
+                                                                <Line
+                                                                    x1={x}
+                                                                    y1={y}
+                                                                    x2={x + width}
+                                                                    y2={y}
+                                                                    stroke={
+                                                                        CHART_COLORS.activeStroke
+                                                                    }
+                                                                    strokeWidth={2}
+                                                                />
+                                                            </G>
+                                                        );
+                                                    })}
 
                                                     <Line
                                                         x1={0}
-                                                        y1={yScale(0) + 4}
+                                                        y1={yScale(0)}
                                                         x2={chartContentWidth}
-                                                        y2={yScale(0) + 4}
-                                                        stroke={colors.gray[600]}
-                                                        strokeWidth={0.5}
+                                                        y2={yScale(0)}
+                                                        stroke={colors.gray[200]}
+                                                        strokeWidth={1}
                                                     />
 
-                                                    {xTicks.map((tickDate, index) => (
+                                                    {xTicks.map((tick, index) => (
                                                         <G key={index}>
                                                             <Line
-                                                                x1={xScale(tickDate)}
-                                                                y1={yScale(0) + 4}
-                                                                x2={xScale(tickDate)}
-                                                                y2={yScale(0) + 9}
-                                                                stroke={colors.gray[600]}
-                                                                strokeWidth={0.5}
+                                                                x1={tick.x}
+                                                                y1={yScale(0)}
+                                                                x2={tick.x}
+                                                                y2={yScale(0) + 5}
+                                                                stroke={colors.gray[300]}
+                                                                strokeWidth={1}
                                                             />
                                                             <SvgText
-                                                                x={xScale(tickDate)}
-                                                                y={yScale(0) + 20}
+                                                                x={tick.x}
+                                                                y={yScale(0) + 18}
                                                                 fontSize="10"
                                                                 fill={CHART_COLORS.text}
                                                                 textAnchor="middle"
                                                             >
-                                                                {formatDate(tickDate)}
+                                                                {formatDate(tick.date)}
                                                             </SvgText>
                                                         </G>
                                                     ))}
@@ -406,20 +346,6 @@ export const ActivePondChart = () => {
                                             </Svg>
                                         </ScrollView>
                                     </View>
-                                </View>
-
-                                <View style={styles.spacer} />
-
-                                <View style={styles.legendWrapper}>
-                                    <LegendItem
-                                        color={CHART_COLORS.activeFill}
-                                        label="Đang hoạt động"
-                                    />
-                                    <LegendItem color={CHART_COLORS.prep} label="Đang chuẩn bị" />
-                                    <LegendItem
-                                        color={CHART_COLORS.functional}
-                                        label="Ao chức năng"
-                                    />
                                 </View>
                             </View>
                         )
@@ -430,22 +356,51 @@ export const ActivePondChart = () => {
     );
 };
 
-const LegendItem = ({ color, label }: { color: string; label: string }) => (
-    <View style={styles.legendItem}>
-        <View style={[styles.legendDot, { backgroundColor: color }]} />
-        <Text style={styles.legendText}>{label}</Text>
-    </View>
-);
-
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     headerButton: {
-        paddingVertical: 12,
+        height: 48,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: 16,
+        backgroundColor: colors.white,
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
+    },
+    headerTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    headerTitleText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    badge: {
+        backgroundColor: colors.gray[900],
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    badgeText: {
+        color: colors.white,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    expandedIcon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    expandedIconRotate: {
+        transform: [{ rotate: '180deg' }],
     },
 
     contentContainer: { paddingBottom: 16 },
@@ -454,64 +409,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: colors.white,
     },
-
-    fixedHeaderLabels: {
-        width: '100%',
-        backgroundColor: colors.white,
-        flexDirection: 'row',
-        position: 'relative',
-        alignItems: 'center',
+    pondIndexWrapper: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 16,
     },
-    labelGroupLeft: {
-        position: 'absolute',
-        left: '10%',
-        alignItems: 'center',
-    },
-    labelGroupRight: {
-        position: 'absolute',
-        right: '20%',
-        alignItems: 'center',
-    },
-    labelTitle: {
-        fontSize: 14,
+    yAxisUnitLabel: {
+        fontSize: 12,
         color: colors.textSecondary,
-        textAlign: 'center',
-        marginBottom: 4,
-    },
-    labelRow: { flexDirection: 'row', alignItems: 'center' },
-    labelTextBig: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    divider: {
-        width: 1,
-        height: 14,
-        backgroundColor: colors.borderDark,
-        marginHorizontal: 10,
-    },
-
-    legendWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: 16,
-        paddingHorizontal: 10,
+        paddingLeft: 16,
+        marginBottom: 8,
     },
     loadingContainer: {
         minHeight: 300,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    legendItem: { flexDirection: 'row', alignItems: 'center' },
-    legendDot: { width: 14, height: 14, borderRadius: 10, marginRight: 6 },
-    legendText: { fontSize: 12, color: colors.textSecondary },
-
-    spacer: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginVertical: 12,
-        opacity: 0.5,
-        marginHorizontal: 16,
     },
 });

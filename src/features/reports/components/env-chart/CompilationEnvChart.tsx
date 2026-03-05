@@ -6,8 +6,6 @@ import { BasicDropDownButton } from '../BasicDropDownButton';
 import { HeadingEnvChart } from './HeadingEnvChart';
 import { PondIndex } from './PondIndex';
 import EnvChar from './EnvChar';
-import { BottomEnvChart } from './BottomEnvChart';
-
 import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
 import { Loading } from '@/shared/components/ui/Loading';
 import Peformance from '@/assets/Icon/IconReport/Peformance.svg';
@@ -92,10 +90,6 @@ const CompilationEnvChart = () => {
                             <View style={styles.chartContainer}>
                                 <EnvChar selected={selectedTab} />
                             </View>
-
-                            <View style={styles.divider} />
-
-                            <BottomEnvChart />
                         </>
                     )}
                 </View>
