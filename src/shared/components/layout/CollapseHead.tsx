@@ -3,7 +3,7 @@ import { Text, StyleSheet, ViewStyle, TextStyle, View, StyleProp } from 'react-n
 import { borderRadius, colors } from '@/styles';
 
 interface CollapseHeadProps {
-    title: string;
+    title: string | React.ReactNode;
     isExpanded: boolean;
     onToggle: () => void;
     style?: StyleProp<ViewStyle>;
@@ -14,9 +14,13 @@ interface CollapseHeadProps {
 export const CollapseHead: React.FC<CollapseHeadProps> = ({ title, style, titleStyle }) => {
     return (
         <View style={[styles.container, style]}>
-            <Text style={[styles.title, titleStyle]} numberOfLines={1}>
-                {title}
-            </Text>
+            {typeof title === 'string' ? (
+                <Text style={[styles.title, titleStyle]} numberOfLines={1}>
+                    {title}
+                </Text>
+            ) : (
+                <View style={{ flex: 1 }}>{title}</View>
+            )}
         </View>
     );
 };

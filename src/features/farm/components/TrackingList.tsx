@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, LayoutAnimation, Platform, UIManager } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { CollapseHead } from '../../../shared/components/layout/CollapseHead';
 import { TimelineEntry } from './Timeline';
 import { ActivityData } from './ActivityCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
-
-// Kích hoạt LayoutAnimation
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 // --- Interface ---
 export interface TimelineActivity {
@@ -33,94 +27,93 @@ interface TrackingDayCardProps {
     noteOnTop?: boolean;
 }
 
-const isToday = (date: Date): boolean => {
-    const today = new Date();
-    return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-    );
-};
-
 const formatSectionTitle = (dateKey: string): string => {
+    // Keep it simple as per mockup (10/01/2026)
     const date = parseDate(dateKey);
-    if (isToday(date)) {
-        return `Hôm nay, ${dateKey}`;
-    }
-    return dateKey;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style, noteOnTop }) => {
-    const [expanded, setExpanded] = useState(true);
-
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setExpanded(!expanded);
-    };
-
     const displayDate = formatSectionTitle(group.date);
 
     return (
-        <View style={style}>
-            {/* Header */}
-            <CollapseHead
-                title={displayDate}
-                isExpanded={expanded}
-                onToggle={toggleExpand}
-                style={expanded ? styles.headerExpanded : styles.headerCollapsed}
-            />
+        <View style={[style, styles.dayContainer]}>
+            {/* Header Ngày */}
+            <View style={styles.dayHeader}>
+                <View style={styles.dayDotContainer}>
+                    <View style={styles.dayDot} />
+                    <View style={styles.dayDotLine} />
+                </View>
+                <Text style={styles.dayTitleText}>{displayDate}</Text>
+            </View>
 
             {/* Body: Timeline List */}
-            {expanded && (
-                <View style={styles.cardBody}>
-                    {group.activities.map(activity => (
-                        <TimelineEntry
-                            key={activity.id}
-                            time={activity.time}
-                            title={activity.title}
-                            data={activity.data}
-                            note={activity.note}
-                            noteOnTop={noteOnTop}
-                            onEdit={activity.onEdit}
-                        />
-                    ))}
+            <View style={styles.cardBody}>
+                {group.activities.map(activity => (
+                    <TimelineEntry
+                        key={activity.id}
+                        time={activity.time}
+                        title={activity.title}
+                        data={activity.data}
+                        note={activity.note}
+                        noteOnTop={noteOnTop}
+                        onEdit={activity.onEdit}
+                    />
+                ))}
 
-                    {group.activities.length === 0 && (
-                        <Text style={styles.emptyText}>Không có hoạt động</Text>
-                    )}
-                </View>
-            )}
+                {group.activities.length === 0 && (
+                    <Text style={styles.emptyText}>Không có hoạt động</Text>
+                )}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    headerExpanded: {
+    dayContainer: {
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.md,
+    },
+    dayHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
+        gap: spacing.md,
+        marginBottom: 8,
     },
-    headerCollapsed: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+    dayDotContainer: {
+        width: 13,
+        alignItems: 'center',
+        position: 'relative',
+        height: 24,
+        justifyContent: 'center',
+    },
+    dayDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: colors.text,
+        backgroundColor: colors.white,
+        zIndex: 2,
+    },
+    dayDotLine: {
+        position: 'absolute',
+        top: 12, // start inside the dot
+        bottom: -8, // extend slightly below
+        width: 1,
+        backgroundColor: colors.borderDark,
+        zIndex: 1,
+    },
+    dayTitleText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
     },
     cardBody: {
-        paddingTop: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+        // No padding left here, TimelineEntry already has gap
     },
     emptyText: {
         textAlign: 'center',

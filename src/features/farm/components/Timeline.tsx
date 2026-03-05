@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
 import { ActivityCard, ActivityData } from './ActivityCard';
+import { spacing } from '@/styles';
 
-interface TimelineEntryProps {
+export interface TimelineEntryProps {
     time: string;
     title: string;
     data: ActivityData[];
@@ -22,17 +23,14 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
 }) => {
     return (
         <View style={styles.row}>
-            {/* Cột thời gian bên trái */}
-            <View style={styles.textBox}>
-                <Text style={styles.timeText}>{time}</Text>
-            </View>
-
+            {/* Cột timeline bên trái */}
             <View style={styles.timelineGraphic}>
-                <View style={styles.dot} />
                 <View style={styles.line} />
             </View>
+
             {/* Nội dung Card bên phải */}
             <View style={styles.contentColumn}>
+                <Text style={styles.timeText}>{time}</Text>
                 <ActivityCard
                     title={title}
                     data={data}
@@ -48,17 +46,7 @@ export const TimelineEntry: React.FC<TimelineEntryProps> = ({
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
-        gap: 8,
-    },
-    textBox: {
-        width: 48,
-        height: 46,
-    },
-    timeText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
+        gap: spacing.md,
     },
     timelineGraphic: {
         alignItems: 'center',
@@ -66,26 +54,22 @@ const styles = StyleSheet.create({
         position: 'relative',
         width: 13,
     },
-    dot: {
-        position: 'absolute',
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        borderWidth: 2,
-        borderColor: colors.borderSubtle,
-        backgroundColor: colors.white,
-        top: 4,
-        zIndex: 1,
-    },
     line: {
         position: 'absolute',
-        width: 2,
+        width: 1,
         top: 0,
         bottom: 0,
-        backgroundColor: colors.borderLight,
+        backgroundColor: colors.borderDark,
     },
     contentColumn: {
         flex: 1,
-        paddingBottom: 16,
+        paddingBottom: 24,
+    },
+    timeText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.textSecondary,
+        lineHeight: 22,
+        marginBottom: 8,
     },
 });
