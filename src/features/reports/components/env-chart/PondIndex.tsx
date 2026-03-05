@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
-import { typography } from '@/styles/typography';
+import { PondIndexCard } from './PondIndexCard';
 
-interface PondData {
+export interface PondData {
     id: string;
     name: string;
     value: string;
@@ -25,15 +25,6 @@ const DEFAULT_DATA: PondData[] = [
 ];
 
 export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {
-    const parseValueAndUnit = (value: string): { value: string; unit: string } => {
-        const firstSpace = value.indexOf(' ');
-        if (firstSpace === -1) return { value, unit: '' };
-        return {
-            value: value.slice(0, firstSpace),
-            unit: value.slice(firstSpace),
-        };
-    };
-
     return (
         <ScrollView
             horizontal
@@ -41,21 +32,9 @@ export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {
             contentContainerStyle={styles.scrollContent}
             style={styles.scrollView}
         >
-            {data.map(item => {
-                const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
-                return (
-                    <View key={item.id} style={styles.card}>
-                        <View style={[styles.indicator, { backgroundColor: item.color }]} />
-                        <Text style={styles.title} numberOfLines={1}>
-                            {item.name}
-                        </Text>
-                        <View style={styles.valueRow}>
-                            <Text style={styles.valueNumber}>{valuePart}</Text>
-                            {unitPart ? <Text style={styles.valueUnit}>{unitPart}</Text> : null}
-                        </View>
-                    </View>
-                );
-            })}
+            {data.map(item => (
+                <PondIndexCard key={item.id} item={item} />
+            ))}
         </ScrollView>
     );
 };
@@ -70,46 +49,5 @@ const styles = StyleSheet.create({
         gap: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
-    },
-    card: {
-        minWidth: 88,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.border,
-        paddingHorizontal: 10,
-        paddingTop: 8,
-        paddingBottom: 12,
-        backgroundColor: colors.white,
-    },
-    indicator: {
-        width: 20,
-        height: 3,
-        borderRadius: 2,
-        marginBottom: 8,
-    },
-    title: {
-        fontFamily: typography.fontFamily.regular,
-        fontSize: 12,
-        color: colors.textSecondary,
-        fontWeight: '400',
-        marginBottom: 4,
-    },
-    valueRow: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-        flexWrap: 'wrap',
-    },
-    valueNumber: {
-        fontFamily: typography.fontFamily.bold,
-        fontSize: 16,
-        color: colors.text,
-        fontWeight: '700',
-    },
-    valueUnit: {
-        fontFamily: typography.fontFamily.regular,
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-        marginLeft: 2,
     },
 });

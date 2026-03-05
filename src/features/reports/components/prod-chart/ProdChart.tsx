@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { spacing } from '@/styles/spacing';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { prodChartData, prodChartSummary, ProdDataPoint } from './prodData';
+import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 import { Loading } from '@/shared/components/ui/Loading';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import ProdChartIcon from '@/assets/Icon/IconReport/ProdChartIcon.svg';
@@ -35,7 +36,7 @@ const VisualChart = ({
     height = 220,
     barWidth = 20,
 }: VisualChartProps) => {
-    const TOP_PADDING = 25; // Space for values on top of bars
+    const TOP_PADDING = 0;
     const X_AXIS_HEIGHT = 20; // Space for pond names below bars
 
     return (
@@ -70,7 +71,7 @@ const VisualChart = ({
                 {/* Bars Area */}
                 <View style={[styles.barsArea, { height: height + TOP_PADDING }]}>
                     {data.map((group, groupIndex) => (
-                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
+                        <View key={groupIndex} style={[styles.barColumn, { flex: 1 }]}>
                             <View style={styles.barsRow}>
                                 {group.items.map((item, itemIndex) => {
                                     if (!item)
@@ -102,49 +103,12 @@ const VisualChart = ({
                 {/* X Axis Labels */}
                 <View style={styles.xAxisRow}>
                     {data.map((group, groupIndex) => (
-                        <View key={groupIndex} style={{ flex: 1, alignItems: 'center' }}>
+                        <View key={groupIndex} style={[styles.barColumn, { flex: 1 }]}>
                             <Text style={styles.xAxisLabel} numberOfLines={1}>
                                 {group.label}
                             </Text>
                         </View>
                     ))}
-                </View>
-            </View>
-        </View>
-    );
-};
-
-// ----------------------------------------------------------------------
-// SUB-COMPONENT: LEGEND
-// ----------------------------------------------------------------------
-
-const Legend = () => {
-    return (
-        <View style={[styles.legendContainer, { alignItems: 'flex-start' }]}>
-            <View style={styles.legendRow}>
-                <Text style={styles.legendTitle}>Còn lại:</Text>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendBox, { backgroundColor: colors.blue[800] }]} />
-                    <Text style={styles.legendText}>{'> 80'}</Text>
-                </View>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendBox, { backgroundColor: colors.blue[600] }]} />
-                    <Text style={styles.legendText}>70 - 80</Text>
-                </View>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendBox, { backgroundColor: colors.blue[400] }]} />
-                    <Text style={styles.legendText}>60 - 70</Text>
-                </View>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendBox, { backgroundColor: colors.blue[50] }]} />
-                    <Text style={styles.legendText}>{'< 40'}</Text>
-                </View>
-            </View>
-            <View style={styles.legendRow}>
-                <Text style={styles.legendTitle}>Đã thu:</Text>
-                <View style={styles.legendItem}>
-                    <View style={[styles.legendBox, { backgroundColor: colors.orange[500] }]} />
-                    <Text style={styles.legendText}>{'> 80'}</Text>
                 </View>
             </View>
         </View>
@@ -182,21 +146,8 @@ const calculateScale = (values: number[]) => {
 // MAIN COMPONENT
 // ----------------------------------------------------------------------
 
-const getAgeGroupColor = (ageGroup: string, type: 'remaining' | 'collected') => {
-    if (type === 'collected') return colors.orange[500];
-
-    switch (ageGroup) {
-        case '>80':
-            return colors.blue[800];
-        case '70-80':
-            return colors.blue[600];
-        case '60-70':
-            return colors.blue[400];
-        case '<40':
-            return colors.blue[50];
-        default:
-            return colors.blue[200];
-    }
+const getAgeGroupColor = () => {
+    return colors.orange[900];
 };
 
 export const ProdChart = () => {
@@ -213,7 +164,7 @@ export const ProdChart = () => {
         }
     }, [isExpanded]);
 
-    const [activeTab, setActiveTab] = useState<'Ngày tuổi' | 'Khu vực'>('Khu vực');
+    const [activeTab] = useState<'Ngày tuổi' | 'Khu vực'>('Khu vực');
 
     // 1. Group data by age group
     const ageGroupData = useMemo(() => {
@@ -238,14 +189,14 @@ export const ProdChart = () => {
                         group.collected > 0
                             ? {
                                   value: group.collected,
-                                  color: String(getAgeGroupColor(age, 'collected')),
+                                  color: String(getAgeGroupColor()),
                                   label: group.collected.toFixed(2).replace('.', ',') + ' T',
                               }
                             : null,
                         group.remaining > 0
                             ? {
                                   value: group.remaining,
-                                  color: String(getAgeGroupColor(age, 'remaining')),
+                                  color: String(getAgeGroupColor()),
                                   label: group.remaining.toFixed(2).replace('.', ',') + ' T',
                               }
                             : null,
@@ -256,28 +207,27 @@ export const ProdChart = () => {
             .filter((item): item is GroupData => item !== null);
     }, []);
 
-    // 2. Data for Pond tab
+    // 2. Data for Pond tab - mỗi ao 1 cột (tổng sản lượng)
     const pondData = useMemo(
         () =>
-            prodChartData.map((d: ProdDataPoint) => ({
-                label: d.pondName,
-                items: [
-                    d.collected > 0
-                        ? {
-                              value: d.collected,
-                              color: d.colorCollected || getAgeGroupColor(d.ageGroup, 'collected'),
-                              label: d.collected.toFixed(2).replace('.', ',') + ' T',
-                          }
-                        : null,
-                    d.remaining > 0
-                        ? {
-                              value: d.remaining,
-                              color: d.colorRemaining || getAgeGroupColor(d.ageGroup, 'remaining'),
-                              label: d.remaining.toFixed(2).replace('.', ',') + ' T',
-                          }
-                        : null,
-                ],
-            })) as GroupData[],
+            prodChartData.map((d: ProdDataPoint) => {
+                const total = d.collected + d.remaining;
+                return {
+                    label: d.pondName,
+                    items: [
+                        total > 0
+                            ? {
+                                  value: total,
+                                  color:
+                                      d.colorCollected ||
+                                      d.colorRemaining ||
+                                      String(getAgeGroupColor()),
+                                  label: total.toFixed(2).replace('.', ',') + ' T',
+                              }
+                            : null,
+                    ],
+                } as GroupData;
+            }),
         []
     );
 
@@ -318,7 +268,7 @@ export const ProdChart = () => {
                         </View>
                     ) : (
                         <>
-                            <View style={styles.tabContainer}>
+                            {/* <View style={styles.tabContainer}>
                                 <TouchableOpacity
                                     style={[
                                         styles.tab,
@@ -351,26 +301,37 @@ export const ProdChart = () => {
                                         Khu vực
                                     </Text>
                                 </TouchableOpacity>
-                            </View>
+                            </View> */}
 
                             <View style={styles.summaryContainer}>
-                                {prodChartSummary.map((item, index) => (
-                                    <View key={index} style={styles.summaryItem}>
-                                        <Text style={styles.summaryLabel}>{item.label}</Text>
-                                        <Text style={styles.summaryValue}>{item.value}</Text>
-                                    </View>
+                                {[prodChartSummary[1], prodChartSummary[0]].map((item, index) => (
+                                    <PondIndexCard
+                                        key={index}
+                                        item={{
+                                            id: String(index),
+                                            name: item.label,
+                                            value: item.value.replace(',', '.'),
+                                            color:
+                                                item.label === 'Đã thu'
+                                                    ? colors.orange[600]
+                                                    : colors.green[600],
+                                        }}
+                                        variant="prodSummary"
+                                    />
                                 ))}
                             </View>
+
+                            <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
 
                             <VisualChart
                                 data={activeData}
                                 yLabels={yLabels}
                                 maxValue={yMax}
                                 height={chartHeight}
-                                barWidth={activeTab === 'Khu vực' ? 20 : 30}
+                                barWidth={32}
                             />
 
-                            <Legend />
+                            {/* <Legend /> */}
                         </>
                     )}
                 </View>
@@ -429,24 +390,20 @@ const styles = StyleSheet.create({
         fontFamily: typography.fontFamily.bold,
     },
     summaryContainer: {
+        marginHorizontal: spacing.md,
+        marginTop: 12,
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginBottom: spacing.xl,
+        flexWrap: 'wrap',
+        gap: 12,
+        marginBottom: spacing.lg,
     },
-    summaryItem: {
-        alignItems: 'center',
-    },
-    summaryLabel: {
-        fontSize: typography.fontSize.sm,
+    chartTitle: {
+        marginHorizontal: spacing.md,
+        marginBottom: spacing.sm,
+        fontSize: typography.fontSize.xs,
+        fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,
-        marginBottom: spacing.xs,
-        fontFamily: typography.fontFamily.regular,
-    },
-    summaryValue: {
-        fontSize: typography.fontSize.xl,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-        fontFamily: typography.fontFamily.bold,
+        fontFamily: typography.fontFamily.medium,
     },
     chartMainArea: {
         flexDirection: 'row',
@@ -490,6 +447,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-end',
     },
+    barColumn: {
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
     barGroup: {
         alignItems: 'center',
         justifyContent: 'flex-end',
@@ -499,7 +460,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        width: '100%',
+        alignSelf: 'center',
     },
     barWrapper: {
         alignItems: 'center',
@@ -528,7 +489,6 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         color: colors.gray[600],
         textAlign: 'center',
-        width: '100%',
         fontFamily: typography.fontFamily.regular,
     },
     legendContainer: {

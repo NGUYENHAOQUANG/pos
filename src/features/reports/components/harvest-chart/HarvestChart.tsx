@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
+import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
 import { mockHarvestChartData } from './harvestData';
+import { Chart } from './Chart';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import HarvestChartIcon from '@/assets/Icon/IconReport/HarvestChartIcon.svg';
 
-const CHART_CONTENT_HEIGHT = 394;
-const BAR_MAX_HEIGHT = 340.61;
+const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
 
 export const HarvestChart: React.FC = () => {
     const [isCollapsed, setIsCollapsed] = useState(true);
@@ -28,20 +29,10 @@ export const HarvestChart: React.FC = () => {
         return mockHarvestChartData.reduce((acc, curr) => acc + curr.yield, 0).toFixed(2);
     }, []);
 
-    const yAxisConfig = useMemo(() => {
-        const maxValue = Math.max(...mockHarvestChartData.map(d => d.yield));
-        const roundMax = Math.ceil(maxValue / 10) * 10 || 10;
-
-        // Create 4 steps
-        const step = roundMax / 4;
-        const labels = [roundMax, roundMax - step, roundMax - step * 2, roundMax - step * 3, 0];
-
-        return { max: roundMax, labels };
-    }, []);
-
-    const getBarHeight = (value: number) => {
-        return (value / yAxisConfig.max) * BAR_MAX_HEIGHT;
-    };
+    // Get screen layout dimensions dynamically
+    const screenWidth = Dimensions.get('window').width;
+    // Assuming 16 horizontal padding on both sides in the container and parent views
+    const chartWidth = screenWidth - 32;
 
     return (
         <View style={chartStyles.container}>
@@ -61,54 +52,24 @@ export const HarvestChart: React.FC = () => {
                     ) : (
                         <>
                             <View style={styles.summaryContainer}>
-                                <Text style={styles.summaryLabel}>Sản lượng đã thu hoạch</Text>
-                                <Text style={styles.summaryValue}>{totalYield} tấn</Text>
+                                <PondIndexCard
+                                    item={{
+                                        id: 'harvest-yield',
+                                        name: 'Sản lượng đã thu hoạch',
+                                        value: `${totalYield} tấn`,
+                                        color: colors.orange[600],
+                                    }}
+                                    variant="prodSummary"
+                                />
                             </View>
 
-                            <View style={styles.chartAreaWrapper}>
-                                <View style={styles.yAxisLabels}>
-                                    {yAxisConfig.labels.map(val => (
-                                        <View key={val} style={styles.yLabelWrapper}>
-                                            <Text style={styles.yLabelText}>
-                                                {val.toLocaleString()}
-                                            </Text>
-                                        </View>
-                                    ))}
-                                </View>
+                            <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
 
-                                {/* Chart-Section */}
-                                <View style={styles.chartContent}>
-                                    <View style={styles.gridContainer} pointerEvents="none">
-                                        {[0, 1, 2, 3, 4].map(i => (
-                                            <View
-                                                key={i}
-                                                style={[
-                                                    styles.gridLine,
-                                                    { top: i * (BAR_MAX_HEIGHT / 4) },
-                                                ]}
-                                            />
-                                        ))}
-                                    </View>
-                                    <View style={styles.barsWrapper}>
-                                        {mockHarvestChartData.map(item => (
-                                            <View key={item.pond} style={styles.barColumn}>
-                                                <Text style={styles.topValueText}>
-                                                    {item.yield.toFixed(2)}
-                                                </Text>
-                                                <View
-                                                    style={[
-                                                        styles.bar,
-                                                        { height: getBarHeight(item.yield) },
-                                                    ]}
-                                                />
-                                                <Text style={styles.bottomLabelText}>
-                                                    {item.pond}
-                                                </Text>
-                                            </View>
-                                        ))}
-                                    </View>
-                                </View>
-                            </View>
+                            <Chart
+                                data={mockHarvestChartData}
+                                chartWidth={chartWidth}
+                                chartHeight={CHART_CONTENT_HEIGHT}
+                            />
                         </>
                     )}
                 </View>
@@ -134,11 +95,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
     },
     summaryContainer: {
-        alignItems: 'center',
-        minHeight: 70,
-        paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        paddingBottom: spacing.md,
         width: '100%',
     },
     loadingContainer: {
@@ -146,76 +103,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    summaryLabel: {
-        fontSize: 10,
-        color: colors.text,
-        fontWeight: typography.fontWeight.regular,
-    },
-    summaryValue: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.text,
-    },
-    chartAreaWrapper: {
-        flexDirection: 'row',
-        height: CHART_CONTENT_HEIGHT,
-    },
-    yAxisLabels: {
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.sm,
-        height: BAR_MAX_HEIGHT + 14,
-        marginTop: 13,
-        paddingBottom: 3,
-    },
-    yLabelText: {
+    chartTitle: {
+        marginBottom: spacing.sm,
         fontSize: typography.fontSize.xs,
-        color: colors.text,
-        textAlign: 'right',
-        width: 35,
-    },
-    yLabelWrapper: {
-        height: 14,
-        justifyContent: 'center',
-    },
-    chartContent: {
-        flex: 1,
-        height: CHART_CONTENT_HEIGHT,
-    },
-    gridContainer: {
-        ...StyleSheet.absoluteFillObject,
-        marginTop: 20,
-        height: BAR_MAX_HEIGHT,
-        justifyContent: 'space-between',
-    },
-    gridLine: {
-        height: 0.75,
-        backgroundColor: colors.defaultBorder,
-    },
-    barsWrapper: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'flex-end',
-        height: BAR_MAX_HEIGHT,
-        marginTop: 20,
-    },
-    barColumn: {
-        alignItems: 'center',
-    },
-    bar: {
-        width: 20.48,
-        backgroundColor: colors.orange[700],
-    },
-    topValueText: {
-        fontSize: typography.fontSize.xs,
-        marginBottom: spacing.xs,
-        fontWeight: typography.fontWeight.regular,
-    },
-    bottomLabelText: {
-        fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.regular,
-        marginTop: spacing.sm,
-        position: 'absolute',
-        bottom: -25,
+        fontWeight: typography.fontWeight.medium,
+        color: colors.textSecondary,
+        fontFamily: typography.fontFamily.medium,
     },
     headerButton: {
         // Ghi đè style của BasicDropDownButton
