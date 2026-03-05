@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors } from '@/styles';
+import { colors, borderRadius } from '@/styles';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
 import { Legend, getFeedProdLegendItems } from '@/features/reports/components/Legend';
@@ -16,6 +16,8 @@ import {
 } from '@/features/reports/components/feed-prod/feedprodData';
 
 import { Loading } from '@/shared/components/ui/Loading';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import FeedChart from '@/assets/Icon/IconReport/FeedChart.svg';
 
 export const CompilationFeedProd = () => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -59,43 +61,38 @@ export const CompilationFeedProd = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             {/* Collapsible Chart Section */}
-            <View style={styles.chartSection}>
-                <BasicDropDownButton
-                    label="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
-                    isExpanded={isExpanded}
-                    onPress={() => setIsExpanded(!isExpanded)}
-                    style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
-                />
+            <BasicDropDownButton
+                prefixIcon={<FeedChart width={18} height={18} />}
+                label="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
+                isExpanded={isExpanded}
+                onPress={() => setIsExpanded(!isExpanded)}
+                style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
+            />
 
-                {isExpanded && (
-                    <View style={isLoading ? styles.loadingContainer : undefined}>
-                        {isLoading ? (
-                            <Loading />
-                        ) : (
-                            <>
-                                <MetricsRow
-                                    production={formatMetricValue(getLatestProduction())}
-                                    consumed={formatMetricValue(getLatestConsumed())}
-                                    fcr={formatFCR(getLatestFCR())}
-                                />
-                                <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                                <Legend items={getFeedProdLegendItems()} />
-                            </>
-                        )}
-                    </View>
-                )}
-            </View>
+            {isExpanded && (
+                <View style={[styles.content, isLoading && styles.loadingContainer]}>
+                    {isLoading ? (
+                        <Loading />
+                    ) : (
+                        <>
+                            <MetricsRow
+                                production={formatMetricValue(getLatestProduction())}
+                                consumed={formatMetricValue(getLatestConsumed())}
+                                fcr={formatFCR(getLatestFCR())}
+                            />
+                            <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                            <Legend items={getFeedProdLegendItems()} />
+                        </>
+                    )}
+                </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     headerExpanded: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -112,8 +109,10 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
     },
-    chartSection: {
+    content: {
         backgroundColor: colors.white,
+        borderBottomLeftRadius: borderRadius.sm,
+        borderBottomRightRadius: borderRadius.sm,
     },
     loadingContainer: {
         minHeight: 300,

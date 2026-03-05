@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { colors } from '@/styles/colors';
+import { colors, borderRadius } from '@/styles';
 
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { HeadingEnvChart } from './HeadingEnvChart';
@@ -10,6 +10,8 @@ import { BottomEnvChart } from './BottomEnvChart';
 
 import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
 import { Loading } from '@/shared/components/ui/Loading';
+import Peformance from '@/assets/Icon/IconReport/Peformance.svg';
+import chartStyles from '@/features/reports/styles/chart.styles';
 
 // Metric Map (duplicated from EnvChar for independence, or could be shared)
 const METRIC_MAP: Record<string, { key: keyof EnvLog; label: string; unit: string }> = {
@@ -66,8 +68,9 @@ const CompilationEnvChart = () => {
     }, [selectedTab]);
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             <BasicDropDownButton
+                prefixIcon={<Peformance width={18} height={18} />}
                 label="BIỂU ĐỒ THÔNG SỐ MÔI TRƯỜNG"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
@@ -104,10 +107,6 @@ const CompilationEnvChart = () => {
 export default CompilationEnvChart;
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     header: {
         paddingVertical: 12,
         paddingHorizontal: 16,
@@ -122,6 +121,9 @@ const styles = StyleSheet.create({
     },
     content: {
         backgroundColor: colors.white,
+        paddingHorizontal: 16,
+        borderBottomLeftRadius: borderRadius.sm,
+        borderBottomRightRadius: borderRadius.sm,
     },
     chartContainer: {
         marginVertical: 16,

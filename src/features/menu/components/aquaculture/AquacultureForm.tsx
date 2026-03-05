@@ -122,190 +122,202 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
         return (
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 {/* Zone Selection */}
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>
-                        {isEditMode ? 'Trại nuôi' : 'Chọn trại nuôi'}
-                    </Text>
-                    <Controller
-                        name="zoneId"
-                        control={control}
-                        render={({ field: { onChange, value } }) => {
-                            const selectedZone = zoneOptions.find(z => z.id === value);
-                            if (isEditMode) {
-                                return (
-                                    <Input
-                                        value={selectedZone?.label || ''}
-                                        editable={false}
-                                        placeholder="Trại nuôi"
-                                        containerStyle={styles.noMarginBottom}
-                                        inputContainerStyle={styles.inputDisabledBox}
-                                    />
-                                );
-                            }
-                            return (
-                                <DropDownButton
-                                    data={zoneOptions}
-                                    value={selectedZone}
-                                    onSelect={(item: DropDownItem) => {
-                                        onChange(item.id.toString());
-                                    }}
-                                    placeholder="Chọn trại nuôi"
-                                    style={styles.dropdown}
-                                    height={40}
-                                    borderRadius={6}
-                                />
-                            );
-                        }}
-                    />
-                    {errors.zoneId && <Text style={styles.errorText}>{errors.zoneId.message}</Text>}
-                </View>
-
-                {/* Cycle Name & Code */}
-                <View style={[styles.row, styles.zIndex10]}>
-                    <View style={styles.flex1}>
+                <View style={styles.card}>
+                    <View style={styles.fieldContainer}>
+                        <Text style={styles.label}>
+                            <Text style={styles.required}>* </Text>
+                            {isEditMode ? 'Trại nuôi' : 'Chọn trại nuôi'}
+                        </Text>
                         <Controller
-                            name="name"
+                            name="zoneId"
                             control={control}
-                            render={({ field: { onChange, value } }) => (
-                                <FarmInput
-                                    label="Tên vụ nuôi"
-                                    required
-                                    value={value}
-                                    onChangeText={onChange}
-                                    placeholder="Nhập"
-                                    containerStyle={styles.noMarginBottom}
-                                    error={errors.name?.message}
-                                />
-                            )}
-                        />
-                    </View>
-                    <View style={[styles.flex1, styles.zIndex10]}>
-                        <TouchableOpacity
-                            activeOpacity={0.7}
-                            onPress={() => (currentCode ? setShowFullCode(!showFullCode) : null)}
-                        >
-                            <View pointerEvents="none">
-                                <Controller
-                                    name="code"
-                                    control={control}
-                                    render={({ field: { value } }) => (
+                            render={({ field: { onChange, value } }) => {
+                                const selectedZone = zoneOptions.find(z => z.id === value);
+                                if (isEditMode) {
+                                    return (
                                         <Input
-                                            label="Mã vụ nuôi"
-                                            value={value || ''}
-                                            placeholder="Mã tự động"
+                                            value={selectedZone?.label || ''}
+                                            editable={false}
+                                            placeholder="Trại nuôi"
                                             containerStyle={styles.noMarginBottom}
                                             inputContainerStyle={styles.inputDisabledBox}
-                                            disabled
-                                            ellipsizeMode="tail"
+                                            required
                                         />
-                                    )}
-                                />
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Full Code Display Popup */}
-                        {showFullCode && currentCode ? (
-                            <View style={styles.fullCodeContainer}>
-                                <Text style={styles.fullCodeText} selectable>
-                                    Mã vụ nuôi:{' '}
-                                    <Text style={styles.fullCodeValue}>{currentCode}</Text>
-                                </Text>
-                            </View>
-                        ) : null}
-                    </View>
-                </View>
-
-                {/* Start & End Date */}
-                <View style={styles.row}>
-                    <View style={styles.flex1}>
-                        <Controller
-                            name="startDate"
-                            control={control}
-                            render={({ field: { onChange, value } }) => (
-                                <DateInputButton
-                                    label="Ngày bắt đầu"
-                                    date={value}
-                                    onDateChange={onChange}
-                                    required
-                                    height={40}
-                                    dateOnly
-                                    formatOptions={{
-                                        showCurrentLabel: false,
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors.startDate && (
-                            <Text style={styles.errorText}>{errors.startDate.message}</Text>
-                        )}
-                    </View>
-                    <View style={styles.flex1}>
-                        <Controller
-                            name="endDate"
-                            control={control}
-                            render={({ field: { onChange, value } }) => (
-                                <DateInputButton
-                                    label="Ngày kết thúc"
-                                    date={value}
-                                    onDateChange={onChange}
-                                    height={40}
-                                    dateOnly
-                                    formatOptions={{
-                                        showCurrentLabel: false,
-                                    }}
-                                />
-                            )}
-                        />
-                    </View>
-                </View>
-
-                {/* Status */}
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.label}>Chọn trạng thái</Text>
-                    <Controller
-                        name="status"
-                        control={control}
-                        render={({ field: { onChange, value } }) => (
-                            <RadioButton
-                                options={statusOptions}
-                                value={value}
-                                onValueChange={(val: string) =>
-                                    onChange(val as AquacultureFormStatus)
+                                    );
                                 }
-                                disabled={initialData?.status === 'ended'}
-                            />
+                                return (
+                                    <DropDownButton
+                                        data={zoneOptions}
+                                        value={selectedZone}
+                                        onSelect={(item: DropDownItem) => {
+                                            onChange(item.id.toString());
+                                        }}
+                                        placeholder="Chọn trại nuôi"
+                                        style={styles.dropdown}
+                                        height={40}
+                                        borderRadius={6}
+                                    />
+                                );
+                            }}
+                        />
+                        {errors.zoneId && (
+                            <Text style={styles.errorText}>{errors.zoneId.message}</Text>
                         )}
-                    />
-                </View>
+                    </View>
 
-                {/* Note */}
-                <View style={styles.fieldContainer}>
-                    <Text style={styles.label}>Ghi chú</Text>
-                    <View style={styles.inputGroup}>
+                    {/* Cycle Name & Code */}
+                    <View style={[styles.row, styles.zIndex10]}>
+                        <View style={styles.flex1}>
+                            <Controller
+                                name="name"
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                    <FarmInput
+                                        label="Tên vụ nuôi"
+                                        required
+                                        value={value}
+                                        onChangeText={onChange}
+                                        placeholder="Nhập"
+                                        containerStyle={styles.noMarginBottom}
+                                        error={errors.name?.message}
+                                    />
+                                )}
+                            />
+                        </View>
+                        <View style={[styles.flex1, styles.zIndex10]}>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() =>
+                                    currentCode ? setShowFullCode(!showFullCode) : null
+                                }
+                            >
+                                <View pointerEvents="none">
+                                    <Controller
+                                        name="code"
+                                        control={control}
+                                        render={({ field: { value } }) => (
+                                            <Input
+                                                label="Mã vụ nuôi"
+                                                value={value || ''}
+                                                placeholder="Mã tự động"
+                                                containerStyle={styles.noMarginBottom}
+                                                inputContainerStyle={styles.inputDisabledBox}
+                                                disabled
+                                            />
+                                        )}
+                                    />
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Full Code Display Popup */}
+                            {showFullCode && currentCode ? (
+                                <View style={styles.fullCodeContainer}>
+                                    <Text style={styles.fullCodeText} selectable>
+                                        Mã vụ nuôi:{' '}
+                                        <Text style={styles.fullCodeValue}>{currentCode}</Text>
+                                    </Text>
+                                </View>
+                            ) : null}
+                        </View>
+                    </View>
+
+                    {/* Start & End Date */}
+                    <View style={styles.row}>
+                        <View style={styles.flex1}>
+                            <Controller
+                                name="startDate"
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                    <DateInputButton
+                                        label="Ngày bắt đầu"
+                                        date={value}
+                                        onDateChange={onChange}
+                                        required
+                                        height={40}
+                                        dateOnly
+                                        formatOptions={{
+                                            showCurrentLabel: false,
+                                        }}
+                                    />
+                                )}
+                            />
+                            {errors.startDate && (
+                                <Text style={styles.errorText}>{errors.startDate.message}</Text>
+                            )}
+                        </View>
+                        <View style={styles.flex1}>
+                            <Controller
+                                name="endDate"
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                    <DateInputButton
+                                        label="Ngày kết thúc"
+                                        date={value}
+                                        onDateChange={onChange}
+                                        height={40}
+                                        dateOnly
+                                        formatOptions={{
+                                            showCurrentLabel: false,
+                                        }}
+                                    />
+                                )}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Status */}
+                    <View style={styles.fieldContainer}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Chọn trạng thái</Text>
+                            <View style={styles.requiredDot} />
+                        </View>
                         <Controller
-                            name="note"
+                            name="status"
                             control={control}
                             render={({ field: { onChange, value } }) => (
-                                <TextInput
-                                    style={styles.textArea}
-                                    placeholder="Nhập ghi chú"
-                                    placeholderTextColor={colors.borderSubtle}
-                                    value={value || ''}
-                                    onChangeText={text => {
-                                        if (text.length > 1999) {
-                                            showLimitCharacterToast();
-                                            onChange(text.substring(0, 1999));
-                                        } else {
-                                            onChange(text);
-                                        }
-                                    }}
-                                    multiline
-                                    textAlignVertical="top"
-                                    maxLength={2000}
+                                <RadioButton
+                                    options={statusOptions}
+                                    value={value}
+                                    onValueChange={(val: string) =>
+                                        onChange(val as AquacultureFormStatus)
+                                    }
+                                    disabled={initialData?.status === 'ended'}
                                 />
                             )}
                         />
+                    </View>
+
+                    {/* Note */}
+                    <View style={styles.fieldContainer}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Ghi chú</Text>
+                            <View style={styles.requiredDot} />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Controller
+                                name="note"
+                                control={control}
+                                render={({ field: { onChange, value } }) => (
+                                    <TextInput
+                                        style={styles.textArea}
+                                        placeholder="Nhập ghi chú"
+                                        placeholderTextColor={colors.borderSubtle}
+                                        value={value || ''}
+                                        onChangeText={text => {
+                                            if (text.length > 1999) {
+                                                showLimitCharacterToast();
+                                                onChange(text.substring(0, 1999));
+                                            } else {
+                                                onChange(text);
+                                            }
+                                        }}
+                                        multiline
+                                        textAlignVertical="top"
+                                        maxLength={2000}
+                                    />
+                                )}
+                            />
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -317,23 +329,31 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'transparent',
         flex: 1,
-        paddingTop: spacing.sm,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 1,
+        marginHorizontal: spacing.md,
     },
-    content: {
+    card: {
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm + 4,
-        backgroundColor: colors.white,
         flexGrow: 0,
         gap: spacing.md,
     },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    requiredDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: colors.error,
+        marginLeft: 4,
+        marginBottom: 2,
+    },
+    content: {},
     fieldContainer: {
         gap: spacing.sm,
     },

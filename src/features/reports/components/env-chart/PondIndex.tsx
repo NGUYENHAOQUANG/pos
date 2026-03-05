@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
@@ -25,75 +25,91 @@ const DEFAULT_DATA: PondData[] = [
 ];
 
 export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {
-    const firstRow = data.slice(0, 4);
-    const secondRow = data.slice(4, 7);
+    const parseValueAndUnit = (value: string): { value: string; unit: string } => {
+        const firstSpace = value.indexOf(' ');
+        if (firstSpace === -1) return { value, unit: '' };
+        return {
+            value: value.slice(0, firstSpace),
+            unit: value.slice(firstSpace),
+        };
+    };
 
     return (
-        <View style={styles.container}>
-            {/* Row 1: 4 Items */}
-            <View style={styles.row}>
-                {firstRow.map(item => (
-                    <View key={item.id} style={[styles.item, { borderColor: item.color }]}>
-                        <Text style={styles.name}>{item.name}</Text>
-                        <Text style={styles.value}>{item.value}</Text>
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+            style={styles.scrollView}
+        >
+            {data.map(item => {
+                const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
+                return (
+                    <View key={item.id} style={styles.card}>
+                        <View style={[styles.indicator, { backgroundColor: item.color }]} />
+                        <Text style={styles.title} numberOfLines={1}>
+                            {item.name}
+                        </Text>
+                        <View style={styles.valueRow}>
+                            <Text style={styles.valueNumber}>{valuePart}</Text>
+                            {unitPart ? <Text style={styles.valueUnit}>{unitPart}</Text> : null}
+                        </View>
                     </View>
-                ))}
-            </View>
-
-            {/* Row 2: 3 Items + 1 Ghost Item for perfect alignment */}
-            <View style={styles.row}>
-                {secondRow.map(item => (
-                    <View key={item.id} style={[styles.item, { borderColor: item.color }]}>
-                        <Text style={styles.name}>{item.name}</Text>
-                        <Text style={styles.value}>{item.value}</Text>
-                    </View>
-                ))}
-                {/* Invisible filler item to match the 4-column layout of row 1 */}
-                <View
-                    style={[
-                        styles.item,
-                        { borderColor: 'transparent', backgroundColor: 'transparent' },
-                    ]}
-                />
-            </View>
-        </View>
+                );
+            })}
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'column',
-        gap: 12,
-        padding: 16,
+    scrollView: {
+        flexGrow: 0,
     },
-    row: {
+    scrollContent: {
         flexDirection: 'row',
-        gap: 12,
-    },
-    item: {
-        flex: 1, // Auto scale
-        // aspectRatio: 1, // Removed to allow rectangular shape
-        justifyContent: 'center',
         alignItems: 'center',
+        gap: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+    },
+    card: {
+        minWidth: 88,
         borderRadius: 8,
         borderWidth: 1,
-        padding: 4,
-        paddingVertical: 12, // More height padding
+        borderColor: colors.border,
+        paddingHorizontal: 10,
+        paddingTop: 8,
+        paddingBottom: 12,
         backgroundColor: colors.white,
     },
-    name: {
-        fontFamily: typography.fontFamily.regular,
-        fontSize: typography.fontSize.xs,
-        color: colors.text,
-        marginBottom: 4,
-        textAlign: 'center',
-        fontWeight: '400',
+    indicator: {
+        width: 20,
+        height: 3,
+        borderRadius: 2,
+        marginBottom: 8,
     },
-    value: {
+    title: {
+        fontFamily: typography.fontFamily.regular,
+        fontSize: 12,
+        color: colors.textSecondary,
+        fontWeight: '400',
+        marginBottom: 4,
+    },
+    valueRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+    },
+    valueNumber: {
         fontFamily: typography.fontFamily.bold,
-        fontSize: typography.fontSize.sm,
+        fontSize: 16,
         color: colors.text,
-        textAlign: 'center',
         fontWeight: '700',
+    },
+    valueUnit: {
+        fontFamily: typography.fontFamily.regular,
+        fontSize: 14,
+        color: colors.textSecondary,
+        fontWeight: '400',
+        marginLeft: 2,
     },
 });

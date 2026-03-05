@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 
 /**
  * Interface for a single legend item
@@ -74,6 +74,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.borderLight,
+        borderBottomLeftRadius: borderRadius.sm,
+        borderBottomRightRadius: borderRadius.sm,
     },
     legendItem: {
         flexDirection: 'row',

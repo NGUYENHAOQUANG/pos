@@ -23,6 +23,7 @@ import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsag
 import { useScrollToTop } from '@react-navigation/native';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones } from '@/features/farm/hooks';
+import { spacing } from '@/styles/spacing';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
@@ -171,7 +172,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 <ScrollView
                     ref={scrollViewRef}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+                    contentContainerStyle={{ paddingBottom: insets.bottom + 20, gap: 6 }}
                 >
                     {selectedPondType.label === 'Ao vèo'
                         ? renderAoVeoContent()
@@ -189,6 +190,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingHorizontal: 0,
+        marginHorizontal: spacing.md,
     },
 });
