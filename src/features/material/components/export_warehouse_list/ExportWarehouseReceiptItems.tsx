@@ -4,6 +4,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ExportReceiptItem } from '@/features/material/types/exportReceipt.types';
 import { formatCurrencyValue } from '@/shared/utils';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 interface ExportWarehouseReceiptItemsProps {
     materials: ExportReceiptItem[];
@@ -14,80 +15,62 @@ export const ExportWarehouseReceiptItems: React.FC<ExportWarehouseReceiptItemsPr
 }) => {
     return (
         <View style={styles.container}>
-            {materials.map((item, index) => {
-                const itemTotal = (item.quantity || 0) * (item.costPrice || 0);
-
-                return (
+            <View>
+                {materials.map((item, index) => (
                     <View key={item.id || index} style={styles.materialCard}>
-                        {/* Header */}
                         <View style={styles.materialHeader}>
                             <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
                         </View>
 
                         <View style={styles.content}>
-                            {/* Material Name - No Label */}
-                            <View style={styles.nameRow}>
-                                <Text style={styles.materialName}>
-                                    {item.materialName || '---'}
-                                </Text>
-                            </View>
-
-                            <View style={styles.separatorFull} />
-
-                            {/* Quantity and Price */}
-                            <View style={styles.detailsRow}>
-                                <View style={styles.detailItem}>
-                                    <View style={styles.detailContent}>
-                                        <Text style={styles.label}>Số lượng: </Text>
-                                        <Text style={styles.value}>{item.quantity}</Text>
-                                    </View>
-                                </View>
-                                <View style={styles.detailItem}>
-                                    <View style={[styles.detailContent, styles.detailContentEnd]}>
-                                        <Text style={styles.priceLabel}>Đơn giá: </Text>
-                                        <Text style={styles.priceValue}>
-                                            {formatCurrency(item.costPrice || 0)}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={styles.separatorInset} />
-
-                            {/* Total Amount */}
-                            <View style={styles.footer}>
-                                <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                <Text style={styles.footerValue}>
-                                    {formatCurrencyValue(item.totalAmount || itemTotal)}
-                                </Text>
-                            </View>
+                            <DetailRow
+                                label={item.materialName || '---'}
+                                value=""
+                                labelStyle={styles.materialName}
+                                style={styles.detailRow}
+                            />
+                            <DetailRow
+                                label="Số lượng:"
+                                value={item.quantity}
+                                style={styles.detailRow}
+                            />
+                            <DetailRow
+                                label="Đơn giá:"
+                                value={formatCurrency(item.costPrice || 0)}
+                                style={styles.detailRow}
+                            />
+                            <DetailRow
+                                label="Thành tiền:"
+                                value={formatCurrencyValue(
+                                    item.totalAmount || item.quantity * item.costPrice
+                                )}
+                                style={styles.detailRow}
+                            />
                         </View>
                     </View>
-                );
-            })}
+                ))}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 12,
         paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xs,
     },
     materialCard: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
+        borderRadius: borderRadius.sm,
         borderWidth: 1,
         borderColor: colors.border,
         marginBottom: spacing.md,
     },
     materialHeader: {
-        paddingVertical: spacing.sm,
+        paddingVertical: 12,
         paddingHorizontal: spacing.md,
         backgroundColor: colors.gray[100],
-        borderTopLeftRadius: borderRadius.md,
-        borderTopRightRadius: borderRadius.md,
+        borderTopLeftRadius: borderRadius.sm,
+        borderTopRightRadius: borderRadius.sm,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
     },
@@ -98,79 +81,43 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingBottom: spacing.md,
+        paddingTop: 12,
+        gap: spacing.sm,
     },
     nameRow: {
         paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingVertical: spacing.sm,
     },
     materialName: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.text,
-        fontWeight: '400',
+        fontWeight: '500',
     },
     detailsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
-        paddingTop: spacing.sm,
     },
     detailItem: {
         flex: 1,
     },
-    detailContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    value: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
     footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingTop: spacing.sm,
     },
-    footerLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    footerValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    priceLabel: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '600',
-    },
-    priceValue: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    detailContentEnd: {
-        justifyContent: 'flex-end',
-    },
-    separatorFull: {
-        height: 1,
-        backgroundColor: colors.border,
-        width: '100%',
-    },
-    separatorInset: {
-        height: 1,
-        backgroundColor: colors.border,
+    detailRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
         marginHorizontal: spacing.md,
+    },
+    detailLabel: {
+        fontWeight: '400',
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+    },
+    detailValue: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
     },
 });

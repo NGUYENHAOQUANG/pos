@@ -124,6 +124,7 @@ export function Input({
                     <Text style={styles.label} maxFontSizeMultiplier={1.1}>
                         {label}
                     </Text>
+                    {/* Small required dot 4x4 displayed to the right of label */}
                     {required && <View style={styles.requiredDot} />}
                 </View>
             )}

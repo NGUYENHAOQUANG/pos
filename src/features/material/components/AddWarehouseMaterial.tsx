@@ -96,167 +96,148 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
         <View style={styles.mainMaterialCard}>
             <CollapseHead title={title} isExpanded={isExpanded} onToggle={toggleExpand} />
 
-            {isExpanded && (
-                <View style={styles.mainContent}>
-                    {materials.map((item, index) => {
-                        const itemTotal = warehouseFormUtils.calculateItemTotal(
-                            item.quantity,
-                            item.price
-                        );
-                        const displayTotal =
-                            itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
-                        const isDropdownOpen = activeDropdownId === item.id;
+            <View style={styles.mainContent}>
+                {materials.map((item, index) => {
+                    const itemTotal = warehouseFormUtils.calculateItemTotal(
+                        item.quantity,
+                        item.price
+                    );
+                    const displayTotal = itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
+                    const isDropdownOpen = activeDropdownId === item.id;
 
-                        const rowOptions = warehouseFormUtils.getAvailableDropdownOptions(
-                            materials,
-                            materialOptions,
-                            index
-                        );
-                        const isOverStock = warehouseFormUtils.isQuantityOverStock(
-                            item.quantity,
-                            item.availableQuantity
-                        );
+                    const rowOptions = warehouseFormUtils.getAvailableDropdownOptions(
+                        materials,
+                        materialOptions,
+                        index
+                    );
+                    const isOverStock = warehouseFormUtils.isQuantityOverStock(
+                        item.quantity,
+                        item.availableQuantity
+                    );
 
-                        return (
-                            <View
-                                key={item.id}
-                                ref={ref => {
-                                    itemRefs.current[item.id] = ref;
-                                }}
-                                style={[
-                                    styles.materialWrapper,
-                                    isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
-                                ]}
-                            >
-                                <View style={styles.materialCard}>
-                                    <View style={styles.materialHeader}>
-                                        <Text style={styles.materialHeaderTitle}>
-                                            Vật tư {index + 1}
-                                        </Text>
-                                        {onRemoveMaterial && (
-                                            <TouchableOpacity
-                                                style={styles.removeButton}
-                                                onPress={() => onRemoveMaterial(item.id)}
-                                                hitSlop={{
-                                                    top: 10,
-                                                    bottom: 10,
-                                                    left: 10,
-                                                    right: 10,
-                                                }}
-                                            >
-                                                <Ionicons
-                                                    name="close-circle-outline"
-                                                    size={24}
-                                                    color={colors.error}
-                                                />
-                                            </TouchableOpacity>
+                    return (
+                        <View
+                            key={item.id}
+                            ref={ref => {
+                                itemRefs.current[item.id] = ref;
+                            }}
+                            style={[
+                                styles.materialWrapper,
+                                isDropdownOpen ? styles.zIndexHigh : styles.zIndexNormal,
+                            ]}
+                        >
+                            <View style={styles.materialCard}>
+                                <View style={styles.materialHeader}>
+                                    <Text style={styles.materialHeaderTitle}>
+                                        Vật tư {index + 1}
+                                    </Text>
+                                    {onRemoveMaterial && (
+                                        <TouchableOpacity
+                                            style={styles.removeButton}
+                                            onPress={() => onRemoveMaterial(item.id)}
+                                            hitSlop={{
+                                                top: 10,
+                                                bottom: 10,
+                                                left: 10,
+                                                right: 10,
+                                            }}
+                                        >
+                                            <Ionicons
+                                                name="close-circle-outline"
+                                                size={24}
+                                                color={colors.error}
+                                            />
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
+
+                                <View style={styles.content}>
+                                    <View style={[styles.inputGroup, styles.zIndexMedium]}>
+                                        <DropdownMaterial
+                                            label="Tên vật tư"
+                                            required
+                                            value={item.materialId} // Use ID
+                                            options={rowOptions} // { label, value: ID }
+                                            onChange={val =>
+                                                onUpdateMaterial(item.id, 'materialId', val)
+                                            }
+                                            placeholder="Chọn vật tư"
+                                            showAllOption={false}
+                                            isOpen={isDropdownOpen}
+                                            onToggle={() => handleToggleDropdown(item.id, index)}
+                                        />
+
+                                        <Input
+                                            label="Số lượng"
+                                            required
+                                            placeholder="Nhập số lượng"
+                                            value={item.quantity}
+                                            onChangeText={val => handleQuantityChange(item.id, val)}
+                                            keyboardType="numeric"
+                                            containerStyle={styles.noMarginBottom}
+                                        />
+                                        {isOverStock && (
+                                            <Text style={styles.overStockText}>
+                                                Vượt quá tồn kho ({item.availableQuantity})
+                                            </Text>
                                         )}
+
+                                        <Input
+                                            label={
+                                                <Text>
+                                                    Đơn giá (
+                                                    <Text style={styles.currencyUnderline}>đ</Text>)
+                                                </Text>
+                                            }
+                                            required
+                                            placeholder="Nhập đơn giá"
+                                            value={warehouseFormUtils.formatPriceInput(item.price)}
+                                            onChangeText={val => handlePriceChange(item.id, val)}
+                                            keyboardType="numeric"
+                                            containerStyle={styles.noMarginBottom}
+                                            disabled={isPriceDisabled}
+                                        />
+
+                                        {/* Show Available Quantity */}
+                                        {item.materialId &&
+                                            item.availableQuantity !== undefined && (
+                                                <View style={styles.stockInfoRow}>
+                                                    <Text style={styles.stockInfoText}>
+                                                        Tồn kho:{' '}
+                                                        <Text style={styles.stockQuantity}>
+                                                            {item.availableQuantity} {item.unit}
+                                                        </Text>
+                                                    </Text>
+                                                </View>
+                                            )}
                                     </View>
 
-                                    <View style={styles.content}>
-                                        <View style={[styles.inputGroup, styles.zIndexMedium]}>
-                                            <DropdownMaterial
-                                                label="Tên vật tư"
-                                                required
-                                                value={item.materialId} // Use ID
-                                                options={rowOptions} // { label, value: ID }
-                                                onChange={val =>
-                                                    onUpdateMaterial(item.id, 'materialId', val)
-                                                }
-                                                placeholder="Chọn vật tư"
-                                                showAllOption={false}
-                                                isOpen={isDropdownOpen}
-                                                onToggle={() =>
-                                                    handleToggleDropdown(item.id, index)
-                                                }
-                                            />
-                                            {/* Show Available Quantity */}
-                                            {item.materialId &&
-                                                item.availableQuantity !== undefined && (
-                                                    <View style={styles.stockInfoRow}>
-                                                        <Text style={styles.stockInfoText}>
-                                                            Tồn kho:{' '}
-                                                            <Text style={styles.stockQuantity}>
-                                                                {item.availableQuantity} {item.unit}
-                                                            </Text>
-                                                        </Text>
-                                                    </View>
-                                                )}
-                                        </View>
-
-                                        <View style={[styles.row, styles.zIndexNormal]}>
-                                            <View style={styles.halfWidth}>
-                                                <Input
-                                                    label="Số lượng"
-                                                    required
-                                                    placeholder="Nhập số lượng"
-                                                    value={item.quantity}
-                                                    onChangeText={val =>
-                                                        handleQuantityChange(item.id, val)
-                                                    }
-                                                    keyboardType="numeric"
-                                                    containerStyle={styles.noMarginBottom}
-                                                />
-                                                {isOverStock && (
-                                                    <Text style={styles.overStockText}>
-                                                        Vượt quá tồn kho ({item.availableQuantity})
-                                                    </Text>
-                                                )}
-                                            </View>
-
-                                            <View style={styles.halfWidth}>
-                                                <Input
-                                                    label={
-                                                        <Text>
-                                                            Đơn giá (
-                                                            <Text style={styles.currencyUnderline}>
-                                                                đ
-                                                            </Text>
-                                                            )
-                                                        </Text>
-                                                    }
-                                                    required
-                                                    placeholder="Nhập đơn giá"
-                                                    value={warehouseFormUtils.formatPriceInput(
-                                                        item.price
-                                                    )}
-                                                    onChangeText={val =>
-                                                        handlePriceChange(item.id, val)
-                                                    }
-                                                    keyboardType="numeric"
-                                                    containerStyle={styles.noMarginBottom}
-                                                    disabled={isPriceDisabled}
-                                                />
-                                            </View>
-                                        </View>
-
-                                        <View style={styles.footer}>
-                                            <Text style={styles.footerLabel}>Thành tiền:</Text>
-                                            <Text
-                                                style={[
-                                                    styles.footerValue,
-                                                    !itemTotal && styles.placeholderText,
-                                                ]}
-                                            >
-                                                {displayTotal}
-                                            </Text>
-                                        </View>
+                                    <View style={styles.footer}>
+                                        <Text style={styles.footerLabel}>Thành tiền:</Text>
+                                        <Text
+                                            style={[
+                                                styles.footerValue,
+                                                !itemTotal && styles.placeholderText,
+                                            ]}
+                                        >
+                                            {displayTotal}
+                                        </Text>
                                     </View>
                                 </View>
                             </View>
-                        );
-                    })}
+                        </View>
+                    );
+                })}
 
-                    <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={onAddMaterial}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="add" size={24} color={colors.textSecondary} />
-                        <Text style={styles.addButtonText}>Thêm vật tư</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={onAddMaterial}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons name="add" size={24} color={colors.textSecondary} />
+                    <Text style={styles.addButtonText}>Thêm vật tư</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -264,27 +245,22 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
 const styles = StyleSheet.create({
     mainMaterialCard: {
         backgroundColor: colors.white,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        marginHorizontal: spacing.md,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
         zIndex: 1,
     },
     mainContent: {
-        padding: spacing.md,
+        paddingHorizontal: 12,
+        paddingTop: spacing.md,
+        paddingBottom: 12,
         zIndex: 2,
         borderTopWidth: 1,
         borderTopColor: colors.gray[100],
     },
     materialWrapper: {
-        marginBottom: spacing.md,
+        marginBottom: 12,
     },
     materialCard: {
         backgroundColor: colors.white,
@@ -317,6 +293,7 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         marginBottom: 12,
+        gap: spacing.md,
     },
     labelContainer: {
         flexDirection: 'row',

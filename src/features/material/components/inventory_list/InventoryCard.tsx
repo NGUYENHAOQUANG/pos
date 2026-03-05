@@ -22,6 +22,9 @@ import {
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { useInventoryItems } from '@/features/material/hooks/inventory';
+import { DetailRow } from '../DetailRow';
+import { ButtonMaterialList } from '../material_form/ButtonMaterialList';
+import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -36,7 +39,6 @@ interface InventoryCardProps {
 export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     const navigation = useNavigation<NavigationProp>();
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isLongNote, setIsLongNote] = useState(false);
 
     // Fetch items only if expanded and no items in props
     const shouldFetch = isExpanded && (!data.items || data.items.length === 0);
@@ -79,62 +81,29 @@ export const InventoryCard: React.FC<InventoryCardProps> = ({ data }) => {
     return (
         <View style={styles.container}>
             <View style={styles.col}>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Trạng thái:</Text>
-                    <MaterialGroup group={getStatusLabel(data.status)} />
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Người kiểm:</Text>
-                    <Text style={styles.value}>{data.creator?.fullname || '---'}</Text>
-                </View>
-                <View style={[styles.row, styles.alignRight]}>
-                    <Text style={styles.label}>Ngày Kiểm</Text>
-                    <Text style={styles.value}>
-                        {new Date(data.createdAt).toLocaleDateString('vi-VN')}
-                    </Text>
-                </View>
+                <DetailRow
+                    label="Trạng thái:"
+                    value={<MaterialGroup group={getStatusLabel(data.status)} />}
+                />
+                <DetailRow
+                    label="Ngày Kiểm"
+                    value={new Date(data.createdAt).toLocaleDateString('vi-VN')}
+                />
+                <DetailRow label="Ghi chú:" value={data.note} />
+                <DetailRow label="Tổng chênh lệch:" value={totalDifference} />
             </View>
-
-            <View style={styles.separator} />
-
-            <View style={[styles.col, styles.colWithMargin]}>
-                <Text
-                    style={styles.noteTextMeasure}
-                    onTextLayout={e => {
-                        setIsLongNote(e.nativeEvent.lines.length > 1);
-                    }}
-                >
-                    {data.note}
-                </Text>
-
-                {!isLongNote ? (
-                    <View style={styles.noteRow}>
-                        <Text style={styles.label}>Ghi chú</Text>
-                        <Text style={styles.noteTextInline}>{data.note}</Text>
-                    </View>
-                ) : (
-                    <View style={styles.noteColumn}>
-                        <Text style={styles.label}>Ghi chú</Text>
-                        <Text style={styles.noteTextBlock}>{data.note}</Text>
-                    </View>
-                )}
-
-                <View style={[styles.row, styles.alignRight]}>
-                    <Text style={styles.label}>Tổng chênh lệch:</Text>
-                    <Text style={styles.value}>{totalDifference}</Text>
-                </View>
-            </View>
-
             {/* Edit Button (Only for Draft and Rejected) */}
             {['Draft', 'Rejected'].includes(data.status) && (
-                <TouchableOpacity
+                <ButtonMaterialList
+                    title="Sửa thông tin"
+                    icon={<EditIcon />}
                     style={styles.editButton}
                     onPress={() => {
-                        navigation.navigate('AddInventory', { inventoryId: data.id });
+                        navigation.navigate('AddInventory', {
+                            inventoryId: data.id,
+                        });
                     }}
-                >
-                    <Text style={styles.editButtonText}>Sửa thông tin</Text>
-                </TouchableOpacity>
+                />
             )}
 
             {isExpanded && (
@@ -215,6 +184,7 @@ const styles = StyleSheet.create({
     },
     col: {
         paddingBottom: 0,
+        gap: 12,
     },
     alignRight: {
         alignItems: 'flex-end',
@@ -269,14 +239,12 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
     },
     editButton: {
-        marginTop: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        alignItems: 'center',
+        marginTop: 12,
+        flexDirection: 'row',
         justifyContent: 'center',
-        backgroundColor: colors.white,
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        alignSelf: 'stretch',
     },
     editButtonText: {
         fontSize: 14,

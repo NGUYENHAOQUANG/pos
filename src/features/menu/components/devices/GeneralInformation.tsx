@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
-
+import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
+import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import Toast from 'react-native-toast-message';
@@ -102,64 +103,62 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
 
                 {/* Device Type */}
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Loại thiết bị
-                    </Text>
+                    {/* Label row with required dot inline */}
+                    <View style={styles.labelRow}>
+                        <Text style={[styles.label, { marginBottom: 0 }]}>Loại thiết bị</Text>
+                        <View style={styles.requiredDot} />
+                    </View>
                     <DropDownButtonBasic
                         data={DEVICE_TYPES}
-                        value={deviceType}
+                        value={deviceType.id === '0' ? undefined : deviceType}
                         onSelect={handleDeviceTypeSelect}
                         showIcon={false}
                         borderRadius={borderRadius.sm}
                         style={styles.dropdown}
+                        placeholder="Chọn loại thiết bị"
                     />
                 </View>
 
-                {/* Row for Quantity and Date */}
-                <View style={styles.row}>
-                    <View style={[styles.col, { paddingRight: spacing.sm }]}>
-                        <Input
-                            label="Số lượng (cái)"
-                            placeholder="Nhập"
-                            value={quantity}
-                            onChangeText={text => setQuantity(handleIntegerInput(text))}
-                            required
-                            keyboardType="numeric"
-                            containerStyle={{ marginBottom: 0 }}
-                        />
-                    </View>
-                    <View style={[styles.col, { paddingLeft: spacing.sm }]}>
-                        <DateInputButton
-                            label="Ngày nhập kho"
-                            required
-                            date={importDate}
-                            onDateChange={setImportDate}
-                            dateOnly
-                            dateText={importDate ? undefined : 'dd/mm/yyyy'}
-                            height={40}
-                        />
-                    </View>
-                </View>
+                {/* Row for Quantity and Date - stacked vertically */}
+                <Input
+                    label="Số lượng"
+                    placeholder="Số lượng"
+                    value={quantity}
+                    onChangeText={text => setQuantity(handleIntegerInput(text))}
+                    required
+                    keyboardType="numeric"
+                    suffix="cái"
+                />
+
+                <DateInputButton
+                    label="Ngày nhập kho"
+                    required
+                    date={importDate}
+                    onDateChange={setImportDate}
+                    dateOnly
+                    dateText={importDate ? undefined : 'dd/mm/yyyy'}
+                    height={40}
+                />
 
                 {/* Import Condition */}
                 <View style={styles.conditionContainer}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Tình trạng nhập kho
-                    </Text>
+                    {/* Label row with required dot inline */}
+                    <View style={styles.labelRow}>
+                        <Text style={[styles.label, { marginBottom: 0 }]}>Tình trạng nhập kho</Text>
+                        <View style={styles.requiredDot} />
+                    </View>
                     <View style={styles.radioGroup}>
                         <TouchableOpacity
                             style={styles.radioButton}
                             onPress={() => setCondition('new')}
                             activeOpacity={0.7}
                         >
-                            <View
-                                style={[
-                                    styles.radioCircle,
-                                    condition === 'new' && styles.radioCircleSelected,
-                                ]}
-                            >
-                                {condition === 'new' && <View style={styles.radioInnerCircle} />}
-                            </View>
+                            {/* Show active or inactive checkbox based on selection */}
+                            {condition === 'new' ? (
+                                <CheckboxActiveIcon width={24} height={24} />
+                            ) : (
+                                <CheckboxIcon width={24} height={24} />
+                            )}
                             <Text style={styles.radioLabel}>Mới</Text>
                         </TouchableOpacity>
 
@@ -168,14 +167,12 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
                             onPress={() => setCondition('used')}
                             activeOpacity={0.7}
                         >
-                            <View
-                                style={[
-                                    styles.radioCircle,
-                                    condition === 'used' && styles.radioCircleSelected,
-                                ]}
-                            >
-                                {condition === 'used' && <View style={styles.radioInnerCircle} />}
-                            </View>
+                            {/* Show active or inactive checkbox based on selection */}
+                            {condition === 'used' ? (
+                                <CheckboxActiveIcon width={24} height={24} />
+                            ) : (
+                                <CheckboxIcon width={24} height={24} />
+                            )}
                             <Text style={styles.radioLabel}>Đã sử dụng</Text>
                         </TouchableOpacity>
                     </View>
@@ -189,8 +186,10 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
-        // borderRadius: borderRadius.lg, // Removed border radius
-        marginBottom: spacing.sm, // 8px spacing between cards
+        marginBottom: spacing.sm,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     title: {
         fontSize: typography.fontSize.lg,
@@ -219,8 +218,21 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
         lineHeight: 22,
     },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+    },
     required: {
         color: colors.error,
+    },
+    requiredDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: colors.error,
+        marginLeft: 4,
+        marginBottom: 2,
     },
     dropdown: {
         width: '100%',
@@ -241,6 +253,7 @@ const styles = StyleSheet.create({
     radioButton: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: spacing.sm,
     },
     radioCircle: {
         width: 20,

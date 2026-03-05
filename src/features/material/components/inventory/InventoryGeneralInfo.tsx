@@ -54,44 +54,42 @@ export const InventoryGeneralInfo: React.FC<InventoryGeneralInfoProps> = ({
                 showIcon={true}
             />
 
-            {isExpanded && (
-                <View style={styles.body}>
-                    {/* Read-only info rows */}
-                    <InfoRow label="Kho" value={warehouseName || '---'} />
-                    <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
-                    <InfoRow label="Người tạo phiếu:" value={creatorName} />
-                    {/* <InfoRow label="Nhóm vật tư" value={materialGroup} isLast /> */}
+            <View style={styles.body}>
+                {/* Read-only info rows */}
+                <InfoRow label="Kho" value={warehouseName || '---'} />
+                <InfoRow label="Ngày tạo phiếu:" value={createdDate} />
+                <InfoRow label="Người tạo phiếu:" value={creatorName} />
+                {/* <InfoRow label="Nhóm vật tư" value={materialGroup} isLast /> */}
 
-                    {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Ngày kiểm kê
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.dateInput}
-                            onPress={onDatePress}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={styles.inputText}>{date}</Text>
-                            <CalenderIcon width={20} height={20} />
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Input: Ghi chú */}
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
-                        <TextInput
-                            style={styles.textArea}
-                            placeholder="Nhập ghi chú"
-                            placeholderTextColor={colors.gray[300]}
-                            multiline
-                            textAlignVertical="top"
-                            value={note}
-                            onChangeText={onNoteChange}
-                        />
-                    </View>
+                {/* Input: Ngày kiểm kê (Bấm vào để chọn ngày) */}
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>
+                        <Text style={styles.required}>* </Text>Ngày kiểm kê
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.dateInput}
+                        onPress={onDatePress}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.inputText}>{date}</Text>
+                        <CalenderIcon width={20} height={20} />
+                    </TouchableOpacity>
                 </View>
-            )}
+
+                {/* Input: Ghi chú */}
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Ghi chú lý do điều chỉnh</Text>
+                    <TextInput
+                        style={styles.textArea}
+                        placeholder="Nhập ghi chú"
+                        placeholderTextColor={colors.gray[300]}
+                        multiline
+                        textAlignVertical="top"
+                        value={note}
+                        onChangeText={onNoteChange}
+                    />
+                </View>
+            </View>
         </View>
     );
 };
@@ -106,23 +104,16 @@ const InfoRow = ({ label, value, isLast }: { label: string; value: string; isLas
 
 const styles = StyleSheet.create({
     container: {
+        margin: spacing.md,
         backgroundColor: colors.white,
-
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.shadow,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-            },
-            android: { elevation: 1 },
-        }),
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        zIndex: 10,
         marginBottom: spacing.md,
     },
     body: {
         padding: spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
     },
     row: {
         flexDirection: 'row',

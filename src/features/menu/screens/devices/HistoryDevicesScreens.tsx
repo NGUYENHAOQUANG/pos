@@ -5,10 +5,10 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '@/styles';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
-import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 
 type HistoryDevicesScreenRouteProp = RouteProp<AppStackParamList, 'HistoryDevices'>;
@@ -223,7 +223,12 @@ export const HistoryDevicesScreens = () => {
                 onBack={() => navigation.navigate('DeviceManagement')}
             />
 
-            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
+            <HeadingBar
+                selectedTab={selectedTab}
+                onTabSelect={setSelectedTab}
+                tabs={tabs}
+                flexTabs
+            />
 
             <View style={styles.filterContainer}>
                 <DateRangeFilter
@@ -231,7 +236,6 @@ export const HistoryDevicesScreens = () => {
                     endDate={endDate}
                     onStartDateChange={setStartDate}
                     onEndDateChange={setEndDate}
-                    style={styles.dateFilter}
                 />
             </View>
 
@@ -267,13 +271,6 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         padding: spacing.md,
-        backgroundColor: colors.white,
-    },
-    dateFilter: {
-        width: '100%',
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
     },
     content: {
         flexGrow: 1,

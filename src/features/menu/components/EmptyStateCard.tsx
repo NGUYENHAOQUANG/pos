@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
+import PlusIcon from '@/assets/Icon/Plus.svg';
 
 interface EmptyStateCardProps {
     message: string;
@@ -26,10 +27,10 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
             <Button
                 title={buttonTitle}
                 onPress={onPress}
-                iconLeft="add"
                 variant="primary"
                 size="medium"
                 style={StyleSheet.flatten([styles.button, buttonStyle])}
+                renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
             />
         </View>
     );
@@ -37,13 +38,10 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
+        backgroundColor: colors.transparent,
         borderRadius: borderRadius.md,
-        padding: spacing.md,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
     },
     iconContainer: {
         alignItems: 'center',
@@ -53,10 +51,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text,
         textAlign: 'center',
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
         fontFamily: typography.fontFamily.regular,
     },
     button: {
-        minWidth: 160,
+        width: '100%',
+        height: 40,
     },
 });

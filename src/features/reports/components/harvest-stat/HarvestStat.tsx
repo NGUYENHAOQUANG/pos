@@ -20,6 +20,8 @@ import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { HarvestItemCard } from './HarvestItemCard';
 import { harvestData } from './harvesStatData';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -54,8 +56,9 @@ export const HarvestStat = () => {
     const displayedData = showAll ? harvestData : harvestData.slice(0, INITIAL_SHOW_COUNT);
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             <BasicDropDownButton
+                prefixIcon={<HarvestStatIcon width={16} height={16} />}
                 label="THỐNG KÊ THU HOẠCH"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
@@ -94,10 +97,6 @@ export const HarvestStat = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     sectionHeader: {
         paddingVertical: 12,
         paddingHorizontal: 16,

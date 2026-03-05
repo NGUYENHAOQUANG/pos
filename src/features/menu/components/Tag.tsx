@@ -96,7 +96,7 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
                 return {
                     label: getLabel(),
                     color: colors.green[600],
-                    backgroundColor: colors.green[50],
+                    backgroundColor: colors.green[25],
                     borderColor: colors.green[300],
                 };
             case 'warehouse':
@@ -109,9 +109,9 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
             case 'maintenance':
                 return {
                     label: getLabel(),
-                    color: colors.orange[500],
-                    backgroundColor: colors.yellow[50],
-                    borderColor: colors.yellow[300],
+                    color: colors.orange[600],
+                    backgroundColor: colors.yellow[25],
+                    borderColor: colors.yellow[200],
                 };
             default:
                 return {
@@ -135,15 +135,15 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: spacing.sm,
-        height: 22,
-        borderRadius: borderRadius.xs,
+        height: 32,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         alignSelf: 'flex-start',
         alignItems: 'center',
         justifyContent: 'center',
     },
     text: {
-        fontSize: 12,
-        fontWeight: '400',
+        fontSize: 14,
+        fontWeight: '500',
     },
 });

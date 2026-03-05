@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     content: {
         paddingTop: spacing.sm,
         paddingBottom: spacing.md,
+        paddingHorizontal: spacing.md,
     },
     footer: {
         backgroundColor: colors.white,

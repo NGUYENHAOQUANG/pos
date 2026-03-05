@@ -5,8 +5,9 @@
  * @created 2025-11-16
  */
 export const colors = {
+    transparent: 'transparent',
     // Primary colors
-    primary: '#007AFF',
+    primary: '#006AFF',
     primaryDark: '#0051D5',
     primaryLight: '#5AC8FA',
 
@@ -22,7 +23,7 @@ export const colors = {
     gray: {
         50: '#F9FAFB',
         100: '#F3F4F6',
-        200: '#E5E7EB',
+        200: '#E6E8EC',
         240: '#F0F0F0',
         300: '#D1D5DB',
         400: '#9CA3AF',
@@ -33,17 +34,17 @@ export const colors = {
         900: '#111827',
     },
     volcano: {
-        200: '#FFF2E8',
-        300: '#FFBB96',
+        200: '#FFFCF5',
+        300: '#FEDF89',
         400: '#FFA39E',
         600: '#e7412bff',
         100: '#FFF1F0',
-        900: '#FA541C',
+        900: '#DC6803',
     },
     magenta: {
-        100: '#FFF0F6',
-        300: '#FFADD2',
-        900: '#EB2F96',
+        100: '#FEF6FB',
+        300: '#FCCEEE',
+        900: '#DD2590',
     },
     cyan: {
         50: '#E6FFFB',
@@ -60,9 +61,9 @@ export const colors = {
         800: '#061178',
     },
     geekblue: {
-        100: '#F0F5FF',
-        300: '#ADC6FF',
-        900: '#2F54EB',
+        100: '#F5FAFF',
+        300: '#B2DDFF',
+        900: '#1570EF',
     },
     orange: {
         50: '#FFF2E8',
@@ -73,11 +74,12 @@ export const colors = {
         700: '#FF7A45',
     },
     green: {
+        25: '#F6FEF9',
         50: '#F6FFED',
         100: '#D9F7BE',
         300: '#B7EB8F',
         500: '#4dff00a2',
-        600: '#389E0D',
+        600: '#16A34A',
         800: '#237804',
     },
     purple: {
@@ -98,9 +100,11 @@ export const colors = {
         900: '#FF4D4F',
     },
     yellow: {
+        25: '#FFFCF5',
         50: '#FFFBE6',
+        200: '#FEDF89',
         300: '#FFE58F',
-        600: '#FFD700',
+        600: '#DC6803',
         700: '#FFC107',
         800: '#876800',
     },
@@ -116,7 +120,8 @@ export const colors = {
 
     // Background colors
     background: '#FFFFFF',
-    backgroundPrimary: '#F0F5FF', // Light blue background for screens
+    backgroundPrimary: '#F0F5FF',
+    //backgroundPrimary: '#FAFAF9',
     backgroundSecondary: '#F9FAFB',
     backgroundTertiary: '#F3F4F6',
     backgroundButton: '#F9FAFB',

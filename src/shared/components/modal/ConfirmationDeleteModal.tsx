@@ -8,8 +8,9 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
 } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
-import { IconWarning } from '@/assets/icons';
+import { colors, spacing, borderRadius, typography } from '@/styles';
+import { Button } from '@/shared/components/buttons/Button';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
 /**
  * Props for ConfirmationDeleteModal component
@@ -21,16 +22,15 @@ interface ConfirmationDeleteModalProps {
     onConfirm: () => void;
     /** Callback function called when user cancels deletion */
     onCancel: () => void;
-    /** Title text displayed in the modal (default: 'Xoá tác vụ') */
+    /** Title text displayed in the modal */
     title?: string;
-    /** Message text displayed in the modal (default: 'Bạn có chắc chắn muốn xoá tác vụ này không?') */
+    /** Message text displayed in the modal */
     message?: string;
-    /** Text for the confirm button (default: 'Đồng ý') */
+    /** Text for the confirm button */
     confirmText?: string;
-    /** Text for the cancel button (default: 'Không') */
-    /** Text for the cancel button (default: 'Không') */
+    /** Text for the cancel button */
     cancelText?: string;
-    /** Toast message on success (default: 'Đã xóa tác vụ thành công') */
+    /** Toast message on success */
     successMessage?: string;
     /** Whether to show success toast after confirm (default: true) */
     showSuccessToast?: boolean;
@@ -38,9 +38,7 @@ interface ConfirmationDeleteModalProps {
 
 /**
  * A reusable modal component for confirming deletion actions.
- *
- * Displays a warning icon, title, message, and two action buttons (cancel and confirm).
- * The confirm button has a red background to indicate a destructive action.
+ * Displays title + X button on top row, message body, and two action buttons.
  */
 export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = ({
     visible,
@@ -71,47 +69,37 @@ export const ConfirmationDeleteModal: React.FC<ConfirmationDeleteModalProps> = (
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>
                         <View style={styles.container}>
-                            <View style={styles.content}>
-                                {/* Row: Icon, Column(title, message, buttons) */}
-                                <View style={styles.mainRow}>
-                                    {/* Icon */}
-                                    <IconWarning
-                                        width={21}
-                                        height={21}
-                                        style={styles.warningIcon}
-                                    />
+                            {/* Header row: title + X close button */}
+                            <View style={styles.header}>
+                                <Text style={styles.title}>{title}</Text>
+                                <TouchableOpacity
+                                    onPress={onCancel}
+                                    style={styles.closeButton}
+                                    activeOpacity={0.7}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                >
+                                    <CloseIcon width={16} height={16} />
+                                </TouchableOpacity>
+                            </View>
 
-                                    {/* Column: Title, Message, Buttons */}
-                                    <View style={styles.column}>
-                                        {/* Title */}
-                                        <Text style={styles.title}>{title}</Text>
+                            {/* Message body */}
+                            <Text style={styles.message}>{message}</Text>
 
-                                        {/* Message */}
-                                        <Text style={styles.message}>{message}</Text>
-
-                                        {/* Buttons Row */}
-                                        <View style={styles.footer}>
-                                            <TouchableOpacity
-                                                style={styles.cancelButton}
-                                                onPress={onCancel}
-                                                activeOpacity={0.7}
-                                            >
-                                                <Text style={styles.cancelButtonText}>
-                                                    {cancelText}
-                                                </Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={styles.confirmButton}
-                                                onPress={handleConfirm}
-                                                activeOpacity={0.7}
-                                            >
-                                                <Text style={styles.confirmButtonText}>
-                                                    {confirmText}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </View>
+                            {/* Footer buttons */}
+                            <View style={styles.footer}>
+                                <Button
+                                    title={cancelText}
+                                    onPress={onCancel}
+                                    variant="outline"
+                                    style={[styles.cancelButton, styles.cancelButtonOverride]}
+                                    textStyle={styles.cancelButtonTextOverride}
+                                />
+                                <Button
+                                    title={confirmText}
+                                    onPress={handleConfirm}
+                                    variant="primary"
+                                    style={styles.confirmButton}
+                                />
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
@@ -127,87 +115,54 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 24,
+        paddingHorizontal: spacing.lg,
     },
     container: {
         width: '100%',
-        maxWidth: 341,
-    },
-    content: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md,
         padding: spacing.lg,
-        borderWidth: 1,
-        borderColor: colors.border,
     },
-    mainRow: {
+    // Header row: title left, X right
+    header: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: spacing.md,
-    },
-    warningIcon: {
-        margin: 3,
-    },
-    column: {
-        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: spacing.md,
     },
     title: {
-        fontFamily: 'Nunito Sans',
+        fontSize: typography.fontSize.lg,
         fontWeight: '700',
-        fontStyle: 'normal',
-        fontSize: 16,
-        lineHeight: 24,
-        letterSpacing: 0,
         color: colors.text,
-        marginBottom: spacing.sm,
+        flex: 1,
     },
+    closeButton: {
+        marginLeft: spacing.sm,
+    },
+    // Body message
     message: {
-        fontFamily: 'Nunito Sans',
+        fontSize: typography.fontSize.base,
         fontWeight: '400',
-        fontStyle: 'normal',
-        fontSize: 14,
-        lineHeight: 22,
-        letterSpacing: 0,
         color: colors.text,
+        lineHeight: 22,
+        marginBottom: spacing.lg,
     },
+    // Button row
     footer: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 8,
-        alignItems: 'flex-end',
-        marginTop: spacing.sm,
-        height: 48,
+        gap: spacing.sm,
     },
     cancelButton: {
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: '#DEE4ED',
-        backgroundColor: '#FFFFFF',
-        paddingVertical: 6,
-        paddingHorizontal: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flex: 1,
     },
-    cancelButtonText: {
-        fontSize: 14,
-        fontWeight: '400',
+    // Override blue outline to gray for cancel button
+    cancelButtonOverride: {
+        borderColor: colors.gray[300],
+    },
+    cancelButtonTextOverride: {
         color: colors.text,
-        lineHeight: 22,
     },
     confirmButton: {
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: '#FF4D4F',
-        backgroundColor: '#FF4D4F',
-        paddingVertical: 6,
-        paddingHorizontal: spacing.md,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    confirmButtonText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.white,
-        lineHeight: 22,
+        flex: 1,
     },
 });

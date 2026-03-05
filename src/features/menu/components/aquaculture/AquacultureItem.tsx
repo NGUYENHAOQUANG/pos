@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { Tag } from '@/features/menu/components/Tag';
-import EditIcon from '@/assets/Icon/IconMenu/EditOutlined.svg';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface AquacultureItemProps {
     item: SeasonData;
@@ -38,19 +38,24 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
         <View style={styles.container}>
             <View style={styles.content}>
                 <View style={styles.header}>
-                    <Text style={styles.name}>{item.name}</Text>
+                    <View style={styles.nameWrapper}>
+                        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                            {item.name}
+                        </Text>
+                    </View>
                     <Tag status={getStatus(item.status)} type="season" style={styles.tag} />
                 </View>
                 <Text style={styles.date}>{dateRange}</Text>
             </View>
 
-            <TouchableOpacity
-                style={styles.editButton}
+            <Button
+                title="Chỉnh sửa"
+                variant="outline"
+                size="small"
                 onPress={() => onEdit?.(item)}
-                activeOpacity={0.7}
-            >
-                <EditIcon width={20} height={20} />
-            </TouchableOpacity>
+                style={styles.editButton}
+                textStyle={styles.editButtonText}
+            />
         </View>
     );
 };
@@ -63,22 +68,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginHorizontal: spacing.md,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.sm,
     },
     content: {
         flex: 1,
+        minWidth: 0,
         marginRight: spacing.md,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.xs,
-        flexWrap: 'wrap',
+        marginBottom: spacing.sm,
+    },
+    nameWrapper: {
+        flex: 1,
+        minWidth: 0,
+        marginRight: spacing.sm,
     },
     name: {
         fontSize: typography.fontSize.base,
         fontWeight: '600',
         color: colors.text,
-        marginRight: spacing.sm,
     },
     tag: {
         // Tag component handles its own styles
@@ -88,13 +101,11 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     editButton: {
-        padding: spacing.xs,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        borderRadius: borderRadius.xs + 2,
-        width: 32,
-        height: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexShrink: 0,
+        backgroundColor: colors.white,
+        borderColor: colors.border,
+    },
+    editButtonText: {
+        color: colors.text,
     },
 });

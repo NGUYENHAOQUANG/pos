@@ -15,6 +15,8 @@ import {
     PADDING_BOTTOM,
     ProfitChartDataRange,
 } from '@/features/reports/components/profit-chart/chartData';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
 
 interface CompilationProfitChartProps {
     /**
@@ -42,41 +44,36 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             {/* Collapsible Chart Section */}
-            <View style={styles.chartSection}>
-                <BasicDropDownButton
-                    label="BIỂU ĐỒ LỢI NHUẬN"
-                    isExpanded={isExpanded}
-                    onPress={() => setIsExpanded(!isExpanded)}
-                    style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
-                />
+            <BasicDropDownButton
+                prefixIcon={<ProfitChartIcon width={16} height={16} />}
+                label="BIỂU ĐỒ LỢI NHUẬN"
+                isExpanded={isExpanded}
+                onPress={() => setIsExpanded(!isExpanded)}
+                style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
+            />
 
-                {isExpanded && (
-                    <>
-                        {isLoading ? (
-                            <View style={styles.loadingContainer}>
-                                <Loading />
-                            </View>
-                        ) : (
-                            <>
-                                <MetricsRow />
-                                <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                                <Legend items={getProfitChartLegendItems()} />
-                            </>
-                        )}
-                    </>
-                )}
-            </View>
+            {isExpanded && (
+                <>
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <Loading />
+                        </View>
+                    ) : (
+                        <>
+                            <MetricsRow />
+                            <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                            <Legend items={getProfitChartLegendItems()} />
+                        </>
+                    )}
+                </>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     headerExpanded: {
         flexDirection: 'row',
         alignItems: 'center',

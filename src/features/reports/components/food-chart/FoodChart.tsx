@@ -5,6 +5,7 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { mockFoodChartData } from './foodData';
+import chartStyles from '@/features/reports/styles/chart.styles';
 
 const BAR_MAX_HEIGHT = 200;
 
@@ -69,7 +70,7 @@ export const FoodChart: React.FC = () => {
     const getBarHeight = (value: number) => (value / yAxisConfig.max) * BAR_MAX_HEIGHT;
 
     return (
-        <View style={styles.card}>
+        <View style={chartStyles.container}>
             <View style={styles.headerWrapper}>
                 <BasicDropDownButton
                     label="THỐNG KÊ LƯỢNG THỨC ĂN"
@@ -164,14 +165,6 @@ export const FoodChart: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.background,
-        width: '100%',
-        alignSelf: 'center',
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        marginBottom: 8,
-    },
     headerWrapper: {
         height: 94,
     },
