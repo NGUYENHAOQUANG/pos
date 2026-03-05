@@ -96,6 +96,7 @@ export interface UnitData {
 
 export const unitsData: UnitData[] = [
     { id: '1', code: 'KG-01', name: 'Trại Kiên Giang', type: 'Trại' },
+    { id: '2', code: 'KG-02', name: 'Trại Bạc Liêu', type: 'Trại' },
     { id: '6', code: 'HCM-01', name: 'Trại TP.HCM', type: 'Trại' },
     { id: '2', code: 'N03', name: 'Ao N03', type: 'Ao' },
     { id: '3', code: 'N02', name: 'Ao N02', type: 'Ao' },

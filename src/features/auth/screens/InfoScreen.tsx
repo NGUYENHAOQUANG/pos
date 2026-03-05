@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     ScrollView,
     StatusBar,
@@ -8,7 +8,6 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
-    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -24,32 +23,16 @@ import InfoIcon from '@/assets/Icon/Info.svg';
 
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 import { handleError } from '@/shared/utils';
+import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 export default function InfoScreen() {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [keyboardOffset, setKeyboardOffset] = useState(0);
 
     const { user, completeProfile } = useAuthStore();
-
-    useEffect(() => {
-        if (Platform.OS !== 'android') return;
-
-        const showSub = Keyboard.addListener('keyboardDidShow', event => {
-            setKeyboardOffset(event.endCoordinates.height);
-        });
-
-        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardOffset(0);
-        });
-
-        return () => {
-            showSub.remove();
-            hideSub.remove();
-        };
-    }, []);
+    const { keyboardHeight } = useKeyboard();
 
     const handleSubmit = async () => {
         if (!fullName.trim()) {
@@ -163,7 +146,7 @@ export default function InfoScreen() {
                                     styles.footer,
                                     Platform.OS === 'android' && {
                                         paddingBottom:
-                                            spacing.xl + spacing.sm + 12 + keyboardOffset,
+                                            spacing.xl + spacing.sm + 12 + keyboardHeight,
                                     },
                                 ]}
                             >

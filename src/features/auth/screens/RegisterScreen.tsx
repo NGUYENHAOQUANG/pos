@@ -9,7 +9,6 @@ import {
     AppStateStatus,
     KeyboardAvoidingView,
     Platform,
-    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -29,6 +28,7 @@ import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { handleError } from '@/shared/utils';
+import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 const COUNTDOWN_DURATION = 60;
 
@@ -48,30 +48,13 @@ export default function RegisterScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const [keyboardOffset, setKeyboardOffset] = useState(0);
+    const { keyboardHeight } = useKeyboard();
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
         const remaining = COUNTDOWN_DURATION - elapsed;
         return remaining > 0 ? remaining : 0;
     }, [countdownStartTime]);
-
-    useEffect(() => {
-        if (Platform.OS !== 'android') return;
-
-        const showSub = Keyboard.addListener('keyboardDidShow', event => {
-            setKeyboardOffset(event.endCoordinates.height);
-        });
-
-        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardOffset(0);
-        });
-
-        return () => {
-            showSub.remove();
-            hideSub.remove();
-        };
-    }, []);
 
     useEffect(() => {
         const updateCountdown = () => {
@@ -238,7 +221,7 @@ export default function RegisterScreen() {
                         style={[
                             styles.footer,
                             Platform.OS === 'android' && {
-                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardOffset,
+                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardHeight,
                             },
                         ]}
                     >
