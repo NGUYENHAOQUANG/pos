@@ -19,7 +19,7 @@ import {
     AIHealthCheckResult,
 } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
@@ -320,7 +320,7 @@ export const ShrimpInspectionScreen: React.FC = () => {
                 </View>
 
                 {/* Delete Confirmation Modal */}
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={isDeleteModalVisible}
                     onConfirm={handleConfirmDelete}
                     onCancel={handleCancelDelete}

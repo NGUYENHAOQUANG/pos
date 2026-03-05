@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { ButtonBarMenu } from '@/features/menu/components/ButtonBarMenu';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -17,7 +17,7 @@ import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useMenuContext } from '@/features/menu/store/menuStore';
 import { DeviceData } from '@/features/menu/types/menu.types';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 
 // Route params - deviceId is optional; if present => Edit mode, else => Add mode
@@ -160,23 +160,17 @@ export const AddDeviceScreens = () => {
               }
             : undefined;
 
-    // Delete button shown only in Edit mode
-    const renderRightAction = () =>
-        isEditMode ? (
-            <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => setDeleteModalVisible(true)}
-            >
-                <DeleteIcon width={20} height={20} />
-            </TouchableOpacity>
-        ) : null;
-
     return (
         <View style={styles.container}>
             <HeaderMenu
                 title={isEditMode ? 'Chỉnh sửa thiết bị' : 'Thêm thiết bị'}
                 onBack={handleBack}
-                rightAction={renderRightAction()}
+                rightIcon={
+                    isEditMode ? (
+                        <DeleteIcon width={20} height={20} color={colors.text} />
+                    ) : undefined
+                }
+                onRightPress={isEditMode ? () => setDeleteModalVisible(true) : undefined}
             />
 
             <SafeInputLayout>
@@ -208,7 +202,7 @@ export const AddDeviceScreens = () => {
             />
 
             {/* Confirmation delete modal - only shown in Edit mode */}
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={handleDelete}
                 onCancel={() => setDeleteModalVisible(false)}
@@ -238,15 +232,5 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-    },
-    deleteButton: {
-        backgroundColor: colors.white,
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
     },
 });

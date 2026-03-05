@@ -4,7 +4,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { DropdownOption } from '@/features/material/components/DropdownMaterial';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { IMaterialType } from '@/features/material/types/material.types';
 import { IMaterialGroupV2 } from '@/features/material/types/materialGroup.types';
 import {
@@ -16,8 +16,8 @@ import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLay
 import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { IconTrashOutlined } from '@/assets/icons';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterial } from '@/features/material/components/material_form/AddMaterial';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -99,16 +99,13 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
             <HeaderMeterial
                 title={isEditMode ? 'Sửa Thông Tin Vật Tư' : 'Tạo Vật Tư'}
                 onBackPress={onBackPress}
-                rightComponent={
+                rightIcon={
                     isEditMode && onDelete ? (
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => setDeleteModalVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <IconTrashOutlined width={20} height={20} />
-                        </TouchableOpacity>
-                    ) : null
+                        <IconTrashOutlined width={20} height={20} color={colors.text} />
+                    ) : undefined
+                }
+                onRightPress={
+                    isEditMode && onDelete ? () => setDeleteModalVisible(true) : undefined
                 }
             />
 
@@ -167,7 +164,7 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
                 primaryButtonDisabled={isSubmitting}
             />
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={() => {
                     setDeleteModalVisible(false);
@@ -193,15 +190,5 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingVertical: spacing.md,
         paddingBottom: 100,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
 });

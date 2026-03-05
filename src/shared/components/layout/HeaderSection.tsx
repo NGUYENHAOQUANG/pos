@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import { colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
+import PlusIcon from '@/assets/Icon/PlusBlack.svg';
 
 export interface HeaderSectionProps {
     // Config
@@ -32,6 +33,11 @@ export interface HeaderSectionProps {
     // Back specific (used if leftComponent is not provided)
     onBack?: () => void;
     showBackButton?: boolean;
+
+    // Right Action specific
+    rightIcon?: React.ReactNode;
+    onRightPress?: () => void;
+    rightButtonStyle?: StyleProp<ViewStyle>;
 }
 
 export const HeaderSection: React.FC<HeaderSectionProps> = ({
@@ -45,6 +51,9 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
     rightComponent,
     onBack,
     showBackButton = true,
+    rightIcon,
+    onRightPress,
+    rightButtonStyle,
 }) => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
@@ -97,6 +106,17 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
 
     const renderRight = () => {
         if (rightComponent) return rightComponent;
+
+        if (onRightPress) {
+            return (
+                <TouchableOpacity
+                    style={[styles.iconButton, rightButtonStyle]}
+                    onPress={onRightPress}
+                >
+                    {rightIcon ? rightIcon : <PlusIcon width={20} height={20} />}
+                </TouchableOpacity>
+            );
+        }
 
         // Auto-balance invalid right side if left has a button and title is centered
         // This maintains perfect centering

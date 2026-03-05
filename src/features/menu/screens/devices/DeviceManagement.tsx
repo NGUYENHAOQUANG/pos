@@ -22,7 +22,7 @@ import { DeviceData } from '@/features/menu/types/menu.types';
 import { WarningDevices } from '@/features/menu/components/devices/WarningDevices';
 import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
 import { useMenuContext } from '@/features/menu/store/menuStore';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 
 const { width: windowWidth } = Dimensions.get('window');
 
@@ -255,7 +255,7 @@ export const DeviceManagement = () => {
                     ]}
                 />
 
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={deleteModalVisible}
                     onConfirm={() => {
                         if (selectedDeviceId) {

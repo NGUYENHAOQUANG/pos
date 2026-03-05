@@ -18,7 +18,7 @@ import { FarmOperation } from '@/features/menu/components/FarmOperation';
 import { RecordManagement } from '@/features/menu/components/RecordManagement';
 import { SecurityManagement } from '@/features/menu/components/SecurityManagement';
 import { DeleteAccountButton } from '@/features/menu/components/DeleteAccountButton';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -127,7 +127,7 @@ export const MenuScreens: React.FC = () => {
                 </View>
             </View>
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={isLogoutModalVisible}
                 onConfirm={onConfirmLogout}
                 onCancel={() => setIsLogoutModalVisible(false)}

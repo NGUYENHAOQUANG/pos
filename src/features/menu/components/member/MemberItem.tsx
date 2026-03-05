@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, Text, StyleSheet } from 'react-native';
+import Avatar from '@/assets/Icon/IconMenu/Avatar.svg';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Tag, TagStatus } from '../Tag';
 import { ActionMenu, getMenuPosition } from '@/shared/components/buttons/ActionMenuButton';
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
 
 interface MemberItemProps {
     name: string;
@@ -78,8 +79,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
             setMenuVisible(false);
             setTimeout(() => onDelete?.(), 100);
         },
-        danger: true,
-    } as any);
+    });
 
     const handlePressOption = () => {
         buttonRef.current?.measureInWindow((x, y, width, height) => {
@@ -105,13 +105,13 @@ export const MemberItem: React.FC<MemberItemProps> = ({
             <View style={styles.leftContent}>
                 {/* Avatar Placeholder */}
                 <View style={styles.avatar}>
-                    <Ionicons name="person-outline" size={24} color={colors.white} />
+                    <Avatar width={48} height={48} />
                 </View>
 
                 <View style={styles.info}>
                     <View style={styles.headerRow}>
                         <Text style={styles.name}>{name}</Text>
-                        <Tag status={status} type="member" style={styles.tag} />
+                        <Tag status={status} type="member" />
                     </View>
                     <Text style={styles.details}>
                         {role} - {managementLevel}
@@ -119,14 +119,9 @@ export const MemberItem: React.FC<MemberItemProps> = ({
                 </View>
             </View>
 
-            <TouchableOpacity
-                ref={buttonRef}
-                style={styles.optionButton}
-                onPress={handlePressOption}
-                activeOpacity={0.7}
-            >
-                <Ionicons name="ellipsis-vertical" size={16} color={colors.textSecondary} />
-            </TouchableOpacity>
+            <View ref={buttonRef} collapsable={false}>
+                <MoreButton onPress={handlePressOption} color={colors.textSecondary} />
+            </View>
 
             <ActionMenu
                 visible={menuVisible}
@@ -144,7 +139,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: spacing.md,
+        marginHorizontal: spacing.md,
+        borderRadius: borderRadius.md,
         backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     leftContent: {
         flexDirection: 'row',
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: colors.gray[300],
+        overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -175,21 +174,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.text,
     },
-    tag: {
-        height: 20, // Slightly smaller than default tag if needed
-    },
     details: {
         fontSize: 14,
         color: colors.text,
         fontWeight: '400',
-    },
-    optionButton: {
-        width: 32,
-        height: 32,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
     },
 });

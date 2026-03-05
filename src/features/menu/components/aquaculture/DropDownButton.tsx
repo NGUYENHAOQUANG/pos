@@ -40,7 +40,7 @@ export const DropDownButton: React.FC<DropDownButtonProps> = ({
     onSelect,
     style,
     placeholder = 'Chọn trại',
-    height = 48,
+    height = 40,
     borderRadius: customBorderRadius,
 }) => {
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
