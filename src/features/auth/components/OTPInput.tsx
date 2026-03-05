@@ -1,5 +1,6 @@
 import {
     View,
+    Text,
     TextInput,
     StyleSheet,
     NativeSyntheticEvent,
@@ -96,29 +97,40 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
         return (
             <View style={styles.boxesContainer}>
                 {code.map((digit, index) => {
-                    let borderColor: string = colors.gray[200];
-                    if (isError) borderColor = colors.red[600];
-                    else if (digit) borderColor = colors.blue[600];
-
                     return (
-                        <TextInput
+                        <View
                             key={index}
-                            ref={el => {
-                                inputRefs.current[index] = el;
-                            }}
-                            style={[styles.otpBoxInput, { borderColor }]}
-                            value={digit}
-                            onChangeText={text => handleCodeChange(text, index)}
-                            onKeyPress={e => handleKeyPress(e, index)}
-                            keyboardType="number-pad"
-                            maxLength={length}
-                            textContentType="oneTimeCode"
-                            autoComplete="sms-otp"
-                            importantForAutofill="yes"
-                            selectTextOnFocus={true}
-                            textAlign="center"
-                            cursorColor={colors.blue[600]}
-                        />
+                            style={[
+                                styles.otpBoxInput,
+                                { borderColor: isError ? colors.error : colors.gray[100] },
+                                digit ? styles.otpBoxInputFilled : null,
+                            ]}
+                        >
+                            <TextInput
+                                ref={el => {
+                                    inputRefs.current[index] = el;
+                                }}
+                                style={styles.innerInput}
+                                value={digit}
+                                onChangeText={text => handleCodeChange(text, index)}
+                                onKeyPress={e => handleKeyPress(e, index)}
+                                keyboardType="number-pad"
+                                maxLength={1}
+                                textContentType="oneTimeCode"
+                                autoComplete="sms-otp"
+                                importantForAutofill="yes"
+                                selectTextOnFocus={true}
+                                textAlign="center"
+                                cursorColor={colors.primary}
+                                selectionColor={colors.primary}
+                                underlineColorAndroid="transparent"
+                            />
+                            {!digit && (
+                                <Text style={styles.dashPlaceholder} pointerEvents="none">
+                                    -
+                                </Text>
+                            )}
+                        </View>
                     );
                 })}
             </View>
@@ -129,21 +141,47 @@ const OTPInput = forwardRef<OTPInputHandle, OTPInputProps>(
 const styles = StyleSheet.create({
     boxesContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         width: '100%',
-        gap: 6,
+        gap: 12,
     },
     otpBoxInput: {
-        width: 56,
-        height: 56,
-        borderWidth: 1.5,
-        borderRadius: 12,
-        fontSize: 24,
+        width: 60,
+        height: 60,
+        borderWidth: 1,
+        borderRadius: 30,
+        fontSize: 20,
         fontWeight: '500',
-        color: colors.gray[900],
+        color: colors.text,
         backgroundColor: colors.white,
         padding: 0,
         textAlign: 'center',
+        textAlignVertical: 'center',
+        includeFontPadding: false,
+    },
+    innerInput: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        fontSize: 20,
+        fontWeight: '500',
+        color: colors.text,
+        textAlign: 'center',
+        padding: 0,
+    },
+    dashPlaceholder: {
+        position: 'absolute',
+        fontSize: 20,
+        color: colors.gray[400],
+        textAlign: 'center',
+        width: '100%',
+        lineHeight: 56,
+        zIndex: -1,
+    },
+    otpBoxInputFilled: {
+        borderColor: colors.primary,
     },
 });
 

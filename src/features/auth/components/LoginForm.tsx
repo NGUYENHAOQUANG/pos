@@ -12,6 +12,7 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
+import DangerIcon from '@/assets/Icon/Danger.svg';
 
 export default function LoginForm() {
     const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -113,13 +114,9 @@ export default function LoginForm() {
 
                     {/* Form Section */}
                     <View style={styles.formSection}>
-                        <View style={styles.inputLabelContainer}>
-                            <Text style={styles.inputLabel}>Số điện thoại</Text>
-                        </View>
-
                         <PhoneInput
-                            // label="Số điện thoại" //
-                            placeholder="0908 456 789"
+                            required
+                            placeholder="Số điện thoại"
                             value={phone}
                             onChangeText={text => {
                                 setPhone(text);
@@ -134,7 +131,14 @@ export default function LoginForm() {
                         />
 
                         {/* Hiển thị text lỗi bên dưới input */}
-                        {error && <Text style={styles.errorText}>{error}</Text>}
+                        {error && (
+                            <View style={styles.errorContainer}>
+                                <View style={styles.errorIconWrapper}>
+                                    <DangerIcon width={16} height={16} />
+                                </View>
+                                <Text style={[styles.errorText, { flex: 1 }]}>{error}</Text>
+                            </View>
+                        )}
 
                         <View style={styles.buttonContainer}>
                             <Button
@@ -196,13 +200,22 @@ const styles = StyleSheet.create({
     inputLabel: {
         fontSize: typography.fontSize.base,
         color: colors.text,
-        fontWeight: '400',
+        fontWeight: '500',
+        lineHeight: 20,
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginTop: -spacing.xs,
+        marginBottom: spacing.md,
+        gap: 6,
+    },
+    errorIconWrapper: {
+        marginTop: 2,
     },
     errorText: {
         color: colors.error,
         fontSize: typography.fontSize.sm,
-        marginTop: -spacing.sm,
-        marginBottom: spacing.md,
         lineHeight: 20,
     },
     buttonContainer: {
