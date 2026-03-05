@@ -64,14 +64,14 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
+        borderRadius: borderRadius.sm,
         marginTop: spacing.sm,
+        marginHorizontal: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginHorizontal: spacing.md,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
     },
     content: {
         flex: 1,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
     },
     nameWrapper: {
         flex: 1,
@@ -93,9 +93,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text,
     },
-    tag: {
-        // Tag component handles its own styles
-    },
+    tag: {},
     date: {
         fontSize: typography.fontSize.sm,
         color: colors.text,

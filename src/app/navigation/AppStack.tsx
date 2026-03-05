@@ -15,8 +15,8 @@ import { MainNavigator } from './MainNavigator';
 import { PondDetailScreen } from '@/features/farm/screens/pond-detail/PondDetailScreen';
 import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
-import { ShrimpInspectionScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionScreen';
-import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpInspectionLogScreen';
+import { ShrimpHealthScreen } from '@/features/farm/screens/pondwork/shrimp-health/ShrimpInspectionScreen';
+import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-health-log/ShrimpInspectionLogScreen';
 import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
 import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
 import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
@@ -41,7 +41,7 @@ import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeAIScreen';
-import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/shrimp-inspection/ShrimpHealthCheckAIScreen';
+import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/ai-shrimp-health/ShrimpHealthAIScreen';
 
 // Material screens
 import { MaterialFormScreen } from '@/features/material/screens/material_form';
@@ -85,6 +85,7 @@ import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types'
 import { Member } from '@/features/menu/types/menu.types';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
+import { AIHealthCheckResult } from '@/features/farm/components/pondwork/shrimp-inspection/ShrimpInspectionObservationBox';
 
 // Wrapped Menu screens - Now using components directly
 const PersonalInformationWithProvider = PersonalInformationScreens;
@@ -116,12 +117,13 @@ export type AppStackParamList = {
     PondDetail: { pondId: string; zoneId: string };
     PondInfo: { pond: PondData };
     FarmInfo: { farm: FarmData };
-    ShrimpInspectionScreen: {
-        pond: PondData;
-        itemToEdit?: JobExecution;
-        aiHealthCheckResult?: any;
+    ShrimpHealthScreen: {
+        pondId: string;
+        zoneId: string;
+        shrimpHealthId?: string;
+        aiHealthCheckResult?: AIHealthCheckResult;
     };
-    ShrimpHealthCheckAIScreen: { pond: PondData };
+    ShrimpHealthCheckAIScreen: { pondId: string; zoneId: string };
     MeasureShrimpSizeLogScreen: { pond: PondData };
     MeasureShrimpSizeScreen: {
         pond: PondData;
@@ -129,7 +131,7 @@ export type AppStackParamList = {
         aiShrimpSize?: string;
     };
     MeasureShrimpSizeAIScreen: { pondId: string };
-    PondworkLogScreen: { pond: PondData };
+    PondworkLogScreen: { pondId: string; zoneId: string };
     AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
     SettingEnvironment: {
         data?: { advancedParameters?: Array<{ id: string; name: string }> };
@@ -274,7 +276,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="FeedingLog" component={FeedingLogScreens} />
             <Stack.Screen name="PondInfo" component={PondInfoScreen} />
             <Stack.Screen name="FarmInfo" component={FarmInfoScreen} />
-            <Stack.Screen name="ShrimpInspectionScreen" component={ShrimpInspectionScreen} />
+            <Stack.Screen name="ShrimpHealthScreen" component={ShrimpHealthScreen} />
             <Stack.Screen
                 name="MeasureShrimpSizeLogScreen"
                 component={MeasureShrimpSizeLogScreen}

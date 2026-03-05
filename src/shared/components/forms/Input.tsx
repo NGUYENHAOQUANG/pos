@@ -160,7 +160,7 @@ export function Input({
                                 inputStyle,
                                 {
                                     color: colors.textTertiary,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     lineHeight: Platform.OS === 'ios' ? 0 : 1.54 * 12,
                                 },
                             ]}
@@ -203,7 +203,7 @@ export function Input({
                                         paddingVertical: 0,
                                         paddingLeft: 0,
                                         marginLeft: 0,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: disabled ? colors.textTertiary : colors.text,
                                         ...Platform.select({
                                             ios: {
@@ -211,7 +211,7 @@ export function Input({
                                                 lineHeight: 0,
                                             },
                                             android: {
-                                                lineHeight: 1.54 * 12,
+                                                lineHeight: 1.54 * 14,
                                             },
                                         }),
                                     },
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
         paddingRight: 0,
     },
     suffixText: {
-        fontSize: 16,
+        fontSize: 14,
         color: colors.textSecondary,
         fontWeight: '400',
     },
