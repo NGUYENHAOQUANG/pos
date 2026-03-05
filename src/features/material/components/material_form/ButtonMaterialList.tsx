@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 1,
         borderColor: colors.borderDark,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
     },
     row: {
