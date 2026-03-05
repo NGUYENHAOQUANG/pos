@@ -130,12 +130,9 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
             <View style={styles.inputGroup}>
                 {label && (
                     <View style={styles.labelWrapper}>
-                        {required && (
-                            <View style={styles.requiredWrapper}>
-                                <Text style={styles.required}>*</Text>
-                            </View>
-                        )}
                         <Text style={styles.label}>{label}</Text>
+                        {/* Small required dot 4x4 displayed to the right of label */}
+                        {required && <View style={styles.requiredDot} />}
                     </View>
                 )}
                 <TouchableOpacity
@@ -167,9 +164,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    requiredWrapper: {
-        width: 7,
-        marginRight: 4,
+    requiredDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: colors.error,
+        marginLeft: 4,
     },
     label: {
         fontSize: 14,

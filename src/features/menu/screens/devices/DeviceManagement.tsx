@@ -13,7 +13,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
-import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
+// import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 // import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
 import { DropDownButtonBasic, DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { DevicesCard } from '@/features/menu/components/devices/DevicesCard';
@@ -114,7 +115,7 @@ export const DeviceManagement = () => {
             style={styles.addButton}
             onPress={() => navigation.navigate('AddDevice' as never)}
         >
-            <Ionicons name="add" size={24} color={colors.primary} />
+            <Ionicons name="add" size={24} color={colors.black} />
         </TouchableOpacity>
     );
 
@@ -126,7 +127,15 @@ export const DeviceManagement = () => {
                 rightAction={renderAddButton()}
             />
 
-            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
+            <HeadingBar
+                selectedTab={selectedTab}
+                onTabSelect={setSelectedTab}
+                tabs={tabs}
+                containerStyle={{
+                    paddingTop: spacing.md,
+                    backgroundColor: colors.transparent,
+                }}
+            />
 
             <View style={styles.filterContainer}>
                 <View style={styles.filterItem}>
@@ -242,7 +251,6 @@ export const DeviceManagement = () => {
                                 setMenuVisible(false);
                                 setDeleteModalVisible(true);
                             },
-                            danger: true,
                         },
                     ]}
                 />
@@ -261,7 +269,7 @@ export const DeviceManagement = () => {
                         setSelectedDeviceId(null);
                     }}
                     title="Xoá thiết bị"
-                    message="Bạn có chắc chắn muốn xoá thiết bị này không?"
+                    message="Bạn có chắc chắn muốn xoá thiết bị này?"
                     successMessage="Đã xóa thiết bị thành công"
                 />
             </View>
@@ -272,7 +280,7 @@ export const DeviceManagement = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.backgroundPrimary,
     },
     addButton: {
         width: 40,
@@ -280,15 +288,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
+        borderColor: colors.border,
     },
     filterContainer: {
         flexDirection: 'row',
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
-        backgroundColor: colors.white,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.sm,
+        backgroundColor: colors.transparent,
         zIndex: 10,
     },
     filterItem: {
@@ -298,7 +307,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
         paddingTop: spacing.sm,
-        backgroundColor: colors.backgroundPrimary,
+        backgroundColor: colors.transparent,
     },
     emptyStateButton: {
         backgroundColor: colors.primary,
@@ -307,6 +316,7 @@ const styles = StyleSheet.create({
         maxWidth: 200,
     },
     scrollContent: {
+        paddingHorizontal: 16,
         paddingBottom: spacing.xl,
     },
 });

@@ -17,7 +17,7 @@ import { useSeasons } from '@/features/menu/hooks/useSeasons';
 // Components
 import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
 import { HeadingMenu } from '@/features/menu/components/HeadingMenu';
-import { EmptyStateCard } from '@/features/menu/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { DropDownButton } from '@/features/menu/components/aquaculture/DropDownButton';
 import { AquacultureItem } from '@/features/menu/components/aquaculture/AquacultureItem';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';

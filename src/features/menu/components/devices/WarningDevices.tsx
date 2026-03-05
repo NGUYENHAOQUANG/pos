@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius, typography } from '@/styles';
-import { IconWarning } from '@/assets/icons';
+import WarningCircleIcon from '@/assets/Icon/IconDevices/WarningCircle.svg';
 
 interface WarningDevicesProps {
     onPress?: () => void;
@@ -11,7 +11,7 @@ export const WarningDevices: React.FC<WarningDevicesProps> = ({ onPress }) => {
     return (
         <View style={styles.container}>
             <View style={styles.iconContainer}>
-                <IconWarning width={24} height={24} />
+                <WarningCircleIcon width={20} height={20} />
             </View>
 
             <View style={styles.contentContainer}>
@@ -28,15 +28,14 @@ export const WarningDevices: React.FC<WarningDevicesProps> = ({ onPress }) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.yellow[50],
+        backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.yellow[300],
+        borderColor: colors.border,
         borderRadius: borderRadius.md,
         padding: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: spacing.sm,
-        marginHorizontal: 12,
     },
     iconContainer: {
         marginRight: spacing.sm,
@@ -56,7 +55,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primary,
         paddingVertical: spacing.xs,
         paddingHorizontal: spacing.md,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         height: 32,
         justifyContent: 'center',
         alignItems: 'center',
