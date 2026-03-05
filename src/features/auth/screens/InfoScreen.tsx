@@ -1,47 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
     ScrollView,
     StatusBar,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
-    Image,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
+    Keyboard,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { CompleteProfilePayload } from '@/features/auth/types/auth.types';
-import { documentApi } from '@/features/material/api/documentApi';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 
 import { colors, spacing, typography } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
-import AvatarIcon from '@/assets/Icon/IconMenu/Avatar.svg';
+import InfoIcon from '@/assets/Icon/Info.svg';
 
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 import { handleError } from '@/shared/utils';
 
 export default function InfoScreen() {
-    const insets = useSafeAreaInsets();
-
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
-    const [avatar, setAvatar] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
 
     const { user, completeProfile } = useAuthStore();
 
-    // Auto-fill phone if available from user store or params
-    // But InfoScreen might need route params if user is not fully set in store?
-    // Store sets user but isAuthenticated=false, so we can access user.
+    useEffect(() => {
+        if (Platform.OS !== 'android') return;
+
+        const showSub = Keyboard.addListener('keyboardDidShow', event => {
+            setKeyboardOffset(event.endCoordinates.height);
+        });
+
+        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardOffset(0);
+        });
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     const handleSubmit = async () => {
         if (!fullName.trim()) {
@@ -53,23 +61,6 @@ export default function InfoScreen() {
         try {
             if (!user?.id) throw new Error('Không tìm thấy thông tin người dùng');
 
-            let finalAvatarId = '';
-
-            // Handle avatar upload if it's a local URI
-            if (avatar && (avatar.startsWith('file://') || avatar.startsWith('content://'))) {
-                const fileToUpload = {
-                    uri: avatar,
-                    type: 'image/jpeg',
-                    name: `avatar_${Date.now()}.jpg`,
-                };
-
-                const uploadedDocs = await documentApi.upload([fileToUpload]);
-
-                if (uploadedDocs && uploadedDocs.length > 0) {
-                    finalAvatarId = uploadedDocs[0].id;
-                }
-            }
-
             const payload: CompleteProfilePayload = {
                 userId: user.id,
                 fullName,
@@ -77,7 +68,6 @@ export default function InfoScreen() {
 
             if (email) payload.email = email;
             if (address) payload.address = address;
-            if (finalAvatarId) payload.avatarId = finalAvatarId;
 
             await completeProfile(payload);
             Toast.show({
@@ -91,117 +81,101 @@ export default function InfoScreen() {
         }
     };
 
-    const handleChoosePhoto = () => {
-        launchImageLibrary(
-            {
-                mediaType: 'photo' as MediaType,
-                quality: 0.8,
-            },
-            (response: ImagePickerResponse) => {
-                if (response.didCancel) {
-                    return;
-                }
-                if (response.errorMessage) {
-                    Alert.alert('Lỗi', response.errorMessage);
-                    return;
-                }
-                if (response.assets && response.assets[0]?.uri) {
-                    setAvatar(response.assets[0].uri);
-                }
-            }
-        );
-    };
-
     return (
         <ErrorBoundary>
             <Loading isLoading={isLoading}>
-                <SafeAreaView
-                    style={styles.container}
-                    edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
-                >
+                <SafeAreaView style={styles.container} edges={['top']}>
                     <FloatingBubblesBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-                    {Platform.OS === 'android' && (
-                        <View style={[styles.androidStatusBar, { height: insets.top }]} />
-                    )}
-
                     <KeyboardAvoidingView
-                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        style={styles.keyboardView}
+                        enabled={Platform.OS === 'ios'}
+                        behavior="padding"
+                        style={styles.keyboardInner}
+                        keyboardVerticalOffset={0}
                     >
-                        <ScrollView
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.scrollContent}
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <View style={styles.formCard}>
+                        <View style={styles.mainContentContainer}>
+                            <ScrollView
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.scrollContent}
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled"
+                            >
+                                <View style={styles.topEmptySpace} />
+
                                 <View style={styles.logoSection}>
-                                    <ErrorBoundary>
-                                        <Logo size="square" />
-                                    </ErrorBoundary>
+                                    <Logo size="square" />
                                 </View>
 
-                                <View style={styles.spacer} />
-
-                                <Text style={styles.screenTitle}>Tạo tài khoản</Text>
-
-                                <View style={styles.avatarContainer}>
-                                    <TouchableOpacity onPress={handleChoosePhoto}>
-                                        <View style={styles.avatar}>
-                                            {avatar ? (
-                                                <Image
-                                                    source={{ uri: avatar }}
-                                                    style={styles.avatarImage}
-                                                />
-                                            ) : (
-                                                <AvatarIcon width={64} height={64} />
-                                            )}
-                                        </View>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={handleChoosePhoto}>
-                                        <Text style={styles.avatarText}>Chọn ảnh</Text>
-                                    </TouchableOpacity>
+                                <View style={styles.infoIconSection}>
+                                    <InfoIcon width={48} height={48} />
                                 </View>
 
-                                <View style={styles.formContent}>
-                                    <Input
-                                        label="Họ và tên"
-                                        required
-                                        placeholder="Nhập họ và tên"
-                                        value={fullName}
-                                        onChangeText={setFullName}
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
+                                <View style={styles.contentSection}>
+                                    <Text style={styles.screenTitle}>Tạo tài khoản</Text>
 
-                                    <Input
-                                        label="Email"
-                                        placeholder="Nhập email của bạn"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        keyboardType="email-address"
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
+                                    <View style={styles.formContent}>
+                                        <Input
+                                            label="Họ và tên"
+                                            required
+                                            placeholder="Nhập họ và tên"
+                                            value={fullName}
+                                            onChangeText={setFullName}
+                                            containerStyle={styles.inputSpacing}
+                                        />
 
-                                    <Input
-                                        label="Địa chỉ"
-                                        placeholder="Nhập địa chỉ của bạn"
-                                        value={address}
-                                        onChangeText={setAddress}
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
+                                        <Input
+                                            label={
+                                                <Text style={styles.labelBase}>
+                                                    Email{' '}
+                                                    <Text style={styles.optionalText}>
+                                                        (Không bắt buộc)
+                                                    </Text>
+                                                </Text>
+                                            }
+                                            placeholder="Nhập email của bạn"
+                                            value={email}
+                                            onChangeText={setEmail}
+                                            keyboardType="email-address"
+                                            containerStyle={styles.inputSpacing}
+                                        />
 
-                                    <Button
-                                        title="Tạo tài khoản"
-                                        onPress={handleSubmit}
-                                        variant="primary"
-                                        fullWidth
-                                        style={styles.loginButton}
-                                    />
+                                        <Input
+                                            label={
+                                                <Text style={styles.labelBase}>
+                                                    Địa chỉ{' '}
+                                                    <Text style={styles.optionalText}>
+                                                        (Không bắt buộc)
+                                                    </Text>
+                                                </Text>
+                                            }
+                                            placeholder="Nhập địa chỉ của bạn"
+                                            value={address}
+                                            onChangeText={setAddress}
+                                            containerStyle={styles.inputSpacing}
+                                        />
+                                    </View>
                                 </View>
+                            </ScrollView>
+
+                            <View
+                                style={[
+                                    styles.footer,
+                                    Platform.OS === 'android' && {
+                                        paddingBottom:
+                                            spacing.xl + spacing.sm + 12 + keyboardOffset,
+                                    },
+                                ]}
+                            >
+                                <Button
+                                    title="Tạo tài khoản"
+                                    onPress={handleSubmit}
+                                    variant="primary"
+                                    fullWidth
+                                    style={styles.submitButton}
+                                />
                             </View>
-                        </ScrollView>
+                        </View>
                     </KeyboardAvoidingView>
                 </SafeAreaView>
             </Loading>
@@ -215,97 +189,64 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundPrimary,
         overflow: 'hidden',
     },
-    androidStatusBar: {
-        backgroundColor: colors.backgroundPrimary,
+    keyboardInner: {
+        flex: 1,
     },
-    keyboardView: { flex: 1, zIndex: 1 },
-    scrollView: { flex: 1, zIndex: 1 },
+    mainContentContainer: {
+        flex: 1,
+    },
+    scrollView: { flex: 1 },
     scrollContent: {
         flexGrow: 1,
-        justifyContent: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.lg,
     },
-    formCard: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        paddingVertical: spacing.md,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
-        marginHorizontal: spacing.xs,
+    topEmptySpace: {
+        height: spacing.md,
     },
     logoSection: {
-        alignItems: 'center',
-        marginBottom: spacing.md,
-        paddingHorizontal: spacing.lg,
-    },
-    avatarContainer: {
-        alignItems: 'center',
-        marginTop: spacing.md,
-    },
-    avatarText: {
-        marginTop: spacing.sm,
-        color: colors.primary,
-        fontWeight: '400',
-        fontSize: 14,
-        marginBottom: 5,
-    },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
         justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
+        alignItems: 'flex-start',
     },
-    avatarImage: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+    infoIconSection: {
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.lg,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
     },
-    spacer: {
-        width: '100%',
-        marginBottom: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+    contentSection: {
+        paddingHorizontal: spacing.md,
+        marginTop: spacing.sm,
+    },
+    inputSpacing: {
+        marginBottom: spacing.lg,
     },
     screenTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.text,
-        textAlign: 'center',
-        marginBottom: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        fontSize: typography.fontSize['2xl'],
+        fontWeight: '600',
+        color: '#0B1117',
+        textAlign: 'left',
+        paddingVertical: spacing.md,
     },
     formContent: {
-        gap: spacing.md,
         marginTop: spacing.sm,
-        paddingHorizontal: spacing.lg,
     },
-    errorText: {
-        fontSize: 14,
-        color: colors.error,
-        marginTop: 2,
-    },
-    unregisteredErrorContainer: {
-        marginTop: 2,
-    },
-    unregisteredErrorText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.error,
-        lineHeight: 22,
-        fontWeight: typography.fontWeight.regular,
-        letterSpacing: 0,
-    },
-    unregisteredLinkText: {
-        color: colors.primary,
-        textDecorationLine: 'underline',
-        fontWeight: typography.fontWeight.regular,
-        letterSpacing: 0,
-    },
-    loginButton: {
+    submitButton: {
         backgroundColor: colors.primary,
-        borderRadius: 8,
-        minHeight: 40,
+        borderRadius: 25,
+        height: 52,
+    },
+    footer: {
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.xl + spacing.sm + 12,
+        paddingTop: spacing.xs,
+    },
+    labelBase: {
+        color: colors.text,
+    },
+    optionalText: {
+        color: colors.gray[400],
+        fontWeight: '400',
+        fontSize: 14,
     },
 });

@@ -4,6 +4,7 @@
  */
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
+import DangerIcon from '@/assets/Icon/Danger.svg';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 // Giả định bạn đã có các biến này trong project, nếu chưa hãy thay bằng mã màu cứng
 import { colors, spacing, typography, borderRadius } from '@/styles';
@@ -29,7 +30,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     // onClear,
     countryCode: _countryCode,
     onCountryCodeChange: _onCountryCodeChange,
-    required: _required,
+    required,
 }) => {
     const [isFocused, setIsFocused] = useState(false);
 
@@ -59,7 +60,12 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
 
     return (
         <View style={styles.container}>
-            {label && <Text style={styles.label}>{label}</Text>}
+            {label && (
+                <View style={styles.labelContainer}>
+                    <Text style={styles.label}>{label}</Text>
+                    {required && <Text style={styles.requiredDot}>{'\u2022'}</Text>}
+                </View>
+            )}
 
             <View
                 style={[
@@ -78,27 +84,39 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                 />
-
-                {/* Hiển thị icon X đỏ nếu có lỗi */}
-                {/* {!!error && (
-          <TouchableOpacity onPress={onClear} style={styles.errorIcon}>
-            <Ionicons name="close-circle" size={20} color={colors.error} />
-          </TouchableOpacity>
-        )} */}
             </View>
 
             {/* Dòng chữ báo lỗi bên dưới - chỉ hiển thị nếu error là string (không phải 'error') */}
-            {!!error && error !== 'error' && <Text style={styles.errorText}>{error}</Text>}
+            {!!error && error !== 'error' && (
+                <View style={styles.errorContainer}>
+                    <View style={styles.errorIconWrapper}>
+                        <DangerIcon width={16} height={16} />
+                    </View>
+                    <Text style={[styles.errorText, { flex: 1 }]}>{error}</Text>
+                </View>
+            )}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {},
+    labelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.sm,
+        gap: 4,
+    },
     label: {
         fontSize: typography.fontSize.base,
         color: colors.text,
-        marginBottom: spacing.md,
+        fontWeight: '500',
+        lineHeight: 20,
+    },
+    requiredDot: {
+        color: colors.error,
+        fontSize: typography.fontSize.base,
+        fontWeight: '700',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -125,10 +143,19 @@ const styles = StyleSheet.create({
     errorIcon: {
         paddingLeft: spacing.xs,
     },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginTop: 4,
+        gap: 6,
+    },
+    errorIconWrapper: {
+        marginTop: 2, // Đưa icon xuống một chút để thẳng hàng với dòng đầu tiên của text
+    },
     errorText: {
         fontSize: typography.fontSize.sm,
         color: colors.error,
-        marginTop: 2, // 2px từ input container đến error text
+        lineHeight: 20,
     },
 });
 

@@ -121,14 +121,10 @@ export function Input({
             {/* Label */}
             {label && (
                 <View style={styles.labelWrapper}>
-                    {required && (
-                        <View style={styles.requiredWrapper}>
-                            <Text style={styles.required}>*</Text>
-                        </View>
-                    )}
                     <Text style={styles.label} maxFontSizeMultiplier={1.1}>
                         {label}
                     </Text>
+                    {required && <View style={styles.requiredDot} />}
                 </View>
             )}
             {/* Input Container */}
@@ -274,9 +270,12 @@ const styles = StyleSheet.create({
     container: {
         marginBottom: 12,
     },
-    requiredWrapper: {
-        width: 7,
-        marginRight: 4,
+    requiredDot: {
+        width: 4,
+        height: 4,
+        borderRadius: 3,
+        backgroundColor: colors.error,
+        marginLeft: 6,
     },
     labelWrapper: {
         flexDirection: 'row',
@@ -284,10 +283,10 @@ const styles = StyleSheet.create({
         marginBottom: spacing.sm,
     },
     label: {
-        fontSize: 14,
-        fontWeight: '400',
+        fontSize: typography.fontSize.base,
+        fontWeight: '500',
         color: colors.text,
-        lineHeight: 22,
+        lineHeight: 20,
     },
     required: {
         color: colors.error,
@@ -317,8 +316,10 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: 16,
+        fontSize: typography.fontSize.base,
+        fontWeight: '500',
         color: colors.text,
+        lineHeight: 20,
         letterSpacing: 0,
         paddingVertical: 0,
         height: '100%',

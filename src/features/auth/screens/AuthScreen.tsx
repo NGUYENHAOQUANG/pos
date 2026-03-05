@@ -1,24 +1,27 @@
 import React from 'react';
 import {
-    KeyboardAvoidingView,
     Platform,
     ScrollView,
     StatusBar,
     StyleSheet,
     View,
     Text,
+    KeyboardAvoidingView,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
 import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
+import DangerIcon from '@/assets/Icon/Danger.svg';
 import { colors, spacing, typography } from '@/styles';
 import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
 
 export default function AuthScreen() {
     const insets = useSafeAreaInsets();
+    const [keyboardOffset, setKeyboardOffset] = React.useState(0);
     const {
         phoneNumber,
         error,
@@ -32,13 +35,27 @@ export default function AuthScreen() {
         handlePhoneChange,
     } = useLoginFlow();
 
+    React.useEffect(() => {
+        if (Platform.OS !== 'android') return;
+
+        const showSub = Keyboard.addListener('keyboardDidShow', event => {
+            setKeyboardOffset(event.endCoordinates.height);
+        });
+
+        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardOffset(0);
+        });
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
+
     return (
         <ErrorBoundary>
             <Loading isLoading={isLoading}>
-                <SafeAreaView
-                    style={styles.container}
-                    edges={Platform.OS === 'ios' ? ['top', 'bottom'] : ['bottom']}
-                >
+                <SafeAreaView style={styles.container} edges={Platform.OS === 'ios' ? ['top'] : []}>
                     <FloatingBubblesBackground />
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
@@ -47,78 +64,102 @@ export default function AuthScreen() {
                     )}
 
                     <KeyboardAvoidingView
-                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        style={styles.keyboardView}
+                        enabled={Platform.OS === 'ios'}
+                        behavior="padding"
+                        style={styles.keyboardInner}
+                        keyboardVerticalOffset={0}
                     >
-                        <ScrollView
-                            style={styles.scrollView}
-                            contentContainerStyle={styles.scrollContent}
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <View style={styles.formCard}>
-                                <View style={styles.logoSection}>
-                                    <ErrorBoundary>
-                                        <Logo size="square" />
-                                    </ErrorBoundary>
-                                </View>
+                        <View style={styles.mainContentContainer}>
+                            <ScrollView
+                                style={styles.scrollView}
+                                contentContainerStyle={styles.scrollContent}
+                                showsVerticalScrollIndicator={false}
+                                keyboardShouldPersistTaps="handled"
+                            >
+                                <View style={styles.formCard}>
+                                    <View style={styles.logoSection}>
+                                        <ErrorBoundary>
+                                            <Logo size="square" />
+                                        </ErrorBoundary>
+                                    </View>
 
-                                <View style={styles.spacer} />
+                                    <Text style={styles.screenTitle}>Đăng nhập</Text>
 
-                                <Text style={styles.screenTitle}>Đăng nhập</Text>
-
-                                <View style={styles.formContent}>
-                                    <PhoneInput
-                                        value={phoneNumber}
-                                        onChangeText={handlePhoneChange}
-                                        error={
-                                            isUnregistered || isUnverifiedAccount ? 'error' : error
-                                        }
-                                        onClear={handleClearError}
-                                    />
-
-                                    {/* Hiển thị error message cho số điện thoại chưa đăng ký */}
-                                    {isUnregistered && (
-                                        <View style={styles.unregisteredErrorContainer}>
-                                            <Text style={styles.unregisteredErrorText}>
-                                                Số điện thoại này chưa được đăng ký, vui lòng kiểm
-                                                tra và thử lại hoặc{' '}
-                                                <Text
-                                                    style={styles.unregisteredLinkText}
-                                                    onPress={handleRegisterPress}
-                                                >
-                                                    tạo tài khoản mới
-                                                </Text>
-                                            </Text>
-                                        </View>
-                                    )}
-
-                                    {/* Hiển thị error message cho tài khoản chưa xác thực */}
-                                    {isUnverifiedAccount && (
-                                        <View style={styles.unregisteredErrorContainer}>
-                                            <Text style={styles.unregisteredErrorText}>
-                                                Số điện thoại này đã được đăng ký nhưng chưa xác
-                                                thực, vui lòng xác thực ngay
-                                            </Text>
-                                        </View>
-                                    )}
-
-                                    <View style={styles.buttonSection}>
-                                        <Button
-                                            title={
-                                                isUnverifiedAccount ? 'Xác thực ngay' : 'Đăng Nhập'
+                                    <View style={styles.formContent}>
+                                        <PhoneInput
+                                            required
+                                            placeholder="Nhập số điện thoại"
+                                            value={phoneNumber}
+                                            onChangeText={handlePhoneChange}
+                                            error={
+                                                isUnregistered || isUnverifiedAccount
+                                                    ? 'error'
+                                                    : error
                                             }
-                                            onPress={
-                                                isUnverifiedAccount ? handleVerifyNow : handleLogin
-                                            }
-                                            variant="primary"
-                                            fullWidth
-                                            style={styles.loginButton}
+                                            onClear={handleClearError}
                                         />
+
+                                        {isUnregistered && (
+                                            <View style={styles.unregisteredErrorContainer}>
+                                                <View style={styles.errorIconWrapper}>
+                                                    <DangerIcon width={16} height={16} />
+                                                </View>
+                                                <Text
+                                                    style={[
+                                                        styles.unregisteredErrorText,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    Số điện thoại này chưa được đăng ký, vui lòng
+                                                    kiểm tra và thử lại hoặc{' '}
+                                                    <Text
+                                                        style={styles.unregisteredLinkText}
+                                                        onPress={handleRegisterPress}
+                                                    >
+                                                        tạo tài khoản mới
+                                                    </Text>
+                                                </Text>
+                                            </View>
+                                        )}
+
+                                        {isUnverifiedAccount && (
+                                            <View style={styles.unregisteredErrorContainer}>
+                                                <View style={styles.errorIconWrapper}>
+                                                    <DangerIcon width={16} height={16} />
+                                                </View>
+                                                <Text
+                                                    style={[
+                                                        styles.unregisteredErrorText,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    Số điện thoại này đã được đăng ký nhưng chưa xác
+                                                    thực, vui lòng xác thực ngay
+                                                </Text>
+                                            </View>
+                                        )}
                                     </View>
                                 </View>
+                            </ScrollView>
+
+                            <View
+                                style={[
+                                    styles.footer,
+                                    Platform.OS === 'android' && {
+                                        paddingBottom:
+                                            spacing.xl + spacing.sm + 12 + keyboardOffset,
+                                    },
+                                ]}
+                            >
+                                <Button
+                                    title={isUnverifiedAccount ? 'Xác thực ngay' : 'Đăng Nhập'}
+                                    onPress={isUnverifiedAccount ? handleVerifyNow : handleLogin}
+                                    variant="primary"
+                                    fullWidth
+                                    style={styles.loginButton}
+                                />
                             </View>
-                        </ScrollView>
+                        </View>
                     </KeyboardAvoidingView>
                 </SafeAreaView>
             </Loading>
@@ -130,76 +171,72 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-        overflow: 'hidden',
     },
     androidStatusBar: {
         backgroundColor: colors.backgroundPrimary,
     },
-    keyboardView: { flex: 1, zIndex: 1 },
-    scrollView: { flex: 1, zIndex: 1 },
+    keyboardInner: {
+        flex: 1,
+    },
+    mainContentContainer: {
+        flex: 1,
+    },
+    scrollView: {
+        flex: 1,
+    },
     scrollContent: {
         flexGrow: 1,
-        justifyContent: 'center',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.lg,
     },
     formCard: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        paddingVertical: spacing.md,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
+        paddingVertical: 0,
     },
     logoSection: {
-        alignItems: 'center',
-        marginBottom: spacing.md,
-        paddingHorizontal: spacing.lg,
-    },
-    spacer: {
-        width: '100%',
-        marginBottom: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        height: 64,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.md,
     },
     screenTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.text,
-        textAlign: 'center',
-        marginBottom: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        fontSize: typography.fontSize['2xl'],
+        fontWeight: '600',
+        color: '#0B1117',
+        textAlign: 'left',
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.md,
     },
     formContent: {
         marginTop: spacing.sm,
-        paddingHorizontal: spacing.lg,
+        paddingHorizontal: spacing.md,
     },
-    buttonSection: {
-        marginTop: spacing.md, // 16px từ error text đến button
-    },
-    errorText: {
-        fontSize: 14,
-        color: colors.error,
-        marginTop: 2, // 2px từ input container đến error text
-    },
+
     unregisteredErrorContainer: {
-        marginTop: 2, // 2px từ input container đến error text
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginTop: 4,
+        gap: 6,
+    },
+    errorIconWrapper: {
+        marginTop: 2,
     },
     unregisteredErrorText: {
-        fontSize: typography.fontSize.sm, // 14px
+        fontSize: typography.fontSize.sm,
         color: colors.error,
-        lineHeight: 22, // 22px theo Figma
-        fontWeight: typography.fontWeight.regular, // 400
-        letterSpacing: 0,
+        lineHeight: 22,
+        fontWeight: typography.fontWeight.regular,
     },
     unregisteredLinkText: {
         color: colors.primary,
         textDecorationLine: 'underline',
-        fontWeight: typography.fontWeight.regular, // 400
-        letterSpacing: 0,
     },
     loginButton: {
         backgroundColor: colors.primary,
         borderRadius: 25,
-        height: 50,
+        height: 52,
+    },
+    footer: {
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.xl + spacing.sm + 12,
+        paddingTop: spacing.xs,
     },
 });
