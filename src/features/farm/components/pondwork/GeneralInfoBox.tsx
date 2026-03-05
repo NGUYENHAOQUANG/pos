@@ -525,74 +525,76 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     {type === 'withImage' && (
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Hình ảnh</Text>
-                            <View style={styles.imagesContainer}>
-                                {/* Selected Images */}
-                                {imageUris.map((uri, index) => {
-                                    const isUploading = uploadingUris.includes(uri);
-                                    const isDeleting = deletingUris.includes(uri);
-                                    return (
-                                        <View key={index} style={styles.imageItem}>
-                                            <TouchableOpacity
-                                                style={styles.imageInner}
-                                                activeOpacity={0.9}
-                                                onPress={() =>
-                                                    !isUploading &&
-                                                    !isDeleting &&
-                                                    handlePreviewImage(uri)
-                                                }
-                                                disabled={isUploading || isDeleting}
-                                            >
-                                                <Image
-                                                    source={{ uri }}
-                                                    style={[
-                                                        styles.image,
-                                                        (isUploading || isDeleting) &&
-                                                            styles.imageLoading,
-                                                    ]}
-                                                />
-                                                {isUploading && (
-                                                    <View style={styles.loadingOverlay}>
-                                                        <ActivityIndicator
-                                                            size="small"
-                                                            color={colors.white}
-                                                        />
-                                                    </View>
-                                                )}
-                                                {isDeleting && (
-                                                    <View style={styles.loadingOverlay}>
-                                                        <ActivityIndicator
-                                                            size="small"
-                                                            color={colors.error}
-                                                        />
-                                                    </View>
-                                                )}
-                                            </TouchableOpacity>
-                                            {!isUploading && !isDeleting && (
-                                                <TouchableOpacity
-                                                    style={styles.removeButton}
-                                                    onPress={() => handleRemoveImage(index)}
-                                                    activeOpacity={0.7}
-                                                >
-                                                    <IconCloseOutlined
-                                                        width={10}
-                                                        height={10}
-                                                        color={colors.textSecondary}
-                                                    />
-                                                </TouchableOpacity>
-                                            )}
-                                        </View>
-                                    );
-                                })}
 
-                                {/* Add Button */}
-                                <TouchableOpacity
-                                    style={styles.imageUploadArea}
-                                    onPress={handleImagePress}
-                                    activeOpacity={0.7}
-                                >
-                                    <Ionicons name="add" size={16} color={colors.black} />
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableOpacity
+                                style={styles.addImageButtonFull}
+                                onPress={handleImagePress}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons name="add" size={20} color={colors.textSecondary} />
+                                <Text style={styles.addImageText}>Thêm hình ảnh</Text>
+                            </TouchableOpacity>
+
+                            {imageUris.length > 0 && (
+                                <View style={styles.imagesGrid}>
+                                    {imageUris.map((uri, index) => {
+                                        const isUploading = uploadingUris.includes(uri);
+                                        const isDeleting = deletingUris.includes(uri);
+                                        return (
+                                            <View key={index} style={styles.imageItem}>
+                                                <TouchableOpacity
+                                                    style={styles.imageInner}
+                                                    activeOpacity={0.9}
+                                                    onPress={() =>
+                                                        !isUploading &&
+                                                        !isDeleting &&
+                                                        handlePreviewImage(uri)
+                                                    }
+                                                    disabled={isUploading || isDeleting}
+                                                >
+                                                    <Image
+                                                        source={{ uri }}
+                                                        style={[
+                                                            styles.image,
+                                                            (isUploading || isDeleting) &&
+                                                                styles.imageLoading,
+                                                        ]}
+                                                    />
+                                                    {isUploading && (
+                                                        <View style={styles.loadingOverlay}>
+                                                            <ActivityIndicator
+                                                                size="small"
+                                                                color={colors.white}
+                                                            />
+                                                        </View>
+                                                    )}
+                                                    {isDeleting && (
+                                                        <View style={styles.loadingOverlay}>
+                                                            <ActivityIndicator
+                                                                size="small"
+                                                                color={colors.error}
+                                                            />
+                                                        </View>
+                                                    )}
+                                                </TouchableOpacity>
+                                                {!isUploading && !isDeleting && (
+                                                    <TouchableOpacity
+                                                        style={styles.removeButton}
+                                                        onPress={() => handleRemoveImage(index)}
+                                                        activeOpacity={0.7}
+                                                    >
+                                                        <IconCloseOutlined
+                                                            width={12}
+                                                            height={12}
+                                                            color={colors.textSecondary}
+                                                        />
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            )}
                         </View>
                     )}
                 </SelectionInfoBox>
@@ -628,10 +630,11 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
     }
 );
 
-const CONTENT_HORIZONTAL_PADDING = spacing.md * 2;
-const IMAGE_GAP = spacing.md;
-const IMAGE_SIZE =
-    (Dimensions.get('window').width - CONTENT_HORIZONTAL_PADDING - IMAGE_GAP * 3) / 4;
+const CONTENT_HORIZONTAL_PADDING = 16 * 2 + 12 * 2; // 16 target margin + 12 target padding
+const IMAGE_GAP = 12;
+const IMAGE_SIZE = Math.floor(
+    (Dimensions.get('window').width - CONTENT_HORIZONTAL_PADDING - IMAGE_GAP * 3) / 4
+);
 
 const styles = StyleSheet.create({
     inputGroup: {
@@ -643,21 +646,28 @@ const styles = StyleSheet.create({
         color: colors.text,
         lineHeight: 22,
     },
-    imagesContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: spacing.md,
-    },
-    imageUploadArea: {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
+    addImageButtonFull: {
+        width: '100%',
+        height: 48,
         borderWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.borderLight,
+        borderRadius: borderRadius.full,
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.white,
+        gap: 8,
+    },
+    addImageText: {
+        fontSize: 16,
+        color: colors.textSecondary,
+        fontWeight: '400',
+    },
+    imagesGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: IMAGE_GAP,
+        marginTop: spacing.xs,
     },
     imageItem: {
         width: IMAGE_SIZE,
@@ -691,12 +701,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -8,
         right: -8,
-        width: 16,
-        height: 16,
-        borderRadius: 100,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        backgroundColor: colors.white,
+        borderColor: colors.borderLight,
+        backgroundColor: '#F3F4F6', // slightly grey as per usual patterns or matching design
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 10,
