@@ -1,29 +1,56 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Button } from '@/shared/components/buttons/Button';
-import { colors, spacing, borderRadius, typography } from '@/styles';
+import { colors, spacing, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import PlusIcon from '@/assets/Icon/Plus.svg';
 
-interface EmptyStateCardProps {
+/**
+ * Props for the shared EmptyStateCard component
+ */
+export interface EmptyStateCardProps {
+    /** Message to display under the empty state icon */
     message: string;
+    /** Title for the action button */
     buttonTitle: string;
+    /** Callback when the action button is pressed */
     onPress: () => void;
+    /** Optional extra style for the action button */
     buttonStyle?: ViewStyle;
+    /** Optional extra style for the container */
+    style?: ViewStyle;
 }
 
+/**
+ * A reusable empty state card with an illustration, message and a primary action button.
+ *
+ * @example
+ * ```tsx
+ * <EmptyStateCard
+ *   message="Chưa có dữ liệu"
+ *   buttonTitle="Thêm mới"
+ *   onPress={handleAdd}
+ * />
+ * ```
+ */
 export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     message,
     buttonTitle,
     onPress,
     buttonStyle,
+    style,
 }) => {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, style]}>
+            {/* Empty state illustration */}
             <View style={styles.iconContainer}>
                 <EmptyStateIcon width={120} height={120} />
             </View>
+
+            {/* Descriptive message */}
             <Text style={styles.text}>{message}</Text>
+
+            {/* Primary action button with Plus icon */}
             <Button
                 title={buttonTitle}
                 onPress={onPress}
@@ -38,8 +65,6 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.transparent,
-        borderRadius: borderRadius.md,
         alignItems: 'center',
         justifyContent: 'center',
     },

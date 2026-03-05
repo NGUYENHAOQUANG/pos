@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '@/styles';
+import { colors, spacing, typography, borderRadius } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
@@ -61,6 +61,7 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
                 onChangeText={text => setOperatingTime(handleIntegerInput(text))}
                 required
                 keyboardType="numeric"
+                suffix="giờ"
             />
 
             {/* Usage Time */}
@@ -71,7 +72,8 @@ export const MaintenancePeriod: React.FC<MaintenancePeriodProps> = ({
                 onChangeText={text => setUsageTime(handleIntegerInput(text))}
                 required
                 keyboardType="numeric"
-                containerStyle={{ marginBottom: 0 }} // Last item
+                containerStyle={{ marginBottom: 0 }}
+                suffix="ngày"
             />
         </View>
     );
@@ -82,6 +84,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: spacing.md,
         marginBottom: 100,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     title: {
         fontSize: typography.fontSize.lg,

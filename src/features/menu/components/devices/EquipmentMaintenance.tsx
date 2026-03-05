@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
+import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
 
 interface EquipmentMaintenanceProps {
     date: Date;
@@ -54,11 +55,11 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
                         onPress={() => onResetTimeChange(true)}
                         activeOpacity={0.7}
                     >
-                        <Ionicons
-                            name={resetTime ? 'radio-button-on' : 'radio-button-off'}
-                            size={20}
-                            color={colors.primary}
-                        />
+                        {resetTime ? (
+                            <CheckboxActiveIcon width={24} height={24} />
+                        ) : (
+                            <CheckboxIcon width={24} height={24} />
+                        )}
                         <Text style={styles.radioLabel}>Có</Text>
                     </TouchableOpacity>
 
@@ -67,11 +68,11 @@ export const EquipmentMaintenance: React.FC<EquipmentMaintenanceProps> = ({
                         onPress={() => onResetTimeChange(false)}
                         activeOpacity={0.7}
                     >
-                        <Ionicons
-                            name={!resetTime ? 'radio-button-on' : 'radio-button-off'}
-                            size={20}
-                            color={colors.primary}
-                        />
+                        {!resetTime ? (
+                            <CheckboxActiveIcon width={24} height={24} />
+                        ) : (
+                            <CheckboxIcon width={24} height={24} />
+                        )}
                         <Text style={styles.radioLabel}>Không</Text>
                     </TouchableOpacity>
                 </View>
@@ -85,6 +86,9 @@ const styles = StyleSheet.create({
         gap: spacing.md,
         backgroundColor: colors.white,
         padding: spacing.md,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     inputGroup: {
         gap: spacing.sm,
