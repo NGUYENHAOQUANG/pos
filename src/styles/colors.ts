@@ -75,6 +75,7 @@ export const colors = {
         500: '#D48806',
         600: '#FA541C',
         700: '#FF7A45',
+        800: '#FD6900',
     },
     green: {
         25: '#F6FEF9',

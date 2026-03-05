@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
 
 export const materialListStyles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.backgroundPrimary,
     },
     containerWithPadding: {
         flex: 1,

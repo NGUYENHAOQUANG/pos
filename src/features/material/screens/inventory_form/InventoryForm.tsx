@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Platform, StatusBar } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -7,7 +7,7 @@ import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import Animated from 'react-native-reanimated';
 import { ButtonBarMaterial } from '@/features/material/components/ButtonBarMaterial';
 import { SafeInputLayoutMaterial } from '@/shared/components/layout/SafeInputLayoutMaterial';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { InventoryGeneralInfo } from '@/features/material/components/inventory/InventoryGeneralInfo';
 import {
@@ -16,7 +16,7 @@ import {
 } from '@/features/material/components/inventory/InventoryMaterialList';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
 import { IconTrashOutlined } from '@/assets/icons';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 import { Loading } from '@/shared/components/ui/Loading';
 
@@ -159,16 +159,6 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         );
     }
 
-    const deleteButton = isEditMode ? (
-        <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => setDeleteModalVisible(true)}
-            activeOpacity={0.7}
-        >
-            <IconTrashOutlined width={20} height={20} />
-        </TouchableOpacity>
-    ) : undefined;
-
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
@@ -181,7 +171,12 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                                 : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
                         }
                         onBackPress={onBackPress}
-                        rightComponent={deleteButton}
+                        rightIcon={
+                            isEditMode ? (
+                                <IconTrashOutlined width={20} height={20} color={colors.text} />
+                            ) : undefined
+                        }
+                        onRightPress={isEditMode ? () => setDeleteModalVisible(true) : undefined}
                     />
 
                     <SafeInputLayoutMaterial>
@@ -248,7 +243,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                         }}
                     />
 
-                    <ConfirmationDeleteModal
+                    <ConfirmationModalUI
                         visible={deleteModalVisible}
                         onConfirm={() => {
                             setDeleteModalVisible(false);
@@ -283,16 +278,6 @@ const styles = StyleSheet.create({
             android: { elevation: 5 },
             ios: { zIndex: 100 },
         }),
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
 });
 

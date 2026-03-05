@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 // Components
-import { HeaderMenu } from '@/features/menu/components/HeaderMenu';
-import { HeadingMenu, MenuTabItem } from '@/features/menu/components/HeadingMenu';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { HeadingBar, HeadingBarItem } from '@/shared/components/layout/HeadingBar';
 import {
     DropDownButton,
     DropDownItem,
@@ -17,7 +16,7 @@ import {
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { useMenuContext } from '@/features/menu/store/menuStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';
 
 import { useRoute } from '@react-navigation/native';
@@ -60,7 +59,7 @@ export const MemberManagementScreens: React.FC = () => {
     );
 
     // Tabs configuration
-    const tabs: MenuTabItem[] = [
+    const tabs: HeadingBarItem[] = [
         { key: 'all', label: 'Tất cả', count: members.length },
         {
             key: 'pending',
@@ -103,21 +102,14 @@ export const MemberManagementScreens: React.FC = () => {
     return (
         <View style={styles.container}>
             {/* Header */}
-            <HeaderMenu
+            <HeaderSection
                 title="Quản lý thành viên"
                 onBack={() => navigation.goBack()}
-                rightAction={
-                    <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={() => navigation.navigate('AddMember')}
-                    >
-                        <Ionicons name="add" size={24} color={colors.primary} />
-                    </TouchableOpacity>
-                }
+                onRightPress={() => navigation.navigate('AddMember')}
             />
 
             {/* Tabs */}
-            <HeadingMenu selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
+            <HeadingBar selectedTab={selectedTab} onTabSelect={setSelectedTab} tabs={tabs} />
 
             {/* Filters */}
             <View style={styles.filterContainer}>
@@ -150,7 +142,7 @@ export const MemberManagementScreens: React.FC = () => {
                                 role={member.role}
                                 managementLevel={member.managementLevel}
                                 status={member.status}
-                                onPressOption={() => navigation.navigate('EditMember', { member })}
+                                onPressOption={() => navigation.navigate('AddMember', { member })}
                                 onDelete={() => {
                                     setSelectedMemberId(member.id);
                                     setDeleteModalVisible(true);
@@ -171,7 +163,7 @@ export const MemberManagementScreens: React.FC = () => {
                         ))}
                     </View>
                 ) : (
-                    <View style={styles.cardContainer}>
+                    <View style={styles.emptyContainer}>
                         <EmptyStateCard
                             message="Chưa có thành viên nào"
                             buttonTitle="Thêm thành viên"
@@ -181,7 +173,7 @@ export const MemberManagementScreens: React.FC = () => {
                 )}
             </ScrollView>
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={() => {
                     if (selectedMemberId) {
@@ -195,7 +187,7 @@ export const MemberManagementScreens: React.FC = () => {
                 successMessage="Đã xoá thành viên thành công"
             />
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={suspendModalVisible}
                 onConfirm={() => {
                     if (selectedMemberId) {
@@ -266,22 +258,11 @@ const styles = StyleSheet.create({
         color: colors.text,
         fontWeight: '500',
     },
-    addButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-    },
+
     filterContainer: {
         flexDirection: 'row',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.md,
-        backgroundColor: colors.white,
-        marginTop: 1,
         gap: spacing.md,
     },
     filterWrapper: {
@@ -303,10 +284,8 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
         backgroundColor: 'transparent',
     },
-    cardContainer: {
-        marginHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        overflow: 'hidden',
+    emptyContainer: {
+        flex: 1,
+        marginTop: spacing.xl,
     },
 });

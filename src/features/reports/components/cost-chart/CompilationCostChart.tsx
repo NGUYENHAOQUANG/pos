@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { colors } from '@/styles/colors';
+import { borderRadius, colors } from '@/styles';
 import { typography } from '@/styles/typography';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import CostChart from './CostChart';
@@ -8,7 +8,8 @@ import BottomCostChart from './BottomCostChart';
 import { COST_DATA } from './costChartData';
 
 import { Loading } from '@/shared/components/ui/Loading';
-
+import chartStyles from '@/features/reports/styles/chart.styles';
+import CostChartIcon from '@/assets/Icon/IconReport/CostChartIcon.svg';
 const CompilationCostChart = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +25,9 @@ const CompilationCostChart = () => {
     }, [isExpanded]);
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             <BasicDropDownButton
+                prefixIcon={<CostChartIcon width={16} height={16} />}
                 label="BIỂU ĐỒ CHI PHÍ"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
@@ -75,10 +77,6 @@ const CompilationCostChart = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        marginBottom: 8,
-        backgroundColor: colors.white,
-    },
     header: {
         paddingVertical: 12,
         paddingHorizontal: 16,
@@ -94,6 +92,8 @@ const styles = StyleSheet.create({
     content: {
         backgroundColor: colors.white,
         paddingBottom: 16,
+        borderBottomLeftRadius: borderRadius.sm,
+        borderBottomRightRadius: borderRadius.sm,
     },
     statsContainer: {
         flexDirection: 'row',
@@ -119,6 +119,8 @@ const styles = StyleSheet.create({
     },
     excludeContainer: {
         paddingHorizontal: 8,
+        borderBottomLeftRadius: borderRadius.sm,
+        borderBottomRightRadius: borderRadius.sm,
     },
     divider: {
         height: 1,

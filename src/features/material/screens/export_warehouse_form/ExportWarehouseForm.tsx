@@ -3,9 +3,8 @@ import { View, StyleSheet, Platform, UIManager } from 'react-native';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import {
     ExportWarehouseFormValues,
     exportWarehouseFormSchema,
@@ -17,7 +16,7 @@ import { ExportWarehouseFooter } from '@/features/material/components/export_war
 import { ExportWarehouseInformation } from '@/features/material/components/export_warehouse/ExportWarehouseInformation';
 import { AddWarehouseMaterial } from '@/features/material/components/AddWarehouseMaterial';
 import { IconTrashOutlined } from '@/assets/icons';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import Animated from 'react-native-reanimated';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { Input } from '@/shared/components/forms/Input';
@@ -146,16 +145,13 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
             <HeaderMeterial
                 title={isEditMode ? 'Chỉnh Sửa Phiếu Xuất Kho' : 'Tạo Phiếu Xuất Kho'}
                 onBackPress={onBackPress}
-                rightComponent={
+                rightIcon={
                     isEditMode && onDelete ? (
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => setDeleteModalVisible(true)}
-                            activeOpacity={0.7}
-                        >
-                            <IconTrashOutlined width={20} height={20} />
-                        </TouchableOpacity>
-                    ) : null
+                        <IconTrashOutlined width={20} height={20} color={colors.text} />
+                    ) : undefined
+                }
+                onRightPress={
+                    isEditMode && onDelete ? () => setDeleteModalVisible(true) : undefined
                 }
             />
 
@@ -240,7 +236,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
                 }}
             />
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={() => {
                     setDeleteModalVisible(false);
@@ -266,15 +262,5 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingVertical: spacing.md,
         paddingBottom: 100,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
 });

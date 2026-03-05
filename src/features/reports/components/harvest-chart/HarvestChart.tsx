@@ -4,6 +4,8 @@ import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { mockHarvestChartData } from './harvestData';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import HarvestChartIcon from '@/assets/Icon/IconReport/HarvestChartIcon.svg';
 
 const CHART_CONTENT_HEIGHT = 394;
 const BAR_MAX_HEIGHT = 340.61;
@@ -42,9 +44,10 @@ export const HarvestChart: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             {/* Header-Section */}
             <BasicDropDownButton
+                prefixIcon={<HarvestChartIcon width={16} height={16} />}
                 label="BIỂU ĐỒ THU HOẠCH"
                 onPress={() => setIsCollapsed(!isCollapsed)}
                 style={styles.sectionHeader}
@@ -115,10 +118,6 @@ export const HarvestChart: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     sectionHeader: {
         paddingVertical: 12,
         paddingHorizontal: 16,

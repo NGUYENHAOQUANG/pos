@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography } from '@/styles';
-import { Input } from '@/shared/components/forms/Input';
+import { View, Text, StyleSheet } from 'react-native';
+import { borderRadius, colors, spacing, typography } from '@/styles';
+import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 
 interface GeneralInformationProps {
     name: string;
@@ -34,13 +34,8 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
             <View style={[styles.content, disabled && styles.disabledContent]}>
                 {/* Name Input */}
                 <Input
-                    label={
-                        <Text>
-                            <Text style={{ color: colors.error }}>* </Text>
-                            Tên
-                        </Text>
-                    }
-                    required={false}
+                    label="Tên"
+                    required={true}
                     value={name}
                     onChangeText={onNameChange}
                     placeholder="Nhập"
@@ -52,13 +47,8 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
 
                 {/* Contact Input */}
                 <Input
-                    label={
-                        <Text>
-                            <Text style={{ color: colors.error }}>* </Text>
-                            Số điện thoại hoặc Email
-                        </Text>
-                    }
-                    required={false}
+                    label="Số điện thoại hoặc Email"
+                    required={true}
                     value={contact}
                     onChangeText={onContactChange}
                     placeholder="Nhập"
@@ -70,67 +60,20 @@ export const GeneralInformation: React.FC<GeneralInformationProps> = ({
 
                 {/* Role Selection (Radio) */}
                 <View style={styles.roleContainer}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Chọn chức vụ
-                    </Text>
-
-                    <View style={styles.radioGroup}>
-                        {/* Staff Option */}
-                        <TouchableOpacity
-                            style={styles.radioButton}
-                            onPress={() => onRoleChange('staff')}
-                            activeOpacity={0.8}
-                            disabled={disabled}
-                        >
-                            <Ionicons
-                                name={role === 'staff' ? 'radio-button-on' : 'radio-button-off'}
-                                size={20}
-                                color={
-                                    disabled
-                                        ? colors.textSecondary
-                                        : role === 'staff'
-                                        ? colors.primary
-                                        : colors.textSecondary
-                                }
-                            />
-                            <Text
-                                style={[
-                                    styles.radioText,
-                                    disabled && { color: colors.textSecondary },
-                                ]}
-                            >
-                                Nhân viên
-                            </Text>
-                        </TouchableOpacity>
-
-                        {/* Manager Option */}
-                        <TouchableOpacity
-                            style={styles.radioButton}
-                            onPress={() => onRoleChange('manager')}
-                            activeOpacity={0.8}
-                            disabled={disabled}
-                        >
-                            <Ionicons
-                                name={role === 'manager' ? 'radio-button-on' : 'radio-button-off'}
-                                size={20}
-                                color={
-                                    disabled
-                                        ? colors.textSecondary
-                                        : role === 'manager'
-                                        ? colors.primary
-                                        : colors.textSecondary
-                                }
-                            />
-                            <Text
-                                style={[
-                                    styles.radioText,
-                                    disabled && { color: colors.textSecondary },
-                                ]}
-                            >
-                                Quản lý
-                            </Text>
-                        </TouchableOpacity>
+                    <View style={styles.fieldLabelWrapper}>
+                        <Text style={styles.fieldLabelText}>Chọn chức vụ</Text>
+                        <RequiredDot />
                     </View>
+
+                    <RadioButton
+                        options={[
+                            { label: 'Nhân viên', value: 'staff' },
+                            { label: 'Quản lý', value: 'manager' },
+                        ]}
+                        value={role}
+                        onValueChange={onRoleChange as any}
+                        disabled={disabled}
+                    />
                 </View>
             </View>
         </View>
@@ -141,16 +84,17 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         overflow: 'hidden',
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     header: {
-        paddingVertical: spacing.md,
+        paddingTop: spacing.md,
         paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
     },
     headerTitle: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         color: colors.text,
     },
     content: {
@@ -165,29 +109,17 @@ const styles = StyleSheet.create({
     roleContainer: {
         marginBottom: 0,
     },
-    label: {
+    fieldLabelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+    },
+    fieldLabelText: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         color: colors.text,
-        marginBottom: spacing.sm,
     },
-    required: {
-        color: colors.error,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xl,
-    },
-    radioButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    radioText: {
-        fontSize: 14,
-        color: colors.text,
-    },
+
     inputDisabled: {
         backgroundColor: colors.gray[200],
     },

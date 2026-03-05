@@ -19,6 +19,9 @@ import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { TransferItemCard } from './TransferItemCard';
 import { pondTransferData } from './pondTransferData';
+import chartStyles from '@/features/reports/styles/chart.styles';
+import PondTransferIcon from '@/assets/Icon/IconReport/PondTransferIcon.svg';
+
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -55,8 +58,9 @@ export const PondTransfer = () => {
         : pondTransferData.slice(0, INITIAL_SHOW_COUNT);
 
     return (
-        <View style={styles.container}>
+        <View style={chartStyles.container}>
             <BasicDropDownButton
+                prefixIcon={<PondTransferIcon width={16} height={16} />}
                 label="THỐNG KÊ SANG AO"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
@@ -95,10 +99,6 @@ export const PondTransfer = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: colors.white,
-        marginBottom: 8,
-    },
     sectionHeader: {
         paddingVertical: 12,
         paddingHorizontal: 16,

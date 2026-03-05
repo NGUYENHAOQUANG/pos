@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, TouchableOpacity, Keyboard } from 'react-native';
+import { View, StyleSheet, StatusBar, Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DocumentPickerResponse } from '@react-native-documents/picker';
 import { useForm, useWatch } from 'react-hook-form';
@@ -13,12 +13,12 @@ import {
     MaterialItem,
 } from '@/features/material/components/AddWarehouseMaterial';
 import { Loading } from '@/shared/components/ui/Loading';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { WarehouseFooter } from '@/features/material/components/import_receipt_form/WarehouseFooter';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
 import { IconTrashOutlined } from '@/assets/icons';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 
 import { showValidationError } from '@/features/material/utils/validationToast';
@@ -197,16 +197,6 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
         );
     }
 
-    const deleteButton = isEditMode ? (
-        <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDeletePress}
-            activeOpacity={0.7}
-        >
-            <IconTrashOutlined width={20} height={20} />
-        </TouchableOpacity>
-    ) : null;
-
     return (
         <>
             <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
@@ -215,7 +205,12 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                     <HeaderMeterial
                         title={isEditMode ? 'Chỉnh Sửa Phiếu Nhập Kho' : 'Tạo Phiếu Nhập Kho'}
                         onBackPress={onBackPress}
-                        rightComponent={deleteButton}
+                        rightIcon={
+                            isEditMode ? (
+                                <IconTrashOutlined width={20} height={20} color={colors.text} />
+                            ) : undefined
+                        }
+                        onRightPress={isEditMode ? handleDeletePress : undefined}
                     />
 
                     <SafeInputLayoutMaterial>
@@ -272,7 +267,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                         onConfirm={handleConfirmSubmit}
                     />
 
-                    <ConfirmationDeleteModal
+                    <ConfirmationModalUI
                         visible={deleteModalVisible}
                         onConfirm={handleConfirmDelete}
                         onCancel={() => setDeleteModalVisible(false)}
@@ -297,16 +292,6 @@ const styles = StyleSheet.create({
     contentContainer: {
         marginTop: spacing.sm,
         paddingBottom: 100,
-    },
-    deleteButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.error,
     },
 });
 
