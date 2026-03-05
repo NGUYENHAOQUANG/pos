@@ -65,7 +65,6 @@ import { AddAquacultureScreens } from '@/features/menu/screens/aquaculture/AddAq
 import { EditAquacultureScreens } from '@/features/menu/screens/aquaculture/EditAquacultureScreens';
 import { MemberManagementScreens } from '@/features/menu/screens/member/MemberManagementScreens';
 import { AddMemberScreens } from '@/features/menu/screens/member/AddMemberScreens';
-import { EditMemberScreens } from '@/features/menu/screens/member/EditMemberScreens';
 import { DeviceManagement } from '@/features/menu/screens/devices/DeviceManagement';
 import { AddDeviceScreens } from '@/features/menu/screens/devices/AddDeviceScreens';
 import { HistoryDevicesScreens } from '@/features/menu/screens/devices/HistoryDevicesScreens';
@@ -94,7 +93,6 @@ const MemberManagementWithProvider = MemberManagementScreens;
 const AddAquacultureWithProvider = AddAquacultureScreens;
 const EditAquacultureWithProvider = EditAquacultureScreens;
 const AddMemberWithProvider = AddMemberScreens;
-const EditMemberWithProvider = EditMemberScreens;
 const DeviceManagementWithProvider = DeviceManagement;
 const AddDeviceWithProvider = AddDeviceScreens;
 const HistoryDevicesWithProvider = HistoryDevicesScreens;
@@ -231,8 +229,7 @@ export type AppStackParamList = {
     MemberManagement: undefined;
     AddAquaculture: undefined;
     EditAquaculture: { aquaculture: SeasonData };
-    AddMember: undefined;
-    EditMember: { member: Member };
+    AddMember: { member?: Member } | undefined;
     DeviceManagement: undefined;
     AddDevice: undefined;
     EditDevice: { deviceId: string };
@@ -336,7 +333,6 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddAquaculture" component={AddAquacultureWithProvider} />
             <Stack.Screen name="EditAquaculture" component={EditAquacultureWithProvider} />
             <Stack.Screen name="AddMember" component={AddMemberWithProvider} />
-            <Stack.Screen name="EditMember" component={EditMemberWithProvider} />
             <Stack.Screen name="DeviceManagement" component={DeviceManagementWithProvider} />
             <Stack.Screen name="AddDevice" component={AddDeviceWithProvider} />
             <Stack.Screen name="EditDevice" component={AddDeviceWithProvider} />

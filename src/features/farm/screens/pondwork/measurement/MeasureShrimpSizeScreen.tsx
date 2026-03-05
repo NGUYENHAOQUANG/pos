@@ -21,7 +21,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useMeasureShrimpSizeForm } from '@/features/farm/hooks/pondwork/sizeMeasurement/useMeasureShrimpSizeForm';
@@ -212,7 +212,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 />
             </View>
 
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={isDeleteModalVisible}
                 onCancel={() => setIsDeleteModalVisible(false)}
                 onConfirm={handleDelete}

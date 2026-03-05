@@ -6,7 +6,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { Loading } from '@/shared/components/ui/Loading';
 
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -231,7 +231,7 @@ export const FeedingManagementScreens = () => {
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
             {isEditMode && (
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={showDeleteModal}
                     onConfirm={confirmDelete}
                     onCancel={() => setShowDeleteModal(false)}

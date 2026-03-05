@@ -13,6 +13,7 @@ import Svg, {
 import { area, curveStepAfter } from 'd3-shape';
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { colors } from '@/styles/colors';
+import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
 
 // --- IMPORT MOCK DATA ---
 import { POND_STATISTICS } from './MockData';
@@ -51,6 +52,7 @@ const CHART_COLORS = {
 
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '../BasicDropDownButton';
+import chartStyles from '@/features/reports/styles/chart.styles';
 
 export const ActivePondChart = () => {
     const [expanded, setExpanded] = useState(false);
@@ -181,8 +183,9 @@ export const ActivePondChart = () => {
         processedData.length > 0 ? processedData[processedData.length - 1].active : 0;
 
     return (
-        <View style={styles.container} onLayout={onLayout}>
+        <View style={chartStyles.container} onLayout={onLayout}>
             <BasicDropDownButton
+                prefixIcon={<ActivePondChartIcon width={16} height={16} />}
                 label={`TỔNG SỐ AO HOẠT ĐỘNG (${currentActiveTotal})`}
                 onPress={handleToggle}
                 style={styles.headerButton}
@@ -437,7 +440,6 @@ const LegendItem = ({ color, label }: { color: string; label: string }) => (
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        marginBottom: 8,
     },
     headerButton: {
         paddingVertical: 12,

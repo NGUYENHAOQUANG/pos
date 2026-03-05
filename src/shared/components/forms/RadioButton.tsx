@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { colors, spacing } from '@/styles';
+import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
+import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';
 
 export interface RadioOption<T = string | number | boolean> {
     label: string;
@@ -66,13 +68,13 @@ export function RadioButton<T = string | number | boolean>({
                         disabled={isDisabled}
                     >
                         <View
-                            style={[
-                                styles.radioOuter,
-                                isSelected && styles.radioOuterSelected,
-                                isDisabled && styles.radioOuterDisabled,
-                            ]}
+                            style={[styles.radioIconWrap, isDisabled && styles.radioOuterDisabled]}
                         >
-                            {isSelected && <View style={styles.radioInner} />}
+                            {isSelected ? (
+                                <CheckboxActiveIcon width={24} height={24} />
+                            ) : (
+                                <CheckboxIcon width={24} height={24} />
+                            )}
                         </View>
                         <Text
                             style={[
@@ -99,31 +101,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    radioOuter: {
+    radioIconWrap: {
         width: 20,
         height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: spacing.xs,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primary,
+        marginRight: spacing.sm,
     },
     radioOuterDisabled: {
-        borderColor: colors.borderLight,
         opacity: 0.5,
     },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primary,
-    },
     radioLabel: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
         fontWeight: '400',
         lineHeight: 22,

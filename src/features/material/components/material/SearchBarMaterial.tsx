@@ -208,7 +208,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
 const styles = StyleSheet.create({
     container: {
         padding: spacing.md,
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.backgroundPrimary,
         zIndex: 1,
     },
     topRow: {

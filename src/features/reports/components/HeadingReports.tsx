@@ -87,8 +87,6 @@ export const HeadingReports = ({
                 position={menuPosition}
             />
 
-            <View style={styles.divider} />
-
             {/* Row 1: Pond Type and Pond Select */}
             <View style={styles.dropdownRow}>
                 <View style={styles.halfWidth}>
@@ -100,7 +98,6 @@ export const HeadingReports = ({
                         height={40}
                     />
                 </View>
-                <View style={styles.spacer} />
                 <View style={styles.halfWidth}>
                     <DropDownButtonBasic
                         data={pondData}
@@ -129,11 +126,9 @@ export const HeadingReports = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white, // White background for the whole block
-        paddingBottom: spacing.md, // Add bottom padding
-        zIndex: 100, // Ensure dropdowns can float above content below
-        marginBottom: 8,
-        // No borderRadius as requested
+        backgroundColor: colors.backgroundPrimary,
+        paddingBottom: spacing.md,
+        zIndex: 100,
     },
     headerRow: {
         flexDirection: 'row',
@@ -161,17 +156,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 2, // Higher zIndex for upper dropdowns
+        zIndex: 2,
         paddingHorizontal: 16,
+        gap: spacing.xs,
     },
     halfWidth: {
         flex: 1,
     },
-    spacer: {
-        width: spacing.sm,
-    },
+
     seasonRow: {
-        marginTop: spacing.md, // Spacing between rows
+        marginTop: spacing.xs,
         zIndex: 1,
         paddingHorizontal: 16,
     },

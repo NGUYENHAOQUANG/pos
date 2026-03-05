@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
 interface FeaturePermissionsProps {
     managementLevel: 'farm' | 'pond';
@@ -71,80 +73,28 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
             <View style={[styles.content, disabled && styles.disabledContent]}>
                 {/* Management Level Section */}
                 <View style={styles.section}>
-                    <Text style={styles.label}>
-                        <Text style={styles.required}>* </Text>Chọn cấp quản lý
-                    </Text>
-                    <View style={styles.radioGroup}>
-                        <TouchableOpacity
-                            style={styles.radioButton}
-                            onPress={() => onManagementLevelChange('farm')}
-                            activeOpacity={0.8}
-                            disabled={disabled}
-                        >
-                            <Ionicons
-                                name={
-                                    managementLevel === 'farm'
-                                        ? 'radio-button-on'
-                                        : 'radio-button-off'
-                                }
-                                size={20}
-                                color={
-                                    disabled
-                                        ? colors.textSecondary
-                                        : managementLevel === 'farm'
-                                        ? colors.primary
-                                        : colors.textSecondary
-                                }
-                            />
-                            <Text
-                                style={[
-                                    styles.radioText,
-                                    disabled && { color: colors.textSecondary },
-                                ]}
-                            >
-                                Cấp trại nuôi
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={styles.radioButton}
-                            onPress={() => onManagementLevelChange('pond')}
-                            activeOpacity={0.8}
-                            disabled={disabled}
-                        >
-                            <Ionicons
-                                name={
-                                    managementLevel === 'pond'
-                                        ? 'radio-button-on'
-                                        : 'radio-button-off'
-                                }
-                                size={20}
-                                color={
-                                    disabled
-                                        ? colors.textSecondary
-                                        : managementLevel === 'pond'
-                                        ? colors.primary
-                                        : colors.textSecondary
-                                }
-                            />
-                            <Text
-                                style={[
-                                    styles.radioText,
-                                    disabled && { color: colors.textSecondary },
-                                ]}
-                            >
-                                Cấp ao nuôi
-                            </Text>
-                        </TouchableOpacity>
+                    <View style={styles.fieldLabelWrapper}>
+                        <Text style={styles.fieldLabelText}>Chọn cấp quản lý</Text>
+                        <RequiredDot />
                     </View>
+                    <RadioButton
+                        options={[
+                            { label: 'Cấp trại nuôi', value: 'farm' },
+                            { label: 'Cấp ao nuôi', value: 'pond' },
+                        ]}
+                        value={managementLevel}
+                        onValueChange={onManagementLevelChange as any}
+                        disabled={disabled}
+                    />
                 </View>
 
                 {/* Work Unit Section */}
                 <View style={styles.section}>
                     <View style={styles.rowBetween}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Đơn vị công tác
-                        </Text>
+                        <View style={styles.fieldLabelWrapper}>
+                            <Text style={styles.fieldLabelText}>Đơn vị công tác</Text>
+                            <RequiredDot />
+                        </View>
                         {!disabled && (
                             <TouchableOpacity onPress={onAddUnitPress} style={styles.addUnitButton}>
                                 <Ionicons name="add" size={16} color={colors.primary} />
@@ -192,14 +142,13 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                     </View>
                 </View>
 
-                <View style={styles.separator} />
-
                 {/* Permissions Section */}
                 <View style={[styles.section, { marginBottom: 0 }]}>
                     <View style={styles.rowBetween}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>Quyền thao tác
-                        </Text>
+                        <View style={styles.fieldLabelWrapper}>
+                            <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
+                            <RequiredDot />
+                        </View>
                         <TouchableOpacity
                             style={styles.checkboxRow}
                             onPress={toggleAll}
@@ -280,16 +229,17 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     header: {
-        paddingVertical: spacing.md,
+        paddingTop: spacing.md,
         paddingHorizontal: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
     },
     headerTitle: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         color: colors.text,
     },
     content: {
@@ -303,36 +253,23 @@ const styles = StyleSheet.create({
         backgroundColor: colors.gray[100],
     },
     section: {
-        marginBottom: spacing.lg,
+        marginBottom: spacing.md,
     },
-    label: {
+    fieldLabelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.md,
+    },
+    fieldLabelText: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.medium,
         color: colors.text,
-        marginBottom: spacing.sm,
     },
-    required: {
-        color: colors.error,
-    },
-    radioGroup: {
-        flexDirection: 'row',
-        gap: spacing.xl,
-        marginTop: spacing.xs,
-    },
-    radioButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
-    radioText: {
-        fontSize: 14,
-        color: colors.text,
-    },
+
     rowBetween: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.sm,
     },
     addUnitButton: {
         flexDirection: 'row',
@@ -368,7 +305,7 @@ const styles = StyleSheet.create({
     checkbox: {
         width: 20,
         height: 20,
-        borderRadius: 4, // xs border radius as requested
+        borderRadius: 4,
         borderWidth: 1.5,
         borderColor: colors.border,
         justifyContent: 'center',
@@ -398,17 +335,12 @@ const styles = StyleSheet.create({
         height: 32,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.borderDark,
         backgroundColor: colors.white,
     },
     disabledElement: {
         // opacity: 0.5, // Removed to keep text dark
-    },
-    separator: {
-        height: 1,
-        backgroundColor: colors.gray[200],
-        marginBottom: spacing.lg,
     },
 });

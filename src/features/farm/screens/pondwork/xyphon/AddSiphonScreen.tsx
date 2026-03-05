@@ -30,7 +30,7 @@ import {
 import { documentApi } from '@/features/material/api/documentApi';
 import { useSiphonMaterials } from '@/features/farm/hooks/useSiphonRecords';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
@@ -360,7 +360,7 @@ export const AddSiphonScreen: React.FC = () => {
             </View>
 
             {/* Delete Confirmation Modal */}
-            <ConfirmationDeleteModal
+            <ConfirmationModalUI
                 visible={deleteModalVisible}
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}

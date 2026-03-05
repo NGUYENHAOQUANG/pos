@@ -6,7 +6,10 @@ import {
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
+    Animated,
+    Dimensions,
 } from 'react-native';
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -108,6 +111,27 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     confirmText,
     cancelText,
 }) => {
+    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+    React.useEffect(() => {
+        if (visible) {
+            // Reset position before animating to ensure slide-up works every time
+            slideAnim.setValue(SCREEN_HEIGHT);
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: SCREEN_HEIGHT,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [visible, slideAnim]);
+
     const config = CONFIRMATION_CONFIGS[type];
     const finalTitle = title ?? config.title;
     const finalConfirmText = confirmText ?? config.confirmText;
@@ -122,7 +146,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <TouchableWithoutFeedback onPress={onCancel}>
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>
-                        <View style={styles.container}>
+                        <Animated.View
+                            style={[
+                                styles.container,
+                                {
+                                    transform: [{ translateY: slideAnim }],
+                                },
+                            ]}
+                        >
                             <View style={styles.content}>
                                 {/* Header */}
                                 <View style={styles.header}>
@@ -176,7 +207,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                                     </TouchableOpacity>
                                 </View>
                             </View>
-                        </View>
+                        </Animated.View>
                     </TouchableWithoutFeedback>
                 </View>
             </TouchableWithoutFeedback>
@@ -187,18 +218,18 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
+        backgroundColor: colors.overlay,
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        padding: spacing.lg,
+        paddingHorizontal: spacing.md,
+        paddingBottom: 40,
     },
     container: {
         width: '100%',
-        maxWidth: 341,
     },
     content: {
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
+        borderRadius: 24,
     },
     header: {
         flexDirection: 'row',

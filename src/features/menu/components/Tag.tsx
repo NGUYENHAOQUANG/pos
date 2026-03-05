@@ -135,7 +135,7 @@ export const Tag: React.FC<TagProps> = ({ status, style, type = 'cycle' }) => {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: spacing.sm,
-        height: 28,
+        height: 32,
         borderRadius: borderRadius.full,
         borderWidth: 1,
         alignSelf: 'flex-start',

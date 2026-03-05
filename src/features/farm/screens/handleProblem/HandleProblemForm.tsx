@@ -9,7 +9,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox, GeneralInfoBoxRef } from '../../components/pondwork/GeneralInfoBox';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { ConfirmationDeleteModal } from '@/shared/components/modal/ConfirmationDeleteModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
@@ -185,7 +185,7 @@ export const HandleProblemForm = ({
                     primaryDisabled={isEditMode && !hasChanges}
                 />
 
-                <ConfirmationDeleteModal
+                <ConfirmationModalUI
                     visible={showDeleteModal}
                     onConfirm={handleConfirmDelete}
                     onCancel={() => setShowDeleteModal(false)}
