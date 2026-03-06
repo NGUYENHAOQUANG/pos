@@ -5,7 +5,8 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
-import DeleteIconBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
 export interface SelectedMaterialItem {
     material: IMaterial;
@@ -42,10 +43,10 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
         <>
             <SelectionInfoBox
                 title={
-                    <Text style={styles.title}>
-                        <Text style={styles.required}>* </Text>
-                        Chọn vật tư
-                    </Text>
+                    <View style={styles.titleWrapper}>
+                        <Text style={styles.title}>Chọn vật tư</Text>
+                        <RequiredDot />
+                    </View>
                 }
             >
                 {/* List of selected materials */}
@@ -71,12 +72,11 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                             onPress={() => handleRemoveMaterial(index)}
                                             style={styles.deleteButton}
                                         >
-                                            <DeleteIconBlack width={18} height={18} />
+                                            <DeleteIcon width={18} height={18} />
                                         </TouchableOpacity>
                                     </View>
                                 </View>
                             ))}
-                            <View style={styles.divider} />
                         </View>
                     </>
                 )}
@@ -86,7 +86,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                     onPress={() => setModalVisible(true)}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="add" size={16} color={colors.primary} style={styles.addIcon} />
+                    <Ionicons name="add" size={16} color={colors.text} style={styles.addIcon} />
                     <Text style={styles.addButtonText} numberOfLines={1}>
                         Thêm vật tư
                     </Text>
@@ -107,17 +107,17 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 };
 
 const styles = StyleSheet.create({
+    titleWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     title: {
         fontSize: 16,
         fontWeight: '700',
-        lineHeight: 22,
         color: colors.text,
     },
-    required: {
-        color: colors.error,
-    },
     materialList: {
-        gap: spacing.sm,
+        gap: spacing.md,
     },
     divider: {
         height: 1,
@@ -129,6 +129,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        padding: spacing.sm,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 8,
     },
     materialName: {
         fontSize: 16,
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         paddingHorizontal: spacing.sm,
         height: 40,
-        width: 110,
+        width: 100,
         marginRight: spacing.sm,
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -163,21 +167,21 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     deleteButton: {
-        width: 40,
-        height: 40,
+        width: 36,
+        height: 36,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.gray[200],
+        borderRadius: 18,
     },
     addButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.primary,
+        borderWidth: 1.5,
+        borderColor: colors.border,
         borderRadius: borderRadius.md,
         height: 40,
         width: '100%',
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
     addButtonText: {
         fontSize: 14,
         fontWeight: '400',
-        color: colors.primary,
+        color: colors.text,
         lineHeight: 22,
         flexShrink: 0,
     },

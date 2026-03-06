@@ -12,11 +12,11 @@ import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CollapseHeadProps {
-    title: string;
+    title: string | React.ReactNode;
     isExpanded: boolean;
-    onToggle: () => void;
-    style?: StyleProp<ViewStyle>;
-    titleStyle?: StyleProp<TextStyle>;
+    onToggle?: () => void;
+    style?: ViewStyle;
+    titleStyle?: TextStyle;
     showIcon?: boolean;
     rightComponent?: React.ReactNode;
 }
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingTop: 12,
-        paddingHorizontal: 12,
+        paddingVertical: 12,
+        paddingHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderTopLeftRadius: borderRadius.md,

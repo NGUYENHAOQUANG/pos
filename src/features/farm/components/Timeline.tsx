@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/colors';
 import { ActivityCard, ActivityData } from './ActivityCard';
 
-interface TimelineEntryProps {
+export interface TimelineEntryProps {
     time: string;
     title: string;
     data: ActivityData[];

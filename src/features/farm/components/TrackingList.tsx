@@ -28,21 +28,13 @@ interface TrackingDayCardProps {
     isFirst?: boolean;
 }
 
-const isToday = (date: Date): boolean => {
-    const today = new Date();
-    return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-    );
-};
-
 const formatSectionTitle = (dateKey: string): string => {
+    // Keep it simple as per mockup (10/01/2026)
     const date = parseDate(dateKey);
-    if (isToday(date)) {
-        return `Hôm nay, ${dateKey}`;
-    }
-    return dateKey;
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({
