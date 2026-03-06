@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingHorizontal: spacing.md,
         paddingBottom: 40,
     },
     container: {
