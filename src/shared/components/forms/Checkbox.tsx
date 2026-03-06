@@ -52,7 +52,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     label,
     disabled = false,
     size = 'md',
-    activeColor = colors.primary,
+    activeColor = colors.primaryOrange,
     style,
     labelStyle,
 }) => {

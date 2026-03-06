@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { ExportReceipt } from '@/features/material/types/exportReceipt.types';
 import { ExportWarehouseReceiptCard } from './ExportWarehouseReceiptCard';
-import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
 import { colors } from '@/styles';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
@@ -81,8 +81,9 @@ export const ExportWarehouseMaterialList: React.FC<ExportWarehouseMaterialListPr
                     ) : null
                 }
                 ListEmptyComponent={
-                    <MaterialEmptyState
-                        tab={MaterialTabType.Export}
+                    <EmptyStateCard
+                        message="Chưa có phiếu xuất kho nào được tạo."
+                        buttonTitle="Tạo phiếu xuất kho"
                         onPress={onPressCreate || (() => {})}
                     />
                 }

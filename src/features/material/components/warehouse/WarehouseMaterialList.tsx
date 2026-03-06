@@ -5,7 +5,7 @@ import { MaterialItemSkeleton } from '@/features/material/components/material_li
 import { colors } from '@/styles';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 interface WarehouseMaterialListProps {
     materials: IWarehouseItem[];
@@ -90,8 +90,9 @@ export const WarehouseMaterialList: React.FC<WarehouseMaterialListProps> = ({
                     ) : null
                 }
                 ListEmptyComponent={
-                    <MaterialEmptyState
-                        tab={MaterialTabType.List}
+                    <EmptyStateCard
+                        message="Chưa có vật tư nào trong kho."
+                        buttonTitle="Thêm vật tư vào kho"
                         onPress={onPressCreate || (() => {})}
                     />
                 }

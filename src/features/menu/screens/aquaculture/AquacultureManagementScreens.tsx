@@ -182,7 +182,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                             <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
                         }
                     >
-                        <View style={styles.cardContainer}>
+                        <View>
                             <EmptyStateCard
                                 message="Chưa có vụ nuôi nào"
                                 buttonTitle="Tạo vụ nuôi"
@@ -200,7 +200,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                         renderItem={renderItem}
                         contentContainerStyle={styles.listContent}
                         ListEmptyComponent={
-                            <View style={styles.cardContainer}>
+                            <View>
                                 <EmptyStateCard
                                     message="Chưa có vụ nuôi nào"
                                     buttonTitle="Tạo vụ nuôi"
@@ -235,11 +235,6 @@ const styles = StyleSheet.create({
         paddingTop: spacing.md,
         paddingBottom: spacing.md,
         zIndex: 100,
-    },
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        margin: spacing.md,
     },
     addButton: {
         width: 40,
