@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import { colors } from '@/styles';
 import { FarmData } from '@/features/farm/types/farm.types';
-import FarmInfor from '@/assets/images/FarmInfor.svg';
+const BGFarmInfo = require('@/assets/backgrounds/Farm-Infor.png');
 
 interface InfoFieldProps {
     label: string;
@@ -41,7 +41,7 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
     return (
         <View style={styles.card}>
             <View style={styles.imageContainer}>
-                <FarmInfor width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+                <Image source={BGFarmInfo} style={styles.backgroundImage} resizeMode="cover" />
                 <View style={styles.mapControls}>
                     <TouchableOpacity
                         style={[
@@ -59,7 +59,6 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
                             Bản đồ
                         </Text>
                     </TouchableOpacity>
-                    <View style={styles.divider} />
                     <TouchableOpacity
                         style={[
                             styles.controlButton,
@@ -93,15 +92,10 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
         paddingHorizontal: 16,
         marginTop: 8,
-        // Shadow equivalent to box-shadow: 0px 1px 6px -1px #00000005
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        elevation: 2, // For Android
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        overflow: 'hidden',
     },
     fieldContainer: {
         flexDirection: 'row',
@@ -121,6 +115,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 16,
+        backgroundColor: colors.gray[100],
+    },
+    backgroundImage: {
+        width: '100%',
+        height: '100%',
     },
     fieldValue: {
         fontSize: 14,
@@ -136,41 +135,33 @@ const styles = StyleSheet.create({
         top: 12,
         left: 12,
         flexDirection: 'row',
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 4,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        backgroundColor: colors.gray[100],
+        borderRadius: 100,
+        padding: 2,
     },
     controlButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: 'transparent',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     controlButtonActive: {
-        borderColor: colors.blue[600],
+        backgroundColor: colors.white,
+        padding: 4,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     controlButtonText: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.text,
+        color: colors.textSecondary,
     },
     controlButtonTextActive: {
-        color: colors.blue[600],
-        fontWeight: '600',
+        color: colors.black,
+        fontWeight: '700',
     },
     divider: {
-        width: 1,
-        backgroundColor: colors.border,
-        marginVertical: 4,
-        marginHorizontal: 4,
+        display: 'none',
     },
 });

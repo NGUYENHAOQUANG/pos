@@ -201,15 +201,20 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.white,
         marginTop: spacing.md,
+        marginHorizontal: spacing.md,
+        marginBottom: spacing.md,
+        borderRadius: 16,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
         paddingTop: spacing.md,
+        gap: spacing.md,
     },
     tableContainer: {
         flex: 1,
-        paddingHorizontal: spacing.sm,
     },
     header: {
         flexDirection: 'row',
-        alignItems: 'stretch', // Ensure vertical lines connect
+        alignItems: 'stretch',
     },
     timeColumnHeader: {
         width: 60,

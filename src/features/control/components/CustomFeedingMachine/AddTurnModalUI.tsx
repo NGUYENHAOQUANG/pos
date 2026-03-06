@@ -1,5 +1,4 @@
-import React from 'react';
-import Toast from 'react-native-toast-message';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Modal,
     View,
@@ -9,64 +8,38 @@ import {
     TouchableWithoutFeedback,
     Animated,
     Dimensions,
-    StyleProp,
-    ViewStyle,
 } from 'react-native';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { colors, spacing, typography } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
+import ModalAddTurn from './ModalAddTurn';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
-/**
- * Props for ConfirmationModalUI component
- */
-interface ConfirmationModalUIProps {
-    /** Whether the modal is visible */
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+interface AddTurnModalUIProps {
     visible: boolean;
-    /** Callback function called when user confirms deletion */
-    onConfirm: () => void;
-    /** Callback function called when user cancels deletion */
-    onCancel: () => void;
-    /** Title text displayed in the modal */
-    title?: string;
-    /** Message text displayed in the modal */
-    message?: string;
-    /** Text for the confirm button */
-    confirmText?: string;
-    /** Text for the cancel button */
-    cancelText?: string;
-    /** Toast message on success */
-    successMessage?: string;
-    /** Whether to show success toast after confirm (default: true) */
-    showSuccessToast?: boolean;
-    /** Custom style for the cancel button */
-    cancelButtonStyle?: StyleProp<ViewStyle>;
-    /** Custom style for the confirm button */
-    confirmButtonStyle?: StyleProp<ViewStyle>;
+    onClose: () => void;
+    onConfirm: (startTime: Date | null, endTime: Date | null) => void;
+    turnIndex: number;
 }
 
-/**
- * A reusable modal component for confirming deletion actions.
- * Displays title + X button on top row, message body, and two action buttons.
- */
-export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
-    visible,
-    onConfirm,
-    onCancel,
-    title = 'Xoá tác vụ',
-    message = 'Bạn có chắc chắn muốn xoá tác vụ này không?',
-    confirmText = 'Đồng ý',
-    cancelText = 'Không',
-    successMessage = 'Tác vụ đã được xóa',
-    showSuccessToast = true,
-    cancelButtonStyle,
-    confirmButtonStyle,
-}) => {
-    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+export function AddTurnModalUI({ visible, onClose, onConfirm, turnIndex }: AddTurnModalUIProps) {
+    const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
-    React.useEffect(() => {
+    const [tempStartTime, setTempStartTime] = useState<Date | null>(null);
+    const [tempEndTime, setTempEndTime] = useState<Date | null>(null);
+
+    // Reset temp values when modal opens
+    useEffect(() => {
         if (visible) {
-            // Reset position before animating to ensure slide-up works every time
+            setTempStartTime(null);
+            setTempEndTime(null);
+        }
+    }, [visible]);
+
+    useEffect(() => {
+        if (visible) {
             slideAnim.setValue(SCREEN_HEIGHT);
             Animated.spring(slideAnim, {
                 toValue: 0,
@@ -84,20 +57,12 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     }, [visible, slideAnim]);
 
     const handleConfirm = () => {
-        onConfirm();
-        if (showSuccessToast) {
-            Toast.show({
-                type: 'success',
-                text1: successMessage,
-                position: 'top',
-                visibilityTime: 3000,
-            });
-        }
+        onConfirm(tempStartTime, tempEndTime);
     };
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-            <TouchableWithoutFeedback onPress={onCancel}>
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+            <TouchableWithoutFeedback onPress={onClose}>
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>
                         <Animated.View
@@ -110,38 +75,62 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
                         >
                             {/* Header row: title + X close button */}
                             <View style={styles.header}>
-                                <Text style={styles.title}>{title}</Text>
+                                <Text style={styles.title}>Thêm lượt - Lần {turnIndex}</Text>
                                 <TouchableOpacity
-                                    onPress={onCancel}
+                                    onPress={onClose}
                                     style={styles.closeButton}
                                     activeOpacity={0.7}
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                                 >
-                                    <CloseIcon width={16} height={16} />
+                                    <CloseIcon
+                                        width={16}
+                                        height={16}
+                                        color={colors.textSecondary}
+                                    />
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Message body */}
-                            <Text style={styles.message}>{message}</Text>
+                            {/* Body Modal */}
+                            <View style={styles.body}>
+                                <View style={styles.inputGroup}>
+                                    <View style={styles.labelWrapper}>
+                                        <Text style={styles.inputLabel}>Bắt đầu</Text>
+                                        <RequiredDot />
+                                    </View>
+                                    <ModalAddTurn
+                                        value={tempStartTime}
+                                        onChange={setTempStartTime}
+                                        placeholder="Chọn thời gian"
+                                    />
+                                </View>
+
+                                <View style={styles.inputGroup}>
+                                    <View style={styles.labelWrapper}>
+                                        <Text style={styles.inputLabel}>Kết thúc</Text>
+                                        <RequiredDot />
+                                    </View>
+                                    <ModalAddTurn
+                                        value={tempEndTime}
+                                        onChange={setTempEndTime}
+                                        placeholder="Chọn thời gian"
+                                    />
+                                </View>
+                            </View>
 
                             {/* Footer buttons */}
                             <View style={styles.footer}>
                                 <Button
-                                    title={cancelText}
-                                    onPress={onCancel}
+                                    title="Không"
+                                    onPress={onClose}
                                     variant="outline"
-                                    style={[
-                                        styles.cancelButton,
-                                        styles.cancelButtonOverride,
-                                        cancelButtonStyle,
-                                    ]}
+                                    style={[styles.cancelButton, styles.cancelButtonOverride]}
                                     textStyle={styles.cancelButtonTextOverride}
                                 />
                                 <Button
-                                    title={confirmText}
+                                    title="Thêm lượt"
                                     onPress={handleConfirm}
                                     variant="primary"
-                                    style={[styles.confirmButton, confirmButtonStyle]}
+                                    style={styles.confirmButton}
                                 />
                             </View>
                         </Animated.View>
@@ -150,7 +139,7 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
             </TouchableWithoutFeedback>
         </Modal>
     );
-};
+}
 
 const styles = StyleSheet.create({
     overlay: {
@@ -167,12 +156,11 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         padding: spacing.lg,
     },
-    // Header row: title left, X right
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: spacing.md,
+        marginBottom: spacing.lg,
     },
     title: {
         fontSize: typography.fontSize.lg,
@@ -183,15 +171,22 @@ const styles = StyleSheet.create({
     closeButton: {
         marginLeft: spacing.sm,
     },
-    // Body message
-    message: {
-        fontSize: typography.fontSize.base,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
+    body: {
         marginBottom: spacing.lg,
+        gap: spacing.lg,
     },
-    // Button row
+    inputGroup: {
+        gap: spacing.xs,
+    },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    inputLabel: {
+        fontSize: typography.fontSize.base,
+        color: colors.text,
+        fontWeight: '400',
+    },
     footer: {
         flexDirection: 'row',
         gap: spacing.sm,
@@ -199,7 +194,6 @@ const styles = StyleSheet.create({
     cancelButton: {
         flex: 1,
     },
-    // Override blue outline to gray for cancel button
     cancelButtonOverride: {
         borderColor: colors.gray[300],
     },

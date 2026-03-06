@@ -24,7 +24,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
                 onPress={onSchedulePress}
                 activeOpacity={0.7}
             >
-                <FieldTimeIcon width={18} height={18} style={styles.icon} />
+                <FieldTimeIcon width={20} height={20} style={styles.icon} />
                 <Text style={styles.text}>Lịch trình</Text>
             </TouchableOpacity>
 
@@ -33,7 +33,7 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
                 onPress={onStatisticPress}
                 activeOpacity={0.7}
             >
-                <LineChartIcon width={16} height={16} style={styles.icon} />
+                <LineChartIcon width={20} height={20} style={styles.icon} />
                 <Text style={styles.text}>Lịch sử & Thống kê</Text>
             </TouchableOpacity>
         </View>
@@ -43,10 +43,9 @@ export const ButtonHistory: React.FC<ButtonHistoryProps> = ({
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
-        padding: spacing.md,
-
-        gap: spacing.md,
+        backgroundColor: 'transparent',
+        paddingHorizontal: spacing.md,
+        gap: spacing.sm,
     },
     button: {
         flexDirection: 'row',
@@ -54,9 +53,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
         backgroundColor: colors.white,
     },
     scheduleButton: {
@@ -64,11 +63,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.sm,
+        paddingVertical: 10,
         paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
         backgroundColor: colors.white,
     },
     statisticButton: {
@@ -76,11 +75,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: spacing.sm,
+        paddingVertical: 10,
         paddingHorizontal: spacing.sm,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.defaultBorder,
         backgroundColor: colors.white,
     },
     icon: {

@@ -8,8 +8,8 @@ import {
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
 
 interface ButtonControlSwitchProps {
     onSwitchToSchedule?: () => void;
@@ -42,9 +42,7 @@ export const ButtonControlSwitch: React.FC<ButtonControlSwitchProps> = ({
     return (
         <View style={styles.container}>
             <View ref={buttonRef} collapsable={false} style={styles.buttonWrapper}>
-                <TouchableOpacity style={styles.button} onPress={openMenu} activeOpacity={0.7}>
-                    <Ionicons name="ellipsis-vertical" size={16} color={colors.gray[500]} />
-                </TouchableOpacity>
+                <MoreButton onPress={openMenu} />
             </View>
 
             <Modal
@@ -96,16 +94,6 @@ const styles = StyleSheet.create({
     },
     buttonWrapper: {
         alignSelf: 'flex-start',
-    },
-    button: {
-        width: 40,
-        height: 40,
-        borderRadius: 8,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.borderDark,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     modalOverlay: {
         flex: 1,

@@ -5,9 +5,13 @@ import {
     StyleSheet,
     Modal,
     TouchableOpacity,
-    Pressable,
     InteractionManager,
+    Animated,
+    Dimensions,
+    Pressable,
 } from 'react-native';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WheelPicker from 'react-native-wheely';
 import { colors } from '@/styles';
@@ -56,6 +60,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     // Defer picker rendering until after modal animation completes
     const [showPickers, setShowPickers] = useState(false);
 
+    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
     useEffect(() => {
         if (visible) {
             const t = time || new Date();
@@ -68,11 +74,28 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             const handle = InteractionManager.runAfterInteractions(() => {
                 setShowPickers(true);
             });
+
+            // Slide up animation
+            slideAnim.setValue(SCREEN_HEIGHT);
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+            }).start();
+
             return () => handle.cancel();
         } else {
             setShowPickers(false);
+
+            // Slide down animation
+            Animated.timing(slideAnim, {
+                toValue: SCREEN_HEIGHT,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
         }
-    }, [visible, time]);
+    }, [visible, time, slideAnim]);
 
     const handleConfirm = useCallback(() => {
         const newDate = new Date();
@@ -93,8 +116,15 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 {/* Overlay - tap to dismiss */}
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
 
-                {/* Container */}
-                <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
+                <Animated.View
+                    style={[
+                        styles.container,
+                        {
+                            paddingBottom: insets.bottom + 20,
+                            transform: [{ translateY: slideAnim }],
+                        },
+                    ]}
+                >
                     {/* Header */}
                     <View style={styles.header}>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -171,7 +201,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                             </>
                         )}
                     </View>
-                </View>
+                </Animated.View>
             </View>
         </Modal>
     );
@@ -195,8 +225,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.gray[100],
         paddingBottom: spacing.sm,
     },
     headerTitle: {
@@ -209,10 +237,12 @@ const styles = StyleSheet.create({
     },
     cancelText: {
         color: colors.textSecondary,
+        fontSize: 14,
     },
     confirmText: {
         color: colors.primary,
-        fontWeight: 'bold',
+        fontWeight: '700',
+        fontSize: 14,
     },
     labelsContainer: {
         flexDirection: 'row',
