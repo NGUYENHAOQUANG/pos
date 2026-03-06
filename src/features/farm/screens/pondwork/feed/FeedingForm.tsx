@@ -10,6 +10,7 @@ import {
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoCircleFilled from '@/assets/Icon/IconFarm/InfoCircleFilled.svg';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import ActivitySchedule, {
     ScheduleItem,
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
@@ -69,7 +70,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         return (
             <View
                 pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
-                style={{ opacity: isSubmitting ? 0.7 : 1 }}
+                style={{ opacity: isSubmitting ? 0.7 : 1, gap: 8 }}
             >
                 <Controller
                     name="executionDate"
@@ -114,10 +115,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 />
 
                 {!isEditMode && (
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                        <View style={styles.fullWidthDivider} />
-
+                    <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
                             <InfoCircleFilled width={16} height={16} style={styles.infoIcon} />
                             <Text style={styles.infoText}>
@@ -169,7 +167,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                                 </View>
                             )}
                         />
-                    </View>
+                    </SelectionInfoBox>
                 )}
 
                 {!isEditMode && currentMode === 'schedule' && (
@@ -220,25 +218,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
 );
 
 const styles = StyleSheet.create({
-    card: {
-        backgroundColor: colors.white,
-        padding: 16,
-        marginTop: 8,
-        marginHorizontal: 0,
-        width: '100%',
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: 12,
-    },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
     radioGroup: {
         flexDirection: 'row',
         gap: 24,

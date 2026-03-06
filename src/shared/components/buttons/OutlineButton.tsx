@@ -1,0 +1,57 @@
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { colors, borderRadius } from '@/styles';
+
+interface OutlineButtonProps {
+    label: string;
+    onPress: () => void;
+    prefix?: React.ReactNode;
+    suffix?: React.ReactNode;
+    disabled?: boolean;
+    style?: ViewStyle;
+}
+
+export const OutlineButton: React.FC<OutlineButtonProps> = ({
+    label,
+    onPress,
+    prefix,
+    suffix,
+    disabled,
+    style,
+}) => {
+    return (
+        <TouchableOpacity
+            style={[styles.button, disabled && styles.disabled, style]}
+            onPress={onPress}
+            activeOpacity={0.7}
+            disabled={disabled}
+        >
+            {prefix}
+            <Text style={styles.label}>{label}</Text>
+            {suffix}
+        </TouchableOpacity>
+    );
+};
+
+const styles = StyleSheet.create({
+    button: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        width: '100%',
+        height: 48,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.white,
+    },
+    label: {
+        fontSize: 15,
+        fontWeight: '400',
+        color: colors.textSecondary,
+    },
+    disabled: {
+        opacity: 0.5,
+    },
+});

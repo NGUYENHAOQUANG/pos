@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
@@ -36,7 +35,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     // Route params now contain full pond object which should be used directly
     const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
-    const insets = useSafeAreaInsets();
 
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
@@ -154,19 +152,15 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={navigation.goBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>
-                    {itemToEdit ? 'Chỉnh sửa đo kích thước' : 'Đo kích thước tôm'}
-                </Text>
-                {itemToEdit ? (
-                    <DeleteButton onPress={() => setIsDeleteModalVisible(true)} />
-                ) : (
-                    <View style={styles.headerSpacer} />
-                )}
-            </View>
+            <HeaderSection
+                title={itemToEdit ? 'Chỉnh sửa đo kích thước' : 'Đo kích thước tôm'}
+                onBack={navigation.goBack}
+                rightComponent={
+                    itemToEdit ? (
+                        <DeleteButton onPress={() => setIsDeleteModalVisible(true)} />
+                    ) : undefined
+                }
+            />
 
             <SafeInputLayout
                 style={styles.scrollView}
@@ -231,42 +225,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
-    },
     scrollView: {
         flex: 1,
     },
     scrollContent: {
         padding: 0,
         paddingBottom: 100,
+        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

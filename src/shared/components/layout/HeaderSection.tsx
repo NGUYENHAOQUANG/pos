@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
         paddingTop: 12,
         paddingHorizontal: 16,
-        backgroundColor: colors.transparent,
+        backgroundColor: colors.backgroundPrimary,
         zIndex: 1000,
         overflow: 'visible',
     },

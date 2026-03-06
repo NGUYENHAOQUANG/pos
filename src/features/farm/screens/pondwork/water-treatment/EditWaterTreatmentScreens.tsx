@@ -6,7 +6,7 @@ import Toast from 'react-native-toast-message';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -249,16 +249,13 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         }
     };
 
-    const renderHeaderRight = () => <DeleteButton onPress={handleDelete} />;
-
     return (
         <>
             {/* Header */}
-            <HeaderFarm
-                type="simple"
+            <HeaderSection
                 title="Xử lý nước"
                 onBack={handleBack}
-                rightAction={renderHeaderRight()}
+                rightComponent={<DeleteButton onPress={handleDelete} />}
             />
 
             <SafeInputLayout
@@ -308,5 +305,6 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: 100,
+        gap: 8,
     },
 });

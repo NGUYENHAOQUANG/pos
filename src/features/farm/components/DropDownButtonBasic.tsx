@@ -10,6 +10,8 @@ import {
     ViewStyle,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ChevronDownIcon from '@/assets/Icon/ChevronDown.svg';
+import ChevronUpIcon from '@/assets/Icon/ChevronUp.svg';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';
 import IconEnvironment from '@/assets/Icon/IconDevices/EnvironmentOutlined.svg';
@@ -128,13 +130,12 @@ export const DropDownButtonBasic: React.FC<DropDownButtonBasicProps> = ({
                     >
                         {currentItem?.label || placeholder}
                     </Text>
-                    {!disabled && (
-                        <Ionicons
-                            name={isDropdownVisible ? 'chevron-up' : 'chevron-down'}
-                            size={18}
-                            color={colors.defaultBorder}
-                        />
-                    )}
+                    {!disabled &&
+                        (isDropdownVisible ? (
+                            <ChevronUpIcon width={18} height={18} color={colors.defaultBorder} />
+                        ) : (
+                            <ChevronDownIcon width={18} height={18} color={colors.defaultBorder} />
+                        ))}
                 </TouchableOpacity>
             </View>
 

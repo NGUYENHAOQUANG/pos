@@ -126,7 +126,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 const styles = StyleSheet.create({
     inputRow: {
         flexDirection: 'row',
-        gap: spacing.md,
+        gap: spacing.sm,
     },
     inputColumn: {
         flex: 1,

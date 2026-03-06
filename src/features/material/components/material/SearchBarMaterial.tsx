@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
-import { TabType } from '@/features/material/components/material/HeadingMaterial';
+import { TabType } from '@/features/material/screens/material/MaterialView';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';

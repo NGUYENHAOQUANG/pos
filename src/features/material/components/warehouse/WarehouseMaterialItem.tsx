@@ -58,12 +58,10 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                 <View style={styles.bodyContainer}>
                     {/* Status Field */}
                     {showStatus && (
-                        <View style={styles.detailRow}>
-                            <DetailRow
-                                label="Trạng thái:"
-                                value={detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
-                            />
-                        </View>
+                        <DetailRow
+                            label="Trạng thái:"
+                            value={detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
+                        />
                     )}
 
                     {/* Basic Info Row */}

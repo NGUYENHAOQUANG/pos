@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     },
     button: {
         flexDirection: 'row',
-        height: 32,
+        height: 40,
         paddingHorizontal: 12,
         borderRadius: borderRadius.full,
         backgroundColor: colors.white,

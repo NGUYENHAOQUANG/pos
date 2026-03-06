@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 import { colors } from '@/styles';
@@ -17,19 +17,17 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     style,
     titleStyle,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
     return (
         <View style={[styles.infoBox, style]}>
             <CollapseHead
                 title={typeof title === 'string' ? title : ''}
                 titleStyle={titleStyle}
-                isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
+                isExpanded={true}
+                // onToggle={() => setIsExpanded(!isExpanded)}
                 // showIcon={true}
                 // style={[styles.collapseHead, !isExpanded && { borderBottomWidth: 0 }]}
             />
-            {isExpanded && <View style={styles.childrenContainer}>{children}</View>}
+            <View style={styles.childrenContainer}>{children}</View>
         </View>
     );
 };

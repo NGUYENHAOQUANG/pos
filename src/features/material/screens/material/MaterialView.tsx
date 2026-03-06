@@ -5,7 +5,6 @@ import {
     ButtonMetaerial,
     MaterialMenuOverlay,
 } from '@/features/material/components/material/ButtonMaterial';
-import { TabType } from '@/features/material/components/material/HeadingMaterial';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { SearchBarMeterial } from '@/features/material/components/material/SearchBarMaterial';
 import { ImportReceiptList } from '@/features/material/screens/import_receipt_list/ImportReceiptList';
@@ -16,6 +15,14 @@ import { InventoryScreen } from '@/features/material/screens/inventory_list/Inve
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import { colors } from '@/styles';
+
+export enum TabType {
+    Warehouse = 'warehouse',
+    Import = 'import',
+    Export = 'export',
+    Inventory = 'inventory',
+    Material = 'material',
+}
 
 export interface MaterialViewProps {
     selectedTab: TabType;

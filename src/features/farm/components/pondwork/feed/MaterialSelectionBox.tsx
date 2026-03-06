@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -16,12 +17,9 @@ export interface SelectedMaterialItem {
 interface MaterialSelectionBoxProps {
     selectedMaterials: SelectedMaterialItem[];
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
-    materials: IMaterial[]; // Available materials list for SelectMaterial modal
+    materials: IMaterial[];
 }
 
-/**
- * Reusable component for material selection with list display and add/remove functionality
- */
 export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     selectedMaterials,
     onMaterialsChange,
@@ -40,60 +38,41 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 
     return (
         <>
-            <SelectionInfoBox
-                title={
-                    <Text style={styles.title}>
-                        <Text style={styles.required}>* </Text>
-                        Chọn vật tư
-                    </Text>
-                }
-            >
-                {/* List of selected materials */}
-                {selectedMaterials.length > 0 && (
-                    <>
-                        <View style={styles.materialList}>
-                            {selectedMaterials.map((item, index) => (
-                                <View
-                                    key={`${item.material.id}-${index}`}
-                                    style={styles.materialItem}
-                                >
-                                    <Text style={styles.materialName}>{item.material.name}</Text>
-                                    <View style={styles.materialActions}>
-                                        <View style={styles.quantityBox}>
-                                            <Text style={styles.quantityText} numberOfLines={1}>
-                                                {item.quantity}
-                                            </Text>
-                                            <Text style={styles.unitText} numberOfLines={1}>
-                                                {item.unit}
-                                            </Text>
-                                        </View>
-                                        <TouchableOpacity
-                                            onPress={() => handleRemoveMaterial(index)}
-                                            style={styles.deleteButton}
-                                        >
-                                            <DeleteIconBlack width={18} height={18} />
-                                        </TouchableOpacity>
-                                    </View>
+            <SelectionInfoBox title="Chọn vật tư">
+                {/* Material Cards */}
+                <View style={styles.materialCardsContainer}>
+                    {selectedMaterials.map((item, index) => (
+                        <View key={`${item.material.id}-${index}`} style={styles.materialCard}>
+                            <Text style={styles.materialName} numberOfLines={1}>
+                                {item.material.name}
+                            </Text>
+                            <View style={styles.materialActions}>
+                                <View style={styles.quantityBox}>
+                                    <Text style={styles.quantityText} numberOfLines={1}>
+                                        {item.quantity}
+                                    </Text>
+                                    <Text style={styles.unitText} numberOfLines={1}>
+                                        {item.unit}
+                                    </Text>
                                 </View>
-                            ))}
-                            <View style={styles.divider} />
+                                <TouchableOpacity
+                                    onPress={() => handleRemoveMaterial(index)}
+                                    style={styles.deleteButton}
+                                >
+                                    <DeleteIconBlack width={18} height={18} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </>
-                )}
-                {/* Add Button */}
-                <TouchableOpacity
-                    style={styles.addButton}
+                    ))}
+                </View>
+
+                <OutlineButton
+                    label="Thêm vật tư"
                     onPress={() => setModalVisible(true)}
-                    activeOpacity={0.8}
-                >
-                    <Ionicons name="add" size={16} color={colors.primary} style={styles.addIcon} />
-                    <Text style={styles.addButtonText} numberOfLines={1}>
-                        Thêm vật tư
-                    </Text>
-                </TouchableOpacity>
+                    prefix={<Ionicons name="add" size={20} color={colors.textSecondary} />}
+                />
             </SelectionInfoBox>
 
-            {/* Select Material Modal */}
             <SelectMaterial
                 isVisible={isModalVisible}
                 onClose={() => setModalVisible(false)}
@@ -107,59 +86,51 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 };
 
 const styles = StyleSheet.create({
-    title: {
-        fontSize: 16,
-        fontWeight: '700',
-        lineHeight: 22,
-        color: colors.text,
-    },
-    required: {
-        color: colors.error,
-    },
-    materialList: {
-        gap: spacing.sm,
-    },
-    divider: {
-        height: 1,
-        marginTop: 4,
-        backgroundColor: colors.gray[100],
-        marginHorizontal: -spacing.md,
-    },
-    materialItem: {
+    materialCard: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.md,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+    },
+    materialCardsContainer: {
+        gap: 8,
     },
     materialName: {
-        fontSize: 16,
+        fontSize: 15,
         color: colors.text,
         flex: 1,
-        marginRight: spacing.md,
+        marginRight: spacing.sm,
     },
     materialActions: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: spacing.sm,
     },
     quantityBox: {
         flexDirection: 'row',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.md,
         paddingHorizontal: spacing.sm,
         height: 40,
         width: 110,
-        marginRight: spacing.sm,
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: colors.white,
     },
     quantityText: {
         fontSize: 16,
+        fontWeight: '600',
         color: colors.text,
         flex: 1,
-        marginRight: 4,
     },
     unitText: {
-        fontSize: 16,
+        fontSize: 14,
         color: colors.textSecondary,
     },
     deleteButton: {
@@ -169,28 +140,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
-    },
-    addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
+        borderRadius: 20,
         backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: borderRadius.md,
-        height: 40,
-        width: '100%',
-        paddingHorizontal: spacing.md,
-    },
-    addIcon: {
-        marginRight: spacing.sm,
-    },
-    addButtonText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.primary,
-        lineHeight: 22,
-        flexShrink: 0,
     },
 });

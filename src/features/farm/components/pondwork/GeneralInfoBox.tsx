@@ -35,6 +35,7 @@ import { IconCloseOutlined } from '@/assets/icons';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
@@ -526,14 +527,13 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Hình ảnh</Text>
 
-                            <TouchableOpacity
-                                style={styles.addImageButtonFull}
+                            <OutlineButton
+                                label="Thêm hình ảnh"
                                 onPress={handleImagePress}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons name="add" size={20} color={colors.textSecondary} />
-                                <Text style={styles.addImageText}>Thêm hình ảnh</Text>
-                            </TouchableOpacity>
+                                prefix={
+                                    <Ionicons name="add" size={20} color={colors.textSecondary} />
+                                }
+                            />
 
                             {imageUris.length > 0 && (
                                 <View style={styles.imagesGrid}>
@@ -645,23 +645,6 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: colors.text,
         lineHeight: 22,
-    },
-    addImageButtonFull: {
-        width: '100%',
-        height: 48,
-        borderWidth: 1,
-        borderColor: colors.borderLight,
-        borderRadius: borderRadius.full,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        gap: 8,
-    },
-    addImageText: {
-        fontSize: 16,
-        color: colors.textSecondary,
-        fontWeight: '400',
     },
     imagesGrid: {
         flexDirection: 'row',
