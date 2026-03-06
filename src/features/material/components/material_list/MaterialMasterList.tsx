@@ -2,7 +2,7 @@ import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
 import { MaterialMasterItem } from '@/features/material/components/material_list/MaterialMasterItem';
 import { MaterialItemSkeleton } from '@/features/material/components/material_list/MaterialListSkeleton';
-import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { colors } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
@@ -78,8 +78,9 @@ export const MaterialMasterList: React.FC<MaterialMasterListProps> = ({
                     ) : null
                 }
                 ListEmptyComponent={
-                    <MaterialEmptyState
-                        tab={MaterialTabType.Material}
+                    <EmptyStateCard
+                        message="Chưa có vật tư nào trong danh mục."
+                        buttonTitle="Tạo vật tư mới"
                         onPress={onPressCreate || (() => {})}
                     />
                 }

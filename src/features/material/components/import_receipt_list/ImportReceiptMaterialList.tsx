@@ -4,7 +4,7 @@ import { colors } from '@/styles';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { ImportReceipt } from '@/features/material/types/importReceipt.types';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { ImportReceiptCard } from '@/features/material/components/import_receipt_list/ImportReceiptCard';
 
 interface ImportReceiptMaterialListProps {
@@ -71,8 +71,9 @@ export const ImportReceiptMaterialList: React.FC<ImportReceiptMaterialListProps>
                     ) : null
                 }
                 ListEmptyComponent={
-                    <MaterialEmptyState
-                        tab={MaterialTabType.History}
+                    <EmptyStateCard
+                        message="Chưa có phiếu nhập kho nào được tạo."
+                        buttonTitle="Tạo phiếu nhập kho"
                         onPress={onPressCreate || (() => {})}
                     />
                 }
