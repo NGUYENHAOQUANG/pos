@@ -152,7 +152,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                 onBack={handleGoBack}
                 rightAction={
                     <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
-                        <Ionicons name="add" size={24} color={colors.primary} />
+                        <Ionicons name="add" size={24} color={colors.text} />
                     </TouchableOpacity>
                 }
             />
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
     },
     listContent: {

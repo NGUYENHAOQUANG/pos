@@ -8,7 +8,7 @@ import {
     Dimensions,
     ActivityIndicator,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import IconSetting from '@/assets/Icon/IconDevices/IconSetting.svg';
 import { ButtonControlMode } from './ButtonControlMode';
 import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
@@ -38,18 +38,18 @@ export const DeviceCard = React.memo<DeviceCardProps>(
     ({ data, onToggle, onSettingsPress, onModePress, style, isLoading }) => {
         // Determine styles based on state
         let containerStyle: ViewStyle = styles.cardContainer;
-        let switchTrackColor: string = colors.primary;
+        let switchTrackColor: string = colors.primaryOrange;
         const isOxy = data.type === 'oxy';
         const effectiveMode = isOxy ? EControlMode.LOCAL : data.mode;
 
         if (data.errorMessage) {
             // Error State
             containerStyle = { ...styles.cardContainer, ...styles.cardError };
-            switchTrackColor = colors.primary;
+            switchTrackColor = colors.primaryOrange;
         } else if (effectiveMode === EControlMode.LOCAL) {
             // Local Mode (Active but locked)
             containerStyle = { ...styles.cardContainer, ...styles.cardActive };
-            switchTrackColor = colors.primaryLight; // Lighter blue to indicate read-only/local
+            switchTrackColor = colors.primaryOrange; // Orange for local too
         } else if (!data.isOn) {
             // Inactive State
             containerStyle = { ...styles.cardContainer, ...styles.cardInactive };
@@ -84,11 +84,7 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                             activeOpacity={0.7}
                             disabled={isLoading}
                         >
-                            <Ionicons
-                                name="settings-outline"
-                                size={s(18)}
-                                color={colors.gray[600]}
-                            />
+                            <IconSetting width={s(32)} height={s(32)} />
                         </TouchableOpacity>
                     </View>
 
@@ -99,16 +95,18 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                                 <AutoScrollText text={data.errorMessage} style={styles.errorText} />
                             ) : null}
                         </View>
-                        <ButtonControlMode
-                            mode={effectiveMode}
-                            onPress={
-                                effectiveMode === EControlMode.LOCAL
-                                    ? undefined
-                                    : () => onModePress?.(data.id)
-                            }
-                            style={styles.scaledButton}
-                            disabled={isLoading}
-                        />
+                        <View style={styles.modeContainer}>
+                            <ButtonControlMode
+                                mode={effectiveMode}
+                                onPress={
+                                    effectiveMode === EControlMode.LOCAL
+                                        ? undefined
+                                        : () => onModePress?.(data.id)
+                                }
+                                style={styles.scaledButton}
+                                disabled={isLoading}
+                            />
+                        </View>
                     </View>
 
                     {/* Bottom Row: Name & Switch */}
@@ -130,7 +128,10 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                                 onToggle(data.id, val);
                             }}
                             trackColor={switchTrackColor}
-                            style={styles.scaledButton}
+                            style={[
+                                styles.scaledButton,
+                                effectiveMode === EControlMode.LOCAL && { opacity: 0.5 },
+                            ]}
                             disabled={isLoading}
                         />
                     </View>
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         width: '100%', // Fill the grid wrapper
-        aspectRatio: 164 / 140, // Increase height for better spacing
+        aspectRatio: 152 / 114, // Increase height for better spacing
     },
     cardActive: {
         borderColor: colors.primary,
@@ -162,11 +163,11 @@ const styles = StyleSheet.create({
     },
     cardInactive: {
         borderColor: colors.border, // Light visible border
-        backgroundColor: colors.gray[50],
+        backgroundColor: colors.gray[100],
     },
     cardError: {
-        borderColor: colors.error,
-        backgroundColor: '#FEF2F2', // Light red background
+        borderColor: colors.red[200],
+        backgroundColor: colors.red[25], // Light red background
     },
     innerContent: {
         flex: 1,
@@ -194,12 +195,8 @@ const styles = StyleSheet.create({
     },
     // Element Styles
     settingsButton: {
-        width: s(40),
-        height: s(40),
-        borderRadius: s(8),
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.border,
+        width: s(32),
+        height: s(32),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -222,6 +219,9 @@ const styles = StyleSheet.create({
         fontSize: s(14),
         fontWeight: '400',
         color: colors.text,
+    },
+    modeContainer: {
+        marginTop: -s(16),
     },
     scaledButton: {
         transform: [{ scale: scaleFactor < 1 ? scaleFactor : 1 }],

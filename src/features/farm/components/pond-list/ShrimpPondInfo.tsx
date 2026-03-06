@@ -2,11 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
-import { POND_TYPES } from '@/features/farm/types/farm.types';
 
 interface ShrimpPondInfoProps {
     status?: TagStatus;
-    typeValue?: string;
     hasData: boolean;
     lastUpdate?: string;
     lastActivity?: string;
@@ -14,42 +12,29 @@ interface ShrimpPondInfoProps {
 
 export const ShrimpPondInfo: React.FC<ShrimpPondInfoProps> = ({
     status,
-    typeValue,
     hasData,
     lastUpdate,
     lastActivity,
 }) => {
-    const showStatusTag = !!(
-        status &&
-        (typeValue === POND_TYPES.NURSERY ||
-            typeValue === POND_TYPES.CULTIVATION ||
-            typeValue === POND_TYPES.READY)
-    );
-
     return (
         <View style={styles.body}>
-            {showStatusTag && (
-                <>
-                    <Tag status={status!} style={styles.statusTag} />
-                    <View
-                        style={[
-                            styles.divider,
-                            { marginHorizontal: -spacing.md, marginBottom: spacing.sm },
-                        ]}
-                    />
-                </>
-            )}
             {hasData ? (
-                <>
-                    <Text style={styles.bodyText}>
-                        Lần cập nhật gần nhất:{' '}
-                        <Text style={styles.bodyValue}>{lastUpdate || '-'}</Text>
-                    </Text>
-                    <Text style={[styles.bodyText, { marginTop: spacing.xs }]}>
-                        Hoạt động gần nhất:{' '}
-                        <Text style={styles.bodyValue}>{lastActivity || '-'}</Text>
-                    </Text>
-                </>
+                <View style={styles.contentContainer}>
+                    {status && (
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Trạng thái</Text>
+                            <Tag status={status} />
+                        </View>
+                    )}
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Lần cập nhật gần nhất:</Text>
+                        <Text style={styles.value}>{lastUpdate || '-'}</Text>
+                    </View>
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Hoạt động gần nhất:</Text>
+                        <Text style={styles.value}>{lastActivity || '-'}</Text>
+                    </View>
+                </View>
             ) : (
                 <Text style={styles.bodyEmptyText}>Ao chức năng không có dữ liệu công việc</Text>
             )}
@@ -66,15 +51,22 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: colors.borderLight,
     },
-    statusTag: {
-        marginBottom: spacing.sm,
+    contentContainer: {
+        gap: spacing.sm,
     },
-    bodyText: {
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    label: {
         fontSize: 14,
         color: colors.text,
     },
-    bodyValue: {
+    value: {
+        fontSize: 14,
         color: colors.text,
+        fontWeight: '500',
     },
     bodyEmptyText: {
         fontSize: 14,

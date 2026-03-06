@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     cycleHeader: {
-        backgroundColor: colors.geekblue[100],
+        backgroundColor: colors.gray[50],
         padding: spacing.sm,
         borderTopLeftRadius: borderRadius.sm,
         borderTopRightRadius: borderRadius.sm,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     },
     cycleDate: {
         fontSize: typography.fontSize.xs,
-        color: colors.textSecondary,
+        color: colors.text,
     },
     cycleInfo: {
         gap: spacing.xs,

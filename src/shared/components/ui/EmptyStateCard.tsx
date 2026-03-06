@@ -11,10 +11,10 @@ import PlusIcon from '@/assets/Icon/Plus.svg';
 export interface EmptyStateCardProps {
     /** Message to display under the empty state icon */
     message: string;
-    /** Title for the action button */
-    buttonTitle: string;
-    /** Callback when the action button is pressed */
-    onPress: () => void;
+    /** Optional title for the action button */
+    buttonTitle?: string;
+    /** Optional callback when the action button is pressed */
+    onPress?: () => void;
     /** Optional extra style for the action button */
     buttonStyle?: ViewStyle;
     /** Optional extra style for the container */
@@ -50,15 +50,17 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
             {/* Descriptive message */}
             <Text style={styles.text}>{message}</Text>
 
-            {/* Primary action button with Plus icon */}
-            <Button
-                title={buttonTitle}
-                onPress={onPress}
-                variant="primary"
-                size="medium"
-                style={StyleSheet.flatten([styles.button, buttonStyle])}
-                renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
-            />
+            {/* Primary action button with Plus icon - rendered only if title and onPress provided */}
+            {buttonTitle && onPress && (
+                <Button
+                    title={buttonTitle}
+                    onPress={onPress}
+                    variant="primary"
+                    size="medium"
+                    style={StyleSheet.flatten([styles.button, buttonStyle])}
+                    renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
+                />
+            )}
         </View>
     );
 };
@@ -74,11 +76,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     text: {
-        fontSize: 14,
-        color: colors.text,
+        fontSize: 16,
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: spacing.md,
         fontFamily: typography.fontFamily.regular,
+        lineHeight: 22,
     },
     button: {
         width: '100%',

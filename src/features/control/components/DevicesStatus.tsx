@@ -5,14 +5,29 @@ import { colors } from '@/styles';
 interface StatusItemProps {
     label: string;
     value: number;
-    valueColor: string;
-    backgroundColor: string;
+    valueColor?: string;
+    backgroundColor?: string;
+    borderColor?: string;
 }
 
-const StatusItem: React.FC<StatusItemProps> = ({ label, value, valueColor, backgroundColor }) => (
-    <View style={[styles.itemContainer, { backgroundColor }]}>
+const StatusItem: React.FC<StatusItemProps> = ({
+    label,
+    value,
+    valueColor,
+    backgroundColor,
+    borderColor,
+}) => (
+    <View
+        style={[
+            styles.itemContainer,
+            {
+                borderColor: borderColor || colors.defaultBorder,
+                backgroundColor: backgroundColor || 'white',
+            },
+        ]}
+    >
+        <Text style={[styles.label, { color: valueColor }]}>{label}</Text>
         <Text style={[styles.value, { color: valueColor }]}>{value}</Text>
-        <Text style={styles.label}>{label}</Text>
     </View>
 );
 
@@ -34,30 +49,20 @@ export const DevicesStatus: React.FC<DevicesStatusProps> = ({
             <StatusItem
                 label="Tổng ao"
                 value={totalPonds}
-                valueColor={colors.status.totalText}
-                backgroundColor={colors.status.totalBg}
+                valueColor={colors.gray[800]} // Hoặc colors.text
             />
             <View style={styles.spacer} />
-            <StatusItem
-                label="Hoạt động"
-                value={activePonds}
-                valueColor={colors.status.activeText}
-                backgroundColor={colors.status.activeBg}
-            />
+            <StatusItem label="Hoạt động" value={activePonds} valueColor={colors.gray[800]} />
             <View style={styles.spacer} />
             <StatusItem
                 label="Nguy cơ"
                 value={warningPonds}
-                valueColor={colors.status.warningText}
-                backgroundColor={colors.status.warningBg}
+                valueColor={colors.red[600]}
+                backgroundColor={colors.red[25]}
+                borderColor={colors.red[200]}
             />
             <View style={styles.spacer} />
-            <StatusItem
-                label="Khác"
-                value={otherPonds}
-                valueColor={colors.status.otherText}
-                backgroundColor={colors.status.otherBg}
-            />
+            <StatusItem label="Khác" value={otherPonds} valueColor={colors.gray[800]} />
         </View>
     );
 };
@@ -65,19 +70,18 @@ export const DevicesStatus: React.FC<DevicesStatusProps> = ({
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 12,
+        backgroundColor: 'transparent',
         marginHorizontal: 16,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
     },
     itemContainer: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         paddingVertical: 12,
-        borderRadius: 12,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     spacer: {
         width: 8,
@@ -85,11 +89,11 @@ const styles = StyleSheet.create({
     value: {
         fontSize: 20,
         fontWeight: '700',
-        marginBottom: 4,
     },
     label: {
         fontSize: 12,
         color: colors.textSecondary,
         fontWeight: '400',
+        marginBottom: 8,
     },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet, StyleProp, ViewStyle, TouchableOpacity } from 'react-native';
 import { EControlMode } from '../../types/control.types';
-import { colors } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 
 interface ButtonControlModeProps {
     mode: EControlMode;
@@ -50,14 +50,14 @@ const styles = StyleSheet.create({
         backgroundColor: colors.gray[50],
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 6,
+        borderRadius: borderRadius.full,
         // alignSelf: 'flex-start', // Removed to allow parent control
         alignItems: 'center',
         justifyContent: 'center',
     },
     text: {
         fontSize: 12,
-        color: colors.gray[800],
-        fontWeight: '400',
+        color: colors.text,
+        fontWeight: '500',
     },
 });
