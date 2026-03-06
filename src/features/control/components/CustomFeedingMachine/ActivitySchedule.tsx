@@ -156,10 +156,26 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         justifyContent: 'space-between',
     },
-    labelTurn: { fontSize: 14, color: colors.text, fontWeight: '500', width: 45 },
-    timeInputsWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 },
-    timeInput: { flex: 1 },
-    dashSeparator: { marginHorizontal: 8, color: colors.text, fontWeight: '500' },
+    labelTurn: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        width: 45,
+    },
+    timeInputsWrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 8,
+    },
+    timeInput: {
+        flex: 1,
+    },
+    dashSeparator: {
+        marginHorizontal: 8,
+        color: colors.text,
+        fontWeight: '500',
+    },
     deleteButton: {
         width: 40,
         height: 40,

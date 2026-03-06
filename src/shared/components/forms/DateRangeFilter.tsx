@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { colors, borderRadius } from '@/styles';
-import { IconCalender, IconVector } from '@/assets/icons';
+import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 
 /**
@@ -98,19 +98,19 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
             <View style={[styles.container, style]}>
                 <View style={styles.textRow}>
                     <TouchableOpacity
-                        style={styles.dateTouchable}
+                        style={styles.dateTouchableStart}
                         onPress={handlePressStart}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.dateText}>{displayStartLabel}</Text>
+                        <Text style={styles.dateTextStart}>{displayStartLabel}</Text>
                     </TouchableOpacity>
-                    <IconVector width={12} height={5} style={styles.arrowIcon} />
+                    <Text style={styles.dashSeparator}>-</Text>
                     <TouchableOpacity
-                        style={styles.dateTouchable}
+                        style={styles.dateTouchableEnd}
                         onPress={handlePressEnd}
                         activeOpacity={0.7}
                     >
-                        <Text style={styles.dateText}>{displayEndLabel}</Text>
+                        <Text style={styles.dateTextEnd}>{displayEndLabel}</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -145,22 +145,35 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
     },
-    dateTouchable: {
-        flex: 1,
+    dateTouchableStart: {
+        alignItems: 'flex-start',
     },
-    dateText: {
-        fontWeight: '400',
+    dateTouchableEnd: {
+        alignItems: 'flex-start',
+    },
+    dateTextStart: {
+        fontWeight: '700',
         fontStyle: 'normal',
         fontSize: 16,
         lineHeight: 24,
         letterSpacing: 0,
         color: colors.text,
-        textAlign: 'left',
     },
-    arrowIcon: {
+    dateTextEnd: {
+        fontWeight: '700',
+        fontStyle: 'normal',
+        fontSize: 16,
+        lineHeight: 24,
+        letterSpacing: 0,
+        color: colors.text,
+    },
+    dashSeparator: {
         marginHorizontal: 8,
+        fontWeight: '700',
+        fontSize: 16,
+        color: colors.text,
     },
     calendarIcon: {
         marginLeft: 8,

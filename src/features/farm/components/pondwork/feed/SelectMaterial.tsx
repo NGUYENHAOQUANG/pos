@@ -14,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, RequiredDot } from '@/shared/components/forms/Input';
 
 interface SelectMaterialProps {
     isVisible: boolean;
@@ -89,7 +89,10 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                         <View style={styles.container}>
                             {/* Header */}
                             <View style={styles.header}>
-                                <Text style={styles.title}>Chọn vật tư</Text>
+                                <View style={styles.titleWrapper}>
+                                    <Text style={styles.title}>Chọn vật tư</Text>
+                                    <RequiredDot />
+                                </View>
                                 <TouchableOpacity
                                     onPress={onClose}
                                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -101,10 +104,10 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                             <View style={styles.content}>
                                 {/* Material Selection */}
                                 <View style={[styles.fieldGroup, { zIndex: 100 }]}>
-                                    <Text style={styles.label}>
-                                        <Text style={styles.required}>* </Text>
-                                        Chọn loại sản phẩm
-                                    </Text>
+                                    <View style={styles.labelWrapper}>
+                                        <Text style={styles.label}>Chọn loại sản phẩm</Text>
+                                        <RequiredDot />
+                                    </View>
                                     <DropDownSelectMaterial
                                         data={materials}
                                         selectedItem={selectedMaterial}
@@ -205,6 +208,14 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.gray[100],
     },
+    titleWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     title: {
         fontSize: 16,
         fontWeight: '700',
@@ -221,7 +232,6 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         color: colors.text,
-        marginBottom: spacing.sm,
         lineHeight: 22,
     },
     required: {

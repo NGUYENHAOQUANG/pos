@@ -22,7 +22,7 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     return (
         <View style={[styles.infoBox, style]}>
             <CollapseHead
-                title={typeof title === 'string' ? title : ''}
+                title={title}
                 titleStyle={titleStyle}
                 isExpanded={isExpanded}
                 onToggle={() => setIsExpanded(!isExpanded)}
@@ -37,7 +37,7 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
 const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
-        marginHorizontal: 16,
+        marginTop: 12,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,
@@ -50,7 +50,8 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
     },
     childrenContainer: {
-        padding: 12,
+        padding: 16,
+        paddingTop: 8,
         gap: 16,
     },
 });
