@@ -155,6 +155,8 @@ const AnimatedTabItem: React.FC<AnimatedTabItemProps> = ({ route, item, isFocuse
                 </View>
                 <Text
                     numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
                     style={[styles.tabLabel, isFocused && styles.tabLabelActive]}
                 >
                     {item.label}
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
     },
     tabLabel: {
         fontSize: 12,
-        color: colors.textMuted,
+        color: colors.text,
         fontWeight: '400',
     },
     tabLabelActive: {

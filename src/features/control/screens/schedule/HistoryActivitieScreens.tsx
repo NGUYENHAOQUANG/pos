@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { HeaderDevices, CONTROL_TABS } from '../../components/HeaderDevices';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { HistoryActivitie } from '../../components/schedule/HistoryActivitie';
 import FilterDate from '../../components/schedule/FilterDate';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
@@ -109,18 +110,23 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
     return (
         <View style={styles.container}>
             <HeaderDevices
+                title={`${pondName} - Lịch sử hoạt động`}
+                onBackPress={onBack}
+                rightComponent={renderRightComponent()}
+            />
+            <HeadingBar
                 tabs={CONTROL_TABS}
                 selectedTab={activeTab}
                 onTabSelect={setActiveTab}
-                onBackPress={onBack}
-                rightComponent={renderRightComponent()}
+                flexTabs
+                containerStyle={styles.headingBar}
             />
             <View style={styles.content}>
                 {isLoading ? (
                     <Loading />
                 ) : activeTab === 'history' ? (
                     <>
-                        <View style={styles.filterWrapper}>
+                        <View>
                             <FilterDate />
                         </View>
                         <HistoryActivitie devices={historyDevices} />
@@ -142,9 +148,8 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingBottom: 0,
     },
-    filterWrapper: {
-        marginTop: spacing.md,
-        marginBottom: spacing.xs, // Small gap before list
+    headingBar: {
+        marginTop: spacing.sm,
     },
     rightComponentContainer: {
         flexDirection: 'row',

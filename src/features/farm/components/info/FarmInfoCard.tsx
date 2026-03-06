@@ -39,7 +39,8 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
     };
 
     return (
-        <View style={styles.card}>
+        <View style={styles.wrapper}>
+            {/* Map Image - Outside card */}
             <View style={styles.imageContainer}>
                 <Image source={BGFarmInfo} style={styles.backgroundImage} resizeMode="cover" />
                 <View style={styles.mapControls}>
@@ -77,25 +78,30 @@ export const FarmInfoCard: React.FC<FarmInfoCardProps> = ({ farm }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <InfoField label="Tên trại:" value={farmInfo.name} />
-            <InfoField label="Mã trại:" value={farmInfo.code} />
-            <InfoField label="Diện tích:" value={farmInfo.area} />
-            <InfoField label="Địa chỉ:" value={farmInfo.address} />
+
+            {/* Info Card - Separate from map */}
+            <View style={styles.card}>
+                <InfoField label="Tên trại:" value={farmInfo.name} />
+                <InfoField label="Mã trại:" value={farmInfo.code} />
+                <InfoField label="Diện tích:" value={farmInfo.area} />
+                <InfoField label="Địa chỉ:" value={farmInfo.address} />
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    wrapper: {
+        flex: 1,
+    },
     card: {
         backgroundColor: colors.white,
-        paddingTop: 12,
-        paddingBottom: 12,
+        paddingVertical: 12,
         paddingHorizontal: 16,
-        marginTop: 8,
+        marginTop: 16,
         borderRadius: 16,
         borderWidth: 1,
         borderColor: colors.border,
-        overflow: 'hidden',
     },
     fieldContainer: {
         flexDirection: 'row',
@@ -110,11 +116,11 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     imageContainer: {
-        height: 180,
+        height: 250,
         width: '100%',
-        borderRadius: 12,
+        borderRadius: 16,
         overflow: 'hidden',
-        marginBottom: 16,
+        marginTop: 16,
         backgroundColor: colors.gray[100],
     },
     backgroundImage: {
