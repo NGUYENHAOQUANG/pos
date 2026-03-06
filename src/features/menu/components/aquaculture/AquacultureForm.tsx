@@ -11,6 +11,7 @@ import {
     DropDownItem,
 } from '@/features/menu/components/aquaculture/DropDownButton';
 import { FarmInput } from '@/features/farm/components/pondwork/FarmInput';
+import { RequiredDot } from '@/shared/components/forms/Input';
 import {
     aquacultureFormSchema,
     AquacultureFormValues,
@@ -124,10 +125,12 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                 {/* Zone Selection */}
                 <View style={styles.card}>
                     <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>
-                            <Text style={styles.required}>* </Text>
-                            {isEditMode ? 'Trại nuôi' : 'Chọn trại nuôi'}
-                        </Text>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>
+                                {isEditMode ? 'Trại nuôi' : 'Chọn trại nuôi'}
+                            </Text>
+                            <RequiredDot />
+                        </View>
                         <Controller
                             name="zoneId"
                             control={control}
@@ -154,8 +157,8 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                         }}
                                         placeholder="Chọn trại nuôi"
                                         style={styles.dropdown}
-                                        height={40}
-                                        borderRadius={6}
+                                        height={44}
+                                        borderRadius={12}
                                     />
                                 );
                             }}
@@ -168,23 +171,36 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                     {/* Cycle Name & Code */}
                     <View style={[styles.row, styles.zIndex10]}>
                         <View style={styles.flex1}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Tên vụ nuôi</Text>
+                                <RequiredDot />
+                            </View>
                             <Controller
                                 name="name"
                                 control={control}
                                 render={({ field: { onChange, value } }) => (
                                     <FarmInput
-                                        label="Tên vụ nuôi"
-                                        required
                                         value={value}
                                         onChangeText={onChange}
-                                        placeholder="Nhập"
+                                        placeholder="Tên vụ nuôi"
                                         containerStyle={styles.noMarginBottom}
+                                        inputContainerStyle={styles.customInputBox}
+                                        inputStyle={
+                                            value
+                                                ? styles.inputTextFilled
+                                                : styles.inputTextPlaceholder
+                                        }
+                                        placeholderTextColor={colors.gray[400]}
                                         error={errors.name?.message}
                                     />
                                 )}
                             />
                         </View>
                         <View style={[styles.flex1, styles.zIndex10]}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Mã vụ nuôi</Text>
+                                <RequiredDot />
+                            </View>
                             <TouchableOpacity
                                 activeOpacity={0.7}
                                 onPress={() =>
@@ -197,11 +213,16 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                         control={control}
                                         render={({ field: { value } }) => (
                                             <Input
-                                                label="Mã vụ nuôi"
                                                 value={value || ''}
-                                                placeholder="Mã tự động"
+                                                placeholder="Mã vụ nuôi"
                                                 containerStyle={styles.noMarginBottom}
-                                                inputContainerStyle={styles.inputDisabledBox}
+                                                inputContainerStyle={styles.customInputDisabledBox}
+                                                inputStyle={
+                                                    value
+                                                        ? styles.inputTextFilled
+                                                        : styles.inputTextPlaceholder
+                                                }
+                                                placeholderTextColor={colors.gray[400]}
                                                 disabled
                                             />
                                         )}
@@ -224,16 +245,19 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                     {/* Start & End Date */}
                     <View style={styles.row}>
                         <View style={styles.flex1}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Ngày bắt đầu</Text>
+                                <RequiredDot />
+                            </View>
                             <Controller
                                 name="startDate"
                                 control={control}
                                 render={({ field: { onChange, value } }) => (
                                     <DateInputButton
-                                        label="Ngày bắt đầu"
                                         date={value}
                                         onDateChange={onChange}
-                                        required
-                                        height={40}
+                                        height={44}
+                                        borderRadius={12}
                                         dateOnly
                                         formatOptions={{
                                             showCurrentLabel: false,
@@ -246,15 +270,18 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                             )}
                         </View>
                         <View style={styles.flex1}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Ngày kết thúc</Text>
+                            </View>
                             <Controller
                                 name="endDate"
                                 control={control}
                                 render={({ field: { onChange, value } }) => (
                                     <DateInputButton
-                                        label="Ngày kết thúc"
                                         date={value}
                                         onDateChange={onChange}
-                                        height={40}
+                                        height={44}
+                                        borderRadius={12}
                                         dateOnly
                                         formatOptions={{
                                             showCurrentLabel: false,
@@ -269,7 +296,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                     <View style={styles.fieldContainer}>
                         <View style={styles.labelRow}>
                             <Text style={styles.label}>Chọn trạng thái</Text>
-                            <View style={styles.requiredDot} />
+                            <RequiredDot />
                         </View>
                         <Controller
                             name="status"
@@ -291,7 +318,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                     <View style={styles.fieldContainer}>
                         <View style={styles.labelRow}>
                             <Text style={styles.label}>Ghi chú</Text>
-                            <View style={styles.requiredDot} />
+                            <RequiredDot />
                         </View>
                         <View style={styles.inputGroup}>
                             <Controller
@@ -299,9 +326,14 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                                 control={control}
                                 render={({ field: { onChange, value } }) => (
                                     <TextInput
-                                        style={styles.textArea}
+                                        style={[
+                                            styles.textArea,
+                                            value
+                                                ? styles.inputTextFilled
+                                                : styles.inputTextPlaceholder,
+                                        ]}
                                         placeholder="Nhập ghi chú"
-                                        placeholderTextColor={colors.borderSubtle}
+                                        placeholderTextColor={colors.gray[400]}
                                         value={value || ''}
                                         onChangeText={text => {
                                             if (text.length > 1999) {
@@ -336,7 +368,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.sm,
         borderWidth: 1,
         borderColor: colors.border,
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: 16,
         paddingVertical: spacing.sm + 4,
         flexGrow: 0,
         gap: spacing.md,
@@ -355,26 +387,25 @@ const styles = StyleSheet.create({
     },
     content: {},
     fieldContainer: {
-        gap: spacing.sm,
+        gap: 6,
     },
     row: {
         flexDirection: 'row',
         marginBottom: 0,
-        gap: spacing.sm,
+        gap: 16,
     },
     flex1: {
         flex: 1,
+        gap: 6,
     },
     zIndex10: {
         zIndex: 10,
     },
     label: {
-        fontFamily: typography.fontFamily.regular,
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.regular,
-        fontStyle: 'normal',
-        lineHeight: 22,
-        color: colors.text,
+        fontSize: 14,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
     },
     required: {
         color: colors.error,
@@ -383,27 +414,50 @@ const styles = StyleSheet.create({
         zIndex: 100,
     },
     inputGroup: {
-        gap: spacing.sm,
+        gap: 6,
     },
     noMarginBottom: {
         marginBottom: 0,
     },
     textArea: {
-        minHeight: 80,
-        maxHeight: 160,
-        paddingVertical: spacing.xs + 1,
-        paddingHorizontal: spacing.md - 4,
+        height: 114,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.xs + 2,
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.regular,
-        fontStyle: 'normal',
-        lineHeight: 24,
-        letterSpacing: 0,
-        color: colors.text,
+        borderRadius: 12,
         textAlignVertical: 'top',
+    },
+    customInputBox: {
+        height: 44,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+    },
+    customInputDisabledBox: {
+        height: 44,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        backgroundColor: colors.gray[100],
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+    },
+    inputTextFilled: {
+        fontSize: 16,
+        fontWeight: '500',
+        lineHeight: 20,
+        color: colors.gray[950],
+    },
+    inputTextPlaceholder: {
+        fontSize: 16,
+        fontWeight: '400',
+        lineHeight: 20,
+        color: colors.gray[400],
     },
     inputDisabledBox: {
         backgroundColor: colors.gray[100],
@@ -416,7 +470,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
+        borderRadius: 12,
         paddingHorizontal: spacing.sm + 4,
         paddingVertical: spacing.sm + 2,
         zIndex: 100,

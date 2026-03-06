@@ -160,8 +160,8 @@ export function Input({
                                 inputStyle,
                                 {
                                     color: colors.textTertiary,
-                                    fontSize: 16,
-                                    lineHeight: Platform.OS === 'ios' ? 0 : 1.54 * 12,
+                                    fontSize: 14,
+                                    lineHeight: Platform.OS === 'ios' ? 0 : 1.54 * 14,
                                 },
                             ]}
                         >
@@ -203,7 +203,7 @@ export function Input({
                                         paddingVertical: 0,
                                         paddingLeft: 0,
                                         marginLeft: 0,
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: disabled ? colors.textTertiary : colors.text,
                                         ...Platform.select({
                                             ios: {
@@ -211,7 +211,7 @@ export function Input({
                                                 lineHeight: 0,
                                             },
                                             android: {
-                                                lineHeight: 1.54 * 12,
+                                                lineHeight: 1.54 * 14,
                                             },
                                         }),
                                     },
@@ -283,10 +283,10 @@ const styles = StyleSheet.create({
     labelWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: 6,
     },
     label: {
-        fontSize: typography.fontSize.base,
+        fontSize: typography.fontSize.sm,
         fontWeight: '500',
         color: colors.text,
         lineHeight: 20,
@@ -319,10 +319,10 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: typography.fontSize.base,
-        fontWeight: '500',
+        fontSize: typography.fontSize.sm,
+        fontWeight: '400',
         color: colors.text,
-        lineHeight: 20,
+        lineHeight: 22,
         letterSpacing: 0,
         paddingVertical: 0,
         height: '100%',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
         paddingRight: 0,
     },
     suffixText: {
-        fontSize: 16,
+        fontSize: 14,
         color: colors.textSecondary,
         fontWeight: '400',
     },

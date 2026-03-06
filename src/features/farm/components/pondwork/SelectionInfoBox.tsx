@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 
 interface SelectionInfoBoxProps {
     title: string | React.ReactNode;
@@ -16,15 +17,19 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     style,
     titleStyle,
 }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+
     return (
         <View style={[styles.infoBox, style]}>
-            {typeof title === 'string' ? (
-                <Text style={[styles.sectionTitle, titleStyle]}>{title}</Text>
-            ) : (
-                <View style={styles.titleContainer}>{title}</View>
-            )}
-            <View style={styles.divider} />
-            <View style={styles.childrenContainer}>{children}</View>
+            <CollapseHead
+                title={typeof title === 'string' ? title : ''}
+                titleStyle={titleStyle}
+                isExpanded={isExpanded}
+                onToggle={() => setIsExpanded(!isExpanded)}
+                // showIcon={true}
+                // style={[styles.collapseHead, !isExpanded && { borderBottomWidth: 0 }]}
+            />
+            {isExpanded && <View style={styles.childrenContainer}>{children}</View>}
         </View>
     );
 };
@@ -32,35 +37,20 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
 const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
-        marginTop: 8,
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 1,
+        marginHorizontal: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 12,
+    },
+    collapseHead: {
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        backgroundColor: colors.transparent,
+        paddingHorizontal: 12,
         paddingVertical: 12,
     },
-    titleContainer: {
-        marginBottom: 12,
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        lineHeight: 22,
-        color: colors.text,
-        marginBottom: 12,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: 12,
-        marginHorizontal: -spacing.md,
-    },
     childrenContainer: {
-        gap: spacing.md,
+        padding: 12,
+        gap: 16,
     },
 });

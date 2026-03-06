@@ -134,10 +134,10 @@ const styles = StyleSheet.create({
         minWidth: 60,
     },
     disclaimer: {
-        fontSize: 10,
+        fontSize: 13,
         fontWeight: '400',
         fontStyle: 'normal',
-        lineHeight: 14,
+        lineHeight: 20,
         letterSpacing: 0,
         color: colors.textMuted,
     },

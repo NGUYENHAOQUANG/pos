@@ -9,7 +9,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { pondListService } from '@/features/farm/services/pondListService';
+import { pondListService } from '@/features/farm/services/pond-list.service';
 import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
