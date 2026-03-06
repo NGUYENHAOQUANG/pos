@@ -25,7 +25,7 @@ const JobCardSkeleton: React.FC = () => {
                 </View>
                 {/* Action Button Skeleton */}
                 <View style={styles.actions}>
-                    <Skeleton width={32} height={32} borderRadius={4} />
+                    <Skeleton width={40} height={40} borderRadius={20} />
                     <View style={{ width: 16, height: 16 }} />
                 </View>
             </View>
@@ -87,7 +87,7 @@ export const PondJobSkeleton: React.FC = () => {
     return (
         <View style={styles.container}>
             {/* Cycle Skeleton at top */}
-            <View style={{ padding: spacing.md, paddingBottom: 0 }}>
+            <View style={{ paddingHorizontal: 16, paddingBottom: 0, borderRadius: 16 }}>
                 <CycleCardSkeleton />
             </View>
 
@@ -95,7 +95,6 @@ export const PondJobSkeleton: React.FC = () => {
             <View style={styles.dateHeader}>
                 <Skeleton width={150} height={20} borderRadius={4} />
             </View>
-            <View style={styles.headerDivider} />
 
             <View style={styles.listContainer}>
                 {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
@@ -112,23 +111,20 @@ const styles = StyleSheet.create({
     },
     dateHeader: {
         paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-    },
-    headerDivider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        width: '100%',
+        marginTop: spacing.md,
+        marginBottom: spacing.xs,
     },
     listContainer: {
-        padding: spacing.md,
+        paddingHorizontal: 16,
+        paddingTop: spacing.sm,
     },
     // Card Styles
     cardContainer: {
         backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: colors.borderDark,
-        borderRadius: 8,
-        marginBottom: 16,
+        borderColor: colors.border,
+        borderRadius: 16,
+        marginBottom: 8,
         overflow: 'hidden',
     },
     header: {

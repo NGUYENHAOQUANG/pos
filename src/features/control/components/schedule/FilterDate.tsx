@@ -68,10 +68,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12, // Reduced gap
-        backgroundColor: colors.white,
-        padding: 16,
-        elevation: 2,
+        gap: 12,
+        paddingHorizontal: 16,
     },
     navButton: {
         width: 40,

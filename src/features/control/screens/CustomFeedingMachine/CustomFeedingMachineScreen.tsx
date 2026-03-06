@@ -1,32 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    BackHandler,
-    RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, BackHandler, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
-import { useControl } from '../../store/controlStore';
-import { deviceApi } from '../../api/deviceApi';
-import { EControlMode } from '../../types/control.types';
+import { useControl } from '@/features/control/store/controlStore';
+import { deviceApi } from '@/features/control/api/deviceApi';
+import { EControlMode } from '@/features/control/types/control.types';
 
 import ActivitySchedule, {
     ScheduleItem,
-} from '../../components/CustomFeedingMachine/ActivitySchedule';
-import { HeaderDevices } from '../../components/HeaderDevices';
+} from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
+import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
-import { ConfirmModal } from '../../components/CustomFeedingMachine/ConfirmModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-//import { Input } from '@/shared/components/forms/Input';
+import { Input } from '@/shared/components/forms/Input';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ControlStackParamList } from '../../navigation/ControlNavigator';
+import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 
 interface CustomFeedingMachineProps {
     onBack?: () => void;
@@ -348,8 +341,15 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
         <View style={styles.container}>
             <HeaderDevices title={getHeaderTitle()} onBackPress={handleCancel} />
 
-            <ConfirmModal
+            <ConfirmationModalUI
                 visible={showConfirmModal}
+                title="Bạn có thay đổi chưa được lưu lại"
+                message="Những thay đổi của bạn sẽ không được lưu lại nếu bạn rời trang"
+                cancelText="Ở lại"
+                confirmText="Rời trang và không lưu"
+                showSuccessToast={false}
+                cancelButtonStyle={{ flex: 0, paddingHorizontal: 24 }}
+                confirmButtonStyle={{ flex: 1 }}
                 onConfirm={() => {
                     setShowConfirmModal(false);
                     // Use setTimeout to ensure state updates allow navigation to proceed
@@ -381,88 +381,56 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                     {/* 1. CHẾ ĐỘ HOẠT ĐỘNG */}
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                        <View style={styles.fullWidthDivider} />
-                        <View style={styles.radioGroup}>
-                            <TouchableOpacity
-                                style={styles.radioItem}
-                                onPress={() => {
-                                    setMode('manual');
-                                    setIsDirty(true);
-                                    isDirtyRef.current = true;
-                                }}
-                                activeOpacity={0.8}
-                            >
-                                <View
-                                    style={[
-                                        styles.radioOuter,
-                                        mode === 'manual' && styles.radioOuterSelected,
-                                    ]}
-                                >
-                                    {mode === 'manual' && <View style={styles.radioInner} />}
-                                </View>
-                                <Text style={styles.radioLabel}>Thủ công</Text>
-                            </TouchableOpacity>
+                        <Text style={styles.sectionSubtitle}>Chọn loại hoạt động</Text>
 
-                            <TouchableOpacity
-                                style={styles.radioItem}
-                                onPress={() => {
-                                    setMode('schedule');
-                                    setIsDirty(true);
-                                    isDirtyRef.current = true;
-                                }}
-                                activeOpacity={0.8}
-                            >
-                                <View
-                                    style={[
-                                        styles.radioOuter,
-                                        mode === 'schedule' && styles.radioOuterSelected,
-                                    ]}
-                                >
-                                    {mode === 'schedule' && <View style={styles.radioInner} />}
-                                </View>
-                                <Text style={styles.radioLabel}>Lịch trình</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <RadioButton
+                            options={[
+                                { label: 'Thủ công', value: 'manual' },
+                                { label: 'Lịch trình', value: 'schedule' },
+                            ]}
+                            value={mode}
+                            onValueChange={val => {
+                                setMode(val as 'manual' | 'schedule');
+                                setIsDirty(true);
+                                isDirtyRef.current = true;
+                            }}
+                        />
                     </View>
 
                     {/* 2. CẤU HÌNH MÁY */}
-                    {/* <View style={styles.card}>
+                    <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Cấu hình máy</Text>
-                        <View style={styles.fullWidthDivider} />
-                        <View style={styles.rowInputs}>
-                            <View style={styles.inputWrapper}>
-                                <Text style={styles.inputLabel}>Chạy (giây)</Text>
-                                <Input
-                                    placeholder="Nhập số giây"
-                                    placeholderTextColor={colors.gray[400]}
-                                    keyboardType="numeric"
-                                    value={runDuration}
-                                    onChangeText={text => {
-                                        const numericText = text.replace(/[^0-9]/g, '');
-                                        setRunDuration(numericText);
-                                        setIsDirty(true);
-                                        isDirtyRef.current = true;
-                                    }}
-                                />
-                            </View>
 
-                            <View style={styles.inputWrapper}>
-                                <Text style={styles.inputLabel}>Dừng (phút)</Text>
-                                <Input
-                                    placeholder="Nhập số phút"
-                                    placeholderTextColor={colors.gray[400]}
-                                    keyboardType="numeric"
-                                    value={stopDuration}
-                                    onChangeText={text => {
-                                        const numericText = text.replace(/[^0-9]/g, '');
-                                        setStopDuration(numericText);
-                                        setIsDirty(true);
-                                        isDirtyRef.current = true;
-                                    }}
-                                />
-                            </View>
-                        </View>
-                    </View> */}
+                        <Input
+                            label="Chạy (giây)"
+                            required
+                            placeholder="Nhập số giây"
+                            placeholderTextColor={colors.gray[400]}
+                            keyboardType="numeric"
+                            value={runDuration}
+                            onChangeText={text => {
+                                const numericText = text.replace(/[^0-9]/g, '');
+                                setRunDuration(numericText);
+                                setIsDirty(true);
+                                isDirtyRef.current = true;
+                            }}
+                        />
+
+                        <Input
+                            label="Dừng (phút)"
+                            required
+                            placeholder="Nhập số phút"
+                            placeholderTextColor={colors.gray[400]}
+                            keyboardType="numeric"
+                            value={stopDuration}
+                            onChangeText={text => {
+                                const numericText = text.replace(/[^0-9]/g, '');
+                                setStopDuration(numericText);
+                                setIsDirty(true);
+                                isDirtyRef.current = true;
+                            }}
+                        />
+                    </View>
 
                     {/* 3. LỊCH HOẠT ĐỘNG */}
                     <ActivitySchedule
@@ -478,8 +446,8 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
 
             <ButtonBar
                 mode="double"
-                primaryTitle={isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
-                secondaryTitle="Hủy Thay Đổi"
+                primaryTitle={isSaving ? 'Đang lưu...' : 'Lưu thông tin'}
+                secondaryTitle="Hủy"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleCancel}
                 primaryButtonDisabled={isSaving}
@@ -499,53 +467,26 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        paddingVertical: 12, // Vertical spacing for scroll
-        paddingHorizontal: 0, // Fill width
+        paddingVertical: 16,
+        paddingHorizontal: 16,
         paddingBottom: 100,
     },
     card: {
         backgroundColor: colors.white,
         padding: 16,
-        marginBottom: 16,
-        marginHorizontal: 0,
-        width: '100%',
+        marginBottom: 8,
+        borderRadius: 16,
     },
     sectionTitle: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '600',
         color: colors.text,
-        marginBottom: 12,
+        marginBottom: 16,
     },
-    radioGroup: {
-        flexDirection: 'row',
-        gap: 24,
-    },
-    radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    radioOuter: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        borderWidth: 2,
-        borderColor: colors.gray[300],
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 8,
-    },
-    radioOuterSelected: {
-        borderColor: colors.primary,
-    },
-    radioInner: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors.primary,
-    },
-    radioLabel: {
+    sectionSubtitle: {
         fontSize: 14,
         color: colors.text,
+        marginBottom: 16,
     },
     rowInputs: {
         flexDirection: 'row',

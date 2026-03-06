@@ -54,15 +54,10 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
         paddingHorizontal: 16,
         marginTop: 8,
-        // Shadow equivalent to box-shadow: 0px 1px 6px -1px #00000005
-        shadowColor: colors.shadow,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        elevation: 2, // For Android
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        overflow: 'hidden',
     },
     fieldContainer: {
         flexDirection: 'row',

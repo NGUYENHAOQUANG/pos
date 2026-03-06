@@ -1,8 +1,6 @@
-import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { IconPond } from '@/assets/icons';
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
-import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { colors, spacing } from '@/styles';
 import { PondType } from '@/features/farm/types/farm.types';
 
@@ -23,7 +21,6 @@ export const ShrimpPondHeader: React.FC<ShrimpPondHeaderProps> = ({
 }) => {
     return (
         <View style={styles.header}>
-            <IconPond width={40} height={40} style={styles.pondIcon} />
             <View style={styles.infoContainer}>
                 <Text style={styles.nameText}>{name}</Text>
                 <Text style={styles.areaText}>
@@ -33,7 +30,7 @@ export const ShrimpPondHeader: React.FC<ShrimpPondHeaderProps> = ({
             <View style={styles.headerRight}>
                 <PondTypeTag type={displayType} style={styles.tag} />
                 <View ref={buttonRef} collapsable={false}>
-                    <ButtonHeader onPress={onMenuPress} style={styles.menuBtn} />
+                    <MoreButton onPress={onMenuPress} style={styles.menuBtn} />
                 </View>
             </View>
         </View>
@@ -55,7 +52,7 @@ const styles = StyleSheet.create({
     },
     nameText: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: colors.text,
         marginBottom: 2,
     },
@@ -75,7 +72,5 @@ const styles = StyleSheet.create({
     menuBtn: {
         width: 32,
         height: 32,
-        borderWidth: 1,
-        borderColor: colors.border,
     },
 });

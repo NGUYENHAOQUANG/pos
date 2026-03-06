@@ -63,10 +63,11 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
-        padding: 16,
-        marginBottom: spacing.md,
+        padding: spacing.md,
+        borderRadius: 16,
+        marginBottom: 8,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        borderColor: colors.border,
     },
     header: {
         flexDirection: 'row',
@@ -76,8 +77,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
         paddingBottom: 12,
-        marginHorizontal: -16,
-        paddingHorizontal: 16,
+        marginHorizontal: -16, // Pull the border to edges
+        paddingHorizontal: 16, // Keep text and icon properly padded
     },
     title: {
         fontSize: 18,

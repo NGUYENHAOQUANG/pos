@@ -51,7 +51,15 @@ export const Tag: React.FC<TagProps> = ({ status, operation, label, style }) => 
 
     return (
         <View style={[styles.container, getStyle(), style]}>
-            <Text style={styles.text}>{getLabel()}</Text>
+            <Text
+                style={[
+                    styles.text,
+                    status === 'active' && styles.textGreen,
+                    status === 'preparing' && styles.textOrange,
+                ]}
+            >
+                {getLabel()}
+            </Text>
         </View>
     );
 };
@@ -60,22 +68,30 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.xs,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         alignSelf: 'flex-start',
         justifyContent: 'center',
         alignItems: 'center',
     },
     text: {
         fontSize: 14,
-        fontWeight: '400', // Regular weight as per image look
-        color: colors.white, // Always white text for these solid tags
+        fontWeight: '500',
+        color: colors.white,
     },
-    // Green - Đang hoạt động
     green: {
-        backgroundColor: colors.green[600], // Dark/Solid Green
+        backgroundColor: colors.green[25],
+        borderColor: colors.green[200],
+        borderWidth: 1,
     },
-    // Orange - Chuẩn bị
+    textGreen: {
+        color: colors.green[600],
+    },
     orange: {
-        backgroundColor: colors.orange[500], // Dark/Solid Orange (using 500 or 600 based on look, 500 seems closer to 'Chuẩn bị' yellow/orange)
+        backgroundColor: colors.yellow[25],
+        borderColor: colors.yellow[200],
+        borderWidth: 1,
+    },
+    textOrange: {
+        color: colors.yellow[600],
     },
 });

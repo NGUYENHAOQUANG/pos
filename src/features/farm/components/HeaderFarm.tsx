@@ -9,14 +9,12 @@ import {
     Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import {
     DropdownHeaderButton,
     DropDownHeaderItem,
 } from '@/shared/components/forms/DropdownHeaderButton';
-import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
-import { IconPond } from '@/assets/icons'; // Import new SVG
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
 import { PondType } from '@/features/farm/types/farm.types';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
@@ -129,30 +127,35 @@ export const HeaderFarm = ({
      * Layout: [Left Part (flex: 1)] [Right Part (auto)]
      */
     if (type === 'detail') {
-        return (
-            <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-                {/* Left Part: Back + Icon + Text */}
-                <View style={styles.detailLeftContainer}>
-                    <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <IconPond width={40} height={40} style={{ marginRight: spacing.sm }} />
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.pondName} numberOfLines={1} ellipsizeMode="tail">
-                            {title || '---'}
-                        </Text>
-                        <Text style={styles.pondArea}>{subtitle || '---'}</Text>
-                    </View>
-                </View>
+        const centerNode = (
+            <View style={styles.infoContainer}>
+                <Text style={styles.pondName} numberOfLines={1} ellipsizeMode="tail">
+                    {title || '---'}
+                </Text>
+                {subtitle && <Text style={styles.pondArea}>{subtitle}</Text>}
+            </View>
+        );
 
-                {/* Right Part: Tags + Menu */}
-                <View style={styles.detailRightContainer}>
-                    {status && <Tag status={status} style={styles.tag} />}
-                    {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
-                    <View ref={buttonRef} collapsable={false}>
-                        <ButtonHeader onPress={openMenu} style={styles.menuButtonDetail} />
-                    </View>
+        const rightNode = (
+            <View style={styles.detailRightContainer}>
+                {status && <Tag status={status} style={styles.tag} />}
+                {tagType && <PondTypeTag type={tagType} style={styles.tag} />}
+                <View ref={buttonRef} collapsable={false}>
+                    <MoreButton onPress={openMenu} style={styles.menuButtonDetail} />
                 </View>
+            </View>
+        );
+
+        return (
+            <>
+                <HeaderSection
+                    centerComponent={centerNode}
+                    titleAlign="left"
+                    rightComponent={rightNode}
+                    onBack={onBack}
+                    showBackButton={true}
+                    containerStyle={styles.detailHeaderContainer}
+                />
 
                 {menuOptions && menuOptions.length > 0 && (
                     <Modal
@@ -185,75 +188,74 @@ export const HeaderFarm = ({
                         </TouchableWithoutFeedback>
                     </Modal>
                 )}
-            </View>
+            </>
         );
     }
 
     /**
      * Render List Mode (Dropdown, Menu) - Default
      */
-    const listLeft = onSelect ? (
-        <View style={styles.listLeftContainer}>
-            <DropdownHeaderButton data={data} value={value} onSelect={onSelect} />
-        </View>
-    ) : undefined;
+    if (type === 'list') {
+        return (
+            <View style={[styles.listContainer, { paddingTop: insets.top + 12 }]}>
+                <Text style={styles.listTitle}>Trại nuôi</Text>
+                <View style={styles.dropdownRow}>
+                    <View style={styles.listLeftContainer}>
+                        <DropdownHeaderButton data={data} value={value} onSelect={onSelect} />
+                    </View>
+                    <View ref={buttonRef} collapsable={false}>
+                        <MoreButton onPress={onMenuPress || openMenu} />
+                    </View>
+                </View>
+            </View>
+        );
+    }
 
-    const listRight = <ButtonHeader onPress={onMenuPress} />;
-
-    return <HeaderSection leftComponent={listLeft} rightComponent={listRight} />;
+    // Default or simple modes
+    return (
+        <HeaderSection
+            leftComponent={
+                onSelect ? (
+                    <View style={styles.listLeftContainer}>
+                        <DropdownHeaderButton data={data} value={value} onSelect={onSelect} />
+                    </View>
+                ) : undefined
+            }
+            rightComponent={<MoreButton onPress={onMenuPress || openMenu} />}
+        />
+    );
 };
 
 const styles = StyleSheet.create({
     // --- List Mode Styles ---
-    container: {
+    listContainer: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        backgroundColor: 'transparent',
+    },
+    listTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: spacing.md,
+    },
+    dropdownRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        zIndex: 1000,
-        overflow: 'visible',
+    },
+    detailHeaderContainer: {
+        backgroundColor: 'transparent',
+        borderBottomWidth: 0,
     },
     listLeftContainer: {
         flexDirection: 'row',
     },
 
     // --- Detail Mode Styles ---
-    detailLeftContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: spacing.sm,
-    },
     detailRightContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.md,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.borderDark || colors.border,
-    },
-    iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.blue[50],
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: spacing.sm,
-    },
-    icon: {
-        width: 24,
-        height: 24,
     },
     infoContainer: {
         flex: 1,
@@ -266,7 +268,7 @@ const styles = StyleSheet.create({
     },
     pondArea: {
         fontSize: 12,
-        color: colors.text,
+        color: colors.textSecondary || colors.text, // Use textSecondary if available
     },
     detailRight: {
         // Keep for backward compatibility if used anywhere else

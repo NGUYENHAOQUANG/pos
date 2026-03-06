@@ -1,13 +1,20 @@
 import React, { useMemo, useState, useRef, useCallback } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HeaderDevices } from '@/features/control/components/HeaderDevices';
-import { HeaderCamLocation, FarmLocation } from '@/features/control/components/HeaderCamLocation';
+import { HeadingBar } from '@/shared/components/layout/HeadingBar';
+import {
+    DropdownHeaderButton,
+    DropDownHeaderItem,
+} from '@/shared/components/forms/DropdownHeaderButton';
+import { MoreButton } from '@/shared/components/buttons/MoreButton';
+
+import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
 import { HelpOptionsModal } from '../components/HelpOptionsModal';
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
@@ -20,6 +27,7 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
+    const insets = useSafeAreaInsets();
 
     // React Query Hooks (replacing farmStore fetchers)
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
@@ -47,6 +55,9 @@ export const DeviceControlScreens = () => {
         height: number;
     } | null>(null);
 
+    const [selectedAppTab, setSelectedAppTab] = useState('thiet-bi');
+    const moreButtonRef = useRef<View>(null);
+
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
 
@@ -56,14 +67,11 @@ export const DeviceControlScreens = () => {
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-        hasNextPage,
-        fetchNextPage,
-        isFetchingNextPage,
     } = usePondsByZone(selectedZoneId);
 
     // Flatten pagination data and ensure valid array
     const farmPonds = useMemo(() => {
-        if (!pondsData?.pages) {
+        if (!pondsData || pondsData.length === 0) {
             // Even if no API data, show Mock Demo Ponds
             return [
                 { id: 'IOT_POND', name: 'Ao IOT', status: 'Framing' },
@@ -73,10 +81,7 @@ export const DeviceControlScreens = () => {
             ];
         }
 
-        const apiPonds = pondsData.pages.reduce(
-            (acc, page) => [...acc, ...page.items],
-            [] as any[]
-        );
+        const apiPonds = pondsData;
 
         // Demo: Inject N001, N002, N003 if they don't exist
         const demoPonds = [
@@ -159,10 +164,7 @@ export const DeviceControlScreens = () => {
     // 3. Loading Ponds (React Query active)
     // 4. Manual Refetch or Network Reconnect (but not Load More)
     const showSkeleton =
-        isLoadingZones ||
-        !selectedFarm ||
-        isLoadingPonds ||
-        (!!isConnected && isRefetching && !isFetchingNextPage);
+        isLoadingZones || !selectedFarm || isLoadingPonds || (!!isConnected && isRefetching);
 
     const handleRefresh = async () => {
         await refetch();
@@ -226,26 +228,61 @@ export const DeviceControlScreens = () => {
     }, [filteredPonds]);
 
     const handleLoadMore = () => {
-        if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-        }
+        // No pagination logic needed for now
     };
 
     return (
         <View style={styles.container}>
-            {true && (
-                <HeaderCamLocation
-                    locations={farmLocations.length > 0 ? farmLocations : undefined}
-                    selectedLocation={selectedFarm}
-                    onLocationSelect={loc => setSelectedZoneId(loc.id)}
-                    onHelpPress={handleHelpPress}
-                />
-            )}
-            <HeaderDevices
-                title="Điều Khiển Thiết Bị"
-                showBackButton={false}
-                includeSafeArea={false}
+            <View style={[styles.headerContainer, { paddingTop: insets.top + 12 }]}>
+                <Text style={styles.headerTitle}>Điều Khiển Thiết Bị</Text>
+            </View>
+            <HeadingBar
+                tabs={[
+                    { key: 'thiet-bi', label: 'Thiết bị' },
+                    { key: 'camera', label: 'Camera' },
+                ]}
+                selectedTab={selectedAppTab}
+                onTabSelect={setSelectedAppTab}
+                flexTabs={true}
+                containerStyle={styles.headingBarContainer}
             />
+            <View style={styles.filterRow}>
+                <View style={styles.dropdownStyle}>
+                    <DropdownHeaderButton
+                        data={farmLocations.map(loc => ({
+                            id: loc.id,
+                            label: loc.name,
+                            value: loc,
+                        }))}
+                        value={
+                            selectedFarm
+                                ? {
+                                      id: selectedFarm.id,
+                                      label: selectedFarm.name,
+                                      value: selectedFarm,
+                                  }
+                                : undefined
+                        }
+                        onSelect={(item: DropDownHeaderItem) => {
+                            if (item.value) {
+                                setSelectedZoneId(item.value.id);
+                            }
+                        }}
+                        showIcon={true}
+                        height={40}
+                        borderRadius={12}
+                    />
+                </View>
+                <View ref={moreButtonRef} collapsable={false}>
+                    <MoreButton
+                        onPress={() => {
+                            moreButtonRef.current?.measureInWindow((x, y, width, height) => {
+                                handleHelpPress({ x, y, width, height });
+                            });
+                        }}
+                    />
+                </View>
+            </View>
             {showSkeleton ? (
                 <DeviceControlSkeleton />
             ) : (
@@ -313,6 +350,29 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
+    headerContainer: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        backgroundColor: 'transparent',
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: colors.text,
+    },
+    headingBarContainer: {
+        marginBottom: 16,
+    },
+    filterRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        marginBottom: 16,
+        gap: 12, // React Native >= 0.71 supports gap
+    },
+    dropdownStyle: {
+        flex: 1,
+    },
     content: {
         flex: 1,
     },
@@ -321,7 +381,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     scrollContentPadding: {
-        paddingTop: 16,
+        paddingTop: 0,
     },
     spacer: {
         height: 16,

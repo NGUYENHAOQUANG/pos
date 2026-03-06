@@ -15,8 +15,8 @@ const StatusSkeleton = () => {
             {Array.from({ length: 4 }).map((_, index) => (
                 <React.Fragment key={index}>
                     <View style={styles.statusItem}>
-                        <Skeleton width={30} height={24} style={{ marginBottom: 4 }} />
-                        <Skeleton width={50} height={14} />
+                        <Skeleton width={50} height={14} style={{ marginBottom: 8 }} />
+                        <Skeleton width={30} height={24} />
                     </View>
                     {/* Add spacer between items, except the last one */}
                     {index < 3 && <View style={styles.statusSpacer} />}
@@ -31,32 +31,35 @@ const StatusSkeleton = () => {
  */
 const PondCardSkeletonItem = () => {
     return (
-        <View style={styles.cardContainer}>
+        <View style={styles.cardWrapper}>
             {/* Header: Pond Name + Detail Button */}
             <View style={styles.cardHeader}>
                 <Skeleton width={80} height={24} style={{ borderRadius: 4 }} />
-                <Skeleton width={90} height={32} style={{ borderRadius: 8 }} />
+                <Skeleton width={90} height={32} style={{ borderRadius: 20 }} />
             </View>
 
-            {/* Devices Grid: 4 items */}
-            <View style={styles.devicesGrid}>
-                {Array.from({ length: 4 }).map((_, index) => (
-                    <View key={index} style={styles.deviceItem}>
-                        {/* Device Icon Circle/Square */}
-                        <Skeleton
-                            width={48}
-                            height={48}
-                            style={{ marginBottom: 12, borderRadius: 24 }}
-                        />
+            {/* Devices Container Wrapper */}
+            <View style={styles.devicesCardContainer}>
+                {/* Devices Grid: 4 items */}
+                <View style={styles.devicesGrid}>
+                    {Array.from({ length: 4 }).map((_, index) => (
+                        <View key={index} style={styles.deviceItem}>
+                            {/* Device Icon Circle/Square */}
+                            <Skeleton
+                                width={48}
+                                height={48}
+                                style={{ marginBottom: 12, borderRadius: 24 }}
+                            />
 
-                        {/* Status Lines (Power, Warning, Error) */}
-                        <View style={{ gap: 6, alignItems: 'center' }}>
-                            <Skeleton width={40} height={12} />
-                            <Skeleton width={40} height={12} />
-                            <Skeleton width={40} height={12} />
+                            {/* Status Lines (Power, Warning, Error) */}
+                            <View style={{ gap: 6, alignItems: 'center' }}>
+                                <Skeleton width={40} height={12} />
+                                <Skeleton width={40} height={12} />
+                                <Skeleton width={40} height={12} />
+                            </View>
                         </View>
-                    </View>
-                ))}
+                    ))}
+                </View>
             </View>
         </View>
     );
@@ -85,22 +88,20 @@ const styles = StyleSheet.create({
     // Status Styles
     statusContainer: {
         flexDirection: 'row',
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 12,
+        backgroundColor: 'transparent',
         marginHorizontal: 16,
-        marginTop: 16,
         marginBottom: 16,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
     },
     statusItem: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         paddingVertical: 12,
-        backgroundColor: colors.backgroundSecondary,
-        borderRadius: 8,
+        paddingHorizontal: 12,
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        borderColor: colors.defaultBorder,
+        borderWidth: 1,
     },
     statusSpacer: {
         width: 8,
@@ -110,23 +111,22 @@ const styles = StyleSheet.create({
     listContainer: {
         paddingBottom: 16,
     },
-    cardContainer: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
+    cardWrapper: {
         marginHorizontal: 16,
-        marginBottom: 16,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
+        marginBottom: 24,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
-        paddingBottom: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        marginBottom: 12,
+    },
+    devicesCardContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 16,
+        borderColor: colors.defaultBorder,
+        borderWidth: 1,
     },
     devicesGrid: {
         flexDirection: 'row',
