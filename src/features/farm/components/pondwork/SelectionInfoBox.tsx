@@ -35,6 +35,7 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
 const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
+        marginHorizontal: 16,
         marginTop: 12,
         borderWidth: 1,
         borderColor: colors.border,

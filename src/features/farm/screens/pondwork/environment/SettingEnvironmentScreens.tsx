@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CompositeNavigationProp } from '@react-navigation/native';
 
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
@@ -162,10 +162,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     dropdownContainer: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.md,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
         backgroundColor: colors.white,
-        paddingBottom: spacing.sm,
+        marginHorizontal: 16,
+        marginTop: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
     },
     label: {
         fontSize: 14,
