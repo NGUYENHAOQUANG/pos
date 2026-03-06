@@ -120,13 +120,11 @@ export const ExportWarehouseReceiptCard: React.FC<ExportWarehouseReceiptCardProp
 
                 {/* Farm Info - Visible when Expanded */}
                 {isExpanded && (
-                    <View style={styles.row}>
-                        <DetailRow
-                            label="Ao yêu cầu:"
-                            value={item.pondName || item.warehouseName || '---'}
-                            style={{ marginTop: 12 }}
-                        />
-                    </View>
+                    <DetailRow
+                        label="Ao yêu cầu:"
+                        value={item.pondName || item.warehouseName || '---'}
+                        style={{ marginTop: 12 }}
+                    />
                 )}
 
                 {/* Edit Button (Only for Draft or if status is undefined/Draft-like) */}

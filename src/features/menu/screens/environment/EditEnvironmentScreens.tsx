@@ -158,6 +158,8 @@ const styles = StyleSheet.create({
     },
     resetButton: {
         borderColor: colors.primary,
+        flex: 1,
+        minWidth: 0,
     },
     resetButtonText: {
         color: colors.primary,

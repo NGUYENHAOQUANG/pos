@@ -5,6 +5,7 @@ import { colors, spacing, typography, borderRadius } from '@/styles';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
+import { Checkbox } from '@/shared/components/forms/Checkbox';
 
 interface FeaturePermissionsProps {
     managementLevel: 'farm' | 'pond';
@@ -149,32 +150,14 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                             <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
                             <RequiredDot />
                         </View>
-                        <TouchableOpacity
-                            style={styles.checkboxRow}
-                            onPress={toggleAll}
-                            activeOpacity={0.8}
+                        <Checkbox
+                            label="Chọn tất cả"
+                            checked={isAllSelected}
+                            onToggle={toggleAll}
                             disabled={disabled}
-                        >
-                            <View
-                                style={[
-                                    styles.checkbox,
-                                    isAllSelected && styles.checkboxChecked,
-                                    disabled && styles.checkboxDisabled,
-                                ]}
-                            >
-                                {isAllSelected && (
-                                    <Ionicons name="checkmark" size={14} color={colors.white} />
-                                )}
-                            </View>
-                            <Text
-                                style={[
-                                    styles.checkboxText,
-                                    disabled && { color: colors.textSecondary },
-                                ]}
-                            >
-                                Chọn tất cả
-                            </Text>
-                        </TouchableOpacity>
+                            labelStyle={styles.checkboxText}
+                            //activeColor={colors.primaryOrange}
+                        />
                     </View>
 
                     <View style={styles.permissionsList}>
@@ -186,37 +169,16 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                         }).map(permission => {
                             const isSelected = selectedPermissions.includes(permission.id);
                             return (
-                                <TouchableOpacity
+                                <Checkbox
                                     key={permission.id}
-                                    style={styles.permissionItem}
-                                    onPress={() => togglePermission(permission.id)}
-                                    activeOpacity={0.8}
+                                    label={permission.label}
+                                    checked={isSelected}
+                                    onToggle={() => togglePermission(permission.id)}
                                     disabled={disabled}
-                                >
-                                    <View
-                                        style={[
-                                            styles.checkbox,
-                                            isSelected && styles.checkboxChecked,
-                                            disabled && styles.checkboxDisabled,
-                                        ]}
-                                    >
-                                        {isSelected && (
-                                            <Ionicons
-                                                name="checkmark"
-                                                size={14}
-                                                color={colors.white}
-                                            />
-                                        )}
-                                    </View>
-                                    <Text
-                                        style={[
-                                            styles.permissionText,
-                                            disabled && { color: colors.textSecondary },
-                                        ]}
-                                    >
-                                        {permission.label}
-                                    </Text>
-                                </TouchableOpacity>
+                                    style={styles.permissionItem}
+                                    labelStyle={styles.permissionText}
+                                    //activeColor={colors.primaryOrange}
+                                />
                             );
                         })}
                     </View>
@@ -248,10 +210,6 @@ const styles = StyleSheet.create({
     disabledContent: {
         // opacity: 0.7, // Removed to ensure headers are dark
     },
-    checkboxDisabled: {
-        borderColor: colors.border,
-        backgroundColor: colors.gray[100],
-    },
     section: {
         marginBottom: spacing.md,
     },
@@ -280,11 +238,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '400',
     },
-    checkboxRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-    },
     checkboxText: {
         fontSize: 16,
         color: colors.text,
@@ -293,27 +246,11 @@ const styles = StyleSheet.create({
         gap: spacing.md,
     },
     permissionItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
+        flex: 1,
     },
     permissionText: {
         fontSize: 14,
         color: colors.text,
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-        borderWidth: 1.5,
-        borderColor: colors.border,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-    },
-    checkboxChecked: {
-        backgroundColor: colors.primary,
-        borderColor: colors.primary,
     },
     selectedUnitsList: {
         gap: spacing.sm,

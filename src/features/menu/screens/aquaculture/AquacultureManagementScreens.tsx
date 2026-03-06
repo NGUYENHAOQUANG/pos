@@ -152,7 +152,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                 onBack={handleGoBack}
                 rightAction={
                     <TouchableOpacity style={styles.addButton} onPress={handleAddNavigate}>
-                        <Ionicons name="add" size={24} color={colors.primary} />
+                        <Ionicons name="add" size={24} color={colors.text} />
                     </TouchableOpacity>
                 }
             />
@@ -182,7 +182,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                             <RefreshControl refreshing={isPulling} onRefresh={onRefresh} />
                         }
                     >
-                        <View style={styles.cardContainer}>
+                        <View>
                             <EmptyStateCard
                                 message="Chưa có vụ nuôi nào"
                                 buttonTitle="Tạo vụ nuôi"
@@ -200,7 +200,7 @@ export const AquacultureManagementScreens: React.FC = () => {
                         renderItem={renderItem}
                         contentContainerStyle={styles.listContent}
                         ListEmptyComponent={
-                            <View style={styles.cardContainer}>
+                            <View>
                                 <EmptyStateCard
                                     message="Chưa có vụ nuôi nào"
                                     buttonTitle="Tạo vụ nuôi"
@@ -236,19 +236,14 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
         zIndex: 100,
     },
-    cardContainer: {
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        margin: spacing.md,
-    },
     addButton: {
         width: 40,
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
     },
     listContent: {
