@@ -5,8 +5,8 @@ import {
     ViewStyle,
     TextStyle,
     View,
-    TouchableOpacity,
     StyleProp,
+    TouchableOpacity,
 } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
