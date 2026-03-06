@@ -114,8 +114,8 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
                         title="Kiểm tra lại"
                         onPress={onResetPress}
                         variant="outline"
-                        style={styles.flexButton}
-                        textStyle={{ color: colors.text }}
+                        style={[styles.flexButton, { borderColor: colors.border }]}
+                        textStyle={{ color: colors.textSecondary }}
                     />
                     <Button
                         title="Lấy kết quả này"

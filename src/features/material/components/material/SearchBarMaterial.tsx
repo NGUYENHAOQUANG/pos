@@ -155,7 +155,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     onPress={handleToggleExpand}
                 >
                     <Ionicons
-                        name="ellipsis-vertical"
+                        name="ellipsis-horizontal"
                         size={20}
                         color={isExpanded ? colors.primary : colors.text}
                     />
