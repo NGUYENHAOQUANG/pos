@@ -127,12 +127,9 @@ export default function ActivitySchedule({
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
-        padding: 16,
-        marginTop: 8,
-        marginHorizontal: 16,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 12,
+        borderRadius: 16,
     },
     headerTitle: {
         fontSize: 16,
