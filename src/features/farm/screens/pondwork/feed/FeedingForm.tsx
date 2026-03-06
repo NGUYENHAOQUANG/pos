@@ -239,6 +239,12 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 12,
     },
+    fullWidthDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+        marginBottom: 16,
+    },
     radioGroup: {
         flexDirection: 'row',
         gap: 24,
