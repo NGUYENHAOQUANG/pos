@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
     },
     title: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         lineHeight: 22,
         color: colors.text,
         flex: 1,

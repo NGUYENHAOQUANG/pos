@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, RequiredDot } from '@/shared/components/forms/Input';
 
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
@@ -111,53 +111,47 @@ const StockingInfoSection: React.FC<Props> = ({
             />
 
             <View style={styles.inputsWrapper}>
-                <View style={styles.row}>
-                    <View style={styles.col65}>
-                        <Controller
-                            control={control}
-                            name="stockingQuantity"
-                            render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                <View>
-                                    <Text style={styles.label}>
-                                        <Text style={styles.required}>* </Text>
-                                        Tổng số lượng thả (PLs)
-                                    </Text>
-                                    <Input
-                                        placeholder="Vd: 200.000"
-                                        keyboardType="numeric"
-                                        value={value || ''}
-                                        onChangeText={text => onChange(text.slice(0, 10))}
-                                    />
-                                    {error && <Text style={styles.errorText}>{error.message}</Text>}
-                                </View>
-                            )}
-                        />
-                    </View>
-                    <View style={styles.col35}>
-                        <Controller
-                            control={control}
-                            name="age"
-                            render={({ field: { onChange, value }, fieldState: { error } }) => (
-                                <View>
-                                    <Text
-                                        style={styles.label}
-                                        numberOfLines={1}
-                                        adjustsFontSizeToFit
-                                    >
-                                        <Text style={styles.required}>* </Text>Ngày tuổi (PLs)
-                                    </Text>
-                                    <Input
-                                        placeholder="Vd: 10"
-                                        keyboardType="numeric"
-                                        value={value || ''}
-                                        onChangeText={onChange}
-                                    />
-                                    {error && <Text style={styles.errorText}>{error.message}</Text>}
-                                </View>
-                            )}
-                        />
-                    </View>
-                </View>
+                <Controller
+                    control={control}
+                    name="stockingQuantity"
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                        <View style={styles.fieldGroup}>
+                            <View style={styles.labelWrapper}>
+                                <Text style={styles.label}>Tổng số lượng thả (PLs)</Text>
+                                <RequiredDot />
+                            </View>
+                            <Input
+                                containerStyle={{ marginBottom: 0 }}
+                                placeholder="Vd: 200.000"
+                                keyboardType="numeric"
+                                value={value || ''}
+                                onChangeText={text => onChange(text.slice(0, 10))}
+                            />
+                            {error && <Text style={styles.errorText}>{error.message}</Text>}
+                        </View>
+                    )}
+                />
+
+                <Controller
+                    control={control}
+                    name="age"
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                        <View style={styles.fieldGroup}>
+                            <View style={styles.labelWrapper}>
+                                <Text style={styles.label}>Ngày tuổi (PLs)</Text>
+                                <RequiredDot />
+                            </View>
+                            <Input
+                                containerStyle={{ marginBottom: 0 }}
+                                placeholder="Vd: 10"
+                                keyboardType="numeric"
+                                value={value || ''}
+                                onChangeText={onChange}
+                            />
+                            {error && <Text style={styles.errorText}>{error.message}</Text>}
+                        </View>
+                    )}
+                />
 
                 <TouchableOpacity style={styles.aiButton} onPress={onPressCountingShrimp}>
                     <Text style={styles.aiButtonText}>Kiểm đếm tôm giống bằng AI</Text>
@@ -171,33 +165,26 @@ export default StockingInfoSection;
 
 const styles = StyleSheet.create({
     inputsWrapper: {
-        gap: 6,
+        gap: spacing.md,
     },
-    row: {
+    fieldGroup: {
+        gap: 4,
+    },
+    labelWrapper: {
         flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    col65: {
-        flex: 0.65,
-    },
-    col35: {
-        flex: 0.35,
+        alignItems: 'center',
     },
     label: {
         fontSize: 14,
+        fontWeight: '400',
         color: colors.text,
-        marginBottom: spacing.sm,
         lineHeight: 22,
         includeFontPadding: false,
         textAlignVertical: 'center',
     },
-    required: {
-        color: colors.error,
-    },
     errorText: {
         color: colors.error,
         fontSize: 12,
-        marginTop: 4,
     },
     aiButton: {
         backgroundColor: colors.blue[50],

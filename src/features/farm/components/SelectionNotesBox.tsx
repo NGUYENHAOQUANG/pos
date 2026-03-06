@@ -54,14 +54,14 @@ export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onN
 
 const styles = StyleSheet.create({
     textArea: {
-        minHeight: 80,
+        minHeight: 104,
         maxHeight: 160,
         paddingVertical: 8,
         paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 6,
+        borderRadius: 8,
         fontSize: 14,
         fontWeight: '400',
         lineHeight: 24,
