@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface WarehouseFooterProps {
     safeBottom: number;
@@ -24,19 +24,13 @@ export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
                 <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
             </View>
             <View style={styles.buttonRow}>
-                <OutlineButton
-                    label="Lưu Nháp"
-                    onPress={onSaveDraft}
-                    style={styles.draftButton}
-                    labelStyle={styles.draftButtonText}
-                />
-                <View style={{ width: spacing.md }} />
-                <OutlineButton
-                    label="Gửi Phiếu"
-                    onPress={onSubmit}
-                    style={styles.submitButton}
-                    labelStyle={styles.submitButtonText}
-                />
+                <View style={styles.buttonWrapper}>
+                    <Button title="Lưu Nháp" variant="outline" onPress={onSaveDraft} />
+                </View>
+                <View style={styles.buttonSpacer} />
+                <View style={styles.buttonWrapper}>
+                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                </View>
             </View>
         </View>
     );
@@ -69,25 +63,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    draftButton: {
+    buttonWrapper: {
         flex: 1,
-        height: 40,
-        borderColor: colors.border,
     },
-    draftButtonText: {
-        fontSize: 16,
-        fontWeight: '500',
-        color: colors.text,
-    },
-    submitButton: {
-        flex: 1,
-        height: 40,
-        backgroundColor: colors.blue[600],
-        borderColor: colors.blue[600],
-    },
-    submitButtonText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.white,
+    buttonSpacer: {
+        width: spacing.md,
     },
 });
