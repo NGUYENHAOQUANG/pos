@@ -34,12 +34,12 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 8,
+        paddingHorizontal: 12,
         borderRadius: 4,
     },
     label: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
         flex: 1,
         marginRight: 12,
     },
@@ -48,10 +48,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexShrink: 0,
         maxWidth: '50%',
+        justifyContent: 'flex-end',
     },
     value: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
         color: colors.text,
         textAlign: 'right',
         lineHeight: 22,

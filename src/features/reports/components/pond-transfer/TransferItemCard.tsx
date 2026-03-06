@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/styles';
+import { colors, typography } from '@/styles';
+import ArrowIcon from '@/assets/Icon/IconReport/Arrow.svg';
 
 export interface TransferData {
     id: string;
@@ -35,31 +36,37 @@ export const TransferItemCard = ({ item }: Props) => {
         setExpanded(!expanded);
     };
 
-    const renderRow = (label: string, value: string) => (
+    const renderRow = (label: string, value: string, unit?: string) => (
         <View style={styles.row}>
             <Text style={styles.label}>{label}:</Text>
-            <Text style={styles.value}>{value}</Text>
+            <View style={styles.valueContainer}>
+                <Text style={styles.value}>{value}</Text>
+                {unit ? <Text style={styles.valueUnit}>{unit}</Text> : null}
+            </View>
         </View>
     );
 
     return (
         <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-                <Text style={styles.bold}>Ao gốc: </Text>
-                {item.sourcePond} -<Text style={styles.bold}> Ao sang: </Text>
-                {item.targetPond}
-            </Text>
-            <Text style={styles.cardSubtitle}>
-                <Text style={styles.bold}>Ngày sang:</Text> {item.transferDate} -
-                <Text style={styles.bold}> Ngày nuôi (DOC): </Text>
-                {item.doc}
-            </Text>
+            {/* Top summary row */}
+            <View style={styles.topRow}>
+                <Text style={styles.pondCode}>{item.sourcePond}</Text>
+                <View style={styles.centerInfo}>
+                    <Text style={styles.centerLineText}>Ngày sang: {item.transferDate}</Text>
+                    <View style={styles.centerDivider}>
+                        <ArrowIcon width={120} height={6} />
+                    </View>
+                    <Text style={styles.centerLineText}>Ngày nuôi (DOC): {item.doc}</Text>
+                </View>
+                <Text style={[styles.pondCode, styles.targetPondCode]}>{item.targetPond}</Text>
+            </View>
 
             <View style={styles.divider} />
 
+            {/* Main content */}
             <View style={styles.content}>
-                {renderRow('Lượng sang (con)', item.amount)}
-                {renderRow('Cỡ tôm (con/kg)', item.size)}
+                {renderRow('Lượng sang (con)', item.amount, 'con/kg')}
+                {renderRow('Cỡ tôm (con/kg)', item.size, 'con/kg')}
 
                 {expanded && (
                     <View style={styles.expandedContent}>
@@ -75,7 +82,7 @@ export const TransferItemCard = ({ item }: Props) => {
                 <Ionicons
                     name={expanded ? 'chevron-up' : 'chevron-down'}
                     size={16}
-                    color={colors.primary}
+                    color={colors.orange[600]}
                 />
             </TouchableOpacity>
         </View>
@@ -85,23 +92,40 @@ export const TransferItemCard = ({ item }: Props) => {
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 16,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 10,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.borderLight,
     },
-    cardTitle: {
-        fontSize: 14,
-        color: colors.text,
-        marginBottom: 4,
+    topRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 12,
     },
-    bold: {
+    pondCode: {
+        fontSize: 18,
         fontWeight: '700',
-    },
-    cardSubtitle: {
-        fontSize: 13,
         color: colors.text,
-        marginBottom: 8,
+    },
+    targetPondCode: {
+        textAlign: 'right',
+    },
+    centerInfo: {
+        flex: 1,
+        marginHorizontal: 12,
+        alignItems: 'center',
+    },
+    centerLineText: {
+        fontSize: typography.fontSize.sm,
+        color: colors.textSecondary,
+        fontFamily: typography.fontFamily.regular,
+        fontWeight: typography.fontWeight.regular,
+    },
+    centerDivider: {
+        marginVertical: 6,
     },
     divider: {
         height: 1,
@@ -121,15 +145,24 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'flex-start',
     },
+    valueContainer: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 4,
+    },
     label: {
         fontSize: 14,
-        fontWeight: '700',
+        fontWeight: '500',
         color: colors.text,
     },
     value: {
         fontSize: 14,
-        color: colors.textSecondary,
+        fontWeight: '500',
         textAlign: 'right',
+    },
+    valueUnit: {
+        fontSize: 12,
+        color: colors.textSecondary,
     },
     expandBtn: {
         flexDirection: 'row',
@@ -139,8 +172,8 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     expandText: {
-        fontSize: 13,
-        color: colors.primary,
+        fontSize: 14,
+        color: colors.orange[600],
         fontWeight: '500',
     },
 });

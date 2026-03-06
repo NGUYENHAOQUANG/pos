@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
-import Svg, { Path, Line, Circle, G } from 'react-native-svg';
+import Svg, { Path, Line } from 'react-native-svg';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';
 import * as shape from 'd3-shape';
@@ -107,9 +107,8 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
     const savedTranslateX = useSharedValue(0);
 
     // Derived dimensions
-    const density = 20; // Increased spacing for 3-day interval
-    const axisWidth = 30;
-    const chartAreaWidth = Math.max(0, layout.width - axisWidth * 2);
+    const density = 8;
+    const chartAreaWidth = Math.max(0, layout.width);
 
     const pointsCount = seriesData[0]?.data.length || 0;
     const contentWidth = Math.max(chartAreaWidth, pointsCount * density);
@@ -177,44 +176,39 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
 
     const scaleX = scaleTime({
         domain: [minDate, maxDate],
-        range: [20, contentWidth - 20],
+        range: [60, contentWidth],
     });
 
-    // Custom Y-Axis Logic
+    // Custom Y-Axis Logic - Always show exactly 6 ticks
+    const TICK_COUNT = 6;
+    const vals = allPoints.map(d => d.value);
     let yDomain = [0, 10];
     let yTicks: number[] = [0, 2, 4, 6, 8, 10];
 
-    // Step Configuration
-    const stepMap: Record<string, number> = {
-        pH: 0.2,
-        DO: 0.2,
-        'Nhiệt độ': 2,
-        'Độ kiềm': 10,
-        'Độ trong': 2,
-        'Độ mặn': 2,
-    };
-
-    const vals = allPoints.map(d => d.value);
     if (vals.length > 0) {
-        let minValRaw = Math.min(...vals);
-        let maxValRaw = Math.max(...vals);
+        const minVal = Math.min(...vals);
+        const maxVal = Math.max(...vals);
 
-        const step = stepMap[selected] || 1;
+        // Calculate a nice step that produces exactly 6 ticks (5 intervals)
+        const rawRange = maxVal - minVal;
+        const rawStep = rawRange / (TICK_COUNT - 1);
 
-        // Round min down and max up to nearest step
-        let start = Math.floor(minValRaw / step) * step;
-        let end = Math.ceil(maxValRaw / step) * step;
+        // Round step up to a "nice" number
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+        const normalized = rawStep / magnitude;
+        let niceStep: number;
+        if (normalized <= 1) niceStep = 1 * magnitude;
+        else if (normalized <= 2) niceStep = 2 * magnitude;
+        else if (normalized <= 5) niceStep = 5 * magnitude;
+        else niceStep = 10 * magnitude;
 
-        // Safety: if start == end (flat line), expand
-        if (start === end) {
-            start -= step;
-            end += step;
-        }
+        // Round start down and generate exactly 6 ticks
+        const start = Math.floor(minVal / niceStep) * niceStep;
 
         yTicks = [];
-        // Use epsilon to avoid floating point issues
-        for (let v = start; v < end + step * 0.5; v += step) {
-            yTicks.push(v);
+        for (let i = 0; i < TICK_COUNT; i++) {
+            const v = start + i * niceStep;
+            yTicks.push(Math.round(v * 100) / 100);
         }
 
         yDomain = [yTicks[0], yTicks[yTicks.length - 1]];
@@ -253,24 +247,6 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
         );
     };
 
-    const RenderDotSeries = ({ data, color }: { data: DataPoint[]; color: string }) => {
-        return (
-            <G>
-                {data.map((d, i) => (
-                    <Circle
-                        key={i}
-                        cx={scaleX(d.date)}
-                        cy={scaleY(d.value)}
-                        r={2.5}
-                        fill={color}
-                        stroke={colors.white}
-                        strokeWidth={0.5}
-                    />
-                ))}
-            </G>
-        );
-    };
-
     const onLayout = (event: LayoutChangeEvent) => {
         setLayout(event.nativeEvent.layout);
     };
@@ -295,8 +271,8 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
 
     return (
         <GestureHandlerRootView style={styles.container} onLayout={onLayout}>
-            {/* Y Axis Labels (Fixed) */}
-            <View style={styles.yAxisContainer} pointerEvents="none">
+            {/* Y Axis Labels (Absolute overlay) */}
+            <View style={styles.yAxisOverlay} pointerEvents="none">
                 {yTicks.map((val, i) => (
                     <Text
                         key={i}
@@ -313,21 +289,7 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                         <Animated.View style={[styles.chartContent, scrollStyle]}>
                             <View>
                                 <Svg width={contentWidth} height={height}>
-                                    {/* Vertical Grid Lines - Every 3 days */}
-                                    {xTicks.map((d, i) => {
-                                        if (i % 3 !== 0) return null;
-                                        return (
-                                            <Line
-                                                key={`v-${i}`}
-                                                x1={scaleX(d.date)}
-                                                y1={0}
-                                                x2={scaleX(d.date)}
-                                                y2={height - 30}
-                                                stroke={colors.borderDark}
-                                                strokeWidth={0.5}
-                                            />
-                                        );
-                                    })}
+                                    {/* Vertical Grid Lines removed */}
                                     {/* Horizontal Grid Lines */}
                                     {yTicks.map((v, i) => (
                                         <Line
@@ -354,23 +316,7 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                             </View>
 
                             {/* Dots */}
-                            <View
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    { width: contentWidth, height: height },
-                                ]}
-                                pointerEvents="none"
-                            >
-                                <Svg width={contentWidth} height={height}>
-                                    {seriesData.map(series => (
-                                        <RenderDotSeries
-                                            key={series.pond}
-                                            data={series.data}
-                                            color={POND_COLORS[series.pond] || '#999'}
-                                        />
-                                    ))}
-                                </Svg>
-                            </View>
+                            {/* Dots removed */}
 
                             {/* Text Label Container */}
                             <View
@@ -385,7 +331,7 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                                 pointerEvents="none"
                             >
                                 {xTicks.map((d, i) => {
-                                    if (i % 3 !== 0) return null;
+                                    if (i % 7 !== 0) return null;
                                     return (
                                         <AnimatedLabel
                                             key={`l-${i}`}
@@ -409,8 +355,6 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                     </View>
                 </GestureDetector>
             </View>
-            {/* Right Axis Mask */}
-            <View style={styles.yAxisContainer} pointerEvents="none" />
         </GestureHandlerRootView>
     );
 }
@@ -421,11 +365,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: colors.white,
     },
-    yAxisContainer: {
+    yAxisOverlay: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
         width: 30,
         height: '100%',
         zIndex: 10,
-        backgroundColor: `${colors.white}E6`,
+        backgroundColor: colors.white,
     },
     chartArea: {
         flex: 1,

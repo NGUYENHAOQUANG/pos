@@ -12,6 +12,7 @@ interface PondData {
 
 interface PondIndexProps {
     data?: PondData[];
+    isEqualWidth?: boolean;
 }
 
 const DEFAULT_DATA: PondData[] = [
@@ -24,7 +25,7 @@ const DEFAULT_DATA: PondData[] = [
     { id: '7', name: 'V04', value: '{chỉ số}', color: colors.yellow[800] },
 ];
 
-export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {
+export const PondIndex = ({ data = DEFAULT_DATA, isEqualWidth }: PondIndexProps) => {
     const parseValueAndUnit = (value: string): { value: string; unit: string } => {
         const firstSpace = value.indexOf(' ');
         if (firstSpace === -1) return { value, unit: '' };
@@ -38,13 +39,16 @@ export const PondIndex = ({ data = DEFAULT_DATA }: PondIndexProps) => {
         <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+                styles.scrollContent,
+                isEqualWidth && styles.scrollContentEqual,
+            ]}
             style={styles.scrollView}
         >
             {data.map(item => {
                 const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
                 return (
-                    <View key={item.id} style={styles.card}>
+                    <View key={item.id} style={[styles.card, isEqualWidth && styles.cardEqual]}>
                         <View style={[styles.indicator, { backgroundColor: item.color }]} />
                         <Text style={styles.title} numberOfLines={1}>
                             {item.name}
@@ -68,7 +72,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        paddingHorizontal: 16,
         paddingVertical: 12,
     },
     card: {
@@ -80,6 +83,13 @@ const styles = StyleSheet.create({
         paddingTop: 8,
         paddingBottom: 12,
         backgroundColor: colors.white,
+    },
+    scrollContentEqual: {
+        width: '100%',
+        justifyContent: 'space-between',
+    },
+    cardEqual: {
+        flex: 1,
     },
     indicator: {
         width: 20,

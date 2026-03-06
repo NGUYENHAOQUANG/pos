@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { borderRadius, colors } from '@/styles';
 import { typography } from '@/styles/typography';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import CostChart from './CostChart';
-import BottomCostChart from './BottomCostChart';
 import { COST_DATA } from './costChartData';
 
 import { Loading } from '@/shared/components/ui/Loading';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import CostChartIcon from '@/assets/Icon/IconReport/CostChartIcon.svg';
+import { PondIndexCard } from '../env-chart/PondIndexCard';
 const CompilationCostChart = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -42,18 +42,23 @@ const CompilationCostChart = () => {
                         <>
                             {/* Stats Header */}
                             <View style={styles.statsContainer}>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statLabel}>Thức ăn</Text>
-                                    <Text style={styles.statValue}>38.91 tấn</Text>
-                                </View>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statLabel}>Chi phí</Text>
-                                    <Text style={styles.statValue}>2.24 tỉ</Text>
-                                </View>
-                                <View style={styles.statItem}>
-                                    <Text style={styles.statLabel}>FCR</Text>
-                                    <Text style={styles.statValue}>1.37</Text>
-                                </View>
+                                <PondIndexCard
+                                    variant="prodSummary"
+                                    item={{
+                                        id: '1',
+                                        name: 'Thức ăn',
+                                        value: '38.91 tấn',
+                                        color: '',
+                                    }}
+                                />
+                                <PondIndexCard
+                                    variant="prodSummary"
+                                    item={{ id: '2', name: 'Chi phí', value: '2.24 tỉ', color: '' }}
+                                />
+                                <PondIndexCard
+                                    variant="prodSummary"
+                                    item={{ id: '3', name: 'FCR', value: '1.37', color: '' }}
+                                />
                             </View>
 
                             {/* Chart */}
@@ -65,9 +70,9 @@ const CompilationCostChart = () => {
                             <View style={styles.divider} />
 
                             {/* Legend */}
-                            <View style={styles.excludeContainer}>
+                            {/* <View style={styles.excludeContainer}>
                                 <BottomCostChart data={COST_DATA} />
-                            </View>
+                            </View> */}
                         </>
                     )}
                 </View>
@@ -97,21 +102,9 @@ const styles = StyleSheet.create({
     },
     statsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
         paddingVertical: 16,
-    },
-    statItem: {
-        alignItems: 'center',
-    },
-    statLabel: {
-        fontSize: typography.fontSize.xs,
-        color: colors.textSecondary,
-        marginBottom: 4,
-    },
-    statValue: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.bold,
-        color: colors.black,
+        paddingHorizontal: 16,
+        gap: 8,
     },
     chartContainer: {
         alignItems: 'center',
