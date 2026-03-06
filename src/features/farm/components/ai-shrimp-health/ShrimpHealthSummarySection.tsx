@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import {
     HealthCheckItem,
     HealthCheckResult,
@@ -22,160 +21,144 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
     onShowDetailsPress,
 }) => {
     return (
-        <>
+        <View style={styles.container}>
             {/* Total Count */}
-            <View>
-                <View style={styles.labelWrapper}>
-                    <View style={styles.requiredWrapper}>
-                        <Text style={styles.required}>*</Text>
-                    </View>
-                    <Text style={styles.label}>Tổng số lượng tôm được kiểm tra - AI</Text>
-                </View>
-                <View style={styles.readOnlyInput}>
-                    <Text style={[styles.readOnlyText, !currentResult && styles.placeholderText]}>
-                        {currentResult
-                            ? currentResult.totalCount.toString()
-                            : 'Kết quả số lượng tôm từ AI'}
-                    </Text>
-                    <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
-                </View>
-                <Text style={styles.helperText}>
-                    Lần kiểm tra trước: {previousResult ? previousResult.totalCount : 0}
+            <View style={styles.row}>
+                <Text style={styles.label}>Tổng số lượng tôm{'\n'}được kiểm tra - AI</Text>
+                <Text style={styles.value}>
+                    {currentResult ? currentResult.totalCount.toString() : '-'}
+                </Text>
+            </View>
+
+            {/* Previous Count */}
+            <View style={styles.row}>
+                <Text style={styles.label}>Lần kiểm tra trước</Text>
+                <Text style={styles.value}>
+                    {previousResult ? previousResult.totalCount.toString() : '-'}
                 </Text>
             </View>
 
             {/* Health Status */}
-            <View>
-                <View style={styles.labelWrapper}>
-                    <View style={styles.requiredWrapper}>
-                        <Text style={styles.required}>*</Text>
-                    </View>
-                    <Text style={styles.label}>Tình trạng tôm - AI</Text>
-                </View>
-                <TouchableOpacity
-                    style={styles.readOnlyInput}
-                    onPress={onShowDetailsPress}
-                    activeOpacity={0.7}
-                >
-                    <Text
-                        style={[styles.readOnlyText, !currentResult && styles.placeholderText]}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                    >
-                        {(() => {
-                            if (results.length === 0) return 'Kết quả tình trạng tôm từ AI';
+            <View style={styles.row}>
+                <Text style={styles.label}>Tình trạng tôm - AI</Text>
+                {(() => {
+                    if (results.length === 0) {
+                        return <Text style={styles.value}>-</Text>;
+                    }
 
-                            const allItems = results.reduce<HealthCheckItem[]>(
-                                (acc, res) => acc.concat(res.items),
-                                []
-                            );
+                    const allItems = results.reduce<HealthCheckItem[]>(
+                        (acc, res) => acc.concat(res.items),
+                        []
+                    );
 
-                            const firstSick = allItems.find(i => i.status !== 'HEALTHY');
-                            if (firstSick) {
-                                return `Tôm ${firstSick.index}: ${firstSick.diagnosis}... Xem thêm`;
-                            }
+                    const firstSick = allItems.find(i => i.status !== 'HEALTHY');
 
-                            return 'Tôm khỏe mạnh';
-                        })()}
-                    </Text>
-                    <Ionicons name="list-outline" size={20} color={colors.textSecondary} />
-                </TouchableOpacity>
+                    if (firstSick) {
+                        return (
+                            <TouchableOpacity
+                                style={[styles.statusPill, styles.statusPillSick]}
+                                onPress={onShowDetailsPress}
+                                activeOpacity={0.7}
+                            >
+                                <Text
+                                    style={[styles.statusText, styles.statusTextSick]}
+                                    numberOfLines={1}
+                                >
+                                    Tôm {firstSick.index}: {firstSick.diagnosis}... Xem thêm
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    }
+
+                    return (
+                        <TouchableOpacity
+                            style={[styles.statusPill, styles.statusPillHealthy]}
+                            onPress={onShowDetailsPress}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.statusText, styles.statusTextHealthy]}>
+                                Khỏe mạnh
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })()}
             </View>
 
             {/* Infection Rate */}
-            <View>
-                <View style={styles.readOnlyInputGray}>
-                    <Text style={styles.label}>Trung bình tỉ lệ nhiễm bệnh</Text>
-                    <Text style={styles.summaryValue}>
-                        {(() => {
-                            if (results.length === 0) return '-';
+            <View style={styles.row}>
+                <Text style={styles.label}>Trung bình tỉ lệ nhiễm</Text>
+                <Text style={styles.value}>
+                    {(() => {
+                        if (results.length === 0) return '-';
 
-                            let totalSick = 0;
-                            let totalChecked = 0;
+                        let totalSick = 0;
+                        let totalChecked = 0;
 
-                            results.forEach(res => {
-                                totalChecked += res.totalCount;
-                                totalSick += res.items.filter(i => i.status !== 'HEALTHY').length;
-                            });
+                        results.forEach(res => {
+                            totalChecked += res.totalCount;
+                            totalSick += res.items.filter(i => i.status !== 'HEALTHY').length;
+                        });
 
-                            if (totalChecked === 0) return '0%';
+                        if (totalChecked === 0) return '0%';
 
-                            const rate = (totalSick / totalChecked) * 100;
-                            return `${parseFloat(rate.toFixed(2))}%`;
-                        })()}
-                    </Text>
-                </View>
-                <Text style={styles.disclaimer}>
-                    Kết quả được hệ thống tính tự động từ đầu ra của AI
+                        const rate = (totalSick / totalChecked) * 100;
+                        return `${parseFloat(rate.toFixed(2))}%`;
+                    })()}
                 </Text>
             </View>
-        </>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    labelWrapper: {
+    container: {
+        gap: 12,
+        paddingVertical: spacing.sm,
+    },
+    row: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.sm,
     },
     label: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '400',
-        color: colors.text,
+        color: colors.textSecondary,
+        flex: 1,
         lineHeight: 24,
     },
-    requiredWrapper: {
-        width: 7,
-        marginRight: 4,
-    },
-    required: {
-        color: colors.error,
-    },
-    readOnlyInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: borderRadius.sm,
-        paddingHorizontal: spacing.md,
-        height: 44,
-        backgroundColor: colors.white,
-    },
-    readOnlyInputGray: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: colors.gray[100],
-        borderRadius: borderRadius.sm,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        height: 44,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    readOnlyText: {
-        fontSize: 14,
+    value: {
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.text,
+        marginLeft: spacing.md,
     },
-    placeholderText: {
-        color: colors.textSecondary,
+    statusPill: {
+        borderRadius: 100,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 4,
+        borderWidth: 1,
+        marginLeft: spacing.md,
+        maxWidth: '60%',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    helperText: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        marginTop: spacing.xs,
-    },
-    summaryValue: {
+    statusText: {
         fontSize: 14,
-        color: colors.text,
         fontWeight: '500',
     },
-    disclaimer: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        marginTop: spacing.xs,
-        fontStyle: 'italic',
+    statusPillHealthy: {
+        backgroundColor: colors.green[50], // Tương tự background màu xanh nhạt
+        borderColor: colors.green[200], // Viền màu xanh lá
+    },
+    statusTextHealthy: {
+        color: colors.green[600],
+    },
+    statusPillSick: {
+        backgroundColor: colors.red[50],
+        borderColor: colors.red[200],
+    },
+    statusTextSick: {
+        color: colors.red[600],
     },
 });

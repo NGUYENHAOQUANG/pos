@@ -305,6 +305,5 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: 100,
-        gap: 8,
     },
 });

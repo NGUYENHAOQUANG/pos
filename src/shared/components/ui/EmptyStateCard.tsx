@@ -10,10 +10,12 @@ import PlusIcon from '@/assets/Icon/Plus.svg';
  */
 export interface EmptyStateCardProps {
     /** Message to display under the empty state icon */
-    message: string;
-    /** Optional title for the action button */
+    message?: string;
+    /** Description for the empty state */
+    description?: string;
+    /** Title for the action button */
     buttonTitle?: string;
-    /** Optional callback when the action button is pressed */
+    /** Callback when the action button is pressed */
     onPress?: () => void;
     /** Optional extra style for the action button */
     buttonStyle?: ViewStyle;
@@ -35,6 +37,7 @@ export interface EmptyStateCardProps {
  */
 export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     message,
+    description,
     buttonTitle,
     onPress,
     buttonStyle,
@@ -48,9 +51,10 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
             </View>
 
             {/* Descriptive message */}
-            <Text style={styles.text}>{message}</Text>
+            {message && <Text style={styles.title}>{message}</Text>}
+            {description && <Text style={styles.description}>{description}</Text>}
 
-            {/* Primary action button with Plus icon - rendered only if title and onPress provided */}
+            {/* Primary action button with Plus icon */}
             {buttonTitle && onPress && (
                 <Button
                     title={buttonTitle}
@@ -74,12 +78,21 @@ const styles = StyleSheet.create({
     iconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: spacing.md,
     },
-    text: {
+    title: {
         fontSize: 16,
+        fontWeight: typography.fontWeight.semibold,
         color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: spacing.md,
+        fontFamily: typography.fontFamily.medium,
+    },
+    description: {
+        fontSize: 14,
+        color: colors.textSecondary || colors.text,
+        textAlign: 'center',
+        marginBottom: spacing.lg,
         fontFamily: typography.fontFamily.regular,
         lineHeight: 22,
     },

@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
         minWidth: 60,
     },
     disclaimer: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: '400',
         fontStyle: 'normal',
         lineHeight: 20,

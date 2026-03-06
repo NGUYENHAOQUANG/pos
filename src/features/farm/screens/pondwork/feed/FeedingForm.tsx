@@ -70,7 +70,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         return (
             <View
                 pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
-                style={{ opacity: isSubmitting ? 0.7 : 1, gap: 8 }}
+                style={{ opacity: isSubmitting ? 0.7 : 1 }}
             >
                 <Controller
                     name="executionDate"
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         padding: 16,
-        marginTop: 12,
+        marginTop: 8,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.borderSubtle || colors.gray[100],
@@ -297,6 +297,7 @@ const styles = StyleSheet.create({
     },
     activitySchedule: {
         marginTop: 8,
+        marginHorizontal: 16,
     },
     activityScheduleTitle: {
         fontSize: 14,

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { borderRadius, colors, spacing } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import IconAICheck from '@/assets/Icon/AIcheck.svg';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;
@@ -12,7 +14,7 @@ interface MeasurementDataBoxProps {
     onRemainingWeightChange: (value: string) => void;
     stockingQuantity?: number; // Số lượng thả ban đầu (PLs) để tính tỉ lệ sống
     onAIMeasurePress?: () => void;
-    averageSizeCm?: number | null;
+    averageSizeCm?: number;
 }
 
 export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
@@ -55,6 +57,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     const resultItems: ResultItem[] = useMemo(() => {
         const items: ResultItem[] = [];
 
+        // Result box in the screenshot only shows Total Shrimp and Survival Rate
+
         items.push({
             label: 'Trung bình kích thước tôm (cm)',
             value:
@@ -86,63 +90,56 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>
-            <View style={styles.inputRow}>
-                <View style={styles.inputColumn}>
-                    <Input
-                        label="Cỡ tôm (con/kg)"
-                        value={shrimpSize}
-                        onChangeText={text => {
-                            if (text.length <= 6) {
-                                onShrimpSizeChange(formatNumericInput(text));
-                            }
-                        }}
-                        keyboardType="numeric"
-                        required
-                        maxLength={6}
-                    />
-                </View>
-                <View style={styles.inputColumn}>
-                    <Input
-                        label="Sản lượng còn lại (kg)"
-                        value={remainingWeight}
-                        onChangeText={text => {
-                            if (text.length <= 12) {
-                                onRemainingWeightChange(formatDecimalInput(text));
-                            }
-                        }}
-                        keyboardType="numeric"
-                        required
-                        maxLength={9}
-                    />
-                </View>
-            </View>
-            <TouchableOpacity style={styles.aiButton} onPress={onAIMeasurePress}>
-                <Text style={styles.aiButtonText}>Đo kích thước & cỡ tôm bằng AI</Text>
-            </TouchableOpacity>
+            <OutlineButton
+                label="Kiểm tra kích thước tôm bằng AI"
+                onPress={onAIMeasurePress || (() => {})}
+                prefix={<IconAICheck width={20} height={20} />}
+                style={styles.aiButton}
+                labelStyle={styles.aiButtonText}
+            />
+
+            <Input
+                label="Cỡ tôm (con/kg)"
+                placeholder="Cỡ tôm (con/kg)"
+                value={shrimpSize}
+                onChangeText={text => {
+                    if (text.length <= 6) {
+                        onShrimpSizeChange(formatNumericInput(text));
+                    }
+                }}
+                keyboardType="numeric"
+                required
+                maxLength={6}
+                containerStyle={{ marginBottom: 0 }}
+            />
+            <Input
+                label="Sản lượng còn lại (kg)"
+                placeholder="Sản lượng còn lại (kg)"
+                value={remainingWeight}
+                onChangeText={text => {
+                    if (text.length <= 12) {
+                        onRemainingWeightChange(formatDecimalInput(text));
+                    }
+                }}
+                keyboardType="numeric"
+                required
+                maxLength={9}
+                containerStyle={{ marginBottom: 0 }}
+            />
         </PondDataBox>
     );
 };
 
 const styles = StyleSheet.create({
-    inputRow: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-    },
-    inputColumn: {
-        flex: 1,
-    },
     aiButton: {
-        backgroundColor: colors.blue[50],
-        borderWidth: 1,
-        borderColor: colors.blue[200],
-        paddingVertical: 12,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: colors.white,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
+        borderWidth: 1.5,
     },
     aiButtonText: {
-        color: colors.primary,
+        color: colors.text,
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
     },
 });

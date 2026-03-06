@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';

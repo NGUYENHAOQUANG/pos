@@ -37,6 +37,7 @@ import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-in
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
@@ -464,29 +465,14 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                 <Text style={styles.label}>{activityLabel}</Text>
                                 <RequiredDot />
                             </View>
-                            <View style={styles.radioGroup}>
-                                {activityOptions.map(option => (
-                                    <TouchableOpacity
-                                        key={option}
-                                        style={styles.radioItem}
-                                        onPress={() => onSelectActivity(option)}
-                                        activeOpacity={0.8}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.radioOuter,
-                                                selectedActivity === option &&
-                                                    styles.radioOuterSelected,
-                                            ]}
-                                        >
-                                            {selectedActivity === option && (
-                                                <View style={styles.radioInner} />
-                                            )}
-                                        </View>
-                                        <Text style={styles.radioLabel}>{option}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
+                            <RadioButton
+                                options={activityOptions.map(opt => ({ label: opt, value: opt }))}
+                                value={selectedActivity}
+                                onValueChange={onSelectActivity}
+                                containerStyle={styles.radioGroup}
+                                itemStyle={styles.radioItem}
+                                gap={0}
+                            />
                         </View>
                     )}
 
@@ -497,29 +483,14 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                                 <Text style={styles.label}>{activityLabel}</Text>
                                 <RequiredDot />
                             </View>
-                            <View style={styles.harvestRadioGroup}>
-                                {activityOptions.map(option => (
-                                    <TouchableOpacity
-                                        key={option}
-                                        style={styles.harvestRadioItem}
-                                        onPress={() => onSelectActivity(option)}
-                                        activeOpacity={0.8}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.radioOuter,
-                                                selectedActivity === option &&
-                                                    styles.radioOuterSelected,
-                                            ]}
-                                        >
-                                            {selectedActivity === option && (
-                                                <View style={styles.radioInner} />
-                                            )}
-                                        </View>
-                                        <Text style={styles.radioLabel}>{option}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
+                            <RadioButton
+                                options={activityOptions.map(opt => ({ label: opt, value: opt }))}
+                                value={selectedActivity}
+                                onValueChange={onSelectActivity}
+                                containerStyle={styles.radioGroup}
+                                itemStyle={styles.harvestRadioItem}
+                                gap={32}
+                            />
                         </View>
                     )}
 
@@ -651,6 +622,23 @@ const styles = StyleSheet.create({
         color: colors.text,
         lineHeight: 22,
     },
+    addImageButtonFull: {
+        width: '100%',
+        height: 48,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+        gap: 8,
+    },
+    addImageText: {
+        fontSize: 16,
+        color: colors.textSecondary,
+        fontWeight: '400',
+    },
     imagesGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -709,18 +697,11 @@ const styles = StyleSheet.create({
         rowGap: spacing.sm, // Khoảng cách hàng
     },
     radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '48%', // Chia đôi màn hình
-    },
-    harvestRadioGroup: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 32,
+        width: '48%',
+        paddingVertical: 6,
     },
     harvestRadioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        paddingVertical: 6,
     },
     radioOuter: {
         width: 20,
@@ -733,13 +714,13 @@ const styles = StyleSheet.create({
         marginRight: spacing.xs,
     },
     radioOuterSelected: {
-        borderColor: colors.primary,
+        borderColor: colors.primaryOrange,
     },
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryOrange,
     },
     radioLabel: {
         fontSize: 14,

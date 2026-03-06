@@ -37,6 +37,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
         <SelectionInfoBox title="Kiểm tra thức ăn">
             <Input
                 label="Lượng thức ăn cho vào nhá (g)"
+                placeholder="Nhập lượng thức ăn vào đây nhá"
                 value={foodAmount}
                 onChangeText={handleFoodAmountChange}
                 keyboardType="numeric"
@@ -74,6 +75,31 @@ const styles = StyleSheet.create({
     },
     radioItem: {
         width: '48%',
-        marginBottom: spacing.xs,
+        paddingVertical: 6,
+    },
+    radioOuter: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: spacing.xs,
+    },
+    radioOuterSelected: {
+        borderColor: colors.primaryOrange,
+    },
+    radioInner: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: colors.primaryOrange,
+    },
+    radioLabel: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '400',
+        lineHeight: 22,
     },
 });

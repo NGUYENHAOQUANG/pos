@@ -192,6 +192,6 @@ export const HandleProblemForm = ({
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.backgroundPrimary },
-    scrollContent: { paddingBottom: 100, gap: 8 },
+    scrollContent: { paddingBottom: 100 },
     spacer: { height: 80 },
 });
