@@ -1,23 +1,51 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
+import {
+    Text,
+    StyleSheet,
+    ViewStyle,
+    TextStyle,
+    View,
+    StyleProp,
+    TouchableOpacity,
+} from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CollapseHeadProps {
     title: string;
     isExpanded: boolean;
     onToggle: () => void;
-    style?: ViewStyle;
-    titleStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    titleStyle?: StyleProp<TextStyle>;
     showIcon?: boolean;
+    rightComponent?: React.ReactNode;
 }
 
-export const CollapseHead: React.FC<CollapseHeadProps> = ({ title, style, titleStyle }) => {
+export const CollapseHead: React.FC<CollapseHeadProps> = ({
+    title,
+    style,
+    titleStyle,
+    isExpanded,
+    onToggle,
+    showIcon = false,
+    rightComponent,
+}) => {
     return (
-        <View style={[styles.container, style]}>
+        <TouchableOpacity style={[styles.container, style]} onPress={onToggle} activeOpacity={0.7}>
             <Text style={[styles.title, titleStyle]} numberOfLines={1}>
                 {title}
             </Text>
-        </View>
+            <View style={styles.actions}>
+                {rightComponent}
+                {showIcon && (
+                    <Ionicons
+                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={20}
+                        color={colors.gray[700]}
+                    />
+                )}
+            </View>
+        </TouchableOpacity>
     );
 };
 
@@ -27,7 +55,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingTop: 12,
-        paddingHorizontal: spacing.md,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderTopLeftRadius: borderRadius.md,
@@ -35,10 +63,15 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
     },
     title: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         lineHeight: 22,
         color: colors.text,
         flex: 1,
+    },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.sm,
     },
 });

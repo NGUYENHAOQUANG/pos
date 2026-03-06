@@ -172,7 +172,6 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
                 items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'))
             );
         } else {
-            // All job types now use item.date, so we can use getPondJobItemsGroupedByDate for all
             itemsByDate = getPondJobItemsGroupedByDate(pondId, config.jobType, startDate, endDate);
         }
 
@@ -200,12 +199,10 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
                     data: config.metaConverter(item, meta),
                     note: item.note,
                     onEdit: () => {
-                        // Handle both pond object and pondId cases
                         if (config.pond) {
                             const params = config.getEditParams(config.pond, item);
                             navigation.navigate(config.editRoute as any, params);
                         } else if (config.pondId) {
-                            // Create a minimal pond object for getEditParams if only pondId is available
                             const pondData = { id: config.pondId } as PondData;
                             const params = config.getEditParams(pondData, item);
                             navigation.navigate(config.editRoute as any, params);

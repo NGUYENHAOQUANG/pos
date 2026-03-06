@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/styles';
-import {
-    DropdownHeaderButton,
-    DropDownHeaderItem,
-} from '@/shared/components/forms/DropdownHeaderButton';
-import { ButtonHeader } from '@/features/farm/components/ButtonHeader';
-import { FarmActionMenu } from '@/features/reports/components/FarmActionMenu';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { colors, spacing, borderRadius } from '@/styles';
+import { DropDownHeaderItem } from '@/shared/components/forms/DropdownHeaderButton';
 import { DropDownButtonBasic } from '@/features/farm/components/DropDownButtonBasic';
+import { FarmActionMenu } from '@/features/reports/components/FarmActionMenu';
+import { Logo } from '@/shared/components/brand/Logo';
 
 interface HeadingReportsProps {
-    // Header Props
     farmData?: DropDownHeaderItem[];
     selectedFarm?: DropDownHeaderItem;
     onSelectFarm?: (item: DropDownHeaderItem) => void;
     onRightPress?: () => void;
 
-    // DropDownReports Props
     pondTypeData?: DropDownHeaderItem[];
     selectedPondType?: DropDownHeaderItem;
     onSelectPondType?: (item: DropDownHeaderItem) => void;
@@ -37,9 +33,7 @@ export const HeadingReports = ({
     selectedFarm,
     onSelectFarm,
     onRightPress,
-    pondTypeData,
-    selectedPondType,
-    onSelectPondType,
+    // pondTypeData and selectedPondType are hidden in the new UI but kept in props for state compatibility
     pondData,
     selectedPond,
     onSelectPond,
@@ -51,7 +45,6 @@ export const HeadingReports = ({
     const insets = useSafeAreaInsets();
     const [menuVisible, setMenuVisible] = useState(false);
 
-    // Header padding (12) + Button height (40) + Gap (4) = 56
     const menuPosition = { top: insets.top + 56, right: 16 };
 
     const handleFarmInfoPress = () => {
@@ -63,21 +56,15 @@ export const HeadingReports = ({
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
-            {/* Top Row: Farm Selector and Action Button */}
-            <View style={styles.headerRow}>
-                <View style={styles.leftContainer}>
-                    {onSelectFarm && (
-                        <DropdownHeaderButton
-                            data={farmData}
-                            value={selectedFarm}
-                            onSelect={onSelectFarm}
-                        />
-                    )}
-                </View>
-
-                <View style={styles.rightContainer}>
-                    <ButtonHeader onPress={() => setMenuVisible(true)} />
-                </View>
+            {/* Top Row: Logo and Notification Action */}
+            <View style={styles.topRow}>
+                <Logo size="squareXs" />
+                <TouchableOpacity
+                    style={styles.notificationButton}
+                    onPress={() => setMenuVisible(true)}
+                >
+                    <Ionicons name="notifications-outline" size={20} color={colors.text} />
+                </TouchableOpacity>
             </View>
 
             <FarmActionMenu
@@ -87,17 +74,21 @@ export const HeadingReports = ({
                 position={menuPosition}
             />
 
-            {/* Row 1: Pond Type and Pond Select */}
-            <View style={styles.dropdownRow}>
-                <View style={styles.halfWidth}>
+            {/* Row 1: Farm Selector */}
+            <View style={styles.row}>
+                <View style={styles.fullWidth}>
                     <DropDownButtonBasic
-                        data={pondTypeData}
-                        value={selectedPondType}
-                        onSelect={onSelectPondType}
+                        data={farmData}
+                        value={selectedFarm}
+                        onSelect={onSelectFarm}
                         showIcon={false}
                         height={40}
                     />
                 </View>
+            </View>
+
+            {/* Row 2: Pond Select and Season Select */}
+            <View style={styles.dropdownRow}>
                 <View style={styles.halfWidth}>
                     <DropDownButtonBasic
                         data={pondData}
@@ -107,18 +98,16 @@ export const HeadingReports = ({
                         height={40}
                     />
                 </View>
-            </View>
-
-            {/* Row 2: Season Select */}
-            <View style={styles.seasonRow}>
-                <DropDownButtonBasic
-                    data={seasonData}
-                    value={selectedSeason}
-                    onSelect={onSelectSeason}
-                    showIcon={false}
-                    height={40}
-                    disabled={seasonDisabled}
-                />
+                <View style={styles.halfWidth}>
+                    <DropDownButtonBasic
+                        data={seasonData}
+                        value={selectedSeason}
+                        onSelect={onSelectSeason}
+                        showIcon={false}
+                        height={40}
+                        disabled={seasonDisabled}
+                    />
+                </View>
             </View>
         </View>
     );
@@ -130,43 +119,41 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
         zIndex: 100,
     },
-    headerRow: {
+    topRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingTop: 12, // Ensure 12px padding top and bottom
-        paddingHorizontal: 16,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
+        paddingTop: spacing.md,
     },
-    leftContainer: {
-        flex: 1,
-        alignItems: 'flex-start',
-    },
-    rightContainer: {
-        alignItems: 'flex-end',
+    notificationButton: {
+        width: 40,
+        height: 40,
         justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: borderRadius.sm,
+        borderWidth: 1,
+        borderColor: colors.borderDark,
+        backgroundColor: colors.white,
     },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderMedium,
-        marginBottom: spacing.md, // Spacing after divider
+    row: {
+        paddingHorizontal: 16,
+        marginBottom: spacing.xs,
+        zIndex: 2,
+    },
+    fullWidth: {
         width: '100%',
     },
     dropdownRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 2,
         paddingHorizontal: 16,
         gap: spacing.xs,
+        zIndex: 1,
     },
     halfWidth: {
         flex: 1,
-    },
-
-    seasonRow: {
-        marginTop: spacing.xs,
-        zIndex: 1,
-        paddingHorizontal: 16,
     },
 });

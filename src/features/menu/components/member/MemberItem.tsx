@@ -27,7 +27,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
     onDelete,
     onSuspend,
     onActivate,
-    // onResendInvite,
+    onResendInvite,
 }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [menuPosition, setMenuPosition] = useState<any>({ top: 0, right: 0 });
@@ -43,7 +43,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
         },
     ];
 
-    /* if (status === 'pending') {
+    if (status === 'pending') {
         menuItems.push({
             label: 'Gửi lại lời mời',
             onPress: () => {
@@ -51,7 +51,7 @@ export const MemberItem: React.FC<MemberItemProps> = ({
                 setTimeout(() => onResendInvite?.(), 100);
             },
         });
-    } */
+    }
 
     if (status === 'active') {
         menuItems.push({

@@ -13,10 +13,11 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ title, onEdit, style }) 
     return (
         <View style={[styles.container, style]}>
             <Text style={styles.title} numberOfLines={1}>
-                {title}{' '}
+                {title}
             </Text>
             {onEdit && (
                 <TouchableOpacity
+                    style={styles.editButton}
                     onPress={onEdit}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
@@ -32,20 +33,31 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 5,
-        paddingHorizontal: 8,
-        backgroundColor: colors.backgroundSubtle,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: colors.backgroundPrimary,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
     },
     title: {
-        fontSize: 14,
+        fontSize: 15,
         fontWeight: '700',
         color: colors.text,
         lineHeight: 22,
         flexShrink: 1,
         paddingRight: 4,
     },
+    editButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: colors.border,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     editIcon: {
-        width: '100%',
-        height: '100%',
+        width: 14,
+        height: 14,
     },
 });

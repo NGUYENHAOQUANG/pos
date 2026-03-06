@@ -29,7 +29,7 @@ import { useStockTransfersAsJobs } from '@/features/farm/hooks/useStockTransfer'
 import { usePondOperations } from '@/features/farm/hooks/usePondOperations';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
-import { pondListService } from '@/features/farm/services/pondListService';
+import { pondListService } from '@/features/farm/services/pond-list.service';
 import {
     usePondJobNavigateHandlers,
     usePondJobEditHandlers,

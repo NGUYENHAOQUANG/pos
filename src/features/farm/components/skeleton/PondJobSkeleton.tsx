@@ -107,7 +107,7 @@ export const PondJobSkeleton: React.FC = () => {
 
 const styles = StyleSheet.create({
     container: {
-        // Transparent container
+        backgroundColor: colors.backgroundPrimary,
     },
     dateHeader: {
         paddingHorizontal: spacing.md,

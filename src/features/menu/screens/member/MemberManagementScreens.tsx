@@ -17,7 +17,6 @@ import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { useMenuContext } from '@/features/menu/store/menuStore';
 import { MemberItem } from '@/features/menu/components/member/MemberItem';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
-import { ResendComfirmCard } from '@/features/menu/components/member/ResendComfirmCard';
 
 import { useRoute } from '@react-navigation/native';
 
@@ -30,7 +29,7 @@ export const MemberManagementScreens: React.FC = () => {
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [suspendModalVisible, setSuspendModalVisible] = useState(false);
-    // const [resendModalVisible, setResendModalVisible] = useState(false);
+    const [resendModalVisible, setResendModalVisible] = useState(false);
     const [activateModalVisible, setActivateModalVisible] = useState(false);
     const [selectedRole, setSelectedRole] = useState<string>('all');
     const [selectedLevel, setSelectedLevel] = useState<string>('all');
@@ -155,10 +154,10 @@ export const MemberManagementScreens: React.FC = () => {
                                     setSelectedMemberId(member.id);
                                     setActivateModalVisible(true);
                                 }}
-                                // onResendInvite={() => {
-                                //     setSelectedMemberId(member.id);
-                                //     setResendModalVisible(true);
-                                // }}
+                                onResendInvite={() => {
+                                    setSelectedMemberId(member.id);
+                                    setResendModalVisible(true);
+                                }}
                             />
                         ))}
                     </View>
@@ -203,28 +202,33 @@ export const MemberManagementScreens: React.FC = () => {
                 successMessage="Đã tạm ngưng tài khoản"
             />
 
-            {/* <ResendComfirmCard
+            <ConfirmationModalUI
                 visible={resendModalVisible}
-                onClose={() => setResendModalVisible(false)}
                 onConfirm={() => {
                     setResendModalVisible(false);
-                    Toast.show(ToastMessages.Member.RESEND_INVITE_SUCCESS);
                 }}
-            /> */}
+                onCancel={() => setResendModalVisible(false)}
+                title="Gửi lại lời mời"
+                message="Bạn có chắc chắn muốn gửi lại lời mời cho thành viên này không?"
+                confirmText="Đồng ý"
+                cancelText="Huỷ"
+                successMessage="Đã gửi lại lời mời thành công"
+            />
 
-            <ResendComfirmCard
+            <ConfirmationModalUI
                 visible={activateModalVisible}
-                onClose={() => setActivateModalVisible(false)}
                 onConfirm={() => {
                     if (selectedMemberId) {
                         updateMember(selectedMemberId, { status: 'active' });
                         setActivateModalVisible(false);
-                        Toast.show(ToastMessages.Member.ACTIVATE_SUCCESS);
                     }
                 }}
+                onCancel={() => setActivateModalVisible(false)}
                 title="Kích hoạt lại"
                 message="Bạn có chắc chắn muốn kích hoạt lại tài khoản này không?"
                 confirmText="Kích hoạt lại"
+                cancelText="Huỷ"
+                successMessage="Đã kích hoạt lại tài khoản thành công"
             />
         </View>
     );

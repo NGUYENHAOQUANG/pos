@@ -35,8 +35,11 @@ export const usePondJobNavigateHandlers = ({
             },
 
             [JOB_TYPES.SHRIMP_INSPECTION]: () => {
-                if (!pond) return;
-                navigation.navigate('ShrimpInspectionScreen', { pond });
+                if (!pond?.id || !pond.zoneId) return;
+                navigation.navigate('ShrimpHealthScreen', {
+                    pondId: pond.id,
+                    zoneId: pond.zoneId.toString(),
+                });
             },
 
             [JOB_TYPES.MEASURE_SIZE]: () => {
@@ -120,8 +123,12 @@ export const usePondJobEditHandlers = ({
             },
 
             [JOB_TYPES.SHRIMP_INSPECTION]: item => {
-                if (!pond) return;
-                navigation.navigate('ShrimpInspectionScreen', { pond, itemToEdit: item });
+                if (!pond?.id || !pond.zoneId) return;
+                navigation.navigate('ShrimpHealthScreen', {
+                    pondId: pond.id,
+                    zoneId: pond.zoneId,
+                    shrimpHealthId: item.id,
+                });
             },
 
             [JOB_TYPES.MEASURE_SIZE]: item => {
@@ -221,8 +228,11 @@ export const usePondJobLogHandlers = ({
             },
 
             [JOB_TYPES.SHRIMP_INSPECTION]: () => {
-                if (!pond) return;
-                navigation.navigate('PondworkLogScreen', { pond });
+                if (!pond?.id || !pond.zoneId) return;
+                navigation.navigate('PondworkLogScreen', {
+                    pondId: pond.id,
+                    zoneId: pond.zoneId.toString(),
+                });
             },
 
             [JOB_TYPES.MEASURE_SIZE]: () => {

@@ -1,15 +1,10 @@
-/**
- * Types for Shrimp Health Check API
- */
+import type { IDocument } from '@/shared/types/common.types';
 
-// Enums
 export type LeftoverFeedEnum = 'None' | 'From5To10' | 'From10To15' | 'From15To20';
 export type GutConditionEnum = 'Empty' | 'Full';
 export type GutColorEnum = 'FeedColor' | 'Black' | 'Abnormal';
 export type FecesColorEnum = 'FeedColor' | 'Abnormal';
 export type LiverConditionEnum = 'Normal' | 'Abnormal';
-
-// Request types
 export interface ShrimpHealthCheckDetail {
     feedInTrapG: number;
     leftoverFeedPercent?: LeftoverFeedEnum;
@@ -18,7 +13,6 @@ export interface ShrimpHealthCheckDetail {
     fecesColor?: FecesColorEnum;
     liverCondition?: LiverConditionEnum;
     notes?: string;
-    // AI Health Check fields
     averageInfectionRate?: number;
     isHealthy?: boolean;
     diagnosisDetails?: Array<{
@@ -38,8 +32,6 @@ export interface UpdateShrimpHealthCheckPayload {
     documentIds?: string[];
     healthCheck?: ShrimpHealthCheckDetail;
 }
-
-// Response types
 export interface Creator {
     id: string;
     fullname: string;
@@ -68,7 +60,6 @@ export interface ShrimpHealthCheckDetailDto {
     fecesColor?: FecesColorEnum;
     liverCondition?: LiverConditionEnum;
     notes?: string;
-    // AI Health Check fields (from GET response)
     averageInfectionRate?: number;
     isHealthy?: boolean;
     diagnosisDetails?: Array<{
@@ -87,13 +78,6 @@ export interface ShrimpHealthCheckDto {
     editor?: Creator;
     pondId: string;
     cycleId?: string;
-    // New API format: list of document IDs associated with this health check
-    documentIds?: string[];
-    documents?: Array<{
-        id: string;
-        fileName: string;
-        filePath: string;
-        publicUrl?: string;
-    }>;
+    documents?: IDocument[];
     healthCheck?: ShrimpHealthCheckDetailDto;
 }

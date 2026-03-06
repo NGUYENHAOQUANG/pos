@@ -60,30 +60,36 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: spacing.md,
+        borderRadius: borderRadius.sm,
         marginTop: spacing.sm,
+        marginHorizontal: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginHorizontal: spacing.md,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.sm,
     },
     content: {
         flex: 1,
         minWidth: 0,
         marginRight: spacing.md,
     },
-    tag: {
-        alignSelf: 'flex-start',
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: spacing.xs,
+    },
+    nameWrapper: {
+        flex: 1,
+        minWidth: 0,
+        marginRight: spacing.sm,
     },
     name: {
         fontSize: typography.fontSize.base,
         fontWeight: '600',
         color: colors.text,
-        marginBottom: spacing.xs,
     },
+    tag: {},
     date: {
         fontSize: typography.fontSize.sm,
         color: colors.text,

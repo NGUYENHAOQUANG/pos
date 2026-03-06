@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, LayoutAnimation, Platform, UIManager } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { CollapseHead } from '../../../shared/components/layout/CollapseHead';
 import { TimelineEntry } from './Timeline';
 import { ActivityData } from './ActivityCard';
 import { parseDate } from '@/features/farm/utils/dateUtils';
-
-// Kích hoạt LayoutAnimation
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 // --- Interface ---
 export interface TimelineActivity {
@@ -31,6 +25,7 @@ interface TrackingDayCardProps {
     group: TrackingGroup;
     style?: any;
     noteOnTop?: boolean;
+    isFirst?: boolean;
 }
 
 const isToday = (date: Date): boolean => {
@@ -50,29 +45,37 @@ const formatSectionTitle = (dateKey: string): string => {
     return dateKey;
 };
 
-export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style, noteOnTop }) => {
-    const [expanded, setExpanded] = useState(true);
-
-    const toggleExpand = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setExpanded(!expanded);
-    };
-
+export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({
+    group,
+    style,
+    noteOnTop,
+    isFirst = false,
+}) => {
     const displayDate = formatSectionTitle(group.date);
 
     return (
-        <View style={style}>
-            {/* Header */}
-            <CollapseHead
-                title={displayDate}
-                isExpanded={expanded}
-                onToggle={toggleExpand}
-                style={expanded ? styles.headerExpanded : styles.headerCollapsed}
-            />
+        <View style={[styles.container, style]}>
+            {/* Timeline column */}
+            <View style={styles.timelineColumn}>
+                <View
+                    style={[
+                        styles.timelineDot,
+                        isFirst ? styles.timelineDotActive : styles.timelineDotInactive,
+                    ]}
+                />
+                <View
+                    style={[
+                        styles.timelineLine,
+                        isFirst ? styles.timelineLineActive : styles.timelineLineInactive,
+                    ]}
+                />
+            </View>
 
-            {/* Body: Timeline List */}
-            {expanded && (
-                <View style={styles.cardBody}>
+            {/* Content column */}
+            <View style={styles.contentColumn}>
+                <Text style={styles.dateText}>{displayDate}</Text>
+
+                <View style={styles.activitiesContainer}>
                     {group.activities.map(activity => (
                         <TimelineEntry
                             key={activity.id}
@@ -89,43 +92,64 @@ export const TrackingDayCard: React.FC<TrackingDayCardProps> = ({ group, style, 
                         <Text style={styles.emptyText}>Không có hoạt động</Text>
                     )}
                 </View>
-            )}
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    headerExpanded: {
+    container: {
         flexDirection: 'row',
+        paddingHorizontal: spacing.md,
+    },
+    timelineColumn: {
+        width: 24,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.white,
     },
-    headerCollapsed: {
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    cardBody: {
-        paddingTop: 12,
-        paddingHorizontal: spacing.md,
+    timelineDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        borderWidth: 2,
         backgroundColor: colors.white,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+        marginTop: 4, // Align with the center of the text roughly
+        zIndex: 1,
+    },
+    timelineDotActive: {
+        borderColor: colors.gray[950],
+    },
+    timelineDotInactive: {
+        borderColor: colors.black,
+    },
+    timelineLine: {
+        flex: 1,
+        width: 1,
+        marginTop: 2,
+    },
+    timelineLineActive: {
+        backgroundColor: colors.gray[950],
+    },
+    timelineLineInactive: {
+        backgroundColor: colors.gray[950],
+    },
+    contentColumn: {
+        flex: 1,
+        paddingBottom: spacing.lg,
+    },
+    dateText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text,
+        marginBottom: spacing.sm,
+        lineHeight: 20,
+    },
+    activitiesContainer: {
+        gap: 16,
     },
     emptyText: {
         textAlign: 'center',
         color: colors.textSecondary,
         fontStyle: 'italic',
-        padding: 10,
+        paddingVertical: 10,
     },
 });

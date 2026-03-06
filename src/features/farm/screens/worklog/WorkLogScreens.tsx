@@ -2,13 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
-import { IconFilter, IconFilterActive } from '@/assets/icons';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
 import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
-import { TouchableOpacity } from 'react-native';
 import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import type { IPondRecordItem } from '@/features/farm/types/pondRecord.types';
@@ -153,13 +151,13 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                         style={styles.dateRange}
                     />
                 </View>
-                <TouchableOpacity onPress={() => setIsFilterVisible(true)} activeOpacity={0.7}>
+                {/* <TouchableOpacity onPress={() => setIsFilterVisible(true)} activeOpacity={0.7}>
                     {selectedFilters.length > 0 ? (
                         <IconFilterActive width={40} height={40} />
                     ) : (
                         <IconFilter width={40} height={40} />
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
 
             {/* Content Section */}
@@ -173,8 +171,13 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                     </View>
                 ) : hasData ? (
                     <View style={styles.listContainer}>
-                        {groupedLogs.map(group => (
-                            <TrackingDayCard key={group.id} group={group} style={styles.dayCard} />
+                        {groupedLogs.map((group, index) => (
+                            <TrackingDayCard
+                                key={group.id}
+                                group={group}
+                                isFirst={index === 0}
+                                style={styles.dayCard}
+                            />
                         ))}
                     </View>
                 ) : (
