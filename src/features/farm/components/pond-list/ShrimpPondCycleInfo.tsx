@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     cycleHeader: {
-        backgroundColor: colors.gray[200],
+        backgroundColor: colors.gray[50],
         padding: spacing.sm,
         borderTopLeftRadius: borderRadius.sm,
         borderTopRightRadius: borderRadius.sm,

@@ -14,6 +14,7 @@ import {
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import BarcodeIcon from '@/assets/Icon/IconDevices/Barcode.svg';
 
 const { height } = Dimensions.get('window');
 const CARD_HEIGHT_RATIO = 360 / 812;
@@ -85,10 +86,9 @@ export const ConnectDevice: React.FC<ConnectDeviceProps> = ({
 
                                 <View style={styles.content}>
                                     <TouchableOpacity style={styles.qrSection}>
-                                        <Ionicons
-                                            name="qr-code-outline"
-                                            size={24}
-                                            color={colors.textSecondary}
+                                        <BarcodeIcon
+                                            width={32}
+                                            height={32}
                                             style={{ marginRight: spacing.sm }}
                                         />
                                         <Text style={styles.qrText}>
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         right: 20,
         width: 40,
         height: 40,
-        borderRadius: 8,
+        borderRadius: borderRadius.full,
         backgroundColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',

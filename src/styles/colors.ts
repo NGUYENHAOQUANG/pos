@@ -22,7 +22,7 @@ export const colors = {
     black: '#000000',
     neutral: '#F7FAFD',
     gray: {
-        50: '#F9FAFB',
+        50: '#FAFAF9',
         100: '#F3F4F6',
         200: '#E6E8EC',
         240: '#F0F0F0',
@@ -129,8 +129,8 @@ export const colors = {
 
     // Background colors
     background: '#FFFFFF',
-    backgroundPrimary: '#F0F5FF',
-    //backgroundPrimary: '#FAFAF9',
+    //backgroundPrimary: '#F0F5FF',
+    backgroundPrimary: '#FAFAF9',
     backgroundSecondary: '#F9FAFB',
     backgroundTertiary: '#F3F4F6',
     backgroundButton: '#F9FAFB',

@@ -255,7 +255,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.white,
-        marginTop: spacing.md,
         marginHorizontal: spacing.md,
         marginBottom: spacing.md,
         borderRadius: 16,
