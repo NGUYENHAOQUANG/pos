@@ -118,7 +118,7 @@ export default function ActivitySchedule({
 
                 {/* Nút mở Popup thêm lượt */}
                 <TouchableOpacity style={styles.addBtn} onPress={openAddModal}>
-                    <IconAdd name="add" size={20} color={colors.textSecondary} />
+                    <IconAdd name="add" size={20} color={colors.text} />
                     <Text style={styles.addBtnText}>Thêm lượt</Text>
                 </TouchableOpacity>
             </View>
@@ -218,8 +218,10 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         padding: 16,
+        marginTop: 12,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        borderColor: colors.borderSubtle || colors.gray[100],
     },
     rowItem: {
         flexDirection: 'row',
@@ -227,10 +229,26 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         justifyContent: 'space-between',
     },
-    labelTurn: { fontSize: 14, color: colors.text, fontWeight: '500', width: 45 },
-    timeInputsWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 },
-    timeInput: { flex: 1 },
-    dashSeparator: { marginHorizontal: 8, color: colors.text, fontWeight: '500' },
+    labelTurn: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        width: 45,
+    },
+    timeInputsWrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 8,
+    },
+    timeInput: {
+        flex: 1,
+    },
+    dashSeparator: {
+        marginHorizontal: 8,
+        color: colors.text,
+        fontWeight: '500',
+    },
     deleteButton: {
         width: 40,
         height: 40,
@@ -248,12 +266,17 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 12,
         borderWidth: 1.5,
-        borderColor: colors.gray[300],
-        borderStyle: 'dashed',
+        borderColor: colors.border,
+        borderStyle: 'solid',
         backgroundColor: colors.white,
         marginTop: 4,
     },
-    addBtnText: { fontSize: 14, fontWeight: '400', color: colors.text, marginLeft: 8 },
+    addBtnText: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.text,
+        marginLeft: 8,
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: colors.overlay,
