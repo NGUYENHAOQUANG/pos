@@ -5,6 +5,7 @@ import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionI
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import IconAICheck from '@/assets/Icon/AIcheck.svg';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 
 export interface AIHealthCheckResult {
     totalCount: number;
@@ -29,28 +30,23 @@ interface ShrimpInspectionObservationBoxProps {
     onViewAIDetails?: () => void;
 }
 
-const intestineOptions = ['Đầy', 'Rỗng'];
-const intestineColorOptions = ['Màu thức ăn', 'Màu đen', 'Bất thường'];
-const stoolColorOptions = ['Màu thức ăn', 'Bất thường'];
-const liverOptions = ['Bình thường', 'Bất thường'];
-
-const renderRadioGroup = (options: string[], selected: string, onSelect: (val: string) => void) => (
-    <View style={styles.radioGroup}>
-        {options.map(option => (
-            <TouchableOpacity
-                key={option}
-                style={styles.radioItem}
-                onPress={() => onSelect(option)}
-                activeOpacity={0.8}
-            >
-                <View style={[styles.radioOuter, selected === option && styles.radioOuterSelected]}>
-                    {selected === option && <View style={styles.radioInner} />}
-                </View>
-                <Text style={styles.radioLabel}>{option}</Text>
-            </TouchableOpacity>
-        ))}
-    </View>
-);
+const intestineOptions = [
+    { label: 'Đầy', value: 'Đầy' },
+    { label: 'Rỗng', value: 'Rỗng' },
+];
+const intestineColorOptions = [
+    { label: 'Màu thức ăn', value: 'Màu thức ăn' },
+    { label: 'Màu đen', value: 'Màu đen' },
+    { label: 'Bất thường', value: 'Bất thường' },
+];
+const stoolColorOptions = [
+    { label: 'Màu thức ăn', value: 'Màu thức ăn' },
+    { label: 'Bất thường', value: 'Bất thường' },
+];
+const liverOptions = [
+    { label: 'Bình thường', value: 'Bình thường' },
+    { label: 'Bất thường', value: 'Bất thường' },
+];
 
 export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservationBoxProps> = ({
     intestine,
@@ -74,9 +70,6 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
         onViewAIDetails?.();
     };
 
-    // Parse status into a list if possible (e.g. "Disease A, Disease B")
-    // For specific percentages found in the design, we would need more data from AI.
-    // Currently mapping the total infection rate or splitting status.
     const diseases =
         aiResult?.status && aiResult.status !== 'Khỏe mạnh'
             ? aiResult.status.split(',').map(s => s.trim())
@@ -133,25 +126,53 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
             {/* Đường ruột */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Đường ruột</Text>
-                {renderRadioGroup(intestineOptions, intestine, onIntestineChange)}
+                <RadioButton
+                    options={intestineOptions}
+                    value={intestine}
+                    onValueChange={onIntestineChange}
+                    containerStyle={styles.radioGroup}
+                    itemStyle={styles.radioItem}
+                    gap={0}
+                />
             </View>
 
             {/* Màu đường ruột */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Màu đường ruột</Text>
-                {renderRadioGroup(intestineColorOptions, intestineColor, onIntestineColorChange)}
+                <RadioButton
+                    options={intestineColorOptions}
+                    value={intestineColor}
+                    onValueChange={onIntestineColorChange}
+                    containerStyle={styles.radioGroup}
+                    itemStyle={styles.radioItem}
+                    gap={0}
+                />
             </View>
 
             {/* Màu phân */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Màu phân</Text>
-                {renderRadioGroup(stoolColorOptions, stoolColor, onStoolColorChange)}
+                <RadioButton
+                    options={stoolColorOptions}
+                    value={stoolColor}
+                    onValueChange={onStoolColorChange}
+                    containerStyle={styles.radioGroup}
+                    itemStyle={styles.radioItem}
+                    gap={0}
+                />
             </View>
 
             {/* Gan */}
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Gan</Text>
-                {renderRadioGroup(liverOptions, liver, onLiverChange)}
+                <RadioButton
+                    options={liverOptions}
+                    value={liver}
+                    onValueChange={onLiverChange}
+                    containerStyle={styles.radioGroup}
+                    itemStyle={styles.radioItem}
+                    gap={0}
+                />
             </View>
 
             {/* Detail Modal */}
@@ -167,7 +188,6 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                     />
                     <View style={styles.modalContent}>
                         <View style={styles.modalBody}>
-                            {/* Show aggregated stats if available, otherwise show current record stats */}
                             {aiResult?.items && aiResult.items.length > 0 ? (
                                 Object.entries(
                                     aiResult.items.reduce(
@@ -315,13 +335,9 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     radioGroup: {
-        flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: spacing.sm,
     },
     radioItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
         width: '48%',
         height: 24,
     },
@@ -358,12 +374,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: spacing.md,
     },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: colors.text,
-        marginBottom: spacing.lg,
-    },
     modalBody: {
         width: '100%',
         marginBottom: spacing.lg,
@@ -386,35 +396,5 @@ const styles = StyleSheet.create({
     noInfoText: {
         textAlign: 'center',
         color: colors.textSecondary,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        gap: spacing.md,
-        width: '100%',
-    },
-    modalButtonSecondary: {
-        flex: 1,
-        paddingVertical: 10,
-        borderWidth: 1,
-        borderColor: colors.gray[300],
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-    },
-    modalButtonSecondaryText: {
-        color: colors.text,
-        fontWeight: '600',
-        fontSize: 14,
-    },
-    modalButtonPrimary: {
-        flex: 1,
-        paddingVertical: 10,
-        backgroundColor: colors.primary,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-    },
-    modalButtonPrimaryText: {
-        color: colors.white,
-        fontWeight: '600',
-        fontSize: 14,
     },
 });

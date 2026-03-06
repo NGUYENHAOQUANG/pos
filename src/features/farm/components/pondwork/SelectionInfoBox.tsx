@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 import { colors } from '@/styles';
@@ -17,18 +17,17 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
     style,
     titleStyle,
 }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-
     return (
         <View style={[styles.infoBox, style]}>
             <CollapseHead
                 title={title}
                 titleStyle={titleStyle}
-                isExpanded={isExpanded}
-                onToggle={() => setIsExpanded(!isExpanded)}
-                style={styles.collapseHead}
+                isExpanded={true}
+                // onToggle={() => setIsExpanded(!isExpanded)}
+                // showIcon={true}
+                // style={[styles.collapseHead, !isExpanded && { borderBottomWidth: 0 }]}
             />
-            {isExpanded && <View style={styles.childrenContainer}>{children}</View>}
+            <View style={styles.childrenContainer}>{children}</View>
         </View>
     );
 };
@@ -36,7 +35,8 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
 const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
-        marginTop: 8,
+        marginHorizontal: 16,
+        marginTop: 12,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,

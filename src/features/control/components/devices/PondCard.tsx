@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DevicesItem } from './DevicesItem';
-import { EmptyDeviceState } from '../EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 import { PondDeviceStats } from '../../types/control.types';
 
@@ -9,7 +9,7 @@ import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
 import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
 import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
 import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
-import { colors } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 
 interface PondCardProps {
     pondName: string;
@@ -27,7 +27,7 @@ export const PondCard: React.FC<PondCardProps> = ({
     deviceStats,
 }) => {
     return (
-        <View style={styles.container}>
+        <View style={styles.wrapper}>
             <View style={styles.header}>
                 <Text style={styles.title}>{pondName}</Text>
                 {!isEmpty && (
@@ -42,37 +42,44 @@ export const PondCard: React.FC<PondCardProps> = ({
             </View>
 
             {isEmpty ? (
-                <EmptyDeviceState onAddDevice={onAddDevice} />
+                <EmptyStateCard
+                    message="Chưa có thiết bị nào được thêm."
+                    buttonTitle="Thêm thiết bị"
+                    onPress={onAddDevice}
+                    style={styles.emptyDeviceContainer}
+                />
             ) : (
-                <View style={styles.devicesContainer}>
-                    <DevicesItem
-                        icon={FanIcon}
-                        activeCount={deviceStats?.fan.active}
-                        warningCount={deviceStats?.fan.warning}
-                        inactiveCount={deviceStats?.fan.inactive}
-                        style={styles.deviceItem}
-                    />
-                    <DevicesItem
-                        icon={FeederIcon}
-                        activeCount={deviceStats?.feeder.active}
-                        warningCount={deviceStats?.feeder.warning}
-                        inactiveCount={deviceStats?.feeder.inactive}
-                        style={styles.deviceItem}
-                    />
-                    <DevicesItem
-                        icon={OxyIcon}
-                        activeCount={deviceStats?.oxy.active}
-                        warningCount={deviceStats?.oxy.warning}
-                        inactiveCount={deviceStats?.oxy.inactive}
-                        style={styles.deviceItem}
-                    />
-                    <DevicesItem
-                        icon={SyphonIcon}
-                        activeCount={deviceStats?.syphon.active}
-                        warningCount={deviceStats?.syphon.warning}
-                        inactiveCount={deviceStats?.syphon.inactive}
-                        style={styles.deviceItem}
-                    />
+                <View style={styles.cardContainer}>
+                    <View style={styles.devicesContainer}>
+                        <DevicesItem
+                            icon={FanIcon}
+                            activeCount={deviceStats?.fan.active}
+                            warningCount={deviceStats?.fan.warning}
+                            inactiveCount={deviceStats?.fan.inactive}
+                            style={styles.deviceItem}
+                        />
+                        <DevicesItem
+                            icon={FeederIcon}
+                            activeCount={deviceStats?.feeder.active}
+                            warningCount={deviceStats?.feeder.warning}
+                            inactiveCount={deviceStats?.feeder.inactive}
+                            style={styles.deviceItem}
+                        />
+                        <DevicesItem
+                            icon={OxyIcon}
+                            activeCount={deviceStats?.oxy.active}
+                            warningCount={deviceStats?.oxy.warning}
+                            inactiveCount={deviceStats?.oxy.inactive}
+                            style={styles.deviceItem}
+                        />
+                        <DevicesItem
+                            icon={SyphonIcon}
+                            activeCount={deviceStats?.syphon.active}
+                            warningCount={deviceStats?.syphon.warning}
+                            inactiveCount={deviceStats?.syphon.inactive}
+                            style={styles.deviceItem}
+                        />
+                    </View>
                 </View>
             )}
         </View>
@@ -80,35 +87,25 @@ export const PondCard: React.FC<PondCardProps> = ({
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
+    wrapper: {
         marginHorizontal: 16,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        marginBottom: 24,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.defaultBorder,
-        paddingBottom: 12,
-        paddingHorizontal: 16,
-        marginHorizontal: -16,
+        marginBottom: 12,
     },
     title: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
         color: '#1F2937',
     },
     detailButton: {
-        paddingVertical: 8,
+        paddingVertical: 6,
         paddingHorizontal: 16,
-        borderRadius: 8,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
         backgroundColor: 'white',
@@ -118,6 +115,13 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#374151',
     },
+    cardContainer: {
+        backgroundColor: 'white',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
+    },
     devicesContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -125,5 +129,10 @@ const styles = StyleSheet.create({
     },
     deviceItem: {
         flex: 1,
+    },
+    emptyDeviceContainer: {
+        paddingTop: 0,
+        paddingBottom: 24,
+        paddingHorizontal: 0,
     },
 });

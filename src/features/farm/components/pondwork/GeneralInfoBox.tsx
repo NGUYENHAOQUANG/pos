@@ -36,6 +36,7 @@ import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerAct
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
 
@@ -527,14 +528,13 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Hình ảnh</Text>
 
-                            <TouchableOpacity
-                                style={styles.addImageButtonFull}
+                            <OutlineButton
+                                label="Thêm hình ảnh"
                                 onPress={handleImagePress}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons name="add" size={20} color={colors.textSecondary} />
-                                <Text style={styles.addImageText}>Thêm hình ảnh</Text>
-                            </TouchableOpacity>
+                                prefix={
+                                    <Ionicons name="add" size={20} color={colors.textSecondary} />
+                                }
+                            />
 
                             {imageUris.length > 0 && (
                                 <View style={styles.imagesGrid}>

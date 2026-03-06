@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: typography.fontWeight.semibold,
-        color: colors.text,
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: spacing.md,
         fontFamily: typography.fontFamily.medium,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: spacing.lg,
         fontFamily: typography.fontFamily.regular,
-        lineHeight: 20,
+        lineHeight: 22,
     },
     button: {
         width: '100%',

@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         position: 'absolute',
-        bottom: 4,
+        bottom: 0,
         left: 0,
         right: 0,
         flexDirection: 'row',
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     },
     tabItem: {
         flex: 1,
-        height: 64,
+        height: 50,
         alignItems: 'center',
         justifyContent: 'center',
     },

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
-import { colors } from '@/styles';
+import { borderRadius, colors } from '@/styles';
 import { spacing } from '@/styles/spacing';
 import {
     IconFeed,
@@ -18,6 +18,7 @@ import {
     IconDryingThePond,
     IconHarvest,
     IconWarningOutlined,
+    IconEdit,
 } from '@/assets/icons';
 
 export type JobType =
@@ -191,7 +192,7 @@ export const JobCard: React.FC<JobCardProps> = ({
                                     </View>
                                     {type !== 'TRANSFER_POND' && (
                                         <TouchableOpacity onPress={() => onEditItem?.(item)}>
-                                            <AntDesign name="edit" size={18} color={colors.text} />
+                                            <IconEdit />
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -213,9 +214,9 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: colors.borderDark,
-        borderRadius: 12,
-        marginBottom: 16,
+        borderColor: colors.border,
+        borderRadius: 16,
+        marginBottom: 8,
         overflow: 'hidden',
     },
     header: {
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '500',
         color: colors.text,
         flex: 1,
     },
@@ -249,14 +250,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 4,
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: spacing.md,
+        marginRight: 24,
     },
     addButtonText: {
         fontSize: 20,

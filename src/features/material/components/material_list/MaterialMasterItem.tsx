@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -64,85 +64,82 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
                     <MaterialGroup group={item.group} />
                 </View>
 
-                <View style={styles.separator} />
-
-                {/* Status Field */}
-                {showStatus && (
-                    <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Trạng thái: </Text>
-                        <Text
-                            style={[
-                                styles.detailValue,
-                                { color: item.isActive ? colors.green[600] : colors.red[500] },
-                            ]}
-                        >
-                            {item.isActive ? 'Hoạt động' : 'Ngưng'}
-                        </Text>
-                    </View>
-                )}
-
-                {/* Basic Info Row */}
-                <View style={styles.infoRow}>
-                    <Text style={styles.infoText}>
-                        <Text style={styles.label}>Đơn vị tính: </Text>
-                        {item.unitName || item.unit}
-                    </Text>
-                    {!hideRemaining && (
-                        <Text style={styles.infoText}>
-                            <Text style={styles.label}>Còn: </Text>
-                            {item.remaining}
-                        </Text>
+                <View style={styles.bodyContainer}>
+                    {/* Status Field */}
+                    {showStatus && (
+                        <View style={styles.detailRow}>
+                            <Text style={styles.detailLabel}>Trạng thái: </Text>
+                            <Text
+                                style={[
+                                    styles.detailValue,
+                                    { color: item.isActive ? colors.green[600] : colors.red[500] },
+                                ]}
+                            >
+                                {item.isActive ? 'Hoạt động' : 'Ngưng'}
+                            </Text>
+                        </View>
                     )}
-                </View>
 
-                {/* Expanded Content */}
-                {isExpanded && (
-                    <View>
-                        {!alwaysExpanded && <View style={styles.separatorCenter} />}
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                            <Text style={styles.detailValue}>{item.type || '---'}</Text>
-                        </View>
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailValue}>
-                                <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                                {item.manufacturer || '---'}
+                    {/* Basic Info Row */}
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoText}>
+                            <Text style={styles.label}>Đơn vị tính: </Text>
+                            <Text style={styles.detailValue}>{item.unitName || item.unit}</Text>
+                        </Text>
+                        {!hideRemaining && (
+                            <Text style={styles.infoText}>
+                                <Text style={styles.label}>Còn: </Text>
+                                <Text style={styles.detailValue}>{item.remaining}</Text>
                             </Text>
-                        </View>
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailValue}>
-                                <Text style={styles.detailLabel}>Mô tả:</Text> {item.usage || '---'}
-                            </Text>
-                        </View>
-
-                        {/* Edit Button */}
-                        {onEdit && (
-                            <ButtonMaterialList
-                                title="Sửa thông tin"
-                                onPress={() => onEdit(item)}
-                                style={styles.editButton}
-                            />
                         )}
                     </View>
-                )}
 
-                {/* Expand Toggle */}
-                {!alwaysExpanded && (
-                    <TouchableOpacity
-                        style={styles.expandToggle}
-                        onPress={toggleExpand}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                        <Ionicons
-                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={16}
-                            color={colors.primary}
-                        />
-                    </TouchableOpacity>
-                )}
+                    {/* Expanded Content */}
+                    {isExpanded && (
+                        <View style={{ gap: 12, paddingBottom: alwaysExpanded ? 0 : 12 }}>
+                            {!alwaysExpanded && <View style={styles.separatorCenter} />}
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Loại vật tư: </Text>
+                                <Text style={styles.detailValue}>{item.type || '---'}</Text>
+                            </View>
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
+                                <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
+                            </View>
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Mô tả: </Text>
+                                <Text style={styles.detailValue}>{item.usage || '---'}</Text>
+                            </View>
 
-                {!alwaysExpanded && <View style={styles.separator} />}
+                            {/* Edit Button */}
+                            {onEdit && (
+                                <ButtonMaterialList
+                                    title="Sửa thông tin"
+                                    onPress={() => onEdit(item)}
+                                    style={styles.editButton}
+                                />
+                            )}
+                        </View>
+                    )}
+
+                    {/* Expand Toggle */}
+                    {!alwaysExpanded && (
+                        <TouchableOpacity
+                            style={styles.expandToggle}
+                            onPress={toggleExpand}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.expandText}>
+                                {isExpanded ? 'Thu gọn' : 'Xem thêm'}
+                            </Text>
+                            <Ionicons
+                                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                                size={16}
+                                color={colors.primary}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
         );
     },
@@ -153,51 +150,65 @@ const styles = StyleSheet.create({
     container: {
         marginHorizontal: spacing.md,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.md,
-        padding: spacing.md,
+        borderRadius: 12,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: colors.border,
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: spacing.md,
+        alignItems: 'center',
+        paddingTop: 12,
+        paddingBottom: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        gap: 4,
+    },
+    bodyContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 16,
+        gap: 12,
     },
     name: {
-        fontSize: 18,
-        color: colors.text,
+        fontSize: 14,
+        fontWeight: '600',
+        lineHeight: 20,
+        color: colors.gray[950],
         flex: 1,
-        marginRight: spacing.sm,
     },
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginVertical: 6,
     },
     infoText: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
+        lineHeight: 20,
     },
     label: {
-        fontWeight: '600',
+        fontWeight: '400',
         fontSize: 14,
+        color: colors.gray[500],
     },
     detailRow: {
         flexDirection: 'row',
-        marginVertical: 6,
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
     },
     detailLabel: {
         fontSize: 14,
-        fontWeight: '600',
-        color: colors.text,
+        fontWeight: '400',
+        color: colors.gray[500],
+        lineHeight: 20,
     },
     detailValue: {
         fontSize: 14,
-        color: colors.text,
-        flex: 1,
+        fontWeight: '500',
+        color: colors.gray[950],
+        lineHeight: 20,
     },
     editButton: {
         marginTop: spacing.sm,
@@ -223,12 +234,6 @@ const styles = StyleSheet.create({
     },
     spacer: {
         width: spacing.md,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-        marginVertical: spacing.xs,
     },
     separatorCenter: {
         height: 1,

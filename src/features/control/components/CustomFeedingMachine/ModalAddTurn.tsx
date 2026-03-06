@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
-import Icon from 'react-native-vector-icons/Fontisto';
+import ClockIcon from '@/assets/Icon/IconDevices/Clock.svg';
 import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
 import { colors } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 
 interface ModalAddTurnProps {
-    label?: string;
     value: Date | null;
     onChange: (date: Date) => void;
     placeholder?: string;
@@ -14,7 +13,6 @@ interface ModalAddTurnProps {
 }
 
 export default function ModalAddTurn({
-    label,
     value,
     onChange,
     placeholder = 'chọn thời gian',
@@ -34,8 +32,6 @@ export default function ModalAddTurn({
 
     return (
         <View style={[styles.container, style]}>
-            {label && <Text style={styles.label}>{label}</Text>}
-
             <TouchableOpacity onPress={() => setPickerVisible(true)} activeOpacity={0.7}>
                 <View style={styles.inputContainer}>
                     {value ? (
@@ -61,7 +57,7 @@ export default function ModalAddTurn({
                             }}
                         />
                     )}
-                    <Icon name="clock" size={16} color={colors.gray[400]} style={styles.icon} />
+                    <ClockIcon width={20} height={20} color={colors.text} style={styles.icon} />
                 </View>
             </TouchableOpacity>
 
@@ -81,12 +77,6 @@ export default function ModalAddTurn({
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-    },
-    label: {
-        marginBottom: 6,
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
     },
     inputContainer: {
         flexDirection: 'row',

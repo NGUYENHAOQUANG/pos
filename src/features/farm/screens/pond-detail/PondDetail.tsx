@@ -1,14 +1,14 @@
 import React from 'react';
-import { View, ScrollView, RefreshControl, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, ScrollView, RefreshControl, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, colors, spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
+import { Button } from '@/shared/components/buttons/Button';
 import { PondData, POND_TYPES } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { HeadingFarm } from '@/features/farm/components/HeadingFarm';
-import { PondCycleEmptyState } from '@/features/farm/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
@@ -114,7 +114,12 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                                             />
                                         </View>
                                     ) : (
-                                        <PondCycleEmptyState />
+                                        <EmptyStateCard
+                                            message={
+                                                'Ao chưa có chu kỳ nuôi nào.\nThực hiện các công việc được liệt kê bên dưới để chuẩn bị ao trước khi bắt đầu chu kỳ nuôi.'
+                                            }
+                                            style={styles.emptyCard}
+                                        />
                                     )}
 
                                     <JobListCard
@@ -148,19 +153,12 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                     <View
                         style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}
                     >
-                        <TouchableOpacity
-                            style={styles.startButton}
+                        <Button
+                            title="Bắt đầu chu kỳ nuôi"
                             onPress={onStartCycle}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons
-                                name="add"
-                                size={20}
-                                color={colors.white}
-                                style={styles.startIcon}
-                            />
-                            <Text style={styles.startButtonText}>Bắt đầu chu kỳ nuôi</Text>
-                        </TouchableOpacity>
+                            iconLeft="add"
+                            fullWidth
+                        />
                     </View>
                 )}
 
@@ -197,24 +195,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },
-    startButton: {
-        width: '100%',
-        height: 40,
-        backgroundColor: colors.primary,
-        borderRadius: borderRadius.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    startIcon: {
-        marginRight: spacing.xs,
-    },
-    startButtonText: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.white,
-        lineHeight: 24,
-    },
     placeholderContainer: {
         padding: spacing.xl,
         alignItems: 'center',
@@ -226,5 +206,9 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
         marginBottom: spacing.sm,
         gap: 8,
+    },
+    emptyCard: {
+        marginTop: spacing.lg,
+        marginBottom: spacing.lg,
     },
 });

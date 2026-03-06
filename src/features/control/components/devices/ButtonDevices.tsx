@@ -72,11 +72,5 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: 10,
         backgroundColor: colors.white,
-        // Shadow for thumb
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1,
-        elevation: 2,
     },
 });

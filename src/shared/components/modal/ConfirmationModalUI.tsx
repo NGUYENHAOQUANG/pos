@@ -9,6 +9,8 @@ import {
     TouchableWithoutFeedback,
     Animated,
     Dimensions,
+    StyleProp,
+    ViewStyle,
 } from 'react-native';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { colors, spacing, typography } from '@/styles';
@@ -37,6 +39,10 @@ interface ConfirmationModalUIProps {
     successMessage?: string;
     /** Whether to show success toast after confirm (default: true) */
     showSuccessToast?: boolean;
+    /** Custom style for the cancel button */
+    cancelButtonStyle?: StyleProp<ViewStyle>;
+    /** Custom style for the confirm button */
+    confirmButtonStyle?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -53,6 +59,8 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     cancelText = 'Không',
     successMessage = 'Tác vụ đã được xóa',
     showSuccessToast = true,
+    cancelButtonStyle,
+    confirmButtonStyle,
 }) => {
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -76,15 +84,17 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     }, [visible, slideAnim]);
 
     const handleConfirm = () => {
-        onConfirm();
-        if (showSuccessToast) {
-            Toast.show({
-                type: 'success',
-                text1: successMessage,
-                position: 'top',
-                visibilityTime: 3000,
-            });
-        }
+        setTimeout(() => {
+            onConfirm();
+            if (showSuccessToast) {
+                Toast.show({
+                    type: 'success',
+                    text1: successMessage,
+                    position: 'top',
+                    visibilityTime: 3000,
+                });
+            }
+        }, 300);
     };
 
     return (
@@ -122,14 +132,18 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
                                     title={cancelText}
                                     onPress={onCancel}
                                     variant="outline"
-                                    style={[styles.cancelButton, styles.cancelButtonOverride]}
+                                    style={[
+                                        styles.cancelButton,
+                                        styles.cancelButtonOverride,
+                                        cancelButtonStyle,
+                                    ]}
                                     textStyle={styles.cancelButtonTextOverride}
                                 />
                                 <Button
                                     title={confirmText}
                                     onPress={handleConfirm}
                                     variant="primary"
-                                    style={styles.confirmButton}
+                                    style={[styles.confirmButton, confirmButtonStyle]}
                                 />
                             </View>
                         </Animated.View>

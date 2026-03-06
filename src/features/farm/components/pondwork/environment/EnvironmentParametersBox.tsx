@@ -107,64 +107,64 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 </View>
             )}
             <View>
-                {/* Row 1 */}
-                <View style={styles.row}>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH)}
-                            value={pH}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onPHChange)}
-                        />
-                    </View>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
-                            value={doValue}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onDOChange)}
-                        />
-                    </View>
+                {/* pH */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH, '1-14')}
+                        value={pH}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onPHChange)}
+                    />
                 </View>
 
-                {/* Row 2 */}
-                <View style={styles.row}>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
-                            value={temperature}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onTemperatureChange)}
-                        />
-                    </View>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
-                            value={salinity}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onSalinityChange)}
-                        />
-                    </View>
+                {/* DO */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
+                        value={doValue}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onDOChange)}
+                    />
                 </View>
 
-                {/* Row 3 */}
-                <View style={styles.row}>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
-                            value={alkalinity}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
-                        />
-                    </View>
-                    <View style={styles.column}>
-                        <Input
-                            label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
-                            value={transparency}
-                            keyboardType="default"
-                            onChangeText={text => handleNumericInput(text, onTransparencyChange)}
-                        />
-                    </View>
+                {/* Nhiệt độ */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
+                        value={temperature}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onTemperatureChange)}
+                    />
+                </View>
+
+                {/* Độ mặn */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
+                        value={salinity}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onSalinityChange)}
+                    />
+                </View>
+
+                {/* Độ kiềm */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
+                        value={alkalinity}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
+                    />
+                </View>
+
+                {/* Độ trong */}
+                <View style={styles.fullWidthRow}>
+                    <Input
+                        label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
+                        value={transparency}
+                        keyboardType="default"
+                        onChangeText={text => handleNumericInput(text, onTransparencyChange)}
+                    />
                 </View>
 
                 {/* Advanced Parameters */}

@@ -11,7 +11,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { DropdownMaterial } from '@/features/material/components/DropdownMaterial';
-import { TabType } from '@/features/material/components/material/HeadingMaterial';
+import { TabType } from '@/features/material/screens/material/MaterialView';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -138,7 +138,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     />
                     <TextInput
                         style={styles.input}
-                        placeholder="Tìm kiếm"
+                        placeholder="Tìm kiếm tên vật tư"
                         placeholderTextColor={colors.textSecondary}
                         value={localSearchText}
                         onChangeText={setLocalSearchText}
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 44,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.border,
         paddingHorizontal: spacing.sm,

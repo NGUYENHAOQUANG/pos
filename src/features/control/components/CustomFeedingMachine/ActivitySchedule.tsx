@@ -1,18 +1,9 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Modal,
-    TouchableWithoutFeedback,
-    ViewStyle,
-    TextStyle,
-} from 'react-native';
-import IconTrash from 'react-native-vector-icons/Feather';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import IconAdd from 'react-native-vector-icons/Ionicons';
-import IconClose from 'react-native-vector-icons/Ionicons';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from './ModalAddTurn';
+import { AddTurnModalUI } from './AddTurnModalUI';
 import { colors } from '@/styles';
 
 export interface ScheduleItem {
@@ -35,13 +26,9 @@ export default function ActivitySchedule({
     titleStyle,
 }: ActivityScheduleProps) {
     const [isModalVisible, setModalVisible] = useState(false);
-    const [tempStartTime, setTempStartTime] = useState<Date | null>(null);
-    const [tempEndTime, setTempEndTime] = useState<Date | null>(null);
 
     // Mở modal
     const openAddModal = () => {
-        setTempStartTime(null);
-        setTempEndTime(null);
         setModalVisible(true);
     };
 
@@ -51,11 +38,11 @@ export default function ActivitySchedule({
     };
 
     // Xác nhận thêm từ Modal
-    const handleConfirmAdd = () => {
+    const handleConfirmAdd = (startTime: Date | null, endTime: Date | null) => {
         const newTurn: ScheduleItem = {
             id: Date.now().toString(),
-            startTime: tempStartTime,
-            endTime: tempEndTime,
+            startTime,
+            endTime,
         };
         onUpdateSchedules([...schedules, newTurn]);
         closeAddModal();
@@ -109,8 +96,9 @@ export default function ActivitySchedule({
                         <TouchableOpacity
                             style={styles.deleteButton}
                             onPress={() => handleDeleteTurn(item.id)}
+                            activeOpacity={0.7}
                         >
-                            <IconTrash name="trash" size={20} color={colors.text} />
+                            <DeleteIcon width={20} height={20} color={colors.text} />
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -123,88 +111,26 @@ export default function ActivitySchedule({
             </View>
 
             {/* --- MODAL POPUP --- */}
-            <Modal
+            <AddTurnModalUI
                 visible={isModalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={closeAddModal}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={closeAddModal}
-                >
-                    <TouchableWithoutFeedback>
-                        <View style={styles.modalContent}>
-                            {/* Header Modal */}
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>
-                                    Thêm lượt - Lần {schedules.length + 1}
-                                </Text>
-                                <TouchableOpacity onPress={closeAddModal}>
-                                    <IconClose
-                                        name="close"
-                                        size={20}
-                                        color={colors.textSecondary}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={styles.modalSeparator} />
-
-                            {/* Body Modal */}
-                            <View style={styles.modalBody}>
-                                <View style={styles.halfInput}>
-                                    <ModalAddTurn
-                                        label="Bắt đầu"
-                                        value={tempStartTime}
-                                        onChange={setTempStartTime}
-                                        placeholder="Chọn thời gian"
-                                    />
-                                </View>
-
-                                <View style={styles.spacer12} />
-
-                                <View style={styles.halfInput}>
-                                    <ModalAddTurn
-                                        label="Kết thúc"
-                                        value={tempEndTime}
-                                        onChange={setTempEndTime}
-                                        placeholder="Chọn thời gian"
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.modalSeparator} />
-
-                            {/* Footer Modal */}
-                            <View style={styles.modalFooter}>
-                                <TouchableOpacity
-                                    style={styles.btnModalCancel}
-                                    onPress={closeAddModal}
-                                >
-                                    <Text style={styles.txtModalCancel}>Huỷ bỏ</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.btnModalConfirm}
-                                    onPress={handleConfirmAdd}
-                                >
-                                    <Text style={styles.txtModalConfirm}>Thêm lượt</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                </TouchableOpacity>
-            </Modal>
+                onClose={closeAddModal}
+                onConfirm={handleConfirmAdd}
+                turnIndex={schedules.length + 1}
+            />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { marginTop: 0 },
+    container: {
+        marginTop: 0,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+    },
     headerTitle: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '600',
         color: colors.text,
         marginBottom: 12,
     },
@@ -248,7 +174,7 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8,
+        borderRadius: 999,
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.white,
@@ -306,19 +232,5 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: colors.border,
-        backgroundColor: colors.white,
-    },
-    txtModalCancel: { fontSize: 14, fontWeight: '400', color: colors.text },
-    btnModalConfirm: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-        backgroundColor: colors.primary,
-    },
-    txtModalConfirm: { fontSize: 14, fontWeight: '400', color: colors.white },
-    modalSeparator: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
     },
 });

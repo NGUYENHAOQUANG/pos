@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 
 import { colors, spacing } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { HealthDetectionBox } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
@@ -71,7 +71,7 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
 }) => {
     return (
         <View style={styles.container}>
-            <HeaderFarm type="simple" title="Kiểm tra sức khỏe tôm bằng AI" onBack={onBackPress} />
+            <HeaderSection title="Kiểm tra sức khỏe tôm bằng AI" onBack={onBackPress} />
 
             <Loading isLoading={isLoading}>
                 <ScrollView
@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         padding: 0,
         paddingBottom: 100,
+        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

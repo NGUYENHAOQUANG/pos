@@ -70,15 +70,16 @@ export const PondTypeTag: React.FC<PondTypeTagProps> = ({ type, style }) => {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 8,
-        borderRadius: borderRadius.xs,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         alignSelf: 'flex-start', // Don't stretch
         justifyContent: 'center',
         alignItems: 'center',
+        height: 28,
     },
     text: {
-        fontSize: 12,
-        fontWeight: '400',
+        fontSize: 14,
+        fontWeight: '500',
         lineHeight: 22,
     },
     // Blue - Ao nuôi
@@ -91,11 +92,11 @@ const styles = StyleSheet.create({
     },
     // Orange - Ao vèo
     orange: {
-        backgroundColor: colors.orange[50],
-        borderColor: colors.orange[200],
+        backgroundColor: colors.volcano[100], // Soft pinkish
+        borderColor: colors.volcano[400], // Soft red border
     },
     textOrange: {
-        color: colors.orange[600],
+        color: colors.volcano[600], // Red text
     },
     // Green - Ao sẵn sàng
     green: {

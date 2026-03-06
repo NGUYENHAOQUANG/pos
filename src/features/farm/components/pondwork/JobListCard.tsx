@@ -32,9 +32,8 @@ export const JobListCard: React.FC<JobListCardProps> = ({
 
     return (
         <View style={styles.container}>
-            {/* Date Header inside card */}
+            {/* Date Header standalone */}
             <Text style={styles.dateHeader}>{displayDateLabel}</Text>
-            <View style={styles.headerDivider} />
 
             {/* Job List */}
             <View style={styles.listContainer}>
@@ -57,21 +56,18 @@ export const JobListCard: React.FC<JobListCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
+        // Removed white background to show individual job cards directly on screen background
     },
     listContainer: {
-        padding: spacing.md,
+        paddingTop: spacing.sm,
+        paddingHorizontal: 16,
     },
     dateHeader: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 15,
+        fontWeight: '500',
         color: colors.text,
         paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-    },
-    headerDivider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        width: '100%',
+        marginTop: spacing.md,
+        marginBottom: spacing.xs,
     },
 });

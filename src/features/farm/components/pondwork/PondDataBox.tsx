@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '400',
         fontStyle: 'normal',
-        lineHeight: 14,
+        lineHeight: 20,
         letterSpacing: 0,
         color: colors.textMuted,
     },

@@ -171,7 +171,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
 
             <ShrimpPondInfo
                 status={status}
-                typeValue={typeValue}
                 hasData={hasData}
                 lastUpdate={displayLastUpdate as string | undefined}
                 lastActivity={displayLastActivity as string | undefined}
@@ -222,17 +221,17 @@ const styles = StyleSheet.create({
         padding: spacing.md,
     },
     detailButton: {
-        paddingVertical: spacing.sm,
-        borderRadius: borderRadius.md,
+        paddingVertical: 10,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.primary,
+        borderColor: colors.border,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: colors.white,
     },
     detailButtonText: {
-        color: colors.primary,
-        fontWeight: '400',
-        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        fontSize: 16,
     },
 });

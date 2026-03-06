@@ -1,5 +1,13 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle, View, TouchableOpacity } from 'react-native';
+import {
+    Text,
+    StyleSheet,
+    ViewStyle,
+    TextStyle,
+    View,
+    TouchableOpacity,
+    StyleProp,
+} from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -7,8 +15,8 @@ interface CollapseHeadProps {
     title: string | React.ReactNode;
     isExpanded: boolean;
     onToggle?: () => void;
-    style?: ViewStyle;
-    titleStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    titleStyle?: StyleProp<TextStyle>;
     showIcon?: boolean;
     rightComponent?: React.ReactNode;
 }
@@ -17,7 +25,7 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
     title,
     style,
     titleStyle,
-    isExpanded,
+    isExpanded = true,
     onToggle,
     showIcon = false,
     rightComponent,
@@ -46,8 +54,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
+        paddingTop: 12,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderTopLeftRadius: borderRadius.md,
@@ -56,7 +64,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontWeight: '700',
+        fontWeight: '600',
         lineHeight: 22,
         color: colors.text,
         flex: 1,

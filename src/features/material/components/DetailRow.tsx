@@ -8,6 +8,7 @@ export interface DetailRowProps {
     labelStyle?: StyleProp<TextStyle>;
     valueStyle?: StyleProp<TextStyle>;
     style?: StyleProp<ViewStyle>;
+    isSpaceBetween?: boolean;
 }
 
 export const DetailRow: React.FC<DetailRowProps> = ({
@@ -16,12 +17,13 @@ export const DetailRow: React.FC<DetailRowProps> = ({
     labelStyle,
     valueStyle,
     style,
+    isSpaceBetween = true,
 }) => {
     const display = value !== null && value !== undefined && value !== '' ? value : '---';
 
     return (
-        <View style={[styles.detailRow, style]}>
-            <Text style={[styles.detailLabel, labelStyle]}>{label} </Text>
+        <View style={[styles.detailRow, isSpaceBetween && styles.detailRowSpaceBetween, style]}>
+            <Text style={[styles.detailLabel, labelStyle]}>{label}</Text>
             {typeof display === 'string' || typeof display === 'number' ? (
                 <Text style={[styles.detailValue, valueStyle]}>{display}</Text>
             ) : (
@@ -34,19 +36,25 @@ export const DetailRow: React.FC<DetailRowProps> = ({
 const styles = StyleSheet.create({
     detailRow: {
         flexDirection: 'row',
+        alignItems: 'flex-start',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        alignItems: 'center',
     },
     detailLabel: {
         fontWeight: '400',
         fontSize: 14,
-        color: colors.text,
-        flex: 1,
+        color: colors.gray[500],
+        lineHeight: 20,
     },
     detailValue: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[950],
         fontWeight: '500',
+        lineHeight: 20,
+    },
+    detailLabelSpaceBetween: {
+        flex: 1,
+    },
+    detailRowSpaceBetween: {
+        justifyContent: 'space-between',
     },
 });

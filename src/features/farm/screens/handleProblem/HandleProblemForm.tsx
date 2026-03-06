@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors, borderRadius } from '@/styles';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { colors } from '@/styles';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox, GeneralInfoBoxRef } from '../../components/pondwork/GeneralInfoBox';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
@@ -12,7 +12,7 @@ import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox'
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { Loading } from '@/shared/components/ui/Loading';
-import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 import { handleProblemSchema, HandleProblemFormValues } from '../../schemas/handleProblemSchema';
@@ -103,19 +103,13 @@ export const HandleProblemForm = ({
     return (
         <Loading isLoading={isSaving}>
             <View style={styles.container}>
-                <HeaderFarm
-                    type="simple"
+                <HeaderSection
                     title={isEditMode ? `Chỉnh sửa ${title.toLowerCase()}` : title}
                     onBack={onBack}
-                    rightAction={
+                    rightComponent={
                         isEditMode ? (
-                            <TouchableOpacity
-                                onPress={() => setShowDeleteModal(true)}
-                                style={styles.headerDeleteButton}
-                            >
-                                <DeleteIcon width={20} height={20} color={colors.red[900]} />
-                            </TouchableOpacity>
-                        ) : null
+                            <DeleteButton onPress={() => setShowDeleteModal(true)} />
+                        ) : undefined
                     }
                 />
 
@@ -198,17 +192,6 @@ export const HandleProblemForm = ({
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.backgroundPrimary },
-    scrollContent: { paddingBottom: 100 },
-
-    headerDeleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.red[900],
-        backgroundColor: colors.white,
-    },
+    scrollContent: { paddingBottom: 100, gap: 8 },
     spacer: { height: 80 },
 });
