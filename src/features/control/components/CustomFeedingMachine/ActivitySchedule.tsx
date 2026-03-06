@@ -123,10 +123,13 @@ export default function ActivitySchedule({
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 0,
+        backgroundColor: colors.white,
+        padding: 16,
+        marginTop: 8,
+        marginHorizontal: 16,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 16,
+        borderRadius: 12,
     },
     headerTitle: {
         fontSize: 16,
@@ -134,19 +137,11 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 12,
     },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
+
     card: {
         backgroundColor: colors.white,
-        padding: 16,
-        marginTop: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.borderSubtle || colors.gray[100],
+        padding: 0,
+        marginTop: 0,
     },
     rowItem: {
         flexDirection: 'row',

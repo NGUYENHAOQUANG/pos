@@ -73,8 +73,8 @@ export const HeadingBar: React.FC<HeadingBarProps> = ({
 
 const styles = StyleSheet.create({
     backgroundWrapper: {
-        height: 44,
-        backgroundColor: colors.gray[200],
+        height: 40,
+        backgroundColor: colors.gray[100],
         borderRadius: borderRadius.full,
         marginHorizontal: spacing.md,
         padding: 4,

@@ -241,7 +241,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         <View style={styles.headerRightContainer}>
             <TouchableOpacity
                 ref={buttonRef}
-                style={[styles.addButton, showAddPopup && styles.addButtonActive]}
+                style={styles.addButton}
                 onPress={handleAddButtonPress}
                 activeOpacity={0.7}
             >
