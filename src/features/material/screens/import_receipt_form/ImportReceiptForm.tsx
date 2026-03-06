@@ -81,6 +81,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                     materialName: '',
                     quantity: '',
                     price: '',
+                    unit: '',
                 },
             ],
         },
@@ -284,7 +285,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F0F5FF',
+        backgroundColor: colors.backgroundPrimary,
     },
     content: {
         flex: 1,

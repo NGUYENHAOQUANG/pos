@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 import { formatDateTime, FormatDateTimeOptions } from '@/features/farm/utils/dateUtils';
@@ -162,7 +162,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
 
 const styles = StyleSheet.create({
     inputGroup: {
-        gap: spacing.sm,
+        gap: 6,
     },
     labelWrapper: {
         flexDirection: 'row',
@@ -171,9 +171,9 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
         color: colors.text,
-        lineHeight: 22,
+        lineHeight: 20,
     },
     required: {
         color: colors.error,

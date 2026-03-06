@@ -330,8 +330,9 @@ export const FileUploader = React.forwardRef<FileUploaderRef, FileUploaderProps>
 const styles = StyleSheet.create({
     label: {
         fontSize: 14,
+        fontWeight: '500',
         color: colors.text,
-        marginBottom: 8,
+        marginBottom: 6,
     },
     uploadButton: {
         flexDirection: 'row',

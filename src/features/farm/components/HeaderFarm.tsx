@@ -200,9 +200,12 @@ export const HeaderFarm = ({
             <View style={[styles.listContainer, { paddingTop: insets.top + 12 }]}>
                 <Text style={styles.listTitle}>Trại nuôi</Text>
                 <View style={styles.dropdownRow}>
-                    <View style={styles.listLeftContainer}>
-                        <DropdownHeaderButton data={data} value={value} onSelect={onSelect} />
-                    </View>
+                    <DropdownHeaderButton
+                        data={data}
+                        value={value}
+                        onSelect={onSelect}
+                        style={{ flex: 1 }}
+                    />
                     <View ref={buttonRef} collapsable={false}>
                         <MoreButton onPress={onMenuPress || openMenu} />
                     </View>
@@ -242,13 +245,14 @@ const styles = StyleSheet.create({
     dropdownRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: 12,
     },
     detailHeaderContainer: {
         backgroundColor: 'transparent',
         borderBottomWidth: 0,
     },
     listLeftContainer: {
+        flex: 1,
         flexDirection: 'row',
     },
 

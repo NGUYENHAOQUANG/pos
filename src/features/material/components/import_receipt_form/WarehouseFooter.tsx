@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { borderRadius, colors, spacing } from '@/styles';
+import { View, StyleSheet, Text } from 'react-native';
+import { colors, spacing } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface WarehouseFooterProps {
     safeBottom: number;
@@ -23,13 +24,13 @@ export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
                 <Text style={styles.totalValue}>{formatCurrency(totalAmount)} </Text>
             </View>
             <View style={styles.buttonRow}>
-                <TouchableOpacity style={styles.draftButton} onPress={onSaveDraft}>
-                    <Text style={styles.draftButtonText}>Lưu Nháp</Text>
-                </TouchableOpacity>
-                <View style={{ width: spacing.md }} />
-                <TouchableOpacity style={styles.submitButton} onPress={onSubmit}>
-                    <Text style={styles.submitButtonText}>Gửi Phiếu</Text>
-                </TouchableOpacity>
+                <View style={styles.buttonWrapper}>
+                    <Button title="Lưu Nháp" variant="outline" onPress={onSaveDraft} />
+                </View>
+                <View style={styles.buttonSpacer} />
+                <View style={styles.buttonWrapper}>
+                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                </View>
             </View>
         </View>
     );
@@ -62,32 +63,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    draftButton: {
+    buttonWrapper: {
         flex: 1,
-        height: 40,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.blue[600],
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
-    draftButtonText: {
-        fontSize: 16,
-        fontWeight: '400',
-        color: colors.blue[600],
-    },
-    submitButton: {
-        flex: 1,
-        height: 40,
-        borderRadius: borderRadius.full,
-        backgroundColor: colors.blue[600],
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    submitButtonText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: colors.white,
+    buttonSpacer: {
+        width: spacing.md,
     },
 });

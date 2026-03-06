@@ -26,8 +26,12 @@ const StatusItem: React.FC<StatusItemProps> = ({
             },
         ]}
     >
-        <Text style={[styles.label, { color: valueColor }]}>{label}</Text>
-        <Text style={[styles.value, { color: valueColor }]}>{value}</Text>
+        <Text style={[styles.label, { color: valueColor }]} numberOfLines={1}>
+            {label}
+        </Text>
+        <Text style={[styles.value, { color: valueColor }]} numberOfLines={1}>
+            {value}
+        </Text>
     </View>
 );
 

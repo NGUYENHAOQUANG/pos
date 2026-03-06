@@ -61,7 +61,7 @@ export const WarehouseInformation: React.FC<WarehouseInformationProps> = ({
                         value={supplier}
                         options={supplierOptions}
                         onChange={onSupplierChange}
-                        placeholder="Chọn nhà cung cấp"
+                        placeholder="Nhập nhà cung cấp"
                         showAllOption={false}
                         isOpen={isDropdownOpen}
                         onToggle={() => setIsDropdownOpen(!isDropdownOpen)}
