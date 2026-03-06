@@ -60,6 +60,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
             {/* Lượng thức ăn cho vào nhá */}
             <Input
                 label="Lượng thức ăn cho vào nhá (g)"
+                placeholder="Nhập lượng thức ăn vào đây nhá"
                 value={foodAmount}
                 onChangeText={handleFoodAmountChange}
                 keyboardType="numeric"
@@ -108,13 +109,13 @@ const styles = StyleSheet.create({
         marginRight: spacing.xs,
     },
     radioOuterSelected: {
-        borderColor: colors.primary,
+        borderColor: colors.primaryOrange,
     },
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryOrange,
     },
     radioLabel: {
         fontSize: 14,

@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
     },
     title: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '700',
         lineHeight: 22,
         color: colors.text,

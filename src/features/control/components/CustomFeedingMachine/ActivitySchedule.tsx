@@ -84,7 +84,6 @@ export default function ActivitySchedule({
         <View style={[styles.container, style]}>
             <View style={styles.card}>
                 <Text style={[styles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
-                <View style={styles.fullWidthDivider} />
 
                 {/* Danh sách các lượt đã thêm */}
                 {schedules.map((item, index) => (
@@ -209,12 +208,7 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 12,
     },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
+
     card: {
         backgroundColor: colors.white,
         padding: 16,

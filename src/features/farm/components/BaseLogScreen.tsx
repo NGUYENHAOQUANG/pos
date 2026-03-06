@@ -8,7 +8,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { TrackingGroup, TrackingDayCard } from '@/features/farm/components/TrackingList';
-import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 

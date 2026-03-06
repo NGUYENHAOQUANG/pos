@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 48,
         borderWidth: 1,
-        borderColor: colors.borderLight,
+        borderColor: colors.border,
         borderRadius: borderRadius.full,
         flexDirection: 'row',
         justifyContent: 'center',
@@ -750,13 +750,13 @@ const styles = StyleSheet.create({
         marginRight: spacing.xs,
     },
     radioOuterSelected: {
-        borderColor: colors.primary,
+        borderColor: colors.primaryOrange,
     },
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryOrange,
     },
     radioLabel: {
         fontSize: 14,

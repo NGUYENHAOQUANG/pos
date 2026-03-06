@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import {
     GeneralInfoBox,
@@ -150,9 +150,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundPrimary,
     },
     scrollContent: {
-        paddingVertical: 16,
+        paddingHorizontal: spacing.md,
         paddingBottom: 100,
-        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

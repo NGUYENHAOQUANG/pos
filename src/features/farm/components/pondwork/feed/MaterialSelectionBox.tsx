@@ -119,12 +119,6 @@ const styles = StyleSheet.create({
     materialList: {
         gap: spacing.md,
     },
-    divider: {
-        height: 1,
-        marginTop: 4,
-        backgroundColor: colors.gray[100],
-        marginHorizontal: -spacing.md,
-    },
     materialItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',

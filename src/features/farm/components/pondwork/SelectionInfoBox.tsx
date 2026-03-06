@@ -26,8 +26,7 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
                 titleStyle={titleStyle}
                 isExpanded={isExpanded}
                 onToggle={() => setIsExpanded(!isExpanded)}
-                // showIcon={true}
-                // style={[styles.collapseHead, !isExpanded && { borderBottomWidth: 0 }]}
+                style={styles.collapseHead}
             />
             {isExpanded && <View style={styles.childrenContainer}>{children}</View>}
         </View>
@@ -37,17 +36,15 @@ export const SelectionInfoBox: React.FC<SelectionInfoBoxProps> = ({
 const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
-        marginTop: 12,
+        marginTop: 8,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,
     },
     collapseHead: {
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-        backgroundColor: colors.transparent,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 4,
     },
     childrenContainer: {
         padding: 16,

@@ -116,7 +116,6 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 {!isEditMode && (
                     <View style={styles.card}>
                         <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                        <View style={styles.fullWidthDivider} />
 
                         <View style={styles.infoBox}>
                             <InfoIcon
@@ -228,7 +227,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.white,
         padding: 16,
-        marginTop: 12,
+        marginTop: 8,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.borderSubtle || colors.gray[100],
@@ -240,12 +239,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.text,
         marginBottom: 12,
-    },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
     },
     radioGroup: {
         flexDirection: 'row',

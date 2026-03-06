@@ -10,11 +10,13 @@ import PlusIcon from '@/assets/Icon/Plus.svg';
  */
 export interface EmptyStateCardProps {
     /** Message to display under the empty state icon */
-    message: string;
+    message?: string;
+    /** Description for the empty state */
+    description?: string;
     /** Title for the action button */
-    buttonTitle: string;
+    buttonTitle?: string;
     /** Callback when the action button is pressed */
-    onPress: () => void;
+    onPress?: () => void;
     /** Optional extra style for the action button */
     buttonStyle?: ViewStyle;
     /** Optional extra style for the container */
@@ -35,6 +37,7 @@ export interface EmptyStateCardProps {
  */
 export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
     message,
+    description,
     buttonTitle,
     onPress,
     buttonStyle,
@@ -48,17 +51,20 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
             </View>
 
             {/* Descriptive message */}
-            <Text style={styles.text}>{message}</Text>
+            {message && <Text style={styles.title}>{message}</Text>}
+            {description && <Text style={styles.description}>{description}</Text>}
 
             {/* Primary action button with Plus icon */}
-            <Button
-                title={buttonTitle}
-                onPress={onPress}
-                variant="primary"
-                size="medium"
-                style={StyleSheet.flatten([styles.button, buttonStyle])}
-                renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
-            />
+            {buttonTitle && onPress && (
+                <Button
+                    title={buttonTitle}
+                    onPress={onPress}
+                    variant="primary"
+                    size="medium"
+                    style={StyleSheet.flatten([styles.button, buttonStyle])}
+                    renderLeftIcon={<PlusIcon width={16} height={16} color="white" />}
+                />
+            )}
         </View>
     );
 };
@@ -72,13 +78,23 @@ const styles = StyleSheet.create({
     iconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: spacing.md,
     },
-    text: {
-        fontSize: 14,
+    title: {
+        fontSize: 16,
+        fontWeight: typography.fontWeight.semibold,
         color: colors.text,
         textAlign: 'center',
         marginBottom: spacing.md,
+        fontFamily: typography.fontFamily.medium,
+    },
+    description: {
+        fontSize: 14,
+        color: colors.textSecondary || colors.text,
+        textAlign: 'center',
+        marginBottom: spacing.lg,
         fontFamily: typography.fontFamily.regular,
+        lineHeight: 20,
     },
     button: {
         width: '100%',

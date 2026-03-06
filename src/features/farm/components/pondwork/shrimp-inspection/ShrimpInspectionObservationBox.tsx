@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import IconAICheck from '@/assets/Icon/AIcheck.svg';
 
 export interface AIHealthCheckResult {
     totalCount: number;
@@ -119,9 +121,13 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                     </>
                 ) : null}
 
-                <TouchableOpacity style={styles.aiButton} onPress={onAICheckPress}>
-                    <Text style={styles.aiButtonText}>Kiểm tra sức khỏe tôm bằng AI</Text>
-                </TouchableOpacity>
+                <OutlineButton
+                    label="Kiểm tra sức khỏe tôm bằng AI"
+                    onPress={onAICheckPress || (() => {})}
+                    prefix={<IconAICheck width={20} height={20} />}
+                    style={styles.aiButton}
+                    labelStyle={styles.aiButtonText}
+                />
             </View>
 
             {/* Đường ruột */}
@@ -227,8 +233,8 @@ const styles = StyleSheet.create({
     },
     aiResultBox: {
         borderWidth: 1,
-        borderColor: colors.text,
-        borderRadius: borderRadius.sm,
+        borderColor: colors.border,
+        borderRadius: borderRadius.md,
         padding: spacing.md,
         marginBottom: spacing.xs,
         backgroundColor: colors.gray[50],
@@ -289,14 +295,13 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     aiButton: {
-        backgroundColor: colors.blue[50],
-        paddingVertical: 12,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: colors.white,
+        borderColor: colors.border,
+        borderRadius: borderRadius.full,
+        borderWidth: 1.5,
     },
     aiButtonText: {
-        color: colors.primary,
+        color: colors.text,
         fontSize: 14,
         fontWeight: '500',
     },
@@ -331,13 +336,13 @@ const styles = StyleSheet.create({
         marginRight: spacing.xs,
     },
     radioOuterSelected: {
-        borderColor: colors.primary,
+        borderColor: colors.primaryOrange,
     },
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryOrange,
     },
     radioLabel: {
         fontSize: 14,

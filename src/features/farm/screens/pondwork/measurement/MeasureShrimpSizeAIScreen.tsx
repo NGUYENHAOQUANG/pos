@@ -13,6 +13,7 @@ import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import { apiClient } from '@/core/api/client';
@@ -447,15 +448,18 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 </ImageUpload>
                             </View>
                             <View style={styles.actionButtons}>
-                                <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-                                    <Text style={styles.resetButtonText}>Đo lại</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.actionButton}
+                                <OutlineButton
+                                    label="Đo lại"
+                                    onPress={handleReset}
+                                    style={styles.resetButton}
+                                    labelStyle={styles.resetButtonText}
+                                />
+                                <OutlineButton
+                                    label="Lấy kết quả đo"
                                     onPress={handleGetCount}
-                                >
-                                    <Text style={styles.actionButtonText}>Lấy kết quả đo</Text>
-                                </TouchableOpacity>
+                                    style={styles.actionButton}
+                                    labelStyle={styles.actionButtonText}
+                                />
                             </View>
 
                             <Text style={styles.countText}>Số lần đo: {countTimes}</Text>
@@ -595,12 +599,13 @@ const styles = StyleSheet.create({
         marginTop: spacing.xs,
     },
     summaryBox: {
-        backgroundColor: colors.blue[50], // Light purple/blue background
+        backgroundColor: colors.neutral,
         borderRadius: borderRadius.md,
         borderWidth: 1,
-        borderColor: colors.blue[200],
+        borderColor: colors.defaultBorder,
         padding: spacing.md,
         marginTop: 12,
+        gap: 4,
     },
     summaryRow: {
         flexDirection: 'row',
@@ -617,7 +622,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     disclaimer: {
-        fontSize: 12,
+        fontSize: 14,
         color: colors.textSecondary,
         marginTop: spacing.xs,
         fontStyle: 'italic',
@@ -647,33 +652,23 @@ const styles = StyleSheet.create({
     },
     resetButton: {
         flex: 1,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.gray[300],
-        borderRadius: borderRadius.sm,
-        paddingVertical: spacing.xs,
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: 48,
+        borderRadius: borderRadius.full,
     },
     resetButtonText: {
         fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
+        color: colors.textSecondary,
+        fontWeight: '400',
     },
     actionButton: {
         flex: 1,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.gray[300],
-        borderRadius: borderRadius.sm,
-        paddingVertical: spacing.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: 48,
+        borderRadius: borderRadius.full,
     },
     actionButtonText: {
         fontSize: 14,
-        color: colors.text,
-        fontWeight: '500',
+        color: colors.textSecondary,
+        fontWeight: '400',
     },
     countText: {
         fontSize: 16,

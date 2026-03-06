@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     disclaimer: {
-        fontSize: 12,
+        fontSize: 14,
         color: colors.textSecondary,
         marginTop: spacing.xs,
         fontStyle: 'italic',
