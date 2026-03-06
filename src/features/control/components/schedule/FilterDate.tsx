@@ -88,8 +88,9 @@ const styles = StyleSheet.create({
         height: 40,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 10,
+        justifyContent: 'flex-start',
+        paddingLeft: 16,
+        paddingRight: 10,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: colors.border,
@@ -98,9 +99,9 @@ const styles = StyleSheet.create({
     dateText: {
         fontSize: 16,
         color: colors.text,
-        fontWeight: '400',
+        fontWeight: '500',
         flexShrink: 1,
-        textAlign: 'center',
+        textAlign: 'left',
     },
     icon: {
         position: 'absolute',

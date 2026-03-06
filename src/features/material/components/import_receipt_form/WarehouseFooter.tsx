@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
     draftButton: {
         flex: 1,
         height: 40,
-        borderColor: colors.blue[600],
+        borderColor: colors.border,
     },
     draftButtonText: {
         fontSize: 16,
         fontWeight: '500',
-        color: colors.blue[600],
+        color: colors.text,
     },
     submitButton: {
         flex: 1,

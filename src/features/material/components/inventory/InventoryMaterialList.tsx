@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    UIManager,
-    Platform,
-} from 'react-native';
+import { View, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import { Button } from '@/shared/components/buttons/Button';
 import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { InventoryMaterialItem } from '@/features/material/components/inventory_list/InventoryMaterialItem';
@@ -99,14 +92,15 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                         );
                     })}
 
-                    <TouchableOpacity
-                        style={styles.addButton}
+                    <Button
+                        title="Thêm vật tư"
+                        variant="outline"
                         onPress={onAddItem}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="add" size={24} color={colors.textSecondary} />
-                        <Text style={styles.addButtonText}>Thêm vật tư</Text>
-                    </TouchableOpacity>
+                        renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                        fullWidth
+                        style={styles.addButton}
+                        textStyle={styles.addButtonText}
+                    />
                 </View>
             )}
         </View>
@@ -127,22 +121,12 @@ const styles = StyleSheet.create({
         zIndex: 2,
     },
     addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
         borderColor: colors.border,
-        borderStyle: 'dashed',
-        borderRadius: borderRadius.md,
         marginTop: spacing.xs,
-        zIndex: 1,
     },
     addButtonText: {
         fontSize: 15,
         color: colors.text,
-        marginLeft: spacing.xs,
         fontWeight: '500',
     },
 });

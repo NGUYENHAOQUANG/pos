@@ -8,8 +8,9 @@ import {
     UIManager,
     Platform,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Button } from '@/shared/components/buttons/Button';
 import { DropdownMaterial, DropdownOption } from './DropdownMaterial';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
@@ -220,14 +221,15 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                     );
                 })}
 
-                <TouchableOpacity
-                    style={styles.addButton}
+                <Button
+                    title="Thêm vật tư"
+                    variant="outline"
                     onPress={onAddMaterial}
-                    activeOpacity={0.7}
-                >
-                    <Ionicons name="add" size={24} color={colors.textSecondary} />
-                    <Text style={styles.addButtonText}>Thêm vật tư</Text>
-                </TouchableOpacity>
+                    renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                    fullWidth
+                    style={styles.addButton}
+                    textStyle={styles.addButtonText}
+                />
             </View>
         </View>
     );
@@ -357,22 +359,12 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: spacing.md,
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderStyle: 'dashed',
-        borderRadius: borderRadius.md,
+        borderColor: colors.border,
         marginTop: spacing.xs,
-        zIndex: 1,
     },
     addButtonText: {
         fontSize: 15,
         color: colors.text,
-        marginLeft: spacing.xs,
         fontWeight: '500',
     },
     // Styles for stock info
