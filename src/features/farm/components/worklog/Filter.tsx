@@ -7,13 +7,14 @@ import {
     TouchableOpacity,
     ScrollView,
     Platform,
+    Animated,
+    Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { IconCheckUnactive } from '@/assets/icons';
-import IconCheckActiveOrange from '@/assets/Icon/CheckActive-Orange.svg';
+import { Checkbox } from '@/shared/components/forms/Checkbox';
 
 interface FilterOption {
     label: string;
@@ -36,12 +37,28 @@ export const Filter: React.FC<FilterProps> = ({
     availableOptions = [],
 }) => {
     const [selectedTypes, setSelectedTypes] = useState<string[]>(initialSelectedTypes);
+    const slideAnim = React.useRef(new Animated.Value(Dimensions.get('window').height)).current;
 
     useEffect(() => {
         if (visible) {
             setSelectedTypes(initialSelectedTypes);
+            // Slide up animation
+            slideAnim.setValue(Dimensions.get('window').height);
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            // Slide down animation
+            Animated.timing(slideAnim, {
+                toValue: Dimensions.get('window').height,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
         }
-    }, [visible, initialSelectedTypes]);
+    }, [visible, initialSelectedTypes, slideAnim]);
 
     // Use availableOptions for rendering
     const optionsToRender = availableOptions;
@@ -85,14 +102,16 @@ export const Filter: React.FC<FilterProps> = ({
 
     if (optionsToRender.length === 0) {
         return (
-            <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+            <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
                 <View style={styles.overlay}>
                     <TouchableOpacity
                         style={styles.overlayTouchable}
                         activeOpacity={1}
                         onPress={onClose}
                     />
-                    <View style={styles.container}>
+                    <Animated.View
+                        style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
+                    >
                         {/* Header */}
                         <View style={headerStyle}>
                             <Text style={styles.headerTitle}>Bộ lọc</Text>
@@ -111,14 +130,14 @@ export const Filter: React.FC<FilterProps> = ({
                                 Không có lựa chọn nào để lọc
                             </Text>
                         </View>
-                    </View>
+                    </Animated.View>
                 </View>
             </Modal>
         );
     }
 
     return (
-        <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <View style={styles.overlay}>
                 {/* Close modal when tapping on overlay */}
                 <TouchableOpacity
@@ -127,7 +146,9 @@ export const Filter: React.FC<FilterProps> = ({
                     onPress={onClose}
                 />
 
-                <View style={styles.container}>
+                <Animated.View
+                    style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
+                >
                     {/* Header */}
                     <View style={headerStyle}>
                         <TouchableOpacity onPress={handleReset} style={styles.headerSide}>
@@ -149,35 +170,25 @@ export const Filter: React.FC<FilterProps> = ({
                         <Text style={styles.sectionTitle}>Loại công việc</Text>
                         <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
                             {/* Select All */}
-                            <TouchableOpacity
+                            <Checkbox
+                                checked={isAllSelected}
+                                onToggle={handleToggleAll}
+                                label="Chọn tất cả"
                                 style={styles.checkboxRow}
-                                onPress={handleToggleAll}
-                                activeOpacity={0.7}
-                            >
-                                {isAllSelected ? (
-                                    <IconCheckActiveOrange width={16} height={16} />
-                                ) : (
-                                    <IconCheckUnactive width={16} height={16} />
-                                )}
-                                <Text style={styles.checkboxLabel}>Chọn tất cả</Text>
-                            </TouchableOpacity>
+                                labelStyle={styles.checkboxLabel}
+                            />
                             {/* Work Types List */}
                             {optionsToRender.map(option => {
                                 const isSelected = selectedTypes.includes(option.value);
                                 return (
-                                    <TouchableOpacity
+                                    <Checkbox
                                         key={option.value}
+                                        checked={isSelected}
+                                        onToggle={() => handleToggleType(option.value)}
+                                        label={option.label}
                                         style={styles.checkboxRow}
-                                        onPress={() => handleToggleType(option.value)}
-                                        activeOpacity={0.7}
-                                    >
-                                        {isSelected ? (
-                                            <IconCheckActiveOrange width={16} height={16} />
-                                        ) : (
-                                            <IconCheckUnactive width={16} height={16} />
-                                        )}
-                                        <Text style={styles.checkboxLabel}>{option.label}</Text>
-                                    </TouchableOpacity>
+                                        labelStyle={styles.checkboxLabel}
+                                    />
                                 );
                             })}
                         </ScrollView>
@@ -195,7 +206,7 @@ export const Filter: React.FC<FilterProps> = ({
                             marginTop: spacing.sm,
                         }}
                     />
-                </View>
+                </Animated.View>
             </View>
         </Modal>
     );
@@ -216,9 +227,9 @@ const styles = StyleSheet.create({
         width: '94%',
         backgroundColor: colors.white,
         borderRadius: 24,
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.sm,
         maxHeight: '80%',
     },
     header: {
