@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
+import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { Input } from '@/shared/components/forms/Input';
 import { numericStringSchema } from '@/shared/utils/validation';
@@ -41,13 +41,9 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                         <Text style={styles.materialHeaderTitle}>Vật tư {index + 1}</Text>
                         <TouchableOpacity
                             onPress={() => onRemoveItem(item.id)}
-                            style={styles.removeButton}
+                            style={styles.trashButton}
                         >
-                            <Ionicons
-                                name="close-circle-outline"
-                                size={24}
-                                color={colors.red[500]}
-                            />
+                            <TrashIcon width={16} height={16} color={colors.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -69,32 +65,28 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                         </View>
 
                         {/* Stock Info */}
-                        <View style={[styles.row, styles.zIndexNormal]}>
-                            <View style={styles.col}>
+                        <View style={styles.zIndexNormal}>
+                            <View style={styles.stockRow}>
                                 <Text style={styles.label}>Tồn kho cũ:</Text>
                                 <Text style={styles.oldStockValue}>
                                     {item.oldStock} {item.unit || ''}
                                 </Text>
                             </View>
 
-                            <View style={styles.dividerVertical} />
-
-                            <View style={styles.col}>
-                                <Input
-                                    label="Tồn kho mới"
-                                    required
-                                    value={item.newStock}
-                                    onChangeText={val => {
-                                        const normalizedText = val.replace(/,/g, '.');
-                                        if (numericStringSchema.safeParse(normalizedText).success) {
-                                            onUpdateItem(item.id, 'newStock', normalizedText);
-                                        }
-                                    }}
-                                    keyboardType="numeric"
-                                    containerStyle={styles.noMarginBottom}
-                                    suffix={item.unit}
-                                />
-                            </View>
+                            <Input
+                                label="Tồn kho mới"
+                                required
+                                value={item.newStock}
+                                onChangeText={val => {
+                                    const normalizedText = val.replace(/,/g, '.');
+                                    if (numericStringSchema.safeParse(normalizedText).success) {
+                                        onUpdateItem(item.id, 'newStock', normalizedText);
+                                    }
+                                }}
+                                keyboardType="numeric"
+                                containerStyle={styles.noMarginBottom}
+                                suffix={item.unit}
+                            />
                         </View>
 
                         {/* Difference Footer */}
@@ -135,7 +127,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         borderBottomWidth: 1,
         borderBottomColor: colors.gray[240],
-        backgroundColor: colors.backgroundSecondary,
+        backgroundColor: colors.backgroundPrimary,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
     },
@@ -144,8 +136,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text,
     },
-    removeButton: {
-        padding: 4,
+    trashButton: {
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.gray[200],
+        backgroundColor: colors.white,
     },
     content: {
         padding: spacing.md,
@@ -158,34 +157,27 @@ const styles = StyleSheet.create({
         gap: spacing.lg,
         marginBottom: 12,
     },
-    col: {
-        flex: 1,
-    },
-    dividerVertical: {
-        width: 1,
-        height: '100%',
-        backgroundColor: colors.gray[100],
+    stockRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
     },
     label: {
         fontSize: 14,
-        color: colors.text,
-        marginBottom: 8,
+        color: colors.textSecondary,
         fontWeight: '400',
-        lineHeight: 24,
     },
     oldStockValue: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '500',
         color: colors.text,
-        marginTop: 4,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
-        paddingTop: spacing.sm,
+        marginTop: 12,
     },
     footerLabel: {
         fontSize: 14,

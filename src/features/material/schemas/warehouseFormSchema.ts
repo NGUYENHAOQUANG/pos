@@ -6,6 +6,7 @@ export const materialItemSchema = z.object({
     materialName: z.string().optional(),
     quantity: z.string().refine(val => parseFloat(val) > 0, 'Số lượng phải lớn hơn 0'),
     price: z.string().refine(val => parseFloat(val) > 0, 'Đơn giá phải lớn hơn 0'),
+    unit: z.string().optional(),
 });
 
 export const warehouseFormSchema = z.object({

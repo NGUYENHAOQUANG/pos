@@ -16,6 +16,7 @@ import { colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { DropdownScrollContext } from '@/features/material/hooks/useDropdownScroll';
+import { RequiredDot } from '@/shared/components/forms/Input';
 
 export interface DropdownOption {
     label: string;
@@ -27,7 +28,7 @@ interface DropdownMaterialProps {
     value?: string | number;
     onChange?: (value: any) => void;
     options?: (string | DropdownOption)[];
-    label?: string;
+    label?: string | React.ReactNode;
     required?: boolean;
     placeholder?: string;
     dropdownStyle?: ViewStyle;
@@ -277,10 +278,10 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
         <View style={styles.container}>
             {label && (
                 <View style={styles.labelContainer}>
-                    <View style={styles.requiredWrapper}>
-                        {required && <Text style={styles.required}>*</Text>}
-                    </View>
-                    <Text style={styles.label}>{label}</Text>
+                    <Text style={styles.label} maxFontSizeMultiplier={1.1}>
+                        {label}
+                    </Text>
+                    {required && <RequiredDot />}
                 </View>
             )}
 
@@ -322,14 +323,14 @@ export const DropdownMaterial: React.FC<DropdownMaterialProps> = ({
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, zIndex: 10 },
-    labelContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
-    requiredWrapper: {
-        width: 7,
-        marginRight: 4,
+    container: { zIndex: 10 },
+    labelContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+    label: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        lineHeight: 20,
     },
-    label: { fontSize: 14, color: colors.text, fontWeight: '400', lineHeight: 24 },
-    required: { color: colors.error },
     button: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     },
     text: {
         flex: 1,
-        fontSize: 15,
+        fontSize: 14,
         color: colors.text,
         lineHeight: 40,
         textAlignVertical: 'center',
