@@ -84,15 +84,17 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     }, [visible, slideAnim]);
 
     const handleConfirm = () => {
-        onConfirm();
-        if (showSuccessToast) {
-            Toast.show({
-                type: 'success',
-                text1: successMessage,
-                position: 'top',
-                visibilityTime: 3000,
-            });
-        }
+        setTimeout(() => {
+            onConfirm();
+            if (showSuccessToast) {
+                Toast.show({
+                    type: 'success',
+                    text1: successMessage,
+                    position: 'top',
+                    visibilityTime: 3000,
+                });
+            }
+        }, 300);
     };
 
     return (

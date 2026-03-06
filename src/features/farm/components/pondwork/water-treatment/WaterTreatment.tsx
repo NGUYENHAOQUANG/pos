@@ -62,5 +62,7 @@ export const WaterTreatment: React.FC<WaterTreatmentProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        gap: 8,
+        marginTop: 8,
     },
 });

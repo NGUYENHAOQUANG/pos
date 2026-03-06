@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, StyleSheet } from 'react-native';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
@@ -42,8 +41,6 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
     onBack,
     onCancel,
 }) => {
-    const insets = useSafeAreaInsets();
-
     const { control, handleSubmit, watch, reset } = useForm<HarvestFormData>({
         resolver: zodResolver(harvestFormSchema),
         defaultValues: initialData,
@@ -98,18 +95,13 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Thu hoạch</Text>
-                {isEditMode ? (
-                    <DeleteButton onPress={handleDeletePress} />
-                ) : (
-                    <View style={styles.headerSpacer} />
-                )}
-            </View>
+            <HeaderSection
+                title="Thu hoạch"
+                onBack={onBack}
+                rightComponent={
+                    isEditMode ? <DeleteButton onPress={handleDeletePress} /> : undefined
+                }
+            />
 
             {/* Content */}
             <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={150}>
@@ -212,39 +204,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
-    },
     scrollContent: {
         padding: 0,
         paddingBottom: 100,
+        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

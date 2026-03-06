@@ -5,7 +5,7 @@ import Toast from 'react-native-toast-message';
 
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -125,7 +125,7 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     return (
         <>
             {/* Header */}
-            <HeaderFarm type="simple" title="Xử lý nước" onBack={handleBack} />
+            <HeaderSection title="Xử lý nước" onBack={handleBack} />
 
             <SafeInputLayout
                 style={styles.container}
