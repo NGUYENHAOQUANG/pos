@@ -17,7 +17,7 @@ import Animated, {
     Extrapolation,
     runOnJS,
 } from 'react-native-reanimated';
-import { HeaderDevices } from '../../components/HeaderDevices';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonHistory } from '../../components/devices/ButtonHistory';
 import { DevicesCard } from '../../components/devices/DevicesCard';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -25,7 +25,8 @@ import { EControlMode, DeviceData } from '../../types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
+import PlusIcon from '@/assets/Icon/PlusBlack.svg';
 import { useControl } from '../../store/controlStore';
 import { useDeviceToggle } from '../../hooks/useDeviceToggle';
 import Toast from 'react-native-toast-message';
@@ -98,6 +99,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         }
     }, [pondName, fetchIoTDevices]);
 
+    const bottomBarHeight = useBottomTabBarHeight();
     const rotation = useSharedValue(0);
     const overlayAnimation = useSharedValue(0);
 
@@ -239,12 +241,12 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         <View style={styles.headerRightContainer}>
             <TouchableOpacity
                 ref={buttonRef}
-                style={[styles.addButton, showAddPopup && styles.addButtonActive]}
+                style={styles.addButton}
                 onPress={handleAddButtonPress}
                 activeOpacity={0.7}
             >
                 <Animated.View style={animatedIconStyle}>
-                    <Ionicons name="add" size={24} color={colors.text} />
+                    <PlusIcon width={20} height={20} />
                 </Animated.View>
             </TouchableOpacity>
         </View>
@@ -297,14 +299,14 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderDevices
+            <HeaderSection
                 title={`Thiết Bị - ${pondName}`}
-                onBackPress={() => navigation.goBack()}
+                onBack={() => navigation.goBack()}
                 rightComponent={renderRightHeader()}
             />
 
             <ScrollView
-                contentContainerStyle={styles.content}
+                contentContainerStyle={[styles.content, { paddingBottom: bottomBarHeight + 40 }]}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -364,7 +366,6 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: spacing.md,
-        paddingBottom: 40,
     },
     historySection: {
         marginBottom: spacing.md,
@@ -372,12 +373,10 @@ const styles = StyleSheet.create({
     },
     historyButton: {
         borderRadius: 0,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0,
     },
     extendedCard: {
-        marginHorizontal: -spacing.md,
-        paddingHorizontal: spacing.md,
+        marginBottom: 8,
     },
     headerRightContainer: {
         zIndex: 1001,
@@ -385,9 +384,9 @@ const styles = StyleSheet.create({
     addButton: {
         width: 40,
         height: 40,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.white,

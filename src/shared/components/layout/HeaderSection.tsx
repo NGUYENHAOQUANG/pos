@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
-import { colors } from '@/styles';
+import { colors, borderRadius } from '@/styles';
 import { useNavigation } from '@react-navigation/native';
 import PlusIcon from '@/assets/Icon/PlusBlack.svg';
 
@@ -137,7 +137,14 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
         >
             <View style={styles.leftContainer}>{renderLeft()}</View>
 
-            <View style={styles.centerContainer}>{renderCenter()}</View>
+            <View
+                style={[
+                    styles.centerContainer,
+                    titleAlign === 'left' && { alignItems: 'flex-start' },
+                ]}
+            >
+                {renderCenter()}
+            </View>
 
             <View style={styles.rightContainer}>{renderRight()}</View>
         </View>
@@ -178,12 +185,12 @@ const styles = StyleSheet.create({
     iconButton: {
         width: 40,
         height: 40,
-        borderRadius: '100%',
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.borderDark,
+        borderColor: colors.border,
     },
     placeholderButton: {
         width: 40,

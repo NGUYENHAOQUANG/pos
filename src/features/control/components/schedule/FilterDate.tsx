@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
+import ArrowRightIcon from '@/assets/Icon/ArrowRight.svg';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
 // removed LayoutChangeEvent
-import { colors } from '@/styles';
-import CalenderIcon from '@/assets/Icon/IconDevices/Calender.svg';
+import { borderRadius, colors } from '@/styles';
+import CalenderIcon from '@/assets/Icon/Calender.svg';
 
 export default function FilterDate() {
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -33,7 +34,7 @@ export default function FilterDate() {
         <View style={styles.container}>
             {/* Nút lùi ngày */}
             <TouchableOpacity style={styles.navButton} onPress={() => handleChangeDay(-1)}>
-                <Ionicons name="chevron-back" size={20} color={colors.text} />
+                <ArrowLeftIcon width={20} height={20} />
             </TouchableOpacity>
 
             {/* Hiển thị ngày đã chọn */}
@@ -42,12 +43,12 @@ export default function FilterDate() {
                     {formatDate(selectedDate)}
                 </Text>
 
-                <CalenderIcon width={18} height={18} style={styles.icon} />
+                <CalenderIcon width={16} height={16} style={styles.icon} />
             </TouchableOpacity>
 
             {/* Nút tiến ngày */}
             <TouchableOpacity style={styles.navButton} onPress={() => handleChangeDay(1)}>
-                <Ionicons name="chevron-forward" size={20} color={colors.text} />
+                <ArrowRightIcon width={20} height={20} />
             </TouchableOpacity>
 
             <DatePickerModal
@@ -68,17 +69,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12, // Reduced gap
-        backgroundColor: colors.white,
-        padding: 16,
-        elevation: 2,
+        gap: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
     },
     navButton: {
         width: 40,
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.white,

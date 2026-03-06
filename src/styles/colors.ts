@@ -22,7 +22,7 @@ export const colors = {
     black: '#000000',
     neutral: '#F7FAFD',
     gray: {
-        50: '#F9FAFB',
+        50: '#FAFAF9',
         100: '#F3F4F6',
         200: '#E6E8EC',
         240: '#F0F0F0',
@@ -83,6 +83,7 @@ export const colors = {
         25: '#F6FEF9',
         50: '#F6FFED',
         100: '#D9F7BE',
+        200: '#BBF7D0',
         300: '#B7EB8F',
         500: '#4dff00a2',
         600: '#16A34A',
@@ -99,10 +100,12 @@ export const colors = {
         600: '#EB2F96',
     },
     red: {
+        25: '#FFF7F7',
         50: '#FFF0F6',
+        200: '#FECACA',
         300: '#FFADD2',
         500: '#F5222D',
-        600: '#eb2f2fff',
+        600: '#DC2626',
         900: '#FF4D4F',
     },
     yellow: {
@@ -126,8 +129,8 @@ export const colors = {
 
     // Background colors
     background: '#FFFFFF',
-    backgroundPrimary: '#F0F5FF',
-    //backgroundPrimary: '#FAFAF9',
+    //backgroundPrimary: '#F0F5FF',
+    backgroundPrimary: '#FAFAF9',
     backgroundSecondary: '#F9FAFB',
     backgroundTertiary: '#F3F4F6',
     backgroundButton: '#F9FAFB',
@@ -143,7 +146,7 @@ export const colors = {
 
     // Border colors
     defaultBorder: '#DEE4ED',
-    border: '#E5E7EB',
+    border: '#E6E8EC',
     borderMedium: '#E2E8F0', // Medium border color
     borderLight: '#F3F4F6',
     borderDark: '#D1D5DB',

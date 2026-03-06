@@ -91,9 +91,10 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
 
 const styles = StyleSheet.create({
     listContent: {
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
     },
     item: {
-        marginBottom: spacing.md,
+        marginBottom: spacing.sm,
     },
 });
