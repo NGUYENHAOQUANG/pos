@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Modal,
-    TouchableWithoutFeedback,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 export interface AIHealthCheckResult {
     totalCount: number;
@@ -16,6 +10,7 @@ export interface AIHealthCheckResult {
     status: string;
     imageUri?: string | null;
     items?: any[];
+    details?: string;
 }
 
 interface ShrimpInspectionObservationBoxProps {
@@ -155,81 +150,65 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
 
             {/* Detail Modal */}
             <Modal
-                transparent
                 visible={isModalVisible}
-                animationType="fade"
+                animationType="slide"
                 onRequestClose={() => setIsModalVisible(false)}
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setIsModalVisible(false)}
-                >
-                    <TouchableWithoutFeedback>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>Tỉ lệ nhiễm bệnh</Text>
-
-                            <View style={styles.modalBody}>
-                                {/* Show aggregated stats if available, otherwise show current record stats */}
-                                {aiResult?.items && aiResult.items.length > 0 ? (
-                                    Object.entries(
-                                        aiResult.items.reduce(
-                                            (acc: Record<string, number>, item: any) => {
-                                                const diagnosis = item.diagnosis || 'Khỏe mạnh';
-                                                acc[diagnosis] = (acc[diagnosis] || 0) + 1;
-                                                return acc;
-                                            },
-                                            {}
-                                        )
+                <View style={styles.fullScreenModal}>
+                    <HeaderSection
+                        title="Tỉ lệ nhiễm bệnh"
+                        onBack={() => setIsModalVisible(false)}
+                    />
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalBody}>
+                            {/* Show aggregated stats if available, otherwise show current record stats */}
+                            {aiResult?.items && aiResult.items.length > 0 ? (
+                                Object.entries(
+                                    aiResult.items.reduce(
+                                        (acc: Record<string, number>, item: any) => {
+                                            const diagnosis = item.diagnosis || 'Khỏe mạnh';
+                                            acc[diagnosis] = (acc[diagnosis] || 0) + 1;
+                                            return acc;
+                                        },
+                                        {}
                                     )
-                                        .filter(([diagnosis]) => diagnosis !== 'Khỏe mạnh')
-                                        .map(([diagnosis, count]) => (
-                                            <View key={diagnosis} style={styles.diseaseRow}>
-                                                <Text style={styles.diseaseName}>{diagnosis}</Text>
-                                                <Text style={styles.diseasePercent}>
-                                                    {(
-                                                        ((count as number) /
-                                                            (aiResult.totalCount ||
-                                                                aiResult.items!.length)) *
-                                                        100
-                                                    ).toFixed(2)}
-                                                    %
-                                                </Text>
-                                            </View>
-                                        ))
-                                ) : diseases.filter(d => d !== 'Khỏe mạnh').length > 0 ? (
-                                    diseases
-                                        .filter(d => d !== 'Khỏe mạnh')
-                                        .map((disease, index) => (
-                                            <View key={index} style={styles.diseaseRow}>
-                                                <Text style={styles.diseaseName}>{disease}</Text>
-                                                <Text style={styles.diseasePercent}>
-                                                    {diseases.filter(d => d !== 'Khỏe mạnh')
-                                                        .length === 1
-                                                        ? aiResult?.infectionRate
-                                                        : '- '}
-                                                    %
-                                                </Text>
-                                            </View>
-                                        ))
-                                ) : (
-                                    <Text style={styles.noInfoText}>
-                                        Không có thông tin chi tiết
-                                    </Text>
-                                )}
-                            </View>
-
-                            <View style={styles.modalButtons}>
-                                <TouchableOpacity
-                                    style={styles.modalButtonPrimary}
-                                    onPress={() => setIsModalVisible(false)}
-                                >
-                                    <Text style={styles.modalButtonPrimaryText}>Quay lại</Text>
-                                </TouchableOpacity>
-                            </View>
+                                )
+                                    .filter(([diagnosis]) => diagnosis !== 'Khỏe mạnh')
+                                    .map(([diagnosis, count]) => (
+                                        <View key={diagnosis} style={styles.diseaseRow}>
+                                            <Text style={styles.diseaseName}>{diagnosis}</Text>
+                                            <Text style={styles.diseasePercent}>
+                                                {(
+                                                    ((count as number) /
+                                                        (aiResult.totalCount ||
+                                                            aiResult.items!.length)) *
+                                                    100
+                                                ).toFixed(2)}
+                                                %
+                                            </Text>
+                                        </View>
+                                    ))
+                            ) : diseases.filter(d => d !== 'Khỏe mạnh').length > 0 ? (
+                                diseases
+                                    .filter(d => d !== 'Khỏe mạnh')
+                                    .map((disease, index) => (
+                                        <View key={index} style={styles.diseaseRow}>
+                                            <Text style={styles.diseaseName}>{disease}</Text>
+                                            <Text style={styles.diseasePercent}>
+                                                {diseases.filter(d => d !== 'Khỏe mạnh').length ===
+                                                1
+                                                    ? aiResult?.infectionRate
+                                                    : '- '}
+                                                %
+                                            </Text>
+                                        </View>
+                                    ))
+                            ) : (
+                                <Text style={styles.noInfoText}>Không có thông tin chi tiết</Text>
+                            )}
                         </View>
-                    </TouchableWithoutFeedback>
-                </TouchableOpacity>
+                    </View>
+                </View>
             </Modal>
         </SelectionInfoBox>
     );
@@ -323,7 +302,6 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         gap: spacing.sm,
-        marginTop: spacing.sm,
     },
     label: {
         fontSize: 14,
@@ -367,20 +345,13 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     // Modal Styles
-    modalOverlay: {
+    fullScreenModal: {
         flex: 1,
-        backgroundColor: colors.overlay,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: spacing.md,
+        backgroundColor: colors.white,
     },
     modalContent: {
-        width: '100%',
-        maxWidth: 320,
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        padding: spacing.lg,
-        alignItems: 'center',
+        flex: 1,
+        padding: spacing.md,
     },
     modalTitle: {
         fontSize: 18,

@@ -138,7 +138,7 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
                     />
                     <TextInput
                         style={styles.input}
-                        placeholder="Tìm kiếm"
+                        placeholder="Tìm kiếm tên vật tư"
                         placeholderTextColor={colors.textSecondary}
                         value={localSearchText}
                         onChangeText={setLocalSearchText}
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height: 44,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.border,
         paddingHorizontal: spacing.sm,

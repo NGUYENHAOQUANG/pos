@@ -7,7 +7,6 @@ import {
     View,
     Text,
     KeyboardAvoidingView,
-    Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,10 +17,11 @@ import DangerIcon from '@/assets/Icon/Danger.svg';
 import { colors, spacing, typography } from '@/styles';
 import { useLoginFlow } from '@/features/auth/hooks/useLoginFlow';
 import { FloatingBubblesBackground } from '@/shared/components/ui/FloatingBubblesBackground';
+import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 export default function AuthScreen() {
     const insets = useSafeAreaInsets();
-    const [keyboardOffset, setKeyboardOffset] = React.useState(0);
+    const { keyboardHeight } = useKeyboard();
     const {
         phoneNumber,
         error,
@@ -34,23 +34,6 @@ export default function AuthScreen() {
         handleClearError,
         handlePhoneChange,
     } = useLoginFlow();
-
-    React.useEffect(() => {
-        if (Platform.OS !== 'android') return;
-
-        const showSub = Keyboard.addListener('keyboardDidShow', event => {
-            setKeyboardOffset(event.endCoordinates.height);
-        });
-
-        const hideSub = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardOffset(0);
-        });
-
-        return () => {
-            showSub.remove();
-            hideSub.remove();
-        };
-    }, []);
 
     return (
         <ErrorBoundary>
@@ -99,45 +82,47 @@ export default function AuthScreen() {
                                             onClear={handleClearError}
                                         />
 
-                                        {isUnregistered && (
-                                            <View style={styles.unregisteredErrorContainer}>
-                                                <View style={styles.errorIconWrapper}>
-                                                    <DangerIcon width={16} height={16} />
-                                                </View>
-                                                <Text
-                                                    style={[
-                                                        styles.unregisteredErrorText,
-                                                        { flex: 1 },
-                                                    ]}
-                                                >
-                                                    Số điện thoại này chưa được đăng ký, vui lòng
-                                                    kiểm tra và thử lại hoặc{' '}
+                                        <View style={styles.errorBlockReserved}>
+                                            {isUnregistered && (
+                                                <View style={styles.unregisteredErrorContainer}>
+                                                    <View style={styles.errorIconWrapper}>
+                                                        <DangerIcon width={16} height={16} />
+                                                    </View>
                                                     <Text
-                                                        style={styles.unregisteredLinkText}
-                                                        onPress={handleRegisterPress}
+                                                        style={[
+                                                            styles.unregisteredErrorText,
+                                                            { flex: 1 },
+                                                        ]}
                                                     >
-                                                        tạo tài khoản mới
+                                                        Số điện thoại này chưa được đăng ký, vui
+                                                        lòng kiểm tra và thử lại hoặc{' '}
+                                                        <Text
+                                                            style={styles.unregisteredLinkText}
+                                                            onPress={handleRegisterPress}
+                                                        >
+                                                            tạo tài khoản mới
+                                                        </Text>
                                                     </Text>
-                                                </Text>
-                                            </View>
-                                        )}
-
-                                        {isUnverifiedAccount && (
-                                            <View style={styles.unregisteredErrorContainer}>
-                                                <View style={styles.errorIconWrapper}>
-                                                    <DangerIcon width={16} height={16} />
                                                 </View>
-                                                <Text
-                                                    style={[
-                                                        styles.unregisteredErrorText,
-                                                        { flex: 1 },
-                                                    ]}
-                                                >
-                                                    Số điện thoại này đã được đăng ký nhưng chưa xác
-                                                    thực, vui lòng xác thực ngay
-                                                </Text>
-                                            </View>
-                                        )}
+                                            )}
+
+                                            {isUnverifiedAccount && (
+                                                <View style={styles.unregisteredErrorContainer}>
+                                                    <View style={styles.errorIconWrapper}>
+                                                        <DangerIcon width={16} height={16} />
+                                                    </View>
+                                                    <Text
+                                                        style={[
+                                                            styles.unregisteredErrorText,
+                                                            { flex: 1 },
+                                                        ]}
+                                                    >
+                                                        Số điện thoại này đã được đăng ký nhưng chưa
+                                                        xác thực, vui lòng xác thực ngay
+                                                    </Text>
+                                                </View>
+                                            )}
+                                        </View>
                                     </View>
                                 </View>
                             </ScrollView>
@@ -147,7 +132,7 @@ export default function AuthScreen() {
                                     styles.footer,
                                     Platform.OS === 'android' && {
                                         paddingBottom:
-                                            spacing.xl + spacing.sm + 12 + keyboardOffset,
+                                            spacing.xl + spacing.sm + 12 + keyboardHeight,
                                     },
                                 ]}
                             >
@@ -209,7 +194,10 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
         paddingHorizontal: spacing.md,
     },
-
+    /** Giữ chiều cao cố định cho vùng lỗi để nút không bị đẩy lên khi hiện/ẩn error. */
+    errorBlockReserved: {
+        minHeight: 56,
+    },
     unregisteredErrorContainer: {
         flexDirection: 'row',
         alignItems: 'flex-start',

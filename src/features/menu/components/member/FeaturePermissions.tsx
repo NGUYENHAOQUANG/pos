@@ -73,7 +73,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
             <View style={[styles.content, disabled && styles.disabledContent]}>
                 {/* Management Level Section */}
                 <View style={styles.section}>
-                    <View style={styles.fieldLabelWrapper}>
+                    <View style={[styles.fieldLabelWrapper, { marginBottom: spacing.md }]}>
                         <Text style={styles.fieldLabelText}>Chọn cấp quản lý</Text>
                         <RequiredDot />
                     </View>
@@ -89,8 +89,8 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
                 </View>
 
                 {/* Work Unit Section */}
-                <View style={styles.section}>
-                    <View style={styles.rowBetween}>
+                <View style={[styles.section, { marginBottom: spacing.md }]}>
+                    <View style={[styles.rowBetween, { marginBottom: spacing.md }]}>
                         <View style={styles.fieldLabelWrapper}>
                             <Text style={styles.fieldLabelText}>Đơn vị công tác</Text>
                             <RequiredDot />
@@ -144,7 +144,7 @@ export const FeaturePermissions: React.FC<FeaturePermissionsProps> = ({
 
                 {/* Permissions Section */}
                 <View style={[styles.section, { marginBottom: 0 }]}>
-                    <View style={styles.rowBetween}>
+                    <View style={[styles.rowBetween, { marginBottom: spacing.md }]}>
                         <View style={styles.fieldLabelWrapper}>
                             <Text style={styles.fieldLabelText}>Quyền thao tác</Text>
                             <RequiredDot />
@@ -258,7 +258,6 @@ const styles = StyleSheet.create({
     fieldLabelWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.md,
     },
     fieldLabelText: {
         fontSize: typography.fontSize.sm,
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
         gap: spacing.xs,
     },
     checkboxText: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
     },
     permissionsList: {
@@ -318,13 +317,17 @@ const styles = StyleSheet.create({
     },
     selectedUnitsList: {
         gap: spacing.sm,
-        marginTop: spacing.sm,
     },
     selectedUnitItem: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: spacing.xs,
+        padding: spacing.sm,
+        paddingHorizontal: spacing.md,
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     selectedUnitText: {
         fontSize: 16,

@@ -87,13 +87,13 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.medium,
+        color: colors.textSecondary,
+        fontWeight: typography.fontWeight.regular,
     },
 
     value: {
         fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.regular,
+        fontWeight: typography.fontWeight.medium,
         color: colors.text,
         textAlign: 'right',
         maxWidth: '60%',

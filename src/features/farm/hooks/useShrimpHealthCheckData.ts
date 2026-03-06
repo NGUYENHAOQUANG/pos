@@ -11,16 +11,12 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
-import { documentApi } from '@/features/material/api/documentApi';
+import { handleError } from '@/shared/utils/errorHandler';
 
-/**
- * Convert API response to JobExecution format
- */
 const convertToJobExecutions = async (
     shrimpHealthChecks: ShrimpHealthCheckDto[],
     pondId: string
 ): Promise<JobExecution[]> => {
-    // 1. Parse dates and prepare for sorting/grouping
     const parsedChecks = shrimpHealthChecks.map(check => {
         const createdDate = check.createdAt ? new Date(check.createdAt) : new Date();
         const timestamp = createdDate.getTime();
@@ -33,37 +29,23 @@ const convertToJobExecutions = async (
         };
     });
 
-    // 2. Sort DESC (Newest first). Tie-break with ID DESC if times are equal.
-    // This ensures "created last" comes first in the list.
     const sortedChecks = parsedChecks.sort((a, b) => {
         const timeDiff = b.timestamp - a.timestamp;
         if (timeDiff !== 0) return timeDiff;
-        // If times are equal, assume higher ID is newer (lexicographical sort for strings usually works for KSUID/UUIDv7,
-        // if random UUID it's arbitrary but stable. If numeric string ID, might need parseInt)
         return (b.id || '').localeCompare(a.id || '');
     });
 
-    // 3. Count total per day
     const totalPerDay: Record<string, number> = {};
     sortedChecks.forEach(check => {
         totalPerDay[check.dateKey] = (totalPerDay[check.dateKey] || 0) + 1;
     });
 
-    // 4. Map to JobExecution with "Lần N" label
-    // Since list is sorted DESC (Newest -> Oldest), the first item for a day is the "Last" one (highest index).
-    // Formula: Index = Total - CountSoFar + 1.
-    // Example: Total=3.
-    // 1st Item (Newest): Count=1. Index = 3 - 1 + 1 = 3 (Lần 3).
-    // 2nd Item: Count=2. Index = 3 - 2 + 1 = 2 (Lần 2).
-    // 3rd Item (Oldest): Count=3. Index = 3 - 3 + 1 = 1 (Lần 1).
     const dayCounts: Record<string, number> = {};
 
     return Promise.all(
         sortedChecks.map(async check => {
             let imageUrls: string[] = [];
-            if (check.documentIds && check.documentIds.length > 0) {
-                imageUrls = await documentApi.getUrls(check.documentIds);
-            } else if (check.documents && check.documents.length > 0) {
+            if (check.documents && check.documents.length > 0) {
                 imageUrls = check.documents
                     .map(doc => doc.publicUrl)
                     .filter((url): url is string => !!url);
@@ -108,7 +90,7 @@ const convertToJobExecutions = async (
                     stoolColor: uiState.stoolColor,
                     liver: uiState.liver,
                     images: uiState.images,
-                    documentIds: check.documentIds || [],
+                    documentIds: check.documents?.map(doc => doc.id) || [],
                     // AI Health Check fields
                     averageInfectionRate: uiState.averageInfectionRate,
                     isHealthy: uiState.isHealthy,
@@ -180,16 +162,10 @@ export const useShrimpHealthChecksAsJobs = (pondId: string) => {
     return { jobs, isLoading, error, refetch };
 };
 
-/**
- * React Query hook to fetch and sync shrimp health check data from API to local store
- */
-export const useShrimpHealthCheckData = (pondId: string | undefined) => {
+export const useShrimpHealthCheckData = (pondId: string) => {
     const updatePondJob = useFarmStore(state => state.updatePondJob);
     const queryClient = useQueryClient();
 
-    const pondIdStr = pondId ? String(pondId) : '';
-
-    // React Query for data fetching
     const {
         data: response,
         isLoading,
@@ -197,22 +173,16 @@ export const useShrimpHealthCheckData = (pondId: string | undefined) => {
         refetch,
         isSuccess,
     } = useQuery({
-        queryKey: farmKeys.shrimpHealthChecks.byPond(pondIdStr),
+        queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
         queryFn: async () => {
-            if (!pondIdStr) {
-                throw new Error('No pondId provided');
-            }
-
-            return await shrimpHealthCheckApi.list(pondIdStr);
+            return await shrimpHealthCheckApi.list(pondId);
         },
-        enabled: !!pondIdStr,
+        enabled: !!pondId,
         staleTime: 30000,
-        gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (formerly cacheTime)
+        gcTime: 5 * 60 * 1000,
     });
 
-    // Sync data to Zustand store when query succeeds
     useEffect(() => {
-        // Chuẩn hoá cờ success từ API (success hoặc isSuccess)
         const apiSuccess = ((response as any)?.success ?? (response as any)?.isSuccess) === true;
 
         if (isSuccess && apiSuccess && response?.data && pondId) {
@@ -230,17 +200,12 @@ export const useShrimpHealthCheckData = (pondId: string | undefined) => {
         error: error as Error | null,
         refetch,
         invalidate: () =>
-            pondIdStr
-                ? queryClient.invalidateQueries({
-                      queryKey: farmKeys.shrimpHealthChecks.byPond(pondIdStr),
-                  })
-                : undefined,
+            queryClient.invalidateQueries({
+                queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
+            }),
     };
 };
 
-/**
- * Hook for creating a new shrimp health check
- */
 export const useCreateShrimpHealthCheck = () => {
     const queryClient = useQueryClient();
 
@@ -255,19 +220,15 @@ export const useCreateShrimpHealthCheck = () => {
             return await shrimpHealthCheckApi.create(pondId, payload);
         },
         onSuccess: (_data, variables) => {
-            // Invalidate and refetch
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
-        onError: () => {},
+        onError: handleError,
     });
 };
 
-/**
- * Hook for updating an existing shrimp health check
- */
 export const useUpdateShrimpHealthCheck = () => {
     const queryClient = useQueryClient();
 
@@ -284,19 +245,15 @@ export const useUpdateShrimpHealthCheck = () => {
             return await shrimpHealthCheckApi.update(pondId, id, payload);
         },
         onSuccess: (_data, variables) => {
-            // Invalidate and refetch
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
-        onError: () => {},
+        onError: handleError,
     });
 };
 
-/**
- * Hook for deleting a shrimp health check
- */
 export const useDeleteShrimpHealthCheck = () => {
     const queryClient = useQueryClient();
 
@@ -311,6 +268,20 @@ export const useDeleteShrimpHealthCheck = () => {
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
-        onError: () => {},
+        onError: handleError,
+    });
+};
+
+export const useShrimpHealthCheckDetail = (pondId: string, id: string) => {
+    return useQuery({
+        queryKey: farmKeys.shrimpHealthChecks.detail(id),
+        queryFn: async () => {
+            if (!pondId || !id) {
+                throw new Error('Missing pondId or id');
+            }
+            return await shrimpHealthCheckApi.getDetail(pondId, id);
+        },
+        enabled: !!pondId && !!id,
+        staleTime: 30000,
     });
 };
