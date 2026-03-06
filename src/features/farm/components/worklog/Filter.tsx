@@ -12,7 +12,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, typography } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
-import { IconCheckActive, IconCheckUnactive } from '@/assets/icons';
+import { IconCheckUnactive } from '@/assets/icons';
+import IconCheckActiveOrange from '@/assets/Icon/CheckActive-Orange.svg';
 
 interface FilterOption {
     label: string;
@@ -129,16 +130,24 @@ export const Filter: React.FC<FilterProps> = ({
                 <View style={styles.container}>
                     {/* Header */}
                     <View style={headerStyle}>
-                        <Text style={styles.headerTitle}>Bộ lọc</Text>
-                        <TouchableOpacity onPress={handleReset}>
+                        <TouchableOpacity onPress={handleReset} style={styles.headerSide}>
                             <Text style={styles.resetText}>Thiết lập lại</Text>
+                        </TouchableOpacity>
+
+                        <Text style={styles.headerTitle}>Bộ lọc</Text>
+
+                        <TouchableOpacity
+                            onPress={onClose}
+                            style={[styles.headerSide, { alignItems: 'flex-end' }]}
+                        >
+                            <Ionicons name="close" size={24} color={colors.textSecondary} />
                         </TouchableOpacity>
                     </View>
 
                     {/* Content */}
                     <View style={styles.content}>
                         <Text style={styles.sectionTitle}>Loại công việc</Text>
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        <ScrollView style={styles.scrollArea} showsVerticalScrollIndicator={false}>
                             {/* Select All */}
                             <TouchableOpacity
                                 style={styles.checkboxRow}
@@ -146,7 +155,7 @@ export const Filter: React.FC<FilterProps> = ({
                                 activeOpacity={0.7}
                             >
                                 {isAllSelected ? (
-                                    <IconCheckActive width={16} height={16} />
+                                    <IconCheckActiveOrange width={16} height={16} />
                                 ) : (
                                     <IconCheckUnactive width={16} height={16} />
                                 )}
@@ -163,7 +172,7 @@ export const Filter: React.FC<FilterProps> = ({
                                         activeOpacity={0.7}
                                     >
                                         {isSelected ? (
-                                            <IconCheckActive width={16} height={16} />
+                                            <IconCheckActiveOrange width={16} height={16} />
                                         ) : (
                                             <IconCheckUnactive width={16} height={16} />
                                         )}
@@ -182,11 +191,8 @@ export const Filter: React.FC<FilterProps> = ({
                         onSecondaryPress={onClose}
                         secondaryType="default"
                         style={{
-                            paddingBottom: 16,
-                            borderTopWidth: 1,
-                            borderTopColor: colors.borderDark,
-                            borderBottomWidth: 1,
-                            borderBottomColor: colors.borderDark,
+                            paddingHorizontal: 0,
+                            marginTop: spacing.sm,
                         }}
                     />
                 </View>
@@ -200,27 +206,35 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.overlay,
         justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingBottom: 40,
     },
     overlayTouchable: {
         ...StyleSheet.absoluteFillObject,
     },
     container: {
+        width: '94%',
         backgroundColor: colors.white,
-        height: '100%',
+        borderRadius: 24,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.md,
+        maxHeight: '80%',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderDark,
+        marginBottom: spacing.md,
     },
     headerTitle: {
         fontSize: typography.fontSize.lg,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
+        textAlign: 'center',
+    },
+    headerSide: {
+        flex: 1,
     },
     resetText: {
         fontSize: typography.fontSize.base,
@@ -228,8 +242,10 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.regular,
     },
     content: {
-        padding: spacing.md,
-        flex: 1,
+        marginVertical: spacing.sm,
+    },
+    scrollArea: {
+        maxHeight: 400,
     },
     sectionTitle: {
         fontSize: typography.fontSize.base,

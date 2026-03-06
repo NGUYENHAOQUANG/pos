@@ -7,13 +7,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
+import IconAICheck from '@/assets/Icon/AIcheck.svg';
+import IconCamera from '@/assets/Icon/camera.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import { apiClient } from '@/core/api/client';
@@ -327,89 +329,87 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     </SelectionInfoBox>
 
                     <SelectionInfoBox title="Kết quả đo từ AI">
-                        <View>
-                            <View style={styles.labelWrapper}>
-                                <View style={styles.requiredWrapper}>
-                                    <Text style={styles.required}>*</Text>
-                                </View>
-                                <Text style={styles.label}>Tổng số lượng tôm được đo - AI</Text>
-                            </View>
-                            <View style={styles.readOnlyInput}>
-                                <Text style={styles.readOnlyText}>
-                                    {aiCount !== null
-                                        ? aiCount.toString()
-                                        : 'Kết quả số lượng tôm được đo từ AI'}
+                        <View style={styles.summaryContainer}>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>
+                                    Tổng số lượng tôm được đo - AI
+                                </Text>
+                                <Text style={styles.summaryValue}>
+                                    {aiCount !== null ? aiCount.toString() : '-'}
                                 </Text>
                             </View>
-                            <Text style={styles.helperText}>
-                                Lần đo trước: {previousMeasurement ? previousMeasurement.count : 0}
-                            </Text>
-                        </View>
-                        <View>
-                            <View style={styles.labelWrapper}>
-                                <View style={styles.requiredWrapper}>
-                                    <Text style={styles.required}>*</Text>
-                                </View>
-                                <Text style={styles.label}>Kích thước tôm (cm) - AI</Text>
-                            </View>
-                            <TouchableOpacity
-                                style={styles.readOnlyInput}
-                                onPress={() => {
-                                    if (
-                                        currentMeasurement?.sizes &&
-                                        currentMeasurement.sizes.length > 0
-                                    ) {
-                                        setIsSheetVisible(true);
-                                    } else {
-                                        Toast.show(ToastMessages.ShrimpMeasurement.NO_DATA);
-                                    }
-                                }}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={styles.readOnlyText}>
-                                    {sizeShrimp1 !== null
-                                        ? `Tôm 1: ${sizeShrimp1.toFixed(2)} cm... Xem thêm`
-                                        : 'Kết quả kích thước tôm (cm) từ AI'}
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Lần đo trước</Text>
+                                <Text style={styles.summaryValue}>
+                                    {previousMeasurement ? previousMeasurement.count : '-'}
                                 </Text>
-                                <Ionicons
-                                    name="list-outline"
-                                    size={20}
-                                    color={colors.textSecondary}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                        <View>
-                            <View style={styles.summaryBox}>
-                                <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>
-                                        Trung bình kích thước tôm (cm)
-                                    </Text>
-                                    <Text style={styles.summaryValue}>
-                                        {averageSizeCm !== null ? averageSizeCm : '-'}
-                                    </Text>
-                                </View>
-                                <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Cỡ tôm (con/kg)</Text>
-                                    <Text style={styles.summaryValue}>
-                                        {sizePcsPerKg !== null ? sizePcsPerKg : '-'}
-                                    </Text>
-                                </View>
                             </View>
-                            <Text style={styles.disclaimer}>
-                                Kết quả được hệ thống tính tự động từ khối lượng và số lượng tôm
-                                được đo
-                            </Text>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Kích thước tôm (cm) - AI</Text>
+                                {sizeShrimp1 !== null && currentMeasurement ? (
+                                    <TouchableOpacity
+                                        style={[styles.statusPill, styles.statusPillNormal]}
+                                        onPress={() => {
+                                            if (
+                                                currentMeasurement?.sizes &&
+                                                currentMeasurement.sizes.length > 0
+                                            ) {
+                                                setIsSheetVisible(true);
+                                            } else {
+                                                Toast.show(ToastMessages.ShrimpMeasurement.NO_DATA);
+                                            }
+                                        }}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text
+                                            style={[styles.statusText, styles.statusTextNormal]}
+                                            numberOfLines={1}
+                                        >
+                                            Tôm 1: {sizeShrimp1.toFixed(2)} cm... Xem thêm
+                                        </Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Text style={styles.summaryValue}>-</Text>
+                                )}
+                            </View>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>
+                                    Trung bình kích thước tôm (cm)
+                                </Text>
+                                <Text style={styles.summaryValue}>
+                                    {averageSizeCm !== null ? averageSizeCm : '-'}
+                                </Text>
+                            </View>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Cỡ tôm (con/kg)</Text>
+                                <Text style={styles.summaryValue}>
+                                    {sizePcsPerKg !== null ? sizePcsPerKg : '-'}
+                                </Text>
+                            </View>
                             {measurements.length > 1 && (
-                                <View style={styles.previousStatsContainer}>
-                                    <Text style={styles.previousStatsText}>
-                                        • TBKTT (cm) lần đo trước: {previousAverageSizeCm}
-                                    </Text>
-                                    <Text style={styles.previousStatsText}>
-                                        • CT (con/kg) lần đo trước: {previousSizePcsPerKg}
-                                    </Text>
-                                </View>
+                                <>
+                                    <View style={styles.summaryRow}>
+                                        <Text style={styles.summaryLabel}>
+                                            TBKTT (cm) lần đo trước
+                                        </Text>
+                                        <Text style={styles.summaryValue}>
+                                            {previousAverageSizeCm}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.summaryRow}>
+                                        <Text style={styles.summaryLabel}>
+                                            CT (con/kg) lần đo trước
+                                        </Text>
+                                        <Text style={styles.summaryValue}>
+                                            {previousSizePcsPerKg}
+                                        </Text>
+                                    </View>
+                                </>
                             )}
                         </View>
+                    </SelectionInfoBox>
+
+                    <SelectionInfoBox title="Hình ảnh xử lý">
                         <View>
                             <View
                                 onLayout={event => {
@@ -418,14 +418,8 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 }}
                             >
                                 <ImageUpload
-                                    label="Hình ảnh xử lý"
                                     imageUri={imageUri}
                                     onImageSelect={handleImageSelect}
-                                    onImageRemove={() => {
-                                        _setImageUri(null);
-                                        setDetections([]);
-                                        setImageDimensions({ width: 1, height: 1 });
-                                    }}
                                     returnBase64={true}
                                     aspectRatio={
                                         imageDimensions.width > 0 && imageDimensions.height > 0
@@ -446,36 +440,63 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                         />
                                     )}
                                 </ImageUpload>
-                            </View>
-                            <View style={styles.actionButtons}>
-                                <OutlineButton
-                                    label="Đo lại"
-                                    onPress={handleReset}
-                                    style={styles.resetButton}
-                                    labelStyle={styles.resetButtonText}
-                                />
-                                <OutlineButton
-                                    label="Lấy kết quả đo"
-                                    onPress={handleGetCount}
-                                    style={styles.actionButton}
-                                    labelStyle={styles.actionButtonText}
-                                />
-                            </View>
 
-                            <Text style={styles.countText}>Số lần đo: {countTimes}</Text>
+                                <View style={{ marginTop: 12, gap: 12 }}>
+                                    <OutlineButton
+                                        label="Chụp lại"
+                                        onPress={() => {
+                                            _setImageUri(null);
+                                            setDetections([]);
+                                            setImageDimensions({ width: 1, height: 1 });
+                                        }}
+                                        prefix={
+                                            <IconCamera
+                                                width={20}
+                                                height={20}
+                                                fill={colors.textSecondary}
+                                            />
+                                        }
+                                    />
+
+                                    <OutlineButton
+                                        label="Kiểm tra"
+                                        onPress={handleGetCount}
+                                        prefix={
+                                            <IconAICheck
+                                                width={20}
+                                                height={20}
+                                                fill={colors.primaryOrange}
+                                            />
+                                        }
+                                    />
+                                </View>
+                            </View>
                         </View>
                     </SelectionInfoBox>
                 </ScrollView>
             </Loading>
 
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle="Lưu và Quay lại"
-                    secondaryTitle="Hủy"
-                    onPrimaryPress={handleSave}
-                    onSecondaryPress={navigation.goBack}
-                    secondaryType="default"
-                />
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+                <View style={styles.checkCountRow}>
+                    <Text style={styles.checkCountLabel}>Số lần đo</Text>
+                    <Text style={styles.checkCountValue}>{countTimes}</Text>
+                </View>
+                <View style={styles.buttonRow}>
+                    <Button
+                        title="Đo lại"
+                        variant="outline"
+                        onPress={handleReset}
+                        style={[styles.flexButton, { borderColor: colors.border }]}
+                        textStyle={{ color: colors.textSecondary }}
+                    />
+                    <Button
+                        title="Lấy kết quả đo"
+                        variant="primary"
+                        onPress={handleSave}
+                        style={styles.flexButton}
+                        disabled={measurements.length === 0}
+                    />
+                </View>
             </View>
 
             <Modal
@@ -560,83 +581,48 @@ const styles = StyleSheet.create({
         padding: 0,
         paddingBottom: 100,
     },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 24,
-    },
-    requiredWrapper: {
-        width: 7,
-        marginRight: 4,
-    },
-    required: {
-        color: colors.error,
-    },
-    readOnlyInput: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: borderRadius.sm,
-        paddingHorizontal: spacing.md,
-        height: 44,
-        backgroundColor: colors.white,
-    },
-    readOnlyText: {
-        fontSize: 14,
-        color: colors.text,
-    },
-    helperText: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        marginTop: spacing.xs,
-    },
-    summaryBox: {
-        backgroundColor: colors.neutral,
-        borderRadius: borderRadius.md,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        padding: spacing.md,
-        marginTop: 12,
-        gap: 4,
+    summaryContainer: {
+        gap: 12,
+        paddingVertical: spacing.sm,
     },
     summaryRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: spacing.xs,
+        alignItems: 'center',
     },
     summaryLabel: {
-        fontSize: 14,
-        color: colors.text,
+        fontSize: 16,
+        fontWeight: '400',
+        color: colors.textSecondary,
+        flex: 1,
+        lineHeight: 24,
     },
     summaryValue: {
-        fontSize: 14,
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.text,
+        marginLeft: spacing.md,
+    },
+    statusPill: {
+        borderRadius: 100,
+        paddingHorizontal: spacing.md,
+        paddingVertical: 4,
+        borderWidth: 1,
+        marginLeft: spacing.md,
+        maxWidth: '60%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    statusText: {
+        fontSize: 14,
         fontWeight: '500',
     },
-    disclaimer: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        marginTop: spacing.xs,
-        fontStyle: 'italic',
+    statusPillNormal: {
+        backgroundColor: colors.green[50],
+        borderColor: colors.green[200],
     },
-    previousStatsContainer: {
-        marginTop: spacing.xs,
-        alignItems: 'flex-start',
-        paddingHorizontal: spacing.md,
-    },
-    previousStatsText: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        fontStyle: 'italic',
-        lineHeight: 18,
+    statusTextNormal: {
+        color: colors.green[600],
     },
     imageContainer: {
         height: 300,
@@ -645,42 +631,36 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
         overflow: 'hidden',
     },
-    actionButtons: {
+
+    checkCountRow: {
         flexDirection: 'row',
-        gap: spacing.md,
-        marginBottom: 34,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        marginBottom: 12,
     },
-    resetButton: {
-        flex: 1,
-        height: 48,
-        borderRadius: borderRadius.full,
-    },
-    resetButtonText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    actionButton: {
-        flex: 1,
-        height: 48,
-        borderRadius: borderRadius.full,
-    },
-    actionButtonText: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        fontWeight: '400',
-    },
-    countText: {
+    checkCountLabel: {
         fontSize: 16,
+        color: colors.textSecondary,
+    },
+    checkCountValue: {
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.text,
-        marginTop: spacing.xs,
-        marginBottom: spacing.md,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        gap: 12,
+        paddingHorizontal: spacing.md,
+    },
+    flexButton: {
+        flex: 1,
     },
     footer: {
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.border,
-        paddingBottom: spacing.sm, // Add padding for bottom
+        paddingTop: 16,
     },
     modalOverlay: {
         flex: 1,

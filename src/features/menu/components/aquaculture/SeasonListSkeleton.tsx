@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 
 const SKELETON_COUNT = 10;
 
@@ -9,20 +9,17 @@ const SeasonListSkeletonItem = () => {
     return (
         <View style={styles.cardContainer}>
             <View style={styles.contentContainer}>
-                {/* Top Row: Title + Tag */}
-                <View style={styles.topRow}>
-                    <Skeleton width={150} height={20} style={{ marginRight: 8 }} />
-                    <Skeleton width={80} height={20} style={{ borderRadius: 4 }} />
-                </View>
-                {/* Bottom Row: Date Range */}
-                <View style={styles.bottomRow}>
-                    <Skeleton width={200} height={16} />
-                </View>
+                {/* Tag */}
+                <Skeleton width={80} height={20} style={styles.tagSkeleton} />
+                {/* Name/Title */}
+                <Skeleton width={150} height={20} style={styles.titleSkeleton} />
+                {/* Date Range */}
+                <Skeleton width={200} height={16} style={styles.dateSkeleton} />
             </View>
 
             {/* Right Side: Edit Button */}
             <View style={styles.actionContainer}>
-                <Skeleton width={32} height={32} style={{ borderRadius: borderRadius.sm }} />
+                <Skeleton width={70} height={32} style={{ borderRadius: 100 }} />
             </View>
         </View>
     );
@@ -44,22 +41,28 @@ const styles = StyleSheet.create({
     },
     cardContainer: {
         backgroundColor: colors.white,
-        padding: spacing.sm,
+        padding: spacing.md,
         marginTop: spacing.sm,
+        marginHorizontal: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     contentContainer: {
         flex: 1,
         marginRight: spacing.md,
     },
-    topRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.xs,
+    tagSkeleton: {
+        marginBottom: 8,
+        borderRadius: 12,
     },
-    bottomRow: {
+    titleSkeleton: {
+        marginBottom: 8,
+    },
+    dateSkeleton: {
         marginTop: 4,
     },
     actionContainer: {

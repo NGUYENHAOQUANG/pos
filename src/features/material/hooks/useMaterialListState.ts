@@ -26,11 +26,11 @@ export const useMaterialListState = () => {
     const warehouseId = warehouses?.[0]?.id;
 
     const getListState = useCallback(
-        ({ isLoading, isRefetching, isFetchingNextPage, itemsCount = 0 }: ListStateParams) => {
+        ({ isLoading, isRefetching, isFetchingNextPage }: ListStateParams) => {
             const showSkeleton = Boolean(
                 isWarehousesLoading ||
                     isLoading ||
-                    (!!isConnected && isRefetching && !isFetchingNextPage && itemsCount === 0)
+                    (!!isConnected && isRefetching && !isFetchingNextPage)
             );
 
             const isRefreshing = isRefetching && !isFetchingNextPage;

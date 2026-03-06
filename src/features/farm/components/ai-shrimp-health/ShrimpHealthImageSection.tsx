@@ -57,7 +57,6 @@ export const ShrimpHealthImageSection: React.FC<Props> = ({
                 <ImageUpload
                     imageUri={imageUri}
                     onImageSelect={onImageSelect}
-                    onImageRemove={onImageRemove}
                     returnBase64={true}
                     aspectRatio={aspectRatio}
                 >

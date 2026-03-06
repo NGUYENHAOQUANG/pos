@@ -110,7 +110,7 @@ export const AquacultureManagementScreens: React.FC = () => {
         [counts]
     );
 
-    const showSkeleton = isLoading;
+    const showSkeleton = isLoading || isPulling;
 
     // Memoized callbacks for navigation
     const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
