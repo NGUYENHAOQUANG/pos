@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, RefreshControl } from 'react-native';
-import { colors, spacing, typography } from '@/styles';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { borderRadius, colors, spacing } from '@/styles';
 import { CycleData } from '@/features/farm/types/cycle.types';
+import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
-
+import { DetailRow } from '@/features/material/components/DetailRow';
 interface CycleDetailContentProps {
     activeCycleData?: CycleData;
     seasonLabel: string;
@@ -30,7 +30,8 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     onRefresh,
     onEditPress,
 }) => {
-    const [isCycleNameExpanded, setIsCycleNameExpanded] = useState(false);
+    const [isStockingExpanded] = useState(true);
+    const [isTransferExpanded, setIsTransferExpanded] = useState(true);
 
     return (
         <ScrollView
@@ -46,188 +47,94 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
         >
             {/* Thông tin thả giống - Chu kỳ gốc của ao nhận */}
             <View style={styles.card}>
-                <View style={styles.cardHeaderWithBorder}>
-                    <Text style={styles.cardTitle}>Thông tin thả giống</Text>
-                    <View style={styles.headerActions}>
+                <CollapseHead
+                    title="Thông tin thả giống"
+                    isExpanded={isStockingExpanded}
+                    rightComponent={
                         <TouchableOpacity style={styles.iconBtn} onPress={onEditPress}>
                             <EditIcon />
                         </TouchableOpacity>
-                        <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
-                    </View>
-                </View>
+                    }
+                    style={styles.cardHeader}
+                />
 
-                <View style={styles.infoContainer}>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Vụ nuôi:</Text>
-                        <Text style={styles.value}>{seasonLabel}</Text>
-                    </View>
-                    {/* Custom row for Tên chu kỳ with expand/collapse */}
-                    <View style={[styles.infoRow, styles.cycleNameRow]}>
-                        <Text style={[styles.label, styles.cycleNameLabel]}>Tên chu kỳ:</Text>
-                        <View style={styles.cycleNameValueContainer}>
-                            <Text
-                                style={[styles.value, styles.cycleNameText]}
-                                numberOfLines={isCycleNameExpanded ? undefined : 1}
-                            >
-                                {activeCycleData?.name || '---'}
-                            </Text>
-                            {(activeCycleData?.name?.length || 0) > 25 && (
-                                <TouchableOpacity
-                                    onPress={() => setIsCycleNameExpanded(!isCycleNameExpanded)}
-                                    style={styles.expandButton}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                >
-                                    <Ionicons
-                                        name={isCycleNameExpanded ? 'chevron-up' : 'chevron-down'}
-                                        size={18}
-                                        color={colors.gray[500]}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Tôm giống:</Text>
-                        <Text style={styles.value}>{breedLabel}</Text>
-                    </View>
+                {isStockingExpanded && (
+                    <View style={styles.infoContainer}>
+                        <DetailRow label="Vụ nuôi:" value={seasonLabel} />
+                        <DetailRow label="Tên chu kỳ:" value={activeCycleData?.name || '---'} />
+                        <DetailRow label="Tôm giống:" value={breedLabel} />
 
-                    <View style={[styles.line]} />
+                        <View style={styles.line} />
 
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Ngày thả:</Text>
-                        <Text style={styles.value}>{displayStockingDate}</Text>
+                        <DetailRow label="Ngày thả:" value={displayStockingDate} />
+                        <DetailRow label="Ngày nuôi (DOC):" value={`${doc} ngày`} />
+                        <DetailRow
+                            label="Số lượng thả (Pls):"
+                            value={activeCycleData?.totalStocking?.toLocaleString() || 0}
+                        />
                     </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Số ngày nuôi (DOC):</Text>
-                        <Text style={styles.value}>{doc} ngày</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Số lượng thả (Pls):</Text>
-                        <Text style={styles.value}>
-                            {activeCycleData?.totalStocking?.toLocaleString() || 0}
-                        </Text>
-                    </View>
-                </View>
+                )}
             </View>
 
             {/* Thông tin sang ao - Luôn hiển thị */}
             <View style={[styles.card, { marginTop: spacing.sm }]}>
-                <View style={styles.cardHeaderWithBorder}>
-                    <Text style={styles.cardTitle}>Thông tin sang ao</Text>
-                    <Ionicons name="chevron-up" size={20} color={colors.gray[700]} />
-                </View>
+                <CollapseHead
+                    title="Thông tin sang ao"
+                    isExpanded={isTransferExpanded}
+                    onToggle={() => setIsTransferExpanded(!isTransferExpanded)}
+                    style={styles.cardHeader}
+                />
 
-                <View style={styles.infoContainer}>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Ngày nhận ao:</Text>
-                        <Text style={styles.value}>{displayStockingDate}</Text>
+                {isTransferExpanded && (
+                    <View style={styles.infoContainer}>
+                        <DetailRow label="Ngày nhận ao:" value={displayStockingDate} />
+                        <DetailRow label="Chuyển sang từ ao:" value={sourcePondName} />
+                        <DetailRow label="Ngày nuôi (DOC):" value={`${doc} ngày`} />
+                        <DetailRow label="Cỡ tôm (con/kg):" value={shrimpSize} />
+                        <DetailRow
+                            label="Số lượng tôm sang (con):"
+                            value={activeCycleData?.totalStocking?.toLocaleString() || 0}
+                        />
                     </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Chuyển sang từ ao:</Text>
-                        <Text style={styles.value}>{sourcePondName}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Ngày nuôi (DOC):</Text>
-                        <Text style={styles.value}>{doc} ngày</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Cỡ tôm (con/kg)</Text>
-                        <Text style={styles.value}>{shrimpSize}</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.label}>Số lượng tôm sang (con):</Text>
-                        <Text style={styles.value}>
-                            {activeCycleData?.totalStocking?.toLocaleString() || 0}
-                        </Text>
-                    </View>
-                </View>
+                )}
             </View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    content: {
-        paddingVertical: spacing.sm,
-    },
+    content: {},
     card: {
         backgroundColor: colors.white,
-        width: '100%',
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
+        borderWidth: 1,
         borderColor: colors.border,
+        borderRadius: 12,
+        marginHorizontal: spacing.md,
     },
-    cardHeaderWithBorder: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    cardHeader: {
+        backgroundColor: colors.transparent, // Inherit from card to prevent corner issues
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
         paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    cardTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.gray[900],
-    },
-    headerActions: {
-        flexDirection: 'row',
-        alignItems: 'center',
     },
     iconBtn: {
-        width: 32,
-        height: 32,
+        width: 40,
+        height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: spacing.md,
-        backgroundColor: colors.gray[50],
-        borderRadius: 4,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.full,
         borderWidth: 1,
         borderColor: colors.border,
     },
     line: {
         height: 1,
         backgroundColor: colors.borderLight,
-    },
-    infoRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 4,
+        marginHorizontal: spacing.md, // match DataRow internal padding, so 12+4=16 total
     },
     infoContainer: {
+        paddingBottom: 16,
         paddingHorizontal: spacing.md,
-        paddingVertical: 12,
-        gap: 8,
-    },
-    label: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
-    },
-    value: {
-        fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.regular,
-    },
-    cycleNameRow: {
-        alignItems: 'flex-start',
-    },
-    cycleNameLabel: {
-        marginTop: 2,
-    },
-    cycleNameValueContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    cycleNameText: {
-        textAlign: 'right',
-        flex: 1,
-    },
-    expandButton: {
-        marginLeft: 6,
-        paddingHorizontal: 2,
+        gap: 12,
     },
 });

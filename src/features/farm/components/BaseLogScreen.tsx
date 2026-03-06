@@ -1,23 +1,15 @@
 import React, { useEffect, ReactNode } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    ViewStyle,
-    RefreshControl,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, ViewStyle, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { TrackingGroup, TrackingDayCard } from '@/features/farm/components/TrackingList';
 import { EmptyStateCard } from '@/features/farm/components/EmptyStateCard';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -53,6 +45,12 @@ export interface BaseLogScreenProps {
     isRefreshing?: boolean;
     /** Callback for pull-to-refresh */
     onRefresh?: () => void;
+    /** Right custom component */
+    rightAction?: ReactNode;
+    /** Right icon */
+    rightIcon?: ReactNode;
+    /** Right press handler */
+    onRightPress?: () => void;
 }
 
 /**
@@ -96,6 +94,9 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     isLoading = false,
     isRefreshing = false,
     onRefresh,
+    rightAction,
+    rightIcon,
+    onRightPress,
 }) => {
     const navigation = useNavigation<NavigationProp>();
     const insets = useSafeAreaInsets();
@@ -116,7 +117,7 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
         ? {
               borderRadius: 0,
               borderWidth: 0,
-              borderBottomWidth: 1,
+              // borderBottomWidth: 1,
               borderBottomColor: colors.border,
               marginBottom: 8,
               shadowColor: 'transparent',
@@ -128,13 +129,16 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.headerSection}>
-                <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                    <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                        <Ionicons name="arrow-back" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{title}</Text>
-                    <View style={styles.headerSpacer} />
-                </View>
+                <HeaderSection
+                    title={title}
+                    titleStyle={{ fontSize: 18, fontWeight: '600', lineHeight: 28 }}
+                    onBack={handleBack}
+                    rightComponent={rightAction}
+                    rightIcon={rightIcon}
+                    onRightPress={onRightPress}
+                    showBackButton={true}
+                    containerStyle={{ backgroundColor: colors.backgroundPrimary }}
+                />
 
                 {/* Divider between header and date range */}
                 <View style={styles.headerDivider} />
@@ -192,35 +196,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundPrimary,
     },
     headerSection: {
-        backgroundColor: colors.white,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
+        backgroundColor: colors.backgroundPrimary,
     },
     headerDivider: {
         height: 1,
