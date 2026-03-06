@@ -9,8 +9,8 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import ActivitySchedule, {
     ScheduleItem,
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';

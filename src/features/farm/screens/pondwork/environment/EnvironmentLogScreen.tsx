@@ -159,9 +159,8 @@ export const EnvironmentLogScreen: React.FC = () => {
                     }
 
                     activityData.push({
-                        label,
+                        label: unit ? `${label} (${unit})` : label,
                         value: m.value.toString(),
-                        unit,
                         isWarning: m.isAlerted || false,
                     });
                 });

@@ -203,8 +203,9 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     cycleCardWrapper: {
-        marginTop: spacing.sm,
-        marginBottom: spacing.sm,
+        marginTop: 16,
+        marginBottom: 8,
+        marginHorizontal: 16,
         gap: 8,
     },
     emptyCard: {

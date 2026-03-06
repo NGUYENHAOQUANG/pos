@@ -4,7 +4,6 @@ import IconAdd from 'react-native-vector-icons/Ionicons';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from './ModalAddTurn';
 import { AddTurnModalUI } from './AddTurnModalUI';
-import { Button } from '@/shared/components/buttons/Button';
 import { colors } from '@/styles';
 
 export interface ScheduleItem {
@@ -105,14 +104,10 @@ export default function ActivitySchedule({
                 ))}
 
                 {/* Nút mở Popup thêm lượt */}
-                <Button
-                    title="Thêm lượt"
-                    variant="outline"
-                    onPress={openAddModal}
-                    renderLeftIcon={<IconAdd name="add" size={20} color={colors.textSecondary} />}
-                    style={styles.addBtn}
-                    textStyle={styles.addBtnText}
-                />
+                <TouchableOpacity style={styles.addBtn} onPress={openAddModal}>
+                    <IconAdd name="add" size={20} color={colors.text} />
+                    <Text style={styles.addBtnText}>Thêm lượt</Text>
+                </TouchableOpacity>
             </View>
 
             {/* --- MODAL POPUP --- */}
@@ -128,10 +123,13 @@ export default function ActivitySchedule({
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 0,
+        backgroundColor: colors.white,
+        padding: 16,
+        marginTop: 8,
+        marginHorizontal: 16,
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 16,
+        borderRadius: 12,
     },
     headerTitle: {
         fontSize: 16,
@@ -139,16 +137,11 @@ const styles = StyleSheet.create({
         color: colors.text,
         marginBottom: 12,
     },
-    fullWidthDivider: {
-        height: 1,
-        backgroundColor: colors.border,
-        marginHorizontal: -16,
-        marginBottom: 16,
-    },
+
     card: {
         backgroundColor: colors.white,
-        padding: 16,
-        borderRadius: 16,
+        padding: 0,
+        marginTop: 0,
     },
     rowItem: {
         flexDirection: 'row',
@@ -187,13 +180,57 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     addBtn: {
-        marginTop: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 40,
+        borderRadius: 12,
+        borderWidth: 1.5,
         borderColor: colors.border,
-        borderWidth: 1,
+        borderStyle: 'solid',
+        backgroundColor: colors.white,
+        marginTop: 4,
     },
     addBtnText: {
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: '400',
         color: colors.text,
+        marginLeft: 8,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: colors.overlay,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    modalContent: {
+        width: '100%',
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        padding: 16,
+        elevation: 5,
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingBottom: 12,
+    },
+    modalTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+    modalBody: { flexDirection: 'row', marginTop: 16, marginBottom: 16 },
+    halfInput: { flex: 1 },
+    spacer12: { width: 12 },
+    modalFooter: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, paddingTop: 16 },
+    btnModalCancel: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
 });

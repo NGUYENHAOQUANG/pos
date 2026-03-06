@@ -2,7 +2,7 @@ import React from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
 import { InventoryCard } from '@/features/material/components/inventory_list/InventoryCard';
 import { MaterialLoadingState } from '@/features/material/components/MaterialLoadingState';
-import { MaterialEmptyState, MaterialTabType } from '@/features/material/components/EmptyStateCard';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { colors } from '@/styles';
 import { materialListStyles } from '@/features/material/styles/materialListStyles';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
@@ -49,8 +49,9 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => <InventoryCard data={item} />}
                 ListEmptyComponent={
-                    <MaterialEmptyState
-                        tab={MaterialTabType.Inventory}
+                    <EmptyStateCard
+                        message="Chưa có phiếu điều chỉnh tồn kho nào được tạo."
+                        buttonTitle="Tạo Phiếu Điều Chỉnh Tồn Kho"
                         onPress={onPressCreate || (() => {})}
                     />
                 }
