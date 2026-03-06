@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, spacing } from '@/styles';
-import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
+import { Button } from '@/shared/components/buttons/Button';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -24,8 +25,6 @@ interface Props {
     imageDimensions: { width: number; height: number };
     displayDimensions: { width: number; height: number };
     onBackPress: () => void;
-    onSavePress: () => void;
-    onCancelPress: () => void;
     onImageSelect: (
         uri: string,
         base64?: string,
@@ -35,6 +34,7 @@ interface Props {
     onImageRemove: () => void;
     onResetPress: () => void;
     onGetResultPress: () => void;
+    onAnalyzeImagePress: () => void;
     onShowDetailsPress: () => void;
     isSheetVisible: boolean;
     onCloseSheet: () => void;
@@ -55,12 +55,11 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     imageDimensions,
     displayDimensions,
     onBackPress,
-    onSavePress,
-    onCancelPress,
     onImageSelect,
     onImageRemove,
     onResetPress,
     onGetResultPress,
+    onAnalyzeImagePress,
     onShowDetailsPress,
     isSheetVisible,
     onCloseSheet,
@@ -69,6 +68,9 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     onCancelReset,
     onImageAreaLayout,
 }) => {
+    const insets = useSafeAreaInsets();
+    const paddingBottom = Math.max(insets.bottom, spacing.sm);
+
     return (
         <View style={styles.container}>
             <HeaderSection title="Kiểm tra sức khỏe tôm bằng AI" onBack={onBackPress} />
@@ -85,31 +87,43 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
                             previousResult={previousResult}
                             onShowDetailsPress={onShowDetailsPress}
                         />
+                    </SelectionInfoBox>
 
+                    <SelectionInfoBox title="Hình ảnh xử lý">
                         <ShrimpHealthImageSection
                             imageUri={imageUri}
                             detections={detections}
                             imageDimensions={imageDimensions}
                             displayDimensions={displayDimensions}
-                            countTimes={countTimes}
                             onImageSelect={onImageSelect}
                             onImageRemove={onImageRemove}
                             onImageAreaLayout={onImageAreaLayout}
-                            onResetPress={onResetPress}
-                            onGetResultPress={onGetResultPress}
+                            onGetResultPress={onAnalyzeImagePress}
                         />
                     </SelectionInfoBox>
                 </ScrollView>
             </Loading>
 
-            <View style={styles.footer}>
-                <ButtonBarFarm
-                    primaryTitle="Lưu và Quay lại"
-                    secondaryTitle="Hủy"
-                    onPrimaryPress={onSavePress}
-                    onSecondaryPress={onCancelPress}
-                    secondaryType="default"
-                />
+            <View style={[styles.footer, { paddingBottom }]}>
+                <View style={styles.countWrapper}>
+                    <Text style={styles.countLabel}>Số lần kiểm tra</Text>
+                    <Text style={styles.countValue}>{countTimes}</Text>
+                </View>
+                <View style={styles.buttonRow}>
+                    <Button
+                        title="Kiểm tra lại"
+                        onPress={onResetPress}
+                        variant="outline"
+                        style={styles.flexButton}
+                        textStyle={{ color: colors.text }}
+                    />
+                    <Button
+                        title="Lấy kết quả này"
+                        onPress={onGetResultPress}
+                        variant="primary"
+                        style={styles.flexButton}
+                    />
+                </View>
             </View>
 
             <ShrimpHealthDetailsModal
@@ -144,6 +158,32 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopWidth: 1,
         borderTopColor: colors.border,
-        paddingBottom: spacing.sm,
+    },
+    countWrapper: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+    },
+    countLabel: {
+        fontSize: 16,
+        color: colors.textSecondary,
+    },
+    countValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.md,
+        gap: spacing.md,
+    },
+    flexButton: {
+        flex: 1,
+        borderRadius: 100,
+        height: 48,
     },
 });

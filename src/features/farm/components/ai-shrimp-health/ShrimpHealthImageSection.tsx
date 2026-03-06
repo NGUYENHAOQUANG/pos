@@ -1,19 +1,21 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import IconAICheck from '@/assets/Icon/AIcheck.svg';
+import IconCamera from '@/assets/Icon/camera.svg';
+import { colors } from '@/styles';
 import {
     ShrimpHealthBoundingBoxOverlay,
     HealthDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
-import { AIActionButtonsWithCount } from '@/features/farm/components/ai-common/AIActionButtonsWithCount';
 
 interface Props {
     imageUri: string | null;
     detections: HealthDetectionBox[];
     imageDimensions: { width: number; height: number };
     displayDimensions: { width: number; height: number };
-    countTimes: number;
     onImageSelect: (
         uri: string,
         base64?: string,
@@ -22,7 +24,6 @@ interface Props {
     ) => void;
     onImageRemove: () => void;
     onImageAreaLayout: (size: { width: number; height: number }) => void;
-    onResetPress: () => void;
     onGetResultPress: () => void;
 }
 
@@ -31,11 +32,9 @@ export const ShrimpHealthImageSection: React.FC<Props> = ({
     detections,
     imageDimensions,
     displayDimensions,
-    countTimes,
     onImageSelect,
     onImageRemove,
     onImageAreaLayout,
-    onResetPress,
     onGetResultPress,
 }) => {
     const aspectRatio =
@@ -56,7 +55,6 @@ export const ShrimpHealthImageSection: React.FC<Props> = ({
                 }}
             >
                 <ImageUpload
-                    label="Hình ảnh xử lý"
                     imageUri={imageUri}
                     onImageSelect={onImageSelect}
                     onImageRemove={onImageRemove}
@@ -74,15 +72,49 @@ export const ShrimpHealthImageSection: React.FC<Props> = ({
                     )}
                 </ImageUpload>
 
-                <AIActionButtonsWithCount
-                    count={countTimes}
-                    countLabel="Số lần kiểm tra"
-                    primaryLabel="Kiểm tra lại"
-                    secondaryLabel="Lấy kết quả kiểm tra"
-                    onPrimaryPress={onResetPress}
-                    onSecondaryPress={onGetResultPress}
+                <OutlineButton
+                    label="Chụp lại"
+                    onPress={onImageRemove}
+                    prefix={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
+                    style={styles.retakeButton}
+                    labelStyle={styles.retakeButtonText}
+                />
+
+                <OutlineButton
+                    label="Kiểm tra"
+                    onPress={onGetResultPress}
+                    prefix={<IconAICheck width={20} height={20} fill={colors.primaryOrange} />}
+                    style={styles.aiButton}
+                    labelStyle={styles.aiButtonText}
                 />
             </View>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    retakeButton: {
+        marginTop: 12,
+        backgroundColor: colors.white,
+        borderColor: colors.border,
+        borderRadius: 100,
+        borderWidth: 1.5,
+    },
+    retakeButtonText: {
+        color: colors.textSecondary,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    aiButton: {
+        marginTop: 12,
+        backgroundColor: colors.white,
+        borderColor: colors.border,
+        borderRadius: 100,
+        borderWidth: 1.5,
+    },
+    aiButtonText: {
+        color: colors.text,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+});

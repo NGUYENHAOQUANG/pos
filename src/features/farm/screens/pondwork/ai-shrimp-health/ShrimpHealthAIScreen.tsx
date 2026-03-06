@@ -162,8 +162,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 imageDimensions={imageDimensions}
                 displayDimensions={displayDimensions}
                 onBackPress={navigation.goBack}
-                onSavePress={handleSave}
-                onCancelPress={navigation.goBack}
                 onImageSelect={handleImageSelect}
                 onImageRemove={() => {
                     _setImageUri(null);
@@ -172,8 +170,9 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                     setImageDimensions({ width: 1, height: 1 });
                 }}
                 onResetPress={handleReset}
-                onGetResultPress={handleGetResult}
+                onGetResultPress={handleSave}
                 onShowDetailsPress={handleShowDetails}
+                onAnalyzeImagePress={handleGetResult}
                 isSheetVisible={isSheetVisible}
                 onCloseSheet={() => setIsSheetVisible(false)}
                 isResetModalVisible={isResetModalVisible}
