@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { colors, typography, borderRadius } from '@/styles';
+import { colors, typography } from '@/styles';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { formatDate } from '@/features/farm/utils/dateUtils';
@@ -11,6 +11,7 @@ import { pondDetailService } from '@/features/farm/services/pond-detail.service'
 
 import { CycleDetailContent } from '@/features/farm/screens/cycle-detail/CycleDetailContent';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import { Tag } from '@/features/farm/components/pond/Tag';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'CycleDetailScreen'>;
 export const CycleDetailScreen: React.FC = () => {
@@ -100,16 +101,24 @@ export const CycleDetailScreen: React.FC = () => {
                 }
                 rightAction={
                     <View style={styles.badgeWrapper}>
-                        <View style={styles.statusBadge}>
-                            <Text style={styles.statusText} numberOfLines={1}>
-                                {activeCycleData?.status === 'InProgress' ||
+                        <Tag
+                            status={
+                                activeCycleData?.status === 'InProgress' ||
+                                activeCycleData?.status === 'Active'
+                                    ? 'preparing'
+                                    : activeCycleData?.status === 'Completed'
+                                    ? 'active'
+                                    : 'preparing'
+                            }
+                            label={
+                                activeCycleData?.status === 'InProgress' ||
                                 activeCycleData?.status === 'Active'
                                     ? 'Chưa hoàn thành'
                                     : activeCycleData?.status === 'Completed'
                                     ? 'Hoàn thành'
-                                    : activeCycleData?.status || 'Chưa hoàn thành'}
-                            </Text>
-                        </View>
+                                    : activeCycleData?.status || 'Chưa hoàn thành'
+                            }
+                        />
                     </View>
                 }
             />
@@ -148,23 +157,8 @@ const styles = StyleSheet.create({
     },
     badgeWrapper: {
         height: 40,
-        minWidth: 110,
         justifyContent: 'center',
         alignItems: 'flex-end',
-    },
-    statusBadge: {
-        backgroundColor: colors.volcano[200],
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.yellow[200],
-    },
-    statusText: {
-        fontSize: typography.fontSize.xs,
-        color: colors.yellow[600],
-        fontWeight: typography.fontWeight.regular,
-        lineHeight: 20,
     },
     leftTitleContainer: {
         alignItems: 'flex-start',

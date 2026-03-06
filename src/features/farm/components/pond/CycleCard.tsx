@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { CycleData } from '@/features/farm/types/cycle.types';
+import { Tag } from './Tag';
 
 interface CycleCardProps {
     cycle: CycleData;
@@ -47,13 +48,11 @@ export const CycleCard: React.FC<CycleCardProps> = ({
                 </View>
 
                 <View style={styles.rightColumn}>
-                    <View style={[styles.statusBadge, isCompleted && styles.statusBadgeCompleted]}>
-                        <Text
-                            style={[styles.statusText, isCompleted && styles.statusTextCompleted]}
-                        >
-                            {status}
-                        </Text>
-                    </View>
+                    <Tag
+                        status={isCompleted ? 'active' : 'preparing'}
+                        label={status}
+                        style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+                    />
                     <Ionicons
                         name="chevron-forward"
                         size={18}
@@ -95,12 +94,13 @@ const styles = StyleSheet.create({
         width: '100%',
         borderWidth: 1,
         borderColor: colors.borderLight,
-        borderRadius: 0,
+        borderRadius: 16,
     },
     header: {
         flexDirection: 'row',
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 8,
         alignItems: 'center',
     },
     leftColumn: {
@@ -123,26 +123,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-end',
     },
-    statusBadge: {
-        backgroundColor: colors.yellow[50],
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: colors.yellow[300],
-    },
-    statusBadgeCompleted: {
-        backgroundColor: colors.neutral,
-        borderColor: colors.defaultBorder,
-    },
-    statusText: {
-        fontSize: typography.fontSize.sm,
-        color: colors.orange[500],
-        fontWeight: typography.fontWeight.regular,
-    },
-    statusTextCompleted: {
-        color: colors.text,
-    },
     arrowIcon: {
         marginLeft: 8,
     },
@@ -151,8 +131,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.borderLight,
     },
     body: {
-        paddingHorizontal: spacing.md,
-        paddingVertical: 12,
+        paddingHorizontal: 16,
+        paddingTop: 8,
+        paddingBottom: 16,
     },
     row: {
         flexDirection: 'row',
@@ -161,12 +142,12 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: typography.fontSize.sm,
-        color: colors.text,
-        fontWeight: typography.fontWeight.bold,
+        color: colors.textSecondary,
+        fontWeight: typography.fontWeight.regular,
     },
     value: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
-        fontWeight: typography.fontWeight.regular,
+        fontWeight: typography.fontWeight.bold,
     },
 });
