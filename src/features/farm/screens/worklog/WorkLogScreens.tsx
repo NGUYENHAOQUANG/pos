@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
+import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
+import { TouchableOpacity } from 'react-native';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData } from '@/features/farm/types/farm.types';
@@ -151,13 +153,30 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                         style={styles.dateRange}
                     />
                 </View>
-                {/* <TouchableOpacity onPress={() => setIsFilterVisible(true)} activeOpacity={0.7}>
-                    {selectedFilters.length > 0 ? (
-                        <IconFilterActive width={40} height={40} />
-                    ) : (
-                        <IconFilter width={40} height={40} />
+                <View style={{ position: 'relative' }}>
+                    <TouchableOpacity
+                        style={styles.filterButton}
+                        onPress={() => setIsFilterVisible(true)}
+                        activeOpacity={0.7}
+                    >
+                        {selectedFilters.length > 0 ? (
+                            <IconFilter2 width={20} height={20} />
+                        ) : (
+                            <IconFilter width={20} height={20} />
+                        )}
+                    </TouchableOpacity>
+                    {selectedFilters.length > 0 && (
+                        <IconDot
+                            width={12}
+                            height={12}
+                            style={{
+                                position: 'absolute',
+                                top: -2,
+                                right: -2,
+                            }}
+                        />
                     )}
-                </TouchableOpacity> */}
+                </View>
             </View>
 
             {/* Content Section */}
@@ -209,16 +228,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
+        backgroundColor: colors.backgroundPrimary,
         gap: spacing.sm,
     },
     dateRangeContainer: {
         flex: 1,
     },
     dateRange: {
-        height: 40,
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderRadius: 12,
+        borderColor: colors.border,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.sm,
+    },
+    filterButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     scrollContent: {
         flexGrow: 1,
