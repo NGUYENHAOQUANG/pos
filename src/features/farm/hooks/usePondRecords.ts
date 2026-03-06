@@ -80,7 +80,8 @@ const convertReferenceDataToActivityData = (
                 data.push({ label: 'Số lượng (con)', value: `${ref.quantity}` });
             if (ref.density != null)
                 data.push({ label: 'Mật độ (con/m²)', value: `${ref.density}` });
-            if (ref.ageDays != null) data.push({ label: 'Số ngày tuổi', value: `${ref.ageDays}` });
+            if (ref.ageDays != null)
+                data.push({ label: 'Ngày tuổi (ngày)', value: `${ref.ageDays}` });
             if (ref.estimatedCost != null)
                 data.push({
                     label: 'Chi phí ước tính (VNĐ)',
@@ -94,7 +95,10 @@ const convertReferenceDataToActivityData = (
                     const mat = materialMap[m.warehouseItemId];
                     const matName = mat?.name || 'Vật tư';
                     const matUnit = mat?.unitName || '';
-                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
+                    data.push({
+                        label: matUnit ? `${matName} (${matUnit})` : matName,
+                        value: m.quantity,
+                    });
                 });
             }
             break;
@@ -135,9 +139,8 @@ const convertReferenceDataToActivityData = (
                         }
 
                         data.push({
-                            label: finalLabel,
+                            label: finalUnit ? `${finalLabel} (${finalUnit})` : finalLabel,
                             value: `${value}`,
-                            unit: finalUnit,
                             isWarning: warningFlag,
                         });
                     }
@@ -191,7 +194,10 @@ const convertReferenceDataToActivityData = (
                             unit = nameMatch[2].trim();
                         }
 
-                        data.push({ label, value: String(val), unit });
+                        data.push({
+                            label: unit ? `${label} (${unit})` : label,
+                            value: String(val),
+                        });
                     }
                 });
             }
@@ -256,7 +262,10 @@ const convertReferenceDataToActivityData = (
                     const mat = materialMap[m.warehouseItemId];
                     const matName = mat?.name || 'Vật tư';
                     const matUnit = mat?.unitName || '';
-                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
+                    data.push({
+                        label: matUnit ? `${matName} (${matUnit})` : matName,
+                        value: m.quantity,
+                    });
                 });
             }
             break;
@@ -279,7 +288,10 @@ const convertReferenceDataToActivityData = (
                     const mat = materialMap[m.warehouseItemId];
                     const matName = mat?.name || 'Vật tư';
                     const matUnit = mat?.unitName || '';
-                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
+                    data.push({
+                        label: matUnit ? `${matName} (${matUnit})` : matName,
+                        value: m.quantity,
+                    });
                 });
             }
             break;
@@ -290,7 +302,10 @@ const convertReferenceDataToActivityData = (
                     const mat = materialMap[m.warehouseItemId];
                     const matName = mat?.name || 'Vật tư';
                     const matUnit = mat?.unitName || '';
-                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
+                    data.push({
+                        label: matUnit ? `${matName} (${matUnit})` : matName,
+                        value: m.quantity,
+                    });
                 });
             }
             break;
@@ -331,8 +346,8 @@ const convertReferenceDataToActivityData = (
                         pond.toPondName ||
                         `Ao đích ${ref.toPonds!.length > 1 ? index + 1 : ''}`.trim();
                     data.push({
-                        label: pondLabel,
-                        value: `${Number(pond.quantity).toLocaleString()} con`,
+                        label: `${pondLabel} (con)`,
+                        value: Number(pond.quantity).toLocaleString(),
                     });
                 });
             }
@@ -348,7 +363,10 @@ const convertReferenceDataToActivityData = (
                     const mat = materialMap[m.warehouseItemId];
                     const matName = mat?.name || 'Vật tư';
                     const matUnit = mat?.unitName || '';
-                    data.push({ label: matName, value: `SL: ${m.quantity} ${matUnit}` });
+                    data.push({
+                        label: matUnit ? `${matName} (${matUnit})` : matName,
+                        value: m.quantity,
+                    });
                 });
             }
             break;

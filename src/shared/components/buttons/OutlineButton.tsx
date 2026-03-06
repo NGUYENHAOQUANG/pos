@@ -1,4 +1,3 @@
-import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 
@@ -19,6 +18,7 @@ export const OutlineButton: React.FC<OutlineButtonProps> = ({
     suffix,
     disabled,
     style,
+    labelStyle,
 }) => {
     return (
         <TouchableOpacity
@@ -28,7 +28,7 @@ export const OutlineButton: React.FC<OutlineButtonProps> = ({
             disabled={disabled}
         >
             {prefix}
-            <Text style={styles.label}>{label}</Text>
+            <Text style={[styles.label, labelStyle]}>{label}</Text>
             {suffix}
         </TouchableOpacity>
     );
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     label: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '400',
         color: colors.textSecondary,
     },

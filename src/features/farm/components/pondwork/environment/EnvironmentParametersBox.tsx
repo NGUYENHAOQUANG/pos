@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { IconError } from '@/assets/icons';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import GearSix from '@/assets/Icon/GearSix.svg';
+import WarningCircle from '@/assets/Icon/WarningCircle.svg';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
 import { Input } from '@/shared/components/forms/Input';
 
@@ -102,7 +103,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
                 <View style={styles.errorBox}>
-                    <IconError width={16} height={16} />
+                    <WarningCircle width={16} height={16} />
                     <Text style={styles.errorText}>Vui lòng nhập ít nhất 1 chỉ số</Text>
                 </View>
             )}
@@ -112,6 +113,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH, '1-14')}
                         value={pH}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onPHChange)}
                     />
@@ -122,6 +124,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
                         value={doValue}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onDOChange)}
                     />
@@ -132,6 +135,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
                         value={temperature}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onTemperatureChange)}
                     />
@@ -142,6 +146,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
                         value={salinity}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onSalinityChange)}
                     />
@@ -152,6 +157,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
                         value={alkalinity}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                     />
@@ -162,6 +168,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                     <Input
                         label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
                         value={transparency}
+                        placeholder="--"
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onTransparencyChange)}
                     />
@@ -174,45 +181,30 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         const paramOnChange = getAdvancedParameterOnChange(param.id);
                         if (!paramOnChange) return null;
 
-                        // Advanced params usually come as "Name (Unit)" (e.g. "Kali (mg/L)")
-                        // If limit exists using same logic:
-                        // const limit = limits[param.id];
                         let label = param.name;
-
-                        // if (limit) {
-                        //     // Extract unit if present in (...)
-                        //     const match = param.name.match(/\((.*?)\)/);
-                        //     const unit = match ? match[1] : '';
-                        //     const baseName = param.name.split(' (')[0];
-                        //     label = `${baseName} (${limit} ${unit})`.trim().replace(' )', ')');
-                        // }
 
                         return (
                             <View key={param.id} style={styles.fullWidthRow}>
                                 <Input
                                     label={label}
                                     value={paramValue}
+                                    placeholder="--"
                                     keyboardType="default"
                                     onChangeText={text => handleNumericInput(text, paramOnChange)}
                                 />
                             </View>
                         );
                     })}
+                {/* Setup Button */}
+                {onSetupPress && (
+                    <OutlineButton
+                        label="Thiết lập chỉ số môi trường"
+                        onPress={onSetupPress}
+                        prefix={<GearSix width={16} height={16} color={colors.textSecondary} />}
+                        style={styles.setupButton}
+                    />
+                )}
             </View>
-
-            <View style={styles.divider} />
-
-            {/* Setup Button */}
-            {onSetupPress && (
-                <TouchableOpacity
-                    style={styles.setupButton}
-                    onPress={onSetupPress}
-                    activeOpacity={0.8}
-                >
-                    <Ionicons name="settings-outline" size={16} color={colors.primary} />
-                    <Text style={styles.setupButtonText}>Thiết lập chỉ số môi trường</Text>
-                </TouchableOpacity>
-            )}
         </SelectionInfoBox>
     );
 };
@@ -247,27 +239,7 @@ const styles = StyleSheet.create({
     fullWidthRow: {
         width: '100%',
     },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
-    },
     setupButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors.white,
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: 6,
-        paddingVertical: spacing.xs,
-        gap: spacing.sm,
-        height: 32,
-    },
-    setupButtonText: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.primary,
-        lineHeight: 22,
+        marginTop: 4,
     },
 });

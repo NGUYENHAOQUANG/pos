@@ -17,9 +17,9 @@ import {
     IconCleaningThePond,
     IconDryingThePond,
     IconHarvest,
-    IconWarningOutlined,
     IconEdit,
 } from '@/assets/icons';
+import Warning from '@/assets/Icon/Warning.svg';
 
 export type JobType =
     | 'FEED'
@@ -186,9 +186,7 @@ export const JobCard: React.FC<JobCardProps> = ({
                                         <Text style={styles.itemText}>
                                             {item.label} - {item.time}
                                         </Text>
-                                        {hasWarning(item) && (
-                                            <IconWarningOutlined width={16} height={16} />
-                                        )}
+                                        {hasWarning(item) && <Warning width={16} height={16} />}
                                     </View>
                                     {type !== 'TRANSFER_POND' && (
                                         <TouchableOpacity onPress={() => onEditItem?.(item)}>
