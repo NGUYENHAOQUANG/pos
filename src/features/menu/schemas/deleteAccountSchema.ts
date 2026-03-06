@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const OTHER_REASON_KEY = 'Lý do khác';
 
 export const DELETE_REASONS = [
-    'Không còn sử dụng ứng dụng nữa',
-    'Ứng dụng khó sử dụng',
-    'Ứng dụng hay bị lỗi / chạy không ổn định',
-    'Không đáp ứng đúng nhu cầu công việc',
+    'Không còn sử dụng ứng dụng nữa.',
+    'Ứng dụng khó sử dụng.',
+    'Ứng dụng hay bị lỗi / chạy không ổn định.',
+    'Không đáp ứng đúng nhu cầu công việc.',
     OTHER_REASON_KEY,
 ];
 
