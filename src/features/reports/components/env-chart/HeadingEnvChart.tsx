@@ -54,7 +54,6 @@ const styles = StyleSheet.create({
         borderBottomColor: colors.borderLight,
     },
     scrollContent: {
-        paddingHorizontal: 16,
         height: '100%',
         alignItems: 'center',
     },
@@ -73,7 +72,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     textSelected: {
-        color: colors.blue[600],
+        color: colors.text,
         fontWeight: '600',
     },
     indicator: {
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 2,
-        backgroundColor: colors.blue[600],
+        backgroundColor: colors.text,
         borderTopLeftRadius: 2,
         borderTopRightRadius: 2,
     },

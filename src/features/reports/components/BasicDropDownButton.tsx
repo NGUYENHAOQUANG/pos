@@ -52,14 +52,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: spacing.md,
         backgroundColor: colors.white,
-        borderTopLeftRadius: borderRadius.sm,
-        borderTopRightRadius: borderRadius.sm,
+        borderTopLeftRadius: borderRadius.md,
+        borderTopRightRadius: borderRadius.md,
         borderBottomWidth: 1,
         borderColor: colors.border,
     },
     roundedBottom: {
-        borderBottomLeftRadius: borderRadius.sm,
-        borderBottomRightRadius: borderRadius.sm,
+        borderBottomLeftRadius: borderRadius.md,
+        borderBottomRightRadius: borderRadius.md,
     },
     prefixIcon: {
         marginRight: spacing.sm,

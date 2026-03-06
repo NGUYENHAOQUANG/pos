@@ -11,167 +11,83 @@ export interface EnvLog {
     salt: number; // Độ mặn (ppt)
 }
 
-export const ENV_DATA: EnvLog[] = [
-    // N01
-    { date: '01/11/2025', pond: 'N01', pH: 7.8, do: 5.6, temp: 29.0, alk: 180, clear: 30, salt: 22 },
-    { date: '02/11/2025', pond: 'N01', pH: 8.0, do: 5.9, temp: 29.5, alk: 190, clear: 32, salt: 23 },
-    { date: '03/11/2025', pond: 'N01', pH: 8.2, do: 6.1, temp: 30.0, alk: 200, clear: 33, salt: 24 },
-    { date: '04/11/2025', pond: 'N01', pH: 8.4, do: 6.3, temp: 30.5, alk: 210, clear: 35, salt: 25 },
-    { date: '05/11/2025', pond: 'N01', pH: 8.6, do: 6.5, temp: 31.0, alk: 220, clear: 36, salt: 26 },
-    { date: '06/11/2025', pond: 'N01', pH: 8.3, do: 6.2, temp: 30.5, alk: 215, clear: 34, salt: 25 },
-    { date: '07/11/2025', pond: 'N01', pH: 8.1, do: 6.0, temp: 30.0, alk: 210, clear: 33, salt: 24 },
-    { date: '08/11/2025', pond: 'N01', pH: 7.9, do: 5.8, temp: 29.5, alk: 200, clear: 32, salt: 23 },
-    { date: '09/11/2025', pond: 'N01', pH: 7.7, do: 5.6, temp: 29.0, alk: 190, clear: 30, salt: 22 },
-    { date: '10/11/2025', pond: 'N01', pH: 7.5, do: 5.4, temp: 28.5, alk: 180, clear: 28, salt: 21 },
-    { date: '11/11/2025', pond: 'N01', pH: 7.6, do: 5.5, temp: 28.0, alk: 175, clear: 27, salt: 21 },
-    { date: '12/11/2025', pond: 'N01', pH: 7.8, do: 5.7, temp: 28.5, alk: 180, clear: 28, salt: 22 },
-    { date: '13/11/2025', pond: 'N01', pH: 8.0, do: 5.9, temp: 29.0, alk: 185, clear: 29, salt: 23 },
-    { date: '14/11/2025', pond: 'N01', pH: 8.2, do: 6.1, temp: 29.5, alk: 190, clear: 30, salt: 24 },
-    { date: '15/11/2025', pond: 'N01', pH: 8.3, do: 6.2, temp: 30.0, alk: 195, clear: 31, salt: 25 },
-    { date: '16/11/2025', pond: 'N01', pH: 8.1, do: 6.0, temp: 30.5, alk: 200, clear: 32, salt: 26 },
-    { date: '17/11/2025', pond: 'N01', pH: 7.9, do: 5.8, temp: 30.0, alk: 205, clear: 33, salt: 27 },
-    { date: '18/11/2025', pond: 'N01', pH: 7.7, do: 5.6, temp: 29.5, alk: 210, clear: 34, salt: 28 },
-    { date: '19/11/2025', pond: 'N01', pH: 7.6, do: 5.5, temp: 29.0, alk: 215, clear: 35, salt: 29 },
-    { date: '20/11/2025', pond: 'N01', pH: 7.8, do: 5.7, temp: 28.5, alk: 220, clear: 36, salt: 30 },
+const generateData = (): EnvLog[] => {
+    const data: EnvLog[] = [];
+    const ponds = [
+        { name: 'N01', baseValue: 6.0, volatility: 0.8 },
+        { name: 'N02', baseValue: 5.5, volatility: 0.9 },
+        { name: 'N03', baseValue: 4.2, volatility: 0.6 },
+        { name: 'N04', baseValue: 6.3, volatility: 0.7 },
+        { name: 'N05', baseValue: 5.8, volatility: 1.0 },
+        { name: 'V01', baseValue: 3.8, volatility: 0.7 },
+        { name: 'V02', baseValue: 5.2, volatility: 0.8 },
+        { name: 'V03', baseValue: 3.4, volatility: 0.6 },
+        { name: 'V04', baseValue: 3.6, volatility: 0.7 },
+        { name: 'V05', baseValue: 4.0, volatility: 0.8 },
+    ];
 
-    // N02
-    { date: '01/11/2025', pond: 'N02', pH: 7.9, do: 5.5, temp: 28.5, alk: 185, clear: 28, salt: 21 },
-    { date: '02/11/2025', pond: 'N02', pH: 8.0, do: 5.7, temp: 29.0, alk: 190, clear: 29, salt: 22 },
-    { date: '03/11/2025', pond: 'N02', pH: 8.1, do: 5.9, temp: 29.5, alk: 195, clear: 30, salt: 23 },
-    { date: '04/11/2025', pond: 'N02', pH: 8.2, do: 6.0, temp: 30.0, alk: 200, clear: 31, salt: 24 },
-    { date: '05/11/2025', pond: 'N02', pH: 8.3, do: 6.2, temp: 30.5, alk: 205, clear: 32, salt: 25 },
-    { date: '06/11/2025', pond: 'N02', pH: 8.1, do: 6.0, temp: 30.0, alk: 200, clear: 31, salt: 24 },
-    { date: '07/11/2025', pond: 'N02', pH: 7.9, do: 5.8, temp: 29.5, alk: 195, clear: 30, salt: 23 },
-    { date: '08/11/2025', pond: 'N02', pH: 7.7, do: 5.6, temp: 29.0, alk: 190, clear: 29, salt: 22 },
-    { date: '09/11/2025', pond: 'N02', pH: 7.6, do: 5.5, temp: 28.5, alk: 185, clear: 28, salt: 21 },
-    { date: '10/11/2025', pond: 'N02', pH: 7.8, do: 5.7, temp: 28.0, alk: 180, clear: 27, salt: 21 },
-    { date: '11/11/2025', pond: 'N02', pH: 8.0, do: 5.9, temp: 28.5, alk: 185, clear: 28, salt: 22 },
-    { date: '12/11/2025', pond: 'N02', pH: 8.2, do: 6.1, temp: 29.0, alk: 190, clear: 29, salt: 23 },
-    { date: '13/11/2025', pond: 'N02', pH: 8.3, do: 6.2, temp: 29.5, alk: 195, clear: 30, salt: 24 },
-    { date: '14/11/2025', pond: 'N02', pH: 8.1, do: 6.0, temp: 30.0, alk: 200, clear: 31, salt: 25 },
-    { date: '15/11/2025', pond: 'N02', pH: 7.9, do: 5.8, temp: 30.5, alk: 205, clear: 32, salt: 26 },
-    { date: '16/11/2025', pond: 'N02', pH: 7.7, do: 5.6, temp: 30.0, alk: 210, clear: 33, salt: 27 },
-    { date: '17/11/2025', pond: 'N02', pH: 7.6, do: 5.5, temp: 29.5, alk: 215, clear: 34, salt: 28 },
-    { date: '18/11/2025', pond: 'N02', pH: 7.8, do: 5.7, temp: 29.0, alk: 220, clear: 35, salt: 29 },
-    { date: '19/11/2025', pond: 'N02', pH: 8.0, do: 5.9, temp: 28.5, alk: 225, clear: 36, salt: 30 },
-    { date: '20/11/2025', pond: 'N02', pH: 8.2, do: 6.1, temp: 28.0, alk: 230, clear: 37, salt: 31 },
+    // Generate dates from 01/11/2025 to 15/12/2025
+    let currentDate = new Date(2025, 10, 1); // 1st Nov 2025
+    const endDate = new Date(2026, 0, 15); // 15th Jan 2026
 
-    // N03
-    { date: '01/11/2025', pond: 'N03', pH: 8.2, do: 6.0, temp: 29.0, alk: 190, clear: 30, salt: 23 },
-    { date: '02/11/2025', pond: 'N03', pH: 8.3, do: 6.1, temp: 29.5, alk: 195, clear: 31, salt: 24 },
-    { date: '03/11/2025', pond: 'N03', pH: 8.4, do: 6.2, temp: 30.0, alk: 200, clear: 32, salt: 25 },
-    { date: '04/11/2025', pond: 'N03', pH: 8.5, do: 6.3, temp: 30.5, alk: 205, clear: 33, salt: 26 },
-    { date: '05/11/2025', pond: 'N03', pH: 8.6, do: 6.4, temp: 31.0, alk: 210, clear: 34, salt: 27 },
-    { date: '06/11/2025', pond: 'N03', pH: 8.4, do: 6.2, temp: 30.5, alk: 205, clear: 33, salt: 26 },
-    { date: '07/11/2025', pond: 'N03', pH: 8.2, do: 6.0, temp: 30.0, alk: 200, clear: 32, salt: 25 },
-    { date: '08/11/2025', pond: 'N03', pH: 8.0, do: 5.8, temp: 29.5, alk: 195, clear: 31, salt: 24 },
-    { date: '09/11/2025', pond: 'N03', pH: 7.9, do: 5.7, temp: 29.0, alk: 190, clear: 30, salt: 23 },
-    { date: '10/11/2025', pond: 'N03', pH: 7.8, do: 5.6, temp: 28.5, alk: 185, clear: 29, salt: 22 },
-    { date: '11/11/2025', pond: 'N03', pH: 7.9, do: 5.7, temp: 28.0, alk: 180, clear: 28, salt: 21 },
-    { date: '12/11/2025', pond: 'N03', pH: 8.0, do: 5.8, temp: 28.5, alk: 185, clear: 29, salt: 22 },
-    { date: '13/11/2025', pond: 'N03', pH: 8.1, do: 5.9, temp: 29.0, alk: 190, clear: 30, salt: 23 },
-    { date: '14/11/2025', pond: 'N03', pH: 8.2, do: 6.0, temp: 29.5, alk: 195, clear: 31, salt: 24 },
-    { date: '15/11/2025', pond: 'N03', pH: 8.3, do: 6.1, temp: 30.0, alk: 200, clear: 32, salt: 25 },
-    { date: '16/11/2025', pond: 'N03', pH: 8.4, do: 6.2, temp: 30.5, alk: 205, clear: 33, salt: 26 },
-    { date: '17/11/2025', pond: 'N03', pH: 8.2, do: 6.0, temp: 30.0, alk: 200, clear: 32, salt: 25 },
-    { date: '18/11/2025', pond: 'N03', pH: 8.0, do: 5.8, temp: 29.5, alk: 195, clear: 31, salt: 24 },
-    { date: '19/11/2025', pond: 'N03', pH: 7.9, do: 5.7, temp: 29.0, alk: 190, clear: 30, salt: 23 },
-    { date: '20/11/2025', pond: 'N03', pH: 8.0, do: 5.8, temp: 28.5, alk: 185, clear: 29, salt: 22 },
+    while (currentDate <= endDate) {
+        const dateStr = `${currentDate.getDate().toString().padStart(2, '0')}/${(
+            currentDate.getMonth() + 1
+        )
+            .toString()
+            .padStart(2, '0')}/${currentDate.getFullYear()}`;
 
-    // V01
-    { date: '01/11/2025', pond: 'V01', pH: 7.8, do: 5.6, temp: 28.5, alk: 180, clear: 30, salt: 21 },
-    { date: '02/11/2025', pond: 'V01', pH: 7.9, do: 5.7, temp: 28.8, alk: 185, clear: 31, salt: 22 },
-    { date: '03/11/2025', pond: 'V01', pH: 8.0, do: 5.9, temp: 29.0, alk: 190, clear: 32, salt: 23 },
-    { date: '04/11/2025', pond: 'V01', pH: 8.1, do: 6.0, temp: 29.2, alk: 195, clear: 33, salt: 23 },
-    { date: '05/11/2025', pond: 'V01', pH: 8.2, do: 6.1, temp: 29.5, alk: 200, clear: 34, salt: 24 },
-    { date: '06/11/2025', pond: 'V01', pH: 8.0, do: 5.9, temp: 29.3, alk: 198, clear: 33, salt: 23 },
-    { date: '07/11/2025', pond: 'V01', pH: 7.9, do: 5.8, temp: 29.0, alk: 195, clear: 32, salt: 22 },
-    { date: '08/11/2025', pond: 'V01', pH: 7.8, do: 5.7, temp: 28.8, alk: 190, clear: 31, salt: 22 },
-    { date: '09/11/2025', pond: 'V01', pH: 7.7, do: 5.6, temp: 28.5, alk: 185, clear: 30, salt: 21 },
-    { date: '10/11/2025', pond: 'V01', pH: 7.8, do: 5.7, temp: 28.7, alk: 188, clear: 31, salt: 22 },
-    { date: '11/11/2025', pond: 'V01', pH: 7.9, do: 5.8, temp: 29.0, alk: 190, clear: 32, salt: 23 },
-    { date: '12/11/2025', pond: 'V01', pH: 8.0, do: 5.9, temp: 29.2, alk: 192, clear: 33, salt: 23 },
-    { date: '13/11/2025', pond: 'V01', pH: 8.1, do: 6.0, temp: 29.5, alk: 195, clear: 34, salt: 24 },
-    { date: '14/11/2025', pond: 'V01', pH: 8.2, do: 6.1, temp: 29.7, alk: 198, clear: 35, salt: 24 },
-    { date: '15/11/2025', pond: 'V01', pH: 8.3, do: 6.2, temp: 30.0, alk: 200, clear: 36, salt: 25 },
-    { date: '16/11/2025', pond: 'V01', pH: 8.1, do: 6.0, temp: 29.8, alk: 198, clear: 35, salt: 24 },
-    { date: '17/11/2025', pond: 'V01', pH: 7.9, do: 5.8, temp: 29.5, alk: 195, clear: 34, salt: 23 },
-    { date: '18/11/2025', pond: 'V01', pH: 7.8, do: 5.7, temp: 29.2, alk: 190, clear: 33, salt: 22 },
-    { date: '19/11/2025', pond: 'V01', pH: 7.7, do: 5.6, temp: 28.9, alk: 185, clear: 32, salt: 21 },
-    { date: '20/11/2025', pond: 'V01', pH: 7.8, do: 5.7, temp: 29.0, alk: 188, clear: 33, salt: 22 },
+        // Spike rules based on date
+        const isSpike1 =
+            currentDate.getDate() >= 17 &&
+            currentDate.getDate() <= 19 &&
+            currentDate.getMonth() === 10;
+        const isDip = currentDate.getDate() === 9 && currentDate.getMonth() === 10;
+        const isSpike2 =
+            currentDate.getDate() >= 7 &&
+            currentDate.getDate() <= 8 &&
+            currentDate.getMonth() === 11;
 
-    // V02
-    { date: '01/11/2025', pond: 'V02', pH: 7.9, do: 5.5, temp: 28.5, alk: 182, clear: 29, salt: 21 },
-    { date: '02/11/2025', pond: 'V02', pH: 8.0, do: 5.6, temp: 28.8, alk: 185, clear: 30, salt: 22 },
-    { date: '03/11/2025', pond: 'V02', pH: 8.1, do: 5.8, temp: 29.0, alk: 190, clear: 31, salt: 23 },
-    { date: '04/11/2025', pond: 'V02', pH: 8.2, do: 5.9, temp: 29.2, alk: 195, clear: 32, salt: 23 },
-    { date: '05/11/2025', pond: 'V02', pH: 8.3, do: 6.0, temp: 29.5, alk: 200, clear: 33, salt: 24 },
-    { date: '06/11/2025', pond: 'V02', pH: 8.1, do: 5.8, temp: 29.3, alk: 198, clear: 32, salt: 23 },
-    { date: '07/11/2025', pond: 'V02', pH: 7.9, do: 5.6, temp: 29.0, alk: 195, clear: 31, salt: 22 },
-    { date: '08/11/2025', pond: 'V02', pH: 7.8, do: 5.5, temp: 28.8, alk: 190, clear: 30, salt: 22 },
-    { date: '09/11/2025', pond: 'V02', pH: 7.7, do: 5.4, temp: 28.5, alk: 185, clear: 29, salt: 21 },
-    { date: '10/11/2025', pond: 'V02', pH: 7.8, do: 5.5, temp: 28.7, alk: 188, clear: 30, salt: 22 },
-    { date: '11/11/2025', pond: 'V02', pH: 7.9, do: 5.6, temp: 29.0, alk: 190, clear: 31, salt: 23 },
-    { date: '12/11/2025', pond: 'V02', pH: 8.0, do: 5.7, temp: 29.2, alk: 192, clear: 32, salt: 23 },
-    { date: '13/11/2025', pond: 'V02', pH: 8.1, do: 5.8, temp: 29.5, alk: 195, clear: 33, salt: 24 },
-    { date: '14/11/2025', pond: 'V02', pH: 8.2, do: 5.9, temp: 29.7, alk: 198, clear: 34, salt: 24 },
-    { date: '15/11/2025', pond: 'V02', pH: 8.3, do: 6.0, temp: 30.0, alk: 200, clear: 35, salt: 25 },
-    { date: '16/11/2025', pond: 'V02', pH: 8.1, do: 5.8, temp: 29.8, alk: 198, clear: 34, salt: 24 },
-    { date: '17/11/2025', pond: 'V02', pH: 7.9, do: 5.6, temp: 29.5, alk: 195, clear: 33, salt: 23 },
-    { date: '18/11/2025', pond: 'V02', pH: 7.8, do: 5.5, temp: 29.2, alk: 190, clear: 32, salt: 22 },
-    { date: '19/11/2025', pond: 'V02', pH: 7.7, do: 5.4, temp: 28.9, alk: 185, clear: 31, salt: 21 },
-    { date: '20/11/2025', pond: 'V02', pH: 7.8, do: 5.5, temp: 29.0, alk: 188, clear: 32, salt: 22 },
+        ponds.forEach(pond => {
+            let val = pond.baseValue + (Math.random() - 0.5) * pond.volatility;
 
-    // V03
-    { date: '01/11/2025', pond: 'V03', pH: 7.8, do: 5.5, temp: 28.5, alk: 180, clear: 29, salt: 21 },
-    { date: '02/11/2025', pond: 'V03', pH: 7.9, do: 5.6, temp: 28.8, alk: 185, clear: 30, salt: 22 },
-    { date: '03/11/2025', pond: 'V03', pH: 8.0, do: 5.7, temp: 29.0, alk: 190, clear: 31, salt: 23 },
-    { date: '04/11/2025', pond: 'V03', pH: 8.1, do: 5.8, temp: 29.2, alk: 195, clear: 32, salt: 23 },
-    { date: '05/11/2025', pond: 'V03', pH: 8.2, do: 5.9, temp: 29.5, alk: 200, clear: 33, salt: 24 },
-    { date: '06/11/2025', pond: 'V03', pH: 8.0, do: 5.7, temp: 29.3, alk: 198, clear: 32, salt: 23 },
-    { date: '07/11/2025', pond: 'V03', pH: 7.9, do: 5.6, temp: 29.0, alk: 195, clear: 31, salt: 22 },
-    { date: '08/11/2025', pond: 'V03', pH: 7.8, do: 5.5, temp: 28.8, alk: 190, clear: 30, salt: 22 },
-    { date: '09/11/2025', pond: 'V03', pH: 7.7, do: 5.4, temp: 28.5, alk: 185, clear: 29, salt: 21 },
-    { date: '10/11/2025', pond: 'V03', pH: 7.8, do: 5.5, temp: 28.7, alk: 188, clear: 30, salt: 22 },
-    { date: '11/11/2025', pond: 'V03', pH: 7.9, do: 5.6, temp: 29.0, alk: 190, clear: 31, salt: 23 },
-    { date: '12/11/2025', pond: 'V03', pH: 8.0, do: 5.7, temp: 29.2, alk: 192, clear: 32, salt: 23 },
-    { date: '13/11/2025', pond: 'V03', pH: 8.1, do: 5.8, temp: 29.5, alk: 195, clear: 33, salt: 24 },
-    { date: '14/11/2025', pond: 'V03', pH: 8.2, do: 5.9, temp: 29.7, alk: 198, clear: 34, salt: 24 },
-    { date: '15/11/2025', pond: 'V03', pH: 8.3, do: 6.0, temp: 30.0, alk: 200, clear: 35, salt: 25 },
-    { date: '16/11/2025', pond: 'V03', pH: 8.1, do: 5.8, temp: 29.8, alk: 198, clear: 34, salt: 24 },
-    { date: '17/11/2025', pond: 'V03', pH: 7.9, do: 5.6, temp: 29.5, alk: 195, clear: 33, salt: 23 },
-    { date: '18/11/2025', pond: 'V03', pH: 7.8, do: 5.5, temp: 29.2, alk: 190, clear: 32, salt: 22 },
-    { date: '19/11/2025', pond: 'V03', pH: 7.7, do: 5.4, temp: 28.9, alk: 185, clear: 31, salt: 21 },
-    { date: '20/11/2025', pond: 'V03', pH: 7.8, do: 5.5, temp: 29.0, alk: 188, clear: 32, salt: 22 },
+            if (isSpike1) {
+                val += Math.random() * 2 + 1.5; // Spike up
+            } else if (isDip) {
+                val -= Math.random() * 1.5 + 1; // Dip down
+            } else if (isSpike2) {
+                val += Math.random() * 1.5 + 1; // Second spike
+            }
 
-    { date: '01/11/2025', pond: 'V04', pH: 7.85, do: 5.55, temp: 28.5, alk: 182, clear: 29, salt: 21 },
-    { date: '02/11/2025', pond: 'V04', pH: 7.95, do: 5.65, temp: 28.8, alk: 187, clear: 30, salt: 22 },
-    { date: '03/11/2025', pond: 'V04', pH: 8.05, do: 5.75, temp: 29.0, alk: 193, clear: 31, salt: 23 },
-    { date: '04/11/2025', pond: 'V04', pH: 8.15, do: 5.85, temp: 29.2, alk: 198, clear: 32, salt: 23 },
-    { date: '05/11/2025', pond: 'V04', pH: 8.25, do: 5.95, temp: 29.5, alk: 203, clear: 33, salt: 24 },
-    { date: '06/11/2025', pond: 'V04', pH: 8.05, do: 5.75, temp: 29.3, alk: 200, clear: 32, salt: 23 },
-    { date: '07/11/2025', pond: 'V04', pH: 7.95, do: 5.65, temp: 29.0, alk: 197, clear: 31, salt: 22 },
-    { date: '08/11/2025', pond: 'V04', pH: 7.85, do: 5.55, temp: 28.8, alk: 192, clear: 30, salt: 22 },
-    { date: '09/11/2025', pond: 'V04', pH: 7.75, do: 5.45, temp: 28.5, alk: 188, clear: 29, salt: 21 },
-    { date: '10/11/2025', pond: 'V04', pH: 7.85, do: 5.55, temp: 28.7, alk: 190, clear: 30, salt: 22 },
-    { date: '11/11/2025', pond: 'V04', pH: 7.95, do: 5.65, temp: 29.0, alk: 193, clear: 31, salt: 23 },
-    { date: '12/11/2025', pond: 'V04', pH: 8.05, do: 5.75, temp: 29.2, alk: 195, clear: 32, salt: 23 },
-    { date: '13/11/2025', pond: 'V04', pH: 8.15, do: 5.85, temp: 29.5, alk: 198, clear: 33, salt: 24 },
-    { date: '14/11/2025', pond: 'V04', pH: 8.25, do: 5.95, temp: 29.7, alk: 200, clear: 34, salt: 24 },
-    { date: '15/11/2025', pond: 'V04', pH: 8.35, do: 6.05, temp: 30.0, alk: 203, clear: 35, salt: 25 },
-    { date: '16/11/2025', pond: 'V04', pH: 8.15, do: 5.85, temp: 29.8, alk: 200, clear: 34, salt: 24 },
-    { date: '17/11/2025', pond: 'V04', pH: 7.95, do: 5.65, temp: 29.5, alk: 198, clear: 33, salt: 23 },
-    { date: '18/11/2025', pond: 'V04', pH: 7.85, do: 5.55, temp: 29.2, alk: 193, clear: 32, salt: 22 },
-    { date: '19/11/2025', pond: 'V04', pH: 7.75, do: 5.45, temp: 28.9, alk: 188, clear: 31, salt: 21 },
-    { date: '20/11/2025', pond: 'V04', pH: 7.85, do: 5.55, temp: 29.0, alk: 190, clear: 32, salt: 22 },
-];
+            data.push({
+                date: dateStr,
+                pond: pond.name,
+                pH: Math.round(val * 10) / 10,
+                do: Math.round((val > 2 ? val - 1 : 1) * 10) / 10,
+                temp: Math.round((24 + Math.random() * 10) * 10) / 10, // Range: 24 - 34
+                alk: Math.round(140 + Math.random() * 80), // Range: 140 - 220
+                clear: Math.round((25 + Math.random() * 15) * 10) / 10, // Range: 25 - 40
+                salt: Math.round((15 + Math.random() * 15) * 10) / 10, // Range: 15 - 30
+            });
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return data;
+};
+
+export const ENV_DATA: EnvLog[] = generateData();
 
 export const POND_COLORS: Record<string, string> = {
-    'N01': colors.orange[700],
-    'N02': colors.green[300],
-    'N03': colors.blue[700],
-    'V01': colors.green[800],
-    'V02': colors.brown[900],
-    'V03': colors.blue[300],
-    'V04': colors.yellow[800],
+    N01: colors.purple[600],
+    N02: colors.orange[700],
+    N03: colors.green[800],
+    N04: colors.blue[700],
+    N05: colors.magenta[900],
+    V01: colors.cyan[800],
+    V02: colors.red[600],
+    V03: colors.geekblue[900],
+    V04: colors.yellow[600],
+    V05: colors.volcano[600],
 };

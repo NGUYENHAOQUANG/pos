@@ -1,7 +1,16 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import Svg, { Line, Path, Rect, G, Text as SvgText, Polygon } from 'react-native-svg';
-import { colors, spacing } from '@/styles';
+import Svg, { Line, Path, Rect, Text as SvgText } from 'react-native-svg';
+import { colors, spacing, typography } from '@/styles';
+import { Text } from '@/shared/components/typography/Text';
+
+const CHART_THEME = {
+    bg: colors.white,
+    grid: colors.gray[200],
+    text: colors.text,
+    green: '#22c55e',
+    orange: '#f97316',
+};
 import {
     CHART_HEIGHT,
     PADDING_LEFT,
@@ -269,7 +278,6 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
         ORANGE_DATA_HISTORICAL,
         ORANGE_DATA_FORECAST,
         BLUE_DATA_HISTORICAL,
-        BLUE_DATA_FORECAST,
         Y_MAX_CHART1,
         getYAxisLabels,
     } = processedData;
@@ -314,28 +322,43 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
         return path;
     };
 
+    /** Path nối thẳng từ điểm đến điểm (không bezier) — tránh đoạn dự báo cong sang trái rồi bị nét đứt */
+    const createLinePath = (data: { day: number; value: number }[]): string => {
+        if (data.length < 2) return '';
+        let path = `M ${getX(data[0].day)} ${getY(data[0].value)}`;
+        for (let i = 1; i < data.length; i++) {
+            path += ` L ${getX(data[i].day)} ${getY(data[i].value)}`;
+        }
+        return path;
+    };
+
     // Create blue line path for historical data (up to divider)
     const createBluePathHistorical = () => {
         return createSmoothPath(BLUE_DATA_HISTORICAL);
     };
 
-    // Create gray line path for forecast data (after divider)
-    const createBluePathForecast = () => {
-        const lastHistorical = BLUE_DATA_HISTORICAL[BLUE_DATA_HISTORICAL.length - 1];
-        const forecastData = [lastHistorical, ...BLUE_DATA_FORECAST];
-        return createSmoothPath(forecastData);
-    };
-
     const dividerX = getX(DIVIDER_DAY);
 
-    // Calculate Y position for X-axis: at middle of range 30-40
-    const axisX_Value = (7 * Y_MAX_CHART1) / 8;
-    const axisX_Y = getY(axisX_Value);
+    // Orange line bên trái: nét thẳng (nối thẳng từng điểm), không cong bezier
+    const createOrangePathHistorical = () => createLinePath(ORANGE_DATA_HISTORICAL);
+    const createOrangePathForecast = () => {
+        const lastHistorical = ORANGE_DATA_HISTORICAL[ORANGE_DATA_HISTORICAL.length - 1];
+        const forecastData = [lastHistorical, ...ORANGE_DATA_FORECAST];
+        return createLinePath(forecastData);
+    };
+
+    // X-axis label: DD/MM
+    const formatXLabel = (fullDate: string) => {
+        const parts = fullDate.split('/');
+        if (parts.length >= 2) return `${parts[0]}/${parts[1]}`;
+        return fullDate;
+    };
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>Khối lượng (Tấn)</Text>
             <View style={{ position: 'relative' }}>
-                {/* Sticky Y-Axis Overlay */}
+                {/* Sticky Y-Axis Overlay: padding 12 trái, nhãn trục Y + title dọc để không bị khuất */}
                 <View
                     style={{
                         position: 'absolute',
@@ -344,20 +367,19 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                         height: CHART_HEIGHT - PADDING_BOTTOM,
                         width: PADDING_LEFT,
                         zIndex: 10,
-                        backgroundColor: colors.white,
+                        // backgroundColor: CHART_THEME.bg,
                     }}
                     pointerEvents="none"
                 >
-                    <Svg width={PADDING_LEFT} height={CHART_HEIGHT}>
-                        {/* Y-axis labels */}
+                    <Svg width={PADDING_LEFT + 12} height={CHART_HEIGHT}>
                         {getYAxisLabels().map(value => {
                             const y = getY(value);
                             return (
                                 <SvgText
                                     key={`y-label-sticky-${value}`}
-                                    x={PADDING_LEFT - 10}
+                                    x={PADDING_LEFT + 2}
                                     y={y + 4}
-                                    fill={colors.text}
+                                    fill={CHART_THEME.text}
                                     fontSize={10}
                                     textAnchor="end"
                                 >
@@ -365,19 +387,6 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                                 </SvgText>
                             );
                         })}
-
-                        {/* Y-axis title */}
-                        <SvgText
-                            x={12}
-                            y={PADDING_TOP + chartHeight / 2}
-                            fill={colors.text}
-                            fontSize={14}
-                            fontWeight="400"
-                            textAnchor="middle"
-                            transform={`rotate(-90 12 ${PADDING_TOP + chartHeight / 2})`}
-                        >
-                            Khối lượng (Tấn)
-                        </SvgText>
                     </Svg>
                 </View>
 
@@ -386,202 +395,91 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
                         width={actualWidth + PADDING_LEFT + PADDING_RIGHT + 40}
                         height={CHART_HEIGHT}
                     >
-                        {/* Grid lines (horizontal, light gray) */}
+                        {/* Dark background */}
+                        <Rect
+                            x={0}
+                            y={0}
+                            width={actualWidth + PADDING_LEFT + PADDING_RIGHT + 40}
+                            height={CHART_HEIGHT}
+                            fill={CHART_THEME.bg}
+                        />
+
+                        {/* Horizontal grid lines - white */}
                         {getYAxisLabels().map(value => {
                             const y = getY(value);
                             return (
                                 <Line
-                                    key={`grid-${value}`}
+                                    key={`grid-h-${value}`}
                                     x1={PADDING_LEFT}
                                     y1={y}
                                     x2={PADDING_LEFT + actualWidth}
                                     y2={y}
-                                    stroke={colors.gray[200]}
+                                    stroke={CHART_THEME.grid}
                                     strokeWidth={1}
                                 />
                             );
                         })}
 
-                        {/* Red divider axis X (horizontal X-axis) - split into 2 parts */}
-                        <Line
-                            x1={PADDING_LEFT}
-                            y1={axisX_Y}
-                            x2={dividerX}
-                            y2={axisX_Y}
-                            stroke={colors.error}
-                            strokeWidth={2}
-                        />
-                        <Line
-                            x1={dividerX}
-                            y1={axisX_Y}
-                            x2={PADDING_LEFT + actualWidth}
-                            y2={axisX_Y}
-                            stroke={colors.textSecondary}
-                            strokeWidth={2}
-                        />
+                        {/* Đường ngăn cách: thực tế | dự báo — nét liền */}
+                        {ORANGE_DATA_FORECAST.length > 0 && (
+                            <Line
+                                x1={dividerX}
+                                y1={PADDING_TOP}
+                                x2={dividerX}
+                                y2={PADDING_TOP + chartHeight}
+                                stroke={CHART_THEME.grid}
+                                strokeWidth={1.5}
+                            />
+                        )}
 
-                        {/* Left arrow */}
-                        <Polygon
-                            points={`${PADDING_LEFT},${axisX_Y} ${PADDING_LEFT + 8},${
-                                axisX_Y - 4
-                            } ${PADDING_LEFT + 8},${axisX_Y + 4}`}
-                            fill="#FF0000"
-                        />
-
-                        {/* Right arrow */}
-                        <Polygon
-                            points={`${PADDING_LEFT + actualWidth},${axisX_Y} ${
-                                PADDING_LEFT + actualWidth - 8
-                            },${axisX_Y - 4} ${PADDING_LEFT + actualWidth - 8},${axisX_Y + 4}`}
-                            fill={colors.textSecondary}
-                        />
-
-                        {/* Labels for divider */}
-                        <G>
-                            <SvgText
-                                x={PADDING_LEFT + 15}
-                                y={axisX_Y - 8}
-                                fill="#FF0000"
-                                fontSize={10}
-                                textAnchor="start"
-                                fontWeight="400"
-                            >
-                                Dữ liệu từ đầu vụ tới hiện tại
-                            </SvgText>
-                            <SvgText
-                                x={PADDING_LEFT + actualWidth - 15}
-                                y={axisX_Y - 8}
-                                fill="#FF0000"
-                                fontSize={10}
-                                textAnchor="end"
-                                fontWeight="400"
-                            >
-                                Dữ liệu dự báo ngày tiếp theo
-                            </SvgText>
-                        </G>
-
-                        {/* Red vertical line at divider position */}
-                        <Line
-                            x1={dividerX}
-                            y1={PADDING_TOP}
-                            x2={dividerX}
-                            y2={PADDING_TOP + chartHeight}
-                            stroke={colors.error}
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                        />
-
-                        {/* Blue line (historical) - smooth bezier curve */}
+                        {/* Green line (Sản lượng) - historical only, solid */}
                         <Path
                             d={createBluePathHistorical()}
                             fill="none"
-                            stroke="#003EB3"
+                            stroke={CHART_THEME.green}
                             strokeWidth={2}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
 
-                        {/* Gray line (forecast, after divider) - smooth bezier curve */}
+                        {/* Orange line - forecast (dashed): vẽ trước để nét liền thực tế đè lên bên trái */}
+                        {ORANGE_DATA_FORECAST.length > 0 && (
+                            <Path
+                                d={createOrangePathForecast()}
+                                fill="none"
+                                stroke={CHART_THEME.orange}
+                                strokeWidth={2}
+                                strokeDasharray="6,4"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        )}
+
+                        {/* Orange line - historical (solid): vẽ sau để luôn nét liền bên trái đường ngăn cách */}
                         <Path
-                            d={createBluePathForecast()}
+                            d={createOrangePathHistorical()}
                             fill="none"
-                            stroke={colors.gray[400]}
+                            stroke={CHART_THEME.orange}
                             strokeWidth={2}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                         />
 
-                        {/* Orange line (historical) - drawn as stacked rectangles (step chart) */}
-                        {ORANGE_DATA_HISTORICAL.map((point, index) => {
-                            if (index === 0) return null;
-
-                            const prevPoint = ORANGE_DATA_HISTORICAL[index - 1];
-                            const x1 = getX(prevPoint.day);
-                            const x2 = getX(point.day);
-                            const y1 = getY(prevPoint.value);
-                            const y2 = getY(point.value);
-
-                            return (
-                                <G key={`orange-step-${point.day}`}>
-                                    <Rect
-                                        x={x1}
-                                        y={y1 - 2}
-                                        width={x2 - x1}
-                                        height={4}
-                                        fill="#FA541C"
-                                    />
-                                    {y2 !== y1 && (
-                                        <Rect
-                                            x={x2 - 2}
-                                            y={Math.min(y1, y2)}
-                                            width={4}
-                                            height={Math.abs(y2 - y1)}
-                                            fill="#FA541C"
-                                        />
-                                    )}
-                                </G>
-                            );
-                        })}
-
-                        {/* Orange line (forecast, after divider) - drawn as stacked rectangles with gray color */}
-                        {ORANGE_DATA_FORECAST.map((point, index) => {
-                            const prevPoint =
-                                index === 0
-                                    ? ORANGE_DATA_HISTORICAL[ORANGE_DATA_HISTORICAL.length - 1]
-                                    : ORANGE_DATA_FORECAST[index - 1];
-
-                            const x1 = getX(prevPoint.day);
-                            const x2 = getX(point.day);
-                            const y1 = getY(prevPoint.value);
-                            const y2 = getY(point.value);
-
-                            return (
-                                <G key={`orange-forecast-step-${point.day}`}>
-                                    <Rect
-                                        x={x1}
-                                        y={y1 - 2}
-                                        width={x2 - x1}
-                                        height={4}
-                                        fill={colors.gray[400]}
-                                    />
-                                    {y2 !== y1 && (
-                                        <Rect
-                                            x={x2 - 2}
-                                            y={Math.min(y1, y2)}
-                                            width={4}
-                                            height={Math.abs(y2 - y1)}
-                                            fill={colors.gray[400]}
-                                        />
-                                    )}
-                                </G>
-                            );
-                        })}
-
+                        {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {
                             const x = getX(day);
-                            const y = PADDING_TOP + chartHeight + 20;
+                            const y = PADDING_TOP + chartHeight + 18;
                             return (
-                                <G key={`x-label-group-${day}`}>
-                                    <Line
-                                        x1={x}
-                                        y1={PADDING_TOP + chartHeight}
-                                        x2={x}
-                                        y2={PADDING_TOP + chartHeight + 5}
-                                        stroke={colors.secondary}
-                                        strokeWidth={1}
-                                    />
-                                    <SvgText
-                                        key={`x-label-${day}`}
-                                        x={x}
-                                        y={y}
-                                        fill={colors.text}
-                                        fontSize={10}
-                                        textAnchor="middle"
-                                        transform={`rotate(-15 ${x} ${y})`}
-                                    >
-                                        {DAY_LABELS[index]}
-                                    </SvgText>
-                                </G>
+                                <SvgText
+                                    key={`x-label-${day}`}
+                                    x={x}
+                                    y={y}
+                                    fill={CHART_THEME.text}
+                                    fontSize={10}
+                                    textAnchor="middle"
+                                >
+                                    {formatXLabel(DAY_LABELS[index])}
+                                </SvgText>
                             );
                         })}
                     </Svg>
@@ -593,11 +491,12 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: colors.white,
         borderRadius: 8,
         paddingHorizontal: spacing.md,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+    },
+    title: {
+        fontSize: typography.fontSize.xs,
+        fontWeight: typography.fontWeight.regular,
+        color: colors.text,
     },
 });

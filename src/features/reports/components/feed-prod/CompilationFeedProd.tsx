@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { MetricsRow } from '@/features/reports/components/feed-prod/MetricsRow';
-import { Legend, getFeedProdLegendItems } from '@/features/reports/components/Legend';
 import { Chart } from '@/features/reports/components/feed-prod/Chart';
+import { FeedProdInfoCard } from '@/features/reports/components/feed-prod/FeedProdInfoCard';
 import {
     CHART_WIDTH,
     CHART_HEIGHT,
@@ -83,7 +83,7 @@ export const CompilationFeedProd = () => {
                                 fcr={formatFCR(getLatestFCR())}
                             />
                             <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
-                            <Legend items={getFeedProdLegendItems()} />
+                            <FeedProdInfoCard />
                         </>
                     )}
                 </View>
