@@ -89,17 +89,6 @@ const styles = StyleSheet.create({
     materialCard: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: colors.text,
-    },
-    materialList: {
-        gap: spacing.md,
-    },
-    materialItem: {
-        flexDirection: 'row',
         justifyContent: 'space-between',
         borderWidth: 1,
         borderColor: colors.border,

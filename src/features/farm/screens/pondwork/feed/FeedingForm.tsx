@@ -70,7 +70,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         return (
             <View
                 pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
-                style={{ opacity: isSubmitting ? 0.7 : 1, gap: 8 }}
+                style={{ opacity: isSubmitting ? 0.7 : 1 }}
             >
                 <Controller
                     name="executionDate"
@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
     },
     activitySchedule: {
         marginTop: 8,
+        marginHorizontal: 16,
     },
     activityScheduleTitle: {
         fontSize: 14,

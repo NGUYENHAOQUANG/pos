@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     },
     radioItem: {
         width: '48%',
-        height: 22,
+        paddingVertical: 6,
     },
     radioOuter: {
         width: 20,

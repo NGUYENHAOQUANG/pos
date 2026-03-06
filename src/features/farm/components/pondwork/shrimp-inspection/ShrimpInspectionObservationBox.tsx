@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    Animated,
+    Dimensions,
+    TouchableWithoutFeedback,
+} from 'react-native';
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import IconAICheck from '@/assets/Icon/AIcheck.svg';
+import IconAICheckOrange from '@/assets/Icon/AIcheck-orange.svg';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
 export interface AIHealthCheckResult {
     totalCount: number;
@@ -62,6 +73,25 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
     onViewAIDetails,
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+    useEffect(() => {
+        if (isModalVisible) {
+            slideAnim.setValue(SCREEN_HEIGHT);
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: SCREEN_HEIGHT,
+                duration: 250,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [isModalVisible, slideAnim]);
 
     useEffect(() => {}, [aiResult]);
 
@@ -70,54 +100,47 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
         onViewAIDetails?.();
     };
 
-    const diseases =
-        aiResult?.status && aiResult.status !== 'Khỏe mạnh'
-            ? aiResult.status.split(',').map(s => s.trim())
-            : [];
-
     return (
         <SelectionInfoBox title="Quan sát mẫu">
             {/* AI Result Section */}
             <View style={styles.aiSection}>
                 {aiResult ? (
-                    <>
-                        <Text style={styles.aiTitle}>Tình trạng tôm - AI</Text>
-                        <View style={styles.aiResultBox}>
-                            <View style={styles.aiResultRow}>
-                                <Text style={styles.aiResultLabel}>
-                                    Trung bình tỉ lệ nhiễm bệnh
-                                </Text>
-                                <Text style={styles.aiResultValue}>{aiResult.infectionRate}%</Text>
-                            </View>
-                            <View style={styles.aiResultRow}>
-                                <Text style={styles.aiResultLabel}>Tình trạng tôm</Text>
-                                {aiResult.status === 'Khỏe mạnh' ? (
-                                    <View style={styles.statusBadgeGreen}>
-                                        <Text style={styles.statusTextGreen}>Khỏe mạnh</Text>
-                                    </View>
-                                ) : (
-                                    <View style={styles.statusBadgeRed}>
-                                        <Text style={styles.statusTextRed}>Nhiễm bệnh</Text>
-                                    </View>
-                                )}
-                            </View>
-                            <TouchableOpacity
-                                style={styles.viewDetailButton}
-                                onPress={handleViewDetails}
-                            >
-                                <Text style={styles.viewDetailText}>Xem chi tiết</Text>
-                            </TouchableOpacity>
+                    <View style={styles.aiResultBox}>
+                        <View style={styles.aiResultHeader}>
+                            <IconAICheckOrange width={20} height={20} fill={colors.primaryOrange} />
+                            <Text style={styles.aiResultTitle}>
+                                Kết quả chuẩn đoán tình trạng tôm từ AI
+                            </Text>
                         </View>
-                        <Text style={styles.aiDisclaimer}>
-                            Kết quả chẩn đoán tình trạng tôm từ AI
-                        </Text>
-                    </>
+
+                        <View style={styles.aiResultRow}>
+                            <Text style={styles.aiResultLabel}>Trung bình nhiễm bệnh</Text>
+                            <Text style={styles.aiResultValue}>{aiResult.infectionRate}%</Text>
+                        </View>
+
+                        <View style={styles.aiResultRow}>
+                            <Text style={styles.aiResultLabel}>Tình trạng tôm</Text>
+                            {aiResult.status === 'Khỏe mạnh' ? (
+                                <View style={styles.statusBadgeGreen}>
+                                    <Text style={styles.statusTextGreen}>Khỏe mạnh</Text>
+                                </View>
+                            ) : (
+                                <View style={styles.statusBadgeRed}>
+                                    <Text style={styles.statusTextRed}>Nhiễm bệnh</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <TouchableOpacity style={styles.viewDetailLink} onPress={handleViewDetails}>
+                            <Text style={styles.viewDetailLinkText}>Xem chi tiết</Text>
+                        </TouchableOpacity>
+                    </View>
                 ) : null}
 
                 <OutlineButton
-                    label="Kiểm tra sức khỏe tôm bằng AI"
+                    label="Kiểm tra tôm bằng AI"
                     onPress={onAICheckPress || (() => {})}
-                    prefix={<IconAICheck width={20} height={20} />}
+                    prefix={<IconAICheck width={20} height={20} fill={colors.gray[500]} />}
                     style={styles.aiButton}
                     labelStyle={styles.aiButtonText}
                 />
@@ -178,63 +201,87 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
             {/* Detail Modal */}
             <Modal
                 visible={isModalVisible}
-                animationType="slide"
+                transparent
+                animationType="fade"
                 onRequestClose={() => setIsModalVisible(false)}
             >
-                <View style={styles.fullScreenModal}>
-                    <HeaderSection
-                        title="Tỉ lệ nhiễm bệnh"
-                        onBack={() => setIsModalVisible(false)}
-                    />
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalBody}>
-                            {aiResult?.items && aiResult.items.length > 0 ? (
-                                Object.entries(
-                                    aiResult.items.reduce(
-                                        (acc: Record<string, number>, item: any) => {
-                                            const diagnosis = item.diagnosis || 'Khỏe mạnh';
-                                            acc[diagnosis] = (acc[diagnosis] || 0) + 1;
-                                            return acc;
-                                        },
-                                        {}
-                                    )
-                                )
-                                    .filter(([diagnosis]) => diagnosis !== 'Khỏe mạnh')
-                                    .map(([diagnosis, count]) => (
-                                        <View key={diagnosis} style={styles.diseaseRow}>
-                                            <Text style={styles.diseaseName}>{diagnosis}</Text>
-                                            <Text style={styles.diseasePercent}>
-                                                {(
-                                                    ((count as number) /
-                                                        (aiResult.totalCount ||
-                                                            aiResult.items!.length)) *
-                                                    100
-                                                ).toFixed(2)}
-                                                %
+                <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <TouchableWithoutFeedback>
+                            <Animated.View
+                                style={[
+                                    styles.modalContainer,
+                                    {
+                                        transform: [{ translateY: slideAnim }],
+                                    },
+                                ]}
+                            >
+                                <View style={styles.modalHeader}>
+                                    <Text style={styles.modalTitle}>Tỉ lệ nhiễm bệnh</Text>
+                                    <TouchableOpacity
+                                        onPress={() => setIsModalVisible(false)}
+                                        style={styles.closeButton}
+                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    >
+                                        <CloseIcon width={16} height={16} fill={colors.text} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <View style={styles.modalBody}>
+                                    {(() => {
+                                        const diseaseGroups: Record<string, number> = {};
+                                        let total = 0;
+
+                                        if (aiResult?.items && aiResult.items.length > 0) {
+                                            total = aiResult.totalCount || aiResult.items.length;
+                                            aiResult.items.forEach((item: any) => {
+                                                const diagnosis = item.diagnosis || 'Khỏe mạnh';
+                                                diseaseGroups[diagnosis] =
+                                                    (diseaseGroups[diagnosis] || 0) + 1;
+                                            });
+                                        } else if (aiResult) {
+                                            if (aiResult.status === 'Khỏe mạnh') {
+                                                diseaseGroups['Khỏe mạnh'] = 1;
+                                                total = 1;
+                                            } else {
+                                                const statusList = aiResult.status
+                                                    .split(',')
+                                                    .map(s => s.trim());
+                                                statusList.forEach(s => {
+                                                    diseaseGroups[s] = 1;
+                                                });
+                                                total = statusList.length;
+                                            }
+                                        }
+
+                                        const entries = Object.entries(diseaseGroups);
+                                        if (entries.length > 0) {
+                                            return entries.map(([name, count]) => (
+                                                <View key={name} style={styles.diseaseRow}>
+                                                    <Text style={styles.diseaseName}>{name}</Text>
+                                                    <Text style={styles.diseasePercent}>
+                                                        {name === 'Khỏe mạnh' &&
+                                                        aiResult?.infectionRate === 0
+                                                            ? '100%'
+                                                            : `${((count / total) * 100).toFixed(
+                                                                  2
+                                                              )}%`}
+                                                    </Text>
+                                                </View>
+                                            ));
+                                        }
+
+                                        return (
+                                            <Text style={styles.noInfoText}>
+                                                Không có thông tin chi tiết
                                             </Text>
-                                        </View>
-                                    ))
-                            ) : diseases.filter(d => d !== 'Khỏe mạnh').length > 0 ? (
-                                diseases
-                                    .filter(d => d !== 'Khỏe mạnh')
-                                    .map((disease, index) => (
-                                        <View key={index} style={styles.diseaseRow}>
-                                            <Text style={styles.diseaseName}>{disease}</Text>
-                                            <Text style={styles.diseasePercent}>
-                                                {diseases.filter(d => d !== 'Khỏe mạnh').length ===
-                                                1
-                                                    ? aiResult?.infectionRate
-                                                    : '- '}
-                                                %
-                                            </Text>
-                                        </View>
-                                    ))
-                            ) : (
-                                <Text style={styles.noInfoText}>Không có thông tin chi tiết</Text>
-                            )}
-                        </View>
+                                        );
+                                    })()}
+                                </View>
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
         </SelectionInfoBox>
     );
@@ -244,30 +291,34 @@ const styles = StyleSheet.create({
     aiSection: {
         marginBottom: spacing.md,
     },
-    aiTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-        marginBottom: spacing.sm,
-        paddingBottom: spacing.xs,
-    },
     aiResultBox: {
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: borderRadius.md,
         padding: spacing.md,
-        marginBottom: spacing.xs,
-        backgroundColor: colors.gray[50],
+        marginBottom: spacing.md,
+        backgroundColor: colors.white,
+    },
+    aiResultHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing.xs,
+        marginBottom: spacing.sm,
+    },
+    aiResultTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text,
     },
     aiResultRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.xs,
+        marginBottom: spacing.sm,
     },
     aiResultLabel: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.textSecondary,
     },
     aiResultValue: {
         fontSize: 14,
@@ -275,44 +326,39 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     statusBadgeGreen: {
-        backgroundColor: colors.status.activeBg,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
+        backgroundColor: colors.green[50],
+        paddingHorizontal: 12,
+        paddingVertical: 2,
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.green[100],
     },
     statusTextGreen: {
-        color: colors.status.activeText,
+        color: colors.green[600],
         fontSize: 12,
         fontWeight: '600',
     },
     statusBadgeRed: {
-        backgroundColor: colors.status.warningBg,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
+        backgroundColor: colors.red[50],
+        paddingHorizontal: 12,
+        paddingVertical: 2,
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.red[200],
     },
     statusTextRed: {
-        color: colors.status.warningText,
+        color: colors.red[600],
         fontSize: 12,
         fontWeight: '600',
     },
-    viewDetailButton: {
+    viewDetailLink: {
         alignSelf: 'center',
-        backgroundColor: colors.status.warningText,
-        paddingHorizontal: 16,
-        paddingVertical: 6,
-        borderRadius: 4,
         marginTop: spacing.xs,
     },
-    viewDetailText: {
-        color: colors.white,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    aiDisclaimer: {
-        fontSize: 12,
-        color: colors.textSecondary,
-        marginBottom: spacing.md,
+    viewDetailLinkText: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: '500',
     },
     aiButton: {
         backgroundColor: colors.white,
@@ -339,7 +385,7 @@ const styles = StyleSheet.create({
     },
     radioItem: {
         width: '48%',
-        height: 24,
+        paddingVertical: 6,
     },
     radioOuter: {
         width: 20,
@@ -366,17 +412,36 @@ const styles = StyleSheet.create({
         fontWeight: '400',
     },
     // Modal Styles
-    fullScreenModal: {
+    modalOverlay: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.overlay,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingHorizontal: spacing.md,
+        paddingBottom: 40,
     },
-    modalContent: {
-        flex: 1,
-        padding: spacing.md,
+    modalContainer: {
+        width: '100%',
+        backgroundColor: colors.white,
+        borderRadius: 24,
+        padding: spacing.lg,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: spacing.lg,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: colors.text,
+    },
+    closeButton: {
+        padding: 4,
     },
     modalBody: {
         width: '100%',
-        marginBottom: spacing.lg,
     },
     diseaseRow: {
         flexDirection: 'row',

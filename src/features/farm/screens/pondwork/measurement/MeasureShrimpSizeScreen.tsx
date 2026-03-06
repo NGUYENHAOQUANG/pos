@@ -187,11 +187,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                             pondId: currentPond?.id || '',
                         })
                     }
-                    averageSizeCm={
-                        averageShrimpSize
-                            ? parseFloat(averageShrimpSize)
-                            : latestAIMeasurement?.averageSizeCm
-                    }
                 />
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
             </SafeInputLayout>
@@ -231,7 +226,6 @@ const styles = StyleSheet.create({
     scrollContent: {
         padding: 0,
         paddingBottom: 100,
-        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

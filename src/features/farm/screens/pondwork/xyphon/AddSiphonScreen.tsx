@@ -370,7 +370,6 @@ const styles = StyleSheet.create({
     scrollContent: {
         padding: 0,
         paddingBottom: 100,
-        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

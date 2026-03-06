@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     infoBox: {
         backgroundColor: colors.white,
         marginHorizontal: 16,
-        marginTop: 12,
+        marginTop: 8,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: 12,
