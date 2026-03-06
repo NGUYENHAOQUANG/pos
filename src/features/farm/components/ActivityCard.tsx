@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     body: {
-        paddingVertical: 4,
-        gap: 2,
+        paddingVertical: 12,
+        gap: 8,
     },
     noteBox: {
         paddingVertical: 4,
