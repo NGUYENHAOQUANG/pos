@@ -109,10 +109,8 @@ export const MemberItem: React.FC<MemberItemProps> = ({
                 </View>
 
                 <View style={styles.info}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.name}>{name}</Text>
-                        <Tag status={status} type="member" />
-                    </View>
+                    <Tag status={status} type="member" />
+                    <Text style={styles.name}>{name}</Text>
                     <Text style={styles.details}>
                         {role} - {managementLevel}
                     </Text>
@@ -147,7 +145,7 @@ const styles = StyleSheet.create({
     },
     leftContent: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         flex: 1,
         gap: spacing.md,
     },
@@ -162,12 +160,6 @@ const styles = StyleSheet.create({
     info: {
         flex: 1,
         gap: 4,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        flexWrap: 'wrap', // Allow wrap if name is too long
     },
     name: {
         fontSize: 16,

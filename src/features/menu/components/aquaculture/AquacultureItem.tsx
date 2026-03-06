@@ -37,14 +37,10 @@ export const AquacultureItem: React.FC<AquacultureItemProps> = ({ item, onEdit }
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <View style={styles.header}>
-                    <View style={styles.nameWrapper}>
-                        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
-                            {item.name}
-                        </Text>
-                    </View>
-                    <Tag status={getStatus(item.status)} type="season" style={styles.tag} />
-                </View>
+                <Tag status={getStatus(item.status)} type="season" style={styles.tag} />
+                <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+                    {item.name}
+                </Text>
                 <Text style={styles.date}>{dateRange}</Text>
             </View>
 
@@ -78,23 +74,15 @@ const styles = StyleSheet.create({
         minWidth: 0,
         marginRight: spacing.md,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: spacing.sm,
-    },
-    nameWrapper: {
-        flex: 1,
-        minWidth: 0,
-        marginRight: spacing.sm,
+    tag: {
+        alignSelf: 'flex-start',
+        marginBottom: spacing.xs,
     },
     name: {
         fontSize: typography.fontSize.base,
         fontWeight: '600',
         color: colors.text,
-    },
-    tag: {
-        // Tag component handles its own styles
+        marginBottom: spacing.xs,
     },
     date: {
         fontSize: typography.fontSize.sm,

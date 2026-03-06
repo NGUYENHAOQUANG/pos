@@ -24,6 +24,7 @@ import { DeviceControlSkeleton } from '@/features/control/components/skeleton/De
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
@@ -246,86 +247,108 @@ export const DeviceControlScreens = () => {
                 flexTabs={true}
                 containerStyle={styles.headingBarContainer}
             />
-            <View style={styles.filterRow}>
-                <View style={styles.dropdownStyle}>
-                    <DropdownHeaderButton
-                        data={farmLocations.map(loc => ({
-                            id: loc.id,
-                            label: loc.name,
-                            value: loc,
-                        }))}
-                        value={
-                            selectedFarm
-                                ? {
-                                      id: selectedFarm.id,
-                                      label: selectedFarm.name,
-                                      value: selectedFarm,
-                                  }
-                                : undefined
-                        }
-                        onSelect={(item: DropDownHeaderItem) => {
-                            if (item.value) {
-                                setSelectedZoneId(item.value.id);
+            {selectedAppTab === 'thiet-bi' && (
+                <View style={styles.filterRow}>
+                    <View style={styles.dropdownStyle}>
+                        <DropdownHeaderButton
+                            data={farmLocations.map(loc => ({
+                                id: loc.id,
+                                label: loc.name,
+                                value: loc,
+                            }))}
+                            value={
+                                selectedFarm
+                                    ? {
+                                          id: selectedFarm.id,
+                                          label: selectedFarm.name,
+                                          value: selectedFarm,
+                                      }
+                                    : undefined
                             }
-                        }}
-                        showIcon={true}
-                        height={40}
-                        borderRadius={12}
-                    />
+                            onSelect={(item: DropDownHeaderItem) => {
+                                if (item.value) {
+                                    setSelectedZoneId(item.value.id);
+                                }
+                            }}
+                            showIcon={true}
+                            height={40}
+                            borderRadius={12}
+                        />
+                    </View>
+                    <View ref={moreButtonRef} collapsable={false}>
+                        <MoreButton
+                            onPress={() => {
+                                moreButtonRef.current?.measureInWindow((x, y, width, height) => {
+                                    handleHelpPress({ x, y, width, height });
+                                });
+                            }}
+                        />
+                    </View>
                 </View>
-                <View ref={moreButtonRef} collapsable={false}>
-                    <MoreButton
-                        onPress={() => {
-                            moreButtonRef.current?.measureInWindow((x, y, width, height) => {
-                                handleHelpPress({ x, y, width, height });
-                            });
-                        }}
-                    />
-                </View>
-            </View>
-            {showSkeleton ? (
-                <DeviceControlSkeleton />
-            ) : (
-                <FlatList
-                    ref={flatListRef}
-                    data={filteredPonds}
-                    keyExtractor={(item: any) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <PondCard
-                            pondName={item.name}
-                            isEmpty={!item.hasDevices}
-                            deviceStats={item.deviceStats}
-                            onPressDetail={() =>
-                                navigation.navigate('ControlDetail', { pondName: item.name })
+            )}
+            {selectedAppTab === 'thiet-bi' ? (
+                <>
+                    {showSkeleton ? (
+                        <DeviceControlSkeleton />
+                    ) : (
+                        <FlatList
+                            ref={flatListRef}
+                            data={filteredPonds}
+                            keyExtractor={(item: any) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <PondCard
+                                    pondName={item.name}
+                                    isEmpty={!item.hasDevices}
+                                    deviceStats={item.deviceStats}
+                                    onPressDetail={() =>
+                                        navigation.navigate('ControlDetail', {
+                                            pondName: item.name,
+                                        })
+                                    }
+                                    onAddDevice={() => handleConnectDevice(item.name)}
+                                />
+                            )}
+                            style={styles.content}
+                            contentContainerStyle={[
+                                styles.scrollContent,
+                                styles.scrollContentPadding,
+                            ]}
+                            ListHeaderComponent={
+                                showStats ? (
+                                    <>
+                                        <DevicesStatus
+                                            totalPonds={filteredPonds.length}
+                                            activePonds={totalStats.active}
+                                            warningPonds={totalStats.warning}
+                                            otherPonds={totalStats.other}
+                                        />
+                                        <View style={styles.spacer} />
+                                    </>
+                                ) : null
                             }
-                            onAddDevice={() => handleConnectDevice(item.name)}
+                            initialNumToRender={5}
+                            maxToRenderPerBatch={10}
+                            windowSize={5}
+                            removeClippedSubviews={true}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={isRefetching}
+                                    onRefresh={handleRefresh}
+                                />
+                            }
+                            onEndReached={handleLoadMore}
+                            onEndReachedThreshold={0.5}
                         />
                     )}
-                    style={styles.content}
-                    contentContainerStyle={[styles.scrollContent, styles.scrollContentPadding]}
-                    ListHeaderComponent={
-                        showStats ? (
-                            <>
-                                <DevicesStatus
-                                    totalPonds={filteredPonds.length}
-                                    activePonds={totalStats.active}
-                                    warningPonds={totalStats.warning}
-                                    otherPonds={totalStats.other}
-                                />
-                                <View style={styles.spacer} />
-                            </>
-                        ) : null
-                    }
-                    initialNumToRender={5}
-                    maxToRenderPerBatch={10}
-                    windowSize={5}
-                    removeClippedSubviews={true}
-                    refreshControl={
-                        <RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
-                    }
-                    onEndReached={handleLoadMore}
-                    onEndReachedThreshold={0.5}
-                />
+                </>
+            ) : (
+                <View style={styles.cameraEmptyContainer}>
+                    <EmptyStateCard
+                        message={
+                            'Chưa có Camera nào được thiết lập\nVui lòng liên hệ để được thiết lập camera'
+                        }
+                    />
+                </View>
             )}
 
             <HelpOptionsModal
@@ -385,5 +408,10 @@ const styles = StyleSheet.create({
     },
     spacer: {
         height: 16,
+    },
+    cameraEmptyContainer: {
+        flex: 1,
+        alignItems: 'center',
+        paddingTop: 40,
     },
 });

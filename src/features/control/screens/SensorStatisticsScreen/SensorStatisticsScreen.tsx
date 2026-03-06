@@ -2,7 +2,6 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import FeedingChart from '../../components/Chart/FeedingChart';
 import FilterDate from '../../components/schedule/FilterDate';
-import { spacing } from '@/styles';
 import { SENSOR_STATISTICS } from '@/features/control/data/devicesData';
 
 interface SensorStatisticsScreenProps {
@@ -27,10 +26,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    filterWrapper: {
-        marginTop: spacing.md,
-        marginBottom: spacing.xs,
-    },
+    filterWrapper: {},
 });
 
 export default SensorStatisticsScreen;
