@@ -154,11 +154,12 @@ export function Button({
                             />
                         )
                     )}
+                    {/* title: title, adjustsFontSizeToFit: true */}
                     <Text
                         style={textStyles}
                         maxFontSizeMultiplier={1.1}
                         numberOfLines={1}
-                        // adjustsFontSizeToFit
+                        adjustsFontSizeToFit
                     >
                         {title}
                     </Text>

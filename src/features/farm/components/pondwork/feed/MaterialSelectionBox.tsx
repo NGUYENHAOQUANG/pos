@@ -6,7 +6,7 @@ import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
-import DeleteIconBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
 
 export interface SelectedMaterialItem {
     material: IMaterial;
@@ -59,7 +59,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                     onPress={() => handleRemoveMaterial(index)}
                                     style={styles.deleteButton}
                                 >
-                                    <DeleteIconBlack width={18} height={18} />
+                                    <DeleteIcon width={18} height={18} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     deleteButton: {
-        width: 40,
-        height: 40,
+        width: 36,
+        height: 36,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,

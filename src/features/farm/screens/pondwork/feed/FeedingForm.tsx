@@ -9,8 +9,8 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import InfoCircleFilled from '@/assets/Icon/IconFarm/InfoCircleFilled.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import InfoIcon from '@/assets/Icon/information-circle.svg';
 import ActivitySchedule, {
     ScheduleItem,
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
@@ -117,7 +117,12 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 {!isEditMode && (
                     <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
-                            <InfoCircleFilled width={16} height={16} style={styles.infoIcon} />
+                            <InfoIcon
+                                width={16}
+                                height={16}
+                                style={styles.infoIcon}
+                                color={colors.white}
+                            />
                             <Text style={styles.infoText}>
                                 Chọn Thủ công để chạy ngay, hoặc Lịch trình để thiết lập nhiều lượt
                                 hoạt động trong ngày
@@ -218,6 +223,28 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
 );
 
 const styles = StyleSheet.create({
+    card: {
+        backgroundColor: colors.white,
+        padding: 16,
+        marginTop: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle || colors.gray[100],
+        marginHorizontal: 0,
+        width: '100%',
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: 12,
+    },
+    fullWidthDivider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+        marginBottom: 16,
+    },
     radioGroup: {
         flexDirection: 'row',
         gap: 24,
@@ -237,27 +264,27 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     radioOuterSelected: {
-        borderColor: colors.primary,
+        borderColor: colors.primaryOrange,
     },
     radioInner: {
         width: 10,
         height: 10,
         borderRadius: 5,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.primaryOrange,
     },
     radioLabel: {
         fontSize: 14,
         color: colors.text,
     },
     infoBox: {
-        backgroundColor: colors.backgroundPrimary,
+        backgroundColor: colors.white,
         padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.geekblue[300],
+        borderRadius: 12,
         marginBottom: 16,
         flexDirection: 'row',
         alignItems: 'center',
+        borderColor: colors.border,
+        borderWidth: 1,
     },
     infoIcon: {
         marginRight: 8,

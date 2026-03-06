@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: spacing.md,
+        paddingHorizontal: spacing.md,
     },
     headerDeleteButton: {
         width: 40,

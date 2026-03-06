@@ -5,14 +5,14 @@ import {
     ViewStyle,
     TextStyle,
     View,
-    TouchableOpacity,
     StyleProp,
+    TouchableOpacity,
 } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface CollapseHeadProps {
-    title: string;
+    title: string | React.ReactNode;
     isExpanded: boolean;
     onToggle?: () => void;
     style?: StyleProp<ViewStyle>;
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
     },
     title: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         lineHeight: 22,
         color: colors.text,
         flex: 1,

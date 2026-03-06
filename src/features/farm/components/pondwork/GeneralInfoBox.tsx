@@ -35,6 +35,7 @@ import { IconCloseOutlined } from '@/assets/icons';
 import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerActionSheet';
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
+import { RequiredDot } from '@/shared/components/forms/Input';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
@@ -459,10 +460,10 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     {/* Chọn loại hoạt động - dùng cho xử lý nước */}
                     {type === 'water_treatment' && activityOptions && onSelectActivity && (
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>
-                                <Text style={styles.required}>* </Text>
-                                {activityLabel}
-                            </Text>
+                            <View style={styles.labelWrapper}>
+                                <Text style={styles.label}>{activityLabel}</Text>
+                                <RequiredDot />
+                            </View>
                             <View style={styles.radioGroup}>
                                 {activityOptions.map(option => (
                                     <TouchableOpacity
@@ -492,10 +493,10 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     {/* Chọn loại hoạt động - dùng cho thu hoạch */}
                     {type === 'harvest' && activityOptions && onSelectActivity && (
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>
-                                <Text style={styles.required}>* </Text>
-                                {activityLabel}
-                            </Text>
+                            <View style={styles.labelWrapper}>
+                                <Text style={styles.label}>{activityLabel}</Text>
+                                <RequiredDot />
+                            </View>
                             <View style={styles.harvestRadioGroup}>
                                 {activityOptions.map(option => (
                                     <TouchableOpacity
@@ -639,6 +640,10 @@ const IMAGE_SIZE = Math.floor(
 const styles = StyleSheet.create({
     inputGroup: {
         gap: spacing.sm,
+    },
+    labelWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     label: {
         fontSize: 14,
