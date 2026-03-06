@@ -1,5 +1,13 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle, View, TouchableOpacity } from 'react-native';
+import {
+    Text,
+    StyleSheet,
+    ViewStyle,
+    TextStyle,
+    View,
+    StyleProp,
+    TouchableOpacity,
+} from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -55,8 +63,8 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
     },
     title: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         lineHeight: 22,
         color: colors.text,
         flex: 1,

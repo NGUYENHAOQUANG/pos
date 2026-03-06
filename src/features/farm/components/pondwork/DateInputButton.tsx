@@ -89,6 +89,8 @@ interface DateInputButtonProps {
     required?: boolean;
     /** Height of the input button (default: 40) */
     height?: number;
+    /** Border radius of the input button (default: 6) */
+    borderRadius?: number;
     /** Whether the input is disabled */
     disabled?: boolean;
 }
@@ -102,6 +104,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
     dateOnly = false,
     required = false,
     height = 40,
+    borderRadius = 6,
     disabled = false,
 }) => {
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -137,7 +140,7 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
                     </View>
                 )}
                 <TouchableOpacity
-                    style={[styles.dateInput, { height }]}
+                    style={[styles.dateInput, { height, borderRadius }]}
                     onPress={() => setIsDatePickerVisible(true)}
                     activeOpacity={0.7}
                     disabled={disabled}

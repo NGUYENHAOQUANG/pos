@@ -264,6 +264,19 @@ export const PersonalInformationScreens: React.FC = () => {
 
                                 <Controller
                                     control={control}
+                                    name="address"
+                                    render={({ field: { onChange, value } }) => (
+                                        <Input
+                                            label="Địa chỉ"
+                                            value={value}
+                                            onChangeText={onChange}
+                                            placeholder="Nhập địa chỉ"
+                                        />
+                                    )}
+                                />
+
+                                <Controller
+                                    control={control}
                                     name="role"
                                     render={({ field: { value } }) => (
                                         <Input

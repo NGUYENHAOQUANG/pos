@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, UIManager } from 'r
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
@@ -54,98 +54,98 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                     {detail?.group && <MaterialGroup group={detail.group} />}
                 </View>
 
-                <View style={styles.separator} />
+                {/* Body Content */}
+                <View style={styles.bodyContainer}>
+                    {/* Status Field */}
+                    {showStatus && (
+                        <View style={styles.detailRow}>
+                            <DetailRow
+                                label="Trạng thái:"
+                                value={detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
+                            />
+                        </View>
+                    )}
 
-                {/* Status Field */}
-                {showStatus && (
-                    <View style={styles.detailRow}>
-                        <DetailRow
-                            label="Trạng thái:"
-                            value={detail?.isActive !== false ? 'Hoạt động' : 'Ngưng'}
-                        />
-                    </View>
-                )}
-
-                {/* Basic Info Row */}
-                <View
-                    style={[
-                        styles.infoRow,
-                        isExpanded ? { marginBottom: 0 } : { marginBottom: 12 },
-                    ]}
-                >
-                    <Text style={styles.infoText}>
-                        <Text style={styles.label}>Đơn vị tính: </Text>
-                        <Text style={styles.detailValue}>{detail?.unitName || item.unitName}</Text>
-                    </Text>
-                    {!hideRemaining && (
+                    {/* Basic Info Row */}
+                    <View style={styles.infoRow}>
                         <Text style={styles.infoText}>
-                            <Text style={styles.label}>Còn: </Text>
-                            <Text style={styles.detailValue}>{item.quantity}</Text>
+                            <Text style={styles.label}>Đơn vị tính: </Text>
+                            <Text style={styles.detailValue}>
+                                {detail?.unitName || item.unitName}
+                            </Text>
                         </Text>
+                        {!hideRemaining && (
+                            <Text style={styles.infoText}>
+                                <Text style={styles.label}>Còn: </Text>
+                                <Text style={styles.detailValue}>{item.quantity}</Text>
+                            </Text>
+                        )}
+                    </View>
+
+                    {/* Expanded Content */}
+                    {isExpanded && (
+                        <View style={styles.detailRow}>
+                            {!alwaysExpanded && <View style={styles.separatorCenter} />}
+                            <DetailRow label="Loại vật tư:" value={detail?.type} />
+                            <DetailRow label="Nhà sản xuất:" value={detail?.manufacturer} />
+                            <DetailRow label="Công dụng:" value={detail?.usage} />
+                            <DetailRow label="Đơn vị sử dụng:" value={detail?.unitName} />
+                            <DetailRow label="Liều dùng:" value={detail?.unitOfUse} />
+                            <ButtonMaterialList
+                                title="Sửa thông tin"
+                                icon={<EditIcon />}
+                                style={styles.editButton}
+                            />
+                        </View>
+                    )}
+
+                    {/* Expand Toggle */}
+                    {!alwaysExpanded && (
+                        <TouchableOpacity
+                            style={styles.expandToggle}
+                            onPress={() => setIsExpanded(!isExpanded)}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.expandText}>
+                                {isExpanded ? 'Thu gọn' : 'Xem thêm'}
+                            </Text>
+                            <Ionicons
+                                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                                size={16}
+                                color={colors.primary}
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {/* Action Buttons */}
+                    {(onHistoryPress || onAdjustmentPress) && (
+                        <View style={styles.actionRow}>
+                            {onHistoryPress && (
+                                <ButtonMaterialList
+                                    title="Lịch sử nhập kho"
+                                    onPress={() => onHistoryPress(item)}
+                                    style={[
+                                        styles.actionButton,
+                                        !onAdjustmentPress
+                                            ? { flex: 0, minWidth: '48%' }
+                                            : undefined,
+                                    ]}
+                                />
+                            )}
+                            {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
+                            {onAdjustmentPress && (
+                                <ButtonMaterialList
+                                    title="Điều chỉnh tồn kho"
+                                    onPress={() => onAdjustmentPress(item)}
+                                    style={[
+                                        styles.actionButton,
+                                        !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
+                                    ]}
+                                />
+                            )}
+                        </View>
                     )}
                 </View>
-
-                {/* Expanded Content */}
-                {isExpanded && (
-                    <View style={styles.detailRow}>
-                        {!alwaysExpanded && <View style={styles.separatorCenter} />}
-                        <DetailRow label="Loại vật tư:" value={detail?.type} />
-                        <DetailRow label="Nhà sản xuất:" value={detail?.manufacturer} />
-                        <DetailRow label="Công dụng:" value={detail?.usage} />
-                        <DetailRow label="Đơn vị sử dụng:" value={detail?.unitName} />
-                        <DetailRow label="Liều dùng:" value={detail?.unitOfUse} />
-                        <ButtonMaterialList
-                            title="Sửa thông tin"
-                            icon={<EditIcon />}
-                            style={styles.editButton}
-                        />
-                    </View>
-                )}
-
-                {/* Expand Toggle */}
-                {!alwaysExpanded && (
-                    <TouchableOpacity
-                        style={styles.expandToggle}
-                        onPress={() => setIsExpanded(!isExpanded)}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={styles.expandText}>{isExpanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                        <Ionicons
-                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                            size={16}
-                            color={colors.primary}
-                        />
-                    </TouchableOpacity>
-                )}
-
-                {!alwaysExpanded && <View style={styles.separator} />}
-
-                {/* Action Buttons */}
-                {(onHistoryPress || onAdjustmentPress) && (
-                    <View style={styles.actionRow}>
-                        {onHistoryPress && (
-                            <ButtonMaterialList
-                                title="Lịch sử nhập kho"
-                                onPress={() => onHistoryPress(item)}
-                                style={[
-                                    styles.actionButton,
-                                    !onAdjustmentPress ? { flex: 0, minWidth: '48%' } : undefined,
-                                ]}
-                            />
-                        )}
-                        {onHistoryPress && onAdjustmentPress && <View style={styles.spacer} />}
-                        {onAdjustmentPress && (
-                            <ButtonMaterialList
-                                title="Điều chỉnh tồn kho"
-                                onPress={() => onAdjustmentPress(item)}
-                                style={[
-                                    styles.actionButton,
-                                    !onHistoryPress ? { flex: 0, minWidth: '48%' } : undefined,
-                                ]}
-                            />
-                        )}
-                    </View>
-                )}
             </View>
         );
     },
@@ -154,12 +154,10 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 12,
         marginHorizontal: spacing.md,
         backgroundColor: colors.white,
-        borderRadius: borderRadius.md,
-        marginBottom: spacing.sm,
-        padding: spacing.md,
+        borderRadius: 12,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: colors.border,
     },
@@ -167,43 +165,55 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
+        paddingTop: 12,
+        paddingBottom: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        gap: 4,
+    },
+    bodyContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 16,
+        gap: 12,
     },
     name: {
         fontSize: 14,
-        fontWeight: '500',
-        color: colors.text,
+        fontWeight: '600',
+        lineHeight: 20,
+        color: colors.gray[950],
         flex: 1,
-        marginRight: spacing.sm,
     },
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: spacing.md,
     },
     infoText: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
+        lineHeight: 20,
     },
     label: {
         fontWeight: '400',
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
     },
     detailRow: {
-        marginBottom: 12,
         gap: 12,
     },
     detailLabel: {
         fontWeight: '400',
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
         flex: 1,
+        lineHeight: 20,
     },
     detailValue: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[950],
         fontWeight: '500',
+        lineHeight: 20,
     },
     editButton: {
         marginTop: spacing.sm,
@@ -217,29 +227,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: spacing.sm,
-        marginBottom: spacing.md,
+        marginTop: 8,
+        marginBottom: 12,
     },
     expandText: {
-        fontSize: 12,
+        fontSize: 14,
         color: colors.primary,
         marginRight: 4,
-        fontWeight: '500',
+        fontWeight: '600',
     },
     actionRow: {
         flexDirection: 'row',
-        marginTop: spacing.md,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.borderLight,
+        marginHorizontal: -16,
+        paddingHorizontal: 16,
     },
     actionButton: {
         flex: 1,
     },
     spacer: {
-        width: spacing.md,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginHorizontal: -spacing.md,
+        width: 16,
     },
     separatorCenter: {
         backgroundColor: colors.borderLight,

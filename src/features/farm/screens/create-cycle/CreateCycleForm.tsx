@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { colors } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 
 import { Control } from 'react-hook-form';
@@ -59,5 +59,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
+        gap: spacing.sm,
     },
 });
