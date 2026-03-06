@@ -9,6 +9,7 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
+import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import ActivitySchedule, {
     ScheduleItem,
@@ -69,7 +70,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         return (
             <View
                 pointerEvents={isLoadingDetail || isSubmitting ? 'none' : 'auto'}
-                style={{ opacity: isSubmitting ? 0.7 : 1 }}
+                style={{ opacity: isSubmitting ? 0.7 : 1, gap: 8 }}
             >
                 <Controller
                     name="executionDate"
@@ -114,10 +115,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 />
 
                 {!isEditMode && (
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Chế độ hoạt động</Text>
-                        <View style={styles.fullWidthDivider} />
-
+                    <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
                             <InfoIcon
                                 width={16}
@@ -174,7 +172,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                                 </View>
                             )}
                         />
-                    </View>
+                    </SelectionInfoBox>
                 )}
 
                 {!isEditMode && currentMode === 'schedule' && (

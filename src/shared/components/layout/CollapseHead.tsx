@@ -7,8 +7,8 @@ interface CollapseHeadProps {
     title: string | React.ReactNode;
     isExpanded: boolean;
     onToggle?: () => void;
-    style?: ViewStyle;
-    titleStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    titleStyle?: StyleProp<TextStyle>;
     showIcon?: boolean;
     rightComponent?: React.ReactNode;
 }
@@ -17,7 +17,7 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
     title,
     style,
     titleStyle,
-    isExpanded,
+    isExpanded = true,
     onToggle,
     showIcon = false,
     rightComponent,
@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: spacing.md,
+        paddingTop: 12,
+        paddingHorizontal: 12,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderTopLeftRadius: borderRadius.md,

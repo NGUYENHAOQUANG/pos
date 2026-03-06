@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
@@ -38,7 +37,6 @@ export const AddTransferScreen: React.FC = () => {
     // ========== HOOKS ==========
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
 
     // Use individual selectors instead of useFarm() to prevent unnecessary re-renders
@@ -434,14 +432,7 @@ export const AddTransferScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Sang ao</Text>
-                <View style={styles.headerSpacer} />
-            </View>
+            <HeaderSection title="Sang ao" onBack={handleBack} />
 
             {/* Content */}
             <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={150}>
@@ -502,39 +493,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
-    },
     scrollContent: {
         padding: 0,
         paddingBottom: 150,
+        gap: 8,
     },
     footer: {
         backgroundColor: colors.white,

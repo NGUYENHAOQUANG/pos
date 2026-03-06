@@ -150,7 +150,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundPrimary,
     },
     scrollContent: {
-        paddingVertical: 16,
         paddingBottom: 100,
         gap: 8,
     },

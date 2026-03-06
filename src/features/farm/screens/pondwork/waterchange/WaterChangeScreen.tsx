@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
@@ -7,10 +7,9 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 // import { HeaderFarm } from '@/features/farm/components/HeaderFarm'; // Replaced with custom header like Siphon
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
@@ -52,7 +51,6 @@ type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 export const WaterSupplyScreen = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
-    const insets = useSafeAreaInsets();
     const { setTabBarVisible } = useTabBarVisibility();
 
     const { pond, item } = route.params || {};
@@ -412,20 +410,11 @@ export const WaterSupplyScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>
-                    {item ? 'Chỉnh sửa Thay/Cấp nước' : 'Thay/Cấp nước'}
-                </Text>
-                {item ? (
-                    <DeleteButton onPress={handleDelete} />
-                ) : (
-                    <View style={styles.headerSpacer} />
-                )}
-            </View>
+            <HeaderSection
+                title={item ? 'Chỉnh sửa Thay/Cấp nước' : 'Thay/Cấp nước'}
+                onBack={handleBack}
+                rightComponent={item ? <DeleteButton onPress={handleDelete} /> : undefined}
+            />
 
             <View style={styles.contentContainer}>
                 <SafeInputLayout
@@ -496,41 +485,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.border,
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
-    },
     contentContainer: {
         flex: 1,
     },
     scrollContent: {
         paddingBottom: 100,
+        gap: 8,
     },
     spacer: {
         height: 80,
