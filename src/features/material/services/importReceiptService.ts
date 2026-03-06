@@ -47,6 +47,7 @@ export const importReceiptService = {
             materialId: item.materialId,
             quantity: item.quantity.toString(),
             price: item.unitPrice.toString(),
+            unit: item.unitName,
         }));
     },
 

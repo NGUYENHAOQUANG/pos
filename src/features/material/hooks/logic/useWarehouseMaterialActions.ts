@@ -22,6 +22,7 @@ export const useWarehouseMaterialActions = (
                     materialName: '',
                     quantity: '',
                     price: '',
+                    unit: '',
                 });
             },
             remove: (id: string) => {
@@ -43,6 +44,10 @@ export const useWarehouseMaterialActions = (
                         setValue(
                             `warehouseItems.${index}.materialName` as any,
                             selectedMaterial?.materialName || ''
+                        );
+                        setValue(
+                            `warehouseItems.${index}.unit` as any,
+                            selectedMaterial?.unit || ''
                         );
                     }
                 }

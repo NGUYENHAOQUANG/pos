@@ -15,6 +15,7 @@ import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { Input } from '@/shared/components/forms/Input';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
+import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -102,7 +103,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                         item.quantity,
                         item.price
                     );
-                    const displayTotal = itemTotal > 0 ? formatCurrency(itemTotal) : 'Tổng tiền';
+                    const displayTotal =
+                        itemTotal > 0
+                            ? formatCurrency(itemTotal)
+                            : 'Vui lòng nhập số lượng và đơn giá';
                     const isDropdownOpen = activeDropdownId === item.id;
 
                     const rowOptions = warehouseFormUtils.getAvailableDropdownOptions(
@@ -133,20 +137,10 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                     </Text>
                                     {onRemoveMaterial && (
                                         <TouchableOpacity
-                                            style={styles.removeButton}
                                             onPress={() => onRemoveMaterial(item.id)}
-                                            hitSlop={{
-                                                top: 10,
-                                                bottom: 10,
-                                                left: 10,
-                                                right: 10,
-                                            }}
+                                            style={styles.trashButton}
                                         >
-                                            <Ionicons
-                                                name="close-circle-outline"
-                                                size={24}
-                                                color={colors.error}
-                                            />
+                                            <TrashIcon width={16} height={16} color={colors.text} />
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -175,6 +169,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             onChangeText={val => handleQuantityChange(item.id, val)}
                                             keyboardType="numeric"
                                             containerStyle={styles.noMarginBottom}
+                                            suffix={item.unit}
                                         />
                                         {isOverStock && (
                                             <Text style={styles.overStockText}>
@@ -183,12 +178,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                         )}
 
                                         <Input
-                                            label={
-                                                <Text>
-                                                    Đơn giá (
-                                                    <Text style={styles.currencyUnderline}>đ</Text>)
-                                                </Text>
-                                            }
+                                            label="Đơn giá"
                                             required
                                             placeholder="Nhập đơn giá"
                                             value={warehouseFormUtils.formatPriceInput(item.price)}
@@ -196,6 +186,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             keyboardType="numeric"
                                             containerStyle={styles.noMarginBottom}
                                             disabled={isPriceDisabled}
+                                            suffix={<Text style={styles.currencyUnderline}>đ</Text>}
                                         />
 
                                         {/* Show Available Quantity */}
@@ -276,7 +267,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         borderBottomWidth: 1,
         borderBottomColor: '#F0F0F0',
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.backgroundPrimary,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
     },
@@ -285,8 +276,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text,
     },
-    removeButton: {
-        padding: 4,
+    trashButton: {
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        backgroundColor: colors.white,
     },
     content: {
         padding: spacing.md,
@@ -294,19 +292,6 @@ const styles = StyleSheet.create({
     inputGroup: {
         marginBottom: 12,
         gap: spacing.md,
-    },
-    labelContainer: {
-        flexDirection: 'row',
-        marginBottom: spacing.xs,
-    },
-    label: {
-        fontSize: 14,
-        color: colors.text,
-        fontWeight: '400',
-    },
-    required: {
-        fontSize: 14,
-        color: colors.error || '#FF4D4F',
     },
     row: {
         flexDirection: 'row',
@@ -367,8 +352,9 @@ const styles = StyleSheet.create({
         marginLeft: spacing.sm,
     },
     placeholderText: {
+        fontSize: 15,
         color: colors.textSecondary || '#999',
-        fontWeight: '400',
+        fontWeight: '600',
     },
     addButton: {
         flexDirection: 'row',
