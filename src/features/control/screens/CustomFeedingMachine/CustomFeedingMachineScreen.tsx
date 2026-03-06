@@ -476,6 +476,8 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 8,
         borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     sectionTitle: {
         fontSize: 16,

@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     },
     info: {
         flex: 1,
-        gap: 4,
+        gap: 8,
     },
     name: {
         fontSize: 16,

@@ -88,8 +88,11 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.base,
         fontWeight: '600',
         color: colors.text,
+        marginBottom: 8,
     },
-    tag: {},
+    tag: {
+        marginBottom: 8,
+    },
     date: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
