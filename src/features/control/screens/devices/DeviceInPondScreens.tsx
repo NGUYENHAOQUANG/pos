@@ -27,7 +27,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '../../navigation/ControlNavigator';
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import PlusIcon from '@/assets/Icon/PlusBlack.svg';
-import { useControl } from '../../store/controlStore';
+import { useDevices, useUpdateDeviceMode } from '@/features/control/hooks/useDevices';
 import { useDeviceToggle } from '../../hooks/useDeviceToggle';
 import Toast from 'react-native-toast-message';
 
@@ -43,19 +43,10 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const route = useRoute<RouteProp<ControlStackParamList, 'ControlDetail'>>();
     const { pondName = 'Ao 1' } = route.params || {};
 
-    const { ponds, updateDeviceMode, fetchIoTDevices } = useControl();
+    const { data: ponds = [], refetch: refetchDevices } = useDevices();
+    const { updateMode: updateDeviceMode } = useUpdateDeviceMode();
 
-    React.useEffect(() => {
-        if (pondName === 'Ao IOT') {
-            fetchIoTDevices(); // Fetch immediately
-            const interval = setInterval(() => {
-                fetchIoTDevices();
-            }, 20000);
-
-            return () => clearInterval(interval); // Cleanup on unmount
-        }
-    }, [pondName, fetchIoTDevices]);
-    const { toggleDevice, loadingIds } = useDeviceToggle();
+    const { toggleDevice, loadingIds } = useDeviceToggle(ponds);
     const currentPond = React.useMemo(
         () => ponds.find(p => p.name === pondName),
         [ponds, pondName]
@@ -86,18 +77,13 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         try {
-            if (pondName === 'Ao IOT') {
-                await fetchIoTDevices();
-            } else {
-                // Mock delay for other ponds
-                await new Promise(resolve => setTimeout(() => resolve(true), 1000));
-            }
+            await refetchDevices();
         } catch (error) {
             console.error('Refresh failed:', error);
         } finally {
             setRefreshing(false);
         }
-    }, [pondName, fetchIoTDevices]);
+    }, [refetchDevices]);
 
     const bottomBarHeight = useBottomTabBarHeight();
     const rotation = useSharedValue(0);
