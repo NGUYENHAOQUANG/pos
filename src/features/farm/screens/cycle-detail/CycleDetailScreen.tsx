@@ -2,7 +2,8 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { colors, typography } from '@/styles';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
-import { useActiveCycle } from '@/features/farm/hooks/useCycle';
+import { useCycleDetail } from '@/features/farm/hooks/useCycle';
+import { useStockTransfers, useStockTransferDetail } from '@/features/farm/hooks/useStockTransfer';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { useIncomingStockTransfer } from '@/features/farm/hooks/stock-transfer/useStockTransfer';
@@ -10,25 +11,48 @@ import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 
 import { CycleDetailContent } from '@/features/farm/screens/cycle-detail/CycleDetailContent';
+import { CycleDetailSkeleton } from '@/features/farm/components/skeleton/CycleDetailSkeleton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Tag } from '@/features/farm/components/pond/Tag';
+import { POND_TYPES } from '@/features/farm/types/farm.types';
+import { usePondDetail } from '@/features/farm/hooks/usePonds';
+import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'CycleDetailScreen'>;
 export const CycleDetailScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<ScreenRouteProp>();
-    const { pondId, zoneId, warehouseId } = route.params ?? {};
+    const { pondId, zoneId, warehouseId, cycleId } = route.params ?? {};
 
     const {
-        data: activeCycleData,
+        data: cycleDetailDataHook,
         refetch,
         isLoading,
         isRefetching,
-    } = useActiveCycle(pondId ?? '');
+    } = useCycleDetail(pondId ?? '', cycleId ?? '');
+
+    const activeCycleData = cycleDetailDataHook?.data;
 
     const { data: shrimpSeeds, refetch: refetchShrimpSeeds } = useShrimpSeeds(warehouseId);
 
-    const { data: incomingTransfer } = useIncomingStockTransfer(pondId);
+    const { data: incomingTransfer } = useIncomingStockTransfer(zoneId, pondId);
+
+    const { data: stockTransfersData, refetch: refetchTransfers } = useStockTransfers(pondId ?? '');
+
+    const { data: pondData, refetch: refetchPondDetail } = usePondDetail(
+        zoneId ?? '',
+        pondId ?? ''
+    );
+    const { data: categoriesResponse } = usePondCategories();
+
+    const matchingTransferId = useMemo(() => {
+        return stockTransfersData?.items?.find(st => st.fromCycleId === cycleId)?.id;
+    }, [stockTransfersData, cycleId]);
+
+    const { data: transferDetail, refetch: refetchTransferDetail } = useStockTransferDetail(
+        pondId ?? '',
+        matchingTransferId ?? ''
+    );
 
     // --- Effects ---
     useFocusEffect(
@@ -43,6 +67,18 @@ export const CycleDetailScreen: React.FC = () => {
     );
 
     const [refreshing, setRefreshing] = useState(false);
+
+    const pondType = useMemo(() => {
+        if (typeof pondData?.type === 'string') return pondData.type;
+        if (pondData?.type?.name) return pondData.type.name;
+
+        const matchedCategory = categoriesResponse?.items?.find(
+            c => c.id === pondData?.pondCategoryId
+        );
+        return matchedCategory?.name;
+    }, [pondData, categoriesResponse]);
+
+    const showTransfer = pondType === POND_TYPES.NURSERY;
 
     const breedLabel = useMemo(
         () => pondDetailService.getBreedName(activeCycleData, shrimpSeeds),
@@ -77,11 +113,16 @@ export const CycleDetailScreen: React.FC = () => {
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await refetch();
+            await Promise.all([
+                refetch(),
+                refetchTransfers(),
+                refetchPondDetail(),
+                matchingTransferId ? refetchTransferDetail() : Promise.resolve(),
+            ]);
         } finally {
             setRefreshing(false);
         }
-    }, [refetch]);
+    }, [refetch, refetchTransfers, refetchTransferDetail, refetchPondDetail, matchingTransferId]);
 
     return (
         <View style={styles.container}>
@@ -100,48 +141,56 @@ export const CycleDetailScreen: React.FC = () => {
                     </View>
                 }
                 rightAction={
-                    <View style={styles.badgeWrapper}>
-                        <Tag
-                            status={
-                                activeCycleData?.status === 'InProgress' ||
-                                activeCycleData?.status === 'Active'
-                                    ? 'preparing'
-                                    : activeCycleData?.status === 'Completed'
-                                    ? 'active'
-                                    : 'preparing'
-                            }
-                            label={
-                                activeCycleData?.status === 'InProgress' ||
-                                activeCycleData?.status === 'Active'
-                                    ? 'Chưa hoàn thành'
-                                    : activeCycleData?.status === 'Completed'
-                                    ? 'Hoàn thành'
-                                    : activeCycleData?.status || 'Chưa hoàn thành'
-                            }
-                        />
-                    </View>
+                    !isLoading && (
+                        <View style={styles.badgeWrapper}>
+                            <Tag
+                                status={
+                                    activeCycleData?.status === 'InProgress' ||
+                                    activeCycleData?.status === 'Active'
+                                        ? 'preparing'
+                                        : activeCycleData?.status === 'Completed'
+                                        ? 'active'
+                                        : 'preparing'
+                                }
+                                label={
+                                    activeCycleData?.status === 'InProgress' ||
+                                    activeCycleData?.status === 'Active'
+                                        ? 'Chưa hoàn thành'
+                                        : activeCycleData?.status === 'Completed'
+                                        ? 'Hoàn thành'
+                                        : activeCycleData?.status || 'Chưa hoàn thành'
+                                }
+                            />
+                        </View>
+                    )
                 }
             />
-            <CycleDetailContent
-                activeCycleData={activeCycleData ?? undefined}
-                seasonLabel={seasonLabel}
-                breedLabel={breedLabel}
-                doc={doc}
-                sourcePondName={sourcePondName}
-                shrimpSize={shrimpSize}
-                displayStockingDate={displayStockingDate}
-                refreshing={refreshing || isLoading || isRefetching}
-                onRefresh={onRefresh}
-                onEditPress={() =>
-                    navigation.navigate('CreateCycle', {
-                        pondId,
-                        zoneId: zoneId,
-                        warehouseId,
-                        cycleId: activeCycleData?.id,
-                        isEditMode: true,
-                    })
-                }
-            />
+            {isLoading ? (
+                <CycleDetailSkeleton />
+            ) : (
+                <CycleDetailContent
+                    activeCycleData={activeCycleData ?? undefined}
+                    seasonLabel={seasonLabel}
+                    breedLabel={breedLabel}
+                    doc={doc}
+                    sourcePondName={sourcePondName}
+                    shrimpSize={shrimpSize}
+                    displayStockingDate={displayStockingDate}
+                    transferDetail={transferDetail}
+                    showIncomingTransfer={showTransfer}
+                    refreshing={refreshing || isRefetching}
+                    onRefresh={onRefresh}
+                    onEditPress={() =>
+                        navigation.navigate('CreateCycle', {
+                            pondId,
+                            zoneId: zoneId,
+                            warehouseId,
+                            cycleId: activeCycleData?.id,
+                            isEditMode: true,
+                        })
+                    }
+                />
+            )}
         </View>
     );
 };

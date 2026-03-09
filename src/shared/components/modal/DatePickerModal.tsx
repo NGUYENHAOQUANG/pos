@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,7 +8,7 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, spacing, typography } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DatePickerModalProps {
@@ -26,30 +26,54 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 }) => {
     const insets = useSafeAreaInsets();
     const [viewDate, setViewDate] = useState(new Date(date));
+    const [pendingDate, setPendingDate] = useState(new Date(date));
 
+    // Sync state when modal opens
+    useEffect(() => {
+        if (visible) {
+            const d = new Date(date);
+            setPendingDate(d);
+            setViewDate(new Date(d.getFullYear(), d.getMonth(), 1));
+        }
+    }, [visible, date]);
+
+    const today = new Date();
     const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
-    const getDaysInMonth = (year: number, month: number) => {
-        return new Date(year, month + 1, 0).getDate();
-    };
+    const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
 
-    const getFirstDayOfMonth = (year: number, month: number) => {
-        return new Date(year, month, 1).getDay();
-    };
+    const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
 
-    const handlePrevMonth = () => {
+    const handlePrevMonth = () =>
         setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
-    };
 
-    const handleNextMonth = () => {
+    const handleNextMonth = () =>
         setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+
+    const handleSelectDay = (day: number, month: number, year: number) => {
+        setPendingDate(new Date(year, month, day));
+        // Also update viewDate if selecting from adjacent month
+        if (month !== viewDate.getMonth() || year !== viewDate.getFullYear()) {
+            setViewDate(new Date(year, month, 1));
+        }
     };
 
-    const handleSelectDay = (day: number) => {
-        const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-        onSelectDate(newDate);
+    const handleApply = () => {
+        onSelectDate(pendingDate);
         onClose();
     };
+
+    const handleClose = () => {
+        // Reset pending to current date when cancelled
+        setPendingDate(new Date(date));
+        setViewDate(new Date(date));
+        onClose();
+    };
+
+    const isSameDay = (d1: Date, d2: Date) =>
+        d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear();
 
     const renderCalendarDays = () => {
         const year = viewDate.getFullYear();
@@ -58,36 +82,48 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
         const firstDay = getFirstDayOfMonth(year, month);
 
         const days = [];
-        const totalCells = 42;
 
-        // Empty slots for previous month
-        for (let i = 0; i < firstDay; i++) {
-            days.push(<View key={`empty-start-${i}`} style={styles.dayCell} />);
+        // Previous month trailing days
+        const prevMonthDays = getDaysInMonth(year, month - 1);
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const d = prevMonthDays - i;
+            const cellDate = new Date(year, month - 1, d);
+            const isSelected = isSameDay(cellDate, pendingDate);
+            days.push(
+                <TouchableOpacity
+                    key={`prev-${d}`}
+                    style={styles.dayCell}
+                    onPress={() => handleSelectDay(d, month - 1, year)}
+                    activeOpacity={0.7}
+                >
+                    {isSelected && <View style={styles.selectedBg} />}
+                    <Text
+                        style={[
+                            styles.dayText,
+                            styles.adjacentDayText,
+                            isSelected && styles.selectedDayText,
+                        ]}
+                    >
+                        {d}
+                    </Text>
+                </TouchableOpacity>
+            );
         }
 
-        // Days of current month
+        // Current month days
         for (let i = 1; i <= daysInMonth; i++) {
-            const currentDate = new Date(year, month, i);
-            const isSelected =
-                currentDate.getDate() === date.getDate() &&
-                currentDate.getMonth() === date.getMonth() &&
-                currentDate.getFullYear() === date.getFullYear();
-
-            const isToday =
-                new Date().getDate() === i &&
-                new Date().getMonth() === month &&
-                new Date().getFullYear() === year;
+            const cellDate = new Date(year, month, i);
+            const isSelected = isSameDay(cellDate, pendingDate);
+            const isToday = isSameDay(cellDate, today);
 
             days.push(
                 <TouchableOpacity
                     key={`day-${i}`}
-                    style={[
-                        styles.dayCell,
-                        isSelected && styles.selectedDayCell,
-                        !isSelected && isToday && styles.todayCell,
-                    ]}
-                    onPress={() => handleSelectDay(i)}
+                    style={styles.dayCell}
+                    onPress={() => handleSelectDay(i, month, year)}
+                    activeOpacity={0.7}
                 >
+                    {isSelected && <View style={styles.selectedBg} />}
                     <Text
                         style={[
                             styles.dayText,
@@ -97,56 +133,92 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
                     >
                         {i}
                     </Text>
+                    {!isSelected && isToday && <View style={styles.todayDot} />}
                 </TouchableOpacity>
             );
         }
 
-        // Fill remaining slots to complete 6 rows
-        const currentCells = firstDay + daysInMonth;
-        for (let i = currentCells; i < totalCells; i++) {
-            days.push(<View key={`empty-end-${i}`} style={styles.dayCell} />);
+        // Fill remaining slots to complete 6 rows (42 cells total)
+        const totalCells = 42;
+        const remaining = totalCells - (firstDay + daysInMonth);
+        for (let i = 1; i <= remaining; i++) {
+            const cellDate = new Date(year, month + 1, i);
+            const isSelected = isSameDay(cellDate, pendingDate);
+            days.push(
+                <TouchableOpacity
+                    key={`next-${i}`}
+                    style={styles.dayCell}
+                    onPress={() => handleSelectDay(i, month + 1, year)}
+                    activeOpacity={0.7}
+                >
+                    {isSelected && <View style={styles.selectedBg} />}
+                    <Text
+                        style={[
+                            styles.dayText,
+                            styles.adjacentDayText,
+                            isSelected && styles.selectedDayText,
+                        ]}
+                    >
+                        {i}
+                    </Text>
+                </TouchableOpacity>
+            );
         }
 
         return days;
     };
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-            <TouchableWithoutFeedback onPress={onClose}>
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+            <TouchableWithoutFeedback onPress={handleClose}>
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>
-                        <View style={[styles.container, { paddingBottom: insets.bottom + 20 }]}>
+                        <View
+                            style={[
+                                styles.container,
+                                { paddingBottom: Math.max(insets.bottom, 16) },
+                            ]}
+                        >
                             {/* Header */}
                             <View style={styles.header}>
                                 <Text style={styles.headerTitle}>Chọn ngày</Text>
-                                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                                    <Ionicons name="close" size={24} color={colors.text} />
+                                <TouchableOpacity
+                                    onPress={handleClose}
+                                    style={styles.closeButton}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons name="close" size={22} color={colors.text} />
                                 </TouchableOpacity>
                             </View>
+
+                            <View style={styles.divider} />
 
                             {/* Month Navigation */}
                             <View style={styles.monthNav}>
                                 <TouchableOpacity
                                     onPress={handlePrevMonth}
                                     style={styles.navButton}
+                                    activeOpacity={0.7}
                                 >
-                                    <Ionicons
-                                        name="chevron-back"
-                                        size={24}
-                                        color={colors.primary}
-                                    />
+                                    <Ionicons name="chevron-back" size={18} color={colors.text} />
                                 </TouchableOpacity>
-                                <Text style={styles.monthText}>
-                                    Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
-                                </Text>
+
+                                <TouchableOpacity style={styles.monthSelector} activeOpacity={0.7}>
+                                    <Text style={styles.monthText}>
+                                        Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
+                                    </Text>
+                                    <Ionicons name="chevron-down" size={16} color={colors.text} />
+                                </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={handleNextMonth}
                                     style={styles.navButton}
+                                    activeOpacity={0.7}
                                 >
                                     <Ionicons
                                         name="chevron-forward"
-                                        size={24}
-                                        color={colors.primary}
+                                        size={18}
+                                        color={colors.text}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -162,6 +234,24 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
                             {/* Calendar Grid */}
                             <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
+
+                            {/* Footer */}
+                            <View style={styles.footer}>
+                                <TouchableOpacity
+                                    style={styles.cancelButton}
+                                    onPress={handleClose}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.applyButton}
+                                    onPress={handleApply}
+                                    activeOpacity={0.8}
+                                >
+                                    <Text style={styles.applyButtonText}>Áp dụng</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </TouchableWithoutFeedback>
                 </View>
@@ -173,96 +263,160 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: colors.overlayLight,
         justifyContent: 'flex-end',
     },
     container: {
+        width: '100%',
         backgroundColor: colors.white,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: spacing.lg,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingHorizontal: 16,
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: -4,
-        },
+        shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
-        elevation: 10,
+        elevation: 12,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.lg,
+        paddingVertical: 2,
+    },
+    headerSpacer: {
+        width: 32,
     },
     headerTitle: {
-        fontSize: typography.fontSize.xl,
-        fontWeight: typography.fontWeight.bold,
+        flex: 1,
+        textAlign: 'center',
+        fontSize: 17,
+        fontWeight: '700',
         color: colors.text,
     },
     closeButton: {
-        padding: 4,
+        width: 36,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: colors.border,
+        marginHorizontal: -16,
+        marginBottom: 12,
     },
     monthNav: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.md,
+        marginBottom: 20,
+        paddingHorizontal: 4,
     },
     navButton: {
-        padding: 8,
-        backgroundColor: colors.gray[100],
-        borderRadius: 8,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+    },
+    monthSelector: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
     monthText: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
+        fontSize: 17,
+        fontWeight: '700',
         color: colors.text,
     },
     weekHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: spacing.sm,
+        marginBottom: 8,
     },
     weekDayText: {
         width: '14.28%',
         textAlign: 'center',
-        fontSize: typography.fontSize.sm,
-        color: colors.textSecondary,
-        fontWeight: typography.fontWeight.medium,
+        fontSize: 13,
+        fontWeight: '700',
+        color: colors.text,
     },
     calendarGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        minHeight: 280, // Fixed height for 6 rows to prevent resizing
     },
     dayCell: {
         width: '14.28%',
         aspectRatio: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 2,
     },
-    selectedDayCell: {
+    selectedBg: {
+        position: 'absolute',
+        width: 36,
+        height: 36,
+        borderRadius: 18,
         backgroundColor: colors.primary,
-        borderRadius: 20, // Circle
-    },
-    todayCell: {
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: 20,
     },
     dayText: {
-        fontSize: typography.fontSize.base,
+        fontSize: 15,
+        fontWeight: '500',
         color: colors.text,
+    },
+    adjacentDayText: {
+        color: colors.textSecondary,
+        fontWeight: '400',
     },
     selectedDayText: {
         color: colors.white,
-        fontWeight: typography.fontWeight.bold,
+        fontWeight: '700',
     },
     todayText: {
         color: colors.primary,
-        fontWeight: typography.fontWeight.bold,
+        fontWeight: '700',
+    },
+    todayDot: {
+        position: 'absolute',
+        bottom: 4,
+        width: 16,
+        height: 2,
+        borderRadius: 1,
+        backgroundColor: colors.primary,
+    },
+    footer: {
+        flexDirection: 'row',
+        gap: spacing.sm,
+    },
+    cancelButton: {
+        flex: 1,
+        height: 48,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: colors.border,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.white,
+    },
+    cancelButtonText: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.text,
+    },
+    applyButton: {
+        flex: 1,
+        height: 48,
+        borderRadius: 999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.primary,
+    },
+    applyButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.white,
     },
 });

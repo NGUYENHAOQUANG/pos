@@ -100,7 +100,7 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                     {/* Expand Toggle */}
                     {!alwaysExpanded && (
                         <TouchableOpacity
-                            style={styles.expandToggle}
+                            style={[styles.expandToggle, { marginTop: isExpanded ? 24 : 0 }]}
                             onPress={() => setIsExpanded(!isExpanded)}
                             activeOpacity={0.7}
                         >
@@ -174,7 +174,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 16,
-        gap: 12,
     },
     name: {
         fontSize: 14,

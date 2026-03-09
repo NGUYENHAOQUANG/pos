@@ -11,7 +11,7 @@ import { showSuccessToast, showErrorToast } from '@/features/material/utils/vali
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { JobExecution } from '@/features/farm/types/farm.types';
-import { mapStockTransferError } from '@/features/farm/utils/toastMessages';
+import { handleError } from '@/shared/utils/errorHandler';
 
 const KEYS = {
     list: (pondId: string, params?: GetStockTransfersParams) => ['stock-transfers', pondId, params],
@@ -22,18 +22,12 @@ export const useStockTransfers = (pondId: string, params?: GetStockTransfersPara
     return useQuery({
         queryKey: KEYS.list(pondId, params),
         queryFn: async () => {
-            const response = await stockTransferApi.getList(pondId, {
+            const { data } = await stockTransferApi.getList(pondId, {
                 ...params,
                 Page: 1,
-                PageSize: 100, // Fetch first 100 items
+                PageSize: 100,
             });
-
-            // Handle both 'success' and 'isSuccess' from backend
-            const isSuccess = response.success || (response as any).isSuccess;
-            if (isSuccess && response.data) {
-                return response.data;
-            }
-            throw new Error(response.message || 'Không thể tải danh sách sang ao');
+            return data;
         },
         enabled: !!pondId,
     });
@@ -151,10 +145,7 @@ export const useCreateStockTransfer = () => {
                 queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
             }
         },
-        onError: error => {
-            const rawMessage = getErrorMessage(error, 'Tạo phiếu sang ao thất bại');
-            showErrorToast(mapStockTransferError(rawMessage));
-        },
+        onError: error => handleError(error),
     });
 };
 

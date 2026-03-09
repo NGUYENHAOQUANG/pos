@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Text } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
+import { IStockTransferDetail } from '@/features/farm/types/stockTransfer.types';
+
 interface CycleDetailContentProps {
     activeCycleData?: CycleData;
     seasonLabel: string;
@@ -13,7 +15,9 @@ interface CycleDetailContentProps {
     sourcePondName: string;
     shrimpSize: string;
     displayStockingDate: string;
+    showIncomingTransfer?: boolean;
     refreshing: boolean;
+    transferDetail?: IStockTransferDetail;
     onRefresh: () => void;
     onEditPress: () => void;
 }
@@ -26,12 +30,15 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     sourcePondName,
     shrimpSize,
     displayStockingDate,
+    showIncomingTransfer = true,
     refreshing,
+    transferDetail,
     onRefresh,
     onEditPress,
 }) => {
     const [isStockingExpanded] = useState(true);
     const [isTransferExpanded, setIsTransferExpanded] = useState(true);
+    const [isOutgoingTransferExpanded, setIsOutgoingTransferExpanded] = useState(true);
 
     return (
         <ScrollView
@@ -76,28 +83,72 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 )}
             </View>
 
-            {/* Thông tin sang ao - Luôn hiển thị */}
-            <View style={[styles.card, { marginTop: spacing.sm }]}>
-                <CollapseHead
-                    title="Thông tin sang ao"
-                    isExpanded={isTransferExpanded}
-                    onToggle={() => setIsTransferExpanded(!isTransferExpanded)}
-                    style={styles.cardHeader}
-                />
+            {/* Thông tin sang ao - Chỉ hiển thị nếu showIncomingTransfer = true (không phải Ao nuôi) */}
+            {!showIncomingTransfer && (
+                <View style={[styles.card, { marginTop: spacing.sm }]}>
+                    <CollapseHead
+                        title="Thông tin nhận ao"
+                        isExpanded={isTransferExpanded}
+                        onToggle={() => setIsTransferExpanded(!isTransferExpanded)}
+                        style={styles.cardHeader}
+                    />
 
-                {isTransferExpanded && (
-                    <View style={styles.infoContainer}>
-                        <DetailRow label="Ngày nhận ao:" value={displayStockingDate} />
-                        <DetailRow label="Chuyển sang từ ao:" value={sourcePondName} />
-                        <DetailRow label="Ngày nuôi (DOC):" value={`${doc} ngày`} />
-                        <DetailRow label="Cỡ tôm (con/kg):" value={shrimpSize} />
-                        <DetailRow
-                            label="Số lượng tôm sang (con):"
-                            value={activeCycleData?.totalStocking?.toLocaleString() || 0}
-                        />
-                    </View>
-                )}
-            </View>
+                    {isTransferExpanded && (
+                        <View style={styles.infoContainer}>
+                            <DetailRow label="Ngày nhận ao:" value={displayStockingDate} />
+                            <DetailRow label="Chuyển sang từ ao:" value={sourcePondName} />
+                            <DetailRow label="Ngày nuôi (DOC):" value={`${doc} ngày`} />
+                            <DetailRow label="Cỡ tôm (con/kg):" value={shrimpSize} />
+                            <DetailRow
+                                label="Số lượng tôm sang (con):"
+                                value={activeCycleData?.totalStocking?.toLocaleString() || 0}
+                            />
+                        </View>
+                    )}
+                </View>
+            )}
+
+            {/* Thông tin sang ao (Đi) - Chỉ hiển thị khi có transferDetail thuộc chu kỳ này */}
+            {transferDetail && (
+                <View style={[styles.card, { marginTop: spacing.sm }]}>
+                    <CollapseHead
+                        title="Thông tin sang ao"
+                        isExpanded={isOutgoingTransferExpanded}
+                        onToggle={() => setIsOutgoingTransferExpanded(!isOutgoingTransferExpanded)}
+                        style={styles.cardHeader}
+                    />
+
+                    {isOutgoingTransferExpanded && (
+                        <View style={styles.infoContainer}>
+                            <DetailRow label="Vụ nuôi:" value={seasonLabel} />
+                            <DetailRow label="Tên chu kỳ:" value={activeCycleData?.name || '---'} />
+                            <DetailRow label="Tôm giống:" value={breedLabel} />
+
+                            <View style={styles.line} />
+
+                            <View style={[styles.receivingPondHeader]}>
+                                <Text style={styles.receivingPondTitle}>Ao nhận</Text>
+                                <Text style={styles.receivingPondCount}>
+                                    {transferDetail.toPonds?.length || 0}
+                                </Text>
+                            </View>
+
+                            <View style={styles.pondListBox}>
+                                {transferDetail.toPonds?.map(tp => (
+                                    <View key={tp.toPondId} style={styles.pondRow}>
+                                        <Text style={styles.pondName}>
+                                            {tp.pond?.name || '---'}
+                                        </Text>
+                                        <Text style={styles.pondQuantity}>
+                                            {tp.quantity?.toLocaleString()}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+                </View>
+            )}
         </ScrollView>
     );
 };
@@ -136,5 +187,43 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         paddingHorizontal: spacing.md,
         gap: 12,
+    },
+    receivingPondHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    receivingPondTitle: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.textSecondary,
+    },
+    receivingPondCount: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+    },
+    pondListBox: {
+        backgroundColor: '#F9FAFB',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.borderLight,
+        padding: spacing.sm,
+        gap: spacing.xs,
+    },
+    pondRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    pondName: {
+        fontSize: 14,
+        fontWeight: '400',
+        color: colors.textSecondary,
+    },
+    pondQuantity: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.text,
     },
 });

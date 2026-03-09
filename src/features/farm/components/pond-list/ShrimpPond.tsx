@@ -144,17 +144,13 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
                 setMenuVisible(false);
             },
         },
-        ...(cycleData
-            ? [
-                  {
-                      label: 'Các chu kì nuôi',
-                      onPress: () => {
-                          onCyclePress?.();
-                          setMenuVisible(false);
-                      },
-                  },
-              ]
-            : []),
+        {
+            label: 'Các chu kỳ nuôi',
+            onPress: () => {
+                onCyclePress?.();
+                setMenuVisible(false);
+            },
+        },
     ];
 
     return (
