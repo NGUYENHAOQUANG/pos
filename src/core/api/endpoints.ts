@@ -240,4 +240,9 @@ export const API_ENDPOINTS = {
         ESTIMATED_SIZE: '/estimatedsize',
         SHRIMP_HEALTH: '/shrimphealth',
     },
+    REPORT: {
+        FEEDING_PRODUCTION: '/report/feeding-production',
+        HARVEST_STATS: '/report/harvest-stats',
+        PROFIT_STATS: '/report/profit-stats',
+    },
 } as const;

@@ -167,8 +167,14 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <OverView />
             <CompilationEnvChart />
             <GrowthChart />
-            <CompilationFeedProd />
-            <CompilationProfitChart />
+            <CompilationFeedProd
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
+            <CompilationProfitChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <CompilationCostChart />
             <WaterUsageChart />
             <FoodChart />
@@ -179,12 +185,21 @@ export const ReportsScreen = ({ navigation }: Props) => {
     const renderStandardContent = () => (
         <>
             <CompilationEnvChart />
-            <CompilationFeedProd />
+            <CompilationFeedProd
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <ActivePondChart />
             <ProdChart />
-            <CompilationProfitChart />
+            <CompilationProfitChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <CompilationCostChart />
-            <HarvestChart />
+            <HarvestChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <PondTransfer />
             <HarvestStat />
         </>

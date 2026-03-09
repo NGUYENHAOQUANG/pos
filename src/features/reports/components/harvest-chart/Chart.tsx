@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
 import { colors, typography } from '@/styles';
-import { HarvestChartData } from './harvestData';
+export interface HarvestChartData {
+    pond: string;
+    yield: number;
+}
 
 interface ChartProps {
     data: HarvestChartData[];
@@ -37,10 +40,17 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Dimensions
     const PADDING_TOP = 20;
     const PADDING_BOTTOM = 25; // space for x-axis labels
-    const PADDING_LEFT = 45; // increased space for y-axis labels
+    const PADDING_LEFT = 35; // decreased space for y-axis labels to move chart left
     const PADDING_RIGHT = 10;
 
-    const drawWidth = chartWidth - PADDING_LEFT - PADDING_RIGHT;
+    // Use dynamic width to prevent squishing when data is large
+    const MIN_BAR_STEP = 50;
+    const actualWidth = Math.max(
+        chartWidth,
+        data.length * MIN_BAR_STEP + PADDING_LEFT + PADDING_RIGHT
+    );
+
+    const drawWidth = actualWidth - PADDING_LEFT - PADDING_RIGHT;
     const drawHeight = chartHeight - PADDING_TOP - PADDING_BOTTOM;
 
     // Helper functions
@@ -49,96 +59,117 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     };
 
     const getX = (index: number) => {
-        const stepLength = drawWidth / data.length;
-        return PADDING_LEFT + index * stepLength + stepLength / 2; // Center of the bar allocation
+        const effectiveDataLength = Math.max(data.length, 5);
+        const stepLength = drawWidth / effectiveDataLength;
+        return PADDING_LEFT + index * stepLength + stepLength / 2;
     };
 
     const barWidth = 32;
 
     return (
         <View style={styles.chartContainer}>
-            <Svg width={chartWidth} height={chartHeight}>
-                {/* Horizontal Grid Lines */}
-                {yAxisLabels.map(value => {
-                    const y = getY(value);
-                    return (
-                        <Line
-                            key={`grid-${value}`}
-                            x1={PADDING_LEFT}
-                            y1={y}
-                            x2={chartWidth - PADDING_RIGHT}
-                            y2={y}
-                            stroke={colors.gray[100]}
-                            strokeWidth={1}
-                        />
-                    );
-                })}
+            <View style={{ position: 'relative', width: '100%' }}>
+                {/* Sticky Y Axis Panel */}
+                <View
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        height: chartHeight - PADDING_BOTTOM + 20, // ensure label visibility
+                        width: PADDING_LEFT,
+                        zIndex: 10,
+                        backgroundColor: colors.white,
+                    }}
+                    pointerEvents="none"
+                >
+                    <Svg width={PADDING_LEFT} height={chartHeight}>
+                        {/* Y Axis Labels */}
+                        {yAxisLabels.map(value => {
+                            const y = getY(value);
+                            return (
+                                <SvgText
+                                    key={`y-label-${value}`}
+                                    x={PADDING_LEFT - 4}
+                                    y={y + 4} // Optical vertical alignment
+                                    fill={colors.gray[500]}
+                                    fontSize={10}
+                                    textAnchor="end"
+                                >
+                                    {value % 1 === 0
+                                        ? value.toString()
+                                        : value.toFixed(1).replace('.', ',')}
+                                </SvgText>
+                            );
+                        })}
+                    </Svg>
+                </View>
 
-                {/* Bars */}
-                {data.map((item, index) => {
-                    const x = getX(index);
-                    const y = getY(item.yield);
-                    const barHeight = PADDING_TOP + drawHeight - y;
+                {/* Scrollable Bars Area */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <Svg width={actualWidth} height={chartHeight}>
+                        {/* Horizontal Grid Lines */}
+                        {yAxisLabels.map(value => {
+                            const y = getY(value);
+                            return (
+                                <Line
+                                    key={`grid-${value}`}
+                                    x1={PADDING_LEFT}
+                                    y1={y}
+                                    x2={actualWidth - PADDING_RIGHT}
+                                    y2={y}
+                                    stroke={colors.gray[100]}
+                                    strokeWidth={1}
+                                />
+                            );
+                        })}
 
-                    return (
-                        <React.Fragment key={`bar-${index}`}>
-                            {/* The Bar */}
-                            <Rect
-                                x={x - barWidth / 2}
-                                y={y}
-                                width={barWidth}
-                                height={barHeight}
-                                fill={colors.orange[900]}
-                                rx={2}
-                                ry={2}
-                            />
+                        {/* Bars and Labels */}
+                        {data.map((item, index) => {
+                            const x = getX(index);
+                            const y = getY(item.yield);
+                            const barHeight = PADDING_TOP + drawHeight - y;
 
-                            {/* Value Label on top of the bar */}
-                            <SvgText
-                                x={x}
-                                y={y - 8} // Slightly above the bar
-                                fill={colors.text}
-                                fontSize={10}
-                                fontWeight={typography.fontWeight.medium.toString()}
-                                textAnchor="middle"
-                            >
-                                {item.yield.toFixed(2)}
-                            </SvgText>
+                            return (
+                                <React.Fragment key={`bar-${index}`}>
+                                    {/* The Bar */}
+                                    <Rect
+                                        x={x - barWidth / 2}
+                                        y={y}
+                                        width={barWidth}
+                                        height={barHeight}
+                                        fill={colors.orange[900]}
+                                        rx={2}
+                                        ry={2}
+                                    />
 
-                            {/* Category Label below the X axis */}
-                            <SvgText
-                                x={x}
-                                y={PADDING_TOP + drawHeight + 16}
-                                fill={colors.gray[600]}
-                                fontSize={12}
-                                textAnchor="middle"
-                            >
-                                {item.pond}
-                            </SvgText>
-                        </React.Fragment>
-                    );
-                })}
+                                    {/* Value Label on top of the bar */}
+                                    <SvgText
+                                        x={x}
+                                        y={y - 8}
+                                        fill={colors.text}
+                                        fontSize={10}
+                                        fontWeight={typography.fontWeight.medium.toString()}
+                                        textAnchor="middle"
+                                    >
+                                        {item.yield.toFixed(2)}
+                                    </SvgText>
 
-                {/* Y Axis Labels */}
-                {yAxisLabels.map(value => {
-                    const y = getY(value);
-                    return (
-                        <SvgText
-                            key={`y-label-${value}`}
-                            x={PADDING_LEFT - 8}
-                            y={y + 4} // Optical vertical alignment
-                            fill={colors.gray[500]}
-                            fontSize={10}
-                            textAnchor="end"
-                        >
-                            {/* Chuyển dấu chấm (ví dụ: 37.5) thành dấu phẩy (37,5) cho giống với hình mẫu */}
-                            {value % 1 === 0
-                                ? value.toString()
-                                : value.toFixed(1).replace('.', ',')}
-                        </SvgText>
-                    );
-                })}
-            </Svg>
+                                    {/* Category Label below the X axis */}
+                                    <SvgText
+                                        x={x}
+                                        y={PADDING_TOP + drawHeight + 16}
+                                        fill={colors.gray[600]}
+                                        fontSize={12}
+                                        textAnchor="middle"
+                                    >
+                                        {item.pond}
+                                    </SvgText>
+                                </React.Fragment>
+                            );
+                        })}
+                    </Svg>
+                </ScrollView>
+            </View>
         </View>
     );
 };
@@ -146,8 +177,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
 const styles = StyleSheet.create({
     chartContainer: {
         width: '100%',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        paddingHorizontal: 12,
     },
 });
