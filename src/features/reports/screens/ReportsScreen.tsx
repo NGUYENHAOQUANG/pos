@@ -22,9 +22,10 @@ import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useScrollToTop } from '@react-navigation/native';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useZones, usePondsByZone } from '@/features/farm/hooks';
+import { useZones, usePondsByZone, useAllPondsByZone } from '@/features/farm/hooks';
 import { spacing } from '@/styles/spacing';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
+import { useAllCycles } from '@/features/farm/hooks/useCycle';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
@@ -71,6 +72,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
     };
 
     const { data: rawPonds } = usePondsByZone(selectedZoneId?.toString() || null);
+    const { data: allPondsForLookup } = useAllPondsByZone(selectedZoneId?.toString() || null);
 
     const pondData: DropDownItem[] = useMemo(() => {
         const defaultOption = { id: '1', label: 'Chọn ao' };
@@ -98,6 +100,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
     }, [pondData, selectedPond.id]);
 
     const { data: rawSeasons } = useSeasonsByZone(selectedZoneId?.toString() || null);
+    const { data: rawCycles } = useAllCycles({ PageSize: 100 });
 
     const seasonData: DropDownItem[] = useMemo(() => {
         const defaultOption = { id: '1', label: 'Chọn mùa vụ' };
@@ -105,7 +108,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
 
         const mapped = rawSeasons.map(s => ({
             id: s.id.toString(),
-            label: s.name || s.seasonName || `Mùa vụ ${s.id}`,
+            label: s.name || s.seasonName || `Mùa vụ ${s.id} `,
             value: s.seasonCode || s.id.toString(),
         }));
         return [defaultOption, ...mapped];
@@ -178,7 +181,11 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <CompilationCostChart />
             <WaterUsageChart />
             <FoodChart />
-            <PondTransfer />
+            <PondTransfer
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+            />
         </>
     );
 
@@ -189,7 +196,7 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <ActivePondChart />
+            <ActivePondChart zoneId={selectedZoneId?.toString() || ''} />
             <ProdChart />
             <CompilationProfitChart
                 zoneId={selectedZoneId?.toString() || ''}
@@ -200,10 +207,16 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <PondTransfer />
+            <PondTransfer
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+            />
             <HarvestStat
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+                cycles={rawCycles?.data?.items}
             />
         </>
     );

@@ -15,7 +15,8 @@ import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
 
 // --- IMPORT MOCK DATA ---
-import { POND_STATISTICS } from './MockData';
+// import { POND_STATISTICS } from './MockData';
+import { usePondStatusDistribution } from '@/features/reports/hooks/usePondStatusDistribution';
 
 // --- CẤU HÌNH ---
 const ITEM_WIDTH = 40;
@@ -26,12 +27,6 @@ const VERTICAL_PADDING = { top: 20, bottom: 20 };
 // CẤU HÌNH TRỤC Y CỐ ĐỊNH THEO THIẾT KẾ
 const FIXED_Y_TICKS = [0, 8, 16, 24, 32, 40];
 const Y_DOMAIN_MAX = 40;
-
-// --- HELPER ---
-const parseDate = (dateStr: string): Date => {
-    const parts = dateStr.split('/');
-    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-};
 
 // --- COLORS ---
 const CHART_COLORS = {
@@ -48,7 +43,11 @@ const CHART_COLORS = {
 import { Loading } from '@/shared/components/ui/Loading';
 import chartStyles from '@/features/reports/styles/chart.styles';
 
-export const ActivePondChart = () => {
+interface ActivePondChartProps {
+    zoneId: string;
+}
+
+export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     const [expanded, setExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -57,6 +56,8 @@ export const ActivePondChart = () => {
     const onLayout = (event: LayoutChangeEvent) => {
         setContainerWidth(event.nativeEvent.layout.width);
     };
+
+    const { data: response, isLoading: isApiLoading } = usePondStatusDistribution({ zoneId });
 
     const handleToggle = () => {
         const nextExpanded = !expanded;
@@ -71,14 +72,15 @@ export const ActivePondChart = () => {
 
     // --- 1. XỬ LÝ DỮ LIỆU ---
     const processedData = useMemo(() => {
-        return POND_STATISTICS.map(item => ({
-            date: parseDate(item.date),
-            active: item.active,
-            prep: item.preparing,
-            functional: item.functional,
-            total: item.total,
-        })).sort((a, b) => a.date.getTime() - b.date.getTime());
-    }, []);
+        if (!response?.data?.byDate) return [];
+        return response.data.byDate.map(item => ({
+            date: new Date(item.date),
+            active: item.framingCount,
+            prep: item.availableCount,
+            functional: item.functionalCount,
+            total: item.framingCount + item.availableCount + item.functionalCount,
+        }));
+    }, [response]);
 
     // --- 2. TỰ ĐỘNG CUỘN ---
     useEffect(() => {
@@ -130,14 +132,11 @@ export const ActivePondChart = () => {
         return `${d}/${m}`;
     };
 
-    const lastItem = processedData[processedData.length - 1] || {
-        active: 0,
-        prep: 0,
-        functional: 0,
-    };
-    const currentActiveTotal = lastItem.active;
-    const currentPrepTotal = lastItem.prep;
-    const currentFunctionalTotal = lastItem.functional;
+    const kpis = response?.data?.kpis;
+    const currentActiveTotal = kpis?.activePonds || 0;
+    const currentPrepTotal = kpis?.availablePonds || 0;
+    const currentFunctionalTotal = kpis?.functionalPonds || 0;
+    const totalPonds = kpis?.totalPonds || 0;
 
     const pondIndexData = useMemo(
         () => [
@@ -174,7 +173,7 @@ export const ActivePondChart = () => {
                     <ActivePondChartIcon width={16} height={16} color={colors.text} />
                     <Text style={styles.headerTitleText}>Tổng số ao hoạt động</Text>
                     <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{currentActiveTotal}</Text>
+                        <Text style={styles.badgeText}>{totalPonds}</Text>
                     </View>
                 </View>
                 <View style={[styles.expandedIcon, expanded && styles.expandedIconRotate]}>
@@ -184,7 +183,7 @@ export const ActivePondChart = () => {
 
             {expanded && (
                 <>
-                    {isLoading ? (
+                    {isLoading || isApiLoading ? (
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
