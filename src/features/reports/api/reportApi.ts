@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { FeedProdResponse } from '../types/feeding-production';
 import { HarvestStatsResponse } from '../types/harvest-stats';
 import { ProfitStatsResponse } from '../types/profit-stats';
+import { WaterUsageResponse } from '../types/water-usage';
 
 export const reportApi = {
     getFeedingProduction: async (params: {
@@ -37,6 +38,19 @@ export const reportApi = {
     }): Promise<ProfitStatsResponse> => {
         const { data } = await apiClient.get<ProfitStatsResponse>(
             API_ENDPOINTS.REPORT.PROFIT_STATS,
+            {
+                params,
+            }
+        );
+        return data;
+    },
+    getDailyWaterStats: async (params: {
+        zoneId: string;
+        startDate?: string;
+        endDate?: string;
+    }): Promise<WaterUsageResponse> => {
+        const { data } = await apiClient.get<WaterUsageResponse>(
+            API_ENDPOINTS.REPORT.DAILY_WATER_STATS,
             {
                 params,
             }

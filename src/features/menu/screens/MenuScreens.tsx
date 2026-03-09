@@ -14,6 +14,7 @@ import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModal
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
+import DeviceInfo from 'react-native-device-info';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useUserProfile, UserProfileData } from '@/features/menu/hooks/useUserProfile';
 import { useQueryClient } from '@tanstack/react-query';
@@ -124,6 +125,9 @@ export const MenuScreens: React.FC = () => {
                                 <Text style={styles.actionText}>Đăng xuất</Text>
                             </TouchableOpacity>
                         </View>
+                    </View>
+                    <View style={styles.versionContainer}>
+                        <Text style={styles.versionText}>Phiên bản {DeviceInfo.getVersion()}</Text>
                     </View>
                 </View>
 
@@ -247,5 +251,13 @@ const styles = StyleSheet.create({
     },
     bottomSpacer: {
         height: 8,
+    },
+    versionContainer: {
+        alignItems: 'center',
+        marginTop: -16,
+    },
+    versionText: {
+        fontSize: 13,
+        color: colors.textSecondary,
     },
 });
