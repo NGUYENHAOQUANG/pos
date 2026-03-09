@@ -17,6 +17,8 @@ export { default as IconVector } from '@/assets/Icon/IconDevices/Vector.svg';
 export { default as IconTrashOutlined } from '@/assets/Icon/IconDevices/TrashOutlined.svg';
 export { default as IconEditOutlined } from '@/assets/Icon/IconDevices/EditOutlined.svg';
 export { default as IconCloseOutlined } from '@/assets/Icon/IconDevices/CloseOutlined.svg';
+export { default as IconSkipBack } from '@/assets/Icon/IconDevices/SkipBack.svg';
+export { default as IconSkipForward } from '@/assets/Icon/IconDevices/SkipForward.svg';
 
 // Icon Farm
 export { default as IconFeed } from '@/assets/Icon/IconFarm/Feed.svg';

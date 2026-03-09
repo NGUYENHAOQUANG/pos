@@ -56,6 +56,7 @@ import { ScheduleActivitieScreens } from '@/features/control/screens/schedule/Sc
 import { UserManualScreens } from '@/features/control/screens/usermanual/UserManualScreens';
 import { GeneralUserManualScreens } from '@/features/control/screens/usermanual/GeneralUserManualScreens';
 import { HistoryActivitieScreens } from '@/features/control/screens/schedule/HistoryActivitieScreens';
+import { VideoPlayerScreen } from '@/features/control/screens/camera/VideoPlayerScreen';
 
 // Menu screens
 import { PersonalInformationScreens } from '@/features/menu/screens/information/PersonalInformationScreens';
@@ -223,6 +224,7 @@ export type AppStackParamList = {
     History: { pondName: string };
     UserManual: undefined;
     GeneralUserManual: undefined;
+    CameraPlayer: { videoUrl: string; cameraName: string; pondName: string };
 
     // ============== Menu Screens (Tab Bar hidden) ==============
     PersonalInformation: undefined;
@@ -324,6 +326,15 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="History" component={HistoryActivitieScreens} />
             <Stack.Screen name="UserManual" component={UserManualScreens} />
             <Stack.Screen name="GeneralUserManual" component={GeneralUserManualScreens} />
+            <Stack.Screen
+                name="CameraPlayer"
+                component={VideoPlayerScreen}
+                options={{
+                    orientation: 'landscape',
+                    gestureEnabled: false,
+                    animation: 'fade',
+                }}
+            />
 
             {/* ============== Menu Screens ============== */}
             <Stack.Screen name="PersonalInformation" component={PersonalInformationWithProvider} />
