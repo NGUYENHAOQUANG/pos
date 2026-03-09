@@ -13,10 +13,9 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
-import IconAICheck from '@/assets/Icon/AIcheck.svg';
-import IconAICheckOrange from '@/assets/Icon/AIcheck-orange.svg';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
+import { IconAICheck, IconAICheckOrange } from '@/assets/icons';
 
 export interface AIHealthCheckResult {
     totalCount: number;
