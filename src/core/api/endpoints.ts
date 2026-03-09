@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
         HEALTH: '/device/health',
         HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
         DEVICE_ID_REFERENCE: '/device/device-id-reference',
+        DEVICES_HUB: '/devicehub',
     },
     POND: {
         CYCLE: {

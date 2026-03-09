@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, BackHandler, RefreshControl } from 
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
-import { useControl } from '@/features/control/store/controlStore';
+import { useDevices, useUpdateDeviceMode, useUpdateDeviceSettings } from '@/features/control/hooks/useDevices';
 import { deviceApi } from '@/features/control/api/deviceApi';
 import { EControlMode } from '@/features/control/types/control.types';
 
@@ -35,13 +35,15 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     const initialMode = route.params?.initialMode || props.initialMode || 'manual';
     const { onBack, onSave } = props;
     const { setTabBarVisible } = useTabBarVisibility();
-    const { ponds, updateDeviceMode, updateDeviceSettings } = useControl();
+    const { data: ponds = [] } = useDevices();
+    const { updateMode: updateDeviceMode } = useUpdateDeviceMode();
+    const { updateSettings: updateDeviceSettings } = useUpdateDeviceSettings();
 
     // Get IDs from params
     const pondId = route.params?.pondId;
     const deviceId = route.params?.deviceId;
 
-    // Find current device data from store
+    // Find current device data from React Query
     const currentPond = ponds.find(p => p.id === pondId);
     const currentDevice = currentPond?.devices.find(d => d.id === deviceId);
 

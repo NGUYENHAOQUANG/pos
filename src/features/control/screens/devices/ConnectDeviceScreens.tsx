@@ -13,7 +13,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { ConnectDevice } from '@/features/control/components/devices/ConnectDevice';
 import { colors } from '@/styles';
-import { useControl } from '@/features/control/store/controlStore';
+import { useConnectDevice } from '@/features/control/hooks/useDevices';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera';
 
 // Define MainTabParams since it's not exported globally yet
@@ -41,7 +41,7 @@ export const ConnectDeviceScreens = () => {
 
     // Params are required in navigator, so we can access directly
     const { pondName } = route.params;
-    const { connectDeviceToPond } = useControl();
+    const { connectDeviceToPond } = useConnectDevice();
     const [isFlashOn, setIsFlashOn] = useState(false);
     const [hasPermission, setHasPermission] = useState(false);
 

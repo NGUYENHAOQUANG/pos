@@ -26,7 +26,7 @@ import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
 } from '@/features/farm/utils/toastMessages';
-import { useControl } from '@/features/control/store/controlStore';
+import { useDevices } from '@/features/control/hooks/useDevices';
 // import { deviceApi } from '@/features/control/api/deviceApi';
 import { DeviceData } from '@/features/control/types/control.types';
 
@@ -57,7 +57,7 @@ export const FeedingManagementScreens = () => {
 
     const isDetailLoading = queryLoading || isMaterialsLoading;
 
-    const { ponds } = useControl();
+    const { data: ponds = [] } = useDevices();
     const pId = String(pondId);
     let feederDevice: DeviceData | undefined;
 
