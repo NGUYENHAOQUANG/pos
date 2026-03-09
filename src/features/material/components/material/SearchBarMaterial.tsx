@@ -253,10 +253,9 @@ const styles = StyleSheet.create({
     },
     expandedContent: {
         marginTop: spacing.md,
-        marginBottom: spacing['2xl'],
         flexDirection: 'row',
         gap: spacing.md,
-        zIndex: 100, // Ensure dropdowns sit on top
+        zIndex: 100,
     },
     dropdownWrapper: {
         flex: 1,

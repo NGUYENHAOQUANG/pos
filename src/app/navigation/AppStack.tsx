@@ -29,6 +29,7 @@ import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/Add
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
 import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
+import { PondCycleListScreen } from '@/features/farm/screens/pond-cycle-list/PondCycleListScreen';
 import { MeasureShrimpSizeLogScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeLogScreen';
 import { MeasureShrimpSizeScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeScreen';
 import { HandleProblemFormScreen } from '@/features/farm/screens/handleProblem/HandleProblemFormScreen';
@@ -178,7 +179,8 @@ export type AppStackParamList = {
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
-    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string };
+    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string; cycleId: string };
+    PondCycleListScreen: { pondId: string; zoneId: string };
     HandleProblem: {
         pondId: string;
         item?: JobExecution;
@@ -301,6 +303,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
             <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
+            <Stack.Screen name="PondCycleListScreen" component={PondCycleListScreen} />
             <Stack.Screen name="HandleProblem" component={HandleProblemFormScreen} />
             <Stack.Screen name="HandleProblemLog" component={HandleProblemLogScreen} />
             <Stack.Screen name="CountingShrimp" component={CountingShrimpScreen} />
