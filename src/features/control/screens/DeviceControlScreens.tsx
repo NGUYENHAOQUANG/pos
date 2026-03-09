@@ -18,13 +18,14 @@ import { colors, spacing } from '@/styles';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
-import { useControl } from '@/features/control/store/controlStore';
+import { useDevices } from '@/features/control/hooks/useDevices';
 import { Zone } from '@/features/farm/types/farm.types';
 import { DeviceControlSkeleton } from '@/features/control/components/skeleton/DeviceControlSkeleton';
 import { useZones, usePondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { CameraList } from '@/features/control/components/camera/CameraList';
+import { CameraData } from '@/features/control/data/camerasData';
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
@@ -72,38 +73,12 @@ export const DeviceControlScreens = () => {
 
     // Flatten pagination data and ensure valid array
     const farmPonds = useMemo(() => {
-        if (!pondsData || pondsData.length === 0) {
-            // Even if no API data, show Mock Demo Ponds
-            return [
-                { id: 'IOT_POND', name: 'Ao IOT', status: 'Framing' },
-                { id: 'N001', name: 'Ao N001', status: 'Framing' },
-                { id: 'N002', name: 'Ao N002', status: 'Framing' },
-                { id: 'N003', name: 'Ao N003', status: 'Framing' },
-            ];
-        }
-
-        const apiPonds = pondsData;
-
-        // Demo: Inject N001, N002, N003 if they don't exist
-        const demoPonds = [
-            { id: 'IOT_POND', name: 'Ao IOT', status: 'Framing' },
-            { id: 'N001', name: 'Ao N001', status: 'Framing' },
-            { id: 'N002', name: 'Ao N002', status: 'Framing' },
-            { id: 'N003', name: 'Ao N003', status: 'Framing' },
-        ];
-
-        const missingDemoPonds = demoPonds.filter(dp => !apiPonds.some(ap => ap.name === dp.name));
-
-        return [...missingDemoPonds, ...apiPonds];
+        if (!pondsData || pondsData.length === 0) return [];
+        return pondsData;
     }, [pondsData]);
 
-    // Device Data from Control Store (Local State)
-    const { ponds: devicePonds, fetchIoTDevices } = useControl();
-
-    // Fetch IoT devices on mount so Ao IOT has data before user enters it
-    React.useEffect(() => {
-        fetchIoTDevices();
-    }, [fetchIoTDevices]);
+    // Device Data from React Query (API)
+    const { data: devicePonds = [], isRefetching: isRefetchingDevices } = useDevices();
 
     // Map zones to FarmLocation format
     const farmLocations: FarmLocation[] = useMemo(() => {
@@ -165,7 +140,7 @@ export const DeviceControlScreens = () => {
     // 3. Loading Ponds (React Query active)
     // 4. Manual Refetch or Network Reconnect (but not Load More)
     const showSkeleton =
-        isLoadingZones || !selectedFarm || isLoadingPonds || (!!isConnected && isRefetching);
+        isLoadingZones || !selectedFarm || isLoadingPonds || (!!isConnected && isRefetching && !isRefetchingDevices);
 
     const handleRefresh = async () => {
         await refetch();
@@ -184,7 +159,7 @@ export const DeviceControlScreens = () => {
         if (!selectedFarm || !farmPonds) return [];
 
         const mappedPonds = farmPonds.map((realPond: any) => {
-            // Find corresponding device data in controlStore
+            // Find corresponding device data from React Query
             const devicePond = devicePonds.find(p => p.name === realPond.name);
 
             return {
@@ -342,13 +317,15 @@ export const DeviceControlScreens = () => {
                     )}
                 </>
             ) : (
-                <View style={styles.cameraEmptyContainer}>
-                    <EmptyStateCard
-                        message={
-                            'Chưa có Camera nào được thiết lập\nVui lòng liên hệ để được thiết lập camera'
-                        }
-                    />
-                </View>
+                <CameraList
+                    onCameraPress={(camera: CameraData) => {
+                        navigation.navigate('CameraPlayer', {
+                            videoUrl: camera.videoUrl,
+                            cameraName: camera.cameraName,
+                            pondName: camera.pondName,
+                        });
+                    }}
+                />
             )}
 
             <HelpOptionsModal
@@ -408,10 +385,5 @@ const styles = StyleSheet.create({
     },
     spacer: {
         height: 16,
-    },
-    cameraEmptyContainer: {
-        flex: 1,
-        alignItems: 'center',
-        paddingTop: 40,
     },
 });
