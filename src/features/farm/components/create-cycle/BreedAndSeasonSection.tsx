@@ -36,7 +36,7 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                 <Controller
                     control={control}
                     name="breedSource"
-                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
                             <View style={styles.labelWrapper}>
                                 <Text style={styles.label}>Chọn tôm giống</Text>
@@ -63,7 +63,6 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                                 height={40}
                                 borderRadius={6}
                             />
-                            {error && <Text style={styles.errorText}>{error.message}</Text>}
                         </View>
                     )}
                 />
@@ -80,7 +79,7 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                 <Controller
                     control={control}
                     name="season"
-                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
                             <View style={styles.labelWrapper}>
                                 <Text style={styles.label}>Chọn vụ nuôi</Text>
@@ -108,7 +107,7 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                                 disabled={isEdit}
                                 borderRadius={6}
                             />
-                            {error && <Text style={styles.errorText}>{error.message}</Text>}
+                            {/* Inline error hidden; errors are shown via toast */}
                         </View>
                     )}
                 />
@@ -116,7 +115,7 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                 <Controller
                     control={control}
                     name="cycleName"
-                    render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value } }) => (
                         <View style={styles.inputGroup}>
                             <View style={styles.labelWrapper}>
                                 <Text style={styles.label}>Tên chu kỳ</Text>
@@ -128,7 +127,7 @@ const BreedAndSeasonSection: React.FC<Props> = ({
                                 value={value || ''}
                                 onChangeText={onChange}
                             />
-                            {error && <Text style={styles.errorText}>{error.message}</Text>}
+                            {/* Inline error hidden; errors are shown via toast */}
                         </View>
                     )}
                 />

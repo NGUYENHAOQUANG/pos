@@ -17,6 +17,8 @@ import { Tag } from '@/features/farm/components/pond/Tag';
 import { POND_TYPES } from '@/features/farm/types/farm.types';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
+import { useHarvestRecords } from '@/features/farm/hooks/useHarvestRecord';
+import type { HarvestType } from '@/features/farm/types/harvestRecord.types';
 
 type ScreenRouteProp = RouteProp<AppStackParamList, 'CycleDetailScreen'>;
 export const CycleDetailScreen: React.FC = () => {
@@ -44,6 +46,12 @@ export const CycleDetailScreen: React.FC = () => {
         pondId ?? ''
     );
     const { data: categoriesResponse } = usePondCategories();
+
+    const { data: harvestRecordsData } = useHarvestRecords(pondId ?? '', {
+        CycleId: cycleId ?? undefined,
+        PageSize: 1000,
+        OrderBy: 'CreatedAt desc',
+    });
 
     const matchingTransferId = useMemo(() => {
         return stockTransfersData?.items?.find(st => st.fromCycleId === cycleId)?.id;
@@ -109,6 +117,82 @@ export const CycleDetailScreen: React.FC = () => {
             ? `${incomingTransfer.shrimpSizePcsPerKg}`
             : '--';
     }, [incomingTransfer?.shrimpSizePcsPerKg]);
+
+    type CycleHarvestType = HarvestType | 'CloseCycle';
+
+    const harvestSummary = useMemo(() => {
+        if (!activeCycleData) return undefined;
+
+        const allItems = harvestRecordsData?.data?.items ?? [];
+        const currentCycleId = activeCycleData.id;
+
+        const items = allItems.filter(item => item.cycleId === currentCycleId);
+
+        if (!items.length) {
+            if (activeCycleData.status === 'Completed') {
+                const end =
+                    activeCycleData.endDate ||
+                    activeCycleData.editedAt ||
+                    activeCycleData.createdAt ||
+                    '';
+                const dateStr = end ? formatDate(new Date(end)) : '---';
+                return [
+                    {
+                        id: 'close-cycle',
+                        type: 'CloseCycle' as CycleHarvestType,
+                        date: dateStr,
+                    },
+                ];
+            }
+            return undefined;
+        }
+
+        const mapped = items
+            .map(item => {
+                const detail = item.harvestDetail ?? item.harvest;
+                if (!detail) return null;
+
+                const createdDate = item.createdAt ? new Date(item.createdAt) : null;
+                const dateStr = createdDate ? formatDate(createdDate) : '---';
+
+                const revenueValue = detail.revenue;
+                const revenue =
+                    typeof revenueValue === 'number'
+                        ? revenueValue.toLocaleString()
+                        : revenueValue != null
+                        ? String(revenueValue)
+                        : undefined;
+
+                return {
+                    id: item.id,
+                    type: detail.harvestType as CycleHarvestType,
+                    date: dateStr,
+                    shrimpSize: detail.shrimpSize != null ? String(detail.shrimpSize) : undefined,
+                    totalWeightKg:
+                        detail.totalWeightKg != null ? String(detail.totalWeightKg) : undefined,
+                    revenue,
+                };
+            })
+            .filter(Boolean) as {
+            id: string;
+            type: CycleHarvestType;
+            date: string;
+            shrimpSize?: string;
+            totalWeightKg?: string;
+            revenue?: string;
+        }[];
+
+        // Sort by createdAt ascending (cũ -> mới)
+        mapped.sort((a, b) => {
+            const aRecord = allItems.find(x => x.id === a.id);
+            const bRecord = allItems.find(x => x.id === b.id);
+            const ta = aRecord?.createdAt ? new Date(aRecord.createdAt).getTime() : 0;
+            const tb = bRecord?.createdAt ? new Date(bRecord.createdAt).getTime() : 0;
+            return ta - tb;
+        });
+
+        return mapped;
+    }, [harvestRecordsData, activeCycleData]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -179,6 +263,7 @@ export const CycleDetailScreen: React.FC = () => {
                     transferDetail={transferDetail}
                     showIncomingTransfer={showTransfer}
                     refreshing={refreshing || isRefetching}
+                    harvestSummary={harvestSummary}
                     onRefresh={onRefresh}
                     onEditPress={() =>
                         navigation.navigate('CreateCycle', {
