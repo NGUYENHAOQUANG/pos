@@ -22,8 +22,9 @@ import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useScrollToTop } from '@react-navigation/native';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useZones } from '@/features/farm/hooks';
+import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { spacing } from '@/styles/spacing';
+import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
 
@@ -69,7 +70,62 @@ export const ReportsScreen = ({ navigation }: Props) => {
         setSelectedZoneId(String(item.id));
     };
 
-    const [selectedPond, setSelectedPond] = useState<DropDownItem>({ id: '1', label: 'Chọn ao' });
+    const { data: rawPonds } = usePondsByZone(selectedZoneId?.toString() || null);
+
+    const pondData: DropDownItem[] = useMemo(() => {
+        const defaultOption = { id: '1', label: 'Chọn ao' };
+        if (!rawPonds || rawPonds.length === 0) return [defaultOption];
+
+        const mapped = rawPonds.map(p => ({
+            id: p.id.toString(),
+            label: p.name,
+            value: p.code || p.id.toString(),
+        }));
+        return [defaultOption, ...mapped];
+    }, [rawPonds]);
+
+    const [selectedPond, setSelectedPond] = useState<DropDownItem>(pondData[0]);
+
+    // Update selected pond when data changes
+    React.useEffect(() => {
+        if (pondData.length > 0) {
+            // Check if current selected pond still exists in new data
+            const exists = pondData.find(p => p.id === selectedPond.id);
+            if (!exists) {
+                setSelectedPond(pondData[0]);
+            }
+        }
+    }, [pondData, selectedPond.id]);
+
+    const { data: rawSeasons } = useSeasonsByZone(selectedZoneId?.toString() || null);
+
+    const seasonData: DropDownItem[] = useMemo(() => {
+        const defaultOption = { id: '1', label: 'Chọn mùa vụ' };
+        if (!rawSeasons || rawSeasons.length === 0) return [defaultOption];
+
+        const mapped = rawSeasons.map(s => ({
+            id: s.id.toString(),
+            label: s.name || s.seasonName || `Mùa vụ ${s.id}`,
+            value: s.seasonCode || s.id.toString(),
+        }));
+        return [defaultOption, ...mapped];
+    }, [rawSeasons]);
+
+    const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
+
+    // Update selected season when data changes
+    React.useEffect(() => {
+        if (seasonData.length > 0) {
+            // Check if current selected season still exists in new data
+            const exists = seasonData.find(s => s.id === selectedSeason.id);
+            if (!exists) {
+                setSelectedSeason(seasonData[0]);
+            }
+        }
+    }, [seasonData, selectedSeason.id]);
+
+    const [isSeasonDisabled, setIsSeasonDisabled] = useState(false);
+
     const pondTypeData: DropDownItem[] = [
         { id: '1', label: 'Ao nuôi' },
         { id: '2', label: 'Ao vèo' },
@@ -78,31 +134,16 @@ export const ReportsScreen = ({ navigation }: Props) => {
     ];
     const [selectedPondType, setSelectedPondType] = useState<DropDownItem>(pondTypeData[0]);
 
-    const pondData: DropDownItem[] = [
-        { id: '1', label: 'Chọn ao' },
-        { id: 'ck1', label: 'Vụ I - CK1' },
-        { id: '2', label: 'Ao 2' },
-        { id: '3', label: 'Ao 3' },
-    ];
-
-    const seasonData: DropDownItem[] = [
-        { id: '1', label: 'Vụ 1 - 2025' },
-        { id: '2', label: 'Vụ 2 - 2025' },
-        { id: '3', label: 'Vụ 3 - 2025' },
-        { id: '4', label: 'Vụ 4 - 2025' },
-    ];
-    const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
-    const [isSeasonDisabled, setIsSeasonDisabled] = useState(false);
-
     const handleSelectPondType = (item: DropDownItem) => {
         setSelectedPondType(item);
         if (item.label === 'Ao vèo') {
-            const autoSelectPond = { id: 'ck1', label: 'Vụ I - CK1' };
+            const autoSelectPond =
+                pondData.find(p => p.label.toLowerCase().includes('vèo')) || pondData[0];
             setSelectedPond(autoSelectPond);
             setIsSeasonDisabled(true);
         } else {
             setIsSeasonDisabled(false);
-            if (selectedPond.id === 'ck1') {
+            if (selectedPond.label.toLowerCase().includes('vèo')) {
                 setSelectedPond(pondData[0]); // Reset to "Chọn ao"
             }
         }
