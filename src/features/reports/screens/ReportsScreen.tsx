@@ -201,7 +201,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
             <PondTransfer />
-            <HarvestStat />
+            <HarvestStat
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
         </>
     );
 

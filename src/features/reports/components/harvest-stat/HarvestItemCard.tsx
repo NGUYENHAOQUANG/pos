@@ -7,21 +7,10 @@ import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, typography, spacing } from '@/styles';
 
-export interface HarvestData {
-    id: string;
-    harvestDate: string;
-    cycleId: string;
-    pondId: string;
-    harvestType: string;
-    output: string;
-    size: number;
-    price: string;
-    revenue: string;
-    cumulativeCost: string;
-}
+import { HarvestStatsByPond } from '@/features/reports/types/harvest-stats';
 
 interface Props {
-    item: HarvestData;
+    item: HarvestStatsByPond;
 }
 
 export const HarvestItemCard = ({ item }: Props) => {
@@ -52,9 +41,9 @@ export const HarvestItemCard = ({ item }: Props) => {
 
             {/* Content column */}
             <View style={styles.contentColumn}>
-                {/* Top row: date + Xem thêm */}
+                {/* Top row: zoneName + Xem thêm */}
                 <View style={styles.topRow}>
-                    <Text style={styles.dateText}>{item.harvestDate}</Text>
+                    <Text style={styles.dateText}>{item.zoneName}</Text>
                     <TouchableOpacity
                         onPress={toggleExpand}
                         style={styles.topAction}
@@ -73,21 +62,30 @@ export const HarvestItemCard = ({ item }: Props) => {
 
                 {/* Inner card */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Ao {item.pondId}</Text>
+                    <Text style={styles.cardTitle}>
+                        {item.pondName} ({item.pondCode})
+                    </Text>
 
                     <View style={styles.content}>
                         {/* Thông tin chính */}
-                        {renderRow('Sản lượng (kg)', item.output)}
-                        {renderRow('Cỡ tôm (con/kg)', item.size, 'con/kg')}
+                        {renderRow('Tổng thu hoạch', item.totalHarvested, 'kg')}
+                        {renderRow('Số lần thu', item.harvestCount, 'lần')}
 
                         {/* Thông tin chi tiết khi mở rộng */}
                         {expanded && (
                             <View style={styles.expandedContent}>
-                                {renderRow('Doanh thu (VNĐ)', item.revenue)}
-                                {renderRow('Đơn giá (VNĐ/kg)', item.price)}
-                                {renderRow('Chi phí lũy kế (VNĐ)', item.cumulativeCost)}
-                                {renderRow('Loại thu hoạch', item.harvestType)}
-                                {renderRow('Chu kỳ', item.cycleId)}
+                                {renderRow(
+                                    'Trung bình mỗi lần',
+                                    Math.round(item.averageHarvestedPerTime),
+                                    'kg/lần'
+                                )}
+                                {renderRow('Nhiều nhất (1 lần)', item.maxHarvestedInOneTime, 'kg')}
+                                {renderRow('Ít nhất (1 lần)', item.minHarvestedInOneTime, 'kg')}
+                                {renderRow(
+                                    'Chiếm tỉ lệ',
+                                    `${item.percentageOfTotalHarvest.toFixed(1)}%`
+                                )}
+                                {renderRow('Tồn kho hiện tại', item.remainingStock, 'con')}
                             </View>
                         )}
                     </View>
