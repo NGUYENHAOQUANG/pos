@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ToastConfig } from 'react-native-toast-message';
+import Toast from 'react-native-toast-message';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { borderRadius, colors } from '@/styles';
+import { borderRadius, colors, spacing } from '@/styles';
 import CheckCircleIcon from '@/assets/Icon/CheckCircleFilled.svg';
+import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 
-// Custom Toast Component to handle dynamic safe area positioning
-// This ensures the toast is always centered vertically relative to the HeaderSection content
+// Custom Toast Component positioned at bottom with full width
 const CustomToast = ({
     text1,
     text2,
@@ -16,29 +17,26 @@ const CustomToast = ({
     text2?: string;
     type: 'success' | 'error';
 }) => {
-    // HeaderSection uses padding: insets.top + 12
-    // We want the toast top to align effectively with the header content top.
-
-    // Logic:
-    // We have set <Toast topOffset={0} /> in App.tsx to remove the default library offset (40px).
-    // Now we have full control. We can exactly match the HeaderSection's padding logic.
-    // HeaderSection content starts at: insets.top + 12.
-    // So we set marginTop to exactly insets.top + 12 to top-align (and thus center-align since heights match).
     const insets = useSafeAreaInsets();
-    const topMargin = insets.top + 12;
 
     return (
-        <View style={[styles.container, { marginTop: topMargin }]}>
-            <View style={styles.iconWrapper}>
-                {type === 'success' ? (
-                    <CheckCircleIcon width={20} height={20} />
-                ) : (
-                    <Text style={styles.errorTextIcon}>!</Text>
-                )}
-            </View>
-            <View style={styles.contentContainer}>
-                <Text style={styles.text}>{text1}</Text>
-                {text2 ? <Text style={styles.subText}>{text2}</Text> : null}
+        <View style={[styles.wrapper, { marginBottom: insets.bottom + 12 }]}>
+            <View style={styles.container}>
+                <View style={styles.iconWrapper}>
+                    {type === 'success' ? (
+                        <CheckCircleIcon width={20} height={20} />
+                    ) : (
+                        <Text style={styles.errorTextIcon}>!</Text>
+                    )}
+                </View>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.text}>{text1}</Text>
+                    {text2 ? <Text style={styles.subText}>{text2}</Text> : null}
+                </View>
+                {/* Close button */}
+                <TouchableOpacity onPress={() => Toast.hide()} style={styles.closeButton}>
+                    <CloseIcon width={16} height={16} color={colors.textSecondary} />
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -50,50 +48,55 @@ export const toastConfig: ToastConfig = {
 };
 
 const styles = StyleSheet.create({
+    wrapper: {
+        width: '100%',
+        paddingHorizontal: spacing.md,
+    },
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: 'auto',
-        maxWidth: '80%',
-        height: 'auto', // Changed from fixed 40 for flexibility
         minHeight: 40,
-        backgroundColor: 'white',
-        borderRadius: borderRadius.sm,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        marginRight: 16,
-        alignSelf: 'flex-end',
-        shadowColor: colors.black,
+        backgroundColor: colors.white,
+        borderRadius: borderRadius.md,
+        paddingVertical: 12,
+        paddingHorizontal: spacing.md,
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: -2,
         },
         shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-        borderLeftWidth: 0,
+        shadowRadius: borderRadius.md,
+        elevation: 4,
     },
     iconWrapper: {
-        marginRight: 8,
+        marginRight: 10,
     },
     contentContainer: {
-        // New container for texts
-        flexShrink: 1,
+        flex: 1,
     },
     text: {
-        fontSize: 14,
+        fontSize: 16,
         color: colors.text,
-        fontWeight: '500', // Slightly bolder for title
+        fontWeight: '400',
     },
     subText: {
-        // New style for text2
-        fontSize: 13,
+        fontSize: 16,
         color: colors.textSecondary,
         fontWeight: '400',
         marginTop: 2,
     },
     errorTextIcon: {
         color: colors.red[900],
+        fontWeight: '400',
+    },
+    closeButton: {
+        marginLeft: 8,
+        padding: 4,
+    },
+    closeText: {
+        fontSize: 16,
+        color: colors.text,
         fontWeight: '400',
     },
 });

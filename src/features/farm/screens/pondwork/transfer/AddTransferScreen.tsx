@@ -315,7 +315,6 @@ export const AddTransferScreen: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập cỡ tôm hiện tại',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -326,7 +325,6 @@ export const AddTransferScreen: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập số lượng cho ít nhất một ao nhận',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -338,7 +336,6 @@ export const AddTransferScreen: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn ao nhận cho tất cả các dòng có số lượng',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;

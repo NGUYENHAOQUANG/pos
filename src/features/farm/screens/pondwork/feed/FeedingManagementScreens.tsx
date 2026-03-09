@@ -143,7 +143,6 @@ export const FeedingManagementScreens = () => {
                         type: 'error',
                         text1: 'Lỗi điều khiển thiết bị',
                         text2: 'Không thể cập nhật trạng thái máy cho ăn',
-                        position: 'top',
                         visibilityTime: 4000,
                     });
                 } finally {
