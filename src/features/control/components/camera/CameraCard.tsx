@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.overlayBadge,
         paddingHorizontal: 10,
         paddingVertical: 5,
-        borderRadius: 12,
+        borderRadius: borderRadius.full,
         gap: 5,
     },
     offlineDot: {
