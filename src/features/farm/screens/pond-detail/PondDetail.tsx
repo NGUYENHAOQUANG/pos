@@ -28,6 +28,7 @@ interface PondDetailProps {
 
     onBack: () => void;
     onGoToPondInfo: () => void;
+    onGoToCycleList: () => void;
     onStartCycle: () => void;
     onEditCycle: () => void;
     breedName: string;
@@ -56,6 +57,7 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 
     onBack,
     onGoToPondInfo,
+    onGoToCycleList,
     onStartCycle,
     onEditCycle,
     breedName,
@@ -83,6 +85,10 @@ export const PondDetail: React.FC<PondDetailProps> = ({
                     {
                         value: 'Thông tin ao',
                         onMenuOptionPress: onGoToPondInfo,
+                    },
+                    {
+                        value: 'Các chu kỳ nuôi',
+                        onMenuOptionPress: onGoToCycleList,
                     },
                 ]}
             />
@@ -203,10 +209,7 @@ const styles = StyleSheet.create({
         color: colors.text,
     },
     cycleCardWrapper: {
-        marginTop: 16,
-        marginBottom: 8,
         marginHorizontal: 16,
-        gap: 8,
     },
     emptyCard: {
         marginTop: spacing.lg,

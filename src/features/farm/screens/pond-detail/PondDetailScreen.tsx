@@ -146,12 +146,11 @@ export const PondDetailScreen: React.FC = () => {
 
     const { data: currentCycle } = useActiveCycle(pond?.id || '');
 
-    const {
-        refetch: refetchCycles,
-        isRefetching: isRefetchingCycles,
-        data: cyclesData,
-    } = useCyclesByPond(pond?.id || '');
-    const cycles = useMemo(() => cyclesData?.data?.items || [], [cyclesData]);
+    const { refetch: refetchCycles, isRefetching: isRefetchingCycles } = useCyclesByPond(
+        pond?.id || ''
+    );
+    // We no longer need cycles as an array here
+    // const cycles = useMemo(() => cyclesData?.data?.items || [], [cyclesData]);
 
     const filteredJobs = useMemo(() => {
         if (currentCycle) return jobs;
@@ -193,14 +192,11 @@ export const PondDetailScreen: React.FC = () => {
 
         const latestShrimpSize = pondDetailService.getLatestShrimpSize(apiMeasureSizeJobs);
 
-        const cycleData = currentCycle || cycles[0] || null;
-
         navigation.navigate('AddTransferScreen', {
             pond,
             latestShrimpSize,
-            cycleData,
         });
-    }, [pond, apiMeasureSizeJobs, setIsMeasureSizeModalVisible, currentCycle, cycles, navigation]);
+    }, [pond, apiMeasureSizeJobs, setIsMeasureSizeModalVisible, navigation]);
 
     const navigateHandlers = usePondJobNavigateHandlers({
         pond,
@@ -270,13 +266,22 @@ export const PondDetailScreen: React.FC = () => {
         navigation.navigate('PondInfo', { pond });
     }, [navigation, pond]);
 
+    const onGoToCycleList = useCallback(() => {
+        if (!pond) return;
+        navigation.navigate('PondCycleListScreen', {
+            pondId: pond.id || '',
+            zoneId: pond.zoneId?.toString() || '',
+        });
+    }, [navigation, pond]);
+
     const onEditCycle = useCallback(() => {
         navigation.navigate('CycleDetailScreen', {
             pondId: pond?.id || '',
             zoneId: pond?.zoneId?.toString() ?? '',
             warehouseId: warehouses?.[0]?.id ?? '',
+            cycleId: currentCycle?.id || '',
         });
-    }, [navigation, pond, warehouses]);
+    }, [navigation, pond, warehouses, currentCycle?.id]);
 
     const onGoToMeasureSizeScreen = useCallback(() => {
         if (!pond) return;
@@ -306,6 +311,7 @@ export const PondDetailScreen: React.FC = () => {
             filteredJobs={filteredJobs}
             onBack={onBack}
             onGoToPondInfo={onGoToPondInfo}
+            onGoToCycleList={onGoToCycleList}
             onStartCycle={handleStartCycle}
             onEditCycle={onEditCycle}
             breedName={pondDetailService.getBreedName(currentCycle, shrimpSeeds)}

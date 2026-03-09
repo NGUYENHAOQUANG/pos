@@ -13,6 +13,7 @@ import { MaterialGroup } from '@/features/material/components/MaterialTag';
 import { ButtonMaterialList } from '@/features/material/components/material_form/ButtonMaterialList';
 import { colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
+import { DetailRow } from '@/features/material/components/DetailRow';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -67,49 +68,31 @@ export const MaterialMasterItem = React.memo<MaterialMasterItemProps>(
                 <View style={styles.bodyContainer}>
                     {/* Status Field */}
                     {showStatus && (
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Trạng thái: </Text>
-                            <Text
-                                style={[
-                                    styles.detailValue,
-                                    { color: item.isActive ? colors.green[600] : colors.red[500] },
-                                ]}
-                            >
-                                {item.isActive ? 'Hoạt động' : 'Ngưng'}
-                            </Text>
-                        </View>
+                        <DetailRow
+                            label="Trạng thái:"
+                            value={item.isActive ? 'Hoạt động' : 'Ngưng'}
+                            valueStyle={{
+                                color: item.isActive ? colors.green[600] : colors.red[500],
+                            }}
+                        />
                     )}
 
                     {/* Basic Info Row */}
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoText}>
-                            <Text style={styles.label}>Đơn vị tính: </Text>
-                            <Text style={styles.detailValue}>{item.unitName || item.unit}</Text>
-                        </Text>
-                        {!hideRemaining && (
-                            <Text style={styles.infoText}>
-                                <Text style={styles.label}>Còn: </Text>
-                                <Text style={styles.detailValue}>{item.remaining}</Text>
-                            </Text>
-                        )}
-                    </View>
+                    <DetailRow label="Đơn vị tính:" value={item.unitName || item.unit} />
+                    {!hideRemaining && <DetailRow label="Còn:" value={item.remaining} />}
 
                     {/* Expanded Content */}
                     {isExpanded && (
                         <View style={{ gap: 12, paddingBottom: alwaysExpanded ? 0 : 12 }}>
                             {!alwaysExpanded && <View style={styles.separatorCenter} />}
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Loại vật tư: </Text>
-                                <Text style={styles.detailValue}>{item.type || '---'}</Text>
-                            </View>
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Nhãn Hàng: </Text>
-                                <Text style={styles.detailValue}>{item.manufacturer || '---'}</Text>
-                            </View>
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Mô tả: </Text>
-                                <Text style={styles.detailValue}>{item.usage || '---'}</Text>
-                            </View>
+                            <DetailRow label="Loại vật tư:" value={item.type} />
+                            <DetailRow label="Nhãn Hàng:" value={item.manufacturer} />
+                            <DetailRow
+                                label="Mô tả:"
+                                value={item.usage}
+                                bottomSheetTitle={item.name}
+                                sheetLabel="Mô tả"
+                            />
 
                             {/* Edit Button */}
                             {onEdit && (

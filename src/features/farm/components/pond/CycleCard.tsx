@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         width: '100%',
         borderWidth: 1,
-        borderColor: colors.borderLight,
+        borderColor: colors.border,
         borderRadius: 16,
     },
     header: {
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: colors.borderLight,
+        backgroundColor: colors.border,
     },
     body: {
         paddingHorizontal: 16,

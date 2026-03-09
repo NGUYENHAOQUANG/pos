@@ -102,16 +102,16 @@ export const MaterialGroup: React.FC<MaterialGroupProps> = ({ group }) => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingVertical: 4,
         borderRadius: borderRadius.full,
         borderWidth: 1,
-        alignSelf: 'flex-start', // Wrap content
+        alignSelf: 'flex-start',
         alignItems: 'center',
         justifyContent: 'center',
     },
     text: {
-        fontSize: 12,
+        fontSize: 14,
         fontWeight: '500',
         lineHeight: 20,
     },
