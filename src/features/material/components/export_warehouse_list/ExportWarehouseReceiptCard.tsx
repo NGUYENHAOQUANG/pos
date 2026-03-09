@@ -192,8 +192,11 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     label: {
+        fontWeight: '400',
         fontSize: 14,
-        color: colors.text,
+        color: colors.gray[500],
+        lineHeight: 20,
+        flex: 1,
     },
     value: {
         fontSize: 14,

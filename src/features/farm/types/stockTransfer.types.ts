@@ -1,4 +1,5 @@
 import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
+import { PondData } from '@/features/farm/types/pond.types';
 
 // Enum for stock transfer status - matches backend StatusRecordEnum
 export enum StockTransferStatus {
@@ -31,10 +32,64 @@ export interface IStockTransfer {
     status: StockTransferStatus;
 }
 
-export interface IStockTransferDetail extends IStockTransfer {
-    // Detail API returns full pond and cycle objects
-    pond?: Record<string, unknown>;
-    cycle?: Record<string, unknown>;
+// ─── Detail-specific nested types ───────────────────────────────────────────
+
+export interface IZoneInfo {
+    id: string;
+    name: string;
+    code?: string;
+    farmId?: string;
+}
+
+export interface IPondCategoryInfo {
+    id: string;
+    name: string;
+    code?: string;
+}
+
+export interface IPondInfo extends Omit<PondData, 'zone'> {
+    zone?: IZoneInfo | null;
+    pondCategory?: IPondCategoryInfo | null;
+    lastOperationAt?: string | null;
+    isDeleted?: boolean;
+    updatedAt?: string;
+}
+
+export interface ICycleInfo {
+    id: string;
+    no: number;
+    code: string;
+    name: string;
+    pondId: string;
+    seasonId?: string;
+    parentCycleId?: string | null;
+    status: string;
+    endDate?: string | null;
+    notes?: string;
+    pond?: IPondInfo | null;
+    season?: ISeasonInfo | null;
+    createdAt: string;
+    updatedAt: string;
+    isDeleted: boolean;
+}
+
+export interface ISeasonInfo {
+    id: string;
+    name: string;
+    code?: string;
+    startDate?: string;
+    endDate?: string;
+    status?: string;
+}
+
+export interface IStockTransferToPondDetail extends IStockTransferToPond {
+    pond?: IPondInfo | null;
+}
+
+export interface IStockTransferDetail extends Omit<IStockTransfer, 'toPonds'> {
+    toPonds: IStockTransferToPondDetail[];
+    pond?: IPondInfo | null;
+    cycle?: ICycleInfo | null;
 }
 
 export interface CreateStockTransferRequest {
