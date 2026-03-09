@@ -32,7 +32,7 @@ export default function InfoScreen() {
     const [isLoading, setIsLoading] = useState(false);
 
     const { user, completeProfile } = useAuthStore();
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
 
     const handleSubmit = async () => {
         if (!fullName.trim()) {
@@ -144,10 +144,7 @@ export default function InfoScreen() {
                             <View
                                 style={[
                                     styles.footer,
-                                    Platform.OS === 'android' && {
-                                        paddingBottom:
-                                            spacing.xl + spacing.sm + 12 + keyboardHeight,
-                                    },
+                                    keyboardVisible && styles.footerKeyboardOpen,
                                 ]}
                             >
                                 <Button
@@ -223,6 +220,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
     labelBase: {
         color: colors.text,

@@ -44,7 +44,7 @@ export default function VerifyOTPScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
 
     useEffect(() => {
         const timer = setTimeout(() => otpInputRef.current?.focusFirst(), 300);
@@ -206,9 +206,7 @@ export default function VerifyOTPScreen() {
                     <View
                         style={[
                             styles.submitButtonContainer,
-                            Platform.OS === 'android' && {
-                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardHeight,
-                            },
+                            keyboardVisible && styles.footerKeyboardOpen,
                         ]}
                     >
                         <Button
@@ -316,6 +314,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
     submitButton: { backgroundColor: colors.primary, borderRadius: 25, height: 52 },
 });

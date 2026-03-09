@@ -48,7 +48,7 @@ export default function RegisterScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -217,14 +217,7 @@ export default function RegisterScreen() {
                             </View>
                         </View>
                     </ScrollView>
-                    <View
-                        style={[
-                            styles.footer,
-                            Platform.OS === 'android' && {
-                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardHeight,
-                            },
-                        ]}
-                    >
+                    <View style={[styles.footer, keyboardVisible && styles.footerKeyboardOpen]}>
                         <Button
                             title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
                             onPress={handleVerifyOTP}
@@ -339,5 +332,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
 });

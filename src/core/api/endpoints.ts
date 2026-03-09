@@ -249,5 +249,6 @@ export const API_ENDPOINTS = {
         POND_STATUS_DISTRIBUTION: '/report/pond-status-distribution',
         PROFIT_STATS: '/report/profit-stats',
         STOCK_TRANSFER_STATS: '/report/stock-transfer-stats',
+        DAILY_WATER_STATS: '/report/daily-water-stats',
     },
 } as const;
