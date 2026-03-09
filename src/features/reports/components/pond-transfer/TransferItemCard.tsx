@@ -50,15 +50,23 @@ export const TransferItemCard = ({ item }: Props) => {
         <View style={styles.card}>
             {/* Top summary row */}
             <View style={styles.topRow}>
-                <Text style={styles.pondCode}>{item.sourcePond}</Text>
+                <Text style={styles.pondCode} numberOfLines={2}>
+                    {item.sourcePond}
+                </Text>
                 <View style={styles.centerInfo}>
-                    <Text style={styles.centerLineText}>Ngày sang: {item.transferDate}</Text>
+                    <Text style={styles.centerLineText} numberOfLines={1}>
+                        Ngày sang: {item.transferDate}
+                    </Text>
                     <View style={styles.centerDivider}>
-                        <ArrowIcon width={120} height={6} />
+                        <ArrowIcon width={100} height={6} />
                     </View>
-                    <Text style={styles.centerLineText}>Ngày nuôi (DOC): {item.doc}</Text>
+                    <Text style={styles.centerLineText} numberOfLines={1}>
+                        Ngày nuôi (DOC): {item.doc}
+                    </Text>
                 </View>
-                <Text style={[styles.pondCode, styles.targetPondCode]}>{item.targetPond}</Text>
+                <Text style={[styles.pondCode, styles.targetPondCode]} numberOfLines={2}>
+                    {item.targetPond}
+                </Text>
             </View>
 
             <View style={styles.divider} />
@@ -106,24 +114,30 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     pondCode: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: '700',
         color: colors.text,
+        flex: 1,
     },
     targetPondCode: {
         textAlign: 'right',
     },
+
     centerInfo: {
-        flex: 1,
-        marginHorizontal: 12,
+        flex: 1.5,
+        marginHorizontal: 8,
         alignItems: 'center',
+        justifyContent: 'center',
     },
+
     centerLineText: {
-        fontSize: typography.fontSize.sm,
+        fontSize: 14,
         color: colors.textSecondary,
         fontFamily: typography.fontFamily.regular,
         fontWeight: typography.fontWeight.regular,
+        textAlign: 'center',
     },
+
     centerDivider: {
         marginVertical: 6,
     },
