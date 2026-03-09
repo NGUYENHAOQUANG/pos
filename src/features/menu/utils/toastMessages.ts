@@ -43,25 +43,21 @@ export const ToastMessages = {
         MAINTENANCE_ADD_SUCCESS: {
             type: 'success',
             text1: 'Đã thêm thông tin bảo trì',
-            position: 'top',
             visibilityTime: 3000,
         },
         MAINTENANCE_DESC_REQUIRED: {
             type: 'error',
             text1: 'Vui lòng nhập mô tả công việc',
-            position: 'top',
             visibilityTime: 3000,
         },
         MAINTENANCE_UPDATE_SUCCESS: {
             type: 'success',
             text1: 'Cập nhật thông tin thành công',
-            position: 'top',
             visibilityTime: 3000,
         },
         MAINTENANCE_DELETE_SUCCESS: {
             type: 'success',
             text1: 'Đã xoá thông tin bảo trì',
-            position: 'top',
             visibilityTime: 3000,
         },
         NOT_FOUND: {
@@ -105,34 +101,28 @@ export const ToastMessages = {
         UPDATE_SUCCESS: {
             type: 'success',
             text1: 'Cập nhật vụ nuôi thành công',
-            position: 'top',
             visibilityTime: 3000,
         },
         CREATE_SUCCESS: {
             type: 'success',
             text1: 'Đã tạo vụ nuôi thành công',
-            position: 'top',
             visibilityTime: 3000,
         },
         FARM_REQUIRED: {
             type: 'error',
             text1: 'Vui lòng chọn trại nuôi',
-            position: 'top',
         },
         CYCLE_NAME_REQUIRED: {
             type: 'error',
             text1: 'Vui lòng nhập tên vụ nuôi',
-            position: 'top',
         },
         CYCLE_CODE_REQUIRED: {
             type: 'error',
             text1: 'Vui lòng nhập mã vụ nuôi',
-            position: 'top',
         },
         START_DATE_REQUIRED: {
             type: 'error',
             text1: 'Vui lòng chọn ngày bắt đầu',
-            position: 'top',
         },
     },
     ShrimpMeasurement: {

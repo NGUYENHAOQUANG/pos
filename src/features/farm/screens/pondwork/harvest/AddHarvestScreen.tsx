@@ -106,7 +106,6 @@ export const AddHarvestScreen: React.FC = () => {
                 Toast.show({
                     type: 'success',
                     text1: getHarvestSuccessMessage(getHarvestTypeDisplay(data.harvestType)),
-                    position: 'top',
                     visibilityTime: 5000,
                 });
             }

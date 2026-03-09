@@ -61,7 +61,6 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn vật tư',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -74,7 +73,6 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Loại hoạt động không hợp lệ',
-                position: 'top',
             });
             return;
         }

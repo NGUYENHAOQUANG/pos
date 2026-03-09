@@ -113,7 +113,6 @@ export const HandleProblemFormScreen = () => {
             text1: 'Lưu thất bại',
             text2: message,
             visibilityTime: 4000,
-            position: 'top',
         });
     };
 
@@ -163,7 +162,6 @@ export const HandleProblemFormScreen = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn vật tư',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -193,7 +191,6 @@ export const HandleProblemFormScreen = () => {
                         Toast.show({
                             type: 'error',
                             text1: res?.message || 'Cập nhật nhật ký cải tạo ao thất bại',
-                            position: 'top',
                             visibilityTime: 4000,
                         });
                         return;
@@ -211,7 +208,6 @@ export const HandleProblemFormScreen = () => {
                         Toast.show({
                             type: 'error',
                             text1: res?.message || 'Tạo nhật ký cải tạo ao thất bại',
-                            position: 'top',
                             visibilityTime: 4000,
                         });
                         return;

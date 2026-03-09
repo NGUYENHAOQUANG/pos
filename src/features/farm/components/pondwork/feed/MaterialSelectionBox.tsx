@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -39,37 +39,43 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     return (
         <>
             <SelectionInfoBox title="Chọn vật tư">
-                {/* Material Cards */}
-                <View style={styles.materialCardsContainer}>
-                    {selectedMaterials.map((item, index) => (
-                        <View key={`${item.material.id}-${index}`} style={styles.materialCard}>
-                            <Text style={styles.materialName} numberOfLines={1}>
-                                {item.material.name}
-                            </Text>
-                            <View style={styles.materialActions}>
-                                <View style={styles.quantityBox}>
-                                    <Text style={styles.quantityText} numberOfLines={1}>
-                                        {item.quantity}
-                                    </Text>
-                                    <Text style={styles.unitText} numberOfLines={1}>
-                                        {item.unit}
-                                    </Text>
+                {/* Material Cards - only render when has items */}
+                {selectedMaterials.length > 0 && (
+                    <View style={styles.materialCardsContainer}>
+                        {selectedMaterials.map((item, index) => (
+                            <View key={`${item.material.id}-${index}`} style={styles.materialCard}>
+                                <Text style={styles.materialName} numberOfLines={1}>
+                                    {item.material.name}
+                                </Text>
+                                <View style={styles.materialActions}>
+                                    <View style={styles.quantityBox}>
+                                        <Text style={styles.quantityText} numberOfLines={1}>
+                                            {item.quantity}
+                                        </Text>
+                                        <Text style={styles.unitText} numberOfLines={1}>
+                                            {item.unit}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={() => handleRemoveMaterial(index)}
+                                        style={styles.deleteButton}
+                                    >
+                                        <DeleteIcon width={18} height={18} />
+                                    </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => handleRemoveMaterial(index)}
-                                    style={styles.deleteButton}
-                                >
-                                    <DeleteIcon width={18} height={18} />
-                                </TouchableOpacity>
                             </View>
-                        </View>
-                    ))}
-                </View>
+                        ))}
+                    </View>
+                )}
 
-                <OutlineButton
-                    label="Thêm vật tư"
+                <Button
+                    title="Thêm vật tư"
+                    variant="outline"
                     onPress={() => setModalVisible(true)}
-                    prefix={<Ionicons name="add" size={20} color={colors.textSecondary} />}
+                    renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}
+                    fullWidth
+                    style={styles.addButton}
+                    textStyle={styles.addButtonText}
                 />
             </SelectionInfoBox>
 
@@ -142,5 +148,11 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: 20,
         backgroundColor: colors.white,
+    },
+    addButton: {
+        borderColor: colors.border,
+    },
+    addButtonText: {
+        color: colors.text,
     },
 });
