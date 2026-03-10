@@ -251,5 +251,6 @@ export const API_ENDPOINTS = {
         PROFIT_STATS: '/report/profit-stats',
         STOCK_TRANSFER_STATS: '/report/stock-transfer-stats',
         DAILY_WATER_STATS: '/report/daily-water-stats',
+        PRODUCTION_DISTRIBUTION: '/report/production-distribution',
     },
 } as const;

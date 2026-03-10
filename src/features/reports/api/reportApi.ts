@@ -13,6 +13,10 @@ import {
     StockTransferStatsResponse,
 } from '../types/stock-transfer-stats';
 import { WaterUsageResponse } from '../types/water-usage';
+import {
+    ProductionDistributionParams,
+    ProductionDistributionResponse,
+} from '../types/production-distribution';
 
 export const reportApi = {
     getFeedingProduction: async (params: {
@@ -92,6 +96,17 @@ export const reportApi = {
     }): Promise<WaterUsageResponse> => {
         const { data } = await apiClient.get<WaterUsageResponse>(
             API_ENDPOINTS.REPORT.DAILY_WATER_STATS,
+            {
+                params,
+            }
+        );
+        return data;
+    },
+    getProductionDistribution: async (
+        params: ProductionDistributionParams
+    ): Promise<ProductionDistributionResponse> => {
+        const { data } = await apiClient.get<ProductionDistributionResponse>(
+            API_ENDPOINTS.REPORT.PRODUCTION_DISTRIBUTION,
             {
                 params,
             }

@@ -13,9 +13,6 @@ import { colors, borderRadius } from '@/styles';
 import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
 import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
-
-// --- IMPORT MOCK DATA ---
-// import { POND_STATISTICS } from './MockData';
 import { usePondStatusDistribution } from '@/features/reports/hooks/usePondStatusDistribution';
 
 // --- CẤU HÌNH ---
