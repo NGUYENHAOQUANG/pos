@@ -21,7 +21,7 @@ import { useKeyboard } from '@/shared/hooks/useKeyboard';
 
 export default function AuthScreen() {
     const insets = useSafeAreaInsets();
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
     const {
         phoneNumber,
         error,
@@ -130,10 +130,7 @@ export default function AuthScreen() {
                             <View
                                 style={[
                                     styles.footer,
-                                    Platform.OS === 'android' && {
-                                        paddingBottom:
-                                            spacing.xl + spacing.sm + 12 + keyboardHeight,
-                                    },
+                                    keyboardVisible && styles.footerKeyboardOpen,
                                 ]}
                             >
                                 <Button
@@ -226,5 +223,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
 });

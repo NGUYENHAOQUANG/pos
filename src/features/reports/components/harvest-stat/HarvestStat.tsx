@@ -20,29 +20,32 @@ import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { HarvestItemCard } from './HarvestItemCard';
-import { harvestData } from './harvesStatData';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
+import { useHarvestStats } from '@/features/reports/hooks/useHarvestStats';
+
+interface HarvestStatProps {
+    zoneId: string;
+    pondId?: string;
+}
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export const HarvestStat = () => {
+export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId }) => {
     const [isSectionOpen, setIsSectionOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    React.useEffect(() => {
-        if (isSectionOpen) {
-            setIsLoading(true);
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [isSectionOpen]);
     const [showAll, setShowAll] = useState(false);
     const INITIAL_SHOW_COUNT = 3;
+
+    const { data: response, isLoading: queryLoading } = useHarvestStats({
+        ZoneId: zoneId,
+        Id: pondId,
+    });
+    const isLoading = isSectionOpen && queryLoading;
+
+    const dataList = response?.data?.byPond || [];
+    const displayedData = showAll ? dataList : dataList.slice(0, INITIAL_SHOW_COUNT);
 
     const toggleSection = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -53,8 +56,6 @@ export const HarvestStat = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setShowAll(!showAll);
     };
-
-    const displayedData = showAll ? harvestData : harvestData.slice(0, INITIAL_SHOW_COUNT);
 
     return (
         <View style={chartStyles.container}>
@@ -75,10 +76,10 @@ export const HarvestStat = () => {
                     ) : (
                         <>
                             {displayedData.map(item => (
-                                <HarvestItemCard key={item.id} item={item} />
+                                <HarvestItemCard key={item.pondId} item={item} />
                             ))}
 
-                            {harvestData.length > INITIAL_SHOW_COUNT && (
+                            {dataList.length > INITIAL_SHOW_COUNT && (
                                 <TouchableOpacity
                                     style={styles.seeAllButton}
                                     onPress={toggleShowAll}

@@ -5,7 +5,7 @@ import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/Pon
 import { borderRadius, colors } from '@/styles';
 import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
-import IconAICheck from '@/assets/Icon/AIcheck.svg';
+import { IconAICheck } from '@/assets/icons';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;

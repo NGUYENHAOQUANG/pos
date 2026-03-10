@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-import { borderRadius, colors, spacing } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
@@ -11,6 +11,8 @@ import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { parseDate } from '@/features/farm/utils/dateUtils';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { IconAICheck } from '@/assets/icons';
 
 interface Props {
     control: Control<CreateCycleFormValues>;
@@ -153,9 +155,12 @@ const StockingInfoSection: React.FC<Props> = ({
                     )}
                 />
 
-                <TouchableOpacity style={styles.aiButton} onPress={onPressCountingShrimp}>
-                    <Text style={styles.aiButtonText}>Kiểm đếm tôm giống bằng AI</Text>
-                </TouchableOpacity>
+                <OutlineButton
+                    label="Kiểm đếm tôm giống bằng AI"
+                    onPress={onPressCountingShrimp || (() => {})}
+                    prefix={<IconAICheck width={20} height={20} />}
+                    labelStyle={styles.aiButtonText}
+                />
             </View>
         </PondDataBox>
     );
@@ -186,18 +191,9 @@ const styles = StyleSheet.create({
         color: colors.error,
         fontSize: 12,
     },
-    aiButton: {
-        backgroundColor: colors.blue[50],
-        borderWidth: 1,
-        borderColor: colors.blue[200],
-        paddingVertical: 12,
-        borderRadius: borderRadius.sm,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     aiButtonText: {
-        color: colors.primary,
+        color: colors.textSecondary,
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
     },
 });
