@@ -101,8 +101,8 @@ export function Button({
             case 'primary':
                 return colors.white;
             case 'outline':
+                return colors.text;
             case 'ghost':
-                return colors.primary;
             case 'text':
                 return colors.primary;
             default:
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     },
     outline: {
         backgroundColor: colors.white,
-        borderColor: colors.primary,
+        borderColor: colors.border,
     },
     ghost: {
         backgroundColor: 'transparent',
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
         color: colors.white,
     },
     outlineText: {
-        color: colors.primary,
+        color: colors.text,
     },
     ghostText: {
         color: colors.primary,

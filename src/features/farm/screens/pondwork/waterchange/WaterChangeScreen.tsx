@@ -301,7 +301,6 @@ export const WaterSupplyScreen = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập đầy đủ thông tin mực nước',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -311,7 +310,6 @@ export const WaterSupplyScreen = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn vật tư',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;

@@ -120,7 +120,7 @@ export const CreateCycleScreen: React.FC = () => {
 
     const onSubmit = (formData: CreateCycleFormValues) => {
         if (!pondId) {
-            Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin Ao', position: 'top' });
+            Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin Ao' });
             return;
         }
 

@@ -346,7 +346,6 @@ export const useAddEnvironment = ({
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập ít nhất một chỉ số',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;

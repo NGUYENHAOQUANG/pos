@@ -90,7 +90,6 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
                 Toast.show({
                     type: 'success',
                     text1: successMessage,
-                    position: 'top',
                     visibilityTime: 3000,
                 });
             }

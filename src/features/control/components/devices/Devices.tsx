@@ -121,7 +121,6 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                                     Toast.show({
                                         type: 'error',
                                         text1: 'Không thể bật/tắt thiết bị này',
-                                        position: 'top',
                                     });
                                     return;
                                 }
