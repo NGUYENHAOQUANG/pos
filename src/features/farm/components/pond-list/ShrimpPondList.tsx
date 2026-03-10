@@ -3,6 +3,9 @@ import { StyleSheet, FlatList, ListRenderItem } from 'react-native';
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 
 import { spacing } from '@/styles';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ShrimpPond } from '@/features/farm/components/pond-list/ShrimpPond';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
 import { PondData } from '@/features/farm/types/farm.types';
@@ -35,6 +38,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
         },
         ref
     ) => {
+        const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
         const bottomBarHeight = useBottomTabBarHeight();
         const getStatus = (item: PondData): TagStatus | undefined => {
             if (item.status === 'Framing') return 'active';
@@ -64,7 +68,12 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                     style={styles.item}
                     pondId={item.id || ''}
                     onInfoPress={() => onInfoPress?.(item)}
-                    onCyclePress={() => {}}
+                    onCyclePress={() =>
+                        navigation.navigate('PondCycleListScreen', {
+                            pondId: item.id || '',
+                            zoneId: item.zoneId || zoneId || '',
+                        })
+                    }
                     onDetailPress={() => onPondPress?.(item)}
                     effectiveZoneId={zoneId}
                 />
