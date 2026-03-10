@@ -72,4 +72,14 @@ export const cycleApi = {
         );
         return response.data;
     },
+
+    /**
+     * Get all cycles
+     */
+    getCycles: async (params?: ICycleListParams): Promise<ICycleListResponse> => {
+        const response = await apiClient.get<ICycleListResponse>(API_ENDPOINTS.CYCLE.LIST, {
+            params,
+        });
+        return response.data;
+    },
 };

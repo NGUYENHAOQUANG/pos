@@ -2,7 +2,11 @@ import { useCallback, useMemo } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
-import { ICreateCyclePayload, IUpdateCyclePayload } from '@/features/farm/types/cycle.types';
+import {
+    ICreateCyclePayload,
+    IUpdateCyclePayload,
+    ICycleListParams,
+} from '@/features/farm/types/cycle.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { normalizeApiError } from '@/core/api/errorHandler';
 
@@ -170,5 +174,12 @@ export const useCycleDetail = (pondId: string, cycleId: string) => {
         queryKey: farmKeys.cycles.detail(pondId, cycleId),
         queryFn: () => cycleApi.getCycleDetail(pondId, cycleId),
         enabled: !!pondId && !!cycleId,
+    });
+};
+
+export const useAllCycles = (params?: ICycleListParams) => {
+    return useQuery({
+        queryKey: [...farmKeys.cycles.all(), params],
+        queryFn: () => cycleApi.getCycles(params),
     });
 };

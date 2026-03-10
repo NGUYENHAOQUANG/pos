@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useZones, usePondsByZone } from '@/features/farm/hooks';
+import { useZones, usePondsByZone, useAllPondsByZone } from '@/features/farm/hooks';
 import { useSeasonsByZone } from '@/features/menu/hooks/useSeasons';
+import { useAllCycles } from '@/features/farm/hooks/useCycle';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 
 export const useReportsScreen = () => {
@@ -61,6 +62,9 @@ export const useReportsScreen = () => {
             }
         }
     }, [pondData, selectedPond.id]);
+
+    const { data: allPondsForLookup } = useAllPondsByZone(selectedZoneId?.toString() || null);
+    const { data: rawCycles } = useAllCycles({ PageSize: 100 });
 
     const { data: rawSeasons } = useSeasonsByZone(selectedZoneId?.toString() || null);
 
@@ -131,5 +135,7 @@ export const useReportsScreen = () => {
         pondTypeData,
         selectedPondType,
         handleSelectPondType,
+        allPondsForLookup,
+        rawCycles,
     };
 };

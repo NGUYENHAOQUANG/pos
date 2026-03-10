@@ -65,7 +65,7 @@ export const TransferItemCard = ({ item }: Props) => {
 
             {/* Main content */}
             <View style={styles.content}>
-                {renderRow('Lượng sang (con)', item.amount, 'con/kg')}
+                {renderRow('Lượng sang (con)', item.amount, 'con')}
                 {renderRow('Cỡ tôm (con/kg)', item.size, 'con/kg')}
 
                 {expanded && (
