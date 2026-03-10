@@ -5,6 +5,7 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
 import { MetricsRow } from '@/features/reports/components/profit-chart/MetricsRow';
+import { useProfitStats } from '@/features/reports/hooks/useProfitStats';
 import {
     CHART_WIDTH,
     CHART_HEIGHT,
@@ -12,33 +13,39 @@ import {
     PADDING_RIGHT,
     PADDING_TOP,
     PADDING_BOTTOM,
-    ProfitChartDataRange,
 } from '@/features/reports/components/profit-chart/chartData';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import ProfitChartIcon from '@/assets/Icon/IconReport/ProfitChartIcon.svg';
 import CostArrow from '@/assets/Icon/IconReport/CostArrow.svg';
 
 interface CompilationProfitChartProps {
-    /**
-     * Optional data range for filtering chart data
-     * This parameter is reserved for future feature development
-     */
-    dataRange?: ProfitChartDataRange;
+    zoneId: string;
+    pondId?: string;
 }
 
-export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+const formatCurrency = (value: number) => {
+    if (value >= 1e9) {
+        return `${(value / 1e9).toFixed(2)} tỉ`;
+    }
+    if (value >= 1e6) {
+        return `${(value / 1e6).toFixed(2)} tr`;
+    }
+    return `${value.toLocaleString()} đ`;
+};
 
-    React.useEffect(() => {
-        if (isExpanded) {
-            setIsLoading(true);
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [isExpanded]);
+export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
+    zoneId,
+    pondId,
+}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const { data: response, isLoading: queryLoading } = useProfitStats({
+        ZoneId: zoneId,
+        Id: pondId,
+    });
+    const isLoading = isExpanded && queryLoading;
+
+    const statsData = response?.data;
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -62,8 +69,23 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({}
                         </View>
                     ) : (
                         <>
-                            <MetricsRow />
-                            <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                            <MetricsRow
+                                revenue={formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0)}
+                                estimatedRevenue={formatCurrency(
+                                    statsData?.kpis?.totalEstimatedRevenue ?? 0
+                                )}
+                                totalCost={formatCurrency(statsData?.kpis?.totalMaterialCost ?? 0)}
+                                estimatedProfit={formatCurrency(
+                                    statsData?.kpis?.totalEstimatedProfit ?? 0
+                                )}
+                            />
+                            {statsData?.byDate && statsData.byDate.length > 0 ? (
+                                <Chart
+                                    chartWidth={chartWidth}
+                                    chartHeight={chartHeight}
+                                    data={statsData.byDate}
+                                />
+                            ) : null}
                             <View style={styles.breakEvenRow}>
                                 <CostArrow width={72} height={8} />
                                 <Text style={styles.breakEvenText}>Điểm hòa vốn</Text>

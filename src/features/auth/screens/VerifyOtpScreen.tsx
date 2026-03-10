@@ -44,7 +44,7 @@ export default function VerifyOTPScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
 
     useEffect(() => {
         const timer = setTimeout(() => otpInputRef.current?.focusFirst(), 300);
@@ -132,8 +132,26 @@ export default function VerifyOTPScreen() {
             setOtp(['', '', '', '']);
             setErrorMessage('');
             Toast.show({ type: 'success', text1: 'Đã gửi lại mã OTP' });
-        } catch (err) {
-            Toast.show({ type: 'error', text1: normalizeApiError(err).message });
+        } catch (err: unknown) {
+            const error = normalizeApiError(err);
+            const responseData = error.data;
+            const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
+
+            if (otpCode) {
+                notificationHelper.displayOtpNotification(String(otpCode));
+                setCountdownStartTime(Date.now());
+                setCountdown(COUNTDOWN_DURATION);
+                setOtp(['', '', '', '']);
+                setErrorMessage('');
+                otpInputRef.current?.focusFirst();
+                Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+                return;
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: error.message || responseData?.message || 'Không thể gửi lại mã xác nhận',
+            });
         } finally {
             setIsResending(false);
         }
@@ -206,9 +224,7 @@ export default function VerifyOTPScreen() {
                     <View
                         style={[
                             styles.submitButtonContainer,
-                            Platform.OS === 'android' && {
-                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardHeight,
-                            },
+                            keyboardVisible && styles.footerKeyboardOpen,
                         ]}
                     >
                         <Button
@@ -316,6 +332,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
     submitButton: { backgroundColor: colors.primary, borderRadius: 25, height: 52 },
 });

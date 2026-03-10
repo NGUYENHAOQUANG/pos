@@ -4,30 +4,51 @@ import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { PondIndexCard } from '@/features/reports/components/env-chart/PondIndexCard';
-import { mockHarvestChartData } from './harvestData';
-import { Chart } from './Chart';
+import { Chart, HarvestChartData } from './Chart';
+import { useHarvestStats } from '@/features/reports/hooks/useHarvestStats';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import HarvestChartIcon from '@/assets/Icon/IconReport/HarvestChartIcon.svg';
 
 const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
 
-export const HarvestChart: React.FC = () => {
-    const [isCollapsed, setIsCollapsed] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
+interface Props {
+    zoneId: string;
+    pondId?: string;
+}
 
-    React.useEffect(() => {
-        if (!isCollapsed) {
-            setIsLoading(true);
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
+export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
+    const [isCollapsed, setIsCollapsed] = useState(true);
+
+    const { data: response, isLoading: queryLoading } = useHarvestStats({
+        ZoneId: zoneId,
+        Id: pondId,
+    });
+    const isLoading = !isCollapsed && queryLoading;
+
+    const statsData = response?.data;
+
+    // Lọc theo pondId nếu có
+    const filteredByPond = useMemo(() => {
+        if (!statsData?.byPond) return [];
+        if (pondId) {
+            return statsData.byPond.filter(p => p.pondId === pondId);
         }
-    }, [isCollapsed]);
+        return statsData.byPond;
+    }, [statsData?.byPond, pondId]);
 
     const totalYield = useMemo(() => {
-        return mockHarvestChartData.reduce((acc, curr) => acc + curr.yield, 0).toFixed(2);
-    }, []);
+        if (pondId) {
+            return filteredByPond.reduce((sum, p) => sum + p.totalHarvested, 0);
+        }
+        return statsData?.kpis?.totalHarvested ?? 0;
+    }, [filteredByPond, pondId, statsData?.kpis?.totalHarvested]);
+
+    const chartData: HarvestChartData[] = useMemo(() => {
+        return filteredByPond.map(pondStat => ({
+            pond: pondStat.pondName,
+            yield: pondStat.totalHarvested,
+        }));
+    }, [filteredByPond]);
 
     // Get screen layout dimensions dynamically
     const screenWidth = Dimensions.get('window').width;
@@ -56,7 +77,7 @@ export const HarvestChart: React.FC = () => {
                                     item={{
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
-                                        value: `${totalYield} tấn`,
+                                        value: `${totalYield.toFixed(2)} tấn`,
                                         color: colors.orange[600],
                                     }}
                                     variant="prodSummary"
@@ -65,11 +86,13 @@ export const HarvestChart: React.FC = () => {
 
                             <Text style={styles.chartTitle}>Khối lượng (Tấn)</Text>
 
-                            <Chart
-                                data={mockHarvestChartData}
-                                chartWidth={chartWidth}
-                                chartHeight={CHART_CONTENT_HEIGHT}
-                            />
+                            {chartData.length > 0 ? (
+                                <Chart
+                                    data={chartData}
+                                    chartWidth={chartWidth}
+                                    chartHeight={CHART_CONTENT_HEIGHT}
+                                />
+                            ) : null}
                         </>
                     )}
                 </View>

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { HeadingReports } from '@/features/reports/components/HeadingReports';
-import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
+
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import CompilationEnvChart from '@/features/reports/components/env-chart/CompilationEnvChart';
 import { ProdChart } from '@/features/reports/components/prod-chart/ProdChart';
@@ -21,19 +21,11 @@ import { PondInfor } from '@/features/reports/components/PondInfor';
 import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useScrollToTop } from '@react-navigation/native';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { useZones } from '@/features/farm/hooks';
 import { spacing } from '@/styles/spacing';
+import { FarmData } from '@/features/reports/types/reports';
+import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;
-
-interface FarmData {
-    id: string;
-    name: string;
-    code: string;
-    area: string;
-    address: string;
-}
 
 export const ReportsScreen = ({ navigation }: Props) => {
     const bottomBarHeight = useBottomTabBarHeight();
@@ -41,72 +33,24 @@ export const ReportsScreen = ({ navigation }: Props) => {
     const scrollViewRef = useRef<ScrollView>(null);
     useScrollToTop(scrollViewRef as any);
 
-    // Global Farm State
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
-    const setSelectedZoneId = useFarmStore(state => state.setSelectedZoneId);
-
-    // React Query Hooks (replacing farmStore fetchers)
-    const { data: zonesData = [] } = useZones();
-    // Fallback to empty array if undefined
-    const zones = useMemo(() => zonesData || [], [zonesData]);
-
-    // Map zones to DropDownItem format
-    const farmOptions: DropDownItem[] = useMemo(() => {
-        return zones.map(z => ({
-            id: z.id.toString(),
-            label: z.name,
-            value: z.code || z.id.toString(),
-        }));
-    }, [zones]);
-
-    // Derived selectedFarm from global ID
-    const selectedFarm = useMemo(() => {
-        const found = farmOptions.find(f => f.id === selectedZoneId?.toString());
-        return found || farmOptions[0] || { id: '1', label: 'Trại Kiên Giang' };
-    }, [farmOptions, selectedZoneId]);
-
-    const handleSelectFarm = (item: DropDownItem) => {
-        setSelectedZoneId(String(item.id));
-    };
-
-    const [selectedPond, setSelectedPond] = useState<DropDownItem>({ id: '1', label: 'Chọn ao' });
-    const pondTypeData: DropDownItem[] = [
-        { id: '1', label: 'Ao nuôi' },
-        { id: '2', label: 'Ao vèo' },
-        { id: '3', label: 'Ao lắng' },
-        { id: '4', label: 'Ao xử lý' },
-    ];
-    const [selectedPondType, setSelectedPondType] = useState<DropDownItem>(pondTypeData[0]);
-
-    const pondData: DropDownItem[] = [
-        { id: '1', label: 'Chọn ao' },
-        { id: 'ck1', label: 'Vụ I - CK1' },
-        { id: '2', label: 'Ao 2' },
-        { id: '3', label: 'Ao 3' },
-    ];
-
-    const seasonData: DropDownItem[] = [
-        { id: '1', label: 'Vụ 1 - 2025' },
-        { id: '2', label: 'Vụ 2 - 2025' },
-        { id: '3', label: 'Vụ 3 - 2025' },
-        { id: '4', label: 'Vụ 4 - 2025' },
-    ];
-    const [selectedSeason, setSelectedSeason] = useState<DropDownItem>(seasonData[0]);
-    const [isSeasonDisabled, setIsSeasonDisabled] = useState(false);
-
-    const handleSelectPondType = (item: DropDownItem) => {
-        setSelectedPondType(item);
-        if (item.label === 'Ao vèo') {
-            const autoSelectPond = { id: 'ck1', label: 'Vụ I - CK1' };
-            setSelectedPond(autoSelectPond);
-            setIsSeasonDisabled(true);
-        } else {
-            setIsSeasonDisabled(false);
-            if (selectedPond.id === 'ck1') {
-                setSelectedPond(pondData[0]); // Reset to "Chọn ao"
-            }
-        }
-    };
+    const {
+        selectedZoneId,
+        farmOptions,
+        selectedFarm,
+        handleSelectFarm,
+        pondData,
+        selectedPond,
+        setSelectedPond,
+        seasonData,
+        selectedSeason,
+        setSelectedSeason,
+        isSeasonDisabled,
+        pondTypeData,
+        selectedPondType,
+        handleSelectPondType,
+        allPondsForLookup,
+        rawCycles,
+    } = useReportsScreen();
 
     const handleRightPress = () => {
         const farmData: FarmData = {
@@ -126,26 +70,55 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <OverView />
             <CompilationEnvChart />
             <GrowthChart />
-            <CompilationFeedProd />
-            <CompilationProfitChart />
+            <CompilationFeedProd
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
+            <CompilationProfitChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <CompilationCostChart />
-            <WaterUsageChart />
+            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
             <FoodChart />
-            <PondTransfer />
+            <PondTransfer
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+            />
         </>
     );
 
     const renderStandardContent = () => (
         <>
             <CompilationEnvChart />
-            <CompilationFeedProd />
-            <ActivePondChart />
+            <CompilationFeedProd
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
+            <ActivePondChart zoneId={selectedZoneId?.toString() || ''} />
             <ProdChart />
-            <CompilationProfitChart />
+            <CompilationProfitChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <CompilationCostChart />
-            <HarvestChart />
-            <PondTransfer />
-            <HarvestStat />
+            <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
+            <HarvestChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
+            <PondTransfer
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+            />
+            <HarvestStat
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+                ponds={allPondsForLookup}
+                cycles={rawCycles?.data?.items}
+            />
         </>
     );
 

@@ -3,8 +3,7 @@ import { View, StyleSheet } from 'react-native';
 
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
-import IconAICheck from '@/assets/Icon/AIcheck.svg';
-import IconCamera from '@/assets/Icon/camera.svg';
+import { IconCamera, IconAICheck } from '@/assets/icons';
 import { colors } from '@/styles';
 import {
     ShrimpHealthBoundingBoxOverlay,

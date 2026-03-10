@@ -147,7 +147,9 @@ export const API_ENDPOINTS = {
             DELETE: (zoneId: string, id: string) => `/zone/${zoneId}/seasons/${id}`,
         },
     },
-
+    CYCLE: {
+        LIST: '/cycle',
+    },
     // Materials
     MATERIAL: {
         LIST: '/material',
@@ -240,5 +242,14 @@ export const API_ENDPOINTS = {
         SEEDSTOCK_COUNTING: '/seedstockcounting',
         ESTIMATED_SIZE: '/estimatedsize',
         SHRIMP_HEALTH: '/shrimphealth',
+    },
+    REPORT: {
+        FEEDING_PRODUCTION: '/report/feeding-production',
+        HARVEST_STATS: '/report/harvest-stats',
+        HARVEST_STATS_TABLE: '/report/harvest-stats-table',
+        POND_STATUS_DISTRIBUTION: '/report/pond-status-distribution',
+        PROFIT_STATS: '/report/profit-stats',
+        STOCK_TRANSFER_STATS: '/report/stock-transfer-stats',
+        DAILY_WATER_STATS: '/report/daily-water-stats',
     },
 } as const;

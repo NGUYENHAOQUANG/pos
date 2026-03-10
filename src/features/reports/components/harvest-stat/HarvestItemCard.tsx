@@ -7,21 +7,11 @@ import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, typography, spacing } from '@/styles';
 
-export interface HarvestData {
-    id: string;
-    harvestDate: string;
-    cycleId: string;
-    pondId: string;
-    harvestType: string;
-    output: string;
-    size: number;
-    price: string;
-    revenue: string;
-    cumulativeCost: string;
-}
+import { HarvestRecord } from '@/features/reports/types/harvest-stats-table';
+import { formatCurrencyValue, formatDate } from '@/shared/utils/formatters';
 
 interface Props {
-    item: HarvestData;
+    item: HarvestRecord;
 }
 
 export const HarvestItemCard = ({ item }: Props) => {
@@ -52,16 +42,18 @@ export const HarvestItemCard = ({ item }: Props) => {
 
             {/* Content column */}
             <View style={styles.contentColumn}>
-                {/* Top row: date + Xem thêm */}
+                {/* Top row: harvestDate + Xem thêm */}
                 <View style={styles.topRow}>
-                    <Text style={styles.dateText}>{item.harvestDate}</Text>
+                    <Text style={styles.dateText}>
+                        Ngày: {formatDate(item.harvestDate, 'short')}
+                    </Text>
                     <TouchableOpacity
                         onPress={toggleExpand}
                         style={styles.topAction}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.topActionText}>
-                            {expanded ? 'Thu gọn' : 'Xem thêm'}
+                            {expanded ? 'Thu gọn' : 'Chi tiết'}
                         </Text>
                         <Ionicons
                             name={expanded ? 'chevron-up' : 'chevron-forward'}
@@ -73,21 +65,25 @@ export const HarvestItemCard = ({ item }: Props) => {
 
                 {/* Inner card */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Ao {item.pondId}</Text>
+                    <Text style={styles.cardTitle}>{item.pondName || item.pondCode}</Text>
 
                     <View style={styles.content}>
                         {/* Thông tin chính */}
-                        {renderRow('Sản lượng (kg)', item.output)}
-                        {renderRow('Cỡ tôm (con/kg)', item.size, 'con/kg')}
+                        {renderRow('Tổng thu hoạch', item.totalWeightKg.toLocaleString(), 'kg')}
+                        {renderRow('Loại thu', item.harvestType || '---')}
 
                         {/* Thông tin chi tiết khi mở rộng */}
                         {expanded && (
                             <View style={styles.expandedContent}>
-                                {renderRow('Doanh thu (VNĐ)', item.revenue)}
-                                {renderRow('Đơn giá (VNĐ/kg)', item.price)}
-                                {renderRow('Chi phí lũy kế (VNĐ)', item.cumulativeCost)}
-                                {renderRow('Loại thu hoạch', item.harvestType)}
-                                {renderRow('Chu kỳ', item.cycleId)}
+                                {renderRow('Chu kì', item.cycleName || item.cycleCode || '---')}
+                                {renderRow('Kích cỡ (Size)', item.shrimpCountPerKg, 'con/kg')}
+                                {renderRow('Ngày nuôi (DOC)', item.doc || 0, 'ngày')}
+                                {renderRow('Đơn giá', formatCurrencyValue(item.unitPrice), 'đ/kg')}
+                                {renderRow(
+                                    'Doanh thu (Tạm tính)',
+                                    formatCurrencyValue(item.revenue),
+                                    'đ'
+                                )}
                             </View>
                         )}
                     </View>
