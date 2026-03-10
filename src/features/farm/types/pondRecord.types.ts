@@ -117,13 +117,15 @@ export interface IPondRecordItem {
 
 /** Query params for record list */
 export interface IPondRecordListParams {
-    Page?: number;
-    PageSize?: number;
-    OrderBy?: string;
+    PondId?: string;
+    CycleId?: string;
+    Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
     CreateAtTo?: string;
-    OperationType?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
 }
 
 /** Response type */

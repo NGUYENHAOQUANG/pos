@@ -6,6 +6,19 @@ import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { IStockTransferDetail } from '@/features/farm/types/stockTransfer.types';
+import type { HarvestType } from '@/features/farm/types/harvestRecord.types';
+import { getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
+
+type CycleHarvestType = HarvestType | 'CloseCycle';
+
+interface HarvestSummaryItem {
+    id: string;
+    type: CycleHarvestType;
+    date: string;
+    shrimpSize?: string;
+    totalWeightKg?: string;
+    revenue?: string;
+}
 
 interface CycleDetailContentProps {
     activeCycleData?: CycleData;
@@ -18,6 +31,7 @@ interface CycleDetailContentProps {
     showIncomingTransfer?: boolean;
     refreshing: boolean;
     transferDetail?: IStockTransferDetail;
+    harvestSummary?: HarvestSummaryItem[];
     onRefresh: () => void;
     onEditPress: () => void;
 }
@@ -33,12 +47,14 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     showIncomingTransfer = true,
     refreshing,
     transferDetail,
+    harvestSummary,
     onRefresh,
     onEditPress,
 }) => {
     const [isStockingExpanded] = useState(true);
     const [isTransferExpanded, setIsTransferExpanded] = useState(true);
     const [isOutgoingTransferExpanded, setIsOutgoingTransferExpanded] = useState(true);
+    const [isHarvestExpanded, setIsHarvestExpanded] = useState(true);
 
     return (
         <ScrollView
@@ -149,6 +165,68 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                     )}
                 </View>
             )}
+
+            {/* Thông tin thu hoạch chu kỳ */}
+            {harvestSummary &&
+                harvestSummary.length > 0 &&
+                harvestSummary.map((item, index) => (
+                    <View
+                        key={item.id}
+                        style={[
+                            styles.card,
+                            { marginTop: spacing.sm },
+                            index === harvestSummary.length - 1
+                                ? { marginBottom: spacing.sm }
+                                : null,
+                        ]}
+                    >
+                        <CollapseHead
+                            title="Thông tin thu hoạch"
+                            isExpanded={isHarvestExpanded}
+                            onToggle={() => setIsHarvestExpanded(!isHarvestExpanded)}
+                            style={styles.cardHeader}
+                        />
+
+                        {isHarvestExpanded && (
+                            <View style={styles.infoContainer}>
+                                <DetailRow
+                                    label={
+                                        item.type === 'CloseCycle'
+                                            ? 'Ngày đóng chu kỳ:'
+                                            : 'Ngày thu hoạch:'
+                                    }
+                                    value={item.date}
+                                />
+                                <DetailRow
+                                    label="Loại thu hoạch:"
+                                    value={
+                                        item.type === 'FullHarvest'
+                                            ? 'Thu hết'
+                                            : getHarvestTypeDisplay(item.type as HarvestType)
+                                    }
+                                />
+                                {item.type !== 'CloseCycle' && (
+                                    <>
+                                        <DetailRow
+                                            label="Cỡ tôm (con/kg):"
+                                            value={item.shrimpSize}
+                                        />
+                                        <DetailRow
+                                            label="Sản lượng (kg):"
+                                            value={item.totalWeightKg}
+                                        />
+                                        <DetailRow
+                                            label="Doanh thu (VND)"
+                                            value={item.revenue}
+                                            valueStyle={{ color: colors.success }}
+                                        />
+                                    </>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                ))}
+            <View style={{ height: 200 }} />
         </ScrollView>
     );
 };

@@ -8,7 +8,7 @@ import {
     ICycleListParams,
 } from '@/features/farm/types/cycle.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { normalizeApiError } from '@/core/api/errorHandler';
+import { handleError } from '@/shared/utils';
 
 export const useCreateCycle = () => {
     const queryClient = useQueryClient();
@@ -28,12 +28,7 @@ export const useCreateCycle = () => {
             });
         },
         onError: error => {
-            const normalized = normalizeApiError(error);
-            Toast.show({
-                type: 'error',
-                text1: 'Có lỗi xảy ra',
-                text2: normalized.message,
-            });
+            handleError(error);
         },
     });
 };
@@ -66,12 +61,7 @@ export const useUpdateCycle = () => {
             });
         },
         onError: error => {
-            const normalized = normalizeApiError(error);
-            Toast.show({
-                type: 'error',
-                text1: 'Có lỗi xảy ra',
-                text2: normalized.message,
-            });
+            handleError(error);
         },
     });
 };
@@ -96,13 +86,7 @@ export const useDeleteCycle = () => {
             });
         },
         onError: error => {
-            const normalized = normalizeApiError(error);
-            Toast.show({
-                type: 'error',
-                text1: 'Xóa thất bại',
-                text2: normalized.message,
-                visibilityTime: 4000,
-            });
+            handleError(error);
         },
     });
 };

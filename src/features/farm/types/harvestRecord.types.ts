@@ -21,6 +21,7 @@ export interface IHarvestRecord {
     creator?: ICreatorEditor;
     editor?: ICreatorEditor;
     pondId?: string;
+    cycleId?: string;
     operationId?: string;
     value?: number;
     documentIds?: string[];
@@ -51,6 +52,7 @@ export interface IUpdateHarvestRecordReq {
 
 export interface IHarvestRecordParams {
     PondId?: string;
+    CycleId?: string;
     HarvestType?: HarvestType;
     Id?: string;
     CreatedAt?: string;

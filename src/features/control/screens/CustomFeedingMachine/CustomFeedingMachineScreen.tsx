@@ -3,7 +3,11 @@ import { View, Text, StyleSheet, ScrollView, BackHandler, RefreshControl } from 
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';
-import { useDevices, useUpdateDeviceMode, useUpdateDeviceSettings } from '@/features/control/hooks/useDevices';
+import {
+    useDevices,
+    useUpdateDeviceMode,
+    useUpdateDeviceSettings,
+} from '@/features/control/hooks/useDevices';
 import { deviceApi } from '@/features/control/api/deviceApi';
 import { EControlMode } from '@/features/control/types/control.types';
 
