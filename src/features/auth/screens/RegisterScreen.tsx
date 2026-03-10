@@ -29,6 +29,7 @@ import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
 import { handleError } from '@/shared/utils';
 import { useKeyboard } from '@/shared/hooks/useKeyboard';
+import { normalizeApiError } from '@/core/api/errorHandler';
 
 const COUNTDOWN_DURATION = 60;
 
@@ -48,7 +49,7 @@ export default function RegisterScreen() {
 
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
-    const { keyboardHeight } = useKeyboard();
+    const { keyboardVisible } = useKeyboard();
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -128,7 +129,26 @@ export default function RegisterScreen() {
             setErrorMessage('');
             otpInputRef.current?.focusFirst();
             Toast.show({ type: 'success', text1: 'Đã gửi lại mã OTP' });
-        } catch (err) {
+        } catch (err: unknown) {
+            const error = normalizeApiError(err);
+            const responseData = error.data;
+            const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
+
+            if (otpCode) {
+                notificationHelper.displayOtpNotification(String(otpCode));
+                setCountdownStartTime(Date.now());
+                setCountdown(COUNTDOWN_DURATION);
+                setOtp(['', '', '', '']);
+                setErrorMessage('');
+                otpInputRef.current?.focusFirst();
+                Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+                return;
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: error.message || responseData?.message || 'Không thể gửi lại mã xác nhận',
+            });
             handleError(err);
         } finally {
             setIsResending(false);
@@ -144,9 +164,29 @@ export default function RegisterScreen() {
             }
             try {
                 const response = await authApi.register({ phoneNumber });
-                if (response?.data?.testOtp)
-                    notificationHelper.displayOtpNotification(String(response.data.testOtp));
-            } catch (_err) {
+                if (response?.data?.testOtp || response?.data?.otpCode) {
+                    const otp = response.data.testOtp || response.data.otpCode;
+                    notificationHelper.displayOtpNotification(String(otp));
+                }
+            } catch (err: unknown) {
+                const error = normalizeApiError(err);
+                const responseData = error.data;
+                const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
+
+                if (otpCode) {
+                    notificationHelper.displayOtpNotification(String(otpCode));
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Mã xác nhận (đang chờ) đã được gửi lại',
+                    });
+                    setCountdownStartTime(Date.now());
+                    return;
+                }
+
+                Toast.show({
+                    type: 'error',
+                    text1: error.message || responseData?.message || 'Không thể tạo tài khoản',
+                });
                 navigation.goBack();
             }
         };
@@ -217,14 +257,7 @@ export default function RegisterScreen() {
                             </View>
                         </View>
                     </ScrollView>
-                    <View
-                        style={[
-                            styles.footer,
-                            Platform.OS === 'android' && {
-                                paddingBottom: spacing.xl + spacing.sm + 12 + keyboardHeight,
-                            },
-                        ]}
-                    >
+                    <View style={[styles.footer, keyboardVisible && styles.footerKeyboardOpen]}>
                         <Button
                             title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
                             onPress={handleVerifyOTP}
@@ -339,5 +372,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.xl + spacing.sm + 12,
         paddingTop: spacing.xs,
+    },
+    footerKeyboardOpen: {
+        paddingBottom: spacing.md,
     },
 });

@@ -6,33 +6,37 @@ import {
     CHART_WIDTH,
     PADDING_LEFT,
     PADDING_TOP,
-    RAW_PROFIT_DATA,
     ProfitLineDataPoint,
 } from '@/features/reports/components/profit-chart/chartData';
+import { ProfitStatsByDate } from '@/features/reports/types/profit-stats';
 
 interface ChartProps {
     chartWidth: number;
     chartHeight: number;
+    data: ProfitStatsByDate[];
 }
 
-export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
+export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
     // ============================================================================
     // DATA PROCESSING (Computed from RAW_PROFIT_DATA)
     // ============================================================================
 
     const processedData = useMemo(() => {
         /**
-         * Parse date string (MM/DD/YYYY) to Date object
+         * Parse date string (YYYY-MM-DD) to Date object
          */
         const parseDateString = (dateStr: string): Date => {
-            const [month, day, year] = dateStr.split('/').map(Number);
-            return new Date(year, month - 1, day); // month is 1-indexed in input
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            }
+            return new Date(dateStr);
         };
 
         /**
          * Start date: parsed from first item in RAW_PROFIT_DATA
          */
-        const START_DATE = parseDateString(RAW_PROFIT_DATA[0].date);
+        const START_DATE = data.length > 0 ? parseDateString(data[0].date) : new Date();
 
         /**
          * Parse date string (MM/DD/YYYY) to day index (0-based)
@@ -47,10 +51,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
         /**
          * Total days: calculated from last item's day index
          */
-        const TOTAL_DAYS =
-            RAW_PROFIT_DATA.length > 0
-                ? parseDateToDay(RAW_PROFIT_DATA[RAW_PROFIT_DATA.length - 1].date)
-                : 0;
+        const TOTAL_DAYS = data.length > 0 ? parseDateToDay(data[data.length - 1].date) : 0;
 
         /**
          * Divider position: separates historical and forecast data
@@ -101,12 +102,9 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
          */
         const DAY_LABELS = DAY_MARKS.map(day => getDateForDay(day));
 
-        /**
-         * Transform RAW_PROFIT_DATA to ProfitLineDataPoint
-         */
-        const PROFIT_LINE_DATA: ProfitLineDataPoint[] = RAW_PROFIT_DATA.map(item => ({
+        const PROFIT_LINE_DATA: ProfitLineDataPoint[] = data.map(item => ({
             day: parseDateToDay(item.date),
-            value: item.profit,
+            value: item.cumulativeEstimatedProfit,
         }));
 
         /**
@@ -163,7 +161,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight }) => {
             getYAxisGridLines,
             getYAxisLabels,
         };
-    }, []);
+    }, [data]);
 
     // ============================================================================
     // CHART RENDERING

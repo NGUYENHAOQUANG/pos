@@ -101,3 +101,17 @@ export const usePondDetail = (zoneId: string, pondId: string) => {
 
     return query;
 };
+
+export const useAllPondsByZone = (zoneId: string | null) => {
+    return useQuery({
+        queryKey: [...farmKeys.ponds.byZone(zoneId || 'all'), 'all-lookup'],
+        queryFn: async () => {
+            if (!zoneId) return [];
+            // Fetch with a large page size to get all ponds for lookup purposes
+            const response = await pondApi.getPondsByZone(zoneId, { PageSize: 500 });
+            return response.data?.items || [];
+        },
+        enabled: !!zoneId,
+        staleTime: 10 * 60 * 1000,
+    });
+};

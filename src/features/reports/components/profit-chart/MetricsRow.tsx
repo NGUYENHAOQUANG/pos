@@ -11,10 +11,10 @@ interface MetricsRowProps {
 }
 
 export const MetricsRow: React.FC<MetricsRowProps> = ({
-    revenue = '5.45 tỉ',
-    estimatedRevenue = '5.45 tỉ',
-    totalCost = '3.53 tỉ',
-    estimatedProfit = '1.92 tỉ',
+    revenue = '0 đ',
+    estimatedRevenue = '0 đ',
+    totalCost = '0 đ',
+    estimatedProfit = '0 đ',
 }) => {
     const items = [
         {

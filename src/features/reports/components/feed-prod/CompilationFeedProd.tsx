@@ -12,45 +12,39 @@ import {
     PADDING_RIGHT,
     PADDING_TOP,
     PADDING_BOTTOM,
-    RAW_DATA,
 } from '@/features/reports/components/feed-prod/feedprodData';
 
 import { Loading } from '@/shared/components/ui/Loading';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import FeedChart from '@/assets/Icon/IconReport/FeedChart.svg';
+import { useFeedingProduction } from '@/features/reports/hooks/useFeedingProduction';
 
-export const CompilationFeedProd = () => {
+interface Props {
+    zoneId: string;
+    pondId?: string;
+}
+
+export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
-    React.useEffect(() => {
-        if (isExpanded) {
-            setIsLoading(true);
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [isExpanded]);
+    const { data: response, isLoading: queryLoading } = useFeedingProduction({
+        ZoneId: zoneId,
+        Id: pondId,
+    });
+
+    const isLoading = isExpanded && queryLoading;
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
-    // Calculate metrics from RAW_DATA
-    const getLatestProduction = (): number => {
-        if (RAW_DATA.length === 0) return 0;
-        return RAW_DATA[RAW_DATA.length - 1].production;
-    };
+    // Use API Data
+    const summaryData = response?.data?.summary;
+    const chartDataList = response?.data?.chartData || [];
 
-    const getLatestConsumed = (): number => {
-        if (RAW_DATA.length === 0) return 0;
-        return RAW_DATA[RAW_DATA.length - 1].consumed;
-    };
-
-    const getLatestFCR = (): number => {
-        if (RAW_DATA.length === 0) return 0;
-        return RAW_DATA[RAW_DATA.length - 1].fcr;
-    };
+    // Calculate metrics from response summary
+    const getLatestProduction = (): number => summaryData?.totalBiomass || 0;
+    const getLatestConsumed = (): number => summaryData?.totalFood || 0;
+    const getLatestFCR = (): number => summaryData?.fcr || 0;
 
     const formatMetricValue = (value: number): string => {
         return `${value.toFixed(2)} tấn`;
@@ -82,7 +76,13 @@ export const CompilationFeedProd = () => {
                                 consumed={formatMetricValue(getLatestConsumed())}
                                 fcr={formatFCR(getLatestFCR())}
                             />
-                            <Chart chartWidth={chartWidth} chartHeight={chartHeight} />
+                            {chartDataList.length > 0 ? (
+                                <Chart
+                                    chartWidth={chartWidth}
+                                    chartHeight={chartHeight}
+                                    data={chartDataList}
+                                />
+                            ) : null}
                             <FeedProdInfoCard />
                         </>
                     )}

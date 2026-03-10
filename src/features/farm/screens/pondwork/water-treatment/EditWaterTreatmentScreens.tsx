@@ -173,7 +173,6 @@ export const EditWaterTreatmentScreens: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Loại hoạt động không hợp lệ',
-                position: 'top',
             });
             return;
         }

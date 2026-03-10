@@ -17,6 +17,8 @@ export { default as IconVector } from '@/assets/Icon/IconDevices/Vector.svg';
 export { default as IconTrashOutlined } from '@/assets/Icon/IconDevices/TrashOutlined.svg';
 export { default as IconEditOutlined } from '@/assets/Icon/IconDevices/EditOutlined.svg';
 export { default as IconCloseOutlined } from '@/assets/Icon/IconDevices/CloseOutlined.svg';
+export { default as IconSkipBack } from '@/assets/Icon/IconDevices/SkipBack.svg';
+export { default as IconSkipForward } from '@/assets/Icon/IconDevices/SkipForward.svg';
 
 // Icon Farm
 export { default as IconFeed } from '@/assets/Icon/IconFarm/Feed.svg';
@@ -36,6 +38,9 @@ export { default as IconError } from '@/assets/Icon/IconFarm/IconError.svg';
 export { default as IconFilter } from '@/assets/Icon/Filter.svg';
 export { default as IconFilterActive } from '@/assets/Icon/Filter-2.svg';
 export { default as IconEdit } from '@/assets/Icon/IconFarm/Edit.svg';
+export { default as IconAICheck } from '@/assets/Icon/IconFarm/AIcheck.svg';
+export { default as IconAICheckOrange } from '@/assets/Icon/IconFarm/AIcheck-orange.svg';
+export { default as IconCamera } from '@/assets/Icon/IconFarm/camera.svg';
 
 export { default as IconCalender } from '@/assets/Icon/Calender.svg';
 export { default as IconCheckActive } from '@/assets/Icon/CheckActive.svg';

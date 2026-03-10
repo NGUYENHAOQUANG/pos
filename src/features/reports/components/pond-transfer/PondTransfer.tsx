@@ -19,30 +19,60 @@ import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { TransferItemCard } from './TransferItemCard';
-import { pondTransferData } from './pondTransferData';
+import { useStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
+import { formatDate } from '@/shared/utils/formatters';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import PondTransferIcon from '@/assets/Icon/IconReport/PondTransferIcon.svg';
+import { PondData } from '@/features/farm/types/pond.types';
+
+interface PondTransferProps {
+    zoneId: string;
+    pondId?: string;
+    cycleId?: string;
+    ponds?: PondData[];
+}
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export const PondTransfer = () => {
+export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycleId, ponds }) => {
     const [isSectionOpen, setIsSectionOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-
-    React.useEffect(() => {
-        if (isSectionOpen) {
-            setIsLoading(true);
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [isSectionOpen]);
     const [showAll, setShowAll] = useState(false);
-
     const INITIAL_SHOW_COUNT = 3;
+
+    const { data: response, isLoading: queryLoading } = useStockTransferStats({
+        ZoneId: zoneId,
+        Id: pondId,
+        CycleId: cycleId,
+    });
+
+    const isLoading = isSectionOpen && queryLoading;
+
+    // Map API data to UI format
+    const dataList = React.useMemo(() => {
+        if (!response?.data?.items) return [];
+
+        const getPondName = (code: string | null) => {
+            if (!code) return 'N/A';
+            // Search by code or by id just in case the API returns id in that field
+            const pond = ponds?.find(p => p.code === code || p.id === code);
+            return pond?.name || code; // Fallback to code if name not found
+        };
+
+        return response.data.items.map(record => ({
+            id: record.recordId,
+            sourcePond: getPondName(record.fromPondCode),
+            targetPond: getPondName(record.toPondCode),
+            transferDate: formatDate(record.transferDate),
+            doc: record.doc,
+            amount: record.transferQuantity.toLocaleString(),
+            size: record.shrimpCountPerKg.toString(),
+            stockingDate: formatDate(record.releaseDate),
+            stockingAmount: record.releaseQuantity.toLocaleString(),
+            expectedAmount: record.estimatedShrimpCount.toLocaleString(),
+        }));
+    }, [response, ponds]);
 
     const toggleSection = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -54,9 +84,7 @@ export const PondTransfer = () => {
         setShowAll(!showAll);
     };
 
-    const displayedData = showAll
-        ? pondTransferData
-        : pondTransferData.slice(0, INITIAL_SHOW_COUNT);
+    const displayedData = showAll ? dataList : dataList.slice(0, INITIAL_SHOW_COUNT);
 
     return (
         <View style={chartStyles.container}>
@@ -80,7 +108,7 @@ export const PondTransfer = () => {
                                 <TransferItemCard key={item.id} item={item} />
                             ))}
 
-                            {pondTransferData.length > INITIAL_SHOW_COUNT && (
+                            {dataList.length > INITIAL_SHOW_COUNT && (
                                 <TouchableOpacity
                                     style={styles.seeAllButton}
                                     onPress={toggleShowAll}
