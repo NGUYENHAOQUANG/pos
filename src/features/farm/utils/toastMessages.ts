@@ -122,7 +122,6 @@ export const showAddJobSuccessToast = (jobType: JobType) => {
     Toast.show({
         type: 'success',
         text1: message,
-        position: 'top',
         visibilityTime: 3000,
     });
 };
@@ -135,7 +134,6 @@ export const showEditJobSuccessToast = (jobType: JobType) => {
     Toast.show({
         type: 'success',
         text1: message,
-        position: 'top',
         visibilityTime: 3000,
     });
 };
@@ -146,7 +144,6 @@ export const showImageSizeExceededToast = () => {
         type: config.type,
         text1: config.text1,
         text2: config.getText2(APP_CONFIG.IMAGE_SIZE_LIMIT_MB),
-        position: 'top',
         visibilityTime: 3000,
     });
 };
@@ -159,7 +156,6 @@ export const showDeleteJobSuccessToast = (jobType: JobType) => {
     Toast.show({
         type: 'success',
         text1: message,
-        position: 'top',
         visibilityTime: 3000,
     });
 };
@@ -173,7 +169,6 @@ type BasicToastConfig = {
 
 export const AppToast = (config: BasicToastConfig) => {
     Toast.show({
-        position: 'top',
         visibilityTime: 3000,
         ...config,
     });
@@ -184,21 +179,18 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
         Toast.show({
             type: 'error',
             text1: 'Vui lòng chọn vật tư',
-            position: 'top',
             visibilityTime: 3000,
         });
     } else if (errors.executionDate) {
         Toast.show({
             type: 'error',
             text1: 'Vui lòng chọn thời gian',
-            position: 'top',
             visibilityTime: 3000,
         });
     } else {
         Toast.show({
             type: 'error',
             text1: 'Vui lòng kiểm tra lại dữ liệu nhập',
-            position: 'top',
             visibilityTime: 3000,
         });
     }

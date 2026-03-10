@@ -29,7 +29,6 @@ export const useCreateCycle = () => {
                 type: 'error',
                 text1: 'Có lỗi xảy ra',
                 text2: normalized.message,
-                position: 'top',
             });
         },
     });
@@ -68,7 +67,6 @@ export const useUpdateCycle = () => {
                 type: 'error',
                 text1: 'Có lỗi xảy ra',
                 text2: normalized.message,
-                position: 'top',
             });
         },
     });
@@ -91,7 +89,6 @@ export const useDeleteCycle = () => {
             Toast.show({
                 type: 'success',
                 text1: 'Đã xóa chu kỳ thành công',
-                position: 'top',
             });
         },
         onError: error => {

@@ -83,7 +83,7 @@ function App(): React.JSX.Element {
                     onConfirm={handleSessionExpiredConfirm}
                 />
                 <UpdateModal />
-                <Toast config={toastConfig} topOffset={0} />
+                <Toast config={toastConfig} position="bottom" bottomOffset={0} />
             </SafeAreaProvider>
         </GestureHandlerRootView>
     );

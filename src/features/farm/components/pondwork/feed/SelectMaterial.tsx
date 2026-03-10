@@ -15,6 +15,7 @@ import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { Button } from '@/shared/components/buttons/Button';
 
 interface SelectMaterialProps {
     isVisible: boolean;
@@ -160,20 +161,19 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
 
                             {/* Footer Buttons */}
                             <View style={styles.footer}>
-                                <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-                                    <Text style={styles.cancelButtonText}>Huỷ</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.saveButton,
-                                        (!selectedMaterial || !quantity || !selectedUnit) &&
-                                            styles.disabledButton,
-                                    ]}
+                                <Button
+                                    title="Huỷ"
+                                    variant="outline"
+                                    onPress={onClose}
+                                    style={{ flex: 1 }}
+                                />
+                                <Button
+                                    title="Lưu"
+                                    variant="primary"
                                     onPress={handleSave}
                                     disabled={!selectedMaterial || !quantity || !selectedUnit}
-                                >
-                                    <Text style={styles.saveButtonText}>Lưu</Text>
-                                </TouchableOpacity>
+                                    style={{ flex: 1 }}
+                                />
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
@@ -195,7 +195,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         width: '100%',
-        maxWidth: 400,
         zIndex: 1,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
@@ -255,49 +254,10 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        padding: spacing.md,
-        borderTopWidth: 1,
-        borderTopColor: colors.gray[100],
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
+        paddingTop: 0,
         zIndex: 1,
         gap: spacing.sm,
-    },
-    cancelButton: {
-        height: 40,
-        paddingHorizontal: spacing.md,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors.gray[300],
-        backgroundColor: colors.white,
-    },
-    cancelButtonText: {
-        fontFamily: 'Nunito Sans',
-        fontSize: 16,
-        fontWeight: '400',
-        fontStyle: 'normal',
-        lineHeight: 24,
-        color: colors.text,
-    },
-    saveButton: {
-        height: 40,
-        paddingHorizontal: spacing.md,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: spacing.sm,
-        backgroundColor: colors.primary,
-    },
-    disabledButton: {
-        opacity: 0.5,
-        backgroundColor: colors.gray[400],
-    },
-    saveButtonText: {
-        fontFamily: 'Nunito Sans',
-        fontSize: 16,
-        fontWeight: '400',
-        fontStyle: 'normal',
-        lineHeight: 24,
-        color: colors.white,
     },
 });

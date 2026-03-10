@@ -227,7 +227,6 @@ export const AddSiphonScreen: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập số tôm hao',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
@@ -237,7 +236,6 @@ export const AddSiphonScreen: React.FC = () => {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng chọn vật tư',
-                position: 'top',
                 visibilityTime: 3000,
             });
             return;
