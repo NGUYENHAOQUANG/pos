@@ -22,7 +22,7 @@ import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
 
-import { useForm } from 'react-hook-form';
+import { FieldErrors, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     createCycleSchema,
@@ -149,6 +149,20 @@ export const CreateCycleScreen: React.FC = () => {
         }
     };
 
+    const onInvalid = (errors: FieldErrors<CreateCycleFormValues>) => {
+        const message =
+            errors.breedSource?.message ||
+            errors.season?.message ||
+            errors.cycleName?.message ||
+            'Vui lòng kiểm tra lại thông tin nguồn giống và vụ nuôi';
+
+        Toast.show({
+            type: 'error',
+            text1: typeof message === 'string' ? message : 'Dữ liệu không hợp lệ',
+            position: 'top',
+        });
+    };
+
     const onDelete = async () => {
         if (pondId && cycleId) {
             try {
@@ -211,7 +225,7 @@ export const CreateCycleScreen: React.FC = () => {
             <ButtonBarFarm
                 primaryTitle={isEditMode ? 'Cập nhật thông tin' : 'Bắt đầu chu kỳ nuôi'}
                 secondaryTitle="Hủy"
-                onPrimaryPress={handleSubmit(onSubmit)}
+                onPrimaryPress={handleSubmit(onSubmit, onInvalid)}
                 onSecondaryPress={() => navigation.goBack()}
                 primaryDisabled={
                     isCreating ||

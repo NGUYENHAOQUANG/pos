@@ -1,7 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { deviceApi, DeviceItem, DeviceHubItem } from '@/features/control/api/deviceApi';
 import { controlKeys } from './controlKeys';
-import { DeviceData, EControlMode, PondDeviceStats, Pond } from '@/features/control/types/control.types';
+import {
+    DeviceData,
+    EControlMode,
+    PondDeviceStats,
+    Pond,
+} from '@/features/control/types/control.types';
 import Toast from 'react-native-toast-message';
 
 // ===== Helper Functions =====
@@ -237,9 +242,7 @@ export const useUpdateDeviceMode = () => {
 
         const updated = currentData.map(pond => {
             if (pond.id !== pondId) return pond;
-            const updatedDevices = pond.devices.map(d =>
-                d.id === deviceId ? { ...d, mode } : d
-            );
+            const updatedDevices = pond.devices.map(d => (d.id === deviceId ? { ...d, mode } : d));
             return {
                 ...pond,
                 devices: updatedDevices,
@@ -295,7 +298,10 @@ export const useConnectDevice = () => {
         if (!currentData) return;
 
         // Device Map for Codes 1-6
-        const typeMap: Record<string, { type: 'feeder' | 'fan' | 'oxy' | 'syphon'; defaultName: string }> = {
+        const typeMap: Record<
+            string,
+            { type: 'feeder' | 'fan' | 'oxy' | 'syphon'; defaultName: string }
+        > = {
             '1': { type: 'feeder', defaultName: 'Máy cho ăn tự động A1' },
             '2': { type: 'syphon', defaultName: 'Hệ thống Xiphong X1' },
             '3': { type: 'fan', defaultName: 'Quạt nước Q1' },

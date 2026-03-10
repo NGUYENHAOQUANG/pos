@@ -37,7 +37,6 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
     onBack,
     onPressCycle,
 }) => {
-    console.log('displayedCycles', displayedCycles);
     return (
         <View style={styles.safeArea}>
             <HeaderSection title="Chu kỳ nuôi" onBack={onBack} />

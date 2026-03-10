@@ -140,7 +140,10 @@ export const DeviceControlScreens = () => {
     // 3. Loading Ponds (React Query active)
     // 4. Manual Refetch or Network Reconnect (but not Load More)
     const showSkeleton =
-        isLoadingZones || !selectedFarm || isLoadingPonds || (!!isConnected && isRefetching && !isRefetchingDevices);
+        isLoadingZones ||
+        !selectedFarm ||
+        isLoadingPonds ||
+        (!!isConnected && isRefetching && !isRefetchingDevices);
 
     const handleRefresh = async () => {
         await refetch();
