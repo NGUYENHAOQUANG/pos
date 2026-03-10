@@ -18,8 +18,8 @@ export const CountingActionButtons: React.FC<CountingActionButtonsProps> = ({
 }) => (
     <AIActionButtonsWithCount
         count={countTimes}
-        countLabel="Số lần đếm"
-        primaryLabel="Đếm lại"
+        countLabel="Số lần kiểm tra"
+        primaryLabel="Đo lại"
         secondaryLabel={secondaryButtonLabel}
         primaryDisabled={countTimes === 0}
         secondaryDisabled={isSecondaryDisabled}
