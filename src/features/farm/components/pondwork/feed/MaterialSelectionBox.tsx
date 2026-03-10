@@ -4,7 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { SelectMaterial } from '@/features/farm/components/pondwork/feed/SelectMaterial';
+import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
 import { IMaterial } from '@/features/material/types/material.types';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 
@@ -79,8 +79,8 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                 />
             </SelectionInfoBox>
 
-            <SelectMaterial
-                isVisible={isModalVisible}
+            <SelectMaterialBottomSheet
+                visible={isModalVisible}
                 onClose={() => setModalVisible(false)}
                 onSave={handleAddMaterial}
                 materials={materials.filter(
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.md,
+        borderRadius: 12,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.md,
         backgroundColor: colors.white,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: borderRadius.md,
+        borderRadius: 12,
         paddingHorizontal: spacing.sm,
         height: 40,
         width: 110,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: colors.border,
-        borderRadius: 20,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
     },
     addButton: {

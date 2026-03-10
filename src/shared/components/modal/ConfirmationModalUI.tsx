@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     cancelButtonTextOverride: {
-        color: colors.textSecondary,
+        color: colors.text,
         fontSize: 14,
     },
     confirmButton: {

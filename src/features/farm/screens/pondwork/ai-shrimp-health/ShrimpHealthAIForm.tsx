@@ -73,7 +73,7 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
 
     return (
         <View style={styles.container}>
-            <HeaderSection title="Kiểm tra sức khỏe tôm bằng AI" onBack={onBackPress} />
+            <HeaderSection title="AI chẩn đoán tôm" onBack={onBackPress} />
 
             <Loading isLoading={isLoading}>
                 <ScrollView

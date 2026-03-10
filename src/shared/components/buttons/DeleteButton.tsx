@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { IconTrashOutlined } from '@/assets/icons';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
 import { colors, borderRadius } from '@/styles';
 
 interface DeleteButtonProps {
@@ -31,7 +31,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
             onPress={onPress}
             activeOpacity={activeOpacity}
         >
-            <IconTrashOutlined width={iconSize} height={iconSize} />
+            <DeleteIcon width={iconSize} height={iconSize} />
         </TouchableOpacity>
     );
 };
@@ -40,11 +40,11 @@ const styles = StyleSheet.create({
     button: {
         width: 40,
         height: 40,
-        borderRadius: borderRadius.sm,
+        borderRadius: borderRadius.full,
         backgroundColor: colors.white,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: colors.error,
+        borderColor: colors.border,
     },
 });

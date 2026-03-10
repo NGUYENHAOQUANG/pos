@@ -46,6 +46,9 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
         if (parts.length > 2) {
             cleaned = parts[0] + '.' + parts.slice(1).join('');
         }
+        if (cleaned.length > 10) {
+            cleaned = cleaned.slice(0, 10);
+        }
 
         callback(cleaned);
     };
@@ -56,6 +59,7 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                 <View style={styles.colInputLeft}>
                     <Input
                         label="Mực nước mục tiêu (cm)"
+                        placeholder="Mực nước mục tiêu (cm)"
                         value={targetLevel}
                         onChangeText={text => handleNumericInput(text, onTargetLevelChange)}
                         keyboardType="numeric"
@@ -69,6 +73,7 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                 <View style={styles.colInputRight}>
                     <Input
                         label="Số cm cấp"
+                        placeholder="Số cm cấp"
                         value={supplyLevel}
                         onChangeText={text => handleNumericInput(text, onSupplyLevelChange)}
                         keyboardType="numeric"
@@ -83,15 +88,16 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
 
 const styles = StyleSheet.create({
     rowInput: {
-        flexDirection: 'row',
+        flexDirection: 'column',
+        gap: spacing.sm,
     },
     colInputLeft: {
-        flex: 2,
+        flex: 1,
     },
     colInputRight: {
-        flex: 1.9,
+        flex: 1,
     },
     colGap: {
-        width: spacing.sm,
+        height: 0,
     },
 });

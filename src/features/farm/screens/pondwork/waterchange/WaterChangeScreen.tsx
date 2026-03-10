@@ -105,9 +105,12 @@ export const WaterSupplyScreen = () => {
         const fetchDetail = async () => {
             if (pond?.id && item?.id) {
                 try {
-                    const response = await waterSupplyApi.getDetail(pond.id, item.id);
-                    if (response && response.data) {
-                        setDetailData(response.data);
+                    // waterSupplyApi.getDetail() already returns response.data (unwrapped from axios)
+                    const result = await waterSupplyApi.getDetail(pond.id, item.id);
+                    // Handle both wrapped { data: {...} } and flat response formats
+                    const detail = result?.data ?? result;
+                    if (detail) {
+                        setDetailData(detail);
                     }
                 } catch (e) {
                     console.error('Fetch detail error:', e);
@@ -409,7 +412,7 @@ export const WaterSupplyScreen = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title={item ? 'Chỉnh sửa Thay/Cấp nước' : 'Thay/Cấp nước'}
+                title="Thay/Cấp nước"
                 onBack={handleBack}
                 rightComponent={item ? <DeleteButton onPress={handleDelete} /> : undefined}
             />
