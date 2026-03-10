@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
-import { IMaterial } from '@/features/material/types/material.types';
+import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 
 export interface SelectedMaterialItem {
@@ -15,17 +16,61 @@ export interface SelectedMaterialItem {
 }
 
 interface MaterialSelectionBoxProps {
+    /** Currently selected materials */
     selectedMaterials: SelectedMaterialItem[];
+    /** Callback when materials list changes */
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
-    materials: IMaterial[];
+    /**
+     * List of MaterialGroupType to filter.
+     * The component fetches all materials internally and filters by these group types.
+     * If not provided, all materials are shown.
+     */
+    groupTypes?: MaterialGroupType[];
+    /**
+     * @deprecated Use groupTypes instead. External materials list, used as fallback
+     * when groupTypes is not provided and external data is needed.
+     */
+    materials?: IMaterial[];
 }
 
 export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     selectedMaterials,
     onMaterialsChange,
-    materials,
+    groupTypes,
+    materials: externalMaterials,
 }) => {
     const [isModalVisible, setModalVisible] = useState(false);
+
+    // Fetch materials internally
+    const { materials: allMaterials } = useFarmMaterials();
+
+    // Filter materials by groupTypes
+    const filteredMaterials = useMemo(() => {
+        // If groupTypes provided, use internal fetch + filter
+        if (groupTypes && groupTypes.length > 0) {
+            if (!allMaterials.length) return [];
+            return allMaterials.filter(m => {
+                if (!m.group) return false;
+                const groupName = m.group.toLowerCase();
+                return groupTypes.some(gt => groupName.includes(gt.toLowerCase()));
+            });
+        }
+
+        // Fallback to external materials if provided
+        if (externalMaterials) {
+            return externalMaterials;
+        }
+
+        // Default: return all materials
+        return allMaterials;
+    }, [allMaterials, groupTypes, externalMaterials]);
+
+    // Exclude already selected materials
+    const availableMaterials = useMemo(() => {
+        return filteredMaterials.filter(
+            m => !selectedMaterials.some(sm => sm.material.id === m.id)
+        );
+    }, [filteredMaterials, selectedMaterials]);
 
     const handleAddMaterial = (data: SelectedMaterialItem) => {
         onMaterialsChange([...selectedMaterials, data]);
@@ -83,9 +128,7 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                 visible={isModalVisible}
                 onClose={() => setModalVisible(false)}
                 onSave={handleAddMaterial}
-                materials={materials.filter(
-                    m => !selectedMaterials.some(sm => sm.material.id === m.id)
-                )}
+                materials={availableMaterials}
             />
         </>
     );

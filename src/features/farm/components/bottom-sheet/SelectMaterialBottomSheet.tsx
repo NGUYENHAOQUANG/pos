@@ -167,7 +167,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                    <CloseIcon width={16} height={16} />
+                    <CloseIcon width={20} height={20} />
                 </TouchableOpacity>
             </View>
 
@@ -260,7 +260,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                    <CloseIcon width={16} height={16} />
+                    <CloseIcon width={20} height={20} />
                 </TouchableOpacity>
             </View>
 
@@ -352,7 +352,9 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
-        padding: spacing.md,
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.lg,
+        paddingBottom: spacing.md,
     },
     containerProduct: {
         maxHeight: SCREEN_HEIGHT * 0.7,
@@ -374,7 +376,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     closeButton: {
-        padding: spacing.xs,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     content: {
         gap: spacing.md,

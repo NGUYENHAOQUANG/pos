@@ -41,6 +41,7 @@ import {
 } from '@/features/farm/hooks/useWaterChangeRecords';
 import { CreateWaterSupplyCommand } from '@/features/farm/types/waterChange.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 
 import { documentApi } from '@/features/material/api/documentApi';
 import { IWaterSupplyRecord } from '@/features/farm/types/waterChange.types';
@@ -87,18 +88,8 @@ export const WaterSupplyScreen = () => {
         setTabBarVisible(false);
     }, [setTabBarVisible]);
 
-    // --- Fetch Materials (Warehouse) ---
+    // --- Fetch Materials (Warehouse) - needed for mapping detail data ---
     const { materials: allMaterials } = useFarmMaterials();
-
-    const materials = useMemo(() => {
-        if (!allMaterials.length) return [];
-
-        return allMaterials.filter(m => {
-            if (!m.group) return false;
-            const name = m.group.toLowerCase();
-            return name.includes('thiết bị điện') || name.includes('công cụ');
-        });
-    }, [allMaterials]);
 
     // --- Load Data khi Edit ---
     useEffect(() => {
@@ -149,7 +140,7 @@ export const WaterSupplyScreen = () => {
 
     // Bind Materials (Wait for materials from warehouse)
     useEffect(() => {
-        if (!detailData?.waterChangeDetail?.materials || materials.length === 0) return;
+        if (!detailData?.waterChangeDetail?.materials || allMaterials.length === 0) return;
 
         const mapped = detailData.waterChangeDetail.materials
             .map((m: any) => {
@@ -157,7 +148,7 @@ export const WaterSupplyScreen = () => {
                 // Priority: warehouseItemId, then materialId
                 const targetId = m.warehouseItemId || m.materialId;
 
-                let found = materials.find(
+                let found = allMaterials.find(
                     mat => mat.id === targetId || mat.materialDefId === targetId
                 );
 
@@ -181,7 +172,7 @@ export const WaterSupplyScreen = () => {
         if (mapped.length > 0) {
             setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
         }
-    }, [detailData, materials]);
+    }, [detailData, allMaterials]);
     // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
     const calculateInfo = useMemo(() => {
         // 1. Kiểm tra nếu chưa nhập liệu thì trả về '-'
@@ -451,7 +442,7 @@ export const WaterSupplyScreen = () => {
                     <MaterialSelectionBox
                         selectedMaterials={selectedMaterials}
                         onMaterialsChange={setSelectedMaterials}
-                        materials={materials}
+                        groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
                     />
 
                     {/* 4. Ghi chú */}

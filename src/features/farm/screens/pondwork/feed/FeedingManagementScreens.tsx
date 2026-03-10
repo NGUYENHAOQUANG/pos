@@ -1,24 +1,24 @@
 import React, { useRef, useState, useCallback, useMemo } from 'react';
 
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { Loading } from '@/shared/components/ui/Loading';
 
-import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import {
-    useFeeding,
     useCreateFeedingRecord,
     useUpdateFeedingRecord,
     useDeleteFeedingRecord,
     useFeedingRecordDetail,
 } from '@/features/farm/hooks/pondwork/feed/useFeeding';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { FeedingForm, FeedingFormRef } from '@/features/farm/screens/pondwork/feed/FeedingForm';
 import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { feedingService } from '@/features/farm/services/feeding.service';
@@ -45,7 +45,7 @@ export const FeedingManagementScreens = () => {
     // const [isSubmittingControl, setIsSubmittingControl] = useState(false);
     const isSubmittingControl = false; // Tạm thời Fix cứng bằng false do đã comment hàm điều khiển thiết bị
 
-    const { materials, isLoading: isMaterialsLoading } = useFeeding();
+    const { materials, isLoading: isMaterialsLoading } = useFarmMaterials();
     const createMutation = useCreateFeedingRecord();
     const updateMutation = useUpdateFeedingRecord();
     const deleteMutation = useDeleteFeedingRecord();
@@ -184,11 +184,7 @@ export const FeedingManagementScreens = () => {
 
     const renderHeaderRight = () => {
         if (!isEditMode) return undefined;
-        return (
-            <TouchableOpacity onPress={handleDelete} style={styles.headerDeleteButton}>
-                <DeleteIcon width={20} height={20} color={colors.red[900]} />
-            </TouchableOpacity>
-        );
+        return <DeleteButton onPress={handleDelete} />;
     };
 
     const handlePrimaryPress = () => {
@@ -215,7 +211,6 @@ export const FeedingManagementScreens = () => {
                                 isLoadingDetail={isDetailLoading && isEditMode}
                                 isSubmitting={isLoading}
                                 initialData={initialData}
-                                materialsList={materials}
                                 onSubmit={handleSubmit}
                             />
                         </SafeInputLayout>
@@ -250,15 +245,5 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: spacing.md,
-    },
-    headerDeleteButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.red[900],
-        backgroundColor: colors.white,
     },
 });

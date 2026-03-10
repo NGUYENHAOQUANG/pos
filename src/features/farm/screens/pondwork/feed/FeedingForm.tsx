@@ -8,6 +8,7 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -16,14 +17,12 @@ import ActivitySchedule, {
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
 import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
-import { IMaterial } from '@/features/material/types/material.types';
 
 export interface FeedingFormProps {
     isEditMode: boolean;
     isLoadingDetail: boolean;
     isSubmitting: boolean;
     initialData: FeedingFormValues | undefined;
-    materialsList: IMaterial[];
     onSubmit: (data: FeedingFormValues) => void;
 }
 
@@ -32,7 +31,7 @@ export interface FeedingFormRef {
 }
 
 export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
-    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, materialsList, onSubmit }, ref) => {
+    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, onSubmit }, ref) => {
         const initializedRef = useRef(false);
 
         const { control, handleSubmit, reset, watch } = useForm<FeedingFormValues>({
@@ -108,7 +107,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                             <MaterialSelectionBox
                                 selectedMaterials={selectedItems}
                                 onMaterialsChange={handleMaterialsChange}
-                                materials={materialsList}
+                                groupTypes={[MaterialGroupType.FARMING]}
                             />
                         );
                     }}
