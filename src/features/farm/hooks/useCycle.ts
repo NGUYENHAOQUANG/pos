@@ -79,7 +79,6 @@ export const useDeleteCycle = () => {
             Toast.show({
                 type: 'success',
                 text1: 'Đã xóa chu kỳ thành công',
-                position: 'top',
             });
         },
         onError: error => {

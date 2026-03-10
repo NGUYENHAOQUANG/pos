@@ -169,7 +169,6 @@ export const PersonalInformationScreens: React.FC = () => {
             Toast.show({
                 type: 'success',
                 text1: 'Cập nhật thông tin thành công',
-                position: 'top',
             });
 
             await refetch();
