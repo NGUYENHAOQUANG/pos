@@ -222,6 +222,8 @@ export const FeedingManagementScreens = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handlePrimaryPress}
                 onSecondaryPress={() => navigation.goBack()}
+                isLoading={createMutation.isPending || updateMutation.isPending}
+                primaryDisabled={createMutation.isPending || updateMutation.isPending}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
             {isEditMode && (
