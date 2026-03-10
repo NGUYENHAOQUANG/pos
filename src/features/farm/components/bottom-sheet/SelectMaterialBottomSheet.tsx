@@ -1,8 +1,9 @@
 /**
  * @file SelectMaterialBottomSheet.tsx
- * @description Bottom sheet for selecting material with slide-up animation
+ * @description Bottom sheet for selecting material with slide-up animation.
+ * Uses inline view swapping instead of nested Modals to avoid iOS issues.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     View,
     Text,
@@ -15,13 +16,16 @@ import {
     Keyboard,
     Platform,
     KeyboardAvoidingView,
+    FlatList,
+    TextInput,
 } from 'react-native';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { Input, RequiredDot } from '@/shared/components/forms/Input';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
-import { SelectProductBottomSheet } from '@/features/farm/components/bottom-sheet/SelectProductBottomSheet';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -46,7 +50,17 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     const [selectedMaterial, setSelectedMaterial] = useState<IMaterial | undefined>();
     const [quantity, setQuantity] = useState('');
     const [selectedUnit, setSelectedUnit] = useState<string>('');
-    const [showProductSheet, setShowProductSheet] = useState(false);
+    // 'form' = material form view, 'product' = product selection list view
+    const [currentView, setCurrentView] = useState<'form' | 'product'>('form');
+    const [searchText, setSearchText] = useState('');
+    const searchInputRef = useRef<TextInput>(null);
+
+    // Filter materials based on search text
+    const filteredMaterials = useMemo(() => {
+        const trimmed = searchText.trim().toLowerCase();
+        if (!trimmed) return materials;
+        return materials.filter(item => item.name.toLowerCase().includes(trimmed));
+    }, [materials, searchText]);
 
     // Slide-up animation
     useEffect(() => {
@@ -73,6 +87,8 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             setSelectedMaterial(undefined);
             setQuantity('');
             setSelectedUnit('');
+            setCurrentView('form');
+            setSearchText('');
         }
     }, [visible]);
 
@@ -85,6 +101,15 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             setSelectedUnit('');
         }
     }, [selectedMaterial]);
+
+    // Focus search input when switching to product view
+    useEffect(() => {
+        if (currentView === 'product') {
+            setTimeout(() => {
+                searchInputRef.current?.focus();
+            }, 200);
+        }
+    }, [currentView]);
 
     const handleSave = () => {
         if (selectedMaterial && quantity && selectedUnit) {
@@ -114,124 +139,204 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
 
     const handleSelectProduct = (material: IMaterial) => {
         setSelectedMaterial(material);
-        setShowProductSheet(false);
+        setCurrentView('form');
+        setSearchText('');
     };
 
-    return (
+    const handleClose = () => {
+        if (currentView === 'product') {
+            // Go back to form view instead of closing
+            setCurrentView('form');
+            setSearchText('');
+        } else {
+            onClose();
+        }
+    };
+
+    // Render the material form content
+    const renderFormContent = () => (
         <>
-            <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-                <TouchableWithoutFeedback onPress={onClose}>
-                    <KeyboardAvoidingView
-                        style={styles.overlay}
-                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            {/* Header */}
+            <View style={styles.header}>
+                <View style={styles.titleWrapper}>
+                    <Text style={styles.title}>Chọn vật tư</Text>
+                </View>
+                <TouchableOpacity
+                    onPress={onClose}
+                    style={styles.closeButton}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                    <CloseIcon width={16} height={16} />
+                </TouchableOpacity>
+            </View>
+
+            {/* Content */}
+            <View style={styles.content}>
+                {/* Product Selection */}
+                <View style={styles.fieldGroup}>
+                    <View style={styles.labelWrapper}>
+                        <Text style={styles.label}>Chọn loại sản phẩm</Text>
+                        <RequiredDot />
+                    </View>
+                    <TouchableOpacity
+                        style={styles.productSelector}
+                        onPress={() => setCurrentView('product')}
+                        activeOpacity={0.7}
                     >
-                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                            <Animated.View
-                                style={[
-                                    styles.container,
-                                    { transform: [{ translateY: slideAnim }] },
-                                ]}
-                            >
-                                {/* Header */}
-                                <View style={styles.header}>
-                                    <View style={styles.titleWrapper}>
-                                        <Text style={styles.title}>Chọn vật tư</Text>
-                                    </View>
-                                    <TouchableOpacity
-                                        onPress={onClose}
-                                        style={styles.closeButton}
-                                        activeOpacity={0.7}
-                                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                    >
-                                        <CloseIcon width={16} height={16} />
-                                    </TouchableOpacity>
-                                </View>
+                        <Text
+                            style={[
+                                styles.productSelectorText,
+                                !selectedMaterial && styles.placeholderText,
+                            ]}
+                            numberOfLines={1}
+                        >
+                            {selectedMaterial ? selectedMaterial.name : 'Chọn loại sản phẩm'}
+                        </Text>
+                        <Ionicons
+                            name="chevron-down-outline"
+                            size={18}
+                            color={colors.textSecondary}
+                        />
+                    </TouchableOpacity>
+                </View>
 
-                                {/* Content */}
-                                <View style={styles.content}>
-                                    {/* Product Selection */}
-                                    <View style={styles.fieldGroup}>
-                                        <View style={styles.labelWrapper}>
-                                            <Text style={styles.label}>Chọn loại sản phẩm</Text>
-                                            <RequiredDot />
-                                        </View>
-                                        <TouchableOpacity
-                                            style={styles.productSelector}
-                                            onPress={() => setShowProductSheet(true)}
-                                            activeOpacity={0.7}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.productSelectorText,
-                                                    !selectedMaterial && styles.placeholderText,
-                                                ]}
-                                                numberOfLines={1}
-                                            >
-                                                {selectedMaterial
-                                                    ? selectedMaterial.name
-                                                    : 'Chọn loại sản phẩm'}
-                                            </Text>
-                                            <View style={styles.chevronIcon}>
-                                                <Text style={styles.chevronText}>›</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
+                {/* Quantity */}
+                <Input
+                    label="Số lượng"
+                    placeholder="Nhập số lượng"
+                    value={quantity}
+                    onChangeText={handleQuantityChange}
+                    keyboardType="decimal-pad"
+                    required
+                    containerStyle={{ marginBottom: 0 }}
+                />
 
-                                    {/* Quantity */}
-                                    <Input
-                                        label="Số lượng"
-                                        placeholder="Nhập số lượng"
-                                        value={quantity}
-                                        onChangeText={handleQuantityChange}
-                                        keyboardType="decimal-pad"
-                                        required
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
+                {/* Unit */}
+                <Input
+                    label="Đơn vị"
+                    placeholder="Nhập đơn vị"
+                    value={selectedUnit}
+                    onChangeText={() => {}}
+                    editable={false}
+                    required
+                    disabled
+                    containerStyle={{ marginBottom: 0 }}
+                />
+            </View>
 
-                                    {/* Unit */}
-                                    <Input
-                                        label="Đơn vị"
-                                        placeholder="Nhập đơn vị"
-                                        value={selectedUnit}
-                                        onChangeText={() => {}}
-                                        editable={false}
-                                        required
-                                        disabled
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
-                                </View>
+            {/* Footer */}
+            <View style={styles.footer}>
+                <Button
+                    title="Huỷ"
+                    variant="outline"
+                    onPress={onClose}
+                    style={[styles.footerButton, styles.cancelButtonOverride]}
+                    textStyle={styles.cancelButtonTextOverride}
+                />
+                <Button
+                    title="Lưu"
+                    variant="primary"
+                    onPress={handleSave}
+                    disabled={!selectedMaterial || !quantity || !selectedUnit}
+                    style={styles.footerButton}
+                />
+            </View>
+        </>
+    );
 
-                                {/* Footer */}
-                                <View style={styles.footer}>
-                                    <Button
-                                        title="Huỷ"
-                                        variant="outline"
-                                        onPress={onClose}
-                                        style={[styles.footerButton, styles.cancelButtonOverride]}
-                                        textStyle={styles.cancelButtonTextOverride}
-                                    />
-                                    <Button
-                                        title="Lưu"
-                                        variant="primary"
-                                        onPress={handleSave}
-                                        disabled={!selectedMaterial || !quantity || !selectedUnit}
-                                        style={styles.footerButton}
-                                    />
-                                </View>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
-                    </KeyboardAvoidingView>
-                </TouchableWithoutFeedback>
-            </Modal>
+    // Render product selection list
+    const renderProductContent = () => (
+        <>
+            {/* Header */}
+            <View style={styles.header}>
+                <Text style={styles.title}>Chọn loại sản phẩm</Text>
+                <TouchableOpacity
+                    onPress={() => {
+                        setCurrentView('form');
+                        setSearchText('');
+                    }}
+                    style={styles.closeButton}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                    <CloseIcon width={16} height={16} />
+                </TouchableOpacity>
+            </View>
 
-            {/* Second bottom sheet for product selection */}
-            <SelectProductBottomSheet
-                visible={showProductSheet}
-                onClose={() => setShowProductSheet(false)}
-                onSelect={handleSelectProduct}
-                materials={materials}
+            {/* Search Input */}
+            <View style={styles.searchContainer}>
+                <Ionicons
+                    name="search-outline"
+                    size={18}
+                    color={colors.textSecondary}
+                    style={styles.searchIcon}
+                />
+                <TextInput
+                    ref={searchInputRef}
+                    style={styles.searchInput}
+                    placeholder="Tìm vật tư"
+                    placeholderTextColor={colors.textTertiary}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                />
+            </View>
+
+            {/* Material List */}
+            <FlatList
+                data={filteredMaterials}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => {
+                    const stockText = `Kho ${item.remaining ?? 0} ${
+                        item.unitName ? String(item.unitName).toLowerCase() : ''
+                    }`;
+                    return (
+                        <TouchableOpacity
+                            style={styles.itemRow}
+                            onPress={() => handleSelectProduct(item)}
+                            activeOpacity={0.6}
+                        >
+                            <Text style={styles.itemName} numberOfLines={1}>
+                                {item.name}
+                            </Text>
+                            <Text style={styles.itemStock}>{stockText}</Text>
+                        </TouchableOpacity>
+                    );
+                }}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <EmptyStateIcon width={60} height={60} />
+                        <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
+                    </View>
+                }
+                style={styles.list}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             />
         </>
+    );
+
+    return (
+        <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+            <TouchableWithoutFeedback onPress={handleClose}>
+                <KeyboardAvoidingView
+                    style={styles.overlay}
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                >
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <Animated.View
+                            style={[
+                                styles.container,
+                                currentView === 'product' && styles.containerProduct,
+                                { transform: [{ translateY: slideAnim }] },
+                            ]}
+                        >
+                            {currentView === 'form' ? renderFormContent() : renderProductContent()}
+                        </Animated.View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
+        </Modal>
     );
 };
 
@@ -248,6 +353,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: borderRadius.md,
         borderTopRightRadius: borderRadius.md,
         padding: spacing.md,
+    },
+    containerProduct: {
+        maxHeight: SCREEN_HEIGHT * 0.7,
     },
     header: {
         flexDirection: 'row',
@@ -266,7 +374,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     closeButton: {
-        padding: spacing.md,
+        padding: spacing.xs,
     },
     content: {
         gap: spacing.md,
@@ -305,14 +413,6 @@ const styles = StyleSheet.create({
     placeholderText: {
         color: colors.textTertiary,
     },
-    chevronIcon: {
-        marginLeft: spacing.sm,
-    },
-    chevronText: {
-        fontSize: 20,
-        color: colors.textSecondary,
-        transform: [{ rotate: '90deg' }],
-    },
     footer: {
         flexDirection: 'row',
         gap: spacing.sm,
@@ -328,5 +428,57 @@ const styles = StyleSheet.create({
     cancelButtonTextOverride: {
         color: colors.text,
         fontSize: 14,
+    },
+    // Product selection styles
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        height: 40,
+        backgroundColor: colors.white,
+        marginBottom: spacing.md,
+    },
+    searchIcon: {
+        marginRight: spacing.sm,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 14,
+        color: colors.text,
+        padding: 0,
+    },
+    list: {
+        flexGrow: 0,
+    },
+    itemRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 14,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.border,
+    },
+    itemName: {
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+        marginRight: spacing.sm,
+    },
+    itemStock: {
+        fontSize: 13,
+        color: colors.textSecondary,
+    },
+    emptyContainer: {
+        padding: spacing.xl,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyText: {
+        marginTop: spacing.sm,
+        fontSize: 14,
+        color: colors.textSecondary,
     },
 });
