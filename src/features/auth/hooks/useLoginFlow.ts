@@ -10,7 +10,6 @@ import Toast from 'react-native-toast-message';
 import { AuthStackParamList } from '@/app/navigation/types';
 import { authApi } from '@/features/auth/api/authApi';
 import { notificationHelper } from '@/shared/utils/notificationHelper';
-import { OtpResponse } from '../types/auth.types';
 import { NormalizedError } from '@/core/api/errorHandler';
 const VN_PHONE_REGEX = /^(0)(3|5|7|8|9)([0-9]{8})$/;
 
@@ -121,81 +120,45 @@ export function useLoginFlow(): UseLoginFlowReturn {
             } else {
                 setIsUnregistered(true);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             const error = err as NormalizedError;
-            console.log('error', error);
+
+            // Handle pending OTP case from backend
+            const responseData = error.data;
+            const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
+
+            if (otpCode) {
+                await notificationHelper.displayOtpNotification(String(otpCode));
+                Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+                navigation.navigate('Verify-otp', {
+                    method: 'phone',
+                    contact: rawPhone,
+                    otpCode: String(otpCode),
+                });
+                return;
+            }
+
             if (error.type === 'VALIDATION_ERROR') {
-                setError(error.fields['PhoneNumber']?.[0]);
+                const msg = error.fields['PhoneNumber']?.[0] || 'Số điện thoại không hợp lệ';
+                setError(msg);
                 Toast.show({
                     type: 'error',
-                    text1: error.fields['PhoneNumber']?.[0],
+                    text1: msg,
                     visibilityTime: 4000,
                 });
                 return;
             }
-            if (error.type === 'NOT_FOUND_ERROR') {
+            if (error.type === 'NOT_FOUND_ERROR' || error.statusCode === 404) {
                 setIsUnregistered(true);
-                Toast.show({
-                    type: 'error',
-                    text1: error.message,
-                    visibilityTime: 4000,
-                });
                 setError('');
                 return;
             }
 
-            // const axiosError = err as {
-            //     status?: number;
-            //     response?: { status?: number; data?: OtpResponse };
-            //     message?: string;
-            // };
-            // console.error('Login failed:', axiosError);
-
-            // const responseData = axiosError?.response?.data;
-
-            // // Handle 400 Bad Request which might contain Unverified info
-            // if (
-            //     axiosError?.response?.status === 400 &&
-            //     responseData?.data?.status === 'Unverified'
-            // ) {
-            //     const otpCode = responseData.data?.otpCode || responseData.data?.testOtp;
-            //     const message = responseData.data?.message;
-
-            //     Toast.show({
-            //         type: 'error',
-            //         text1: 'Tài khoản chưa xác thực',
-            //         text2: message || 'Vui lòng nhập mã OTP để xác thực tài khoản.',
-            //         visibilityTime: 4000,
-            //     });
-
-            //     if (otpCode) {
-            //         await notificationHelper.displayOtpNotification(String(otpCode));
-            //     }
-
-            //     navigation.navigate('Verify-otp', {
-            //         method: 'phone',
-            //         contact: rawPhone,
-            //         otpCode: otpCode ? String(otpCode) : undefined,
-            //     });
-            //     return;
-            // }
-
-            // // Check for user not found error (404)
-            // if (
-            //     axiosError?.status === 404 ||
-            //     axiosError?.response?.status === 404 ||
-            //     axiosError?.message?.includes('not found')
-            // ) {
-            //     setIsUnregistered(true);
-            //     setError('');
-            // } else {
-            //     setError('Đã có lỗi xảy ra, vui lòng thử lại.');
-            //     Toast.show({
-            //         type: 'error',
-            //         text1: 'Lỗi',
-            //         text2: 'Không thể gửi mã OTP. Vui lòng kiểm tra kết nối.',
-            //     });
-            // }
+            // Handle generic errors like timeout ("Vui lòng đợi...")
+            Toast.show({
+                type: 'error',
+                text1: error.message || responseData?.message || 'Không thể gửi mã xác nhận',
+            });
         } finally {
             setIsLoading(false);
         }
@@ -232,34 +195,30 @@ export function useLoginFlow(): UseLoginFlowReturn {
                 });
             }
         } catch (err: unknown) {
-            const axiosError = err as {
-                response?: { data?: OtpResponse; status?: number };
-                message?: string;
-            };
-            console.error('Verify now failed:', err);
+            const error = err as NormalizedError;
+            console.error('Verify now failed:', error);
 
-            // Even if 400 or error, if we get data with OTP, we might want to allow verify?
-            // But based on log "Request failed with status code 400", backend rejects maybe because pending?
-            // If backend returns 400 but has data, we can try to use it.
+            const responseData = error.data;
+            const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
 
-            const responseData = axiosError?.response?.data;
-            if (responseData && (responseData.success || responseData.data?.otpCode)) {
-                const otpCode = responseData.data?.otpCode || responseData.data?.testOtp;
-                if (otpCode) {
-                    await notificationHelper.displayOtpNotification(String(otpCode));
-                    navigation.navigate('Verify-otp', {
-                        method: 'phone',
-                        contact: rawPhone,
-                        otpCode: String(otpCode),
-                    });
-                    return; // Success handling error case
-                }
+            if (otpCode) {
+                await notificationHelper.displayOtpNotification(String(otpCode));
+                Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+                navigation.navigate('Verify-otp', {
+                    method: 'phone',
+                    contact: rawPhone,
+                    otpCode: String(otpCode),
+                });
+                return;
             }
 
             Toast.show({
                 type: 'error',
                 text1: 'Lỗi',
-                text2: responseData?.data?.message || 'Không thể gửi mã OTP. Vui lòng thử lại.',
+                text2:
+                    error.message ||
+                    responseData?.message ||
+                    'Không thể gửi mã OTP. Vui lòng thử lại.',
             });
         } finally {
             setIsLoading(false);

@@ -132,8 +132,26 @@ export default function VerifyOTPScreen() {
             setOtp(['', '', '', '']);
             setErrorMessage('');
             Toast.show({ type: 'success', text1: 'Đã gửi lại mã OTP' });
-        } catch (err) {
-            Toast.show({ type: 'error', text1: normalizeApiError(err).message });
+        } catch (err: unknown) {
+            const error = normalizeApiError(err);
+            const responseData = error.data;
+            const otpCode = responseData?.data?.otpCode || responseData?.data?.testOtp;
+
+            if (otpCode) {
+                notificationHelper.displayOtpNotification(String(otpCode));
+                setCountdownStartTime(Date.now());
+                setCountdown(COUNTDOWN_DURATION);
+                setOtp(['', '', '', '']);
+                setErrorMessage('');
+                otpInputRef.current?.focusFirst();
+                Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+                return;
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: error.message || responseData?.message || 'Không thể gửi lại mã xác nhận',
+            });
         } finally {
             setIsResending(false);
         }
