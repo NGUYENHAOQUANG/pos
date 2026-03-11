@@ -158,6 +158,7 @@ export function FarmInput({
                         multiline={multiline}
                         textAlignVertical="center"
                         numberOfLines={numberOfLines}
+                        selection={!isFocused ? { start: 0, end: 0 } : undefined}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => {
                             setIsFocused(false);

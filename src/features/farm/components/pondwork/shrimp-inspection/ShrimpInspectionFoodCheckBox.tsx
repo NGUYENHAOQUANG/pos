@@ -37,7 +37,7 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
         <SelectionInfoBox title="Kiểm tra thức ăn">
             <Input
                 label="Lượng thức ăn cho vào nhá (g)"
-                placeholder="Nhập lượng thức ăn vào đây nhá"
+                placeholder="Lượng thức ăn cho vào nhá (g)"
                 value={foodAmount}
                 onChangeText={handleFoodAmountChange}
                 keyboardType="numeric"
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '600',
         color: colors.text,
         lineHeight: 22,
     },
