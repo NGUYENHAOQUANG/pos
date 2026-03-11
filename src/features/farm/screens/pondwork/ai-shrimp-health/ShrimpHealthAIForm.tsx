@@ -7,11 +7,14 @@ import { Button } from '@/shared/components/buttons/Button';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { Loading } from '@/shared/components/ui/Loading';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { HealthDetectionBox } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
+import {
+    HealthDetectionBox,
+    ShrimpHealthBoundingBoxOverlay as HealthDetectionBoxOverlay,
+} from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 import { HealthCheckResult } from '@/features/farm/services/shrimp-health-ai.service';
 import { ShrimpHealthSummarySection } from '@/features/farm/components/ai-shrimp-health/ShrimpHealthSummarySection';
-import { ShrimpHealthImageSection } from '@/features/farm/components/ai-shrimp-health/ShrimpHealthImageSection';
+import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
 import { ShrimpHealthDetailsModal } from '@/features/farm/components/ai-shrimp-health/ShrimpHealthDetailsModal';
 
 interface Props {
@@ -31,7 +34,6 @@ interface Props {
         file?: any,
         dimensions?: { width: number; height: number }
     ) => void;
-    onImageRemove: () => void;
     onResetPress: () => void;
     onGetResultPress: () => void;
     onAnalyzeImagePress: () => void;
@@ -42,6 +44,7 @@ interface Props {
     onConfirmReset: () => void;
     onCancelReset: () => void;
     onImageAreaLayout: (size: { width: number; height: number }) => void;
+    hasAnalyzedCurrent: boolean;
 }
 
 export const ShrimpHealthAIForm: React.FC<Props> = ({
@@ -56,7 +59,6 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     displayDimensions,
     onBackPress,
     onImageSelect,
-    onImageRemove,
     onResetPress,
     onGetResultPress,
     onAnalyzeImagePress,
@@ -67,6 +69,7 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
     onConfirmReset,
     onCancelReset,
     onImageAreaLayout,
+    hasAnalyzedCurrent,
 }) => {
     const insets = useSafeAreaInsets();
     const paddingBottom = Math.max(insets.bottom, spacing.sm);
@@ -80,25 +83,39 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    <SelectionInfoBox title="Kết quả kiểm tra từ AI">
+                    <SelectionInfoBox title="Hình ảnh xử lý" style={{ marginTop: 0 }}>
+                        <AIImageProcessingSection
+                            imageUri={imageUri}
+                            imageDimensions={imageDimensions}
+                            displayDimensions={displayDimensions}
+                            onImageSelect={onImageSelect}
+                            onImageAreaLayout={onImageAreaLayout}
+                        >
+                            {imageUri && detections.length > 0 && (
+                                <HealthDetectionBoxOverlay
+                                    detections={detections}
+                                    displayWidth={displayDimensions.width}
+                                    displayHeight={
+                                        displayDimensions.width /
+                                        (imageDimensions.width / imageDimensions.height)
+                                    }
+                                    originalWidth={imageDimensions.width}
+                                    originalHeight={imageDimensions.height}
+                                />
+                            )}
+                        </AIImageProcessingSection>
+                    </SelectionInfoBox>
+                    <SelectionInfoBox title="Kết quả kiểm tra từ AI" style={{ marginTop: 0 }}>
                         <ShrimpHealthSummarySection
                             results={results}
                             currentResult={currentResult}
                             previousResult={previousResult}
                             onShowDetailsPress={onShowDetailsPress}
-                        />
-                    </SelectionInfoBox>
-
-                    <SelectionInfoBox title="Hình ảnh xử lý">
-                        <ShrimpHealthImageSection
-                            imageUri={imageUri}
-                            detections={detections}
-                            imageDimensions={imageDimensions}
-                            displayDimensions={displayDimensions}
-                            onImageSelect={onImageSelect}
-                            onImageRemove={onImageRemove}
-                            onImageAreaLayout={onImageAreaLayout}
-                            onGetResultPress={onAnalyzeImagePress}
+                            countTimes={countTimes}
+                            showAddMore={
+                                countTimes >= 2 || (countTimes === 1 && !hasAnalyzedCurrent)
+                            }
+                            onAddMore={onAnalyzeImagePress}
                         />
                     </SelectionInfoBox>
                 </ScrollView>
@@ -110,19 +127,31 @@ export const ShrimpHealthAIForm: React.FC<Props> = ({
                     <Text style={styles.countValue}>{countTimes}</Text>
                 </View>
                 <View style={styles.buttonRow}>
-                    <Button
-                        title="Kiểm tra lại"
-                        onPress={onResetPress}
-                        variant="outline"
-                        style={[styles.flexButton, { borderColor: colors.border }]}
-                        textStyle={{ color: colors.textSecondary }}
-                    />
-                    <Button
-                        title="Lấy kết quả này"
-                        onPress={onGetResultPress}
-                        variant="primary"
-                        style={styles.flexButton}
-                    />
+                    {countTimes === 0 ? (
+                        <Button
+                            title="Bắt đầu chuẩn đoán"
+                            onPress={onAnalyzeImagePress}
+                            variant="primary"
+                            style={styles.flexButton}
+                            disabled={!imageUri}
+                        />
+                    ) : (
+                        <>
+                            <Button
+                                title="Kiểm tra lại"
+                                onPress={onResetPress}
+                                variant="outline"
+                                style={[styles.flexButton, { borderColor: colors.border }]}
+                                textStyle={{ color: colors.textSecondary }}
+                            />
+                            <Button
+                                title="Lấy kết quả này"
+                                onPress={onGetResultPress}
+                                variant="primary"
+                                style={styles.flexButton}
+                            />
+                        </>
+                    )}
                 </View>
             </View>
 
@@ -150,7 +179,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.backgroundPrimary,
     },
     scrollContent: {
-        padding: 0,
+        paddingHorizontal: 0,
+        paddingTop: 8,
         paddingBottom: 100,
         gap: 8,
     },

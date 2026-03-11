@@ -1,50 +1,108 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
-import { Input } from '@/shared/components/forms/Input';
+import InfoIcon from '@/assets/Icon/information-circle.svg';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 
 export interface CountingResultSectionProps {
     result: string;
-    previousTotal: number;
+    currentImageCount: number;
+    countTimes: number;
+    showAddMore: boolean;
+    onAddMore?: () => void;
 }
 
 export const CountingResultSection: React.FC<CountingResultSectionProps> = ({
     result,
-    previousTotal,
+    currentImageCount,
+    countTimes,
+    showAddMore,
+    onAddMore,
 }) => (
-    <View style={styles.section}>
-        <Text style={styles.label}>
-            <Text style={styles.required}>* </Text>Tổng số lượng thả (PLs) - AI
-        </Text>
-        <Input
-            placeholder="0"
-            value={result}
-            editable={false}
-            inputContainerStyle={styles.resultInput}
-        />
-        <Text style={styles.helperText}>Lần đếm trước: {previousTotal}</Text>
+    <View>
+        <View style={styles.row}>
+            <Text style={styles.label}>Tổng lượng thả</Text>
+            <Text style={styles.value}>
+                {result !== '0' && result !== '' ? Number(result).toLocaleString('en-US') : '-'}
+            </Text>
+        </View>
+        <View style={styles.row}>
+            <Text style={styles.label}>Lần kiểm tra trước</Text>
+            <Text style={styles.value}>
+                {countTimes > 1 && currentImageCount > 0
+                    ? Number(currentImageCount).toLocaleString('en-US')
+                    : '-'}
+            </Text>
+        </View>
+        <View style={styles.row}>
+            <Text style={styles.label}>Số lần đếm</Text>
+            <Text style={styles.value}>
+                {countTimes > 0 ? countTimes.toLocaleString('en-US') : '-'}
+            </Text>
+        </View>
+
+        {countTimes > 0 && (
+            <>
+                <View style={styles.infoBox}>
+                    <InfoIcon width={20} height={20} style={styles.infoIcon} />
+                    <Text style={styles.infoText}>
+                        Bạn có thể chụp thêm hình để kiểm tra thêm nếu cần.
+                    </Text>
+                </View>
+
+                {showAddMore && (
+                    <OutlineButton
+                        label="Đo thêm"
+                        onPress={onAddMore || (() => {})}
+                        labelStyle={styles.addMoreText}
+                    />
+                )}
+            </>
+        )}
     </View>
 );
 
 const styles = StyleSheet.create({
-    section: {
-        marginBottom: spacing.md,
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: spacing.xs,
     },
     label: {
-        fontSize: 14,
+        fontSize: 16,
+        color: colors.textSecondary,
+        flex: 1,
+    },
+    value: {
+        fontSize: 16,
+        fontWeight: '500',
         color: colors.text,
-        marginBottom: spacing.xs,
-        fontWeight: '400',
+        marginLeft: spacing.md,
     },
-    required: {
-        color: colors.red[500],
-    },
-    resultInput: {
+    infoBox: {
         backgroundColor: colors.white,
+        padding: 16,
+        borderRadius: 8,
+        marginTop: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: colors.border,
+        borderWidth: 1,
+        marginBottom: spacing.md,
     },
-    helperText: {
+    infoIcon: {
+        marginRight: 8,
+    },
+    infoText: {
         fontSize: 14,
         color: colors.text,
-        marginTop: spacing.xs,
+        lineHeight: 20,
+        fontWeight: '500',
+    },
+    addMoreText: {
+        color: colors.text,
+        fontWeight: '500',
+        fontSize: 16,
     },
 });

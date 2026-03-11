@@ -17,6 +17,7 @@ import ActivitySchedule, {
 import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
 import { IMaterial } from '@/features/material/types/material.types';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 export interface FeedingFormProps {
     isEditMode: boolean;
@@ -29,6 +30,7 @@ export interface FeedingFormProps {
 
 export interface FeedingFormRef {
     submit: () => void;
+    allowNavigation: () => void;
 }
 
 export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
@@ -49,11 +51,46 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         const currentMode = watch('mode');
 
         useEffect(() => {
-            if (initialData && !initializedRef.current) {
-                reset(initialData);
+            if (isEditMode) {
+                if (initialData && !initializedRef.current) {
+                    reset(initialData);
+                    initializedRef.current = true;
+                }
+            } else {
                 initializedRef.current = true;
             }
-        }, [initialData, reset]);
+        }, [initialData, reset, isEditMode]);
+
+        const currentValues = watch();
+
+        const hasChanges = React.useMemo(() => {
+            if (!initializedRef.current) return false;
+
+            if (!isEditMode) {
+                const hasSelectedMaterials =
+                    currentValues.materials && currentValues.materials.length > 0;
+                const hasNote = currentValues.note && currentValues.note.trim().length > 0;
+                const hasSchedules =
+                    currentValues.mode === 'schedule' &&
+                    currentValues.schedules &&
+                    currentValues.schedules.length > 0;
+
+                return !!(hasSelectedMaterials || hasNote || hasSchedules);
+            }
+
+            if (!initialData) return false;
+
+            const materialsChanged =
+                JSON.stringify(currentValues.materials) !== JSON.stringify(initialData.materials);
+            const noteChanged = currentValues.note !== initialData.note;
+            const modeChanged = currentValues.mode !== initialData.mode;
+            const schedulesChanged =
+                JSON.stringify(currentValues.schedules) !== JSON.stringify(initialData.schedules);
+
+            return materialsChanged || noteChanged || modeChanged || schedulesChanged;
+        }, [currentValues, initialData, isEditMode]);
+
+        const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
         React.useImperativeHandle(
             ref,
@@ -63,8 +100,9 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                         onSubmit(data);
                     }, handleFeedingFormError)();
                 },
+                allowNavigation: () => allowNavigation(),
             }),
-            [handleSubmit, onSubmit]
+            [handleSubmit, onSubmit, allowNavigation]
         );
 
         return (
@@ -217,6 +255,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                 />
 
                 <View style={styles.spacer} />
+                {UnsavedChangesModal}
             </View>
         );
     }

@@ -104,6 +104,7 @@ export const FeedingManagementScreens = () => {
                         { pondId, id: jobId, payload },
                         {
                             onSuccess: () => {
+                                formRef.current?.allowNavigation();
                                 showEditJobSuccessToast('FEED');
                                 navigation.goBack();
                             },
@@ -154,6 +155,7 @@ export const FeedingManagementScreens = () => {
                     { pondId, payload },
                     {
                         onSuccess: () => {
+                            formRef.current?.allowNavigation();
                             showAddJobSuccessToast('FEED');
                             navigation.goBack();
                         },
@@ -175,6 +177,7 @@ export const FeedingManagementScreens = () => {
                 { pondId, id: jobId },
                 {
                     onSuccess: () => {
+                        formRef.current?.allowNavigation();
                         navigation.goBack();
                     },
                 }

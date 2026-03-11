@@ -43,6 +43,10 @@ interface ImageUploadProps {
     returnBase64?: boolean;
     aspectRatio?: number;
     children?: React.ReactNode;
+    customEmptyState?: React.ReactNode | ((openPicker: () => void) => React.ReactNode);
+    bottomContent?: React.ReactNode | ((openPicker: () => void) => React.ReactNode);
+    uploadStyle?: ViewStyle;
+    disablePressContainer?: boolean;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -56,6 +60,10 @@ export function ImageUpload({
     returnBase64 = false,
     aspectRatio,
     children,
+    customEmptyState,
+    bottomContent,
+    uploadStyle,
+    disablePressContainer = false,
 }: ImageUploadProps) {
     const [actionSheetVisible, setActionSheetVisible] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -191,6 +199,54 @@ export function ImageUpload({
         }
     };
 
+    const renderContent = () => {
+        if (imageUri) {
+            return (
+                <View style={styles.imageContainer}>
+                    <RNImage source={{ uri: imageUri }} style={styles.image} />
+                    {children}
+                </View>
+            );
+        }
+
+        if (customEmptyState) {
+            if (isProcessing) {
+                return (
+                    <View style={styles.placeholderContainer}>
+                        <Ionicons
+                            name={'hourglass-outline'}
+                            size={sizes.icon['2xl']}
+                            color={colors.textSecondary}
+                        />
+                        <Text style={styles.processingText}>Đang xử lý...</Text>
+                    </View>
+                );
+            }
+            return typeof customEmptyState === 'function'
+                ? customEmptyState(handleImagePress)
+                : customEmptyState;
+        }
+
+        return (
+            <View style={styles.placeholderContainer}>
+                <Ionicons
+                    name={isProcessing ? 'hourglass-outline' : 'image-outline'}
+                    size={sizes.icon['2xl']}
+                    color={colors.textSecondary}
+                />
+                {!isProcessing && (
+                    <Ionicons
+                        name="add-circle"
+                        size={sizes.icon.lg}
+                        color={colors.textSecondary}
+                        style={styles.addIcon}
+                    />
+                )}
+                {isProcessing && <Text style={styles.processingText}>Đang xử lý...</Text>}
+            </View>
+        );
+    };
+
     return (
         <View style={[styles.container, style]}>
             <View style={styles.headerRow}>
@@ -205,40 +261,38 @@ export function ImageUpload({
                     </TouchableOpacity>
                 )}
             </View>
-            <TouchableOpacity
-                style={[
-                    styles.uploadContainer,
-                    isProcessing && styles.disabledContainer,
-                    aspectRatio ? { aspectRatio } : undefined,
-                ]}
-                onPress={handleImagePress}
-                disabled={isProcessing}
-                activeOpacity={0.7}
-            >
-                {imageUri ? (
-                    <View style={styles.imageContainer}>
-                        <RNImage source={{ uri: imageUri }} style={styles.image} />
-                        {children}
-                    </View>
-                ) : (
-                    <View style={styles.placeholderContainer}>
-                        <Ionicons
-                            name={isProcessing ? 'hourglass-outline' : 'image-outline'}
-                            size={sizes.icon['2xl']}
-                            color={colors.textSecondary}
-                        />
-                        {!isProcessing && (
-                            <Ionicons
-                                name="add-circle"
-                                size={sizes.icon.lg}
-                                color={colors.textSecondary}
-                                style={styles.addIcon}
-                            />
-                        )}
-                        {isProcessing && <Text style={styles.processingText}>Đang xử lý...</Text>}
-                    </View>
-                )}
-            </TouchableOpacity>
+
+            {disablePressContainer ? (
+                <View
+                    style={[
+                        styles.uploadContainer,
+                        isProcessing && styles.disabledContainer,
+                        aspectRatio ? { aspectRatio } : undefined,
+                        uploadStyle,
+                    ]}
+                >
+                    {renderContent()}
+                </View>
+            ) : (
+                <TouchableOpacity
+                    style={[
+                        styles.uploadContainer,
+                        isProcessing && styles.disabledContainer,
+                        aspectRatio ? { aspectRatio } : undefined,
+                        uploadStyle,
+                    ]}
+                    onPress={handleImagePress}
+                    disabled={isProcessing}
+                    activeOpacity={0.7}
+                >
+                    {renderContent()}
+                </TouchableOpacity>
+            )}
+
+            {bottomContent &&
+                (typeof bottomContent === 'function'
+                    ? bottomContent(handleImagePress)
+                    : bottomContent)}
 
             <ImagePickerActionSheet
                 visible={actionSheetVisible}
