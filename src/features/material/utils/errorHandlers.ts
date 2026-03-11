@@ -14,15 +14,26 @@ export const getErrorMessage = (error: unknown, defaultMessage: string): string 
 
     // If normalizedError has a specific message, use it
     if (normalizedError.message) {
+        let message = normalizedError.message;
+
+        // Centralized mapping for material/stock errors
+        if (
+            message.includes('invalid start of a value') ||
+            message.includes('converted to System.Decimal') ||
+            message.includes('System.Decimal') ||
+            message.includes('Insufficient central warehouse stock')
+        ) {
+            return 'Số lượng vật tư không hợp lệ !';
+        }
+
         // For validation errors, we might want to be more specific if needed
-        // But normalizeApiError already checks validationErrors and sets message
         if (normalizedError.type === 'VALIDATION_ERROR' && normalizedError.fields) {
             const firstField = Object.keys(normalizedError.fields)[0];
             if (firstField && normalizedError.fields[firstField]?.length > 0) {
                 return normalizedError.fields[firstField][0];
             }
         }
-        return normalizedError.message;
+        return message;
     }
 
     return defaultMessage;

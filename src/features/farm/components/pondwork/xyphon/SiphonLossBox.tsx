@@ -33,6 +33,7 @@ export const SiphonLossBox: React.FC<SiphonLossBoxProps> = ({ lossAmount, onLoss
         <SelectionInfoBox title="Hao hụt trong ao">
             <Input
                 label="Số tôm hao (kg)"
+                placeholder="Số tôm hao (kg)"
                 value={lossAmount}
                 onChangeText={text => handleNumericInput(text, onLossAmountChange)}
                 keyboardType="numeric"
