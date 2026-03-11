@@ -1,4 +1,6 @@
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { PondData } from '@/features/farm/types/pond.types';
+import { CycleData } from '@/features/farm/types/cycle.types';
 
 export interface HarvestRecord {
     recordId: string;
@@ -27,3 +29,16 @@ export interface HarvestStatsTableParams {
 }
 
 export type HarvestStatsTableResponse = IApiResponse<IPaginate<HarvestRecord>>;
+
+// ----------------------------------------------------------------------
+// UI TYPES
+// ----------------------------------------------------------------------
+
+/** Props for HarvestStat main component */
+export interface HarvestStatProps {
+    zoneId: string;
+    pondId?: string;
+    cycleId?: string;
+    ponds?: PondData[];
+    cycles?: CycleData[];
+}
