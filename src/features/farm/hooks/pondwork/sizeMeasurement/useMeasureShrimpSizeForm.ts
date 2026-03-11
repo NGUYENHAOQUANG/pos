@@ -12,10 +12,6 @@ import { JobExecution } from '@/features/farm/types/farm.types';
 import { NormalizedError } from '@/core/api/errorHandler';
 import { numericStringSchema } from '@/shared/utils/validation';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
-import {
-    showShrimpSizeRequiredToast,
-    showRemainingWeightRequiredToast,
-} from '@/features/farm/utils/toastMessages';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
@@ -220,21 +216,10 @@ export const useMeasureShrimpSizeForm = ({
     };
 
     const handleSave = (documentIds: string[]) => {
-        // Validation for required fields
-        if (!shrimpSize) {
-            showShrimpSizeRequiredToast();
-            return;
-        }
-
-        if (!remainingWeight) {
-            showRemainingWeightRequiredToast();
-            return;
-        }
-
         const isSizeValid = numericStringSchema.safeParse(shrimpSize).success;
         const isWeightValid = numericStringSchema.safeParse(remainingWeight).success;
 
-        if (!isSizeValid || !isWeightValid) {
+        if (!isSizeValid || !isWeightValid || !shrimpSize || !remainingWeight) {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập đúng định dạng số cho kích thước và trọng lượng',
