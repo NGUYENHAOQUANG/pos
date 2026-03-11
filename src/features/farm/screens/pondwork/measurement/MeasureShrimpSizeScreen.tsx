@@ -115,6 +115,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
+        UnsavedChangesModal,
         isSubmitting,
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
@@ -211,6 +212,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 cancelText="Không"
                 successMessage="Đã xoá tác vụ thành công"
             />
+            {UnsavedChangesModal}
         </View>
     );
 };
