@@ -2,7 +2,8 @@
  * @file useLoginFlow.ts
  * @description Hook to handle login flow logic (OTP request, validation, navigation)
  */
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
@@ -38,6 +39,15 @@ export function useLoginFlow(): UseLoginFlowReturn {
     const [isUnregistered, setIsUnregistered] = useState(false);
     const [isUnverifiedAccount, setIsUnverifiedAccount] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    const dismissKeyboardAndDelay = useCallback(
+        () =>
+            new Promise<void>(resolve => {
+                Keyboard.dismiss();
+                setTimeout(resolve, 1500);
+            }),
+        []
+    );
 
     const validatePhoneNumber = (phone: string): boolean => {
         if (!phone.trim()) {
@@ -76,6 +86,7 @@ export function useLoginFlow(): UseLoginFlowReturn {
 
         const rawPhone = phoneNumber.replace(/\s/g, '');
         setIsLoading(true);
+        await dismissKeyboardAndDelay();
 
         try {
             const response = await authApi.requestOtp(rawPhone);
@@ -130,6 +141,7 @@ export function useLoginFlow(): UseLoginFlowReturn {
             if (otpCode) {
                 await notificationHelper.displayOtpNotification(String(otpCode));
                 Toast.show({ type: 'success', text1: 'Mã xác nhận (đang chờ) đã được gửi lại' });
+
                 navigation.navigate('Verify-otp', {
                     method: 'phone',
                     contact: rawPhone,
@@ -171,6 +183,8 @@ export function useLoginFlow(): UseLoginFlowReturn {
         const rawPhone = phoneNumber.replace(/\s/g, '');
 
         setIsLoading(true);
+        await dismissKeyboardAndDelay();
+
         try {
             const response = await authApi.requestOtp(rawPhone);
             // const status = response?.data?.status; // Unused

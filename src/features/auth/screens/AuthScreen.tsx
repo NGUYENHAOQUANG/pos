@@ -11,7 +11,6 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';
-import { Loading } from '@/shared/components/ui/Loading';
 import PhoneInput from '@/features/auth/components/PhoneInput';
 import DangerIcon from '@/assets/Icon/Danger.svg';
 import { colors, spacing, typography } from '@/styles';
@@ -37,114 +36,106 @@ export default function AuthScreen() {
 
     return (
         <ErrorBoundary>
-            <Loading isLoading={isLoading}>
-                <SafeAreaView style={styles.container} edges={Platform.OS === 'ios' ? ['top'] : []}>
-                    <FloatingBubblesBackground />
-                    <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+            <SafeAreaView style={styles.container} edges={Platform.OS === 'ios' ? ['top'] : []}>
+                <FloatingBubblesBackground />
+                <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-                    {Platform.OS === 'android' && (
-                        <View style={[styles.androidStatusBar, { height: insets.top }]} />
-                    )}
+                {Platform.OS === 'android' && (
+                    <View style={[styles.androidStatusBar, { height: insets.top }]} />
+                )}
 
-                    <KeyboardAvoidingView
-                        enabled={Platform.OS === 'ios'}
-                        behavior="padding"
-                        style={styles.keyboardInner}
-                        keyboardVerticalOffset={0}
-                    >
-                        <View style={styles.mainContentContainer}>
-                            <ScrollView
-                                style={styles.scrollView}
-                                contentContainerStyle={styles.scrollContent}
-                                showsVerticalScrollIndicator={false}
-                                keyboardShouldPersistTaps="handled"
-                            >
-                                <View style={styles.formCard}>
-                                    <View style={styles.logoSection}>
-                                        <ErrorBoundary>
-                                            <Logo size="square" />
-                                        </ErrorBoundary>
-                                    </View>
+                <KeyboardAvoidingView
+                    enabled={Platform.OS === 'ios'}
+                    behavior="padding"
+                    style={styles.keyboardInner}
+                    keyboardVerticalOffset={0}
+                >
+                    <View style={styles.mainContentContainer}>
+                        <ScrollView
+                            style={styles.scrollView}
+                            contentContainerStyle={styles.scrollContent}
+                            showsVerticalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            <View style={styles.formCard}>
+                                <View style={styles.logoSection}>
+                                    <ErrorBoundary>
+                                        <Logo size="square" />
+                                    </ErrorBoundary>
+                                </View>
 
-                                    <Text style={styles.screenTitle}>Đăng nhập</Text>
+                                <Text style={styles.screenTitle}>Đăng nhập</Text>
 
-                                    <View style={styles.formContent}>
-                                        <PhoneInput
-                                            required
-                                            placeholder="Nhập số điện thoại"
-                                            value={phoneNumber}
-                                            onChangeText={handlePhoneChange}
-                                            error={
-                                                isUnregistered || isUnverifiedAccount
-                                                    ? 'error'
-                                                    : error
-                                            }
-                                            onClear={handleClearError}
-                                        />
+                                <View style={styles.formContent}>
+                                    <PhoneInput
+                                        required
+                                        placeholder="Nhập số điện thoại"
+                                        value={phoneNumber}
+                                        onChangeText={handlePhoneChange}
+                                        error={
+                                            isUnregistered || isUnverifiedAccount ? 'error' : error
+                                        }
+                                        onClear={handleClearError}
+                                    />
 
-                                        <View style={styles.errorBlockReserved}>
-                                            {isUnregistered && (
-                                                <View style={styles.unregisteredErrorContainer}>
-                                                    <View style={styles.errorIconWrapper}>
-                                                        <DangerIcon width={16} height={16} />
-                                                    </View>
-                                                    <Text
-                                                        style={[
-                                                            styles.unregisteredErrorText,
-                                                            { flex: 1 },
-                                                        ]}
-                                                    >
-                                                        Số điện thoại này chưa được đăng ký, vui
-                                                        lòng kiểm tra và thử lại hoặc{' '}
-                                                        <Text
-                                                            style={styles.unregisteredLinkText}
-                                                            onPress={handleRegisterPress}
-                                                        >
-                                                            tạo tài khoản mới
-                                                        </Text>
-                                                    </Text>
+                                    <View style={styles.errorBlockReserved}>
+                                        {isUnregistered && (
+                                            <View style={styles.unregisteredErrorContainer}>
+                                                <View style={styles.errorIconWrapper}>
+                                                    <DangerIcon width={16} height={16} />
                                                 </View>
-                                            )}
-
-                                            {isUnverifiedAccount && (
-                                                <View style={styles.unregisteredErrorContainer}>
-                                                    <View style={styles.errorIconWrapper}>
-                                                        <DangerIcon width={16} height={16} />
-                                                    </View>
+                                                <Text
+                                                    style={[
+                                                        styles.unregisteredErrorText,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    Số điện thoại này chưa được đăng ký, vui lòng
+                                                    kiểm tra và thử lại hoặc{' '}
                                                     <Text
-                                                        style={[
-                                                            styles.unregisteredErrorText,
-                                                            { flex: 1 },
-                                                        ]}
+                                                        style={styles.unregisteredLinkText}
+                                                        onPress={handleRegisterPress}
                                                     >
-                                                        Số điện thoại này đã được đăng ký nhưng chưa
-                                                        xác thực, vui lòng xác thực ngay
+                                                        tạo tài khoản mới
                                                     </Text>
+                                                </Text>
+                                            </View>
+                                        )}
+
+                                        {isUnverifiedAccount && (
+                                            <View style={styles.unregisteredErrorContainer}>
+                                                <View style={styles.errorIconWrapper}>
+                                                    <DangerIcon width={16} height={16} />
                                                 </View>
-                                            )}
-                                        </View>
+                                                <Text
+                                                    style={[
+                                                        styles.unregisteredErrorText,
+                                                        { flex: 1 },
+                                                    ]}
+                                                >
+                                                    Số điện thoại này đã được đăng ký nhưng chưa xác
+                                                    thực, vui lòng xác thực ngay
+                                                </Text>
+                                            </View>
+                                        )}
                                     </View>
                                 </View>
-                            </ScrollView>
-
-                            <View
-                                style={[
-                                    styles.footer,
-                                    keyboardVisible && styles.footerKeyboardOpen,
-                                ]}
-                            >
-                                <Button
-                                    title={isUnverifiedAccount ? 'Xác thực ngay' : 'Đăng Nhập'}
-                                    onPress={isUnverifiedAccount ? handleVerifyNow : handleLogin}
-                                    variant="primary"
-                                    fullWidth
-                                    style={styles.loginButton}
-                                />
                             </View>
+                        </ScrollView>
+
+                        <View style={[styles.footer, keyboardVisible && styles.footerKeyboardOpen]}>
+                            <Button
+                                title={isUnverifiedAccount ? 'Xác thực ngay' : 'Đăng Nhập'}
+                                onPress={isUnverifiedAccount ? handleVerifyNow : handleLogin}
+                                variant="primary"
+                                fullWidth
+                                loading={isLoading}
+                                style={styles.loginButton}
+                            />
                         </View>
-                    </KeyboardAvoidingView>
-                </SafeAreaView>
-            </Loading>
+                    </View>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
         </ErrorBoundary>
     );
 }
