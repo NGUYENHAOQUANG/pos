@@ -27,22 +27,12 @@ export function handleApiError(error: any): ApiError {
 export const handleError = (err: unknown) => {
     const error = err as NormalizedError;
 
-    const mapErrorMessage = (msg: string): string => {
-        if (
-            msg.includes('The command field is required.') ||
-            msg.includes('The Command field is required.')
-        ) {
-            return 'Giá trị chỉ được tối đa 15 số nguyên và 5 chữ số thập phân';
-        }
-        return msg;
-    };
-
     if (error.type === 'VALIDATION_ERROR') {
         const firstFieldKey = Object.keys(error.fields)[0];
         if (firstFieldKey && error.fields[firstFieldKey]?.length > 0) {
             Toast.show({
                 type: 'error',
-                text1: mapErrorMessage(error.fields[firstFieldKey][0]),
+                text1: error.fields[firstFieldKey][0],
                 visibilityTime: 4000,
             });
             return;
@@ -58,8 +48,5 @@ export const handleError = (err: unknown) => {
         return;
     }
 
-    Toast.show({
-        type: 'error',
-        text1: mapErrorMessage(error.message || 'Có lỗi xảy ra'),
-    });
+    Toast.show({ type: 'error', text1: error.message || 'Có lỗi xảy ra' });
 };
