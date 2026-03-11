@@ -181,7 +181,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
             documentIds: detailData?.documentIds || [],
             waterTreatmentDetail: {
                 treatmentType: treatmentTypeEnum,
-                notes: note || undefined,
+                notes: note.trim() || '',
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
                     quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),
