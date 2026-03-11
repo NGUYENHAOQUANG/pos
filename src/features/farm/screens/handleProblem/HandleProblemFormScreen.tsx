@@ -10,6 +10,7 @@ import { formatDate } from '@/features/farm/utils/dateUtils';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
+    showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
 import { documentApi } from '@/features/material/api/documentApi';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -156,6 +157,12 @@ export const HandleProblemFormScreen = () => {
                 text1: 'Vui lòng chọn vật tư',
                 visibilityTime: 3000,
             });
+            return;
+        }
+
+        // Validate material quantities must be greater than 0
+        if (data.selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
             return;
         }
 

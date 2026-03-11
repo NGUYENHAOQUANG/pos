@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
+    showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -312,6 +313,12 @@ export const WaterSupplyScreen = () => {
                 text1: 'Vui lòng chọn vật tư',
                 visibilityTime: 3000,
             });
+            return;
+        }
+
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
             return;
         }
 
