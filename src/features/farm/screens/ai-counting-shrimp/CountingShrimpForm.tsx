@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { colors, spacing } from '@/styles';
@@ -35,6 +35,8 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [countTimes, setCountTimes] = useState(0);
     const [currentImageCount, setCurrentImageCount] = useState<number>(0);
+    const [previousImageCount, setPreviousImageCount] = useState<number>(0);
+    const lastCompletedCount = useRef<number>(0);
     const [base64Image, setBase64Image] = useState<string | null>(null);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [detections, setDetections] = useState<DetectionDot[]>([]);
@@ -69,7 +71,9 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
 
     useEffect(() => {
         if (lastCountingResult && lastCountingResult.count > 0 && currentImageCount === 0) {
+            setPreviousImageCount(lastCompletedCount.current);
             setCurrentImageCount(lastCountingResult.count);
+            lastCompletedCount.current = lastCountingResult.count;
             setDetections(lastCountingResult.detections);
             setCountTimes(c => c + 1);
             const currentTotal = parseInt(result || '0', 10);
@@ -93,6 +97,8 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
         setResult('0');
         setCountTimes(0);
         setCurrentImageCount(0);
+        setPreviousImageCount(0);
+        lastCompletedCount.current = 0;
         setDetections([]);
         setImageUri(null);
         setBase64Image(null);
@@ -155,7 +161,7 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                             <SelectionInfoBox title="Kết quả kiểm tra từ AI">
                                 <CountingResultSection
                                     result={result}
-                                    currentImageCount={currentImageCount}
+                                    currentImageCount={previousImageCount}
                                     countTimes={countTimes}
                                     showAddMore={showAddMore}
                                     onAddMore={handleAddMore}

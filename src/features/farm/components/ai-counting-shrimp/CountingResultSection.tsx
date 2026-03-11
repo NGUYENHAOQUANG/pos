@@ -29,7 +29,9 @@ export const CountingResultSection: React.FC<CountingResultSectionProps> = ({
         <View style={styles.row}>
             <Text style={styles.label}>Lần kiểm tra trước</Text>
             <Text style={styles.value}>
-                {currentImageCount > 0 ? Number(currentImageCount).toLocaleString('en-US') : '-'}
+                {countTimes > 1 && currentImageCount > 0
+                    ? Number(currentImageCount).toLocaleString('en-US')
+                    : '-'}
             </Text>
         </View>
         <View style={styles.row}>
@@ -87,6 +89,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderColor: colors.border,
         borderWidth: 1,
+        marginBottom: spacing.md,
     },
     infoIcon: {
         marginRight: 8,
