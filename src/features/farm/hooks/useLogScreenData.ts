@@ -1,7 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution, JobMeta } from '@/features/farm/types/farm.types';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
@@ -9,6 +8,7 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 import { parseDate, compareTime, formatDate } from '@/features/farm/utils/dateUtils';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 
@@ -84,14 +84,12 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
 ): UseLogScreenDataResult => {
     const navigation = useNavigation<NavigationProp>();
 
-    // Use specific selectors to prevent re-renders from unrelated job updates
-    const getPondJobItemsGroupedByDate = useFarmStore(state => state.getPondJobItemsGroupedByDate);
-
-    const [internalStartDate, setInternalStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [internalEndDate, setInternalEndDate] = useState(new Date());
+    const {
+        startDate: internalStartDate,
+        endDate: internalEndDate,
+        setStartDate: setInternalStartDate,
+        setEndDate: setInternalEndDate,
+    } = useDateRangeFilter();
 
     const startDate = config.startDate || internalStartDate;
     const endDate = config.endDate || internalEndDate;
@@ -100,80 +98,26 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
 
     const pondId = config.pond?.id || config.pondId;
 
-    // Determine which data slice to listen to based on jobType using a selector
-    const jobsSourceToCheck = useFarmStore(state => {
-        switch (config.jobType) {
-            case 'FEED':
-                return state.feedJobs;
-            case 'SHRIMP_INSPECTION':
-                return state.shrimpInspectionJobs;
-            case 'MEASURE_SIZE':
-                return state.measureSizeJobs;
-            case 'ENVIRONMENT':
-                return state.environmentJobs;
-            case 'WATER_TREATMENT':
-                return state.waterTreatmentJobs;
-            case 'WATER_CHANGE':
-                return state.waterChangeJobs;
-            case 'SIPHON':
-                return state.siphonJobs;
-            case 'TROUBLESHOOTING':
-                return state.troubleshootingJobs;
-            case 'TRANSFER_POND':
-                return state.transferPondJobs;
-            case 'CLEAN_POND':
-                return state.cleanPondJobs;
-            case 'SUN_DRY_POND':
-                return state.sunDryJobs;
-            case 'HARVEST':
-                return state.harvestJobs;
-            default:
-                return {};
-        }
-    });
-
     const groupedData: TrackingGroup[] = useMemo(() => {
-        if (!pondId) return [];
+        if (!pondId || !config.externalData) return [];
 
-        let itemsByDate: Map<string, JobExecution[]>;
+        // Data is already filtered by API via date params — just group by date
+        const itemsByDate = new Map<string, JobExecution[]>();
+        config.externalData.forEach(item => {
+            const dateStr = item.date;
+            const date = dateStr
+                ? dateStr.includes('/')
+                    ? parseDate(dateStr)
+                    : new Date(dateStr)
+                : new Date();
+            const dateKey = formatDate(date);
+            if (!itemsByDate.has(dateKey)) itemsByDate.set(dateKey, []);
+            itemsByDate.get(dateKey)!.push(item);
+        });
 
-        if (config.externalData) {
-            const startOfStartDate = new Date(startDate);
-            startOfStartDate.setHours(0, 0, 0, 0);
-            const endOfEndDate = new Date(endDate);
-            endOfEndDate.setHours(23, 59, 59, 999);
-
-            const filteredItems = config.externalData.filter(item => {
-                const dateStr = item.date;
-                const itemDate = dateStr
-                    ? dateStr.includes('/')
-                        ? parseDate(dateStr)
-                        : new Date(dateStr)
-                    : new Date();
-                const startOfItemDate = new Date(itemDate);
-                startOfItemDate.setHours(0, 0, 0, 0);
-                return startOfItemDate >= startOfStartDate && startOfItemDate <= endOfEndDate;
-            });
-
-            itemsByDate = new Map<string, JobExecution[]>();
-            filteredItems.forEach(item => {
-                const dateStr = item.date;
-                const date = dateStr
-                    ? dateStr.includes('/')
-                        ? parseDate(dateStr)
-                        : new Date(dateStr)
-                    : new Date();
-                const dateKey = formatDate(date);
-                if (!itemsByDate.has(dateKey)) itemsByDate.set(dateKey, []);
-                itemsByDate.get(dateKey)!.push(item);
-            });
-
-            itemsByDate.forEach(items =>
-                items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'))
-            );
-        } else {
-            itemsByDate = getPondJobItemsGroupedByDate(pondId, config.jobType, startDate, endDate);
-        }
+        itemsByDate.forEach(items =>
+            items.sort((a, b) => compareTime(b.time ?? '00:00', a.time ?? '00:00'))
+        );
 
         if (itemsByDate.size === 0) return [];
 
@@ -242,18 +186,8 @@ export const useLogScreenData = <T extends JobMeta = JobMeta>(
             const dateB = parseDate(b.date);
             return dateB.getTime() - dateA.getTime();
         });
-        // Depend on jobsSourceToCheck to trigger updates when data changes
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        pondId,
-        config,
-        getPondJobItemsGroupedByDate,
-        startDate,
-        endDate,
-        navigation,
-        jobsSourceToCheck,
-        config.externalData,
-    ]);
+    }, [pondId, config, navigation, config.externalData]);
 
     return {
         startDate,

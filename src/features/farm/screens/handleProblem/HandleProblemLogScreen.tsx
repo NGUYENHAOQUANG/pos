@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -13,6 +13,7 @@ import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation'
 import { useIncidentsAsJobs } from '@/features/farm/hooks/useIncidentData';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HandleProblemLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -26,40 +27,23 @@ export const HandleProblemLogScreen = () => {
     // Get pond from store
     const pond = useFarmStore(state => state.getPondById(pondId));
 
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
-    const [refreshing, setRefreshing] = useState(false);
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
+    const [refreshing, setRefreshing] = React.useState(false);
 
     const currentJobType: JobType = jobType as JobType;
 
-    const cleanDryDateParams = useMemo(() => {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        return {
-            createAtFrom: start.toISOString(),
-            createAtTo: end.toISOString(),
-            page: 1,
-            limit: 1000,
-        };
-    }, [startDate, endDate]);
+    const cleanDryDateParams = {
+        createAtFrom: dateParams.CreateAtFrom,
+        createAtTo: dateParams.CreateAtTo,
+        page: 1,
+        limit: 1000,
+    };
 
-    const incidentDateParams = useMemo(() => {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        return {
-            CreateAtFrom: start.toISOString(),
-            CreateAtTo: end.toISOString(),
-            page: 1,
-            limit: 100,
-        };
-    }, [startDate, endDate]);
+    const incidentDateParams = {
+        ...dateParams,
+        page: 1,
+        limit: 100,
+    };
 
     const {
         jobs: cleanJobs,
