@@ -253,3 +253,23 @@ export const mapStockTransferError = (
 
     return fallback;
 };
+
+/**
+ * Show error toast when shrimp size is missing
+ */
+export const showShrimpSizeRequiredToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng nhập cỡ tôm(con/kg) !',
+    });
+};
+
+/**
+ * Show error toast when remaining weight is missing
+ */
+export const showRemainingWeightRequiredToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng nhập sản lượng còn lại(kg) !',
+    });
+};
