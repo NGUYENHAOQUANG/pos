@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, AppState, AppStateStatus } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, AppState, AppStateStatus, Modal } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -70,10 +70,12 @@ export const NetworkStatusModal = () => {
         return () => subscription.remove();
     }, []);
 
-    if (!visible) return null;
+    if (!visible) {
+        return null;
+    }
 
     return (
-        <View style={[StyleSheet.absoluteFill, { zIndex: 99999, elevation: 99999 }]}>
+        <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
             <View style={styles.overlay}>
                 <View style={styles.container}>
                     {statusType === 'lost' ? (
@@ -109,7 +111,7 @@ export const NetworkStatusModal = () => {
                     )}
                 </View>
             </View>
-        </View>
+        </Modal>
     );
 };
 
