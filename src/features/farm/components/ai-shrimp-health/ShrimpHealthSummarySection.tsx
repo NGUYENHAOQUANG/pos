@@ -7,11 +7,17 @@ import {
     HealthCheckResult,
 } from '@/features/farm/services/shrimp-health-ai.service';
 
+import InfoIcon from '@/assets/Icon/information-circle.svg';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+
 interface Props {
     results: HealthCheckResult[];
     currentResult: HealthCheckResult | null;
     previousResult: HealthCheckResult | null;
     onShowDetailsPress: () => void;
+    countTimes: number;
+    showAddMore: boolean;
+    onAddMore?: () => void;
 }
 
 export const ShrimpHealthSummarySection: React.FC<Props> = ({
@@ -19,6 +25,9 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
     currentResult,
     previousResult,
     onShowDetailsPress,
+    countTimes,
+    showAddMore,
+    onAddMore,
 }) => {
     return (
         <View style={styles.container}>
@@ -106,6 +115,25 @@ export const ShrimpHealthSummarySection: React.FC<Props> = ({
                     })()}
                 </Text>
             </View>
+
+            {countTimes > 0 && (
+                <>
+                    <View style={styles.infoBox}>
+                        <InfoIcon width={20} height={20} style={styles.infoIcon} />
+                        <Text style={styles.infoText}>
+                            Bạn có thể chụp thêm hình để đo thêm nếu cần.
+                        </Text>
+                    </View>
+
+                    {showAddMore && (
+                        <OutlineButton
+                            label="Đo thêm"
+                            onPress={onAddMore || (() => {})}
+                            labelStyle={styles.addMoreText}
+                        />
+                    )}
+                </>
+            )}
         </View>
     );
 };
@@ -160,5 +188,27 @@ const styles = StyleSheet.create({
     },
     statusTextSick: {
         color: colors.red[600],
+    },
+    infoBox: {
+        backgroundColor: colors.white,
+        paddingBottom: 16,
+        borderRadius: 8,
+        marginTop: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: colors.border,
+        borderWidth: 1,
+    },
+    infoIcon: {
+        marginRight: 8,
+    },
+    infoText: {
+        fontSize: 14,
+        color: colors.text,
+        lineHeight: 20,
+        flex: 1,
+    },
+    addMoreText: {
+        color: colors.textSecondary,
     },
 });

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { borderRadius, colors } from '@/styles';
+import { colors } from '@/styles';
 import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconAICheck } from '@/assets/icons';
@@ -94,7 +94,6 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 label="Kiểm tra kích thước tôm bằng AI"
                 onPress={onAIMeasurePress || (() => {})}
                 prefix={<IconAICheck width={20} height={20} />}
-                style={styles.aiButton}
                 labelStyle={styles.aiButtonText}
             />
 
@@ -131,14 +130,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 };
 
 const styles = StyleSheet.create({
-    aiButton: {
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-        borderWidth: 1.5,
-    },
     aiButtonText: {
-        color: colors.text,
+        color: colors.textSecondary,
         fontSize: 14,
         fontWeight: '500',
     },

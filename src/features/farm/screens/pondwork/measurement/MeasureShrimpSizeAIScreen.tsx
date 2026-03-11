@@ -8,14 +8,16 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Loading } from '@/shared/components/ui/Loading';
-import { ImageUpload } from '@/shared/components/forms/ImageUpload';
+
 import Toast from 'react-native-toast-message';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { Button } from '@/shared/components/buttons/Button';
-import { IconCamera, IconAICheck } from '@/assets/icons';
+import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
+
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import InfoIcon from '@/assets/Icon/information-circle.svg';
+import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { formatDecimalInput } from '@/shared/utils/formatters';
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
@@ -55,6 +57,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [imageUri, _setImageUri] = useState<string | null>(null);
     const [base64Image, setBase64Image] = useState<string | null>(null);
     const [isLoading, _setIsLoading] = useState(false);
+    const [hasAnalyzedCurrent, setHasAnalyzedCurrent] = useState(false);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
 
@@ -67,6 +70,9 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         measurements.length > 0 ? measurements[measurements.length - 1] : null;
     const previousMeasurement =
         measurements.length > 1 ? measurements[measurements.length - 2] : null;
+
+    const countTimes = measurements.length;
+    const showAddMore = countTimes >= 2 || (countTimes === 1 && !hasAnalyzedCurrent);
 
     const previousAverageSizeCm = useMemo(() => {
         if (!previousMeasurement || previousMeasurement.sizes.length === 0) return 0;
@@ -114,9 +120,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         return Math.round((1000 * totalCount) / totalWeight);
     }, [measurements]);
 
-    // Count times is just the length of history
-    const countTimes = measurements.length;
-
     // Include isAnalyzing in loading state
     const isScreenLoading = isLoading || isAnalyzing;
 
@@ -134,6 +137,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
             setImageDimensions(dimensions);
         }
         setDetections([]); // Clear previous detections
+        setHasAnalyzedCurrent(false);
     };
 
     const handleGetCount = async () => {
@@ -235,6 +239,12 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                         setMeasurements(prev => [...prev, newMeasurement]);
                         setDetections(newDetections);
                         setMeasuredWeight('');
+                        setHasAnalyzedCurrent(true);
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Đã có kết quả đo từ AI!',
+                            position: 'bottom',
+                        });
                     },
                     onError: (error: any) => {
                         console.error('Estimate Size AI Error:', error);
@@ -316,7 +326,29 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                    <SelectionInfoBox title="Thông tin nhập">
+                    <SelectionInfoBox title="Hình ảnh xử lý" style={{ marginTop: 0 }}>
+                        <AIImageProcessingSection
+                            imageUri={imageUri}
+                            imageDimensions={imageDimensions}
+                            displayDimensions={displayDimensions}
+                            onImageSelect={handleImageSelect}
+                            onImageAreaLayout={size => setDisplayDimensions(size)}
+                        >
+                            {imageUri && detections.length > 0 && (
+                                <ShrimpMeasurementBoundingBoxOverlay
+                                    detections={detections}
+                                    displayWidth={displayDimensions.width}
+                                    displayHeight={
+                                        displayDimensions.width /
+                                        (imageDimensions.width / imageDimensions.height)
+                                    }
+                                    originalWidth={imageDimensions.width}
+                                    originalHeight={imageDimensions.height}
+                                />
+                            )}
+                        </AIImageProcessingSection>
+                    </SelectionInfoBox>
+                    <SelectionInfoBox title="Thông tin nhập" style={{ marginTop: 0 }}>
                         <Input
                             label="Khối lượng tôm được đo (g)"
                             value={measuredWeight}
@@ -327,7 +359,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                         />
                     </SelectionInfoBox>
 
-                    <SelectionInfoBox title="Kết quả đo từ AI">
+                    <SelectionInfoBox title="Kết quả đo từ AI" style={{ marginTop: 0 }}>
                         <View style={styles.summaryContainer}>
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>
@@ -338,13 +370,13 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 </Text>
                             </View>
                             <View style={styles.summaryRow}>
-                                <Text style={styles.summaryLabel}>Lần đo trước</Text>
+                                <Text style={styles.summaryLabel}>Lần kiểm tra trước</Text>
                                 <Text style={styles.summaryValue}>
                                     {previousMeasurement ? previousMeasurement.count : '-'}
                                 </Text>
                             </View>
                             <View style={styles.summaryRow}>
-                                <Text style={styles.summaryLabel}>Kích thước tôm (cm) - AI</Text>
+                                <Text style={styles.summaryLabel}>Kích thước tôm</Text>
                                 {sizeShrimp1 !== null && currentMeasurement ? (
                                     <TouchableOpacity
                                         style={[styles.statusPill, styles.statusPillNormal]}
@@ -372,9 +404,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                 )}
                             </View>
                             <View style={styles.summaryRow}>
-                                <Text style={styles.summaryLabel}>
-                                    Trung bình kích thước tôm (cm)
-                                </Text>
+                                <Text style={styles.summaryLabel}>Trung bình kích thước tôm</Text>
                                 <Text style={styles.summaryValue}>
                                     {averageSizeCm !== null ? averageSizeCm : '-'}
                                 </Text>
@@ -405,71 +435,25 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                                     </View>
                                 </>
                             )}
-                        </View>
-                    </SelectionInfoBox>
 
-                    <SelectionInfoBox title="Hình ảnh xử lý">
-                        <View>
-                            <View
-                                onLayout={event => {
-                                    const { width, height } = event.nativeEvent.layout;
-                                    setDisplayDimensions({ width, height });
-                                }}
-                            >
-                                <ImageUpload
-                                    imageUri={imageUri}
-                                    onImageSelect={handleImageSelect}
-                                    returnBase64={true}
-                                    aspectRatio={
-                                        imageDimensions.width > 0 && imageDimensions.height > 0
-                                            ? imageDimensions.width / imageDimensions.height
-                                            : 1
-                                    }
-                                >
-                                    {imageUri && detections.length > 0 && (
-                                        <ShrimpMeasurementBoundingBoxOverlay
-                                            detections={detections}
-                                            displayWidth={displayDimensions.width}
-                                            displayHeight={
-                                                displayDimensions.width /
-                                                (imageDimensions.width / imageDimensions.height)
-                                            }
-                                            originalWidth={imageDimensions.width}
-                                            originalHeight={imageDimensions.height}
+                            {countTimes > 0 && (
+                                <>
+                                    <View style={styles.infoBox}>
+                                        <InfoIcon width={20} height={20} style={styles.infoIcon} />
+                                        <Text style={styles.infoText}>
+                                            Bạn có thể chụp thêm hình để đo thêm nếu cần.
+                                        </Text>
+                                    </View>
+
+                                    {showAddMore && (
+                                        <OutlineButton
+                                            label="Đo thêm"
+                                            onPress={handleGetCount}
+                                            labelStyle={styles.addMoreText}
                                         />
                                     )}
-                                </ImageUpload>
-
-                                <View style={{ marginTop: 12, gap: 12 }}>
-                                    <OutlineButton
-                                        label="Chụp lại"
-                                        onPress={() => {
-                                            _setImageUri(null);
-                                            setDetections([]);
-                                            setImageDimensions({ width: 1, height: 1 });
-                                        }}
-                                        prefix={
-                                            <IconCamera
-                                                width={20}
-                                                height={20}
-                                                fill={colors.textSecondary}
-                                            />
-                                        }
-                                    />
-
-                                    <OutlineButton
-                                        label="Kiểm tra"
-                                        onPress={handleGetCount}
-                                        prefix={
-                                            <IconAICheck
-                                                width={20}
-                                                height={20}
-                                                fill={colors.primaryOrange}
-                                            />
-                                        }
-                                    />
-                                </View>
-                            </View>
+                                </>
+                            )}
                         </View>
                     </SelectionInfoBox>
                 </ScrollView>
@@ -481,20 +465,32 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                     <Text style={styles.checkCountValue}>{countTimes}</Text>
                 </View>
                 <View style={styles.buttonRow}>
-                    <Button
-                        title="Đo lại"
-                        variant="outline"
-                        onPress={handleReset}
-                        style={[styles.flexButton, { borderColor: colors.border }]}
-                        textStyle={{ color: colors.textSecondary }}
-                    />
-                    <Button
-                        title="Lấy kết quả đo"
-                        variant="primary"
-                        onPress={handleSave}
-                        style={styles.flexButton}
-                        disabled={measurements.length === 0}
-                    />
+                    {countTimes === 0 ? (
+                        <Button
+                            title="Bắt đầu đo"
+                            variant="primary"
+                            onPress={handleGetCount}
+                            style={styles.flexButton}
+                            disabled={!imageUri}
+                        />
+                    ) : (
+                        <>
+                            <Button
+                                title="Đo lại"
+                                variant="outline"
+                                onPress={handleReset}
+                                style={[styles.flexButton, { borderColor: colors.border }]}
+                                textStyle={{ color: colors.textSecondary }}
+                            />
+                            <Button
+                                title="Lấy kết quả đo"
+                                variant="primary"
+                                onPress={handleSave}
+                                style={styles.flexButton}
+                                disabled={measurements.length === 0}
+                            />
+                        </>
+                    )}
                 </View>
             </View>
 
@@ -577,8 +573,10 @@ const styles = StyleSheet.create({
         width: 40,
     },
     scrollContent: {
-        padding: 0,
+        paddingHorizontal: 0,
+        paddingTop: 8,
         paddingBottom: 100,
+        gap: 8,
     },
     summaryContainer: {
         gap: 12,
@@ -601,6 +599,29 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: colors.text,
         marginLeft: spacing.md,
+    },
+    infoBox: {
+        backgroundColor: colors.white,
+        padding: 16,
+        borderRadius: 8,
+        marginTop: spacing.md,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderColor: colors.border,
+        borderWidth: 1,
+    },
+    infoIcon: {
+        marginRight: 8,
+    },
+    infoText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        lineHeight: 20,
+        flex: 1,
+    },
+    addMoreText: {
+        color: colors.textSecondary,
     },
     statusPill: {
         borderRadius: 100,

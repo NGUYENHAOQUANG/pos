@@ -140,7 +140,6 @@ export const ShrimpInspectionObservationBox: React.FC<ShrimpInspectionObservatio
                     label="Kiểm tra tôm bằng AI"
                     onPress={onAICheckPress || (() => {})}
                     prefix={<IconAICheck width={20} height={20} fill={colors.gray[500]} />}
-                    style={styles.aiButton}
                     labelStyle={styles.aiButtonText}
                 />
             </View>
@@ -359,14 +358,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '500',
     },
-    aiButton: {
-        backgroundColor: colors.white,
-        borderColor: colors.border,
-        borderRadius: borderRadius.full,
-        borderWidth: 1.5,
-    },
     aiButtonText: {
-        color: colors.text,
+        color: colors.textSecondary,
         fontSize: 14,
         fontWeight: '500',
     },
