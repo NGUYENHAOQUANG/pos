@@ -95,6 +95,14 @@ export const AddWaterTreatmentScreens: React.FC = () => {
             console.error('Create water treatment error', error);
             let message = getErrorMessage(error, 'Vui lòng thử lại');
 
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Có lỗi xảy ra',

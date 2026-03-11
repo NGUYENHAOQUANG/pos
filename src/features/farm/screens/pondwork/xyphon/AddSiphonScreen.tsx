@@ -290,6 +290,14 @@ export const AddSiphonScreen: React.FC = () => {
         } catch (error: any) {
             let message = getErrorMessage(error, 'Vui lòng thử lại');
 
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Lưu thất bại',
@@ -301,7 +309,7 @@ export const AddSiphonScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title="Xi-phông"
+                title="Xi-Phông"
                 onBack={handleBack}
                 rightComponent={
                     itemToEdit ? <DeleteButton onPress={handleDeletePress} /> : undefined
@@ -309,7 +317,7 @@ export const AddSiphonScreen: React.FC = () => {
             />
 
             {/* Content */}
-            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={200}>
+            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={80}>
                 <GeneralInfoBox
                     ref={generalInfoBoxRef}
                     type="withImage"
