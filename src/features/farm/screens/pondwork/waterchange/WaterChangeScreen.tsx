@@ -370,6 +370,14 @@ export const WaterSupplyScreen = () => {
         } catch (error: any) {
             let message = getErrorMessage(error, 'Vui lòng thử lại');
 
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
+
             Toast.show({
                 type: 'error',
                 text1: 'Lưu thất bại',

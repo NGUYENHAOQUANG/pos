@@ -99,7 +99,15 @@ export const HandleProblemFormScreen = () => {
     };
 
     const handleError = (err: unknown) => {
-        const message = getErrorMessage(err, 'Có lỗi xảy ra');
+        let message = getErrorMessage(err, 'Có lỗi xảy ra');
+
+        if (
+            message.includes('invalid start of a value') ||
+            message.includes('converted to System.Decimal') ||
+            message.includes('System.Decimal')
+        ) {
+            message = 'Số lượng vật tư không hợp lệ';
+        }
 
         Toast.show({
             type: 'error',
