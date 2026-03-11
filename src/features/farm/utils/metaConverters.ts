@@ -240,10 +240,6 @@ export const convertHarvestMetaToActivityData = (
         data.push({ label: 'Doanh thu (VNĐ):', value: formatNumber(meta.revenue) });
     }
 
-    if (item.note) {
-        data.push({ label: 'Ghi chú:', value: item.note });
-    }
-
     return data;
 };
 

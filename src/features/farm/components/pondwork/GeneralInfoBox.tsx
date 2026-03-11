@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
         color: colors.text,
         lineHeight: 22,
     },
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: colors.borderLight,
-        backgroundColor: '#F3F4F6', // slightly grey as per usual patterns or matching design
+        backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 10,
@@ -693,8 +693,8 @@ const styles = StyleSheet.create({
     radioGroup: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        columnGap: spacing.sm, // Khoảng cách cột
-        rowGap: spacing.sm, // Khoảng cách hàng
+        columnGap: spacing.sm,
+        rowGap: spacing.sm,
     },
     radioItem: {
         width: '48%',
