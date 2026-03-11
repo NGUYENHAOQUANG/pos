@@ -84,12 +84,11 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         padding: 16,
         borderRadius: 8,
-        marginTop: spacing.md,
+        marginVertical: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         borderColor: colors.border,
         borderWidth: 1,
-        marginBottom: spacing.md,
     },
     infoIcon: {
         marginRight: 8,
