@@ -8,6 +8,7 @@ import {
     GetWarehouseItemsQueryParams,
 } from '@/features/material/types/warehouse.types';
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
+import { serializeParams } from '@/core/utils/params';
 
 export type GetWarehousesResponse = IApiResponse<IPaginate<IWarehouse>>;
 
@@ -23,12 +24,11 @@ export const warehouseApi = {
         warehouseId: string,
         params?: GetWarehouseItemsQueryParams
     ): Promise<GetWarehouseItemsResponse> => {
-        const { data } = await apiClient.get<GetWarehouseItemsResponse>(
-            API_ENDPOINTS.WAREHOUSE.ITEMS(warehouseId),
-            {
-                params,
-            }
-        );
+        const queryString = serializeParams(params as Record<string, unknown>);
+        const url = `${API_ENDPOINTS.WAREHOUSE.ITEMS(warehouseId)}${
+            queryString ? `?${queryString}` : ''
+        }`;
+        const { data } = await apiClient.get<GetWarehouseItemsResponse>(url);
         return data;
     },
 

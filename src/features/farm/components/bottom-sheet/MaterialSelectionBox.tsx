@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
@@ -6,7 +6,9 @@ import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import { useFilteredWarehouseMaterials } from '@/features/farm/hooks/useFilteredWarehouseMaterials';
+import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 
 export interface SelectedMaterialItem {
@@ -16,66 +18,63 @@ export interface SelectedMaterialItem {
 }
 
 interface MaterialSelectionBoxProps {
-    /** Currently selected materials */
     selectedMaterials: SelectedMaterialItem[];
-    /** Callback when materials list changes */
     onMaterialsChange: (materials: SelectedMaterialItem[]) => void;
-    /**
-     * List of MaterialGroupType to filter.
-     * The component fetches all materials internally and filters by these group types.
-     * If not provided, all materials are shown.
-     */
     groupTypes?: MaterialGroupType[];
-    /**
-     * @deprecated Use groupTypes instead. External materials list, used as fallback
-     * when groupTypes is not provided and external data is needed.
-     */
-    materials?: IMaterial[];
 }
 
 export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
     selectedMaterials,
     onMaterialsChange,
     groupTypes,
-    materials: externalMaterials,
 }) => {
     const [isModalVisible, setModalVisible] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const debouncedSearchText = useDebounce(searchText, 500);
 
-    // Fetch materials internally
-    const { materials: allMaterials } = useFarmMaterials();
+    // Fetch material groups to resolve groupTypes → UUIDs
+    const { data: materialGroups = [] } = useMaterialGroups();
 
-    // Filter materials by groupTypes
-    const filteredMaterials = useMemo(() => {
-        // If groupTypes provided, use internal fetch + filter
-        if (groupTypes && groupTypes.length > 0) {
-            if (!allMaterials.length) return [];
-            return allMaterials.filter(m => {
-                if (!m.group) return false;
-                const groupName = m.group.toLowerCase();
+    const materialGroupIds = useMemo(() => {
+        if (!groupTypes?.length || !materialGroups.length) return undefined;
+        return materialGroups
+            .filter(g => {
+                if (!g.name) return false;
+                const groupName = g.name.toLowerCase();
                 return groupTypes.some(gt => groupName.includes(gt.toLowerCase()));
-            });
-        }
+            })
+            .map(g => String(g.id));
+    }, [groupTypes, materialGroups]);
 
-        // Fallback to external materials if provided
-        if (externalMaterials) {
-            return externalMaterials;
-        }
-
-        // Default: return all materials
-        return allMaterials;
-    }, [allMaterials, groupTypes, externalMaterials]);
+    // Fetch materials with API-level filtering + search
+    const {
+        materials: allMaterials,
+        isLoading,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useFilteredWarehouseMaterials({
+        materialGroupIds,
+        searchText: debouncedSearchText,
+    });
 
     // Exclude already selected materials
     const availableMaterials = useMemo(() => {
-        return filteredMaterials.filter(
-            m => !selectedMaterials.some(sm => sm.material.id === m.id)
+        return allMaterials.filter(
+            (m: IMaterial) => !selectedMaterials.some(sm => sm.material.id === m.id)
         );
-    }, [filteredMaterials, selectedMaterials]);
+    }, [allMaterials, selectedMaterials]);
 
     const handleAddMaterial = (data: SelectedMaterialItem) => {
         onMaterialsChange([...selectedMaterials, data]);
         setModalVisible(false);
+        setSearchText('');
     };
+
+    const handleClose = useCallback(() => {
+        setModalVisible(false);
+        setSearchText('');
+    }, []);
 
     const handleRemoveMaterial = (index: number) => {
         onMaterialsChange(selectedMaterials.filter((_, i) => i !== index));
@@ -126,9 +125,15 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 
             <SelectMaterialBottomSheet
                 visible={isModalVisible}
-                onClose={() => setModalVisible(false)}
+                onClose={handleClose}
                 onSave={handleAddMaterial}
                 materials={availableMaterials}
+                isLoading={isLoading}
+                onLoadMore={fetchNextPage}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                searchText={searchText}
+                onSearchChange={setSearchText}
             />
         </>
     );

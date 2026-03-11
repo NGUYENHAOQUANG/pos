@@ -24,7 +24,7 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
-} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+} from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 // import { useFarmStore } from '@/features/farm/store/farmStore'; // Removed
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';

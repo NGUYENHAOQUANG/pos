@@ -25,7 +25,7 @@ import { SiphonLossBox } from '@/features/farm/components/pondwork/xyphon/Siphon
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
-} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+} from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { documentApi } from '@/features/material/api/documentApi';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { MaterialGroupType } from '@/features/material/types/material.types';

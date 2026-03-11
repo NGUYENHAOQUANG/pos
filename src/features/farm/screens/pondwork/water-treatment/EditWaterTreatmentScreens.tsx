@@ -10,7 +10,7 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
