@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors } from '@/styles';
@@ -26,6 +27,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
     const [imageBase64, setImageBase64] = useState<string | null>(null);
     const [isSheetVisible, setIsSheetVisible] = useState(false);
     const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+    const [hasAnalyzedCurrent, setHasAnalyzedCurrent] = useState(false);
 
     React.useEffect(() => {
         if (results.length > 0) {
@@ -69,6 +71,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
             setImageDimensions(dimensions);
         }
         setDetections([]);
+        setHasAnalyzedCurrent(false);
     };
 
     const handleGetResult = async () => {
@@ -88,6 +91,12 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
 
                     setResults(prev => [...prev, newResult]);
                     setDetections(newDetections);
+                    setHasAnalyzedCurrent(true);
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Đã có kết quả phân tích từ AI!',
+                        position: 'bottom',
+                    });
                 },
                 onSettled: () => {
                     _setIsLoading(false);
@@ -105,6 +114,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
         setImageBase64(null);
         setResults([]);
         setDetections([]);
+        setHasAnalyzedCurrent(false);
         setIsResetModalVisible(false);
     };
     const handleShowDetails = () => {
@@ -163,12 +173,6 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 displayDimensions={displayDimensions}
                 onBackPress={navigation.goBack}
                 onImageSelect={handleImageSelect}
-                onImageRemove={() => {
-                    _setImageUri(null);
-                    setImageBase64(null);
-                    setDetections([]);
-                    setImageDimensions({ width: 1, height: 1 });
-                }}
                 onResetPress={handleReset}
                 onGetResultPress={handleSave}
                 onShowDetailsPress={handleShowDetails}
@@ -179,6 +183,7 @@ export const ShrimpHealthCheckAIScreen: React.FC = () => {
                 onConfirmReset={handleConfirmReset}
                 onCancelReset={() => setIsResetModalVisible(false)}
                 onImageAreaLayout={size => setDisplayDimensions(size)}
+                hasAnalyzedCurrent={hasAnalyzedCurrent}
             />
         </View>
     );

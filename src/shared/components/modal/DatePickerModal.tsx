@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Modal,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing } from '@/styles';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { borderRadius } from '@/styles';
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 
 interface DatePickerModalProps {
     visible: boolean;
@@ -24,7 +18,6 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
     date,
     onSelectDate,
 }) => {
-    const insets = useSafeAreaInsets();
     const [viewDate, setViewDate] = useState(new Date(date));
     const [pendingDate, setPendingDate] = useState(new Date(date));
 
@@ -169,94 +162,83 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
     };
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-            <TouchableWithoutFeedback onPress={handleClose}>
-                <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                        <View
-                            style={[
-                                styles.container,
-                                { paddingBottom: Math.max(insets.bottom, 16) },
-                            ]}
-                        >
-                            {/* Header */}
-                            <View style={styles.header}>
-                                <Text style={styles.headerTitle}>Chọn ngày</Text>
-                                <TouchableOpacity
-                                    onPress={handleClose}
-                                    style={styles.closeButton}
-                                    activeOpacity={0.7}
-                                >
-                                    <Ionicons name="close" size={22} color={colors.text} />
-                                </TouchableOpacity>
-                            </View>
+        <AnimatedBottomSheet
+            visible={visible}
+            onClose={handleClose}
+            overlayStyle={styles.overlay}
+            containerStyle={styles.container}
+        >
+            {/* Header */}
+            <View style={styles.header}>
+                <View style={styles.headerSpacer} />
+                <Text style={styles.headerTitle}>Chọn ngày</Text>
+                <TouchableOpacity
+                    onPress={handleClose}
+                    style={styles.closeButton}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons name="close" size={22} color={colors.text} />
+                </TouchableOpacity>
+            </View>
 
-                            <View style={styles.divider} />
+            <View style={styles.divider} />
 
-                            {/* Month Navigation */}
-                            <View style={styles.monthNav}>
-                                <TouchableOpacity
-                                    onPress={handlePrevMonth}
-                                    style={styles.navButton}
-                                    activeOpacity={0.7}
-                                >
-                                    <Ionicons name="chevron-back" size={18} color={colors.text} />
-                                </TouchableOpacity>
+            {/* Month Navigation */}
+            <View style={styles.monthNav}>
+                <TouchableOpacity
+                    onPress={handlePrevMonth}
+                    style={styles.navButton}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons name="chevron-back" size={18} color={colors.text} />
+                </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.monthSelector} activeOpacity={0.7}>
-                                    <Text style={styles.monthText}>
-                                        Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
-                                    </Text>
-                                    <Ionicons name="chevron-down" size={16} color={colors.text} />
-                                </TouchableOpacity>
+                <TouchableOpacity style={styles.monthSelector} activeOpacity={0.7}>
+                    <Text style={styles.monthText}>
+                        Tháng {viewDate.getMonth() + 1}, {viewDate.getFullYear()}
+                    </Text>
+                    <Ionicons name="chevron-down" size={16} color={colors.text} />
+                </TouchableOpacity>
 
-                                <TouchableOpacity
-                                    onPress={handleNextMonth}
-                                    style={styles.navButton}
-                                    activeOpacity={0.7}
-                                >
-                                    <Ionicons
-                                        name="chevron-forward"
-                                        size={18}
-                                        color={colors.text}
-                                    />
-                                </TouchableOpacity>
-                            </View>
+                <TouchableOpacity
+                    onPress={handleNextMonth}
+                    style={styles.navButton}
+                    activeOpacity={0.7}
+                >
+                    <Ionicons name="chevron-forward" size={18} color={colors.text} />
+                </TouchableOpacity>
+            </View>
 
-                            {/* Days Header */}
-                            <View style={styles.weekHeader}>
-                                {daysOfWeek.map((day, index) => (
-                                    <Text key={index} style={styles.weekDayText}>
-                                        {day}
-                                    </Text>
-                                ))}
-                            </View>
+            {/* Days Header */}
+            <View style={styles.weekHeader}>
+                {daysOfWeek.map((day, index) => (
+                    <Text key={index} style={styles.weekDayText}>
+                        {day}
+                    </Text>
+                ))}
+            </View>
 
-                            {/* Calendar Grid */}
-                            <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
+            {/* Calendar Grid */}
+            <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
 
-                            {/* Footer */}
-                            <View style={styles.footer}>
-                                <TouchableOpacity
-                                    style={styles.cancelButton}
-                                    onPress={handleClose}
-                                    activeOpacity={0.7}
-                                >
-                                    <Text style={styles.cancelButtonText}>Hủy</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.applyButton}
-                                    onPress={handleApply}
-                                    activeOpacity={0.8}
-                                >
-                                    <Text style={styles.applyButtonText}>Áp dụng</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
+            {/* Footer */}
+            <View style={styles.footer}>
+                <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={handleClose}
+                    activeOpacity={0.7}
+                >
+                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.applyButton}
+                    onPress={handleApply}
+                    activeOpacity={0.8}
+                >
+                    <Text style={styles.applyButtonText}>Áp dụng</Text>
+                </TouchableOpacity>
+            </View>
+        </AnimatedBottomSheet>
     );
 };
 
@@ -265,18 +247,15 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.overlayLight,
         justifyContent: 'flex-end',
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.md,
     },
     container: {
         width: '100%',
         backgroundColor: colors.white,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingHorizontal: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 12,
+        borderRadius: borderRadius.md,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
     },
     header: {
         flexDirection: 'row',
@@ -350,7 +329,7 @@ const styles = StyleSheet.create({
     },
     dayCell: {
         width: '14.28%',
-        aspectRatio: 1,
+        height: 48,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 2,
@@ -390,6 +369,7 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: 'row',
         gap: spacing.sm,
+        marginTop: 32,
     },
     cancelButton: {
         flex: 1,

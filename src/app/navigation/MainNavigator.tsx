@@ -82,7 +82,7 @@ const navigationItems: NavigationItem[] = [
     },
     {
         key: 'Devices',
-        label: 'Điều khiển',
+        label: 'Thiết bị',
         Icon: IconDevices,
         IconActive: IconDevicesActive,
         component: ControlStackScreen, // Use Stack instead of single screen
@@ -103,7 +103,7 @@ const navigationItems: NavigationItem[] = [
     },
     {
         key: 'Menu',
-        label: 'Menu',
+        label: 'Tài khoản',
         Icon: IconSetting,
         IconActive: IconSettingActive,
         component: MenuScreenWithProvider,

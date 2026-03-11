@@ -39,6 +39,8 @@ interface TimePickerModalProps {
     onClose: () => void;
     time: Date | null;
     onSelectTime: (date: Date) => void;
+    /** Whether to show seconds column. Default: true */
+    showSeconds?: boolean;
 }
 
 export const TimePickerModal: React.FC<TimePickerModalProps> = ({
@@ -46,13 +48,16 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
     onClose,
     time,
     onSelectTime,
+    showSeconds = true,
 }) => {
     const insets = useSafeAreaInsets();
 
     const defaultTime = time || new Date();
     const [selectedHour, setSelectedHour] = useState(defaultTime.getHours());
     const [selectedMinute, setSelectedMinute] = useState(defaultTime.getMinutes());
-    const [selectedSecond, setSelectedSecond] = useState(defaultTime.getSeconds());
+    const [selectedSecond, setSelectedSecond] = useState(
+        showSeconds ? defaultTime.getSeconds() : 0
+    );
 
     // Force remount key - changes each time modal opens so FlatList re-initializes
     const [mountKey, setMountKey] = useState(0);
@@ -67,7 +72,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             const t = time || new Date();
             setSelectedHour(t.getHours());
             setSelectedMinute(t.getMinutes());
-            setSelectedSecond(t.getSeconds());
+            setSelectedSecond(showSeconds ? t.getSeconds() : 0);
             setMountKey(prev => prev + 1);
 
             // Wait for modal animation to finish, then mount pickers
@@ -95,7 +100,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 useNativeDriver: true,
             }).start();
         }
-    }, [visible, time, slideAnim]);
+    }, [visible, time, slideAnim, showSeconds]);
 
     const handleConfirm = useCallback(() => {
         const newDate = new Date();
@@ -140,7 +145,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                     <View style={styles.labelsContainer}>
                         <Text style={styles.columnLabel}>Giờ</Text>
                         <Text style={styles.columnLabel}>Phút</Text>
-                        <Text style={styles.columnLabel}>Giây</Text>
+                        {showSeconds && <Text style={styles.columnLabel}>Giây</Text>}
                     </View>
 
                     {/* Time Picker Body */}
@@ -180,24 +185,28 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                     />
                                 </View>
 
-                                {/* Separator : */}
-                                <View style={styles.separatorContainer}>
-                                    <Text style={styles.separatorText}>:</Text>
-                                </View>
+                                {/* Separator : (seconds) */}
+                                {showSeconds && (
+                                    <View style={styles.separatorContainer}>
+                                        <Text style={styles.separatorText}>:</Text>
+                                    </View>
+                                )}
 
                                 {/* Second */}
-                                <View style={styles.columnContainer}>
-                                    <WheelPicker
-                                        key={`second-${mountKey}`}
-                                        selectedIndex={selectedSecond}
-                                        options={SECOND_OPTIONS}
-                                        onChange={handleSecondChange}
-                                        itemHeight={ITEM_HEIGHT}
-                                        visibleRest={VISIBLE_REST}
-                                        itemTextStyle={styles.pickerItemText}
-                                        selectedIndicatorStyle={styles.selectedIndicator}
-                                    />
-                                </View>
+                                {showSeconds && (
+                                    <View style={styles.columnContainer}>
+                                        <WheelPicker
+                                            key={`second-${mountKey}`}
+                                            selectedIndex={selectedSecond}
+                                            options={SECOND_OPTIONS}
+                                            onChange={handleSecondChange}
+                                            itemHeight={ITEM_HEIGHT}
+                                            visibleRest={VISIBLE_REST}
+                                            itemTextStyle={styles.pickerItemText}
+                                            selectedIndicatorStyle={styles.selectedIndicator}
+                                        />
+                                    </View>
+                                )}
                             </>
                         )}
                     </View>

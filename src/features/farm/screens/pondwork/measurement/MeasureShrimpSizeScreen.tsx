@@ -115,6 +115,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
+        UnsavedChangesModal,
         isSubmitting,
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
@@ -153,7 +154,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title={itemToEdit ? 'Chỉnh sửa đo kích thước' : 'Đo kích thước tôm'}
+                title="Đo kích thước tôm"
                 onBack={navigation.goBack}
                 rightComponent={
                     itemToEdit ? (
@@ -211,6 +212,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                 cancelText="Không"
                 successMessage="Đã xoá tác vụ thành công"
             />
+            {UnsavedChangesModal}
         </View>
     );
 };
