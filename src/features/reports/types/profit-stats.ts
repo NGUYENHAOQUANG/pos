@@ -1,3 +1,5 @@
+import { IApiResponse } from '@/shared/types/common.types';
+
 export interface ProfitStatsKPIs {
     totalActualRevenue: number;
     totalEstimatedRevenue: number;
@@ -19,8 +21,4 @@ export interface ProfitStatsData {
     byDate: ProfitStatsByDate[];
 }
 
-export interface ProfitStatsResponse {
-    success: boolean;
-    data: ProfitStatsData;
-    message: string | null;
-}
+export type ProfitStatsResponse = IApiResponse<ProfitStatsData>;

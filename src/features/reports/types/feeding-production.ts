@@ -1,3 +1,5 @@
+import { IApiResponse } from '@/shared/types/common.types';
+
 export interface FeedProdSummary {
     totalBiomass: number;
     totalFood: number;
@@ -19,8 +21,4 @@ export interface FeedProdData {
     chartData: FeedProdChartDataPoint[];
 }
 
-export interface FeedProdResponse {
-    success: boolean;
-    data: FeedProdData;
-    message: string | null;
-}
+export type FeedProdResponse = IApiResponse<FeedProdData>;
