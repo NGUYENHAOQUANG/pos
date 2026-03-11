@@ -1,5 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Platform } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    Pressable,
+    Platform,
+    Animated,
+    Dimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
     launchCamera,
@@ -9,6 +19,8 @@ import {
 } from 'react-native-image-picker';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface ImagePickerActionSheetProps {
     visible: boolean;
@@ -29,6 +41,26 @@ export function ImagePickerActionSheet({
     onImageSelected,
 }: ImagePickerActionSheetProps) {
     const insets = useSafeAreaInsets();
+    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+    // Slide-up on open, slide-down on close (same pattern as ConfirmationModalUI)
+    React.useEffect(() => {
+        if (visible) {
+            slideAnim.setValue(SCREEN_HEIGHT);
+            Animated.spring(slideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: SCREEN_HEIGHT,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [visible, slideAnim]);
 
     const handleResponse = (response: ImagePickerResponse) => {
         if (response.didCancel) {
@@ -89,53 +121,68 @@ export function ImagePickerActionSheet({
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <Pressable style={styles.backdrop} onPress={onClose}>
-                <Pressable
-                    style={[styles.card, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}
-                    onPress={e => e.stopPropagation()}
+                <Animated.View
+                    style={[
+                        styles.card,
+                        {
+                            paddingBottom: Math.max(insets.bottom, spacing.lg),
+                            transform: [{ translateY: slideAnim }],
+                        },
+                    ]}
                 >
-                    <View style={styles.header}>
-                        <View style={styles.indicator} />
-                        <Text style={styles.title}>Chọn ảnh thiết bị</Text>
-                    </View>
+                    <Pressable onPress={e => e.stopPropagation()}>
+                        <View style={styles.header}>
+                            <View style={styles.indicator} />
+                            <Text style={styles.title}>Chọn ảnh thiết bị</Text>
+                        </View>
 
-                    <View style={styles.content}>
-                        <TouchableOpacity
-                            style={styles.optionButton}
-                            onPress={handleTakePhoto}
-                            activeOpacity={0.7}
-                        >
-                            <View
-                                style={[
-                                    styles.iconContainer,
-                                    { backgroundColor: colors.primary + '15' },
-                                ]}
+                        <View style={styles.content}>
+                            <TouchableOpacity
+                                style={styles.optionButton}
+                                onPress={handleTakePhoto}
+                                activeOpacity={0.7}
                             >
-                                <Ionicons name="camera" size={24} color={colors.primary} />
-                            </View>
-                            <Text style={styles.optionText}>Chụp ảnh mới</Text>
-                            <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
-                        </TouchableOpacity>
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        { backgroundColor: colors.primary + '15' },
+                                    ]}
+                                >
+                                    <Ionicons name="camera" size={24} color={colors.primary} />
+                                </View>
+                                <Text style={styles.optionText}>Chụp ảnh mới</Text>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={colors.gray[400]}
+                                />
+                            </TouchableOpacity>
 
-                        <View style={styles.divider} />
+                            <View style={styles.divider} />
 
-                        <TouchableOpacity
-                            style={styles.optionButton}
-                            onPress={handleChooseLibrary}
-                            activeOpacity={0.7}
-                        >
-                            <View
-                                style={[
-                                    styles.iconContainer,
-                                    { backgroundColor: colors.info + '15' },
-                                ]}
+                            <TouchableOpacity
+                                style={styles.optionButton}
+                                onPress={handleChooseLibrary}
+                                activeOpacity={0.7}
                             >
-                                <Ionicons name="images" size={24} color={colors.info} />
-                            </View>
-                            <Text style={styles.optionText}>Chọn từ thư viện</Text>
-                            <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
-                        </TouchableOpacity>
-                    </View>
-                </Pressable>
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        { backgroundColor: colors.info + '15' },
+                                    ]}
+                                >
+                                    <Ionicons name="images" size={24} color={colors.info} />
+                                </View>
+                                <Text style={styles.optionText}>Chọn từ thư viện</Text>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={colors.gray[400]}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </Pressable>
+                </Animated.View>
             </Pressable>
         </Modal>
     );

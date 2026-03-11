@@ -9,10 +9,8 @@ import {
     PermissionsAndroid,
     Alert,
     ActivityIndicator,
-    Dimensions,
 } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
     launchCamera,
     launchImageLibrary,
@@ -23,12 +21,6 @@ import {
 import { documentApi } from '@/features/material/api/documentApi';
 import { APP_CONFIG } from '@/shared/constants/config';
 import { showImageSizeExceededToast } from '@/features/farm/utils/toastMessages';
-
-export interface GeneralInfoBoxRef {
-    markAsSaved: () => void;
-    getUploadedIds: () => string[];
-}
-
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { IconCloseOutlined } from '@/assets/icons';
@@ -36,61 +28,14 @@ import { ImagePickerActionSheet } from '@/shared/components/forms/ImagePickerAct
 import { ImagePreviewModal } from '@/features/farm/components/pondwork/shrimp-inspection/ImagePreviewModal';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { RequiredDot } from '@/shared/components/forms/Input';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
+import { Button } from '@/shared/components/buttons/Button';
 
+export interface GeneralInfoBoxRef {
+    markAsSaved: () => void;
+    getUploadedIds: () => string[];
+}
 type GeneralInfoBoxType = 'default' | 'withImage' | 'water_treatment' | 'harvest';
-
-/**
- * GeneralInfoBox Component
- *
- * A reusable component for displaying general information fields including:
- * - Date/time picker
- * - Activity type selection (radio buttons) for water_treatment and harvest
- * - Image picker (for withImage and harvest types)
- *
- * @example
- * // Default type - only date picker
- * <GeneralInfoBox
- *   type="default"
- *   date={selectedDate}
- *   onDateChange={setSelectedDate}
- * />
- *
- * @example
- * // With image support
- * <GeneralInfoBox
- *   type="withImage"
- *   date={selectedDate}
- *   onDateChange={setSelectedDate}
- *   imageUris={imageUris}
- *   onImagesChange={setImageUris}
- * />
- *
- * @example
- * // Water treatment type - with activity selection
- * <GeneralInfoBox
- *   type="water_treatment"
- *   date={selectedDate}
- *   onDateChange={setSelectedDate}
- *   activityLabel="Chọn loại xử lý nước"
- *   activityOptions={['Xử lý hóa chất', 'Xử lý vi sinh', 'Xử lý khác']}
- *   selectedActivity={selectedTreatment}
- *   onSelectActivity={setSelectedTreatment}
- * />
- *
- * @example
- * // Harvest type - with activity selection (no image)
- * <GeneralInfoBox
- *   type="harvest"
- *   date={selectedDate}
- *   onDateChange={setSelectedDate}
- *   activityLabel="Chọn loại thu hoạch"
- *   activityOptions={['Thu hết', 'Thu tỉa', 'Đóng chu kỳ']}
- *   selectedActivity={harvestType}
- *   onSelectActivity={setHarvestType}
- * />
- */
 interface GeneralInfoBox {
     type?: GeneralInfoBoxType;
     date?: Date; // Initial date (for edit mode)
@@ -139,6 +84,9 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
         // Loading states
         const [uploadingUris, setUploadingUris] = useState<string[]>([]);
         const [deletingUris, setDeletingUris] = useState<string[]>([]);
+
+        // Dynamic image grid sizing
+        const [gridWidth, setGridWidth] = useState(0);
 
         // Track total size of images (bytes) to enforce global limit
         const [totalImageSize, setTotalImageSize] = useState(0);
@@ -362,9 +310,42 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                     const docId = uploadedDocs[0].id;
                     sessionUploadedFileIds.current.push(docId);
                     uploadedFilesMap.current[uri] = docId;
+                }
+                // Always remove spinner when upload call completes (success or unexpected response)
+                setUploadingUris(prev => prev.filter(u => u !== uri));
+            } catch {
+                // Retry upload up to 2 times before giving up
+                const uri = asset.uri;
+                const fileToRetry = {
+                    uri: asset.uri,
+                    type: asset.type || 'image/jpeg',
+                    name: asset.fileName || asset.uri.split('/').pop() || `image-${Date.now()}.jpg`,
+                };
+
+                for (let attempt = 1; attempt <= 2; attempt++) {
+                    try {
+                        await new Promise<void>(r => setTimeout(r, attempt * 1500));
+                        if (!isMounted.current) return;
+
+                        const retryDocs = await documentApi.upload([fileToRetry]);
+                        if (!isMounted.current) return;
+
+                        if (retryDocs?.length > 0 && retryDocs[0].id) {
+                            const docId = retryDocs[0].id;
+                            sessionUploadedFileIds.current.push(docId);
+                            uploadedFilesMap.current[uri] = docId;
+                            setUploadingUris(prev => prev.filter(u => u !== uri));
+                            return; // Retry succeeded
+                        }
+                    } catch {
+                        // Continue to next retry attempt
+                    }
+                }
+
+                // All retries failed — remove spinner but keep image visible
+                if (isMounted.current) {
                     setUploadingUris(prev => prev.filter(u => u !== uri));
                 }
-            } catch {
                 // Upload failed — add to pending retry list for auto-retry when network recovers
                 if (asset.uri) {
                     pendingRetryUris.current.add(asset.uri);
@@ -528,21 +509,34 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Hình ảnh</Text>
 
-                            <OutlineButton
-                                label="Thêm hình ảnh"
+                            <Button
+                                title="Thêm hình ảnh"
+                                variant="outline"
                                 onPress={handleImagePress}
-                                prefix={
-                                    <Ionicons name="add" size={20} color={colors.textSecondary} />
-                                }
+                                iconLeft="add"
+                                fullWidth
                             />
 
                             {imageUris.length > 0 && (
-                                <View style={styles.imagesGrid}>
+                                <View
+                                    style={styles.imagesGrid}
+                                    onLayout={e => setGridWidth(e.nativeEvent.layout.width)}
+                                >
                                     {imageUris.map((uri, index) => {
                                         const isUploading = uploadingUris.includes(uri);
                                         const isDeleting = deletingUris.includes(uri);
+                                        const imageSize =
+                                            gridWidth > 0
+                                                ? Math.floor((gridWidth - IMAGE_GAP * 3) / 4)
+                                                : 70;
                                         return (
-                                            <View key={index} style={styles.imageItem}>
+                                            <View
+                                                key={index}
+                                                style={[
+                                                    styles.imageItem,
+                                                    { width: imageSize, height: imageSize },
+                                                ]}
+                                            >
                                                 <TouchableOpacity
                                                     style={styles.imageInner}
                                                     activeOpacity={0.9}
@@ -631,11 +625,7 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
     }
 );
 
-const CONTENT_HORIZONTAL_PADDING = 16 * 2 + 12 * 2; // 16 target margin + 12 target padding
-const IMAGE_GAP = 12;
-const IMAGE_SIZE = Math.floor(
-    (Dimensions.get('window').width - CONTENT_HORIZONTAL_PADDING - IMAGE_GAP * 3) / 4
-);
+const IMAGE_GAP = 8;
 
 const styles = StyleSheet.create({
     inputGroup: {
@@ -647,7 +637,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '500',
         color: colors.text,
         lineHeight: 22,
     },
@@ -675,8 +665,6 @@ const styles = StyleSheet.create({
         marginTop: spacing.xs,
     },
     imageItem: {
-        width: IMAGE_SIZE,
-        height: IMAGE_SIZE,
         borderRadius: borderRadius.sm,
         overflow: 'visible',
         position: 'relative',

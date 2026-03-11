@@ -27,7 +27,8 @@ import {
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 import { documentApi } from '@/features/material/api/documentApi';
-import { useSiphonMaterials } from '@/features/farm/hooks/useSiphonRecords';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -88,8 +89,8 @@ export const AddSiphonScreen: React.FC = () => {
         };
     }, [itemToEdit, meta]);
 
-    // Fetch materials using the new hook
-    const { materials } = useSiphonMaterials(pond?.zoneId);
+    // Fetch materials - needed for mapping detail data
+    const { materials } = useFarmMaterials();
 
     // Hide tab bar when this screen is mounted
     useEffect(() => {
@@ -400,7 +401,7 @@ export const AddSiphonScreen: React.FC = () => {
                 <MaterialSelectionBox
                     selectedMaterials={selectedMaterials}
                     onMaterialsChange={setSelectedMaterials}
-                    materials={materials}
+                    groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
                 />
 
                 <SelectionNotesBox notes={notes} onNotesChange={setNotes} />

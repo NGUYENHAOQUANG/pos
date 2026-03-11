@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 
 /**
  * Hook to handle unsaved changes warning before navigating away.
@@ -59,11 +59,15 @@ export const useUnsavedChanges = (hasUnsavedChanges: boolean, onDiscard?: () => 
     };
 
     const UnsavedChangesModal = (
-        <ConfirmationModal
+        <ConfirmationModalUI
             visible={showModal}
-            type="unsaved_changes"
+            title="Thay đổi chưa lưu"
+            message={'Bạn có thay đổi chưa lưu,\nBạn có chắc chắn muốn thoát?'}
+            confirmText="Đồng ý"
+            cancelText="Không"
             onConfirm={handleConfirmLeave}
             onCancel={handleCancelLeave}
+            showSuccessToast={false}
         />
     );
 

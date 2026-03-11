@@ -154,7 +154,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title={itemToEdit ? 'Chỉnh sửa đo kích thước' : 'Đo kích thước tôm'}
+                title="Đo kích thước tôm"
                 onBack={navigation.goBack}
                 rightComponent={
                     itemToEdit ? (

@@ -39,15 +39,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const updateMutation = useUpdateWaterTreatment();
     const deleteMutation = useDeleteWaterTreatment();
 
-    // Fetch warehouse materials
+    // Fetch warehouse materials - needed for mapping detail data
     const { materials } = useFarmMaterials();
-
-    const filteredMaterials = useMemo(() => {
-        return materials.filter(m => {
-            const groupName = (m.group || '').toLowerCase();
-            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
-        });
-    }, [materials]);
 
     // Local state
     const [executionDate, setExecutionDate] = useState<Date>(new Date());
@@ -269,7 +262,6 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                     disabledDate={true}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
-                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}

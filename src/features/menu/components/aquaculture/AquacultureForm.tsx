@@ -242,54 +242,54 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
                         </View>
                     </View>
 
-                    {/* Start & End Date */}
-                    <View style={styles.row}>
-                        <View style={styles.flex1}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Ngày bắt đầu</Text>
-                                <RequiredDot />
-                            </View>
-                            <Controller
-                                name="startDate"
-                                control={control}
-                                render={({ field: { onChange, value } }) => (
-                                    <DateInputButton
-                                        date={value}
-                                        onDateChange={onChange}
-                                        height={44}
-                                        borderRadius={12}
-                                        dateOnly
-                                        formatOptions={{
-                                            showCurrentLabel: false,
-                                        }}
-                                    />
-                                )}
-                            />
-                            {errors.startDate && (
-                                <Text style={styles.errorText}>{errors.startDate.message}</Text>
+                    {/* Start Date */}
+                    <View style={styles.fieldContainer}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Ngày bắt đầu</Text>
+                            <RequiredDot />
+                        </View>
+                        <Controller
+                            name="startDate"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <DateInputButton
+                                    date={value}
+                                    onDateChange={onChange}
+                                    height={44}
+                                    borderRadius={12}
+                                    formatOptions={{
+                                        showCurrentLabel: 'auto',
+                                    }}
+                                />
                             )}
+                        />
+                        {errors.startDate && (
+                            <Text style={styles.errorText}>{errors.startDate.message}</Text>
+                        )}
+                    </View>
+
+                    {/* End Date */}
+                    <View style={styles.fieldContainer}>
+                        <View style={styles.labelRow}>
+                            <Text style={styles.label}>Ngày kết thúc</Text>
+                            <RequiredDot />
                         </View>
-                        <View style={styles.flex1}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Ngày kết thúc</Text>
-                            </View>
-                            <Controller
-                                name="endDate"
-                                control={control}
-                                render={({ field: { onChange, value } }) => (
-                                    <DateInputButton
-                                        date={value}
-                                        onDateChange={onChange}
-                                        height={44}
-                                        borderRadius={12}
-                                        dateOnly
-                                        formatOptions={{
-                                            showCurrentLabel: false,
-                                        }}
-                                    />
-                                )}
-                            />
-                        </View>
+                        <Controller
+                            name="endDate"
+                            control={control}
+                            render={({ field: { onChange, value } }) => (
+                                <DateInputButton
+                                    date={value}
+                                    onDateChange={onChange}
+                                    height={44}
+                                    borderRadius={12}
+                                    formatOptions={{
+                                        showCurrentLabel: false,
+                                        fallbackText: 'dd/mm/yyyy, hr:mm',
+                                    }}
+                                />
+                            )}
+                        />
                     </View>
 
                     {/* Status */}

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors } from '@/styles';
 import { IconCalender } from '@/assets/icons';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';
+import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
 import { formatDateTime, FormatDateTimeOptions } from '@/features/farm/utils/dateUtils';
 import { RequiredDot } from '@/shared/components/forms/Input';
 
@@ -11,6 +12,7 @@ import { RequiredDot } from '@/shared/components/forms/Input';
  *
  * A reusable date input button component with integrated date picker modal.
  * It handles all date picker logic internally, so you don't need to manage modal state.
+ * When dateOnly is false, a time picker will open after selecting a date.
  *
  * @example
  * // Basic usage with date state
@@ -108,6 +110,9 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
     disabled = false,
 }) => {
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
+    // Temporarily hold selected date from calendar before time selection
+    const [pendingDate, setPendingDate] = useState<Date | null>(null);
 
     // Determine the current date for the picker
     const currentDate = date instanceof Date ? date : date ? new Date(date) : new Date();
@@ -125,8 +130,32 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
             : formatDateTime(date || null, finalFormatOptions);
 
     const handleDateSelect = (selectedDate: Date) => {
-        onDateChange?.(selectedDate);
-        setIsDatePickerVisible(false);
+        if (dateOnly) {
+            // Date only mode: apply immediately
+            onDateChange?.(selectedDate);
+            setIsDatePickerVisible(false);
+        } else {
+            // Date + time mode: save date, close calendar first then open time picker
+            setPendingDate(selectedDate);
+            setIsDatePickerVisible(false);
+            // Delay to let DatePickerModal fully close before opening TimePickerModal
+            setTimeout(() => {
+                setIsTimePickerVisible(true);
+            }, 400);
+        }
+    };
+
+    const handleTimeSelect = (timeDate: Date) => {
+        if (pendingDate) {
+            // Combine date from calendar with time from time picker
+            const combined = new Date(pendingDate);
+            combined.setHours(timeDate.getHours());
+            combined.setMinutes(timeDate.getMinutes());
+            combined.setSeconds(0, 0);
+            onDateChange?.(combined);
+        }
+        setIsTimePickerVisible(false);
+        setPendingDate(null);
     };
 
     return (
@@ -156,6 +185,20 @@ export const DateInputButton: React.FC<DateInputButtonProps> = ({
                 date={currentDate}
                 onSelectDate={handleDateSelect}
             />
+
+            {/* Time picker modal - opens after date selection when not dateOnly */}
+            {!dateOnly && (
+                <TimePickerModal
+                    visible={isTimePickerVisible}
+                    onClose={() => {
+                        setIsTimePickerVisible(false);
+                        setPendingDate(null);
+                    }}
+                    time={pendingDate || currentDate}
+                    onSelectTime={handleTimeSelect}
+                    showSeconds={false}
+                />
+            )}
         </>
     );
 };

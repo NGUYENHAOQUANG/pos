@@ -8,6 +8,7 @@ import {
     MaterialSelectionBox,
     SelectedMaterialItem,
 } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -24,7 +25,6 @@ export interface FeedingFormProps {
     isLoadingDetail: boolean;
     isSubmitting: boolean;
     initialData: FeedingFormValues | undefined;
-    materialsList: IMaterial[];
     onSubmit: (data: FeedingFormValues) => void;
 }
 
@@ -34,7 +34,7 @@ export interface FeedingFormRef {
 }
 
 export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
-    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, materialsList, onSubmit }, ref) => {
+    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, onSubmit }, ref) => {
         const initializedRef = useRef(false);
 
         const { control, handleSubmit, reset, watch } = useForm<FeedingFormValues>({
@@ -146,7 +146,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                             <MaterialSelectionBox
                                 selectedMaterials={selectedItems}
                                 onMaterialsChange={handleMaterialsChange}
-                                materials={materialsList}
+                                groupTypes={[MaterialGroupType.FARMING]}
                             />
                         );
                     }}
