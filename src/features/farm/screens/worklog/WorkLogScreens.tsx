@@ -192,6 +192,11 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                         ) : null
                     }
                     showsVerticalScrollIndicator={false}
+                    // Performance optimizations
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    removeClippedSubviews
                 />
             ) : (
                 <View style={styles.emptyStateContainer}>

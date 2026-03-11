@@ -6,6 +6,7 @@ import { Button } from '@/shared/components/buttons/Button';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { SelectMaterialBottomSheet } from '@/features/farm/components/bottom-sheet/SelectMaterialBottomSheet';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
+import { RequiredDot } from '@/shared/components/forms/Input';
 import { useFilteredWarehouseMaterials } from '@/features/farm/hooks/useFilteredWarehouseMaterials';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
 import { useDebounce } from '@/shared/hooks/useDebounce';
@@ -82,7 +83,14 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
 
     return (
         <>
-            <SelectionInfoBox title="Chọn vật tư">
+            <SelectionInfoBox
+                title={
+                    <View style={styles.titleRow}>
+                        <Text style={styles.titleText}>Chọn vật tư</Text>
+                        <RequiredDot />
+                    </View>
+                }
+            >
                 {/* Material Cards - only render when has items */}
                 {selectedMaterials.length > 0 && (
                     <View style={styles.materialCardsContainer}>
@@ -202,5 +210,14 @@ const styles = StyleSheet.create({
     },
     addButtonText: {
         color: colors.text,
+    },
+    titleText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+    },
+    titleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 });
