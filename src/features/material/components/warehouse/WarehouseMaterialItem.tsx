@@ -6,7 +6,6 @@ import { ButtonMaterialList } from '@/features/material/components/material_form
 import { colors, spacing } from '@/styles';
 import { useMaterial } from '@/features/material/hooks/useMaterials';
 import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -89,11 +88,6 @@ export const WarehouseMaterialItem = React.memo<WarehouseMaterialItemProps>(
                             <DetailRow label="Công dụng:" value={detail?.usage} />
                             <DetailRow label="Đơn vị sử dụng:" value={detail?.unitName} />
                             <DetailRow label="Liều dùng:" value={detail?.unitOfUse} />
-                            <ButtonMaterialList
-                                title="Sửa thông tin"
-                                icon={<EditIcon />}
-                                style={styles.editButton}
-                            />
                         </View>
                     )}
 

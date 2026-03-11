@@ -27,10 +27,8 @@ export const pondRecordService = {
                 return 'Xử lý sự cố';
             case PondRecordOperationType.StockTransfer:
                 return 'Sang ao';
-            case PondRecordOperationType.CleanPond:
             case PondRecordOperationType.CleanRenovation:
                 return 'Rửa ao';
-            case PondRecordOperationType.SunDryPond:
             case PondRecordOperationType.DryRenovation:
                 return 'Phơi ao';
             case PondRecordOperationType.Harvest:
