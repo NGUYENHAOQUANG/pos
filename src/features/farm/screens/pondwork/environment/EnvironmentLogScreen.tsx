@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,6 +13,7 @@ import {
 } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'EnvironmentLogScreen'>;
@@ -29,33 +30,15 @@ export const EnvironmentLogScreen: React.FC = () => {
     const { metricTypes } = useEnvironmentInit(currentZone ? String(currentZone.id) : undefined);
 
     // Date range state
-    const [startDate, setStartDate] = useState<Date>(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState<Date>(new Date());
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
-    const params = useMemo(() => {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-
-        // Convert to local time string (YYYY-MM-DDTHH:mm:ss) to avoid backend UTC parsing issues
-        const formatLocalISO = (d: Date) => {
-            const pad = (n: number) => n.toString().padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
-                d.getHours()
-            )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-        };
-
-        return {
-            CreateAtFrom: formatLocalISO(start),
-            CreateAtTo: formatLocalISO(end),
+    const params = useMemo(
+        () => ({
+            ...dateParams,
             PageSize: 1000,
-        };
-    }, [startDate, endDate]);
+        }),
+        [dateParams]
+    );
 
     // Fetch environment measurements from API
     const { data: envMeasurementsData, isLoading } = useEnvMeasurements(pond?.id || '', params);
@@ -64,17 +47,8 @@ export const EnvironmentLogScreen: React.FC = () => {
     const groupedData: TrackingGroup[] = useMemo(() => {
         if (!envMeasurementsData?.data?.items || metricTypes.length === 0) return [];
 
-        const startTS = new Date(startDate);
-        startTS.setHours(0, 0, 0, 0);
-        const endTS = new Date(endDate);
-        endTS.setHours(23, 59, 59, 999);
-
-        // Filter valid measurements strictly based on local calendar dates for reliability
-        const measurements = envMeasurementsData.data.items.filter((m: any) => {
-            if (!m.createdAt) return false;
-            const createdTime = new Date(m.createdAt).getTime();
-            return createdTime >= startTS.getTime() && createdTime <= endTS.getTime();
-        });
+        // Data is already filtered by API via dateParams — use directly
+        const measurements = envMeasurementsData.data.items.filter((m: any) => !!m.createdAt);
 
         // 1. Group raw measurements by date
         const rawGrouped = new Map<string, any[]>();
@@ -215,7 +189,7 @@ export const EnvironmentLogScreen: React.FC = () => {
             const dateB = new Date(b.date);
             return dateB.getTime() - dateA.getTime();
         });
-    }, [envMeasurementsData, metricTypes, pond, navigation, startDate, endDate]);
+    }, [envMeasurementsData, metricTypes, pond, navigation]);
 
     const handleStartEnvironment = () => {
         if (pond) {

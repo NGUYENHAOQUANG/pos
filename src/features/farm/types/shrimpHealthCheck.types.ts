@@ -81,3 +81,15 @@ export interface ShrimpHealthCheckDto {
     documents?: IDocument[];
     healthCheck?: ShrimpHealthCheckDetailDto;
 }
+
+/** Query params for shrimp health list – matches Swagger /api/v1/pond/{pondId}/shrimp-healths */
+export interface IShrimpHealthListParams {
+    PondId?: string;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
+}

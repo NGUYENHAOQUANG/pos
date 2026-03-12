@@ -16,6 +16,7 @@ import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useE
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { mapRecordItemToJobExecution } from '@/features/farm/services/worklog.service';
 import type { IPondRecordItem } from '@/features/farm/types/pondRecord.types';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 interface WorkLogScreensProps {
     pond?: PondData;
@@ -28,25 +29,15 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     onEditJobItem,
     availableJobTypes = [],
 }) => {
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate } = useDateRangeFilter();
 
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    const adjustedEndDate = useMemo(() => {
-        const d = new Date(endDate);
-        d.setHours(23, 59, 59, 999);
-        return d;
-    }, [endDate]);
-
     const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
         usePondRecordGroups(pond?.id || '', {
             startDate,
-            endDate: adjustedEndDate,
+            endDate,
             operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
         });
 

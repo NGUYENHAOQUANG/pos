@@ -6,6 +6,7 @@ import type {
     ShrimpHealthCheckDto,
     CreateShrimpHealthCheckPayload,
     UpdateShrimpHealthCheckPayload,
+    IShrimpHealthListParams,
 } from '@/features/farm/types/shrimpHealthCheck.types';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution } from '@/features/farm/types/farm.types';
@@ -106,14 +107,14 @@ const convertToJobExecutions = async (
 /**
  * Hook to fetch shrimp health checks as JobExecution list (for cards)
  */
-export const useShrimpHealthChecksAsJobs = (pondId: string) => {
+export const useShrimpHealthChecksAsJobs = (pondId: string, params?: IShrimpHealthListParams) => {
     const { data, isLoading, error, refetch } = useQuery({
-        queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
+        queryKey: [...farmKeys.shrimpHealthChecks.byPond(pondId), params],
         queryFn: async () => {
             if (!pondId) {
                 throw new Error('No pondId provided');
             }
-            return await shrimpHealthCheckApi.list(pondId);
+            return await shrimpHealthCheckApi.list(pondId, params);
         },
         enabled: !!pondId,
         staleTime: 30000,

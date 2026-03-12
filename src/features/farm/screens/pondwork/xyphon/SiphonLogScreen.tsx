@@ -7,6 +7,7 @@ import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogS
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { convertSiphonMetaToActivityData } from '@/features/farm/utils/metaConverters';
 import { useSiphonRecordsAsJobs } from '@/features/farm/hooks/useSiphonRecords';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'SiphonLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -16,18 +17,11 @@ export const SiphonLogScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pond } = route.params || {};
 
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     const [refreshing, setRefreshing] = useState(false);
 
-    const { jobs, isLoading, refetch } = useSiphonRecordsAsJobs(pond?.id, {
-        CreateAtFrom: startDate.toISOString(),
-        CreateAtTo: endDate.toISOString(),
-    } as any);
+    const { jobs, isLoading, refetch } = useSiphonRecordsAsJobs(pond?.id, dateParams as any);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);

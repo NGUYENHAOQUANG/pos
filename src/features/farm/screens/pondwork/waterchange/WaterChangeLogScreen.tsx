@@ -12,6 +12,7 @@ import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { useWaterSupplyRecordsAsJobs } from '@/features/farm/hooks/useWaterChangeRecords';
 import { ActivityIndicator, View } from 'react-native';
 import { colors } from '@/styles';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterSupplyLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -23,8 +24,13 @@ export const WaterSupplyLogScreen = () => {
 
     const pondId = pond?.id || '';
 
-    // Fetch data using the hook
-    const { jobs, isLoading, refetch } = useWaterSupplyRecordsAsJobs(pondId);
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
+
+    // Fetch data using the hook with date params
+    const { jobs, isLoading, refetch } = useWaterSupplyRecordsAsJobs(pondId, {
+        CreateAtFrom: dateParams.CreateAtFrom,
+        CreateAtTo: dateParams.CreateAtTo,
+    });
 
     // Auto refetch when screen is focused (e.g. back from Edit)
     useFocusEffect(
@@ -38,6 +44,10 @@ export const WaterSupplyLogScreen = () => {
     const config: LogScreenConfig<WaterSupplyMeta> = {
         jobType: 'WATER_CHANGE',
         pond,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
         metaConverter: (item: JobExecution, meta: WaterSupplyMeta) =>
             convertWaterSupplyMetaToActivityData(item, meta),
         editRoute: 'WaterSupply',
@@ -45,7 +55,7 @@ export const WaterSupplyLogScreen = () => {
         externalData: jobs, // Use real API data
     };
 
-    const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const { groupedData } = useLogScreenData(config);
 
     const handleCreateNew = () => {
         if (pond) {
