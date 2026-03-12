@@ -179,47 +179,73 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             onImagesChange?.(imageUris);
         }, [imageUris, onImagesChange]);
 
-        // Ref để NetInfo callback đọc uploadingUris mới nhất
-        const uploadingUrisRef = useRef<string[]>([]);
-        uploadingUrisRef.current = uploadingUris;
+        // Track URIs that need retry upload (failed due to network or other transient errors)
+        const pendingRetryUris = useRef<Set<string>>(new Set());
+        const retryInProgressRef = useRef(false);
 
-        // Khi mạng khôi phục: retry upload cho các ảnh đang loading (chưa có document ID)
+        // Retry upload helper - processes all pending URIs
+        const retryPendingUploads = React.useCallback(() => {
+            if (retryInProgressRef.current) return;
+            const pending = Array.from(pendingRetryUris.current).filter(
+                uri => !uploadedFilesMap.current[uri]
+            );
+            if (pending.length === 0) return;
+
+            retryInProgressRef.current = true;
+            const retryPromises = pending.map(uri => {
+                const fileToUpload = {
+                    uri,
+                    type: 'image/jpeg' as const,
+                    name: uri.split('/').pop() || 'image.jpg',
+                };
+                return documentApi
+                    .upload([fileToUpload])
+                    .then(uploadedDocs => {
+                        if (!isMounted.current || !uploadedDocs?.length || !uploadedDocs[0].id) {
+                            return;
+                        }
+                        const docId = uploadedDocs[0].id;
+                        sessionUploadedFileIds.current.push(docId);
+                        uploadedFilesMap.current[uri] = docId;
+                        pendingRetryUris.current.delete(uri);
+                        setUploadingUris(u => u.filter(u2 => u2 !== uri));
+                    })
+                    .catch(() => {
+                        // Still pending, will retry next cycle
+                    });
+            });
+            Promise.all(retryPromises)
+                .then(() => {
+                    retryInProgressRef.current = false;
+                })
+                .catch(() => {
+                    retryInProgressRef.current = false;
+                });
+        }, []);
+
+        // Khi mạng khôi phục: retry upload cho các ảnh pending
         const prevConnectedRef = useRef<boolean | null>(null);
         useEffect(() => {
             const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
                 const connected = state.isConnected;
-                if (connected === true && prevConnectedRef.current === false) {
-                    const pending = uploadingUrisRef.current.filter(
-                        uri => !uploadedFilesMap.current[uri]
-                    );
-                    pending.forEach(uri => {
-                        const fileToUpload = {
-                            uri,
-                            type: 'image/jpeg' as const,
-                            name: uri.split('/').pop() || 'image.jpg',
-                        };
-                        documentApi
-                            .upload([fileToUpload])
-                            .then(uploadedDocs => {
-                                if (
-                                    !isMounted.current ||
-                                    !uploadedDocs?.length ||
-                                    !uploadedDocs[0].id
-                                ) {
-                                    return;
-                                }
-                                const docId = uploadedDocs[0].id;
-                                sessionUploadedFileIds.current.push(docId);
-                                uploadedFilesMap.current[uri] = docId;
-                                setUploadingUris(u => u.filter(u2 => u2 !== uri));
-                            })
-                            .catch(() => {});
-                    });
+                // Retry khi mạng chuyển từ off → on (bao gồm cả lần đầu null → true)
+                if (connected === true && prevConnectedRef.current !== true) {
+                    retryPendingUploads();
                 }
-                prevConnectedRef.current = connected;
+                prevConnectedRef.current = connected ?? null;
             });
             return () => unsubscribe();
-        }, []);
+        }, [retryPendingUploads]);
+
+        // Periodic retry mỗi 10s cho trường hợp mạng "connected" nhưng request vẫn fail
+        useEffect(() => {
+            const interval = setInterval(() => {
+                if (pendingRetryUris.current.size > 0) {
+                    retryPendingUploads();
+                }
+            }, 10000);
+            return () => clearInterval(interval);
+        }, [retryPendingUploads]);
 
         const requestCameraPermission = async (): Promise<boolean> => {
             if (Platform.OS === 'android') {
