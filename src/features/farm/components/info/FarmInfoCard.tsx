@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         borderWidth: 1,
         borderColor: colors.border,
+        marginHorizontal: 16,
     },
     fieldContainer: {
         flexDirection: 'row',
@@ -116,11 +117,11 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         height: 250,
-        width: '100%',
         borderRadius: 16,
         overflow: 'hidden',
         marginTop: 16,
         backgroundColor: colors.gray[100],
+        marginHorizontal: 16,
     },
     backgroundImage: {
         width: '100%',
