@@ -10,19 +10,7 @@ import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, typography } from '@/styles';
 import ArrowIcon from '@/assets/Icon/IconReport/Arrow.svg';
-
-export interface TransferData {
-    id: string;
-    sourcePond: string;
-    targetPond: string;
-    transferDate: string;
-    doc: number;
-    amount: string;
-    size: string;
-    stockingDate: string;
-    stockingAmount: string;
-    expectedAmount: string;
-}
+import { TransferData } from '@/features/reports/types/stock-transfer-stats';
 
 interface Props {
     item: TransferData;

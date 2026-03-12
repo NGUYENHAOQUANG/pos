@@ -8,6 +8,7 @@ import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogS
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { convertShrimpInspectionMetaToActivityData } from '@/features/farm/utils/metaConverters';
 import { useShrimpHealthChecksAsJobs } from '@/features/farm/hooks/useShrimpHealthCheckData';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'PondworkLogScreen'>;
@@ -17,14 +18,10 @@ export const PondworkLogScreen: React.FC = () => {
     const route = useRoute<ScreenRouteProp>();
     const { pondId, zoneId } = route.params || {};
 
-    const [startDate, setStartDate] = React.useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = React.useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
     const [refreshing, setRefreshing] = React.useState(false);
 
-    const { jobs, isLoading, refetch } = useShrimpHealthChecksAsJobs(pondId || '');
+    const { jobs, isLoading, refetch } = useShrimpHealthChecksAsJobs(pondId || '', dateParams);
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     View,
-    TextInput,
     TouchableOpacity,
     StyleSheet,
     LayoutAnimation,
@@ -15,6 +14,7 @@ import { TabType } from '@/features/material/screens/material/MaterialView';
 import { useMaterialTypes, useMaterialGroups } from '@/features/material/hooks';
 import { ImportReceiptStatus } from '@/features/material/types/importReceipt.types';
 import { useDebounce } from '@/shared/hooks/useDebounce';
+import { Input } from '@/shared/components/forms/Input';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -129,25 +129,17 @@ export const SearchBarMeterial: React.FC<SearchBarMeterialProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.topRow}>
-                <View style={styles.searchContainer}>
-                    <Ionicons
-                        name="search-outline"
-                        size={20}
-                        color={colors.textSecondary}
-                        style={styles.searchIcon}
-                    />
-                    <TextInput
-                        style={styles.input}
+                <View style={styles.searchInputWrapper}>
+                    <Input
+                        icon="search-outline"
                         placeholder="Tìm kiếm tên vật tư"
-                        placeholderTextColor={colors.textSecondary}
                         value={localSearchText}
                         onChangeText={setLocalSearchText}
+                        iconRight={localSearchText.length > 0 ? 'close-circle' : undefined}
+                        onIconPress={handleClearSearch}
+                        containerStyle={styles.inputContainer}
+                        inputContainerStyle={styles.inputInnerContainer}
                     />
-                    {localSearchText.length > 0 && (
-                        <TouchableOpacity onPress={handleClearSearch}>
-                            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-                        </TouchableOpacity>
-                    )}
                 </View>
 
                 <TouchableOpacity
@@ -216,26 +208,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: spacing.sm,
     },
-    searchContainer: {
+    searchInputWrapper: {
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
+    },
+    inputContainer: {
+        marginBottom: 0,
+    },
+    inputInnerContainer: {
         height: 44,
-        backgroundColor: colors.white,
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
-        paddingHorizontal: spacing.sm,
-    },
-    searchIcon: {
-        marginRight: spacing.xs,
-    },
-    input: {
-        flex: 1,
-        height: '100%',
-        fontSize: 15,
-        color: colors.text,
-        padding: 0, // Remove default padding on Android
     },
     moreButton: {
         width: 44,

@@ -6,6 +6,7 @@ import type {
     UpdateShrimpHealthCheckPayload,
     ShrimpHealthCheckResult,
     ShrimpHealthCheckDto,
+    IShrimpHealthListParams,
 } from '@/features/farm/types/shrimpHealthCheck.types';
 
 // Re-export types for convenience
@@ -44,9 +45,13 @@ export const shrimpHealthCheckApi = {
      * Lấy danh sách kiểm tra tôm của ao
      * GET /api/v1/pond/{pondId}/shrimp-healths
      */
-    list: async (pondId: string): Promise<IApiResponse<IPaginate<ShrimpHealthCheckDto>>> => {
+    list: async (
+        pondId: string,
+        params?: IShrimpHealthListParams
+    ): Promise<IApiResponse<IPaginate<ShrimpHealthCheckDto>>> => {
         const response = await apiClient.get<IApiResponse<IPaginate<ShrimpHealthCheckDto>>>(
-            API_ENDPOINTS.POND.SHRIMP_HEALTH.LIST(pondId)
+            API_ENDPOINTS.POND.SHRIMP_HEALTH.LIST(pondId),
+            { params }
         );
         return response.data;
     },

@@ -1,9 +1,10 @@
 import { IApiResponse as IAppResponse, IPaginate } from '@/shared/types/common.types';
 
 export interface GetWarehouseItemsQueryParams {
-    id?: string;
+    WarehouseId?: string;
     SearchText?: string;
-    MaterialGroupId?: string;
+    MaterialGroupIds?: string[];
+    MaterialTypeIds?: string[];
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
@@ -68,13 +69,19 @@ export interface IWarehouseItem {
     id: string;
     materialId: string;
     materialName?: string;
-    quantity: number;
-    unitId: string;
-    unitName?: string;
-    alertQty?: number;
+    materialGroupId?: string;
+    materialTypeId?: string;
     materialCode?: string;
-    costPrice?: number;
+    quantity: number;
+    unitName?: string;
+    manufacturer?: string;
     averagePrice?: number;
+    alertQty?: number;
+    no?: number;
+    creatorId?: string;
+    editorId?: string | null;
+    createdAt?: string;
+    editedAt?: string;
 }
 
 export type GetWarehouseItemsResponse = IAppResponse<IPaginate<IWarehouseItem>>;

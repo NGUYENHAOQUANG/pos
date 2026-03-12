@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { colors, spacing, borderRadius } from '@/styles';
+import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 
@@ -105,12 +105,12 @@ const styles = StyleSheet.create({
         gap: spacing.xs,
     },
     resultBox: {
-        backgroundColor: colors.neutral,
-        borderRadius: borderRadius.md,
-        padding: 12,
+        backgroundColor: colors.gray[50],
+        borderRadius: 8,
+        padding: 8,
         gap: 4,
         borderWidth: 1,
-        borderColor: colors.defaultBorder,
+        borderColor: colors.border,
     },
     resultRow: {
         flexDirection: 'row',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     resultLabel: {
         fontSize: 14,
         fontWeight: '400',
-        color: colors.text,
+        color: colors.textTertiary,
         lineHeight: 22,
         flexShrink: 0,
     },

@@ -7,7 +7,7 @@ import { colors } from '@/styles';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox, GeneralInfoBoxRef } from '../../components/pondwork/GeneralInfoBox';
-import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { MaterialSelectionBox } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';

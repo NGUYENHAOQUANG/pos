@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { spacing } from '@/styles';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { Input } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
@@ -69,54 +68,47 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
             resultItems={resultItems}
             containerStyle={containerStyle}
         >
-            {/* First Row: Sản lượng và Cỡ tôm */}
-            <View style={styles.row}>
-                {/* Sản lượng (kg) */}
-                <View style={[styles.col, { paddingRight: spacing.xs }]}>
-                    <Input
-                        label="Sản lượng (kg)"
-                        value={String(yieldAmount)}
-                        onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
-                        keyboardType="numeric"
-                        required
-                        maxLength={20}
-                        containerStyle={{ marginBottom: 0 }}
-                    />
-                </View>
+            <Input
+                label="Sản lượng (kg)"
+                placeholder="Sản lượng (kg)"
+                value={String(yieldAmount)}
+                onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
+                keyboardType="numeric"
+                required
+                maxLength={20}
+                containerStyle={styles.inputGap}
+            />
 
-                {/* Cỡ tôm (con/kg) */}
-                <View style={[styles.col, { paddingLeft: spacing.xs }]}>
-                    <Input
-                        label="Cỡ tôm (con/kg)"
-                        value={String(shrimpSize)}
-                        onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
-                        keyboardType="numeric"
-                        required
-                        maxLength={20}
-                        containerStyle={{ marginBottom: 0 }}
-                    />
-                </View>
-            </View>
+            <Input
+                label="Cỡ tôm (con/kg)"
+                placeholder="Cỡ tôm (con/kg)"
+                value={String(shrimpSize)}
+                onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
+                keyboardType="numeric"
+                required
+                maxLength={20}
+                containerStyle={styles.inputGap}
+            />
 
-            {/* Second Row: Giá tôm tham khảo */}
             <Input
                 label="Giá tôm tham khảo (VNĐ/kg)"
+                placeholder="Giá tôm tham khảo (VNĐ/kg)"
                 value={String(referencePrice)}
                 onChangeText={text => handleNumericInput(text, onReferencePriceChange)}
                 keyboardType="numeric"
                 required
                 maxLength={20}
-                containerStyle={{ marginBottom: 0 }}
+                containerStyle={styles.lastInput}
             />
         </PondDataBox>
     );
 };
 
 const styles = StyleSheet.create({
-    row: {
-        flexDirection: 'row',
+    inputGap: {
+        marginBottom: 0,
     },
-    col: {
-        flex: 1,
+    lastInput: {
+        marginBottom: 0,
     },
 });

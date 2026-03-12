@@ -8,6 +8,7 @@ import { useFeedingRecordsAsJobs } from '@/features/farm/hooks/pondwork/feed/use
 import { convertFeedJobToActivityData } from '@/features/farm/utils/metaConverters';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'FeedingLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -16,16 +17,24 @@ export const FeedingLogScreens = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<ScreenRouteProp>();
     const { pondId } = route.params || {};
-    const { jobs: apiJobs } = useFeedingRecordsAsJobs(pondId || '');
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
+    const { jobs: apiJobs } = useFeedingRecordsAsJobs(pondId || '', {
+        CreateAtFrom: dateParams.CreateAtFrom,
+        CreateAtTo: dateParams.CreateAtTo,
+    });
     const config: LogScreenConfig = {
         jobType: 'FEED',
         pondId,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
         metaConverter: (item: JobExecution) => convertFeedJobToActivityData(item),
         editRoute: 'FeedingManagement',
         getEditParams: (_pond, item) => ({ pondId: pondId!, jobId: item.id, itemToEdit: item }),
         externalData: apiJobs,
     };
-    const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const { groupedData } = useLogScreenData(config);
     const handleStartFeeding = () => {
         if (pondId) {
             navigation.navigate('FeedingManagement', { pondId });
