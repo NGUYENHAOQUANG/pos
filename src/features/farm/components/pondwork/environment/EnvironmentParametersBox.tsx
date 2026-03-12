@@ -32,7 +32,25 @@ interface EnvironmentParametersBoxProps {
     onMagieChange?: (value: string) => void;
     no3?: string;
     onNo3Change?: (value: string) => void;
-    limits?: Record<string, string>; // ID -> Limit string (e.g., "7.5 - 8.5")
+    limits?: Record<string, string>; // Code -> Limit string (e.g., "7.5 - 8.5")
+}
+
+/** Parse limit string "min - max" into [min, max] or null */
+function parseLimits(limitStr?: string): [number, number] | null {
+    if (!limitStr) return null;
+    const parts = limitStr.split('-').map(s => parseFloat(s.trim()));
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+    return [parts[0], parts[1]];
+}
+
+/** Check if value is outside the min/max range */
+function isOutOfRange(value: string, limitStr?: string): boolean {
+    if (!value || value === '') return false;
+    const num = parseFloat(value);
+    if (isNaN(num)) return false;
+    const range = parseLimits(limitStr);
+    if (!range) return false;
+    return num < range[0] || num > range[1];
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -59,6 +77,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onMagieChange,
     no3 = '',
     onNo3Change,
+    limits = {},
 }) => {
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
@@ -99,6 +118,18 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
 
         callback(cleaned);
     };
+
+    /** Render warning text below input if out of range */
+    const renderWarning = (metricCode: string, value: string) => {
+        const limitStr = limits[metricCode];
+        if (!isOutOfRange(value, limitStr)) return null;
+        return (
+            <View style={styles.warningRow}>
+                <WarningCircle width={14} height={14} color={colors.warning} />
+                <Text style={styles.warningText}>Giá trị ngoài phạm vi cho phép ({limitStr})</Text>
+            </View>
+        );
+    };
     return (
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
@@ -117,6 +148,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onPHChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.PH, pH)}
                 </View>
 
                 {/* DO */}
@@ -128,6 +160,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onDOChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.DO, doValue)}
                 </View>
 
                 {/* Nhiệt độ */}
@@ -139,6 +172,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onTemperatureChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.TEMPERATURE, temperature)}
                 </View>
 
                 {/* Độ mặn */}
@@ -150,6 +184,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onSalinityChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.SALINITY, salinity)}
                 </View>
 
                 {/* Độ kiềm */}
@@ -161,6 +196,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.ALKALINITY, alkalinity)}
                 </View>
 
                 {/* Độ trong */}
@@ -172,6 +208,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="default"
                         onChangeText={text => handleNumericInput(text, onTransparencyChange)}
                     />
+                    {renderWarning(ENVIRONMENT_METRIC_IDS.TRANSPARENCY, transparency)}
                 </View>
 
                 {/* Advanced Parameters */}
@@ -192,6 +229,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                     keyboardType="default"
                                     onChangeText={text => handleNumericInput(text, paramOnChange)}
                                 />
+                                {renderWarning(param.id, paramValue)}
                             </View>
                         );
                     })}
@@ -241,5 +279,16 @@ const styles = StyleSheet.create({
     },
     setupButton: {
         marginTop: 4,
+    },
+    warningRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 2,
+    },
+    warningText: {
+        fontSize: 12,
+        color: colors.warning,
+        flex: 1,
     },
 });

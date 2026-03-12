@@ -4,6 +4,7 @@ import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { PondTypeOperation } from '@/features/farm/types/pondOperation.types';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 import { parseDate } from '@/features/farm/utils/dateUtils';
+import { IShrimpSeed } from '@/features/material/types/warehouse.types';
 
 export const pondDetailService = {
     getJobName: (typeStr: string): string => {
@@ -76,7 +77,7 @@ export const pondDetailService = {
 
     getBreedName: (
         currentCycle: CycleData | null | undefined,
-        shrimpSeeds: any[] | undefined
+        shrimpSeeds: IShrimpSeed[] | undefined
     ): string => {
         if (!currentCycle) return 'N/A';
 

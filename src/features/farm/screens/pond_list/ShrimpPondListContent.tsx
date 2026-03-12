@@ -26,6 +26,7 @@ export interface ShrimpPondListContentProps {
     onPondInfoPress: (pond: PondData) => void;
     onLoadMore: () => void;
     onRefresh: () => void;
+    warehouseId?: string;
 }
 
 export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
@@ -45,6 +46,7 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
     onPondInfoPress,
     onLoadMore,
     onRefresh,
+    warehouseId,
 }) => {
     const flatListRef = useRef<FlatList<PondData>>(null);
     useScrollToTop(flatListRef as any);
@@ -87,6 +89,7 @@ export const ShrimpPondListContent: React.FC<ShrimpPondListContentProps> = ({
                     refreshing={isRefetching}
                     onRefresh={onRefresh}
                     zoneId={selectedZoneId}
+                    warehouseId={warehouseId}
                 />
             )}
         </View>

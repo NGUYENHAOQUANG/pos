@@ -75,7 +75,7 @@ export const HarvestItemCard = ({ item }: Props) => {
                         {/* Thông tin chi tiết khi mở rộng */}
                         {expanded && (
                             <View style={styles.expandedContent}>
-                                {renderRow('Chu kì', item.cycleName || item.cycleCode || '---')}
+                                {renderRow('Chu kỳ', item.cycleName || item.cycleCode || '---')}
                                 {renderRow('Kích cỡ (Size)', item.shrimpCountPerKg, 'con/kg')}
                                 {renderRow('Ngày nuôi (DOC)', item.doc || 0, 'ngày')}
                                 {renderRow('Đơn giá', formatCurrencyValue(item.unitPrice), 'đ/kg')}
