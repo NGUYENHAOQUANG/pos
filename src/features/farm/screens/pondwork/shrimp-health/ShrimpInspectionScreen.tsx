@@ -18,6 +18,7 @@ import {
     shrimpHealthService,
     ShrimpHealthFormState,
 } from '@/features/farm/services/shrimp-health.service';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'ShrimpHealthScreen'>;
@@ -165,6 +166,27 @@ export const ShrimpHealthScreen: React.FC = () => {
         return false;
     })();
 
+    const hasUnsavedChangesForWarning = (() => {
+        if (!isEditMode) {
+            return (
+                foodAmount.length > 0 ||
+                leftoverFood !== 'Hết' ||
+                intestine !== 'Đầy' ||
+                intestineColor !== 'Màu thức ăn' ||
+                stoolColor !== 'Màu thức ăn' ||
+                liver !== 'Bình thường' ||
+                notes.length > 0 ||
+                imageUris.length > 0 ||
+                averageInfectionRate > 0 ||
+                !isHealthy ||
+                aiItems.length > 0
+            );
+        }
+        return hasChanges;
+    })();
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasUnsavedChangesForWarning);
+
     const isButtonDisabled = !isFormComplete || (isEditMode && !hasChanges);
 
     const handleSubmit = (documentIds: string[]) => {
@@ -198,6 +220,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                 },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         AppToast({
                             type: 'success',
                             text1: TOAST_MESSAGES_CONFIG.JOB.SHRIMP_INSPECTION?.edit || '',
@@ -214,6 +237,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                 },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         AppToast({
                             type: 'success',
                             text1: TOAST_MESSAGES_CONFIG.JOB.SHRIMP_INSPECTION?.add || '',
@@ -232,6 +256,7 @@ export const ShrimpHealthScreen: React.FC = () => {
             { pondId, id: shrimpHealthId },
             {
                 onSuccess: () => {
+                    allowNavigation();
                     setIsDeleteModalVisible(false);
                     AppToast({
                         type: 'success',
@@ -258,54 +283,59 @@ export const ShrimpHealthScreen: React.FC = () => {
     };
 
     return (
-        <ShrimpInspectionForm
-            itemToEdit={
-                isEditMode && shrimpHealthId ? ({ id: shrimpHealthId } as JobExecution) : undefined
-            }
-            meta={(meta || { documentIds }) as ShrimpInspectionMeta}
-            selectedDate={selectedDate}
-            onSelectedDateChange={setSelectedDate}
-            values={{
-                date: selectedDate,
-                foodAmount,
-                leftoverFood,
-                intestine,
-                intestineColor,
-                stoolColor,
-                liver,
-                notes,
-                images: imageUris,
-                averageInfectionRate,
-                isHealthy,
-                diagnosisDetails,
-                aiItems,
-            }}
-            onChange={(patch: Partial<ShrimpInspectionFormValues>) => {
-                if (patch.foodAmount !== undefined) setFoodAmount(patch.foodAmount);
-                if (patch.leftoverFood !== undefined) setLeftoverFood(patch.leftoverFood);
-                if (patch.intestine !== undefined) setIntestine(patch.intestine);
-                if (patch.intestineColor !== undefined) setIntestineColor(patch.intestineColor);
-                if (patch.stoolColor !== undefined) setStoolColor(patch.stoolColor);
-                if (patch.liver !== undefined) setLiver(patch.liver);
-                if (patch.notes !== undefined) setNotes(patch.notes);
-                if (patch.images !== undefined) setImageUris(patch.images);
-                if (patch.averageInfectionRate !== undefined)
-                    setAverageInfectionRate(patch.averageInfectionRate);
-                if (patch.isHealthy !== undefined) setIsHealthy(patch.isHealthy);
-                if (patch.diagnosisDetails !== undefined)
-                    setDiagnosisDetails(patch.diagnosisDetails);
-                if (patch.aiItems !== undefined) setAiItems(patch.aiItems);
-            }}
-            aiResult={displayAiResult}
-            isSaving={isSaving}
-            isDeleteModalVisible={isDeleteModalVisible}
-            onBack={handleBack}
-            onDeletePress={() => setIsDeleteModalVisible(true)}
-            onConfirmDelete={handleDelete}
-            onCancelDelete={() => setIsDeleteModalVisible(false)}
-            onAICheckPress={handleAICheckPress}
-            onSubmit={handleSubmit}
-            primaryDisabled={!!isButtonDisabled}
-        />
+        <>
+            <ShrimpInspectionForm
+                itemToEdit={
+                    isEditMode && shrimpHealthId
+                        ? ({ id: shrimpHealthId } as JobExecution)
+                        : undefined
+                }
+                meta={(meta || { documentIds }) as ShrimpInspectionMeta}
+                selectedDate={selectedDate}
+                onSelectedDateChange={setSelectedDate}
+                values={{
+                    date: selectedDate,
+                    foodAmount,
+                    leftoverFood,
+                    intestine,
+                    intestineColor,
+                    stoolColor,
+                    liver,
+                    notes,
+                    images: imageUris,
+                    averageInfectionRate,
+                    isHealthy,
+                    diagnosisDetails,
+                    aiItems,
+                }}
+                onChange={(patch: Partial<ShrimpInspectionFormValues>) => {
+                    if (patch.foodAmount !== undefined) setFoodAmount(patch.foodAmount);
+                    if (patch.leftoverFood !== undefined) setLeftoverFood(patch.leftoverFood);
+                    if (patch.intestine !== undefined) setIntestine(patch.intestine);
+                    if (patch.intestineColor !== undefined) setIntestineColor(patch.intestineColor);
+                    if (patch.stoolColor !== undefined) setStoolColor(patch.stoolColor);
+                    if (patch.liver !== undefined) setLiver(patch.liver);
+                    if (patch.notes !== undefined) setNotes(patch.notes);
+                    if (patch.images !== undefined) setImageUris(patch.images);
+                    if (patch.averageInfectionRate !== undefined)
+                        setAverageInfectionRate(patch.averageInfectionRate);
+                    if (patch.isHealthy !== undefined) setIsHealthy(patch.isHealthy);
+                    if (patch.diagnosisDetails !== undefined)
+                        setDiagnosisDetails(patch.diagnosisDetails);
+                    if (patch.aiItems !== undefined) setAiItems(patch.aiItems);
+                }}
+                aiResult={displayAiResult}
+                isSaving={isSaving}
+                isDeleteModalVisible={isDeleteModalVisible}
+                onBack={handleBack}
+                onDeletePress={() => setIsDeleteModalVisible(true)}
+                onConfirmDelete={handleDelete}
+                onCancelDelete={() => setIsDeleteModalVisible(false)}
+                onAICheckPress={handleAICheckPress}
+                onSubmit={handleSubmit}
+                primaryDisabled={!!isButtonDisabled}
+            />
+            {UnsavedChangesModal}
+        </>
     );
 };

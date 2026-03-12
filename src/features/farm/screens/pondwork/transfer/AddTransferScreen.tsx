@@ -228,11 +228,20 @@ export const AddTransferScreen: React.FC = () => {
     const hasChanges = useMemo(() => {
         if (!itemToEdit) {
             // Creation mode: check if any meaningful data is entered
+            const hasPondSelected = receivingPonds.some(p => !!p.receivingPond);
+            const hasQuantityChanged = receivingPonds.some(
+                p => p.quantity !== '' && p.quantity !== totalEstimatedShrimp.toString()
+            );
+            const defaultShrimpSize = latestShrimpSizeFromParams?.toString() || '60';
+            const hasShrimpSizeChanged = shrimpSize !== defaultShrimpSize;
+
             return (
                 notes !== '' ||
-                receivingPonds.some(
-                    p => p.quantity !== '' && p.quantity !== totalEstimatedShrimp.toString()
-                )
+                hasPondSelected ||
+                hasQuantityChanged ||
+                hasShrimpSizeChanged ||
+                transferMethod !== 'Sang hết' ||
+                receivingPonds.length > 1
             );
         }
 
@@ -257,6 +266,7 @@ export const AddTransferScreen: React.FC = () => {
         transferMethod,
         receivingPonds,
         totalEstimatedShrimp,
+        latestShrimpSizeFromParams,
     ]);
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);

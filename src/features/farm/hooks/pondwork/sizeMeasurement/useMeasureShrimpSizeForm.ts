@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { documentApi } from '@/features/material/api/documentApi';
@@ -11,10 +11,6 @@ import {
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { NormalizedError } from '@/core/api/errorHandler';
 import { numericStringSchema } from '@/shared/utils/validation';
-import {
-    showShrimpSizeRequiredToast,
-    showRemainingWeightRequiredToast,
-} from '@/features/farm/utils/toastMessages';
 
 interface UseMeasureShrimpSizeFormProps {
     pondId?: string;
@@ -48,6 +44,14 @@ export const useMeasureShrimpSizeForm = ({
     const [images, setImages] = useState<string[]>([]);
     const [initialDocumentIds, setInitialDocumentIds] = useState<string[]>([]);
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+    const [initialState, setInitialState] = useState<{
+        shrimpSize: string;
+        remainingWeight: string;
+        averageShrimpSize: string;
+        notes: string;
+        images: string[];
+    } | null>(null);
 
     // Populate state
     useEffect(() => {
@@ -106,10 +110,82 @@ export const useMeasureShrimpSizeForm = ({
                     setImages(urls);
                 }
             }
+
+            // Capture initial state for unsaved changes detection
+            setInitialState(prev => {
+                if (prev) return prev; // Only set once
+                let initShrimpSize = '';
+                let initRemainingWeight = '';
+                let initAverageShrimpSize = '';
+                let initNotes = '';
+                let initImages: string[] = [];
+
+                if (itemToEdit) {
+                    const meta = itemToEdit.meta as any;
+                    if (meta) {
+                        if (meta.shrimpSize) initShrimpSize = meta.shrimpSize.toString();
+                        if (meta.remainingWeight)
+                            initRemainingWeight = meta.remainingWeight.toString();
+                        if (meta.averageShrimpSize)
+                            initAverageShrimpSize = meta.averageShrimpSize.toString();
+                        if (meta.notes) initNotes = meta.notes;
+                        if (meta.documents && Array.isArray(meta.documents)) {
+                            initImages = meta.documents
+                                .map((d: any) => d.publicUrl)
+                                .filter(Boolean);
+                        } else if (meta.images) {
+                            initImages = meta.images;
+                        } else if (itemToEdit.images) {
+                            initImages = itemToEdit.images;
+                        }
+                    }
+                } else if (detail) {
+                    const sizeDetail = detail.sizeMeasurementDetail ?? detail.sizeMeasurement;
+                    if (sizeDetail) {
+                        if (sizeDetail.shrimpSizePcsPerKg != null)
+                            initShrimpSize = sizeDetail.shrimpSizePcsPerKg.toString();
+                        if (sizeDetail.estimatedRemainingStockKg != null)
+                            initRemainingWeight = sizeDetail.estimatedRemainingStockKg.toString();
+                        if (sizeDetail.averageShrimpSize != null)
+                            initAverageShrimpSize = sizeDetail.averageShrimpSize.toString();
+                        if (sizeDetail.notes) initNotes = sizeDetail.notes;
+                    }
+                }
+                return {
+                    shrimpSize: initShrimpSize,
+                    remainingWeight: initRemainingWeight,
+                    averageShrimpSize: initAverageShrimpSize,
+                    notes: initNotes,
+                    images: initImages,
+                };
+            });
         };
 
         populateData();
     }, [detail, itemToEdit]);
+
+    const hasChanges = useMemo(() => {
+        if (!itemToEdit) {
+            return !!(
+                shrimpSize ||
+                remainingWeight ||
+                averageShrimpSize ||
+                notes ||
+                images.length > 0
+            );
+        }
+        if (!initialState) return false;
+
+        return (
+            shrimpSize !== initialState.shrimpSize ||
+            remainingWeight !== initialState.remainingWeight ||
+            averageShrimpSize !== initialState.averageShrimpSize ||
+            notes !== initialState.notes ||
+            JSON.stringify(images) !== JSON.stringify(initialState.images)
+        );
+    }, [itemToEdit, initialState, shrimpSize, remainingWeight, averageShrimpSize, notes, images]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
     const handleError = (err: unknown) => {
         const error = err as NormalizedError;
@@ -139,21 +215,10 @@ export const useMeasureShrimpSizeForm = ({
     };
 
     const handleSave = (documentIds: string[]) => {
-        // Validation for required fields
-        if (!shrimpSize) {
-            showShrimpSizeRequiredToast();
-            return;
-        }
-
-        if (!remainingWeight) {
-            showRemainingWeightRequiredToast();
-            return;
-        }
-
         const isSizeValid = numericStringSchema.safeParse(shrimpSize).success;
         const isWeightValid = numericStringSchema.safeParse(remainingWeight).success;
 
-        if (!isSizeValid || !isWeightValid) {
+        if (!isSizeValid || !isWeightValid || !shrimpSize || !remainingWeight) {
             Toast.show({
                 type: 'error',
                 text1: 'Vui lòng nhập đúng định dạng số cho kích thước và trọng lượng',
@@ -188,6 +253,7 @@ export const useMeasureShrimpSizeForm = ({
                 },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         onSaveSuccess?.();
                         Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
                         navigation.goBack();
@@ -203,6 +269,7 @@ export const useMeasureShrimpSizeForm = ({
                 },
                 {
                     onSuccess: () => {
+                        allowNavigation();
                         onSaveSuccess?.();
                         Toast.show({
                             type: 'success',
@@ -223,6 +290,7 @@ export const useMeasureShrimpSizeForm = ({
             { pondId, id: itemToEdit.id },
             {
                 onSuccess: () => {
+                    allowNavigation();
                     setIsDeleteModalVisible(false);
                     Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
                     navigation.goBack();
@@ -249,6 +317,7 @@ export const useMeasureShrimpSizeForm = ({
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
+        UnsavedChangesModal,
         isSubmitting:
             createSizeMeasurement.isPending ||
             updateSizeMeasurement.isPending ||

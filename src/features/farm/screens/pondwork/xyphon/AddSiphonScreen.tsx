@@ -38,6 +38,7 @@ import {
 } from '@/features/farm/utils/toastMessages';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'AddSiphonScreen'>;
@@ -62,6 +63,10 @@ export const AddSiphonScreen: React.FC = () => {
     const [documentIds, setDocumentIds] = useState<string[]>(itemToEdit?.images || []);
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+    // Additional state to track when data from API is fully loaded for accurate comparison
+    const [isDetailLoaded, setIsDetailLoaded] = useState(!itemToEdit);
+    const [fetchedInitialData, setFetchedInitialData] = useState<any>(null);
 
     // Store initial data for comparison when editing
     const initialData = useMemo(() => {
@@ -147,9 +152,20 @@ export const AddSiphonScreen: React.FC = () => {
                                 console.error('Error fetching image URLs:', e);
                             }
                         }
+
+                        // Set fetched initial data for comparison after everything is loaded
+                        setFetchedInitialData({
+                            date: detail.createdAt ? new Date(detail.createdAt) : new Date(),
+                            lossAmount: detail.siphonDetail?.shrimpLossKg?.toString() || '',
+                            notes: detail.siphonDetail?.notes || '',
+                            images: detail.documentIds || [],
+                            materials: detail.siphonDetail?.materials || [],
+                        });
+                        setIsDetailLoaded(true);
                     }
                 } catch (error) {
                     console.error('Fetch siphon detail error:', error);
+                    setIsDetailLoaded(true); // Allow exit on error
                 }
             }
         };
@@ -176,6 +192,7 @@ export const AddSiphonScreen: React.FC = () => {
     const handleConfirmDelete = async () => {
         if (pond?.id && itemToEdit?.id) {
             try {
+                allowNavigation();
                 await deleteMutation.mutateAsync({ pondId: pond.id, id: itemToEdit.id });
                 setDeleteModalVisible(false);
                 navigation.goBack();
@@ -200,26 +217,74 @@ export const AddSiphonScreen: React.FC = () => {
 
     // Check if data has changed from initial (when editing)
     const hasChanges = useMemo(() => {
-        if (!itemToEdit || !initialData) return true; // New item always has "changes"
+        if (!itemToEdit || !isDetailLoaded) return false;
+
+        // Use either fetched data or fallback to initial routing data
+        const compareData = fetchedInitialData || initialData;
+
+        if (!compareData) return true;
 
         // Compare dates (only date part, not time)
         const currentDateStr = selectedDate.toDateString();
-        const initialDateStr = initialData.date.toDateString();
+        const initialDateStr = compareData.date.toDateString();
         if (currentDateStr !== initialDateStr) return true;
 
         // Compare other fields
-        if (lossAmount !== initialData.lossAmount) return true;
-        if (notes !== initialData.notes) return true;
+        if (lossAmount !== compareData.lossAmount) return true;
+        if (notes !== compareData.notes) return true;
 
-        // Compare images arrays
-        if (JSON.stringify(imageUris) !== JSON.stringify(initialData.images)) return true;
+        // Set up arrays for comparison, default to empty to safely check lengths
+        const compareDocs = compareData.images || [];
+        const currentDocs = documentIds || [];
+
+        // Ensure same number of images
+        if (currentDocs.length !== compareDocs.length) return true;
 
         // Compare materials arrays
-        if (JSON.stringify(selectedMaterials) !== JSON.stringify(initialData.materials))
-            return true;
+        const currentMats = selectedMaterials.map(m => ({
+            id: m.material.id,
+            quantity: m.quantity,
+        }));
 
-        return false;
-    }, [itemToEdit, initialData, selectedDate, lossAmount, notes, imageUris, selectedMaterials]);
+        const initialMats = compareData.materials.map((m: any) => ({
+            id: m.warehouseItemId || m.id,
+            quantity: m.quantity,
+        }));
+
+        if (currentMats.length !== initialMats.length) return true;
+
+        // Detailed material comparison
+        const isMaterialsChanged = currentMats.some((curr, index) => {
+            const init = initialMats[index];
+            return !init || curr.id !== init.id || String(curr.quantity) !== String(init.quantity);
+        });
+
+        return isMaterialsChanged;
+    }, [
+        itemToEdit,
+        isDetailLoaded,
+        fetchedInitialData,
+        initialData,
+        selectedDate,
+        lossAmount,
+        notes,
+        documentIds,
+        selectedMaterials,
+    ]);
+
+    const hasUnsavedChangesForWarning = useMemo(() => {
+        if (!itemToEdit) {
+            return (
+                lossAmount.length > 0 ||
+                notes.length > 0 ||
+                imageUris.length > 0 ||
+                selectedMaterials.length > 0
+            );
+        }
+        return hasChanges;
+    }, [itemToEdit, hasChanges, lossAmount, notes, imageUris, selectedMaterials]);
+
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasUnsavedChangesForWarning);
 
     const isButtonDisabled = itemToEdit && !hasChanges;
 
@@ -273,6 +338,7 @@ export const AddSiphonScreen: React.FC = () => {
                     data: payload,
                 });
 
+                allowNavigation();
                 generalInfoBoxRef.current?.markAsSaved(); // Prevent cleanup
                 showEditJobSuccessToast('SIPHON');
                 navigation.goBack();
@@ -283,12 +349,21 @@ export const AddSiphonScreen: React.FC = () => {
                     data: payload,
                 });
 
+                allowNavigation();
                 generalInfoBoxRef.current?.markAsSaved(); // Prevent cleanup
                 showAddJobSuccessToast('SIPHON');
                 navigation.goBack();
             }
         } catch (error: any) {
             let message = getErrorMessage(error, 'Vui lòng thử lại');
+
+            if (
+                message.includes('invalid start of a value') ||
+                message.includes('converted to System.Decimal') ||
+                message.includes('System.Decimal')
+            ) {
+                message = 'Số lượng vật tư không hợp lệ';
+            }
 
             Toast.show({
                 type: 'error',
@@ -301,7 +376,7 @@ export const AddSiphonScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title="Xi-phông"
+                title="Xi-Phông"
                 onBack={handleBack}
                 rightComponent={
                     itemToEdit ? <DeleteButton onPress={handleDeletePress} /> : undefined
@@ -309,7 +384,7 @@ export const AddSiphonScreen: React.FC = () => {
             />
 
             {/* Content */}
-            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={200}>
+            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={80}>
                 <GeneralInfoBox
                     ref={generalInfoBoxRef}
                     type="withImage"
@@ -349,6 +424,7 @@ export const AddSiphonScreen: React.FC = () => {
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
             />
+            {UnsavedChangesModal}
         </View>
     );
 };
