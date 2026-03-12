@@ -23,3 +23,6 @@ export const ALLOWED_JOBS_WHEN_NO_CYCLE: string[] = [
     JOB_TYPES.CLEAN_POND,
     JOB_TYPES.SUN_DRY_POND,
 ];
+
+// Rửa ao & phơi ao chỉ hiện khi KHÔNG có chu kỳ
+export const HIDDEN_JOBS_WHEN_HAS_CYCLE: string[] = [JOB_TYPES.CLEAN_POND, JOB_TYPES.SUN_DRY_POND];

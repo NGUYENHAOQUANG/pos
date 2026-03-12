@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
     },
     fieldLabel: {
         fontSize: 14,
-        fontWeight: '700',
         lineHeight: 22,
         color: colors.textSecondary,
     },
