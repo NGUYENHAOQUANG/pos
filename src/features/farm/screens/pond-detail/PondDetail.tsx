@@ -94,63 +94,61 @@ export const PondDetail: React.FC<PondDetailProps> = ({
             />
 
             <View style={styles.content}>
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={['black']}
-                        />
-                    }
-                >
-                    {selectedTab === 'work' ? (
-                        <>
-                            {isLoading || isRefetchingCycles ? (
-                                <PondJobSkeleton />
-                            ) : (
-                                <>
-                                    {currentCycle ? (
-                                        <View style={styles.cycleCardWrapper}>
-                                            <CycleCard
-                                                cycle={currentCycle}
-                                                breedName={breedName}
-                                                onPress={onEditCycle}
-                                            />
-                                        </View>
-                                    ) : (
-                                        <EmptyStateCard
-                                            message={
-                                                'Ao chưa có chu kỳ nuôi nào.\nThực hiện các công việc được liệt kê bên dưới để chuẩn bị ao trước khi bắt đầu chu kỳ nuôi.'
-                                            }
-                                            style={styles.emptyCard}
+                {selectedTab === 'work' ? (
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={['black']}
+                            />
+                        }
+                    >
+                        {isLoading || isRefetchingCycles ? (
+                            <PondJobSkeleton />
+                        ) : (
+                            <>
+                                {currentCycle ? (
+                                    <View style={styles.cycleCardWrapper}>
+                                        <CycleCard
+                                            cycle={currentCycle}
+                                            breedName={breedName}
+                                            onPress={onEditCycle}
                                         />
-                                    )}
-
-                                    <JobListCard
-                                        jobs={filteredJobs}
-                                        onPressJob={handleJobPress}
-                                        onPressAddJob={handleAddJobItem}
-                                        onEditJobItem={handleEditJobItem}
+                                    </View>
+                                ) : (
+                                    <EmptyStateCard
+                                        message={
+                                            'Ao chưa có chu kỳ nuôi nào.\nThực hiện các công việc được liệt kê bên dưới để chuẩn bị ao trước khi bắt đầu chu kỳ nuôi.'
+                                        }
+                                        style={styles.emptyCard}
                                     />
-                                </>
-                            )}
-                        </>
-                    ) : selectedTab === 'log' ? (
-                        <WorkLogScreens
-                            pond={pond}
-                            onEditJobItem={handleEditJobItem}
-                            availableJobTypes={availableJobTypes}
-                        />
-                    ) : (
-                        <View style={styles.placeholderContainer}>
-                            <Text style={styles.placeholderText}>
-                                Nhật ký công việc chưa có dữ liệu
-                            </Text>
-                        </View>
-                    )}
-                </ScrollView>
+                                )}
+
+                                <JobListCard
+                                    jobs={filteredJobs}
+                                    onPressJob={handleJobPress}
+                                    onPressAddJob={handleAddJobItem}
+                                    onEditJobItem={handleEditJobItem}
+                                />
+                            </>
+                        )}
+                    </ScrollView>
+                ) : selectedTab === 'log' ? (
+                    <WorkLogScreens
+                        pond={pond}
+                        onEditJobItem={handleEditJobItem}
+                        availableJobTypes={availableJobTypes}
+                    />
+                ) : (
+                    <View style={styles.placeholderContainer}>
+                        <Text style={styles.placeholderText}>
+                            Nhật ký công việc chưa có dữ liệu
+                        </Text>
+                    </View>
+                )}
             </View>
             {selectedTab === 'work' &&
                 !currentCycle &&

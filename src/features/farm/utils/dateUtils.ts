@@ -148,6 +148,24 @@ export const formatDateTime = (
 };
 
 /**
+ * Format date to YYYY-MM-DD (local date parts) — dùng cho API CreateAtFrom/CreateAtTo để param khớp DateRangeFilter.
+ */
+export const toDateOnlyISO = (date: Date): string => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+/**
+ * Start of day UTC cho ngày calendar (local): YYYY-MM-DDT00:00:00.000Z — CreateAtFrom khớp ngày user chọn.
+ */
+export const toCreateAtFromISO = (date: Date): string => `${toDateOnlyISO(date)}T00:00:00.000Z`;
+
+/**
+ * End of day UTC cho ngày calendar (local): YYYY-MM-DDT23:59:59.999Z — CreateAtTo khớp ngày user chọn.
+ */
+export const toCreateAtToISO = (date: Date): string => `${toDateOnlyISO(date)}T23:59:59.999Z`;
+
+/**
  * Compare two time strings in "HH:mm" format
  * @param timeA - First time string (e.g., "09:30")
  * @param timeB - Second time string (e.g., "10:00")

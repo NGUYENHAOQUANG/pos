@@ -1,5 +1,6 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { serializeParams } from '@/core/utils/params';
 import type {
     IPondRecordListParams,
     PondRecordListResponse,
@@ -14,10 +15,12 @@ export const pondRecordApi = {
         pondId: string,
         params?: IPondRecordListParams
     ): Promise<PondRecordListResponse> => {
-        const response = await apiClient.get<PondRecordListResponse>(
-            API_ENDPOINTS.POND.RECORD.LIST(pondId),
-            { params }
-        );
+        const queryString = serializeParams(params as Record<string, unknown>);
+        const url = queryString
+            ? `${API_ENDPOINTS.POND.RECORD.LIST(pondId)}?${queryString}`
+            : API_ENDPOINTS.POND.RECORD.LIST(pondId);
+        const response = await apiClient.get<PondRecordListResponse>(url);
+        console.log('param:', params, 'response', response.data);
         return response.data;
     },
 };

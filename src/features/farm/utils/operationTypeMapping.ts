@@ -4,6 +4,7 @@
  */
 
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
+
 export const OPERATION_TYPE_TO_JOB_TYPE: Record<string, JobType> = {
     Feeding: 'FEED',
     ShrimpHealthCheck: 'SHRIMP_INSPECTION',
@@ -14,8 +15,6 @@ export const OPERATION_TYPE_TO_JOB_TYPE: Record<string, JobType> = {
     Siphon: 'SIPHON',
     Incident: 'TROUBLESHOOTING',
     StockTransfer: 'TRANSFER_POND',
-    CleanPond: 'CLEAN_POND',
-    SunDryPond: 'SUN_DRY_POND',
     CleanRenovation: 'CLEAN_POND',
     DryRenovation: 'SUN_DRY_POND',
     Harvest: 'HARVEST',
@@ -42,3 +41,14 @@ export const mapOperationTypeToJobType = (operationTypeName: string): JobType | 
 export const isValidOperationType = (operationTypeName: string): boolean => {
     return operationTypeName in OPERATION_TYPE_TO_JOB_TYPE;
 };
+
+// Reverse mapping: JobType -> list of OperationType names
+export const JOB_TYPE_TO_OPERATION_TYPES: Record<JobType, string[]> = Object.entries(
+    OPERATION_TYPE_TO_JOB_TYPE
+).reduce((acc, [operationType, jobType]) => {
+    if (!acc[jobType]) {
+        acc[jobType] = [];
+    }
+    acc[jobType].push(operationType);
+    return acc;
+}, {} as Record<JobType, string[]>);

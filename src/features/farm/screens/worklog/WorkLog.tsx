@@ -1,135 +1,72 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
-import { PondData } from '@/features/farm/types/farm.types';
-import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
 import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
-import { JobExecution } from '@/features/farm/types/farm.types';
-import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
-import { buildPondRecordGroups } from '@/features/farm/services/worklog.service';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
-import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
-import { useFarmStore } from '@/features/farm/store/farmStore';
-import { mapRecordItemToJobExecution } from '@/features/farm/services/worklog.service';
-import type { IPondRecordItem } from '@/features/farm/types/pondRecord.types';
 
-interface WorkLogScreensProps {
-    pond?: PondData;
-    onEditJobItem?: (type: JobType, item: JobExecution) => void;
-    availableJobTypes?: JobType[];
+export interface WorkLogProps {
+    startDate: Date;
+    endDate: Date;
+    setStartDate: (date: Date) => void;
+    setEndDate: (date: Date) => void;
+    isFilterVisible: boolean;
+    setIsFilterVisible: (visible: boolean) => void;
+    selectedFilters: string[];
+    isLoading: boolean;
+    groupedLogs: TrackingGroup[];
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    onLoadMore?: () => void;
+    availableFilterOptions: { label: string; value: string }[];
+    handleApplyFilter: (selectedTypes: string[]) => void;
 }
 
-export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
-    pond,
-    onEditJobItem,
-    availableJobTypes = [],
+export const WorkLog: React.FC<WorkLogProps> = ({
+    startDate,
+    endDate,
+    setStartDate,
+    setEndDate,
+    isFilterVisible,
+    setIsFilterVisible,
+    selectedFilters,
+    isLoading,
+    groupedLogs,
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore,
+    availableFilterOptions,
+    handleApplyFilter,
 }) => {
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
-
-    const [isFilterVisible, setIsFilterVisible] = useState(false);
-    const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-
-    const adjustedEndDate = useMemo(() => {
-        const d = new Date(endDate);
-        d.setHours(23, 59, 59, 999);
-        return d;
-    }, [endDate]);
-
-    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-        usePondRecordGroups(pond?.id || '', {
-            startDate,
-            endDate: adjustedEndDate,
-            operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
-        });
-
-    const handleLoadMore = useCallback(() => {
-        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-    const { materialMap } = useFarmMaterials();
-    const { metricTypes } = useEnvironmentInit();
-    const ponds = useFarmStore(s => s.ponds);
-    const pondNameMap = useMemo(() => {
-        const map: Record<string, string> = {};
-        ponds.forEach(p => {
-            if (p.id && p.name) map[p.id] = p.name;
-        });
-        return map;
-    }, [ponds]);
-
-    const groups = useMemo(
-        () =>
-            buildPondRecordGroups(rawItems, {
-                materialMap,
-                metricTypes,
-                pondNameMap,
-            }),
-        [rawItems, materialMap, metricTypes, pondNameMap]
-    );
-
-    const groupedLogs: TrackingGroup[] = useMemo(() => {
-        return groups.map(group => ({
-            id: group.id,
-            date: group.date,
-            activities: group.activities.map(activity => {
-                const recordItem = (activity as unknown as { _recordItem?: IPondRecordItem })
-                    ._recordItem;
-                const jobType = (activity as unknown as { _jobType?: JobType })._jobType;
-                const canEdit =
-                    onEditJobItem && jobType && jobType !== 'TRANSFER_POND' && recordItem;
-
-                return {
-                    ...activity,
-                    onEdit: canEdit
-                        ? () => {
-                              const jobExecution = mapRecordItemToJobExecution(
-                                  recordItem,
-                                  activity.title,
-                                  group.date,
-                                  pond?.id || ''
-                              );
-                              onEditJobItem(jobType, jobExecution);
-                          }
-                        : undefined,
-                };
-            }),
-        }));
-    }, [groups, onEditJobItem, pond?.id]);
-
-    const availableFilterOptions = useMemo(() => {
-        return availableJobTypes.map(type => ({
-            label: JOB_CONFIG[type].defaultTitle,
-            value: type,
-        }));
-    }, [availableJobTypes]);
-
-    const handleApplyFilter = (selectedTypes: string[]) => {
-        setSelectedFilters(selectedTypes);
-    };
-
     const hasData = groupedLogs.length > 0;
     const [showFooterSpinner, setShowFooterSpinner] = useState(false);
+
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage && onLoadMore) {
+            onLoadMore();
+        }
+    }, [hasNextPage, isFetchingNextPage, onLoadMore]);
+
+    // Giữ spinner footer tối thiểu một khoảng thời gian để tránh nháy giật
     useEffect(() => {
         if (isFetchingNextPage) {
             setShowFooterSpinner(true);
             return;
         }
+
         if (showFooterSpinner) {
-            const t = setTimeout(() => setShowFooterSpinner(false), 300);
-            return () => clearTimeout(t);
+            const timeout = setTimeout(() => {
+                setShowFooterSpinner(false);
+            }, 300);
+            return () => clearTimeout(timeout);
         }
     }, [isFetchingNextPage, showFooterSpinner]);
 
     return (
         <View style={styles.container}>
+            {/* Filter Section */}
             <View style={styles.filterSection}>
                 <View style={styles.dateRangeContainer}>
                     <DateRangeFilter
@@ -166,6 +103,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 </View>
             </View>
 
+            {/* Content Section */}
             {isLoading && !hasData ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={colors.primary} />
@@ -199,6 +137,7 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 </View>
             )}
 
+            {/* Filter Modal */}
             <Filter
                 visible={isFilterVisible}
                 onClose={() => setIsFilterVisible(false)}
@@ -219,7 +158,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingBottom: spacing.sm,
+        paddingVertical: spacing.sm,
         backgroundColor: colors.backgroundPrimary,
         gap: spacing.sm,
     },
@@ -256,7 +195,9 @@ const styles = StyleSheet.create({
     listContainer: {
         gap: spacing.sm,
     },
-    dayCard: {},
+    dayCard: {
+        // Optional styling for the card container
+    },
     emptyStateContainer: {
         flex: 1,
         justifyContent: 'flex-start',
