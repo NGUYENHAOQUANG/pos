@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         overflow: 'hidden',
+        marginHorizontal: 16,
     },
     fieldContainer: {
         flexDirection: 'row',
