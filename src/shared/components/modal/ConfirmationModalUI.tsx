@@ -1,22 +1,11 @@
 import React from 'react';
 import Toast from 'react-native-toast-message';
-import {
-    Modal,
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    Animated,
-    Dimensions,
-    StyleProp,
-    ViewStyle,
-} from 'react-native';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { colors, spacing, typography } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
+import { AnimatedBottomSheet } from '@/shared/components/modal/AnimatedBottomSheet';
 
 /**
  * Props for ConfirmationModalUI component
@@ -63,27 +52,6 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     cancelButtonStyle,
     confirmButtonStyle,
 }) => {
-    const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-    React.useEffect(() => {
-        if (visible) {
-            // Reset position before animating to ensure slide-up works every time
-            slideAnim.setValue(SCREEN_HEIGHT);
-            Animated.spring(slideAnim, {
-                toValue: 0,
-                tension: 50,
-                friction: 8,
-                useNativeDriver: true,
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: SCREEN_HEIGHT,
-                duration: 200,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [visible, slideAnim]);
-
     const [safeConfirm, isConfirming] = usePreventDoubleTap(() => {
         return new Promise<void>(resolve => {
             setTimeout(() => {
@@ -105,61 +73,47 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
     }, 1000);
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-            <TouchableWithoutFeedback onPress={onCancel}>
-                <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                        <Animated.View
-                            style={[
-                                styles.container,
-                                {
-                                    transform: [{ translateY: slideAnim }],
-                                },
-                            ]}
-                        >
-                            {/* Header row: title + X close button */}
-                            <View style={styles.header}>
-                                <Text style={styles.title}>{title}</Text>
-                                <TouchableOpacity
-                                    onPress={onCancel}
-                                    style={styles.closeButton}
-                                    activeOpacity={0.7}
-                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                >
-                                    <CloseIcon width={16} height={16} />
-                                </TouchableOpacity>
-                            </View>
+        <AnimatedBottomSheet
+            visible={visible}
+            onClose={onCancel}
+            overlayStyle={styles.overlay}
+            containerStyle={styles.container}
+        >
+            {/* Header row: title + X close button */}
+            <View style={styles.header}>
+                <Text style={styles.title}>{title}</Text>
+                <TouchableOpacity
+                    onPress={onCancel}
+                    style={styles.closeButton}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                    <CloseIcon width={16} height={16} />
+                </TouchableOpacity>
+            </View>
 
-                            {/* Message body */}
-                            <Text style={styles.message}>{message}</Text>
+            {/* Message body */}
+            <Text style={styles.message}>{message}</Text>
 
-                            {/* Footer buttons */}
-                            <View style={styles.footer}>
-                                <Button
-                                    title={cancelText}
-                                    onPress={onCancel}
-                                    variant="outline"
-                                    style={[
-                                        styles.cancelButton,
-                                        styles.cancelButtonOverride,
-                                        cancelButtonStyle,
-                                    ]}
-                                    textStyle={styles.cancelButtonTextOverride}
-                                />
-                                <Button
-                                    title={confirmText}
-                                    onPress={safeConfirm}
-                                    variant="primary"
-                                    loading={isConfirming}
-                                    disabled={isConfirming}
-                                    style={[styles.confirmButton, confirmButtonStyle]}
-                                />
-                            </View>
-                        </Animated.View>
-                    </TouchableWithoutFeedback>
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
+            {/* Footer buttons */}
+            <View style={styles.footer}>
+                <Button
+                    title={cancelText}
+                    onPress={onCancel}
+                    variant="outline"
+                    style={[styles.cancelButton, styles.cancelButtonOverride, cancelButtonStyle]}
+                    textStyle={styles.cancelButtonTextOverride}
+                />
+                <Button
+                    title={confirmText}
+                    onPress={safeConfirm}
+                    variant="primary"
+                    loading={isConfirming}
+                    disabled={isConfirming}
+                    style={[styles.confirmButton, confirmButtonStyle]}
+                />
+            </View>
+        </AnimatedBottomSheet>
     );
 };
 

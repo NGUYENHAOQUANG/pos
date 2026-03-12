@@ -9,7 +9,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/HarvestDataBox';
-import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -53,7 +53,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
     const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
-    const [confirmationModalType, setConfirmationModalType] = useState<'harvest_full' | null>(null);
+
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const watchedHarvestType = watch('harvestType');
@@ -62,7 +62,6 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const handleSavePress = () => {
         if (harvestTypeDisplay === 'Thu hết' && !isEditMode) {
-            setConfirmationModalType('harvest_full');
             setIsConfirmationModalVisible(true);
         } else {
             handleSubmit(onSubmitForm)();
@@ -71,13 +70,11 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const handleConfirmSave = () => {
         setIsConfirmationModalVisible(false);
-        setConfirmationModalType(null);
         handleSubmit(onSubmitForm)();
     };
 
     const handleCancelConfirmation = () => {
         setIsConfirmationModalVisible(false);
-        setConfirmationModalType(null);
     };
 
     const handleDeletePress = () => {
@@ -179,15 +176,17 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                 />
             </View>
 
-            {/* Confirmation Modal */}
-            {confirmationModalType && (
-                <ConfirmationModal
-                    visible={isConfirmationModalVisible}
-                    onConfirm={handleConfirmSave}
-                    onCancel={handleCancelConfirmation}
-                    type={confirmationModalType}
-                />
-            )}
+            {/* Confirmation Modal for full harvest */}
+            <ConfirmationModalUI
+                visible={isConfirmationModalVisible}
+                onConfirm={handleConfirmSave}
+                onCancel={handleCancelConfirmation}
+                title="Xác nhận thu hoạch hết"
+                message={`Việc thu hoạch hết sẽ kết thúc chu kỳ nuôi hiện tại và không thể hoàn tác.\nBạn có chắc chắn muốn thu hoạch hết không?`}
+                confirmText="Thu hết"
+                cancelText="Không"
+                showSuccessToast={false}
+            />
 
             {/* Delete Confirmation Modal */}
             <ConfirmationModalUI
