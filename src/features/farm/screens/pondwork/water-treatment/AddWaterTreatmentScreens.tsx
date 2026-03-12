@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { showMaterialQuantityZeroToast } from '@/features/farm/utils/toastMessages';
 
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
@@ -54,6 +55,12 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                 text1: 'Vui lòng chọn vật tư',
                 visibilityTime: 3000,
             });
+            return;
+        }
+
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
             return;
         }
 

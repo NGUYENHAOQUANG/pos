@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { showMaterialQuantityZeroToast } from '@/features/farm/utils/toastMessages';
 
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
@@ -160,6 +161,12 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
     const handleSave = async () => {
         if (!targetPondId || !targetJobId) return;
+
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
+            return;
+        }
 
         const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
         if (!treatmentTypeEnum) {

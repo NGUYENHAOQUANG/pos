@@ -1,90 +1,42 @@
 /**
  * @file PondTransfer.tsx
- * @description list item
- * @author NGUYENHAOQUANG
- * @created 2025-12-24
+ * @description Pond transfer statistics with infinite scroll (optimized for nested ScrollView)
  */
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { TransferItemCard } from './TransferItemCard';
-import { useStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
-import { formatDate } from '@/shared/utils/formatters';
+import { useInfiniteStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import PondTransferIcon from '@/assets/Icon/IconReport/PondTransferIcon.svg';
-import { PondData } from '@/features/farm/types/pond.types';
+import { PondTransferProps } from '@/features/reports/types/stock-transfer-stats';
 
-interface PondTransferProps {
-    zoneId: string;
-    pondId?: string;
-    cycleId?: string;
-    ponds?: PondData[];
-}
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+// Wrap item with React.memo for performance
+const MemoizedTransferItemCard = React.memo(TransferItemCard);
 
 export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycleId, ponds }) => {
-    const [isSectionOpen, setIsSectionOpen] = useState(false);
-    const [showAll, setShowAll] = useState(false);
-    const INITIAL_SHOW_COUNT = 3;
+    const [isSectionOpen, setIsSectionOpen] = React.useState(false);
 
-    const { data: response, isLoading: queryLoading } = useStockTransferStats({
-        ZoneId: zoneId,
-        Id: pondId,
-        CycleId: cycleId,
-    });
-
-    const isLoading = isSectionOpen && queryLoading;
-
-    // Map API data to UI format
-    const dataList = React.useMemo(() => {
-        if (!response?.data?.items) return [];
-
-        const getPondName = (code: string | null) => {
-            if (!code) return 'N/A';
-            // Search by code or by id just in case the API returns id in that field
-            const pond = ponds?.find(p => p.code === code || p.id === code);
-            return pond?.name || code; // Fallback to code if name not found
-        };
-
-        return response.data.items.map(record => ({
-            id: record.recordId,
-            sourcePond: getPondName(record.fromPondCode),
-            targetPond: getPondName(record.toPondCode),
-            transferDate: formatDate(record.transferDate),
-            doc: record.doc,
-            amount: record.transferQuantity.toLocaleString(),
-            size: record.shrimpCountPerKg.toString(),
-            stockingDate: formatDate(record.releaseDate),
-            stockingAmount: record.releaseQuantity.toLocaleString(),
-            expectedAmount: record.estimatedShrimpCount.toLocaleString(),
-        }));
-    }, [response, ponds]);
+    const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+        useInfiniteStockTransferStats({
+            ZoneId: zoneId,
+            Id: pondId,
+            CycleId: cycleId,
+            ponds,
+            enabled: isSectionOpen,
+        });
 
     const toggleSection = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsSectionOpen(!isSectionOpen);
     };
 
-    const toggleShowAll = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setShowAll(!showAll);
-    };
-
-    const displayedData = showAll ? dataList : dataList.slice(0, INITIAL_SHOW_COUNT);
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     return (
         <View style={chartStyles.container}>
@@ -102,28 +54,30 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
                 >
                     {isLoading ? (
                         <Loading />
+                    ) : dataList.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>Chưa có dữ liệu sang ao</Text>
+                        </View>
                     ) : (
                         <>
-                            {displayedData.map(item => (
-                                <TransferItemCard key={item.id} item={item} />
+                            {dataList.map(item => (
+                                <MemoizedTransferItemCard key={item.id} item={item} />
                             ))}
 
-                            {dataList.length > INITIAL_SHOW_COUNT && (
+                            {/* Load more button */}
+                            {isFetchingNextPage && (
+                                <View style={styles.footerLoader}>
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            )}
+
+                            {hasNextPage && !isFetchingNextPage && (
                                 <TouchableOpacity
-                                    style={styles.seeAllButton}
-                                    onPress={toggleShowAll}
+                                    style={styles.loadMoreButton}
+                                    onPress={handleLoadMore}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={styles.seeAllText}>
-                                        {showAll ? 'Thu gọn' : 'Xem tất cả'}
-                                    </Text>
-                                    {!showAll && (
-                                        <Ionicons
-                                            name="arrow-forward"
-                                            size={16}
-                                            color={colors.textSecondary}
-                                        />
-                                    )}
+                                    <Text style={styles.loadMoreText}>Tải thêm</Text>
                                 </TouchableOpacity>
                             )}
                         </>
@@ -152,21 +106,29 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    seeAllButton: {
-        marginTop: 8,
+    emptyContainer: {
+        paddingVertical: 40,
+        alignItems: 'center',
+    },
+    emptyText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    footerLoader: {
+        paddingVertical: 16,
+        alignItems: 'center',
+    },
+    loadMoreButton: {
         alignSelf: 'stretch',
-        paddingVertical: 8,
-        paddingHorizontal: 24,
+        height: 40,
         borderWidth: 1,
         borderColor: colors.gray[200],
         borderRadius: 10,
         backgroundColor: colors.white,
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
     },
-    seeAllText: {
+    loadMoreText: {
         fontSize: 14,
         color: colors.textSecondary,
         fontWeight: '500',
