@@ -26,12 +26,33 @@ const FIXED_Y_TICKS = [0, 8, 16, 24, 32, 40];
 const Y_DOMAIN_MAX = 40;
 
 // --- COLORS ---
+/** Filter type for pond categories */
+type PondFilterType = 'active' | 'prep' | 'functional';
+
+/** Color config for each filter type */
+interface FilterColorConfig {
+    fill: string;
+    stroke: string;
+}
+
+const FILTER_COLORS: Record<PondFilterType, FilterColorConfig> = {
+    active: {
+        fill: colors.orange[300],
+        stroke: colors.orange[500],
+    },
+    prep: {
+        fill: colors.green[300],
+        stroke: colors.green[500],
+    },
+    functional: {
+        fill: colors.yellow[300],
+        stroke: colors.yellow[600],
+    },
+};
+
 const CHART_COLORS = {
-    activeFill: colors.orange[300],
-    activeStroke: colors.orange[500],
     grid: colors.gray[100],
     text: colors.textSecondary,
-    indicator: colors.orange[700],
     white: colors.white,
     border: colors.border,
     black: colors.black,
@@ -48,6 +69,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     const [expanded, setExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [containerWidth, setContainerWidth] = useState(0);
+    const [selectedFilter, setSelectedFilter] = useState<PondFilterType>('active');
     const scrollViewRef = useRef<ScrollView>(null);
 
     const onLayout = (event: LayoutChangeEvent) => {
@@ -78,6 +100,24 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
             total: item.framingCount + item.availableCount + item.functionalCount,
         }));
     }, [response]);
+
+    // Get chart value based on selected filter
+    const getChartValue = useMemo(() => {
+        return (d: { active: number; prep: number; functional: number }) => {
+            switch (selectedFilter) {
+                case 'prep':
+                    return d.prep;
+                case 'functional':
+                    return d.functional;
+                case 'active':
+                default:
+                    return d.active;
+            }
+        };
+    }, [selectedFilter]);
+
+    // Current color config based on filter
+    const currentColors = FILTER_COLORS[selectedFilter];
 
     // --- 2. TỰ ĐỘNG CUỘN ---
     useEffect(() => {
@@ -134,6 +174,30 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
     const currentPrepTotal = kpis?.availablePonds || 0;
     const currentFunctionalTotal = kpis?.functionalPonds || 0;
     const totalPonds = kpis?.totalPonds || 0;
+
+    // Map filter id to PondFilterType
+    const handleFilterPress = (id: string) => {
+        const filterMap: Record<string, PondFilterType> = {
+            '1': 'active',
+            '2': 'prep',
+            '3': 'functional',
+        };
+        const newFilter = filterMap[id];
+        if (newFilter) {
+            // Toggle: if already selected, reset to active (default)
+            setSelectedFilter(prev => (prev === newFilter ? 'active' : newFilter));
+        }
+    };
+
+    // Get selected PondIndex id from filter
+    const selectedPondIndexId = useMemo(() => {
+        const idMap: Record<PondFilterType, string> = {
+            active: '1',
+            prep: '2',
+            functional: '3',
+        };
+        return idMap[selectedFilter];
+    }, [selectedFilter]);
 
     const pondIndexData = useMemo(
         () => [
@@ -195,7 +259,12 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                             >
                                 {/* --- VÙNG THỐNG KÊ POND INDEX --- */}
                                 <View style={styles.pondIndexWrapper}>
-                                    <PondIndex data={pondIndexData} isEqualWidth={true} />
+                                    <PondIndex
+                                        data={pondIndexData}
+                                        isEqualWidth={true}
+                                        selectedId={selectedPondIndexId}
+                                        onPress={handleFilterPress}
+                                    />
                                 </View>
 
                                 <Text style={styles.yAxisUnitLabel}>Số ao</Text>
@@ -256,12 +325,12 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                     >
                                                         <Stop
                                                             offset="0"
-                                                            stopColor={CHART_COLORS.activeFill}
+                                                            stopColor={currentColors.fill}
                                                             stopOpacity="1"
                                                         />
                                                         <Stop
                                                             offset="1"
-                                                            stopColor={CHART_COLORS.activeFill}
+                                                            stopColor={currentColors.fill}
                                                             stopOpacity="0.2"
                                                         />
                                                     </LinearGradient>
@@ -283,7 +352,8 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                     {processedData.map((d, index) => {
                                                         const x = index * ITEM_WIDTH;
                                                         const width = ITEM_WIDTH;
-                                                        const y = yScale(d.active);
+                                                        const chartValue = getChartValue(d);
+                                                        const y = yScale(chartValue);
                                                         const height = yScale(0) - y;
                                                         return (
                                                             <G key={index}>
@@ -299,9 +369,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                                     y1={y}
                                                                     x2={x + width}
                                                                     y2={y}
-                                                                    stroke={
-                                                                        CHART_COLORS.activeStroke
-                                                                    }
+                                                                    stroke={currentColors.stroke}
                                                                     strokeWidth={2}
                                                                 />
                                                             </G>

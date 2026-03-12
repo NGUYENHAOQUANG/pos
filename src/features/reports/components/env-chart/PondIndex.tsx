@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
@@ -13,6 +14,10 @@ interface PondData {
 interface PondIndexProps {
     data?: PondData[];
     isEqualWidth?: boolean;
+    /** Currently selected card id for filter highlight */
+    selectedId?: string | null;
+    /** Called when a card is pressed */
+    onPress?: (id: string) => void;
 }
 
 const DEFAULT_DATA: PondData[] = [
@@ -25,7 +30,12 @@ const DEFAULT_DATA: PondData[] = [
     { id: '7', name: 'V04', value: '{chỉ số}', color: colors.yellow[800] },
 ];
 
-export const PondIndex = ({ data = DEFAULT_DATA, isEqualWidth }: PondIndexProps) => {
+export const PondIndex = ({
+    data = DEFAULT_DATA,
+    isEqualWidth,
+    selectedId,
+    onPress,
+}: PondIndexProps) => {
     const parseValueAndUnit = (value: string): { value: string; unit: string } => {
         const firstSpace = value.indexOf(' ');
         if (firstSpace === -1) return { value, unit: '' };
@@ -47,8 +57,19 @@ export const PondIndex = ({ data = DEFAULT_DATA, isEqualWidth }: PondIndexProps)
         >
             {data.map(item => {
                 const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
+                const isSelected = selectedId === item.id;
+                const CardWrapper = onPress ? TouchableOpacity : View;
                 return (
-                    <View key={item.id} style={[styles.card, isEqualWidth && styles.cardEqual]}>
+                    <CardWrapper
+                        key={item.id}
+                        style={[
+                            styles.card,
+                            isEqualWidth && styles.cardEqual,
+                            isSelected && { borderColor: item.color, borderWidth: 2 },
+                        ]}
+                        activeOpacity={0.7}
+                        onPress={onPress ? () => onPress(item.id) : undefined}
+                    >
                         <View style={[styles.indicator, { backgroundColor: item.color }]} />
                         <Text style={styles.title} numberOfLines={1}>
                             {item.name}
@@ -57,7 +78,7 @@ export const PondIndex = ({ data = DEFAULT_DATA, isEqualWidth }: PondIndexProps)
                             <Text style={styles.valueNumber}>{valuePart}</Text>
                             {unitPart ? <Text style={styles.valueUnit}>{unitPart}</Text> : null}
                         </View>
-                    </View>
+                    </CardWrapper>
                 );
             })}
         </ScrollView>
