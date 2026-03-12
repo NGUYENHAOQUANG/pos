@@ -2,40 +2,74 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { DevicesItem } from './DevicesItem';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
+import { SvgProps } from 'react-native-svg';
 
-import { PondDeviceStats } from '../../types/control.types';
+import { DeviceStat, PondDeviceStats } from '../../types/control.types';
 
 import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
 import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
 import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
 import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
-import { borderRadius, colors } from '@/styles';
+import PumpIcon from '@/assets/Icon/IconDevices/Pump.svg';
+import { colors } from '@/styles';
+
+// Config for all device types
+interface DeviceTypeConfig {
+    key: keyof PondDeviceStats;
+    label: string;
+    icon: React.FC<SvgProps>;
+}
+
+const DEVICE_TYPES: DeviceTypeConfig[] = [
+    { key: 'feeder', label: 'Máy cho ăn', icon: FeederIcon },
+    { key: 'fan', label: 'Quạt nước', icon: FanIcon },
+    { key: 'oxy', label: 'Máy Oxy', icon: OxyIcon },
+    { key: 'syphon', label: 'Syphon', icon: SyphonIcon },
+    { key: 'pump', label: 'Máy bơm', icon: PumpIcon },
+];
+
+/** Check if a DeviceStat has any devices */
+const hasDevices = (stat?: DeviceStat): boolean => {
+    if (!stat) return false;
+    return stat.active + stat.warning + stat.inactive > 0;
+};
 
 interface PondCardProps {
     pondName: string;
     onPressDetail?: () => void;
     isEmpty?: boolean;
-    onAddDevice?: () => void;
     deviceStats?: PondDeviceStats;
+    compact?: boolean;
 }
 
 export const PondCard: React.FC<PondCardProps> = ({
     pondName,
     onPressDetail,
     isEmpty = false,
-    onAddDevice,
     deviceStats,
+    compact = false,
 }) => {
+    // Filter to only device types that this pond actually has
+    const visibleTypes = React.useMemo(() => {
+        if (!deviceStats) return [];
+        return DEVICE_TYPES.filter(dt => hasDevices(deviceStats[dt.key]));
+    }, [deviceStats]);
+
+    // Split into rows of 2
+    const rows = React.useMemo(() => {
+        const result: DeviceTypeConfig[][] = [];
+        for (let i = 0; i < visibleTypes.length; i += 2) {
+            result.push(visibleTypes.slice(i, i + 2));
+        }
+        return result;
+    }, [visibleTypes]);
+
     return (
         <View style={styles.wrapper}>
             <View style={styles.header}>
                 <Text style={styles.title}>{pondName}</Text>
                 {!isEmpty && (
-                    <TouchableOpacity
-                        style={styles.detailButton}
-                        onPress={onPressDetail}
-                        activeOpacity={0.7}
-                    >
+                    <TouchableOpacity onPress={onPressDetail} activeOpacity={0.7}>
                         <Text style={styles.detailButtonText}>Xem chi tiết</Text>
                     </TouchableOpacity>
                 )}
@@ -44,42 +78,30 @@ export const PondCard: React.FC<PondCardProps> = ({
             {isEmpty ? (
                 <EmptyStateCard
                     message="Chưa có thiết bị nào được thêm."
-                    buttonTitle="Thêm thiết bị"
-                    onPress={onAddDevice}
                     style={styles.emptyDeviceContainer}
                 />
             ) : (
-                <View style={styles.cardContainer}>
-                    <View style={styles.devicesContainer}>
-                        <DevicesItem
-                            icon={FanIcon}
-                            activeCount={deviceStats?.fan.active}
-                            warningCount={deviceStats?.fan.warning}
-                            inactiveCount={deviceStats?.fan.inactive}
-                            style={styles.deviceItem}
-                        />
-                        <DevicesItem
-                            icon={FeederIcon}
-                            activeCount={deviceStats?.feeder.active}
-                            warningCount={deviceStats?.feeder.warning}
-                            inactiveCount={deviceStats?.feeder.inactive}
-                            style={styles.deviceItem}
-                        />
-                        <DevicesItem
-                            icon={OxyIcon}
-                            activeCount={deviceStats?.oxy.active}
-                            warningCount={deviceStats?.oxy.warning}
-                            inactiveCount={deviceStats?.oxy.inactive}
-                            style={styles.deviceItem}
-                        />
-                        <DevicesItem
-                            icon={SyphonIcon}
-                            activeCount={deviceStats?.syphon.active}
-                            warningCount={deviceStats?.syphon.warning}
-                            inactiveCount={deviceStats?.syphon.inactive}
-                            style={styles.deviceItem}
-                        />
-                    </View>
+                <View style={styles.gridContainer}>
+                    {rows.map((row, rowIndex) => (
+                        <View key={rowIndex} style={styles.gridRow}>
+                            {row.map(dt => {
+                                const stat = deviceStats?.[dt.key];
+                                const isAlone = row.length === 1;
+                                return (
+                                    <DevicesItem
+                                        key={dt.key}
+                                        icon={dt.icon}
+                                        label={dt.label}
+                                        activeCount={stat?.active}
+                                        warningCount={stat?.warning}
+                                        inactiveCount={stat?.inactive}
+                                        style={isAlone ? styles.gridItemHalf : styles.gridItem}
+                                        compact={compact}
+                                    />
+                                );
+                            })}
+                        </View>
+                    ))}
                 </View>
             )}
         </View>
@@ -99,36 +121,26 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 16,
-        fontWeight: '700',
-        color: '#1F2937',
-    },
-    detailButton: {
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: borderRadius.full,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
-        backgroundColor: 'white',
+        fontWeight: '600',
+        color: colors.gray[900],
     },
     detailButtonText: {
         fontSize: 14,
         fontWeight: '500',
-        color: '#374151',
+        color: colors.primary,
     },
-    cardContainer: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: colors.defaultBorder,
+    gridContainer: {
+        gap: 10,
     },
-    devicesContainer: {
+    gridRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 8,
+        gap: 10,
     },
-    deviceItem: {
+    gridItem: {
         flex: 1,
+    },
+    gridItemHalf: {
+        width: '48%',
     },
     emptyDeviceContainer: {
         paddingTop: 0,

@@ -8,6 +8,7 @@ import {
     Pond,
 } from '@/features/control/types/control.types';
 import Toast from 'react-native-toast-message';
+import { MOCK_PONDS } from '@/features/control/data/devicesData';
 
 // ===== Helper Functions =====
 
@@ -18,6 +19,7 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
         feeder: { active: 0, warning: 0, inactive: 0 },
         oxy: { active: 0, warning: 0, inactive: 0 },
         syphon: { active: 0, warning: 0, inactive: 0 },
+        pump: { active: 0, warning: 0, inactive: 0 },
     };
 
     devices.forEach(device => {
@@ -38,7 +40,7 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
 
 /** Map API DeviceItem to local DeviceData */
 const mapApiDeviceToDeviceData = (item: DeviceItem): DeviceData => {
-    let type: 'feeder' | 'fan' | 'oxy' | 'syphon' = 'feeder';
+    let type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' = 'feeder';
     switch (item.deviceType) {
         case 'Syphon':
             type = 'syphon';
@@ -51,6 +53,9 @@ const mapApiDeviceToDeviceData = (item: DeviceItem): DeviceData => {
             break;
         case 'PaddleWheel':
             type = 'fan';
+            break;
+        case 'Pump':
+            type = 'pump';
             break;
         default:
             type = 'feeder';
@@ -132,13 +137,28 @@ const buildPondsFromApi = (hubs: DeviceHubItem[], devices: DeviceItem[]): Pond[]
         });
     });
 
-    // Sort: ponds with devices first, then alphabetically by name
-    ponds.sort((a, b) => {
-        if (a.hasDevices !== b.hasDevices) return a.hasDevices ? -1 : 1;
+    return ponds;
+};
+
+const getPondCategoryPriority = (pondName: string): number => {
+    const nameAfterAo = pondName.replace(/^Ao\s+/i, '');
+    if (nameAfterAo.startsWith('V')) return 0;
+    if (nameAfterAo.startsWith('N')) return 1;
+    if (nameAfterAo.startsWith('SS')) return 2;
+    if (nameAfterAo.startsWith('XL')) return 3;
+    if (nameAfterAo.startsWith('L')) return 4;
+    if (nameAfterAo.startsWith('T')) return 5;
+    return 99;
+};
+
+const sortPondsByCategory = (ponds: Pond[]): Pond[] => {
+    return ponds.sort((a, b) => {
+        const priorityA = getPondCategoryPriority(a.name);
+        const priorityB = getPondCategoryPriority(b.name);
+
+        if (priorityA !== priorityB) return priorityA - priorityB;
         return a.name.localeCompare(b.name);
     });
-
-    return ponds;
 };
 
 // ===== React Query Hooks =====
@@ -160,10 +180,11 @@ export const useDevices = () => {
             const hubs = hubsResponse.data?.data?.items ?? [];
             const devices = devicesResponse.data?.data?.items ?? [];
 
-            return buildPondsFromApi(hubs, devices);
+            const allPonds = [...buildPondsFromApi(hubs, devices), ...MOCK_PONDS];
+            return sortPondsByCategory(allPonds);
         },
-        staleTime: 1000 * 3,
-        refetchInterval: 5000,
+        staleTime: 1000 * 30,
+        refetchInterval: 30000,
     });
 };
 
@@ -300,14 +321,15 @@ export const useConnectDevice = () => {
         // Device Map for Codes 1-6
         const typeMap: Record<
             string,
-            { type: 'feeder' | 'fan' | 'oxy' | 'syphon'; defaultName: string }
+            { type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump'; defaultName: string }
         > = {
-            '1': { type: 'feeder', defaultName: 'Máy cho ăn tự động A1' },
-            '2': { type: 'syphon', defaultName: 'Hệ thống Xiphong X1' },
-            '3': { type: 'fan', defaultName: 'Quạt nước Q1' },
-            '4': { type: 'fan', defaultName: 'Quạt nước Q2' },
-            '5': { type: 'oxy', defaultName: 'Máy thổi khí Oxy 1' },
-            '6': { type: 'syphon', defaultName: 'Hệ thống Xiphong X2' },
+            '1': { type: 'feeder' as const, defaultName: 'Máy cho ăn tự động A1' },
+            '2': { type: 'syphon' as const, defaultName: 'Hệ thống Xiphong X1' },
+            '3': { type: 'fan' as const, defaultName: 'Quạt nước Q1' },
+            '4': { type: 'fan' as const, defaultName: 'Quạt nước Q2' },
+            '5': { type: 'oxy' as const, defaultName: 'Máy thổi khí Oxy 1' },
+            '6': { type: 'syphon' as const, defaultName: 'Hệ thống Xiphong X2' },
+            '7': { type: 'pump' as const, defaultName: 'Máy bơm B1' },
         };
 
         let config = typeMap[code];

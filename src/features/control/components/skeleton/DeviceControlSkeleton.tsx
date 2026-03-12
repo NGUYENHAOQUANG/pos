@@ -27,38 +27,59 @@ const StatusSkeleton = () => {
 };
 
 /**
- * Skeleton for a single Pond Device Card
+ * Skeleton for a single DevicesItem card (icon + label + 3 status rows)
+ */
+const DevicesItemSkeleton = () => {
+    return (
+        <View style={styles.deviceItemCard}>
+            {/* Icon + Label row */}
+            <View style={styles.deviceItemHeader}>
+                <Skeleton width={32} height={32} style={{ borderRadius: 8 }} />
+                <Skeleton width={70} height={14} style={{ marginLeft: 8 }} />
+            </View>
+
+            {/* Status rows (active, warning, inactive) */}
+            <View style={styles.deviceStatusRows}>
+                <View style={styles.deviceStatusRow}>
+                    <Skeleton width={12} height={12} style={{ borderRadius: 6 }} />
+                    <Skeleton width={80} height={12} style={{ marginLeft: 6 }} />
+                    <View style={{ flex: 1 }} />
+                    <Skeleton width={16} height={12} />
+                </View>
+                <View style={styles.deviceStatusRow}>
+                    <Skeleton width={12} height={12} style={{ borderRadius: 6 }} />
+                    <Skeleton width={28} height={12} style={{ marginLeft: 6 }} />
+                    <View style={{ flex: 1 }} />
+                    <Skeleton width={16} height={12} />
+                </View>
+                <View style={styles.deviceStatusRow}>
+                    <Skeleton width={12} height={12} style={{ borderRadius: 6 }} />
+                    <Skeleton width={44} height={12} style={{ marginLeft: 6 }} />
+                    <View style={{ flex: 1 }} />
+                    <Skeleton width={16} height={12} />
+                </View>
+            </View>
+        </View>
+    );
+};
+
+/**
+ * Skeleton for a single Pond Card (header + 2-col device grid)
  */
 const PondCardSkeletonItem = () => {
     return (
         <View style={styles.cardWrapper}>
             {/* Header: Pond Name + Detail Button */}
             <View style={styles.cardHeader}>
-                <Skeleton width={80} height={24} style={{ borderRadius: 4 }} />
-                <Skeleton width={90} height={32} style={{ borderRadius: 20 }} />
+                <Skeleton width={80} height={20} style={{ borderRadius: 4 }} />
+                <Skeleton width={80} height={16} style={{ borderRadius: 4 }} />
             </View>
 
-            {/* Devices Container Wrapper */}
-            <View style={styles.devicesCardContainer}>
-                {/* Devices Grid: 4 items */}
-                <View style={styles.devicesGrid}>
-                    {Array.from({ length: 4 }).map((_, index) => (
-                        <View key={index} style={styles.deviceItem}>
-                            {/* Device Icon Circle/Square */}
-                            <Skeleton
-                                width={48}
-                                height={48}
-                                style={{ marginBottom: 12, borderRadius: 24 }}
-                            />
-
-                            {/* Status Lines (Power, Warning, Error) */}
-                            <View style={{ gap: 6, alignItems: 'center' }}>
-                                <Skeleton width={40} height={12} />
-                                <Skeleton width={40} height={12} />
-                                <Skeleton width={40} height={12} />
-                            </View>
-                        </View>
-                    ))}
+            {/* 2-column devices grid */}
+            <View style={styles.devicesGrid}>
+                <View style={styles.gridRow}>
+                    <DevicesItemSkeleton />
+                    <DevicesItemSkeleton />
                 </View>
             </View>
         </View>
@@ -121,20 +142,35 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 12,
     },
-    devicesCardContainer: {
-        backgroundColor: 'white',
-        borderRadius: 16,
-        padding: 16,
-        borderColor: colors.defaultBorder,
-        borderWidth: 1,
-    },
+
+    // Device grid (2 columns)
     devicesGrid: {
+        gap: 10,
+    },
+    gridRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        gap: 10,
+    },
+
+    // Single DevicesItem card
+    deviceItemCard: {
+        flex: 1,
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: colors.defaultBorder,
+    },
+    deviceItemHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    deviceStatusRows: {
         gap: 8,
     },
-    deviceItem: {
-        flex: 1,
+    deviceStatusRow: {
+        flexDirection: 'row',
         alignItems: 'center',
     },
 });
