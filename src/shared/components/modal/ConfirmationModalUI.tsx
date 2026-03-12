@@ -16,6 +16,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { colors, spacing, typography } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
+import { usePreventDoubleTap } from '@/shared/hooks/usePreventDoubleTap';
 
 /**
  * Props for ConfirmationModalUI component
@@ -24,7 +25,7 @@ interface ConfirmationModalUIProps {
     /** Whether the modal is visible */
     visible: boolean;
     /** Callback function called when user confirms deletion */
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
     /** Callback function called when user cancels deletion */
     onCancel: () => void;
     /** Title text displayed in the modal */
@@ -83,18 +84,25 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
         }
     }, [visible, slideAnim]);
 
-    const handleConfirm = () => {
-        setTimeout(() => {
-            onConfirm();
-            if (showSuccessToast) {
-                Toast.show({
-                    type: 'success',
-                    text1: successMessage,
-                    visibilityTime: 3000,
-                });
-            }
-        }, 300);
-    };
+    const [safeConfirm, isConfirming] = usePreventDoubleTap(() => {
+        return new Promise<void>(resolve => {
+            setTimeout(() => {
+                const result = onConfirm();
+                if (result && typeof (result as Promise<void>).then === 'function') {
+                    (result as Promise<void>).then(resolve, resolve);
+                } else {
+                    resolve();
+                }
+                if (showSuccessToast) {
+                    Toast.show({
+                        type: 'success',
+                        text1: successMessage,
+                        visibilityTime: 3000,
+                    });
+                }
+            }, 300);
+        });
+    }, 1000);
 
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
@@ -140,8 +148,10 @@ export const ConfirmationModalUI: React.FC<ConfirmationModalUIProps> = ({
                                 />
                                 <Button
                                     title={confirmText}
-                                    onPress={handleConfirm}
+                                    onPress={safeConfirm}
                                     variant="primary"
+                                    loading={isConfirming}
+                                    disabled={isConfirming}
                                     style={[styles.confirmButton, confirmButtonStyle]}
                                 />
                             </View>
@@ -207,7 +217,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
     },
     cancelButtonTextOverride: {
-        color: colors.textSecondary,
+        color: colors.text,
         fontSize: 14,
     },
     confirmButton: {

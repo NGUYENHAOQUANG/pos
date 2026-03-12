@@ -1,20 +1,23 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * Custom hook to prevent double tap/spam clicking on buttons.
- * It immediately executes the callback on the first click and ignores subsequent clicks within the specified delay.
+ * Supports both sync and async callbacks:
+ * - For async callbacks: blocks until the Promise resolves/rejects
+ * - For sync callbacks: blocks for the specified delay
  *
- * @param callback The function to execute on press
- * @param delay The delay in milliseconds to ignore subsequent presses
- * @returns A safe version of the callback that prevents double taps
+ * @param callback The function to execute on press (sync or async)
+ * @param delay The minimum delay in ms to ignore subsequent presses (default: 500)
+ * @returns [safePressHandler, isProcessing] - handler and loading state
  */
 export const usePreventDoubleTap = (
-    callback?: (...args: unknown[]) => void,
+    callback?: (...args: unknown[]) => void | Promise<void>,
     delay: number = 500
-) => {
+): [(...args: unknown[]) => void, boolean] => {
     const isBlocked = useRef(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    return useCallback(
+    const handler = useCallback(
         (...args: unknown[]) => {
             if (!callback || isBlocked.current) return;
 
@@ -22,13 +25,25 @@ export const usePreventDoubleTap = (
             isBlocked.current = true;
 
             // Execute the callback immediately on the first tap
-            callback(...args);
+            const result = callback(...args);
 
-            // Unblock after the delay
-            setTimeout(() => {
-                isBlocked.current = false;
-            }, delay);
+            // If callback returns a Promise, wait for it to complete
+            if (result && typeof (result as Promise<void>).then === 'function') {
+                setIsProcessing(true);
+                const unblock = () => {
+                    isBlocked.current = false;
+                    setIsProcessing(false);
+                };
+                (result as Promise<void>).then(unblock, unblock);
+            } else {
+                // For sync callbacks, unblock after the delay
+                setTimeout(() => {
+                    isBlocked.current = false;
+                }, delay);
+            }
         },
         [callback, delay]
     );
+
+    return [handler, isProcessing];
 };

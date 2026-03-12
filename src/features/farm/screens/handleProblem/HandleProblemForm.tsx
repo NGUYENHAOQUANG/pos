@@ -8,6 +8,7 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { GeneralInfoBox, GeneralInfoBoxRef } from '../../components/pondwork/GeneralInfoBox';
 import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -16,13 +17,11 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 import { handleProblemSchema, HandleProblemFormValues } from '../../schemas/handleProblemSchema';
-import { IMaterial } from '@/features/material/types/material.types';
 
 export interface HandleProblemFormProps {
     isEditMode: boolean;
     isSaving: boolean;
     initialData: HandleProblemFormValues;
-    materials: IMaterial[];
     title: string;
     onBack: () => void;
     onSubmit: (data: HandleProblemFormValues, documentIds: string[]) => void;
@@ -33,7 +32,6 @@ export const HandleProblemForm = ({
     isEditMode,
     isSaving,
     initialData,
-    materials,
     title,
     onBack,
     onSubmit,
@@ -152,7 +150,10 @@ export const HandleProblemForm = ({
                                 <MaterialSelectionBox
                                     selectedMaterials={value}
                                     onMaterialsChange={onChange}
-                                    materials={materials}
+                                    groupTypes={[
+                                        MaterialGroupType.ELECTRIC,
+                                        MaterialGroupType.TOOLS,
+                                    ]}
                                 />
                             )}
                         />
