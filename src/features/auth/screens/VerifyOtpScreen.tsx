@@ -9,6 +9,7 @@ import {
     AppStateStatus,
     KeyboardAvoidingView,
     Platform,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -45,11 +46,6 @@ export default function VerifyOTPScreen() {
     const otpInputRef = useRef<OTPInputHandle>(null);
     const isError = !!errorMessage;
     const { keyboardVisible } = useKeyboard();
-
-    useEffect(() => {
-        const timer = setTimeout(() => otpInputRef.current?.focusFirst(), 300);
-        return () => clearTimeout(timer);
-    }, []);
 
     const calculateRemainingTime = useCallback(() => {
         const elapsed = Math.floor((Date.now() - countdownStartTime) / 1000);
@@ -89,6 +85,8 @@ export default function VerifyOTPScreen() {
             return;
         }
         setIsVerifying(true);
+        Keyboard.dismiss();
+        await new Promise<void>(resolve => setTimeout(resolve, 1500));
         try {
             const status = await verifyOtp(contact, otpString);
             if (status === 'REQUIRE_UPDATE_PROFILE') {
@@ -125,7 +123,9 @@ export default function VerifyOTPScreen() {
             const response = await apiClient.post(API_ENDPOINTS.AUTH.SEND_OTP, {
                 phoneNumber: phone,
             });
-            const otpCode = response.data?.testOtp || response.data?.otpCode;
+            const responseData = response.data;
+            const data = responseData?.data;
+            const otpCode = data?.testOtp || data?.otpCode;
             if (otpCode) notificationHelper.displayOtpNotification(String(otpCode));
             setCountdownStartTime(Date.now());
             setCountdown(COUNTDOWN_DURATION);
@@ -228,11 +228,11 @@ export default function VerifyOTPScreen() {
                         ]}
                     >
                         <Button
-                            title={isVerifying ? 'Đang xác thực...' : 'Tiếp Tục'}
+                            title="Tiếp Tục"
                             onPress={handleVerifyOTP}
                             variant="primary"
                             fullWidth
-                            disabled={isVerifying}
+                            loading={isVerifying}
                             style={styles.submitButton}
                         />
                     </View>
