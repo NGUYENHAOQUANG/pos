@@ -6,8 +6,8 @@ import { colors } from '@/styles';
 interface ButtonBarFarmProps {
     primaryTitle?: string;
     secondaryTitle?: string;
-    onPrimaryPress?: () => void;
-    onSecondaryPress?: () => void;
+    onPrimaryPress?: () => void | Promise<void>;
+    onSecondaryPress?: () => void | Promise<void>;
     primaryDisabled?: boolean;
     secondaryType?: 'default' | 'primary';
     style?: StyleProp<ViewStyle>;

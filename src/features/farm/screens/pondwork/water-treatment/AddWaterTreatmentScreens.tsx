@@ -13,7 +13,7 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
 
 import { useCreateWaterTreatment } from '@/features/farm/hooks/useWaterTreatmentRecords';
-import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+
 import {
     CreateWaterTreatmentCommand,
     TREATMENT_LABEL_TO_ENUM,
@@ -29,15 +29,6 @@ export const AddWaterTreatmentScreens: React.FC = () => {
     const { pond } = route.params || {};
     const pondId = pond?.id;
 
-    // Fetch warehouse materials
-    const { materials } = useFarmMaterials();
-
-    const filteredMaterials = useMemo(() => {
-        return materials.filter(m => {
-            const groupName = (m.group || '').toLowerCase();
-            return groupName.includes('công cụ') || groupName.includes('thiết bị điện');
-        });
-    }, [materials]);
     // Mutation
     const createMutation = useCreateWaterTreatment();
 
@@ -136,7 +127,6 @@ export const AddWaterTreatmentScreens: React.FC = () => {
                     onExecutionDateChange={setExecutionDate}
                     activityType={activityType}
                     onActivityTypeChange={setActivityType}
-                    materials={filteredMaterials}
                     selectedMaterials={selectedMaterials}
                     onSelectedMaterialsChange={setSelectedMaterials}
                     note={note}

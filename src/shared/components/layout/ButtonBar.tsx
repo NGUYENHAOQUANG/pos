@@ -11,8 +11,8 @@ export interface ButtonBarProps {
     mode?: ButtonBarMode;
     primaryTitle?: string;
     secondaryTitle?: string;
-    onPrimaryPress?: () => void;
-    onSecondaryPress?: () => void;
+    onPrimaryPress?: () => void | Promise<void>;
+    onSecondaryPress?: () => void | Promise<void>;
     totalLabel?: string;
     totalValue?: string | number | React.ReactNode;
     primaryButtonDisabled?: boolean;
@@ -48,8 +48,12 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
     // Use actual safe area insets with minimum fallback
     const paddingBottom = Math.max(insets.bottom, 12);
 
-    const safePrimaryPress = usePreventDoubleTap(onPrimaryPress, 500);
-    const safeSecondaryPress = usePreventDoubleTap(onSecondaryPress, 500);
+    const [safePrimaryPress, isPrimaryProcessing] = usePreventDoubleTap(onPrimaryPress, 500);
+    const [safeSecondaryPress] = usePreventDoubleTap(onSecondaryPress, 500);
+
+    // Auto-disable and show loading when async callback is in progress
+    const isPrimaryDisabled = primaryButtonDisabled || isPrimaryProcessing;
+    const isPrimaryLoading = primaryButtonLoading || isPrimaryProcessing;
 
     const renderContent = () => {
         switch (mode) {
@@ -69,8 +73,8 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
-                            disabled={primaryButtonDisabled}
-                            loading={primaryButtonLoading}
+                            disabled={isPrimaryDisabled}
+                            loading={isPrimaryLoading}
                             style={StyleSheet.flatten([styles.primaryButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}
                         />
@@ -101,8 +105,8 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
-                            disabled={primaryButtonDisabled}
-                            loading={primaryButtonLoading}
+                            disabled={isPrimaryDisabled}
+                            loading={isPrimaryLoading}
                             style={StyleSheet.flatten([styles.flexButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}
                         />
@@ -117,8 +121,8 @@ export const ButtonBar: React.FC<ButtonBarProps> = ({
                             onPress={safePrimaryPress}
                             variant="primary"
                             size="medium"
-                            disabled={primaryButtonDisabled}
-                            loading={primaryButtonLoading}
+                            disabled={isPrimaryDisabled}
+                            loading={isPrimaryLoading}
                             fullWidth
                             style={StyleSheet.flatten([styles.fullButton, primaryButtonStyle])}
                             textStyle={primaryButtonTextStyle}

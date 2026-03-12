@@ -52,15 +52,6 @@ export const HandleProblemFormScreen = () => {
 
     const { materials: allMaterials } = useFarmMaterials();
 
-    const materials = useMemo(() => {
-        if (!allMaterials.length) return [];
-        return allMaterials.filter(m => {
-            if (!m.group) return false;
-            const name = m.group.toLowerCase();
-            return name.includes('thiết bị điện') || name.includes('công cụ');
-        });
-    }, [allMaterials]);
-
     const createCleanMutation = useCreateCleanRenovation();
     const updateCleanMutation = useUpdateCleanRenovation();
     const deleteCleanMutation = useDeleteCleanRenovation();
@@ -152,8 +143,8 @@ export const HandleProblemFormScreen = () => {
     }, [item]);
 
     const initialData = useMemo(() => {
-        return handleProblemService.mapDetailToForm(item, materials, imageUrls);
-    }, [item, materials, imageUrls]);
+        return handleProblemService.mapDetailToForm(item, allMaterials, imageUrls);
+    }, [item, allMaterials, imageUrls]);
 
     const onSubmit = async (data: HandleProblemFormValues, documentIds: string[]) => {
         if (!pondId) return;
@@ -362,7 +353,6 @@ export const HandleProblemFormScreen = () => {
             isEditMode={isEditMode}
             isSaving={isSaving}
             initialData={initialData}
-            materials={materials}
             title={getTitle()}
             onBack={() => navigation.goBack()}
             onSubmit={onSubmit}
