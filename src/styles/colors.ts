@@ -195,6 +195,15 @@ export const colors = {
         gradientTop: 'rgba(233,253,255, 1)',
         gradientBottom: 'rgba(252,242,240, 1)',
     },
+    fade: {
+        0: 'rgba(255, 255, 255, 0)',
+        8: 'rgba(255, 255, 255, 0.08)',
+        20: 'rgba(255, 255, 255, 0.2)',
+        40: 'rgba(255, 255, 255, 0.4)',
+        65: 'rgba(255, 255, 255, 0.65)',
+        85: 'rgba(255, 255, 255, 0.85)',
+        95: 'rgba(255, 255, 255, 0.95)',
+    },
 } as const;
 
 export type Colors = typeof colors;

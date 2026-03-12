@@ -30,6 +30,7 @@ const PondListSkeletonItem: React.FC = () => {
 
             {/* Info Section */}
             <View style={styles.infoBox}>
+                +
                 <View style={styles.infoRow}>
                     <Skeleton width={80} height={16} />
                     <Skeleton width={60} height={24} style={{ borderRadius: borderRadius.full }} />

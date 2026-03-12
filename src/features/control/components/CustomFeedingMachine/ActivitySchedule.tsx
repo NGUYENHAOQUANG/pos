@@ -5,7 +5,7 @@ import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from './ModalAddTurn';
 import { AddTurnModalUI } from './AddTurnModalUI';
 import { colors } from '@/styles';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 
 export interface ScheduleItem {
     id: string;
@@ -105,10 +105,11 @@ export default function ActivitySchedule({
                 ))}
 
                 {/* Nút mở Popup thêm lượt */}
-                <OutlineButton
-                    label="Thêm lượt"
+                <Button
+                    title="Thêm lượt"
+                    variant="outline"
                     onPress={openAddModal}
-                    prefix={<IconAdd name="add" size={20} color={colors.textSecondary} />}
+                    renderLeftIcon={<IconAdd name="add" size={20} color={colors.text} />}
                     style={styles.addBtn}
                 />
             </View>
