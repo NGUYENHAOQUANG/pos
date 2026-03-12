@@ -114,6 +114,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
                 secondaryTitle="Thiết lập lại"
                 onPrimaryPress={handleSaveWithBypass}
                 onSecondaryPress={handleReset}
+                primaryButtonDisabled={!isDirty}
                 secondaryButtonStyle={{ flex: 1, minWidth: 0 }}
             />
             {UnsavedChangesModal}

@@ -59,7 +59,25 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onMagieChange,
     no3 = '',
     onNo3Change,
+    limits = {},
 }) => {
+    // Parse limit string "min - max" and validate input value
+    const getLimitError = (value: string, metricCode: string): string | undefined => {
+        if (!value || !limits[metricCode]) return undefined;
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) return undefined;
+
+        const parts = limits[metricCode].split('-').map(s => s.trim());
+        if (parts.length !== 2) return undefined;
+
+        const min = parseFloat(parts[0]);
+        const max = parseFloat(parts[1]);
+        if (isNaN(min) || isNaN(max)) return undefined;
+
+        if (numValue < min) return `Thấp quá giới hạn dưới: ${min}`;
+        if (numValue > max) return `Vượt quá giới hạn trên: ${max}`;
+        return undefined;
+    };
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
         return unit ? `${baseName} (${unit})` : baseName;
@@ -100,6 +118,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onPHChange}
+                        error={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
                     />
                 </View>
 
@@ -112,6 +131,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onDOChange}
+                        error={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
                     />
                 </View>
 
@@ -124,6 +144,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onTemperatureChange}
+                        error={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
                     />
                 </View>
 
@@ -136,6 +157,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onSalinityChange}
+                        error={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
                     />
                 </View>
 
@@ -148,6 +170,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onAlkalinityChange}
+                        error={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
                     />
                 </View>
 
@@ -160,6 +183,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onTransparencyChange}
+                        error={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
                     />
                 </View>
 
@@ -181,6 +205,7 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                     keyboardType="numeric"
                                     inputFormat={InputFormat.DECIMAL}
                                     onChangeText={paramOnChange}
+                                    error={getLimitError(paramValue, param.id)}
                                 />
                             </View>
                         );
