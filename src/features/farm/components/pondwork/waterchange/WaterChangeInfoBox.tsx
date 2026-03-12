@@ -46,8 +46,8 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
         if (parts.length > 2) {
             cleaned = parts[0] + '.' + parts.slice(1).join('');
         }
-        if (cleaned.length > 10) {
-            cleaned = cleaned.slice(0, 10);
+        if (cleaned.length > 20) {
+            cleaned = cleaned.slice(0, 20);
         }
 
         callback(cleaned);
