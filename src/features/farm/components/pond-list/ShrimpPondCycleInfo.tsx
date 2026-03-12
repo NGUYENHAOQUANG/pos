@@ -56,21 +56,22 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         marginHorizontal: spacing.md,
         marginBottom: 12,
+        overflow: 'hidden',
     },
     cycleHeader: {
         backgroundColor: colors.gray[50],
         padding: spacing.sm,
-        borderTopLeftRadius: borderRadius.sm,
-        borderTopRightRadius: borderRadius.sm,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     cycleName: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
-        marginBottom: spacing.xs,
     },
     cycleDate: {
-        fontSize: typography.fontSize.xs,
+        fontSize: typography.fontSize.sm,
         color: colors.text,
     },
     cycleInfo: {
@@ -84,14 +85,13 @@ const styles = StyleSheet.create({
     },
     cycleLabel: {
         fontSize: typography.fontSize.sm,
-        color: colors.text,
+        color: colors.textSecondary,
         flex: 1,
-        fontWeight: typography.fontWeight.bold,
         lineHeight: 22,
     },
     cycleValue: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
-        fontWeight: typography.fontWeight.regular,
+        fontWeight: typography.fontWeight.bold,
     },
 });

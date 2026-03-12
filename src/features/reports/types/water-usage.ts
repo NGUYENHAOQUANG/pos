@@ -1,3 +1,5 @@
+import { IApiResponse } from '@/shared/types/common.types';
+
 export interface DailyWaterStat {
     date: string;
     totalWaterAdded: number;
@@ -26,12 +28,4 @@ export interface WaterUsageData {
     days: DailyWaterStat[];
 }
 
-export interface WaterUsageResponse {
-    success: boolean;
-    data: WaterUsageData;
-    message: string;
-    errorCode: string | null;
-    validationErrors: any | null;
-    details: any | null;
-    timestamp: string;
-}
+export type WaterUsageResponse = IApiResponse<WaterUsageData>;

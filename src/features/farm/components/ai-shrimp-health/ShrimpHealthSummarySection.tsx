@@ -191,9 +191,9 @@ const styles = StyleSheet.create({
     },
     infoBox: {
         backgroundColor: colors.white,
-        paddingBottom: 16,
+        padding: 16,
         borderRadius: 8,
-        marginTop: spacing.md,
+        marginVertical: spacing.md,
         flexDirection: 'row',
         alignItems: 'center',
         borderColor: colors.border,

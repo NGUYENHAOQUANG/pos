@@ -17,7 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
-import { colors } from '@/styles';
+import { colors, typography } from '@/styles';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -32,6 +32,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import OnboardingBackgroundThree from '@/features/onboarding/components/OnboardingBackgroundThree.tsx';
 import { Logo } from '@/shared/components/brand/Logo';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { Button } from '@/shared/components/buttons/Button';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -154,24 +155,19 @@ export default function OnboardingScreen() {
                         onPress={() => goToSlide(currentIndex - 1)}
                         activeOpacity={0.7}
                     >
-                        <Ionicons name="arrow-back-outline" color={colors.primary} size={24} />
+                        <Ionicons name="arrow-back-outline" color={colors.text} size={24} />
                     </TouchableOpacity>
                 )}
 
-                {/* Nút Main: Sử dụng flexGrow để tự động co giãn */}
-                <TouchableOpacity
-                    style={styles.mainButton}
+                {/* Nút Main: Sử dụng shared Button component */}
+                <Button
+                    title={mainButtonText}
                     onPress={handleMainButtonPress}
-                    activeOpacity={0.8}
-                >
-                    <Text style={styles.mainButtonText}>{mainButtonText}</Text>
-                    <Ionicons
-                        name="arrow-forward-outline"
-                        color={colors.white}
-                        size={24}
-                        style={styles.iconArrow}
-                    />
-                </TouchableOpacity>
+                    variant="primary"
+                    iconRight="arrow-forward-outline"
+                    style={styles.mainButton}
+                    textStyle={styles.mainButtonText}
+                />
             </View>
         );
     };
@@ -309,7 +305,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#d1d5db',
     },
     activeDot: {
-        backgroundColor: '#6366f1',
+        backgroundColor: colors.primary,
         width: 24,
     },
     actionContainer: {
@@ -320,37 +316,25 @@ const styles = StyleSheet.create({
         paddingBottom: 24,
     },
     backButton: {
-        width: 52,
-        height: 52,
-        borderRadius: 16,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
         borderWidth: 1,
-        borderColor: colors.primary,
+        borderColor: colors.border,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.white,
         marginRight: 12,
     },
     mainButton: {
-        height: 52,
-        borderRadius: 16,
-        backgroundColor: colors.primary,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 24,
         flexGrow: 1,
         flexShrink: 1,
+        height: 64,
     },
     mainButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 18,
+        fontWeight: typography.fontWeight.bold,
         lineHeight: 24,
-        textAlignVertical: 'center',
-        includeFontPadding: false,
-    },
-    iconArrow: {
-        marginLeft: 8,
     },
     gestureHandler: {
         // flex: 1,

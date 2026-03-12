@@ -22,7 +22,7 @@ import { OverView } from '@/features/reports/components/OverView';
 import WaterUsageChart from '@/features/reports/components/water-usage/WaterUsageChart';
 import { useScrollToTop } from '@react-navigation/native';
 import { spacing } from '@/styles/spacing';
-import { FarmData } from '@/features/reports/types/reports';
+import { FarmData } from '@/features/farm/types/farm.types';
 import { useReportsScreen } from '@/features/reports/hooks/useReportsScreen';
 
 type Props = NativeStackScreenProps<ReportStackParamList, 'ReportHome'>;

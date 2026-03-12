@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { colors, spacing, typography } from '@/styles';
 import { Tag, TagStatus } from '@/features/farm/components/pond/Tag';
 
 interface ShrimpPondInfoProps {
@@ -61,12 +61,12 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.textSecondary,
     },
     value: {
         fontSize: 14,
         color: colors.text,
-        fontWeight: '500',
+        fontWeight: typography.fontWeight.bold,
     },
     bodyEmptyText: {
         fontSize: 14,
