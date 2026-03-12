@@ -9,7 +9,7 @@ import { Input, RequiredDot } from '@/shared/components/forms/Input';
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
-import { formatNumber } from '@/features/farm/utils/numberUtils';
+
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconAICheck } from '@/assets/icons';
@@ -81,11 +81,11 @@ const StockingInfoSection: React.FC<Props> = ({
             resultItems={[
                 {
                     label: 'Mật độ (con/m²)',
-                    value: density > 0 ? formatNumber(density) : '-',
+                    value: density > 0 ? density : '-',
                 },
                 {
-                    label: 'Tổng chi phí giống ước tính (VNĐ)',
-                    value: estimatedCost > 0 ? formatNumber(estimatedCost) : '-',
+                    label: 'Tổng chi phí \ngiống ước tính (VNĐ)',
+                    value: estimatedCost > 0 ? estimatedCost : '-',
                 },
             ]}
         >
