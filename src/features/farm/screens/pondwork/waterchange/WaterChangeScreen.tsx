@@ -215,16 +215,16 @@ export const WaterSupplyScreen = () => {
 
         return {
             // Mực nước xả xuống (cm)
-            drainLevel: H_base >= 0 ? parseFloat(H_base.toFixed(5)).toString() : '0',
+            drainLevel: H_base >= 0 ? H_base.toString() : '0',
 
             // Thể tích sau xả (m3)
-            volumeAfterDrain: V_base > 0 ? V_base.toFixed(0) : '0',
+            volumeAfterDrain: V_base > 0 ? V_base.toString() : '0',
 
             // Thể tích nước cấp vào (m3)
-            volumeSupply: V_add.toFixed(0),
+            volumeSupply: V_add.toString(),
 
             // Thể tích nước sau cấp (m3)
-            volumeAfterSupply: V_total.toFixed(0),
+            volumeAfterSupply: V_total.toString(),
         };
     }, [targetLevel, supplyLevel, pond]);
 
