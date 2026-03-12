@@ -3,13 +3,28 @@ import { HarvestType } from '@/features/farm/types/harvestRecord.types';
 
 /**
  * Harvest Form Schema
- * Simple schema without validation - API handles all validation
+ * Validates required fields before sending to API
  */
 export const harvestFormSchema = z.object({
     harvestType: z.enum(['FullHarvest', 'PartialHarvest'] as const),
-    totalWeightKg: z.string().optional(),
-    shrimpSize: z.string().optional(),
-    referencePrice: z.string().optional(),
+    totalWeightKg: z
+        .string({ required_error: 'Vui lòng nhập sản lượng' })
+        .min(1, 'Vui lòng nhập sản lượng')
+        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+            message: 'Sản lượng phải lớn hơn 0',
+        }),
+    shrimpSize: z
+        .string({ required_error: 'Vui lòng nhập cỡ tôm' })
+        .min(1, 'Vui lòng nhập cỡ tôm')
+        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+            message: 'Cỡ tôm phải lớn hơn 0',
+        }),
+    referencePrice: z
+        .string({ required_error: 'Vui lòng nhập giá tôm tham khảo' })
+        .min(1, 'Vui lòng nhập giá tôm tham khảo')
+        .refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+            message: 'Giá tôm tham khảo phải lớn hơn 0',
+        }),
     notes: z.string().optional(),
 });
 
