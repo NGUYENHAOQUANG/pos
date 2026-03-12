@@ -262,6 +262,9 @@ export const CycleDetailScreen: React.FC = () => {
                     displayStockingDate={displayStockingDate}
                     transferDetail={transferDetail}
                     showIncomingTransfer={showTransfer}
+                    isCultivation={
+                        pondType === POND_TYPES.CULTIVATION || pondType === POND_TYPES.READY
+                    }
                     refreshing={refreshing || isRefetching}
                     harvestSummary={harvestSummary}
                     onRefresh={onRefresh}
