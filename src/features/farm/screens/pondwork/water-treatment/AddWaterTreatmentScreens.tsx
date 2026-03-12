@@ -11,7 +11,7 @@ import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 
 import { useCreateWaterTreatment } from '@/features/farm/hooks/useWaterTreatmentRecords';
 

@@ -3,7 +3,7 @@
  * @description Bottom sheet for selecting material with slide-up animation.
  * Uses inline view swapping instead of nested Modals to avoid iOS issues.
  */
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -18,6 +18,7 @@ import {
     KeyboardAvoidingView,
     FlatList,
     TextInput,
+    ActivityIndicator,
 } from 'react-native';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -30,14 +31,18 @@ import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface SelectMaterialBottomSheetProps {
-    /** Whether the bottom sheet is visible */
     visible: boolean;
-    /** Callback when bottom sheet is closed */
     onClose: () => void;
-    /** Callback when material is saved */
     onSave: (data: { material: IMaterial; quantity: number; unit: string }) => void;
-    /** Available materials list */
     materials: IMaterial[];
+    isLoading?: boolean;
+    onLoadMore?: () => void;
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    /** Controlled search text from parent */
+    searchText?: string;
+    /** Callback when search text changes */
+    onSearchChange?: (text: string) => void;
 }
 
 export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps> = ({
@@ -45,6 +50,12 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     onClose,
     onSave,
     materials,
+    isLoading,
+    onLoadMore,
+    hasNextPage,
+    isFetchingNextPage,
+    searchText = '',
+    onSearchChange,
 }) => {
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
     const [selectedMaterial, setSelectedMaterial] = useState<IMaterial | undefined>();
@@ -52,15 +63,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     const [selectedUnit, setSelectedUnit] = useState<string>('');
     // 'form' = material form view, 'product' = product selection list view
     const [currentView, setCurrentView] = useState<'form' | 'product'>('form');
-    const [searchText, setSearchText] = useState('');
     const searchInputRef = useRef<TextInput>(null);
-
-    // Filter materials based on search text
-    const filteredMaterials = useMemo(() => {
-        const trimmed = searchText.trim().toLowerCase();
-        if (!trimmed) return materials;
-        return materials.filter(item => item.name.toLowerCase().includes(trimmed));
-    }, [materials, searchText]);
 
     // Slide-up animation
     useEffect(() => {
@@ -88,7 +91,6 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             setQuantity('');
             setSelectedUnit('');
             setCurrentView('form');
-            setSearchText('');
         }
     }, [visible]);
 
@@ -101,15 +103,6 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             setSelectedUnit('');
         }
     }, [selectedMaterial]);
-
-    // Focus search input when switching to product view
-    useEffect(() => {
-        if (currentView === 'product') {
-            setTimeout(() => {
-                searchInputRef.current?.focus();
-            }, 200);
-        }
-    }, [currentView]);
 
     const handleSave = () => {
         if (selectedMaterial && quantity && selectedUnit) {
@@ -140,14 +133,14 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     const handleSelectProduct = (material: IMaterial) => {
         setSelectedMaterial(material);
         setCurrentView('form');
-        setSearchText('');
+        onSearchChange?.('');
     };
 
     const handleClose = () => {
         if (currentView === 'product') {
             // Go back to form view instead of closing
             setCurrentView('form');
-            setSearchText('');
+            onSearchChange?.('');
         } else {
             onClose();
         }
@@ -254,7 +247,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                 <TouchableOpacity
                     onPress={() => {
                         setCurrentView('form');
-                        setSearchText('');
+                        onSearchChange?.('');
                     }}
                     style={styles.closeButton}
                     activeOpacity={0.7}
@@ -278,13 +271,13 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     placeholder="Tìm vật tư"
                     placeholderTextColor={colors.textTertiary}
                     value={searchText}
-                    onChangeText={setSearchText}
+                    onChangeText={text => onSearchChange?.(text)}
                 />
             </View>
 
             {/* Material List */}
             <FlatList
-                data={filteredMaterials}
+                data={materials}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => {
                     const stockText = `Kho ${item.remaining ?? 0} ${
@@ -304,11 +297,30 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     );
                 }}
                 ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <EmptyStateIcon width={60} height={60} />
-                        <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
-                    </View>
+                    isLoading ? (
+                        <View style={styles.emptyContainer}>
+                            <ActivityIndicator size="small" color={colors.primaryOrange} />
+                        </View>
+                    ) : (
+                        <View style={styles.emptyContainer}>
+                            <EmptyStateIcon width={60} height={60} />
+                            <Text style={styles.emptyText}>Không tìm thấy vật tư</Text>
+                        </View>
+                    )
                 }
+                ListFooterComponent={
+                    isFetchingNextPage ? (
+                        <View style={styles.loadingFooter}>
+                            <ActivityIndicator size="small" color={colors.primaryOrange} />
+                        </View>
+                    ) : null
+                }
+                onEndReached={() => {
+                    if (hasNextPage && !isFetchingNextPage) {
+                        onLoadMore?.();
+                    }
+                }}
+                onEndReachedThreshold={0.3}
                 style={styles.list}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
@@ -319,22 +331,37 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
             <TouchableWithoutFeedback onPress={handleClose}>
-                <KeyboardAvoidingView
-                    style={styles.overlay}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                >
-                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                        <Animated.View
-                            style={[
-                                styles.container,
-                                currentView === 'product' && styles.containerProduct,
-                                { transform: [{ translateY: slideAnim }] },
-                            ]}
-                        >
-                            {currentView === 'form' ? renderFormContent() : renderProductContent()}
-                        </Animated.View>
-                    </TouchableWithoutFeedback>
-                </KeyboardAvoidingView>
+                {currentView === 'form' ? (
+                    <KeyboardAvoidingView
+                        style={styles.overlay}
+                        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    >
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <Animated.View
+                                style={[
+                                    styles.container,
+                                    { transform: [{ translateY: slideAnim }] },
+                                ]}
+                            >
+                                {renderFormContent()}
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
+                ) : (
+                    <View style={styles.overlay}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                            <Animated.View
+                                style={[
+                                    styles.container,
+                                    styles.containerProduct,
+                                    { transform: [{ translateY: slideAnim }] },
+                                ]}
+                            >
+                                {renderProductContent()}
+                            </Animated.View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                )}
             </TouchableWithoutFeedback>
         </Modal>
     );
@@ -357,7 +384,7 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     containerProduct: {
-        maxHeight: SCREEN_HEIGHT * 0.7,
+        height: SCREEN_HEIGHT * 0.7,
     },
     header: {
         flexDirection: 'row',
@@ -483,5 +510,10 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
         fontSize: 14,
         color: colors.textSecondary,
+    },
+    loadingFooter: {
+        paddingVertical: spacing.md,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

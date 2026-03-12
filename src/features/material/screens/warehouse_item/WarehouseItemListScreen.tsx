@@ -51,7 +51,7 @@ export const WarehouseItemListScreen: React.FC<WarehouseItemListScreenProps> = (
         }
 
         if (filterGroup) {
-            params.MaterialGroupId = filterGroup;
+            params.MaterialGroupIds = [filterGroup];
         }
 
         return params;

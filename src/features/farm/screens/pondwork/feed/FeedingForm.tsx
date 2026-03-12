@@ -7,7 +7,7 @@ import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoB
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
-} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+} from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { IMaterial, MaterialGroupType } from '@/features/material/types/material.types';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
