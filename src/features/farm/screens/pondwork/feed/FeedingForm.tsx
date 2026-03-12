@@ -17,7 +17,6 @@ import ActivitySchedule, {
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
 import { feedingFormSchema, FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
 import { handleFeedingFormError } from '@/features/farm/utils/toastMessages';
-import { IMaterial } from '@/features/material/types/material.types';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 
 export interface FeedingFormProps {

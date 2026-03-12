@@ -346,10 +346,6 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
                 if (isMounted.current) {
                     setUploadingUris(prev => prev.filter(u => u !== uri));
                 }
-                // Upload failed — add to pending retry list for auto-retry when network recovers
-                if (asset.uri) {
-                    pendingRetryUris.current.add(asset.uri);
-                }
             }
         };
 
