@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     title: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '700',
         color: colors.text,
         flex: 1,

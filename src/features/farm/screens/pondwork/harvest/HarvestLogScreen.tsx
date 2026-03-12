@@ -8,6 +8,7 @@ import { HarvestMeta, JobExecution } from '@/features/farm/types/farm.types';
 import { convertHarvestMetaToActivityData } from '@/features/farm/utils/metaConverters';
 import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogScreenData';
 import { useHarvestRecordsAsJobs } from '@/features/farm/hooks/useHarvestRecord';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'HarvestLog'>;
@@ -17,18 +18,11 @@ export const HarvestLogScreen: React.FC = () => {
     const { params } = useRoute<ScreenRouteProp>();
     const { pond } = params || {};
 
-    const [startDate, setStartDate] = React.useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = React.useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     const [refreshing, setRefreshing] = React.useState(false);
 
-    const { jobs, isLoading, refetch } = useHarvestRecordsAsJobs(pond?.id || '', {
-        CreateAtFrom: startDate.toISOString(),
-        CreateAtTo: endDate.toISOString(),
-    });
+    const { jobs, isLoading, refetch } = useHarvestRecordsAsJobs(pond?.id || '', dateParams);
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);

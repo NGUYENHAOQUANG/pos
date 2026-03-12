@@ -208,9 +208,9 @@ const styles = StyleSheet.create({
         overflow: 'visible',
     },
     resultBox: {
-        backgroundColor: colors.neutral,
-        borderRadius: borderRadius.md,
-        padding: 12,
+        backgroundColor: colors.gray[50],
+        borderRadius: 8,
+        padding: 8,
         gap: 4,
         borderWidth: 1,
         borderColor: colors.defaultBorder,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     resultLabel: {
         fontSize: 14,
         fontWeight: '400',
-        color: colors.text,
+        color: colors.textTertiary,
         lineHeight: 22,
         flexShrink: 0,
     },

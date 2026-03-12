@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-import { colors } from '@/styles';
+import { colors, typography } from '@/styles';
 import { FarmData } from '@/features/farm/types/farm.types';
 const BGFarmInfo = require('@/assets/backgrounds/Farm-Infor.png');
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         lineHeight: 22,
-        color: colors.text,
+        color: colors.textSecondary,
     },
     imageContainer: {
         height: 250,
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     },
     fieldValue: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: typography.fontWeight.medium,
         lineHeight: 22,
         color: colors.text,
         flex: 1,

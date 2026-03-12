@@ -9,6 +9,7 @@ import { useLogScreenData, LogScreenConfig } from '@/features/farm/hooks/useLogS
 import { useDryRenovationsAsJobs } from '@/features/farm/hooks/useDryRenovation';
 import { ActivityData } from '@/features/farm/components/ActivityCard';
 import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'SunDryPondLog'>;
@@ -21,17 +22,13 @@ export const SunDryPondLogScreen: React.FC = () => {
     // Get pond from store
     const pond = useFarmStore(state => state.getPondById(pondId));
 
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     const [refreshing, setRefreshing] = useState(false);
 
     const { jobs, isLoading, refetch } = useDryRenovationsAsJobs(pondId, {
-        createAtFrom: startDate.toISOString(),
-        createAtTo: endDate.toISOString(),
+        createAtFrom: dateParams.CreateAtFrom,
+        createAtTo: dateParams.CreateAtTo,
         page: 1,
         limit: 1000,
     });

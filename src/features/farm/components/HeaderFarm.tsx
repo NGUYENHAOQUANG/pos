@@ -198,7 +198,7 @@ export const HeaderFarm = ({
     if (type === 'list') {
         return (
             <View style={[styles.listContainer, { paddingTop: insets.top + 12 }]}>
-                <Text style={styles.listTitle}>Trại nuôi</Text>
+                <Text style={styles.listTitle}>Trại Nuôi</Text>
                 <View style={styles.dropdownRow}>
                     <DropdownHeaderButton
                         data={data}

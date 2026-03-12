@@ -1,9 +1,4 @@
-import type {
-    IApiResponse,
-    IPaginate,
-    PaginationParams,
-    ICreatorEditor,
-} from '@/shared/types/common.types';
+import type { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 
 /** Material line in feeding detail (API) */
 export interface FeedingMaterial {
@@ -52,14 +47,16 @@ export interface FeedingRecordItem {
     documentIds?: string[];
 }
 
-/** Query params for feeding list – follow PaginationParams (page, limit) */
-export interface FeedingRecordListParams extends PaginationParams {
-    pondId?: string;
-    id?: string;
-    createdAt?: string;
-    createAtFrom?: string;
-    createAtTo?: string;
-    orderBy?: string;
+export interface FeedingRecordListParams {
+    PondId?: string;
+    CycleId?: string;
+    Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
+    Page?: number;
+    PageSize?: number;
+    OrderBy?: string;
 }
 
 /** Response types */

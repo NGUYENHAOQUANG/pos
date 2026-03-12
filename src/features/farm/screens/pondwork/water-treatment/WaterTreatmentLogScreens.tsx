@@ -10,6 +10,7 @@ import { JobExecution } from '@/features/farm/types/farm.types';
 import { BaseLogScreen } from '@/features/farm/components/BaseLogScreen';
 import { useWaterTreatmentRecordsAsJobs } from '@/features/farm/hooks/useWaterTreatmentRecords';
 import { colors } from '@/styles';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 type ScreenRouteProp = RouteProp<FarmStackParamList, 'WaterTreatmentLog'>;
 type NavigationProp = NativeStackNavigationProp<FarmStackParamList>;
@@ -20,8 +21,13 @@ export const WaterTreatmentLogScreens = () => {
     const { pondId, pond } = route.params || {};
     const targetPondId = pondId || pond?.id || '';
 
-    // Fetch data from API
-    const { jobs, isLoading, refetch } = useWaterTreatmentRecordsAsJobs(targetPondId);
+    const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
+
+    // Fetch data from API with date params
+    const { jobs, isLoading, refetch } = useWaterTreatmentRecordsAsJobs(targetPondId, {
+        CreateAtFrom: dateParams.CreateAtFrom,
+        CreateAtTo: dateParams.CreateAtTo,
+    });
 
     // Auto refetch when screen is focused (e.g. back from Edit)
     useFocusEffect(
@@ -36,6 +42,10 @@ export const WaterTreatmentLogScreens = () => {
         jobType: 'WATER_TREATMENT',
         pond: pond,
         pondId: targetPondId,
+        startDate,
+        endDate,
+        setStartDate,
+        setEndDate,
         metaConverter: (item: JobExecution) => convertWaterTreatmentJobToActivityData(item),
         editRoute: 'EditWaterTreatmentScreens',
         getEditParams: (_pond, item) => ({
@@ -47,7 +57,7 @@ export const WaterTreatmentLogScreens = () => {
         externalData: jobs, // Use real API data instead of store
     };
 
-    const { startDate, endDate, setStartDate, setEndDate, groupedData } = useLogScreenData(config);
+    const { groupedData } = useLogScreenData(config);
 
     const handleStartActivity = () => {
         if (pond) {

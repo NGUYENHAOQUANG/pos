@@ -1,43 +1,20 @@
 /**
  * @file HarvestStat.tsx
- * @description list item
- * @author NGUYENHAOQUANG
- * @created 2025-12-24
+ * @description Harvest statistics with infinite scroll (optimized for nested ScrollView)
  */
-
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { HarvestItemCard } from './HarvestItemCard';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
-import { useHarvestStatsTable } from '@/features/reports/hooks/useHarvestStatsTable';
+import { useInfiniteHarvestStatsTable } from '@/features/reports/hooks/useHarvestStatsTable';
+import { HarvestStatProps } from '@/features/reports/types/harvest-stats-table';
 
-import { PondData } from '@/features/farm/types/pond.types';
-import { CycleData } from '@/features/farm/types/cycle.types';
-
-interface HarvestStatProps {
-    zoneId: string;
-    pondId?: string;
-    cycleId?: string;
-    ponds?: PondData[];
-    cycles?: CycleData[];
-}
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+// Wrap item with React.memo for performance
+const MemoizedHarvestItemCard = React.memo(HarvestItemCard);
 
 export const HarvestStat: React.FC<HarvestStatProps> = ({
     zoneId,
@@ -46,54 +23,27 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({
     ponds,
     cycles,
 }) => {
-    const [isSectionOpen, setIsSectionOpen] = useState(false);
-    const [showAll, setShowAll] = useState(false);
-    const INITIAL_SHOW_COUNT = 3;
+    const [isSectionOpen, setIsSectionOpen] = React.useState(false);
 
-    const { data: response, isLoading: queryLoading } = useHarvestStatsTable({
-        ZoneId: zoneId,
-        CycleId: cycleId,
-        Id: pondId,
-        PageNumber: 1,
-        PageSize: 100, // Load enough for simple list
-        enabled: isSectionOpen,
-    });
-    const isLoading = isSectionOpen && queryLoading;
-
-    // Map API data to UI format
-    const dataList = React.useMemo(() => {
-        if (!response?.data?.items) return [];
-
-        const getPondName = (code: string | null) => {
-            if (!code) return 'N/A';
-            const pond = ponds?.find(p => p.code === code || p.id === code);
-            return pond?.name || code;
-        };
-
-        const getCycleName = (code: string | null) => {
-            if (!code) return undefined;
-            const cycle = cycles?.find(c => c.code === code || c.id === code);
-            return cycle?.name;
-        };
-
-        return response.data.items.map(record => ({
-            ...record,
-            pondName: getPondName(record.pondCode),
-            cycleName: getCycleName(record.cycleCode),
-        }));
-    }, [response, ponds, cycles]);
-
-    const displayedData = showAll ? dataList : dataList.slice(0, INITIAL_SHOW_COUNT);
+    const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
+        useInfiniteHarvestStatsTable({
+            ZoneId: zoneId,
+            Id: pondId,
+            CycleId: cycleId,
+            ponds,
+            cycles,
+            enabled: isSectionOpen,
+        });
 
     const toggleSection = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsSectionOpen(!isSectionOpen);
     };
 
-    const toggleShowAll = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setShowAll(!showAll);
-    };
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     return (
         <View style={chartStyles.container}>
@@ -111,28 +61,30 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({
                 >
                     {isLoading ? (
                         <Loading />
+                    ) : dataList.length === 0 ? (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>Chưa có dữ liệu thu hoạch</Text>
+                        </View>
                     ) : (
                         <>
-                            {displayedData.map(item => (
-                                <HarvestItemCard key={item.recordId} item={item} />
+                            {dataList.map(item => (
+                                <MemoizedHarvestItemCard key={item.recordId} item={item} />
                             ))}
 
-                            {dataList.length > INITIAL_SHOW_COUNT && (
+                            {/* Load more button */}
+                            {isFetchingNextPage && (
+                                <View style={styles.footerLoader}>
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            )}
+
+                            {hasNextPage && !isFetchingNextPage && (
                                 <TouchableOpacity
-                                    style={styles.seeAllButton}
-                                    onPress={toggleShowAll}
+                                    style={styles.loadMoreButton}
+                                    onPress={handleLoadMore}
                                     activeOpacity={0.7}
                                 >
-                                    <Text style={styles.seeAllText}>
-                                        {showAll ? 'Thu gọn' : 'Xem tất cả'}
-                                    </Text>
-                                    {!showAll && (
-                                        <Ionicons
-                                            name="arrow-forward"
-                                            size={16}
-                                            color={colors.textSecondary}
-                                        />
-                                    )}
+                                    <Text style={styles.loadMoreText}>Tải thêm</Text>
                                 </TouchableOpacity>
                             )}
                         </>
@@ -161,21 +113,29 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    seeAllButton: {
-        marginTop: 8,
+    emptyContainer: {
+        paddingVertical: 40,
+        alignItems: 'center',
+    },
+    emptyText: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    footerLoader: {
+        paddingVertical: 16,
+        alignItems: 'center',
+    },
+    loadMoreButton: {
         alignSelf: 'stretch',
         height: 40,
-        paddingHorizontal: 24,
         borderWidth: 1,
         borderColor: colors.gray[200],
         borderRadius: 10,
         backgroundColor: colors.white,
-        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
     },
-    seeAllText: {
+    loadMoreText: {
         fontSize: 14,
         color: colors.textSecondary,
         fontWeight: '500',

@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
+    showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,7 +25,7 @@ import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
-} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+} from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 // import { useFarmStore } from '@/features/farm/store/farmStore'; // Removed
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
@@ -306,6 +307,12 @@ export const WaterSupplyScreen = () => {
                 text1: 'Vui lòng chọn vật tư',
                 visibilityTime: 3000,
             });
+            return;
+        }
+
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
             return;
         }
 

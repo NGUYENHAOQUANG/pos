@@ -87,7 +87,7 @@ export const useWaterTreatmentRecordsAsJobs = (pondId: string, params?: IWaterTr
                       hour12: false,
                   })
                 : '00:00',
-            note: item.waterTreatmentDetail?.notes || undefined,
+            note: item.waterTreatmentDetail?.notes?.trim() || undefined,
             pondId: item.pondId,
             waterTreatmentType: treatmentLabel,
             materials: item.waterTreatmentDetail?.materials?.map(m => {

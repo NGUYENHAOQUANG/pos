@@ -2,9 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { GeneralInfoBox } from '@/features/farm/components/pondwork/GeneralInfoBox';
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
-import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { MaterialGroupType } from '@/features/material/types/material.types';
-import { MaterialSelectionBox } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { MaterialSelectionBox } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 
 interface WaterTreatmentProps {
     executionDate: Date;

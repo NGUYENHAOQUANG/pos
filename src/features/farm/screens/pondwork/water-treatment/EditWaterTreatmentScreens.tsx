@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { showMaterialQuantityZeroToast } from '@/features/farm/utils/toastMessages';
 
 import { getErrorMessage } from '@/features/material/utils/errorHandlers';
 import { colors } from '@/styles';
@@ -10,7 +11,7 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { WaterTreatment } from '@/features/farm/components/pondwork/water-treatment/WaterTreatment';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { SelectedMaterialItem } from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
@@ -161,6 +162,12 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const handleSave = async () => {
         if (!targetPondId || !targetJobId) return;
 
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
+            return;
+        }
+
         const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
         if (!treatmentTypeEnum) {
             Toast.show({
@@ -174,7 +181,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
             documentIds: detailData?.documentIds || [],
             waterTreatmentDetail: {
                 treatmentType: treatmentTypeEnum,
-                notes: note || undefined,
+                notes: note.trim() || '',
                 materials: selectedMaterials.map(m => ({
                     warehouseItemId: m.material.id,
                     quantity: Number.isNaN(Number(m.quantity)) ? m.quantity : Number(m.quantity),

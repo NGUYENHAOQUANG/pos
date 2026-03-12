@@ -82,7 +82,7 @@ export const MenuScreens: React.FC = () => {
         <View style={[styles.container, { paddingTop: insets.top }]}>
             {/* Header title */}
             <View style={styles.headerTitleContainer}>
-                <Text style={styles.headerTitle}>Tài khoản</Text>
+                <Text style={styles.headerTitle}>Tài Khoản</Text>
             </View>
 
             {/* Scrollable content */}
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 20,
         lineHeight: 28,
         fontWeight: '600',
         color: colors.text,

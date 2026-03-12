@@ -1,17 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { View, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { DateRangeFilter } from '@/shared/components/forms/DateRangeFilter';
 import { IconFilter, IconFilter2, IconDot } from '@/assets/icons';
-import { TouchableOpacity } from 'react-native';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { Filter } from '@/features/farm/components/worklog/Filter';
 import { PondData } from '@/features/farm/types/farm.types';
 import { JobType, JOB_CONFIG } from '@/features/farm/components/pondwork/JobItem';
 import { TrackingDayCard, TrackingGroup } from '@/features/farm/components/TrackingList';
-import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
 import { JobExecution } from '@/features/farm/types/farm.types';
+import { usePondRecordGroups } from '@/features/farm/hooks/usePondRecords';
+import { buildPondRecordGroups } from '@/features/farm/services/worklog.service';
+import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
+import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { mapRecordItemToJobExecution } from '@/features/farm/services/worklog.service';
 import type { IPondRecordItem } from '@/features/farm/types/pondRecord.types';
+import { useDateRangeFilter } from '@/shared/hooks/useDateRangeFilter';
 
 interface WorkLogScreensProps {
     pond?: PondData;
@@ -24,108 +29,72 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
     onEditJobItem,
     availableJobTypes = [],
 }) => {
-    // State for DateRangeFilter
-    const [startDate, setStartDate] = useState(() => {
-        const date = new Date();
-        return new Date(date.getFullYear(), date.getMonth(), 1);
-    });
-    const [endDate, setEndDate] = useState(new Date());
+    const { startDate, endDate, setStartDate, setEndDate } = useDateRangeFilter();
 
-    // State for Filter modal
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
-    // Fetch records from API
-    const adjustedEndDate = useMemo(() => {
-        const d = new Date(endDate);
-        d.setHours(23, 59, 59, 999);
-        return d;
-    }, [endDate]);
+    const { rawItems, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+        usePondRecordGroups(pond?.id || '', {
+            startDate,
+            endDate,
+            operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
+        });
 
-    const { groups, isLoading } = usePondRecordGroups(pond?.id || '', {
-        startDate,
-        endDate: adjustedEndDate,
-        operationNameFilter: selectedFilters.length > 0 ? selectedFilters : undefined,
-    });
+    const handleLoadMore = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    // Convert API groups to TrackingGroup[] with onEdit handlers
+    const { materialMap } = useFarmMaterials();
+    const { metricTypes } = useEnvironmentInit();
+    const ponds = useFarmStore(s => s.ponds);
+    const pondNameMap = useMemo(() => {
+        const map: Record<string, string> = {};
+        ponds.forEach(p => {
+            if (p.id && p.name) map[p.id] = p.name;
+        });
+        return map;
+    }, [ponds]);
+
+    const groups = useMemo(
+        () =>
+            buildPondRecordGroups(rawItems, {
+                materialMap,
+                metricTypes,
+                pondNameMap,
+            }),
+        [rawItems, materialMap, metricTypes, pondNameMap]
+    );
+
     const groupedLogs: TrackingGroup[] = useMemo(() => {
         return groups.map(group => ({
             id: group.id,
             date: group.date,
             activities: group.activities.map(activity => {
-                // Get the hidden record item and jobType
-                const recordItem = (activity as unknown as Record<string, unknown>)._recordItem as
-                    | IPondRecordItem
-                    | undefined;
-                const jobType = (activity as unknown as Record<string, unknown>)._jobType as
-                    | JobType
-                    | undefined;
+                const recordItem = (activity as unknown as { _recordItem?: IPondRecordItem })
+                    ._recordItem;
+                const jobType = (activity as unknown as { _jobType?: JobType })._jobType;
+                const canEdit =
+                    onEditJobItem && jobType && jobType !== 'TRANSFER_POND' && recordItem;
 
                 return {
                     ...activity,
-                    onEdit:
-                        onEditJobItem && jobType && jobType !== 'TRANSFER_POND' && recordItem
-                            ? () => {
-                                  // Convert record to JobExecution for edit handler
-                                  const createdDate = recordItem.createdAt
-                                      ? new Date(recordItem.createdAt)
-                                      : new Date();
-                                  const timeStr = createdDate.toLocaleTimeString('en-GB', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                  });
-
-                                  const refData: any = recordItem.referenceData || {};
-
-                                  // Transform meta to match what Edit Screens expect (Work Tab compatibility)
-                                  const mappedMeta = { ...refData };
-
-                                  // Mapping for Measure Size
-                                  if (refData.shrimpSizePcsPerKg)
-                                      mappedMeta.shrimpSize = refData.shrimpSizePcsPerKg;
-                                  if (refData.estimatedRemainingStockKg)
-                                      mappedMeta.remainingWeight =
-                                          refData.estimatedRemainingStockKg;
-
-                                  // Mapping for Harvest
-                                  if (refData.totalWeightKg)
-                                      mappedMeta.yieldAmount = refData.totalWeightKg;
-                                  // Harvest also uses shrimpSize, mapped above if key matches, or:
-                                  if (refData.shrimpSizePcsPerKg)
-                                      mappedMeta.shrimpSize = refData.shrimpSizePcsPerKg;
-
-                                  // Mapping for Shrimp Inspection (images alias)
-                                  if (refData.documents)
-                                      mappedMeta.images = refData.documents
-                                          .map((d: any) => d.publicUrl)
-                                          .filter(Boolean);
-
-                                  const jobExecution: JobExecution = {
-                                      id: recordItem.id,
-                                      label: activity.title,
-                                      time: timeStr,
-                                      date: group.date,
-                                      pondId: pond?.id || '',
-
-                                      // Map fields to match "Work Tab" structure (syncing Log -> Work)
-                                      note: (refData.notes as string) ?? refData.note ?? undefined,
-                                      materials: refData.materials, // Pass raw materials array
-                                      documentIds: refData.documentIds,
-                                      images: refData.images || refData.documentIds, // Fallback/Alias
-
-                                      meta: mappedMeta, // Use transformed meta
-                                      createdAt: recordItem.createdAt,
-                                  };
-                                  onEditJobItem(jobType, jobExecution);
-                              }
-                            : undefined,
+                    onEdit: canEdit
+                        ? () => {
+                              const jobExecution = mapRecordItemToJobExecution(
+                                  recordItem,
+                                  activity.title,
+                                  group.date,
+                                  pond?.id || ''
+                              );
+                              onEditJobItem(jobType, jobExecution);
+                          }
+                        : undefined,
                 };
             }),
         }));
     }, [groups, onEditJobItem, pond?.id]);
 
-    // Calculate available job types based on passed props (from Work tab)
     const availableFilterOptions = useMemo(() => {
         return availableJobTypes.map(type => ({
             label: JOB_CONFIG[type].defaultTitle,
@@ -133,16 +102,25 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
         }));
     }, [availableJobTypes]);
 
-    // Handle Filter Apply
     const handleApplyFilter = (selectedTypes: string[]) => {
         setSelectedFilters(selectedTypes);
     };
 
     const hasData = groupedLogs.length > 0;
+    const [showFooterSpinner, setShowFooterSpinner] = useState(false);
+    useEffect(() => {
+        if (isFetchingNextPage) {
+            setShowFooterSpinner(true);
+            return;
+        }
+        if (showFooterSpinner) {
+            const t = setTimeout(() => setShowFooterSpinner(false), 300);
+            return () => clearTimeout(t);
+        }
+    }, [isFetchingNextPage, showFooterSpinner]);
 
     return (
         <View style={styles.container}>
-            {/* Filter Section */}
             <View style={styles.filterSection}>
                 <View style={styles.dateRangeContainer}>
                     <DateRangeFilter
@@ -179,34 +157,44 @@ export const WorkLogScreens: React.FC<WorkLogScreensProps> = ({
                 </View>
             </View>
 
-            {/* Content Section */}
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {isLoading ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={colors.primary} />
-                    </View>
-                ) : hasData ? (
-                    <View style={styles.listContainer}>
-                        {groupedLogs.map((group, index) => (
-                            <TrackingDayCard
-                                key={group.id}
-                                group={group}
-                                isFirst={index === 0}
-                                style={styles.dayCard}
-                            />
-                        ))}
-                    </View>
-                ) : (
-                    <View style={styles.emptyStateContainer}>
-                        <EmptyStateCard message="Chưa có dữ liệu" />
-                    </View>
-                )}
-            </ScrollView>
+            {isLoading && !hasData ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                </View>
+            ) : hasData ? (
+                <FlatList
+                    data={groupedLogs}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={styles.scrollContent}
+                    renderItem={({ item, index }) => (
+                        <TrackingDayCard
+                            group={item}
+                            isFirst={index === 0}
+                            style={styles.dayCard}
+                        />
+                    )}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.4}
+                    ListFooterComponent={
+                        showFooterSpinner ? (
+                            <View style={styles.footerLoader}>
+                                <ActivityIndicator size="small" color={colors.primary} />
+                            </View>
+                        ) : null
+                    }
+                    showsVerticalScrollIndicator={false}
+                    // Performance optimizations
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    removeClippedSubviews
+                />
+            ) : (
+                <View style={styles.emptyStateContainer}>
+                    <EmptyStateCard message="Chưa có dữ liệu" />
+                </View>
+            )}
 
-            {/* Filter Modal */}
             <Filter
                 visible={isFilterVisible}
                 onClose={() => setIsFilterVisible(false)}
@@ -227,7 +215,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
+        paddingBottom: spacing.sm,
         backgroundColor: colors.backgroundPrimary,
         gap: spacing.sm,
     },
@@ -264,12 +252,13 @@ const styles = StyleSheet.create({
     listContainer: {
         gap: spacing.sm,
     },
-    dayCard: {
-        // Optional styling for the card container
-    },
+    dayCard: {},
     emptyStateContainer: {
         flex: 1,
         justifyContent: 'flex-start',
         paddingHorizontal: spacing.md,
+    },
+    footerLoader: {
+        paddingVertical: spacing.md,
     },
 });

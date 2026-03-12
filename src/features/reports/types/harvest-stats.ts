@@ -1,3 +1,5 @@
+import { IApiResponse } from '@/shared/types/common.types';
+
 export interface HarvestStatsKPIs {
     totalHarvested: number;
     averageHarvestedPerPond: number;
@@ -35,8 +37,4 @@ export interface HarvestStatsData {
     byDOC: HarvestStatsByDOC[];
 }
 
-export interface HarvestStatsResponse {
-    success: boolean;
-    data: HarvestStatsData;
-    message: string | null;
-}
+export type HarvestStatsResponse = IApiResponse<HarvestStatsData>;

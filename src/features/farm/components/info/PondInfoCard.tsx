@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-import { colors } from '@/styles';
+import { colors, typography } from '@/styles';
 import { PondData } from '@/features/farm/types/farm.types';
 
 interface InfoFieldProps {
@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         lineHeight: 22,
-        color: colors.text,
+        color: colors.textSecondary,
     },
     fieldValue: {
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: typography.fontWeight.bold,
         lineHeight: 22,
         color: colors.text,
         flex: 1,

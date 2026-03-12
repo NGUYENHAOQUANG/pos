@@ -190,7 +190,7 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
     } else {
         Toast.show({
             type: 'error',
-            text1: 'Vui lòng kiểm tra lại dữ liệu nhập',
+            text1: 'Số lượng vật tư phải lớn hơn 0',
             visibilityTime: 3000,
         });
     }
@@ -203,6 +203,17 @@ export const showLimitCharacterToast = () => {
     Toast.show({
         type: 'error',
         text1: 'Không được vượt quá 2000 kí tự',
+    });
+};
+
+/**
+ * Show error toast when material quantity is zero or negative
+ */
+export const showMaterialQuantityZeroToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Số lượng vật tư phải lớn hơn 0',
+        visibilityTime: 3000,
     });
 };
 

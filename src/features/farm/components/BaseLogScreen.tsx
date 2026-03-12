@@ -140,9 +140,6 @@ export const BaseLogScreen: React.FC<BaseLogScreenProps> = ({
                     containerStyle={{ backgroundColor: colors.backgroundPrimary }}
                 />
 
-                {/* Divider between header and date range */}
-                <View style={styles.headerDivider} />
-
                 {/* Date range filter */}
                 <DateRangeFilter
                     startDate={startDate}
@@ -197,10 +194,6 @@ const styles = StyleSheet.create({
     },
     headerSection: {
         backgroundColor: colors.backgroundPrimary,
-    },
-    headerDivider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
     },
     dateRangeWrapper: {
         marginHorizontal: spacing.md,

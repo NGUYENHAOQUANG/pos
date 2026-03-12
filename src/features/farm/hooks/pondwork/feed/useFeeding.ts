@@ -10,6 +10,7 @@ import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import type {
     FeedingRecordItem,
+    FeedingRecordListParams,
     CreateFeedingRecordPayload,
 } from '@/features/farm/types/feedingRecord.types';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
@@ -29,16 +30,16 @@ export const useFeeding = () => {
     };
 };
 
-export const useFeedingRecords = (pondId: string) => {
+export const useFeedingRecords = (pondId: string, params?: FeedingRecordListParams) => {
     return useQuery({
-        queryKey: farmKeys.feedingRecords.list(pondId),
-        queryFn: () => feedingRecordApi.list(pondId),
+        queryKey: farmKeys.feedingRecords.list(pondId, params),
+        queryFn: () => feedingRecordApi.list(pondId, params),
         enabled: !!pondId,
     });
 };
 
-export const useFeedingRecordsAsJobs = (pondId: string) => {
-    const { data, isLoading, error, refetch } = useFeedingRecords(pondId);
+export const useFeedingRecordsAsJobs = (pondId: string, params?: FeedingRecordListParams) => {
+    const { data, isLoading, error, refetch } = useFeedingRecords(pondId, params);
     const { materialMap } = useFarmMaterials();
 
     const rawItems: FeedingRecordItem[] = data?.data?.items ?? [];

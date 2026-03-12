@@ -11,9 +11,7 @@ export enum PondRecordOperationType {
     Siphon = 'Siphon',
     Incident = 'Incident',
     StockTransfer = 'StockTransfer',
-    CleanPond = 'CleanPond',
     CleanRenovation = 'CleanRenovation',
-    SunDryPond = 'SunDryPond',
     DryRenovation = 'DryRenovation',
     Harvest = 'Harvest',
 }
@@ -101,7 +99,7 @@ export interface IPondRecordReferenceData {
     [key: string]: unknown;
 }
 
-/** Generic record item from GET /pond/{pondId}/record */
+/** Generic record item from GET /pond/{pondId}/record (unified: operationType + referenceData) */
 export interface IPondRecordItem {
     id: string;
     no?: number;
@@ -115,10 +113,31 @@ export interface IPondRecordItem {
     referenceData?: IPondRecordReferenceData | null;
 }
 
+/**
+ * Raw record from API: có thể là dạng unified (referenceData) hoặc dạng api riêng (xxxDetail).
+ * Dùng normalizeRecordToRef() để đưa về một dạng trước khi convert → ActivityData / TrackingDayCard.
+ */
+export type RawPondRecordItem = IPondRecordItem & {
+    sizeMeasurementDetail?: Record<string, unknown>;
+    waterChangeDetail?: Record<string, unknown>;
+    siphonDetail?: Record<string, unknown>;
+    healthCheck?: Record<string, unknown>;
+    feedingDetail?: Record<string, unknown>;
+    waterTreatmentDetail?: Record<string, unknown>;
+    /** CleanRenovation / DryRenovation */
+    detail?: Record<string, unknown>;
+    /** StockTransfer (flat) */
+    toPonds?: { toPondId: string; quantity: number; toPondName?: string }[];
+    totalStocking?: number;
+    fromPondId?: string;
+    fromCycleId?: string;
+};
+
 /** Query params for record list */
 export interface IPondRecordListParams {
     PondId?: string;
     CycleId?: string;
+    OperationTypes?: string[];
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;

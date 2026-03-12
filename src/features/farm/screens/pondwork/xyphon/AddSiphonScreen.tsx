@@ -25,7 +25,7 @@ import { SiphonLossBox } from '@/features/farm/components/pondwork/xyphon/Siphon
 import {
     MaterialSelectionBox,
     SelectedMaterialItem,
-} from '@/features/farm/components/pondwork/feed/MaterialSelectionBox';
+} from '@/features/farm/components/bottom-sheet/MaterialSelectionBox';
 import { documentApi } from '@/features/material/api/documentApi';
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { MaterialGroupType } from '@/features/material/types/material.types';
@@ -35,6 +35,7 @@ import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
+    showMaterialQuantityZeroToast,
 } from '@/features/farm/utils/toastMessages';
 import { parseDate } from '@/features/farm/utils/dateUtils';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -304,6 +305,12 @@ export const AddSiphonScreen: React.FC = () => {
                 text1: 'Vui lòng chọn vật tư',
                 visibilityTime: 3000,
             });
+            return;
+        }
+
+        // Validate material quantities must be greater than 0
+        if (selectedMaterials.some(m => m.quantity <= 0)) {
+            showMaterialQuantityZeroToast();
             return;
         }
 
