@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 import { colors } from '@/styles';
-import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconAICheck } from '@/assets/icons';
 
@@ -101,12 +100,10 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 label="Cỡ tôm (con/kg)"
                 placeholder="Cỡ tôm (con/kg)"
                 value={shrimpSize}
-                onChangeText={text => {
-                    if (text.length <= 6) {
-                        onShrimpSizeChange(formatNumericInput(text));
-                    }
-                }}
+                onChangeText={onShrimpSizeChange}
                 keyboardType="numeric"
+                inputFormat={InputFormat.INTEGER}
+                maxDigits={6}
                 required
                 maxLength={6}
                 containerStyle={{ marginBottom: 0 }}
@@ -115,12 +112,10 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 label="Sản lượng còn lại (kg)"
                 placeholder="Sản lượng còn lại (kg)"
                 value={remainingWeight}
-                onChangeText={text => {
-                    if (text.length <= 12) {
-                        onRemainingWeightChange(formatDecimalInput(text));
-                    }
-                }}
+                onChangeText={onRemainingWeightChange}
                 keyboardType="numeric"
+                inputFormat={InputFormat.DECIMAL}
+                maxDigits={9}
                 required
                 maxLength={9}
                 containerStyle={{ marginBottom: 0 }}
