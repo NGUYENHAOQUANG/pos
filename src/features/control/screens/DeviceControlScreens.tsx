@@ -142,8 +142,8 @@ export const DeviceControlScreens = () => {
         if (!selectedFarm || !farmPonds) return [];
 
         // Separate API device ponds from mock ponds
-        const apiDevicePonds = devicePonds.filter(p => !p.id.startsWith('mock-'));
-        const mockDevicePonds = devicePonds.filter(p => p.id.startsWith('mock-'));
+        const apiDevicePonds = devicePonds.filter(p => !p.id?.startsWith('mock-'));
+        const mockDevicePonds = devicePonds.filter(p => p.id?.startsWith('mock-'));
 
         // Map farm ponds - match API first, then mock by name
         const farmPondNames = new Set<string>();
