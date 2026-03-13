@@ -28,6 +28,7 @@ interface Props {
     onSelectedDateChange: (date: Date) => void;
     values: ShrimpInspectionFormValues;
     onChange: (patch: Partial<ShrimpInspectionFormValues>) => void;
+    onImagesChange: (images: string[]) => void;
     aiResult: AIHealthCheckResult | null;
     isSaving: boolean;
     isDeleteModalVisible: boolean;
@@ -47,6 +48,7 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
     onSelectedDateChange,
     values,
     onChange,
+    onImagesChange,
     aiResult,
     isSaving,
     isDeleteModalVisible,
@@ -88,7 +90,7 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
                         onDateChange={onSelectedDateChange}
                         type="withImage"
                         imageUris={values.images || []}
-                        onImagesChange={uris => onChange({ images: uris })}
+                        onImagesChange={onImagesChange}
                         documentIds={meta.documentIds}
                         disabledDate={true}
                     />

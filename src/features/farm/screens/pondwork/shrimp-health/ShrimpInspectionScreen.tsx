@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -19,6 +19,7 @@ import {
     ShrimpHealthFormState,
 } from '@/features/farm/services/shrimp-health.service';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
+import { documentApi } from '@/features/material/api/documentApi';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type ScreenRouteProp = RouteProp<AppStackParamList, 'ShrimpHealthScreen'>;
@@ -64,35 +65,70 @@ export const ShrimpHealthScreen: React.FC = () => {
     const [meta, setMeta] = useState<ShrimpInspectionMeta>({});
     const [documentIds, setDocumentIds] = useState<string[]>([]);
 
+    // Track loaded documentIds to avoid refetching image URLs when they haven't changed
+    const loadedDocIdsRef = useRef<string>('');
+
     useEffect(() => {
         if (!isEditMode) {
             setInitialData(null);
+            loadedDocIdsRef.current = '';
             return;
         }
 
         const detail = detailResponse?.data;
         if (!detail) return;
 
-        const initialFormState = shrimpHealthService.buildFormStateFromDetail(detail);
+        const populateDetail = async () => {
+            const initialFormState = shrimpHealthService.buildFormStateFromDetail(detail);
 
-        setSelectedDate(initialFormState.date);
-        setInitialData(initialFormState);
-        setFoodAmount(initialFormState.foodAmount);
-        setLeftoverFood(initialFormState.leftoverFood);
-        setIntestine(initialFormState.intestine);
-        setIntestineColor(initialFormState.intestineColor);
-        setStoolColor(initialFormState.stoolColor);
-        setLiver(initialFormState.liver);
-        setNotes(initialFormState.notes);
-        setImageUris(initialFormState.images);
-        setAverageInfectionRate(initialFormState.averageInfectionRate);
-        setIsHealthy(initialFormState.isHealthy);
-        setDiagnosisDetails(initialFormState.diagnosisDetails);
-        setAiItems(initialFormState.aiItems);
-        setDocumentIds(detail.documents?.map(doc => doc.id) || []);
-        setMeta({
-            documentIds: detail.documents?.map(doc => doc.id) || [],
-        });
+            setSelectedDate(initialFormState.date);
+            setFoodAmount(initialFormState.foodAmount);
+            setLeftoverFood(initialFormState.leftoverFood);
+            setIntestine(initialFormState.intestine);
+            setIntestineColor(initialFormState.intestineColor);
+            setStoolColor(initialFormState.stoolColor);
+            setLiver(initialFormState.liver);
+            setNotes(initialFormState.notes);
+            setAverageInfectionRate(initialFormState.averageInfectionRate);
+            setIsHealthy(initialFormState.isHealthy);
+            setDiagnosisDetails(initialFormState.diagnosisDetails);
+            setAiItems(initialFormState.aiItems);
+
+            // Resolve image URLs from documentIds (same pattern as useMeasureShrimpSizeForm)
+            // Only refetch URLs when documentIds actually changed (prevents flicker from SAS token changes)
+            const currentDocIds = detail.documentIds || detail.documents?.map(d => d.id) || [];
+            const docIdsKey = JSON.stringify(currentDocIds);
+
+            if (docIdsKey !== loadedDocIdsRef.current) {
+                let resolvedImages: string[] = [];
+                let resolvedDocIds: string[] = [];
+
+                if (detail.documents && detail.documents.length > 0) {
+                    resolvedImages = detail.documents
+                        .map(doc => doc.publicUrl)
+                        .filter(Boolean) as string[];
+                    resolvedDocIds = detail.documents.map(doc => doc.id);
+                } else if (detail.documentIds && detail.documentIds.length > 0) {
+                    resolvedImages = await documentApi.getUrls(detail.documentIds);
+                    resolvedDocIds = detail.documentIds;
+                }
+
+                loadedDocIdsRef.current = docIdsKey;
+                setImageUris(resolvedImages);
+                setDocumentIds(resolvedDocIds);
+                setMeta({ documentIds: resolvedDocIds });
+
+                // Set initialData AFTER images resolved to prevent false hasChanges
+                setInitialData({ ...initialFormState, images: resolvedImages });
+            } else {
+                // DocIds unchanged, keep existing images but update other form data
+                setInitialData((prev: ShrimpHealthFormState | null) =>
+                    prev ? { ...initialFormState, images: prev.images } : initialFormState
+                );
+            }
+        };
+
+        populateDetail();
     }, [isEditMode, detailResponse]);
 
     useEffect(() => {
@@ -316,7 +352,6 @@ export const ShrimpHealthScreen: React.FC = () => {
                     if (patch.stoolColor !== undefined) setStoolColor(patch.stoolColor);
                     if (patch.liver !== undefined) setLiver(patch.liver);
                     if (patch.notes !== undefined) setNotes(patch.notes);
-                    if (patch.images !== undefined) setImageUris(patch.images);
                     if (patch.averageInfectionRate !== undefined)
                         setAverageInfectionRate(patch.averageInfectionRate);
                     if (patch.isHealthy !== undefined) setIsHealthy(patch.isHealthy);
@@ -324,6 +359,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                         setDiagnosisDetails(patch.diagnosisDetails);
                     if (patch.aiItems !== undefined) setAiItems(patch.aiItems);
                 }}
+                onImagesChange={setImageUris}
                 aiResult={displayAiResult}
                 isSaving={isSaving}
                 isDeleteModalVisible={isDeleteModalVisible}
