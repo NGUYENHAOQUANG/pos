@@ -75,8 +75,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     // Initialize state from store
     useEffect(() => {
         if (currentDevice) {
-            // Set Mode
-            setMode(currentDevice.mode === EControlMode.SCHEDULE ? 'schedule' : 'manual');
+            // Mode is determined by fetchSchedules based on API data
 
             // Set Config
             if (currentDevice.feedingConfig) {
@@ -187,11 +186,26 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                 });
 
                 setSchedules(mappedSchedules);
+
+                // If device has schedules, set mode to schedule
+                if (mappedSchedules.length > 0) {
+                    setMode('schedule');
+                    // Update store so device list shows correct mode tag
+                    if (pondId && deviceId) {
+                        updateDeviceMode(pondId, deviceId, EControlMode.SCHEDULE);
+                    }
+                } else {
+                    setMode('manual');
+                    // Update store so device list shows correct mode tag
+                    if (pondId && deviceId) {
+                        updateDeviceMode(pondId, deviceId, EControlMode.MANUAL);
+                    }
+                }
             }
         } catch (error) {
             console.error('Failed to fetch schedules:', error);
         }
-    }, [deviceId]);
+    }, [deviceId, pondId, updateDeviceMode]);
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -206,7 +220,7 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
     const handleSave = async () => {
         if (isSaving) return;
         setIsSaving(true);
-        console.log('Dữ liệu:', { mode, runDuration, stopDuration, schedules });
+        console.log('Dữ liệu:', { deviceId, mode, runDuration, stopDuration, schedules });
 
         const controlMode = mode === 'schedule' ? EControlMode.SCHEDULE : EControlMode.MANUAL;
 
@@ -245,52 +259,97 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         return `${y}-${mo}-${d}T${h}:${min}:${sec}.000Z`;
                     };
 
-                    const validSchedules = schedules.filter(s => s.startTime && s.endTime);
-                    const responses = await Promise.all(
-                        validSchedules.map(s => {
-                            const payload = {
-                                deviceId,
-                                startTime: toLocalISO(s.startTime!),
-                                endtime: toLocalISO(s.endTime!),
-                            };
-                            console.log('[Schedule API] Sending payload:', JSON.stringify(payload));
-                            return deviceApi.createSchedule(payload);
-                        })
-                    );
+                    // Only send new schedules (not already saved to server)
+                    const newSchedules = schedules.filter(s => s.startTime && s.endTime && s.isNew);
+                    const now = new Date();
 
-                    // Log responses from backend
-                    responses.forEach((r, i) => {
-                        console.log(`[Schedule API] Response ${i + 1}:`, JSON.stringify(r.data));
-                    });
-                    // Check all responses for success
-                    const allSuccess = responses.every(r => r.data?.success === true);
+                    // Filter out schedules with startTime in the past
+                    const futureSchedules = newSchedules.filter(s => s.startTime! > now);
+                    const skippedCount = newSchedules.length - futureSchedules.length;
 
-                    if (allSuccess) {
+                    if (skippedCount > 0) {
+                        console.log(
+                            `[Schedule API] Skipped ${skippedCount} schedule(s) with past startTime`
+                        );
+                    }
+
+                    // No new schedules to send - just save config
+                    if (newSchedules.length === 0) {
                         Toast.show({
                             type: 'success',
-                            text1: 'Cập nhật lịch trình thành công',
+                            text1: 'Cập nhật cấu hình thành công',
                         });
-                    } else {
+                    } else if (futureSchedules.length === 0) {
                         Toast.show({
                             type: 'error',
                             text1: 'Lỗi',
-                            text2: 'Một số lịch trình không thể lưu',
+                            text2: 'Tất cả lịch trình mới đều đã qua thời gian bắt đầu',
                         });
                         setIsSaving(false);
                         return;
+                    } else {
+                        // Send each schedule individually, catch errors per request
+                        const results = await Promise.all(
+                            futureSchedules.map(async s => {
+                                const payload = {
+                                    deviceId,
+                                    startTime: toLocalISO(s.startTime!),
+                                    endtime: toLocalISO(s.endTime!),
+                                    runTime: parseInt(runDuration) || 0,
+                                    pauseTime: parseInt(stopDuration) || 0,
+                                };
+                                console.log(
+                                    '[Schedule API] Sending payload:',
+                                    JSON.stringify(payload)
+                                );
+                                try {
+                                    const res = await deviceApi.createSchedule(payload);
+                                    return { success: true as const, data: res.data };
+                                } catch (err) {
+                                    console.error('[Schedule API] Failed:', err);
+                                    return { success: false as const, error: err };
+                                }
+                            })
+                        );
+
+                        // Count successes and failures
+                        const successCount = results.filter(r => r.success).length;
+                        const failCount = results.length - successCount;
+
+                        if (failCount === 0) {
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Cập nhật lịch trình thành công',
+                                text2:
+                                    skippedCount > 0
+                                        ? `${successCount} lịch trình đã lưu, ${skippedCount} bỏ qua (đã qua giờ)`
+                                        : undefined,
+                            });
+                        } else if (successCount > 0) {
+                            Toast.show({
+                                type: 'info',
+                                text1: 'Lưu lịch trình một phần',
+                                text2: `${successCount} thành công, ${failCount} thất bại`,
+                            });
+                        } else {
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Lỗi',
+                                text2: 'Không thể lưu lịch trình',
+                            });
+                            setIsSaving(false);
+                            return;
+                        }
                     }
-                } catch (error: any) {
+                } catch (error: unknown) {
                     console.error('Failed to create schedules:', error);
-                    const errorMessage =
-                        error?.response?.data?.message ||
-                        'Thời gian bắt đầu phải nhỏ hơn thời gian hiện tại';
                     Toast.show({
                         type: 'error',
                         text1: 'Lỗi',
-                        text2: errorMessage,
+                        text2: 'Có lỗi xảy ra khi lưu lịch trình',
                     });
                     setIsSaving(false);
-                    return; // Don't navigate back on error
+                    return;
                 }
             } else {
                 Toast.show({
@@ -403,50 +462,54 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                         />
                     </View>
 
-                    {/* 2. CẤU HÌNH MÁY */}
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Cấu hình máy</Text>
+                    {/* 2. CẤU HÌNH MÁY - Only show in schedule mode */}
+                    {mode === 'schedule' && (
+                        <View style={styles.card}>
+                            <Text style={styles.sectionTitle}>Cấu hình máy</Text>
 
-                        <Input
-                            label="Chạy (giây)"
-                            required
-                            placeholder="Nhập số giây"
-                            placeholderTextColor={colors.gray[400]}
-                            keyboardType="numeric"
-                            value={runDuration}
-                            onChangeText={text => {
-                                const numericText = text.replace(/[^0-9]/g, '');
-                                setRunDuration(numericText);
+                            <Input
+                                label="Chạy (giây)"
+                                required
+                                placeholder="Nhập số giây"
+                                placeholderTextColor={colors.gray[400]}
+                                keyboardType="numeric"
+                                value={runDuration}
+                                onChangeText={text => {
+                                    const numericText = text.replace(/[^0-9]/g, '');
+                                    setRunDuration(numericText);
+                                    setIsDirty(true);
+                                    isDirtyRef.current = true;
+                                }}
+                            />
+
+                            <Input
+                                label="Dừng (phút)"
+                                required
+                                placeholder="Nhập số phút"
+                                placeholderTextColor={colors.gray[400]}
+                                keyboardType="numeric"
+                                value={stopDuration}
+                                onChangeText={text => {
+                                    const numericText = text.replace(/[^0-9]/g, '');
+                                    setStopDuration(numericText);
+                                    setIsDirty(true);
+                                    isDirtyRef.current = true;
+                                }}
+                            />
+                        </View>
+                    )}
+
+                    {/* 3. LỊCH HOẠT ĐỘNG - Only show in schedule mode */}
+                    {mode === 'schedule' && (
+                        <ActivitySchedule
+                            schedules={schedules}
+                            onUpdateSchedules={newSchedules => {
+                                setSchedules(newSchedules);
                                 setIsDirty(true);
                                 isDirtyRef.current = true;
                             }}
                         />
-
-                        <Input
-                            label="Dừng (phút)"
-                            required
-                            placeholder="Nhập số phút"
-                            placeholderTextColor={colors.gray[400]}
-                            keyboardType="numeric"
-                            value={stopDuration}
-                            onChangeText={text => {
-                                const numericText = text.replace(/[^0-9]/g, '');
-                                setStopDuration(numericText);
-                                setIsDirty(true);
-                                isDirtyRef.current = true;
-                            }}
-                        />
-                    </View>
-
-                    {/* 3. LỊCH HOẠT ĐỘNG */}
-                    <ActivitySchedule
-                        schedules={schedules}
-                        onUpdateSchedules={newSchedules => {
-                            setSchedules(newSchedules);
-                            setIsDirty(true);
-                            isDirtyRef.current = true;
-                        }}
-                    />
+                    )}
                 </ScrollView>
             </SafeInputLayout>
 
