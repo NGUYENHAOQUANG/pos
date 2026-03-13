@@ -118,8 +118,17 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onPHChange}
-                        error={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
+                        containerStyle={{
+                            marginBottom: getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* DO */}
@@ -131,8 +140,17 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onDOChange}
-                        error={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
+                        containerStyle={{
+                            marginBottom: getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Nhiệt độ */}
@@ -144,8 +162,20 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onTemperatureChange}
-                        error={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
+                        containerStyle={{
+                            marginBottom: getLimitError(
+                                temperature,
+                                ENVIRONMENT_METRIC_IDS.TEMPERATURE
+                            )
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Độ mặn */}
@@ -157,8 +187,17 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onSalinityChange}
-                        error={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
+                        containerStyle={{
+                            marginBottom: getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Độ kiềm */}
@@ -170,8 +209,20 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onAlkalinityChange}
-                        error={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
+                        containerStyle={{
+                            marginBottom: getLimitError(
+                                alkalinity,
+                                ENVIRONMENT_METRIC_IDS.ALKALINITY
+                            )
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Độ trong */}
@@ -183,8 +234,20 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         keyboardType="numeric"
                         inputFormat={InputFormat.DECIMAL}
                         onChangeText={onTransparencyChange}
-                        error={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
+                        containerStyle={{
+                            marginBottom: getLimitError(
+                                transparency,
+                                ENVIRONMENT_METRIC_IDS.TRANSPARENCY
+                            )
+                                ? 0
+                                : undefined,
+                        }}
                     />
+                    {getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY) && (
+                        <Text style={styles.warningHintText}>
+                            {getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Advanced Parameters */}
@@ -205,8 +268,17 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                     keyboardType="numeric"
                                     inputFormat={InputFormat.DECIMAL}
                                     onChangeText={paramOnChange}
-                                    error={getLimitError(paramValue, param.id)}
+                                    containerStyle={{
+                                        marginBottom: getLimitError(paramValue, param.id)
+                                            ? 0
+                                            : undefined,
+                                    }}
                                 />
+                                {getLimitError(paramValue, param.id) && (
+                                    <Text style={styles.warningHintText}>
+                                        {getLimitError(paramValue, param.id)}
+                                    </Text>
+                                )}
                             </View>
                         );
                     })}
@@ -267,5 +339,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: colors.warning,
         flex: 1,
+    },
+    warningHintText: {
+        fontSize: 12,
+        color: colors.error,
+        marginTop: 2,
+        marginBottom: 12,
     },
 });
