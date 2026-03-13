@@ -9,12 +9,14 @@ interface ExportWarehouseFooterProps {
     totalAmount: number;
     onSaveDraft: () => void;
     onSubmit: () => void;
+    disabled?: boolean;
 }
 
 export const ExportWarehouseFooter: React.FC<ExportWarehouseFooterProps> = ({
     totalAmount,
     onSaveDraft,
     onSubmit,
+    disabled = false,
 }) => {
     const insets = useSafeAreaInsets();
     const safeBottom = Math.max(insets.bottom, 12);
@@ -27,11 +29,21 @@ export const ExportWarehouseFooter: React.FC<ExportWarehouseFooterProps> = ({
             </View>
             <View style={styles.buttonRow}>
                 <View style={styles.buttonWrapper}>
-                    <Button title="Lưu Nháp" variant="outline" onPress={onSaveDraft} />
+                    <Button
+                        title="Lưu Nháp"
+                        variant="outline"
+                        onPress={onSaveDraft}
+                        disabled={disabled}
+                    />
                 </View>
                 <View style={styles.buttonSpacer} />
                 <View style={styles.buttonWrapper}>
-                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                    <Button
+                        title="Gửi Phiếu"
+                        variant="primary"
+                        onPress={onSubmit}
+                        disabled={disabled}
+                    />
                 </View>
             </View>
         </View>

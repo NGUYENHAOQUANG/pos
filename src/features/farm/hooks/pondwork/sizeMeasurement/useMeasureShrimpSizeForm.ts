@@ -319,6 +319,7 @@ export const useMeasureShrimpSizeForm = ({
         handleSave,
         handleDelete,
         UnsavedChangesModal,
+        hasChanges,
         isSubmitting:
             createSizeMeasurement.isPending ||
             updateSizeMeasurement.isPending ||

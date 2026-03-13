@@ -38,6 +38,7 @@ export const EditAquacultureScreens: React.FC = () => {
     const formRef = useRef<AquacultureFormRef>(null);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [closeModalVisible, setCloseModalVisible] = useState(false);
+    const [formHasChanges, setFormHasChanges] = useState(false);
 
     // ================================================================
     // Data Fetching (TanStack Query)
@@ -195,6 +196,7 @@ export const EditAquacultureScreens: React.FC = () => {
                             initialData={initialData}
                             zoneOptions={zoneOptions}
                             onSubmit={handleSubmit}
+                            onHasChangesChange={setFormHasChanges}
                         />
                     </View>
                 )}
@@ -207,6 +209,7 @@ export const EditAquacultureScreens: React.FC = () => {
                         }
                         onPrimaryPress={handlePrimaryPress}
                         onSecondaryPress={handleSecondaryPress}
+                        primaryDisabled={!formHasChanges}
                         secondaryType={
                             aquaculture.status === SeasonStatus.Closed ? 'default' : 'danger'
                         }

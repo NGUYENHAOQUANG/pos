@@ -25,6 +25,7 @@ export interface FeedingFormProps {
     isSubmitting: boolean;
     initialData: FeedingFormValues | undefined;
     onSubmit: (data: FeedingFormValues) => void;
+    onHasChangesChange?: (hasChanges: boolean) => void;
 }
 
 export interface FeedingFormRef {
@@ -33,7 +34,10 @@ export interface FeedingFormRef {
 }
 
 export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
-    ({ isEditMode, isLoadingDetail, isSubmitting, initialData, onSubmit }, ref) => {
+    (
+        { isEditMode, isLoadingDetail, isSubmitting, initialData, onSubmit, onHasChangesChange },
+        ref
+    ) => {
         const initializedRef = useRef(false);
 
         const { control, handleSubmit, reset, watch } = useForm<FeedingFormValues>({
@@ -90,6 +94,11 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
         }, [currentValues, initialData, isEditMode]);
 
         const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
+
+        // Notify parent when hasChanges changes
+        React.useEffect(() => {
+            onHasChangesChange?.(hasChanges);
+        }, [hasChanges, onHasChangesChange]);
 
         React.useImperativeHandle(
             ref,

@@ -282,6 +282,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={handleBack}
+                primaryDisabled={!hasChanges}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
 

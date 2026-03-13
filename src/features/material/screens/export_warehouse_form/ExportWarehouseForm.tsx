@@ -58,6 +58,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
     const initializedRef = useRef(false);
+    const initialSnapshotRef = useRef<string | null>(null);
     const {
         scrollRef: scrollViewRef,
         scrollToDropdown,
@@ -93,8 +94,35 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
         if (initialData && !initializedRef.current) {
             reset(initialData);
             initializedRef.current = true;
+            // Save snapshot for stable fields only (not zone/pond)
+            const normalizeItems = (items: any[]) =>
+                (items || []).map((item: any) => ({
+                    materialId: item.materialId || '',
+                    quantity: item.quantity || '',
+                    price: item.price || '',
+                }));
+            initialSnapshotRef.current = JSON.stringify({
+                date: new Date(initialData.date).getTime(),
+                note: initialData.note || '',
+                exportItems: normalizeItems(initialData.exportItems as any[]),
+            });
         }
     }, [initialData, reset]);
+
+    // Track zone/pond separately — capture settled values after auto-population
+    const [settledZone, setSettledZone] = useState<string | null>(null);
+    const [settledPond, setSettledPond] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (initializedRef.current && settledZone === null && isEditMode) {
+            const timer = setTimeout(() => {
+                const values = getValues();
+                setSettledZone(values.selectedZone ?? '');
+                setSettledPond(values.selectedPond ?? '');
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isEditMode, initialData, settledZone, getValues]);
 
     const { add, remove, update } = useExportMaterialActions(
         control,
@@ -139,6 +167,41 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
             return sum + qty * price;
         }, 0);
     }, [watchedForm.exportItems]);
+
+    // Track changes for edit mode disable
+    const hasChanges = useMemo(() => {
+        if (!isEditMode) return true;
+        // Check stable fields via snapshot
+        if (!initialSnapshotRef.current) return true;
+        const normalizeItems = (items: any[]) =>
+            (items || []).map((item: any) => ({
+                materialId: item.materialId || '',
+                quantity: item.quantity || '',
+                price: item.price || '',
+            }));
+        const currentSnapshot = JSON.stringify({
+            date: new Date(watchedForm.date ?? new Date()).getTime(),
+            note: watchedForm.note ?? '',
+            exportItems: normalizeItems(watchedForm.exportItems as any[]),
+        });
+        if (currentSnapshot !== initialSnapshotRef.current) return true;
+        // Check zone/pond separately (compare against settled values)
+        if (settledZone !== null && (watchedForm.selectedZone ?? '') !== settledZone) return true;
+        if (settledPond !== null && (watchedForm.selectedPond ?? '') !== settledPond) return true;
+        // Check new files
+        if ((watchedForm.files || []).length > 0) return true;
+        return false;
+    }, [
+        isEditMode,
+        settledZone,
+        settledPond,
+        watchedForm.date,
+        watchedForm.selectedZone,
+        watchedForm.selectedPond,
+        watchedForm.note,
+        watchedForm.exportItems,
+        watchedForm.files,
+    ]);
 
     return (
         <View style={styles.container}>
@@ -223,6 +286,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
                 totalAmount={totalAmount}
                 onSaveDraft={handleSubmit(data => onSubmit(data, true), onError)}
                 onSubmit={() => setConfirmModalVisible(true)}
+                disabled={isEditMode && !hasChanges}
             />
 
             <ConfirmSubmiss

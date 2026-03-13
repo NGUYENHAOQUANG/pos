@@ -465,6 +465,7 @@ export const WaterSupplyScreen = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
+                primaryDisabled={!!item && !hasChanges}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
 

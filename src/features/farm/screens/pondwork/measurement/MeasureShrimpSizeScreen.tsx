@@ -85,6 +85,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         handleSave,
         handleDelete,
         UnsavedChangesModal,
+        hasChanges,
         isSubmitting,
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
@@ -168,6 +169,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onPrimaryPress={onSavePress}
                     onSecondaryPress={navigation.goBack}
                     isLoading={isSubmitting}
+                    primaryDisabled={!!itemToEdit && !hasChanges}
                 />
             </View>
 

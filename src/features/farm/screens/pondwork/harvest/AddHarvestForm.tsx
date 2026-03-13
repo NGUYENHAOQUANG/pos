@@ -42,7 +42,13 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
     onBack,
     onCancel,
 }) => {
-    const { control, handleSubmit, watch, reset } = useForm<HarvestFormData>({
+    const {
+        control,
+        handleSubmit,
+        watch,
+        reset,
+        formState: { isDirty },
+    } = useForm<HarvestFormData>({
         resolver: zodResolver(harvestFormSchema),
         defaultValues: initialData,
     });
@@ -174,7 +180,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                             : 'Lưu thông tin'
                     }
                     secondaryTitle="Huỷ"
-                    primaryDisabled={isSubmitting}
+                    primaryDisabled={isSubmitting || (isEditMode && !isDirty)}
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={onCancel}
                 />
