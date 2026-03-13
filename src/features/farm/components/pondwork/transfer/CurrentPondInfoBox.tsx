@@ -58,6 +58,7 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
                 keyboardType="numeric"
                 placeholder="0"
                 required
+                editable={false}
                 containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>

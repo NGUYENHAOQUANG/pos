@@ -240,6 +240,28 @@ export const showInvalidActivityTypeToast = () => {
 };
 
 /**
+ * Show error toast when pond info is not found
+ */
+export const showPondNotFoundToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Không tìm thấy thông tin Ao',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast for cycle form validation errors
+ */
+export const showCycleFormValidationToast = (message: string) => {
+    Toast.show({
+        type: 'error',
+        text1: message || 'Dữ liệu không hợp lệ',
+        visibilityTime: 3000,
+    });
+};
+
+/**
  * Stock transfer error message mapping
  * Maps backend error keywords to user-friendly Vietnamese messages
  */
