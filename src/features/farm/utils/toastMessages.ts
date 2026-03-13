@@ -218,6 +218,28 @@ export const showMaterialQuantityZeroToast = () => {
 };
 
 /**
+ * Show error toast when no material is selected
+ */
+export const showSelectMaterialToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng chọn vật tư',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast when activity type is invalid
+ */
+export const showInvalidActivityTypeToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Loại hoạt động không hợp lệ',
+        visibilityTime: 3000,
+    });
+};
+
+/**
  * Stock transfer error message mapping
  * Maps backend error keywords to user-friendly Vietnamese messages
  */
