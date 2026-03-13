@@ -99,6 +99,8 @@ export const AddSiphonScreen: React.FC = () => {
     }, [setTabBarVisible]);
 
     // Fetch detail when editing
+    const [detailData, setDetailData] = useState<any>(null);
+
     useEffect(() => {
         const fetchDetail = async () => {
             if (pond?.id && itemToEdit?.id) {
@@ -106,6 +108,7 @@ export const AddSiphonScreen: React.FC = () => {
                     const response = await siphonApi.getDetail(pond.id, itemToEdit.id);
                     if (response && response.data) {
                         const detail = response.data;
+                        setDetailData(detail);
 
                         // Update Date
                         if (detail.createdAt) {
@@ -116,31 +119,6 @@ export const AddSiphonScreen: React.FC = () => {
                         if (detail.siphonDetail) {
                             setLossAmount(detail.siphonDetail.shrimpLossKg?.toString() || '');
                             setNotes(detail.siphonDetail.notes || '');
-
-                            // Update Materials
-                            if (detail.siphonDetail.materials && materials.length > 0) {
-                                const mappedMaterials: SelectedMaterialItem[] =
-                                    detail.siphonDetail.materials
-                                        .map((m: any) => {
-                                            // Find material in materials (id matches warehouseItemId)
-                                            const foundItem = materials.find(
-                                                mat => mat.id === m.warehouseItemId
-                                            );
-                                            if (foundItem) {
-                                                return {
-                                                    material: foundItem,
-                                                    quantity: m.quantity,
-                                                    unit: foundItem.unitName || '',
-                                                };
-                                            }
-                                            return null;
-                                        })
-                                        .filter((m: any) => m !== null);
-
-                                if (mappedMaterials.length > 0) {
-                                    setSelectedMaterials(mappedMaterials);
-                                }
-                            }
                         }
 
                         // Update Images
@@ -175,7 +153,36 @@ export const AddSiphonScreen: React.FC = () => {
             fetchDetail();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pond?.id, itemToEdit, materials]);
+    }, [pond?.id, itemToEdit?.id]);
+
+    // Bind materials separately — re-run when warehouse data loads
+    useEffect(() => {
+        if (!detailData?.siphonDetail?.materials) return;
+
+        const mapped: SelectedMaterialItem[] = detailData.siphonDetail.materials.map((m: any) => {
+            const targetId = m.warehouseItemId;
+            const found =
+                materials.length > 0
+                    ? materials.find(mat => mat.id === targetId || mat.materialDefId === targetId)
+                    : undefined;
+            return {
+                material:
+                    found ||
+                    ({
+                        id: targetId,
+                        name: m.warehouseItemName || 'Vật tư',
+                        unitName: m.unitName || '',
+                        materialDefId: targetId,
+                    } as any),
+                quantity: m.quantity,
+                unit: found?.unitName || m.unitName || '',
+            } as SelectedMaterialItem;
+        });
+
+        if (mapped.length > 0) {
+            setSelectedMaterials(mapped);
+        }
+    }, [detailData, materials]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
