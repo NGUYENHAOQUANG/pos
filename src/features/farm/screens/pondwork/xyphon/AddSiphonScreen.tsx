@@ -32,6 +32,7 @@ import { MaterialGroupType } from '@/features/material/types/material.types';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
+import { Loading } from '@/shared/components/ui/Loading';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -67,6 +68,7 @@ export const AddSiphonScreen: React.FC = () => {
 
     // Additional state to track when data from API is fully loaded for accurate comparison
     const [isDetailLoaded, setIsDetailLoaded] = useState(!itemToEdit);
+    const isLoadingDetail = !!itemToEdit && !isDetailLoaded;
     const [fetchedInitialData, setFetchedInitialData] = useState<any>(null);
 
     // Store initial data for comparison when editing
@@ -396,28 +398,35 @@ export const AddSiphonScreen: React.FC = () => {
             />
 
             {/* Content */}
-            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={80}>
-                <GeneralInfoBox
-                    ref={generalInfoBoxRef}
-                    type="withImage"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    documentIds={documentIds}
-                    disabledDate={true}
-                />
+            <Loading isLoading={isLoadingDetail}>
+                {isLoadingDetail ? null : (
+                    <SafeInputLayout
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={80}
+                    >
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            type="withImage"
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            imageUris={imageUris}
+                            onImagesChange={setImageUris}
+                            documentIds={documentIds}
+                            disabledDate={true}
+                        />
 
-                <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
+                        <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
 
-                <MaterialSelectionBox
-                    selectedMaterials={selectedMaterials}
-                    onMaterialsChange={setSelectedMaterials}
-                    groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
-                />
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
+                        />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
-            </SafeInputLayout>
+                        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                    </SafeInputLayout>
+                )}
+            </Loading>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>

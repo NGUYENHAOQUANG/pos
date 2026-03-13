@@ -31,6 +31,7 @@ interface Props {
     onImagesChange: (images: string[]) => void;
     aiResult: AIHealthCheckResult | null;
     isSaving: boolean;
+    isLoadingDetail?: boolean;
     isDeleteModalVisible: boolean;
     onBack: () => void;
     onDeletePress: () => void;
@@ -51,6 +52,7 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
     onImagesChange,
     aiResult,
     isSaving,
+    isLoadingDetail,
     isDeleteModalVisible,
     onBack,
     onDeletePress,
@@ -80,46 +82,48 @@ export const ShrimpInspectionForm: React.FC<Props> = ({
                     containerStyle={styles.headerContainer}
                 />
 
-                <SafeInputLayout
-                    contentContainerStyle={styles.scrollContent}
-                    extraScrollHeight={100}
-                >
-                    <GeneralInfoBox
-                        ref={generalInfoBoxRef}
-                        date={selectedDate}
-                        onDateChange={onSelectedDateChange}
-                        type="withImage"
-                        imageUris={values.images || []}
-                        onImagesChange={onImagesChange}
-                        documentIds={meta.documentIds}
-                        disabledDate={true}
-                    />
+                {isLoadingDetail ? null : (
+                    <SafeInputLayout
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={100}
+                    >
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            date={selectedDate}
+                            onDateChange={onSelectedDateChange}
+                            type="withImage"
+                            imageUris={values.images || []}
+                            onImagesChange={onImagesChange}
+                            documentIds={meta.documentIds}
+                            disabledDate={true}
+                        />
 
-                    <ShrimpInspectionFoodCheckBox
-                        foodAmount={values.foodAmount || ''}
-                        onFoodAmountChange={val => onChange({ foodAmount: val })}
-                        leftoverFood={values.leftoverFood || 'Hết'}
-                        onLeftoverFoodChange={val => onChange({ leftoverFood: val })}
-                    />
+                        <ShrimpInspectionFoodCheckBox
+                            foodAmount={values.foodAmount || ''}
+                            onFoodAmountChange={val => onChange({ foodAmount: val })}
+                            leftoverFood={values.leftoverFood || 'Hết'}
+                            onLeftoverFoodChange={val => onChange({ leftoverFood: val })}
+                        />
 
-                    <ShrimpInspectionObservationBox
-                        intestine={values.intestine || 'Đầy'}
-                        onIntestineChange={val => onChange({ intestine: val })}
-                        intestineColor={values.intestineColor || 'Màu thức ăn'}
-                        onIntestineColorChange={val => onChange({ intestineColor: val })}
-                        stoolColor={values.stoolColor || 'Màu thức ăn'}
-                        onStoolColorChange={val => onChange({ stoolColor: val })}
-                        liver={values.liver || 'Bình thường'}
-                        onLiverChange={val => onChange({ liver: val })}
-                        onAICheckPress={onAICheckPress}
-                        aiResult={aiResult}
-                    />
+                        <ShrimpInspectionObservationBox
+                            intestine={values.intestine || 'Đầy'}
+                            onIntestineChange={val => onChange({ intestine: val })}
+                            intestineColor={values.intestineColor || 'Màu thức ăn'}
+                            onIntestineColorChange={val => onChange({ intestineColor: val })}
+                            stoolColor={values.stoolColor || 'Màu thức ăn'}
+                            onStoolColorChange={val => onChange({ stoolColor: val })}
+                            liver={values.liver || 'Bình thường'}
+                            onLiverChange={val => onChange({ liver: val })}
+                            onAICheckPress={onAICheckPress}
+                            aiResult={aiResult}
+                        />
 
-                    <SelectionNotesBox
-                        notes={values.notes || ''}
-                        onNotesChange={val => onChange({ notes: val })}
-                    />
-                </SafeInputLayout>
+                        <SelectionNotesBox
+                            notes={values.notes || ''}
+                            onNotesChange={val => onChange({ notes: val })}
+                        />
+                    </SafeInputLayout>
+                )}
 
                 <View style={styles.footer}>
                     <ButtonBarFarm

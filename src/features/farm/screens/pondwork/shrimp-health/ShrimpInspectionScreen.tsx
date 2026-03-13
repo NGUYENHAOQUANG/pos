@@ -362,6 +362,7 @@ export const ShrimpHealthScreen: React.FC = () => {
                 onImagesChange={setImageUris}
                 aiResult={displayAiResult}
                 isSaving={isSaving}
+                isLoadingDetail={isDetailLoading && isEditMode}
                 isDeleteModalVisible={isDeleteModalVisible}
                 onBack={handleBack}
                 onDeletePress={() => setIsDeleteModalVisible(true)}

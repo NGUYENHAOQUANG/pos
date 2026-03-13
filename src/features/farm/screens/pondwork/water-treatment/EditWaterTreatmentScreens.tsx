@@ -249,24 +249,26 @@ export const EditWaterTreatmentScreens: React.FC = () => {
             />
 
             <Loading isLoading={isLoadingDetail}>
-                <SafeInputLayout
-                    style={styles.container}
-                    contentContainerStyle={styles.scrollContent}
-                    extraScrollHeight={50}
-                >
-                    {/* Main Content Component */}
-                    <WaterTreatment
-                        executionDate={executionDate}
-                        onExecutionDateChange={setExecutionDate}
-                        disabledDate={true}
-                        activityType={activityType}
-                        onActivityTypeChange={setActivityType}
-                        selectedMaterials={selectedMaterials}
-                        onSelectedMaterialsChange={setSelectedMaterials}
-                        note={note}
-                        onNoteChange={setNote}
-                    />
-                </SafeInputLayout>
+                {isLoadingDetail ? null : (
+                    <SafeInputLayout
+                        style={styles.container}
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={50}
+                    >
+                        {/* Main Content Component */}
+                        <WaterTreatment
+                            executionDate={executionDate}
+                            onExecutionDateChange={setExecutionDate}
+                            disabledDate={true}
+                            activityType={activityType}
+                            onActivityTypeChange={setActivityType}
+                            selectedMaterials={selectedMaterials}
+                            onSelectedMaterialsChange={setSelectedMaterials}
+                            note={note}
+                            onNoteChange={setNote}
+                        />
+                    </SafeInputLayout>
+                )}
             </Loading>
 
             {/* Footer Buttons */}
