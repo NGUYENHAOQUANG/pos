@@ -20,7 +20,6 @@ export const pondRecordApi = {
             ? `${API_ENDPOINTS.POND.RECORD.LIST(pondId)}?${queryString}`
             : API_ENDPOINTS.POND.RECORD.LIST(pondId);
         const response = await apiClient.get<PondRecordListResponse>(url);
-        console.log('param:', params, 'response', response.data);
         return response.data;
     },
 };

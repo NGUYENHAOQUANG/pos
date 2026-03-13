@@ -6,6 +6,7 @@ import { useCyclesByPond, useCycleDetails } from '@/features/farm/hooks/useCycle
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
+import { useSeasonList } from '@/features/menu/hooks/useSeason';
 import { PondCycleDetailContent } from './PondCycleList';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { APP_CONFIG } from '@/shared/constants/config';
@@ -18,6 +19,9 @@ export const PondCycleListScreen = () => {
     const route = useRoute<RouteProps>();
     const { pondId, zoneId, warehouseId } = route.params;
 
+    const [selectedSeason, setSelectedSeason] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     const { data: _pond } = usePondDetail(zoneId, pondId);
 
     const { data: warehouses } = useWarehouses({
@@ -27,35 +31,28 @@ export const PondCycleListScreen = () => {
     const effectiveWarehouseId = warehouseId || warehouses?.[0]?.id;
     const { data: shrimpSeeds } = useShrimpSeeds(effectiveWarehouseId);
 
-    const { data: cyclesResponse, isLoading } = useCyclesByPond(pondId);
+    const { data: cyclesResponse, isLoading } = useCyclesByPond(pondId, {
+        SeasonId: selectedSeason || undefined,
+    });
     const cycles = useMemo(() => cyclesResponse?.data?.items || [], [cyclesResponse]);
 
     const cycleIds = useMemo(() => cycles.map(c => c.id), [cycles]);
     const { warehouseItemMap } = useCycleDetails(pondId, cycleIds);
 
-    const [selectedSeason, setSelectedSeason] = useState('');
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { data: seasons } = useSeasonList(zoneId, {
+        PageSize: APP_CONFIG.MAX_PAGE_SIZE,
+    });
 
     const seasonOptions = useMemo(() => {
-        const uniqueSeasons = new Map();
-        cycles.forEach(c => {
-            if (c.season && c.season.id) {
-                if (!uniqueSeasons.has(c.season.id)) {
-                    uniqueSeasons.set(c.season.id, {
-                        label: c.season.name || 'Unknown',
-                        value: c.season.id,
-                    });
-                }
-            }
-        });
-        const options = Array.from(uniqueSeasons.values());
+        const seasonsList = seasons?.data?.items || [];
+        const options = seasonsList.map(s => ({
+            label: s.name || 'Unknown',
+            value: s.id as string,
+        }));
         return [{ label: 'Tất cả vụ nuôi', value: '' }, ...options];
-    }, [cycles]);
+    }, [seasons]);
 
-    const displayedCycles = useMemo(() => {
-        if (!selectedSeason) return cycles;
-        return cycles.filter(c => c.season?.id === selectedSeason);
-    }, [cycles, selectedSeason]);
+    const displayedCycles = cycles;
 
     const getBreedLabel = useCallback(
         (cycle: CycleData) => {

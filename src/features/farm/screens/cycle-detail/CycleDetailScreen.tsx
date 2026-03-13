@@ -3,18 +3,15 @@ import { View, StyleSheet, Text } from 'react-native';
 import { colors, typography } from '@/styles';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useCycleDetail } from '@/features/farm/hooks/useCycle';
-import { useStockTransfers, useStockTransferDetail } from '@/features/farm/hooks/useStockTransfer';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { useIncomingStockTransfer } from '@/features/farm/hooks/stock-transfer/useStockTransfer';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 
 import { CycleDetailContent } from '@/features/farm/screens/cycle-detail/CycleDetailContent';
 import { CycleDetailSkeleton } from '@/features/farm/components/skeleton/CycleDetailSkeleton';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Tag } from '@/features/farm/components/pond/Tag';
-import { POND_TYPES } from '@/features/farm/types/farm.types';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { useHarvestRecords } from '@/features/farm/hooks/useHarvestRecord';
@@ -37,30 +34,35 @@ export const CycleDetailScreen: React.FC = () => {
 
     const { data: shrimpSeeds, refetch: refetchShrimpSeeds } = useShrimpSeeds(warehouseId);
 
-    const { data: incomingTransfer } = useIncomingStockTransfer(zoneId, pondId);
-
-    const { data: stockTransfersData, refetch: refetchTransfers } = useStockTransfers(pondId ?? '');
-
     const { data: pondData, refetch: refetchPondDetail } = usePondDetail(
         zoneId ?? '',
         pondId ?? ''
     );
     const { data: categoriesResponse } = usePondCategories();
 
+    const pondType = useMemo(() => {
+        if (typeof pondData?.type === 'string') return pondData.type;
+        if (pondData?.type?.name) return pondData.type.name;
+
+        const matchedCategory = categoriesResponse?.items?.find(
+            c => c.id === pondData?.pondCategoryId
+        );
+        return matchedCategory?.name;
+    }, [pondData, categoriesResponse]);
+
+    const { data: incomingTransfer } = useIncomingStockTransfer({
+        pondId,
+        cycleId,
+        pondType,
+    });
+
+    const transferDetail = incomingTransfer?.transferDetail;
+
     const { data: harvestRecordsData } = useHarvestRecords(pondId ?? '', {
         CycleId: cycleId ?? undefined,
         PageSize: 1000,
         OrderBy: 'CreatedAt desc',
     });
-
-    const matchingTransferId = useMemo(() => {
-        return stockTransfersData?.items?.find(st => st.fromCycleId === cycleId)?.id;
-    }, [stockTransfersData, cycleId]);
-
-    const { data: transferDetail, refetch: refetchTransferDetail } = useStockTransferDetail(
-        pondId ?? '',
-        matchingTransferId ?? ''
-    );
 
     // --- Effects ---
     useFocusEffect(
@@ -76,47 +78,11 @@ export const CycleDetailScreen: React.FC = () => {
 
     const [refreshing, setRefreshing] = useState(false);
 
-    const pondType = useMemo(() => {
-        if (typeof pondData?.type === 'string') return pondData.type;
-        if (pondData?.type?.name) return pondData.type.name;
-
-        const matchedCategory = categoriesResponse?.items?.find(
-            c => c.id === pondData?.pondCategoryId
-        );
-        return matchedCategory?.name;
-    }, [pondData, categoriesResponse]);
-
-    const showTransfer = pondType === POND_TYPES.NURSERY;
-
-    const breedLabel = useMemo(
-        () => pondDetailService.getBreedName(activeCycleData, shrimpSeeds),
-        [activeCycleData, shrimpSeeds]
-    );
-
-    const seasonLabel = useMemo(
-        () => (activeCycleData?.season ? activeCycleData.season.name : 'N/A'),
-        [activeCycleData?.season]
-    );
-
-    const doc = useMemo(
-        () => pondDetailService.calculateDOC(activeCycleData?.createdAt),
-        [activeCycleData?.createdAt]
-    );
     const displayStockingDate = useMemo(
         () =>
             activeCycleData?.createdAt ? formatDate(new Date(activeCycleData.createdAt)) : '---',
         [activeCycleData?.createdAt]
     );
-    const sourcePondName = useMemo(() => {
-        if (incomingTransfer?.fromPondName) return incomingTransfer.fromPondName;
-        return '--';
-    }, [incomingTransfer]);
-
-    const shrimpSize = useMemo(() => {
-        return incomingTransfer?.shrimpSizePcsPerKg
-            ? `${incomingTransfer.shrimpSizePcsPerKg}`
-            : '--';
-    }, [incomingTransfer?.shrimpSizePcsPerKg]);
 
     type CycleHarvestType = HarvestType | 'CloseCycle';
 
@@ -197,16 +163,15 @@ export const CycleDetailScreen: React.FC = () => {
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         try {
-            await Promise.all([
-                refetch(),
-                refetchTransfers(),
-                refetchPondDetail(),
-                matchingTransferId ? refetchTransferDetail() : Promise.resolve(),
-            ]);
+            await Promise.all([refetch(), refetchPondDetail()]);
         } finally {
             setRefreshing(false);
         }
-    }, [refetch, refetchTransfers, refetchTransferDetail, refetchPondDetail, matchingTransferId]);
+    }, [refetch, refetchPondDetail]);
+
+    const isCompleted = activeCycleData?.status === 'Completed';
+    const cycleTagStatus = isCompleted ? 'active' : 'preparing';
+    const cycleTagLabel = isCompleted ? 'Hoàn thành' : activeCycleData?.status || 'Chưa hoàn thành';
 
     return (
         <View style={styles.container}>
@@ -227,24 +192,7 @@ export const CycleDetailScreen: React.FC = () => {
                 rightAction={
                     !isLoading && (
                         <View style={styles.badgeWrapper}>
-                            <Tag
-                                status={
-                                    activeCycleData?.status === 'InProgress' ||
-                                    activeCycleData?.status === 'Active'
-                                        ? 'preparing'
-                                        : activeCycleData?.status === 'Completed'
-                                        ? 'active'
-                                        : 'preparing'
-                                }
-                                label={
-                                    activeCycleData?.status === 'InProgress' ||
-                                    activeCycleData?.status === 'Active'
-                                        ? 'Chưa hoàn thành'
-                                        : activeCycleData?.status === 'Completed'
-                                        ? 'Hoàn thành'
-                                        : activeCycleData?.status || 'Chưa hoàn thành'
-                                }
-                            />
+                            <Tag status={cycleTagStatus} label={cycleTagLabel} />
                         </View>
                     )
                 }
@@ -254,17 +202,10 @@ export const CycleDetailScreen: React.FC = () => {
             ) : (
                 <CycleDetailContent
                     activeCycleData={activeCycleData ?? undefined}
-                    seasonLabel={seasonLabel}
-                    breedLabel={breedLabel}
-                    doc={doc}
-                    sourcePondName={sourcePondName}
-                    shrimpSize={shrimpSize}
-                    displayStockingDate={displayStockingDate}
+                    shrimpSeeds={shrimpSeeds}
+                    incomingTransfer={incomingTransfer}
                     transferDetail={transferDetail}
-                    showIncomingTransfer={showTransfer}
-                    isCultivation={
-                        pondType === POND_TYPES.CULTIVATION || pondType === POND_TYPES.READY
-                    }
+                    pondType={pondType}
                     refreshing={refreshing || isRefetching}
                     harvestSummary={harvestSummary}
                     onRefresh={onRefresh}

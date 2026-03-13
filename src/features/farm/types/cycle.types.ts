@@ -45,6 +45,7 @@ export interface ICycleListParams {
     PondId?: string;
     Code?: string;
     Name?: string;
+    SeasonId?: string;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;

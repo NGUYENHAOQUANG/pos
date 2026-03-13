@@ -12,6 +12,7 @@ export enum StockTransferStatus {
 export interface IStockTransferToPond {
     toPondId: string;
     quantity: number;
+    toCycleId: string;
 }
 
 export interface IStockTransfer {

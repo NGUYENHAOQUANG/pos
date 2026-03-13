@@ -1,90 +1,111 @@
 import { useQuery } from '@tanstack/react-query';
 import { stockTransferApi } from '@/features/farm/api/stockTransferApi';
 import { IStockTransferDetail } from '@/features/farm/types/stockTransfer.types';
-import { API_ENDPOINTS } from '@/core/api/endpoints';
-import { apiClient } from '@/core/api/client';
+import { POND_TYPES } from '@/features/farm/types/farm.types';
 
 export type IncomingStockTransfer = {
     fromPondId: string;
     fromPondName: string;
     shrimpSizePcsPerKg?: number;
     quantity?: number;
+    transferDetail?: IStockTransferDetail;
 };
 
-export function useIncomingStockTransfer(zoneId: string | undefined, pondId: string | undefined) {
+type PondTypeValue = (typeof POND_TYPES)[keyof typeof POND_TYPES];
+
+interface UseIncomingStockTransferParams {
+    pondId?: string;
+    cycleId?: string;
+    pondType?: PondTypeValue | string;
+}
+
+export function useIncomingStockTransfer({
+    pondId,
+    cycleId,
+    pondType,
+}: UseIncomingStockTransferParams) {
     return useQuery({
-        queryKey: ['incoming-stock-transfer', zoneId, pondId],
+        queryKey: ['incoming-stock-transfer', pondId, cycleId, pondType],
         queryFn: async (): Promise<IncomingStockTransfer | null> => {
-            if (pondId) {
-                try {
-                    await stockTransferApi.getList(pondId, {
-                        PageSize: 100,
-                        OrderBy: 'CreatedAt desc',
-                    });
-                } catch {}
+            if (!pondId || !cycleId) return null;
 
-                if (zoneId) {
-                    try {
-                        const pondsRes = await apiClient.get<{ data: { items: any[] } }>(
-                            API_ENDPOINTS.ZONE.PONDS(zoneId),
-                            { params: { PageSize: 100 } }
+            try {
+                const transferRes = await stockTransferApi.getList(pondId, {
+                    PageSize: 50,
+                    OrderBy: 'CreatedAt desc',
+                });
+
+                const transfers = transferRes?.data?.items || [];
+
+                if (pondType === POND_TYPES.CULTIVATION || pondType === POND_TYPES.READY) {
+                    // Ao nuôi: tìm transfer có toPondId === pondId & toCycleId === cycleId
+                    for (const transfer of transfers) {
+                        const matchingToPond = transfer.toPonds?.find(
+                            (tp: any) => tp.toPondId === pondId && tp.toCycleId === cycleId
                         );
-
-                        const ponds = pondsRes.data?.data?.items || [];
-
-                        for (const pond of ponds) {
-                            if (pond.id === pondId) continue;
-
+                        if (matchingToPond) {
                             try {
-                                const transferRes = await stockTransferApi.getList(pond.id, {
-                                    PageSize: 100,
-                                    OrderBy: 'CreatedAt desc',
-                                });
-
-                                const transfers = transferRes?.data?.items || [];
-                                for (const transfer of transfers) {
-                                    const isToThisPond = transfer.toPonds?.some(
-                                        (tp: any) => tp.toPondId === pondId
-                                    );
-                                    if (isToThisPond) {
-                                        try {
-                                            const detailRes = await stockTransferApi.getDetail(
-                                                pond.id,
-                                                transfer.id
-                                            );
-                                            const detail = detailRes?.data;
-                                            if (detail) {
-                                                const targetToPond = detail.toPonds?.find(
-                                                    tp => tp.toPondId === pondId
-                                                );
-                                                return {
-                                                    fromPondId: pond.id,
-                                                    fromPondName: pond.name || transfer.fromPondId,
-                                                    shrimpSizePcsPerKg: detail.shrimpSizePcsPerKg,
-                                                    quantity: targetToPond?.quantity,
-                                                };
-                                            }
-                                        } catch {
-                                            return {
-                                                fromPondId: pond.id,
-                                                fromPondName: pond.name || transfer.fromPondId,
-                                                shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
-                                            };
-                                        }
-                                    }
+                                const detailRes = await stockTransferApi.getDetail(
+                                    transfer.fromPondId,
+                                    transfer.id
+                                );
+                                const detail = detailRes?.data;
+                                if (detail) {
+                                    const fromPondName = detail.pond?.name || transfer.fromPondId;
+                                    return {
+                                        fromPondId: transfer.fromPondId,
+                                        fromPondName,
+                                        shrimpSizePcsPerKg: detail.shrimpSizePcsPerKg,
+                                        quantity: matchingToPond.quantity,
+                                    };
                                 }
                             } catch {
-                                continue;
+                                return {
+                                    fromPondId: transfer.fromPondId,
+                                    fromPondName: transfer.fromPondId,
+                                    shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
+                                    quantity: matchingToPond.quantity,
+                                };
                             }
                         }
-                    } catch (err) {
-                        console.error('Error fetching fallback incoming transfer:', err);
+                    }
+                } else if (pondType === POND_TYPES.NURSERY) {
+                    // Ao vèo: tìm transfer có fromPondId === pondId & fromCycleId === cycleId
+                    for (const transfer of transfers) {
+                        if (transfer.fromPondId === pondId && transfer.fromCycleId === cycleId) {
+                            try {
+                                const detailRes = await stockTransferApi.getDetail(
+                                    pondId,
+                                    transfer.id
+                                );
+                                const detail = detailRes?.data;
+                                if (detail) {
+                                    return {
+                                        fromPondId: pondId,
+                                        fromPondName: detail.pond?.name || pondId,
+                                        shrimpSizePcsPerKg: detail.shrimpSizePcsPerKg,
+                                        quantity: transfer.totalStocking,
+                                        transferDetail: detail,
+                                    };
+                                }
+                            } catch {
+                                return {
+                                    fromPondId: pondId,
+                                    fromPondName: pondId,
+                                    shrimpSizePcsPerKg: transfer.shrimpSizePcsPerKg,
+                                    quantity: transfer.totalStocking,
+                                };
+                            }
+                        }
                     }
                 }
+            } catch (err) {
+                console.error('Error fetching stock transfer:', err);
             }
+
             return null;
         },
-        enabled: !!pondId && !!zoneId,
+        enabled: !!pondId && !!cycleId,
         staleTime: 5 * 60 * 1000,
     });
 }
