@@ -13,6 +13,7 @@ import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/Harv
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     HarvestFormData,
     harvestFormSchema,
@@ -63,6 +64,8 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(isDirty);
+
     const watchedHarvestType = watch('harvestType');
     const harvestTypeDisplay = getHarvestTypeDisplay(watchedHarvestType);
     const harvestTypeOptions = ['Thu hết', 'Thu tỉa'];
@@ -74,12 +77,14 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                 setIsConfirmationModalVisible(true);
             }, handleHarvestFormError)();
         } else {
+            allowNavigation();
             handleSubmit(onSubmitForm, handleHarvestFormError)();
         }
     };
 
     const handleConfirmSave = () => {
         setIsConfirmationModalVisible(false);
+        allowNavigation();
         handleSubmit(onSubmitForm, handleHarvestFormError)();
     };
 
@@ -93,6 +98,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const handleConfirmDelete = () => {
         setDeleteModalVisible(false);
+        allowNavigation();
         onDelete?.();
     };
 
@@ -204,6 +210,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
             />
+            {UnsavedChangesModal}
         </View>
     );
 };
