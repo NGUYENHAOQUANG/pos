@@ -1,6 +1,22 @@
 import { IApiResponse, IPaginate, ICreatorEditor } from '@/shared/types/common.types';
 import { OperationType, PondType, PondTypeOperation } from '@/features/farm/types/farm.types';
 
+export enum PondShape {
+    Rectangle = 'Rectangle',
+    Circle = 'Circle',
+    Square = 'Square',
+    LShape = 'LShape',
+    Irregular = 'Irregular',
+}
+
+export const POND_SHAPE_LABELS: Record<PondShape, string> = {
+    [PondShape.Rectangle]: 'Hình chữ nhật',
+    [PondShape.Circle]: 'Hình tròn',
+    [PondShape.Square]: 'Hình vuông',
+    [PondShape.LShape]: 'Hình chữ L',
+    [PondShape.Irregular]: 'Không đều',
+};
+
 export interface PondData {
     id: string;
     code?: string;
@@ -8,7 +24,7 @@ export interface PondData {
     no?: number;
     area?: number | string;
     areaSqm?: number;
-    shape?: string;
+    shape?: PondShape;
     depth?: string | number;
     maxDepth?: number;
     pondPhase?: string;

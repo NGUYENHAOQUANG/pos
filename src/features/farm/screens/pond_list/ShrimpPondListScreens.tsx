@@ -10,6 +10,8 @@ import { useZones, usePondsByZone } from '@/features/farm/hooks';
 import { usePondCategories } from '@/features/farm/hooks/usePondCategories';
 import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { pondListService } from '@/features/farm/services/pond-list.service';
+import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { APP_CONFIG } from '@/shared/constants/config';
 import { ShrimpPondListContent } from '@/features/farm/screens/pond_list/ShrimpPondListContent';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -67,6 +69,12 @@ export const ShrimpPondListScreens: React.FC = () => {
 
     const { data: categoriesResponse } = usePondCategories();
     const categories = useMemo(() => categoriesResponse?.items || [], [categoriesResponse]);
+
+    const { data: warehouses } = useWarehouses({
+        PageSize: APP_CONFIG.DEFAULT_PAGE_SIZE,
+        ZoneId: selectedZoneId ? String(selectedZoneId) : undefined,
+    });
+    const warehouseId = warehouses?.[0]?.id;
 
     const currentDataSlice = useMemo(() => {
         if (selectedTab === 'active') return activePondsData;
@@ -192,6 +200,7 @@ export const ShrimpPondListScreens: React.FC = () => {
             onPondInfoPress={handlePondInfoPress}
             onLoadMore={handleLoadMore}
             onRefresh={handleRefresh}
+            warehouseId={warehouseId}
         />
     );
 };

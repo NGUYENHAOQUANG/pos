@@ -33,6 +33,7 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             keyboardOpeningTime={0}
+            enableResetScrollToCoords={false}
         >
             {children}
         </KeyboardAwareScrollView>

@@ -15,7 +15,7 @@ import { Tag } from '@/features/farm/components/pond/Tag';
 interface PondCycleDetailContentProps {
     isLoading: boolean;
     displayedCycles: CycleData[];
-    getBreedLabel: (warehouseItemId: string | undefined) => string | undefined;
+    getBreedLabel: (cycle: CycleData) => string;
     seasonOptions: DropdownOption[];
     selectedSeason: string;
     setSelectedSeason: (val: string) => void;
@@ -78,7 +78,7 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                         const statusText =
                             cycle.status === 'Completed' ? 'Hoàn thành' : 'Chưa hoàn thành';
                         const doc = pondDetailService.calculateDOC(cycle.createdAt);
-                        const breed = getBreedLabel(cycle.warehouseItemId);
+                        const breed = getBreedLabel(cycle);
 
                         return (
                             <View key={cycle.id || index.toString()} style={styles.card}>

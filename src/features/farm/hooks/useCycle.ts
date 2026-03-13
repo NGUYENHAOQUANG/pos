@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery, useQueries } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import {
@@ -166,4 +166,32 @@ export const useAllCycles = (params?: ICycleListParams) => {
         queryKey: [...farmKeys.cycles.all(), params],
         queryFn: () => cycleApi.getCycles(params),
     });
+};
+
+/**
+ * Fetch detail for multiple cycles to get warehouseItemId
+ * (list API doesn't return warehouseItemId)
+ */
+export const useCycleDetails = (pondId: string, cycleIds: string[]) => {
+    const queries = useQueries({
+        queries: cycleIds.map(cycleId => ({
+            queryKey: farmKeys.cycles.detail(pondId, cycleId),
+            queryFn: () => cycleApi.getCycleDetail(pondId, cycleId),
+            enabled: !!pondId && !!cycleId,
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    const warehouseItemMap = useMemo(() => {
+        const map = new Map<string, string>();
+        queries.forEach(query => {
+            const detail = query.data?.data;
+            if (detail?.id && detail?.warehouseItemId) {
+                map.set(detail.id, detail.warehouseItemId);
+            }
+        });
+        return map;
+    }, [queries]);
+
+    return { warehouseItemMap };
 };

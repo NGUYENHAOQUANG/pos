@@ -105,7 +105,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 inputFormat={InputFormat.INTEGER}
                 maxDigits={6}
                 required
-                maxLength={6}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
             <Input
@@ -117,7 +117,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 inputFormat={InputFormat.DECIMAL}
                 maxDigits={9}
                 required
-                maxLength={9}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>
