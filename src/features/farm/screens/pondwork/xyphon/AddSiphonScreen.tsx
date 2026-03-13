@@ -238,8 +238,10 @@ export const AddSiphonScreen: React.FC = () => {
         const compareDocs = compareData.images || [];
         const currentDocs = documentIds || [];
 
-        // Ensure same number of images
+        // Ensure same number of images (check both documentIds and imageUris)
         if (currentDocs.length !== compareDocs.length) return true;
+        // Also check imageUris for newly added images (not yet uploaded)
+        if (imageUris.length !== compareDocs.length) return true;
 
         // Compare materials arrays
         const currentMats = selectedMaterials.map(m => ({
@@ -270,6 +272,7 @@ export const AddSiphonScreen: React.FC = () => {
         lossAmount,
         notes,
         documentIds,
+        imageUris,
         selectedMaterials,
     ]);
 

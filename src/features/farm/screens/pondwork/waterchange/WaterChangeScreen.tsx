@@ -276,6 +276,7 @@ export const WaterSupplyScreen = () => {
         const originalDocIds =
             detailData.waterChangeDetail?.documentIds || detailData.documentIds || [];
         if (documentIds.length !== originalDocIds.length) return true;
+        if (imageUris.length !== originalDocIds.length) return true;
 
         return false;
     }, [

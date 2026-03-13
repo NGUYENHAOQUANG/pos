@@ -79,6 +79,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         notes,
         setNotes,
         images,
+        setImages,
         initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
@@ -144,6 +145,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     date={time}
                     onDateChange={setTime}
                     imageUris={images}
+                    onImagesChange={setImages}
                     documentIds={initialDocumentIds}
                     disabledDate={true}
                 />

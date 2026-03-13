@@ -313,6 +313,7 @@ export const useMeasureShrimpSizeForm = ({
         notes,
         setNotes,
         images,
+        setImages,
         initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
