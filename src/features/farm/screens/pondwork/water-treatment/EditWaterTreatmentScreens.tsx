@@ -2,9 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { showMaterialQuantityZeroToast } from '@/features/farm/utils/toastMessages';
-
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import {
+    showMaterialQuantityZeroToast,
+    showEditJobSuccessToast,
+    showDeleteJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
+import { handleError } from '@/shared/utils/errorHandler';
 import { colors } from '@/styles';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -196,28 +199,10 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 data: payload,
             });
             allowNavigation();
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật nhật ký thành công',
-            });
+            showEditJobSuccessToast('WATER_TREATMENT');
             navigation.goBack();
-        } catch (error: any) {
-            console.error('Update water treatment error', error);
-            let message = getErrorMessage(error, 'Vui lòng thử lại');
-
-            if (
-                message.includes('invalid start of a value') ||
-                message.includes('converted to System.Decimal') ||
-                message.includes('System.Decimal')
-            ) {
-                message = 'Số lượng vật tư không hợp lệ';
-            }
-
-            Toast.show({
-                type: 'error',
-                text1: 'Có lỗi xảy ra',
-                text2: message,
-            });
+        } catch (error: unknown) {
+            handleError(error);
         }
     };
 
@@ -235,15 +220,9 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 allowNavigation();
                 setShowDeleteModal(false);
                 navigation.goBack();
-                Toast.show({ type: 'success', text1: 'Xóa thành công' });
+                showDeleteJobSuccessToast('WATER_TREATMENT');
             } catch (error: unknown) {
-                console.error('Delete water treatment error', error);
-                const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
-                Toast.show({
-                    type: 'error',
-                    text1: 'Xóa thất bại',
-                    text2: message,
-                });
+                handleError(error);
             }
         }
     };

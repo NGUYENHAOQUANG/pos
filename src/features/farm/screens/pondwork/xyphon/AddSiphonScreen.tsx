@@ -174,6 +174,7 @@ export const AddSiphonScreen: React.FC = () => {
         if (itemToEdit) {
             fetchDetail();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pond?.id, itemToEdit, materials]);
 
     const handleBack = () => {
@@ -234,13 +235,8 @@ export const AddSiphonScreen: React.FC = () => {
         if (lossAmount !== compareData.lossAmount) return true;
         if (notes !== compareData.notes) return true;
 
-        // Set up arrays for comparison, default to empty to safely check lengths
+        // Image check — imageUris reflects visible images (including newly added/removed)
         const compareDocs = compareData.images || [];
-        const currentDocs = documentIds || [];
-
-        // Ensure same number of images (check both documentIds and imageUris)
-        if (currentDocs.length !== compareDocs.length) return true;
-        // Also check imageUris for newly added images (not yet uploaded)
         if (imageUris.length !== compareDocs.length) return true;
 
         // Compare materials arrays
@@ -271,7 +267,6 @@ export const AddSiphonScreen: React.FC = () => {
         selectedDate,
         lossAmount,
         notes,
-        documentIds,
         imageUris,
         selectedMaterials,
     ]);

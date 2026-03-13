@@ -65,9 +65,13 @@ export const WaterSupplyScreen = () => {
     // Initial Data
     const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
 
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    // Init date from item (list data has correct createdAt)
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (item?.date) return new Date(item.date);
+        return new Date();
+    });
 
-    // Thông số nước
+    // Thông số nước - use meta from list API directly (detail API returns 0 bug)
     const [targetLevel, setTargetLevel] = useState(meta.targetLevel?.toString() || ''); // H_target
     const [supplyLevel, setSupplyLevel] = useState(meta.supplyLevel?.toString() || ''); // H_add
 
@@ -97,9 +101,7 @@ export const WaterSupplyScreen = () => {
         const fetchDetail = async () => {
             if (pond?.id && item?.id) {
                 try {
-                    // waterSupplyApi.getDetail() already returns response.data (unwrapped from axios)
                     const result = await waterSupplyApi.getDetail(pond.id, item.id);
-                    // Handle both wrapped { data: {...} } and flat response formats
                     const detail = result?.data ?? result;
                     if (detail) {
                         setDetailData(detail);
@@ -145,14 +147,10 @@ export const WaterSupplyScreen = () => {
 
         const mapped = detailData.waterChangeDetail.materials
             .map((m: any) => {
-                // Try to find in warehouse items
-                // Priority: warehouseItemId, then materialId
                 const targetId = m.warehouseItemId || m.materialId;
-
-                let found = allMaterials.find(
+                const found = allMaterials.find(
                     mat => mat.id === targetId || mat.materialDefId === targetId
                 );
-
                 if (found) {
                     return {
                         material: found,
@@ -164,12 +162,6 @@ export const WaterSupplyScreen = () => {
             })
             .filter(Boolean) as SelectedMaterialItem[];
 
-        // Only set if we found something, to avoid clearing valid user selection if re-runs?
-        // Actually for Edit mode, we want to set initial.
-        // If user already changed selectedMaterials, this might overwrite?
-        // But this only runs when detailData changes or materials loads.
-        // detailData changes once. materials might change once.
-        // To be safe, checking if selectedMaterials is empty might start initial load only.
         if (mapped.length > 0) {
             setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
         }
@@ -272,23 +264,14 @@ export const WaterSupplyScreen = () => {
 
         if (materialsChanged) return true;
 
-        // Image check (simplified comparison)
+        // Image check — compare current images count vs original
         const originalDocIds =
             detailData.waterChangeDetail?.documentIds || detailData.documentIds || [];
-        if (documentIds.length !== originalDocIds.length) return true;
+        // imageUris reflects actual visible images (including newly added/removed)
         if (imageUris.length !== originalDocIds.length) return true;
 
         return false;
-    }, [
-        item,
-        detailData,
-        targetLevel,
-        supplyLevel,
-        selectedMaterials,
-        note,
-        imageUris,
-        documentIds,
-    ]);
+    }, [item, detailData, targetLevel, supplyLevel, selectedMaterials, note, imageUris]);
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
