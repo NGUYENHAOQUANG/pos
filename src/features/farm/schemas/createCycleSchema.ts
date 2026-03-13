@@ -8,8 +8,9 @@ export const createCycleSchema = z.object({
         .string({ required_error: 'Bạn chưa chọn vụ nuôi' })
         .min(1, { message: 'Bạn chưa chọn vụ nuôi' }),
     cycleName: z
-        .string({ required_error: 'Bạn chưa nhập tên chu kỳ' })
-        .min(1, { message: 'Bạn chưa nhập tên chu kỳ' }),
+        .string({ required_error: 'Tên vụ nuôi không được để trống' })
+        .trim()
+        .min(1, { message: 'Tên vụ nuôi không được để trống' }),
     stockingDate: z.string().optional(),
     stockingQuantity: z.string().optional(),
     age: z.string().optional(),
