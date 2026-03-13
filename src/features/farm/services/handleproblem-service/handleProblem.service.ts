@@ -46,7 +46,12 @@ export const handleProblemService = {
             if (item.createdAt) {
                 selectedDate = new Date(item.createdAt);
             } else if (item.date) {
-                if (item.meta?.date && item.meta?.time) {
+                // Try parsing as ISO string first (from API's createdAt)
+                const parsed = new Date(item.date);
+                if (!isNaN(parsed.getTime())) {
+                    selectedDate = parsed;
+                } else if (item.meta?.date && item.meta?.time) {
+                    // Fallback: parse dd/MM/yyyy + HH:mm format from local store
                     const [day, month, year] = item.meta.date.split('/').map(Number);
                     const [hours, minutes] = item.meta.time.split(':').map(Number);
                     if (
