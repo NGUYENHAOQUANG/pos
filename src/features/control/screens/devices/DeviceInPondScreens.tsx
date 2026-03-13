@@ -9,6 +9,7 @@ import {
     NativeSyntheticEvent,
     NativeScrollEvent,
     InteractionManager,
+    Image,
 } from 'react-native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
@@ -62,9 +63,13 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     const [isReady, setIsReady] = useState(false);
 
     // Delay heavy render until navigation animation completes
+    // Use minimum delay to ensure skeleton is always visible when navigating
     useEffect(() => {
         const interaction = InteractionManager.runAfterInteractions(() => {
-            setIsReady(true);
+            // Add minimum delay so skeleton is visible even when data is cached
+            setTimeout(() => {
+                setIsReady(true);
+            }, 300);
         });
         return () => interaction.cancel();
     }, []);
@@ -275,11 +280,15 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                         >
                             <Text style={styles.mockSectionTitle}>{section.title}</Text>
                             {section.devices.map(device => {
-                                const Icon = getDeviceIcon(device.type);
+                                const iconSource = getDeviceIcon(device.type);
                                 return (
                                     <View key={device.id} style={styles.mockDeviceCard}>
                                         <View style={styles.mockIconContainer}>
-                                            <Icon width={40} height={40} />
+                                            <Image
+                                                source={iconSource}
+                                                style={{ width: 40, height: 40 }}
+                                                resizeMode="contain"
+                                            />
                                         </View>
                                         <View style={styles.mockDeviceInfo}>
                                             <Text style={styles.mockDeviceName}>{device.name}</Text>

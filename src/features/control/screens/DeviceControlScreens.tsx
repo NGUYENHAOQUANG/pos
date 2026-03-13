@@ -27,6 +27,10 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
 import { CameraData } from '@/features/control/data/camerasData';
 
+/** Stable key extractor - defined outside component to prevent re-creation */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const keyExtractor = (item: any) => item.id.toString();
+
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const insets = useSafeAreaInsets();
@@ -218,6 +222,47 @@ export const DeviceControlScreens = () => {
         // No pagination logic needed for now
     };
 
+    const handlePondDetail = useCallback(
+        (pondName: string, isMock: boolean) => {
+            navigation.navigate('ControlDetail', {
+                pondName,
+                isMock,
+            });
+        },
+        [navigation]
+    );
+
+    const renderPondCard = useCallback(
+        ({ item }: { item: (typeof filteredPonds)[number] }) => {
+            const isMock = item.id.startsWith('mock-');
+            return (
+                <PondCard
+                    pondName={item.name}
+                    isEmpty={!item.hasDevices}
+                    deviceStats={item.deviceStats}
+                    compact={isMock}
+                    onPressDetail={() => handlePondDetail(item.name, isMock)}
+                />
+            );
+        },
+        [handlePondDetail]
+    );
+
+    const ListHeader = useMemo(() => {
+        if (!showStats) return null;
+        return (
+            <>
+                <DevicesStatus
+                    totalPonds={filteredPonds.length}
+                    activePonds={totalStats.active}
+                    warningPonds={totalStats.warning}
+                    otherPonds={totalStats.other}
+                />
+                <View style={styles.spacer} />
+            </>
+        );
+    }, [showStats, filteredPonds.length, totalStats.active, totalStats.warning, totalStats.other]);
+
     return (
         <View style={styles.container}>
             <View style={[styles.headerContainer, { paddingTop: insets.top + 12 }]}>
@@ -280,43 +325,19 @@ export const DeviceControlScreens = () => {
                         <FlatList
                             ref={flatListRef}
                             data={filteredPonds}
-                            keyExtractor={(item: any) => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <PondCard
-                                    pondName={item.name}
-                                    isEmpty={!item.hasDevices}
-                                    deviceStats={item.deviceStats}
-                                    compact={item.id.startsWith('mock-')}
-                                    onPressDetail={() =>
-                                        navigation.navigate('ControlDetail', {
-                                            pondName: item.name,
-                                            isMock: item.id.startsWith('mock-'),
-                                        })
-                                    }
-                                />
-                            )}
+                            keyExtractor={keyExtractor}
+                            renderItem={renderPondCard}
                             style={styles.content}
                             contentContainerStyle={[
                                 styles.scrollContent,
                                 styles.scrollContentPadding,
                             ]}
-                            ListHeaderComponent={
-                                showStats ? (
-                                    <>
-                                        <DevicesStatus
-                                            totalPonds={filteredPonds.length}
-                                            activePonds={totalStats.active}
-                                            warningPonds={totalStats.warning}
-                                            otherPonds={totalStats.other}
-                                        />
-                                        <View style={styles.spacer} />
-                                    </>
-                                ) : null
-                            }
-                            initialNumToRender={5}
-                            maxToRenderPerBatch={10}
-                            windowSize={5}
+                            ListHeaderComponent={ListHeader}
+                            initialNumToRender={4}
+                            maxToRenderPerBatch={4}
+                            windowSize={3}
                             removeClippedSubviews={true}
+                            updateCellsBatchingPeriod={100}
                             refreshControl={
                                 <RefreshControl
                                     refreshing={isRefetching}

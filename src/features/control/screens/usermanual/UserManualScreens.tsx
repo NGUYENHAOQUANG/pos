@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
@@ -55,13 +55,15 @@ const DescriptionRow: React.FC<{ index: number; text: string }> = ({ index, text
 
 // Manual row component
 const ManualRow: React.FC<{ item: ManualItem }> = ({ item }) => {
-    const CardSvg = item.CardSvg;
-
     return (
         <View style={styles.row}>
             {/* Device Card Column */}
             <View style={styles.deviceCell}>
-                <CardSvg width={140} height={105} />
+                <Image
+                    source={item.icon}
+                    style={{ width: 140, height: 105 }}
+                    resizeMode="contain"
+                />
             </View>
 
             {/* Description Column */}

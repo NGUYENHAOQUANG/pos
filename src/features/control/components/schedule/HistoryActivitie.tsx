@@ -1,14 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, ImageSourcePropType } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { ScheduleDescriptionTab } from './ScheduleDescriptionTab';
 import { ScheduleActivityPill } from './ScheduleActivityPill';
-import { SvgProps } from 'react-native-svg';
 
-import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
+const FanIcon = require('@/assets/Icon/IconDevices/Fan.png');
+const FeederIcon = require('@/assets/Icon/IconDevices/Feeder.png');
+const OxyIcon = require('@/assets/Icon/IconDevices/Oxy.png');
+const SyphonIcon = require('@/assets/Icon/IconDevices/Syphon.png');
 
 // Device types
 type DeviceType = 'fan' | 'feeder' | 'oxy' | 'syphon';
@@ -40,11 +39,11 @@ interface HistoryActivitieProps {
 }
 
 // Device icon mapping
-const DEVICE_ICONS: Record<DeviceType, React.FC<SvgProps>> = {
-    fan: FanIcon,
-    feeder: FeederIcon,
-    oxy: OxyIcon,
-    syphon: SyphonIcon,
+const DEVICE_ICONS: Record<DeviceType, ImageSourcePropType> = {
+    fan: FanIcon as ImageSourcePropType,
+    feeder: FeederIcon as ImageSourcePropType,
+    oxy: OxyIcon as ImageSourcePropType,
+    syphon: SyphonIcon as ImageSourcePropType,
 };
 
 // Generate time slots from 00:00 to 24:00 with 15 min intervals
@@ -143,10 +142,14 @@ export const HistoryActivitie: React.FC<HistoryActivitieProps> = ({
                     <View style={styles.timeColumnHeader} />
                     {devices.map((device, index) => {
                         const iconColor = device.color || colors.primary;
-                        const Icon = DEVICE_ICONS[device.type];
+                        const iconSource = DEVICE_ICONS[device.type];
                         return (
                             <View key={index} style={styles.deviceColumn}>
-                                <Icon width={32} height={32} color={iconColor} />
+                                <Image
+                                    source={iconSource}
+                                    style={{ width: 32, height: 32 }}
+                                    resizeMode="contain"
+                                />
                                 <Text style={[styles.deviceCount, { color: iconColor }]}>
                                     {device.count}
                                 </Text>

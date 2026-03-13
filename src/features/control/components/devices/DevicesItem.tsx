@@ -1,6 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
-import { SvgProps } from 'react-native-svg';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    StyleProp,
+    ViewStyle,
+    Image,
+    ImageSourcePropType,
+} from 'react-native';
 import { colors } from '@/styles/colors';
 
 import DeviceActiveIcon from '@/assets/Icon/IconDevices/DeviceActive.svg';
@@ -8,7 +16,7 @@ import DeviceErrorIcon from '@/assets/Icon/IconDevices/DeviceError.svg';
 import DeviceOffIcon from '@/assets/Icon/IconDevices/DeviceOff.svg';
 
 interface DevicesItemProps {
-    icon: React.FC<SvgProps>;
+    icon: ImageSourcePropType;
     label: string;
     activeCount?: number;
     warningCount?: number;
@@ -19,7 +27,7 @@ interface DevicesItemProps {
 }
 
 export const DevicesItem: React.FC<DevicesItemProps> = ({
-    icon: Icon,
+    icon,
     label,
     activeCount = 0,
     warningCount = 0,
@@ -39,7 +47,7 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
                 activeOpacity={0.7}
             >
                 <View style={styles.iconContainer}>
-                    <Icon width={32} height={32} />
+                    <Image source={icon} style={{ width: 32, height: 32 }} resizeMode="contain" />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>
                     {label}
@@ -56,7 +64,7 @@ export const DevicesItem: React.FC<DevicesItemProps> = ({
             {/* Header: Icon + Label */}
             <View style={styles.header}>
                 <View style={styles.iconContainer}>
-                    <Icon width={32} height={32} />
+                    <Image source={icon} style={{ width: 32, height: 32 }} resizeMode="contain" />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>
                     {label}

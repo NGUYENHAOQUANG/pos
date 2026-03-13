@@ -11,6 +11,7 @@ interface DevicesCardProps {
     onToggle?: (id: string, val: boolean) => void;
     onSettingsPress?: (id: string) => void;
     onModePress?: (id: string) => void;
+    onLocalInfoPress?: () => void;
     loadingIds?: Record<string, boolean>;
 }
 
@@ -21,6 +22,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
     onToggle,
     onSettingsPress,
     onModePress,
+    onLocalInfoPress,
     loadingIds = {},
 }) => {
     return (
@@ -39,6 +41,7 @@ export const DevicesCard: React.FC<DevicesCardProps> = ({
                         onToggle={(id, val) => onToggle?.(id, val)}
                         onSettingsPress={onSettingsPress}
                         onModePress={onModePress}
+                        onLocalInfoPress={onLocalInfoPress}
                         isLoading={loadingIds[device.id]}
                     />
                 ))}
