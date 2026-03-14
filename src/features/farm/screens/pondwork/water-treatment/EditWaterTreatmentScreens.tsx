@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
-import { showMaterialQuantityZeroToast } from '@/features/farm/utils/toastMessages';
-
-import { getErrorMessage } from '@/features/material/utils/errorHandlers';
+import {
+    showMaterialQuantityZeroToast,
+    showInvalidActivityTypeToast,
+    showEditJobSuccessToast,
+    showDeleteJobSuccessToast,
+} from '@/features/farm/utils/toastMessages';
+import { handleError } from '@/shared/utils/errorHandler';
 import { colors } from '@/styles';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -15,6 +18,7 @@ import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/Ma
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
+import { WaterTreatmentSkeleton } from '@/features/farm/components/skeleton/WaterTreatmentSkeleton';
 
 import { waterTreatmentApi } from '@/features/farm/api/waterTreatmentApi';
 import {
@@ -50,6 +54,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const [note, setNote] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [detailData, setDetailData] = useState<IWaterTreatmentRecord | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const targetPondId = pondId || pond?.id || '';
     const targetJobId = jobId || item?.id || '';
@@ -59,13 +64,18 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         const fetchDetail = async () => {
             if (targetPondId && targetJobId) {
                 try {
+                    setIsLoading(true);
                     const response = await waterTreatmentApi.getDetail(targetPondId, targetJobId);
                     if (response?.data) {
                         setDetailData(response.data);
                     }
                 } catch (e) {
                     console.error('Fetch water treatment detail error:', e);
+                } finally {
+                    setIsLoading(false);
                 }
+            } else {
+                setIsLoading(false);
             }
         };
         fetchDetail();
@@ -170,10 +180,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
         const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
         if (!treatmentTypeEnum) {
-            Toast.show({
-                type: 'error',
-                text1: 'Loại hoạt động không hợp lệ',
-            });
+            showInvalidActivityTypeToast();
             return;
         }
 
@@ -196,28 +203,10 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 data: payload,
             });
             allowNavigation();
-            Toast.show({
-                type: 'success',
-                text1: 'Cập nhật nhật ký thành công',
-            });
+            showEditJobSuccessToast('WATER_TREATMENT');
             navigation.goBack();
-        } catch (error: any) {
-            console.error('Update water treatment error', error);
-            let message = getErrorMessage(error, 'Vui lòng thử lại');
-
-            if (
-                message.includes('invalid start of a value') ||
-                message.includes('converted to System.Decimal') ||
-                message.includes('System.Decimal')
-            ) {
-                message = 'Số lượng vật tư không hợp lệ';
-            }
-
-            Toast.show({
-                type: 'error',
-                text1: 'Có lỗi xảy ra',
-                text2: message,
-            });
+        } catch (error: unknown) {
+            handleError(error);
         }
     };
 
@@ -235,15 +224,9 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 allowNavigation();
                 setShowDeleteModal(false);
                 navigation.goBack();
-                Toast.show({ type: 'success', text1: 'Xóa thành công' });
+                showDeleteJobSuccessToast('WATER_TREATMENT');
             } catch (error: unknown) {
-                console.error('Delete water treatment error', error);
-                const message = error instanceof Error ? error.message : 'Vui lòng thử lại';
-                Toast.show({
-                    type: 'error',
-                    text1: 'Xóa thất bại',
-                    text2: message,
-                });
+                handleError(error);
             }
         }
     };
@@ -257,33 +240,39 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 rightComponent={<DeleteButton onPress={handleDelete} />}
             />
 
-            <SafeInputLayout
-                style={styles.container}
-                contentContainerStyle={styles.scrollContent}
-                extraScrollHeight={50}
-            >
-                {/* Main Content Component */}
-                <WaterTreatment
-                    executionDate={executionDate}
-                    onExecutionDateChange={setExecutionDate}
-                    disabledDate={true}
-                    activityType={activityType}
-                    onActivityTypeChange={setActivityType}
-                    selectedMaterials={selectedMaterials}
-                    onSelectedMaterialsChange={setSelectedMaterials}
-                    note={note}
-                    onNoteChange={setNote}
-                />
-            </SafeInputLayout>
+            {isLoading ? (
+                <WaterTreatmentSkeleton />
+            ) : (
+                <>
+                    <SafeInputLayout
+                        style={styles.container}
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={50}
+                    >
+                        {/* Main Content Component */}
+                        <WaterTreatment
+                            executionDate={executionDate}
+                            onExecutionDateChange={setExecutionDate}
+                            disabledDate={true}
+                            activityType={activityType}
+                            onActivityTypeChange={setActivityType}
+                            selectedMaterials={selectedMaterials}
+                            onSelectedMaterialsChange={setSelectedMaterials}
+                            note={note}
+                            onNoteChange={setNote}
+                        />
+                    </SafeInputLayout>
 
-            {/* Footer Buttons */}
-            <ButtonBarFarm
-                primaryTitle="Cập nhật thông tin"
-                secondaryTitle="Huỷ"
-                onPrimaryPress={handleSave}
-                onSecondaryPress={handleBack}
-                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
-            />
+                    {/* Footer Buttons */}
+                    <ButtonBarFarm
+                        primaryTitle="Cập nhật thông tin"
+                        secondaryTitle="Huỷ"
+                        onPrimaryPress={handleSave}
+                        onSecondaryPress={handleBack}
+                        style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+                    />
+                </>
+            )}
 
             {UnsavedChangesModal}
 

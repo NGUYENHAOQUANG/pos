@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     editButton: {
         width: 32,
         height: 32,
-        borderRadius: 14,
+        borderRadius: 16,
         borderWidth: 1,
         borderColor: colors.border,
         alignItems: 'center',

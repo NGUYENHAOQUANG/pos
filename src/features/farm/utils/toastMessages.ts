@@ -218,6 +218,50 @@ export const showMaterialQuantityZeroToast = () => {
 };
 
 /**
+ * Show error toast when no material is selected
+ */
+export const showSelectMaterialToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng chọn vật tư',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast when activity type is invalid
+ */
+export const showInvalidActivityTypeToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Loại hoạt động không hợp lệ',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast when pond info is not found
+ */
+export const showPondNotFoundToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Không tìm thấy thông tin Ao',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast for cycle form validation errors
+ */
+export const showCycleFormValidationToast = (message: string) => {
+    Toast.show({
+        type: 'error',
+        text1: message || 'Dữ liệu không hợp lệ',
+        visibilityTime: 3000,
+    });
+};
+
+/**
  * Stock transfer error message mapping
  * Maps backend error keywords to user-friendly Vietnamese messages
  */

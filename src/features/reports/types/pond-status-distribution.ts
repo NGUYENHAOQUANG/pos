@@ -15,11 +15,18 @@ export interface PondStatusByDate {
     framingCount: number;
 }
 
+export interface PondStatusChange {
+    changedAt: string;
+    oldStatus: string | null;
+    newStatus: string;
+}
+
 export interface PondStatusByPond {
     pondId: string;
     pondName: string;
     pondCode: string;
     currentStatus: string;
+    statusChanges: PondStatusChange[];
 }
 
 export interface PondStatusDistributionData {

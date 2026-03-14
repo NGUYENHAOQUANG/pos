@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { spacing } from '@/styles';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 
 interface WaterSupplyInfoBoxProps {
     targetLevel: string;
@@ -32,27 +32,6 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
         { label: 'Thể tích nước sau cấp (m³)', value: volumeAfterSupply },
     ];
 
-    const handleNumericInput = (text: string, callback: (val: string) => void) => {
-        // 1. Remove any character that is not 0-9 or .
-        let cleaned = text.replace(/[^0-9.]/g, '');
-
-        // 2. Prevent . at the beginning
-        if (cleaned.startsWith('.')) {
-            cleaned = cleaned.substring(1);
-        }
-
-        // 3. Ensure only one . exists
-        const parts = cleaned.split('.');
-        if (parts.length > 2) {
-            cleaned = parts[0] + '.' + parts.slice(1).join('');
-        }
-        if (cleaned.length > 20) {
-            cleaned = cleaned.slice(0, 20);
-        }
-
-        callback(cleaned);
-    };
-
     return (
         <PondDataBox title="Mực nước và thể tích" resultItems={resultItems}>
             <View style={styles.rowInput}>
@@ -61,8 +40,10 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         label="Mực nước mục tiêu (cm)"
                         placeholder="Mực nước mục tiêu (cm)"
                         value={targetLevel}
-                        onChangeText={text => handleNumericInput(text, onTargetLevelChange)}
+                        onChangeText={onTargetLevelChange}
                         keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        maxDigits={10}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />
@@ -75,8 +56,10 @@ export const WaterSupplyInfoBox: React.FC<WaterSupplyInfoBoxProps> = ({
                         label="Số cm cấp"
                         placeholder="Số cm cấp"
                         value={supplyLevel}
-                        onChangeText={text => handleNumericInput(text, onSupplyLevelChange)}
+                        onChangeText={onSupplyLevelChange}
                         keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        maxDigits={10}
                         required
                         containerStyle={{ marginBottom: 0 }}
                     />
