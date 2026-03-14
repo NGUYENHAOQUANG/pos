@@ -2,24 +2,22 @@ import { useMemo } from 'react';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useMaterials } from '@/features/material/hooks/useMaterials';
 import { useMaterialGroups } from '@/features/material/hooks/useMaterialGroups';
-import { useWarehouseItems, useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { IMaterial } from '@/features/material/types/material.types';
+import { APP_CONFIG } from '@/shared/constants';
 
 export const useFarmMaterials = () => {
-    const selectedZoneId = useFarmStore(state => state.selectedZoneId);
+    const warehouseId = useFarmStore(state => state.currentWarehouseId);
 
     const { data: allMaterials = [] } = useMaterials();
     const { data: groups = [] } = useMaterialGroups();
 
-    const { data: warehouses = [] } = useWarehouses({ ZoneId: selectedZoneId || undefined });
-    const defaultWarehouseId = warehouses?.[0]?.id;
-
     const { data: warehouseItemsData, isLoading: warehouseItemsLoading } = useWarehouseItems(
-        defaultWarehouseId,
+        warehouseId ?? undefined,
         {
-            PageSize: 1000,
+            PageSize: APP_CONFIG.MAX_PAGE_SIZE,
         },
-        { enabled: !!defaultWarehouseId }
+        { enabled: !!warehouseId }
     );
 
     const materials: IMaterial[] = useMemo(() => {

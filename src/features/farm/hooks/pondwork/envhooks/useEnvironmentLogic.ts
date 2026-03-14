@@ -1,49 +1,35 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
+import { useMemo } from 'react';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { EnvMetricType, ParameterSetting } from '@/features/farm/api/environmentApi';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
 import { ENVIRONMENT_METRIC_IDS, PondData, Zone } from '@/features/farm/types/farm.types';
+import {
+    useEnvironmentMetricTypes,
+    useEnvironmentSettings,
+} from '@/features/farm/hooks/pondwork/envhooks/useSettingEnvironment';
 
 /**
- * Hook to initialize environment data (Metric Types, Zones)
- * Handles loading state and data fetching on focus.
+ * Hook to initialize environment data (Metric Types, Parameter Settings)
+ * Uses TanStack Query for data fetching instead of store actions.
  */
 export const useEnvironmentInit = (currentZoneId?: string) => {
     const zones = useFarmStore(state => state.zones);
-    const fetchZones = useFarmStore(state => state.fetchZones);
-    const metricTypes = useFarmStore(state => state.metricTypes);
-    const fetchMetricTypes = useFarmStore(state => state.fetchMetricTypes);
-    const fetchParameterSettings = useFarmStore(state => state.fetchParameterSettings);
 
-    const [isLoading, setIsLoading] = useState(true);
-
-    useFocusEffect(
-        useCallback(() => {
-            const loadData = async () => {
-                setIsLoading(true);
-                await fetchMetricTypes();
-                if (zones.length === 0) await fetchZones();
-
-                if (currentZoneId) {
-                    await fetchParameterSettings(String(currentZoneId));
-                }
-                setIsLoading(false);
-            };
-            loadData();
-        }, [currentZoneId, fetchMetricTypes, fetchZones, fetchParameterSettings, zones.length])
+    const { data: metricTypesData, isLoading: isLoadingMetrics } = useEnvironmentMetricTypes();
+    const { data: settingsResponse, isLoading: isLoadingSettings } = useEnvironmentSettings(
+        currentZoneId || ''
     );
 
-    // Force re-fetch settings on focus separately to ensure latest data
-    useFocusEffect(
-        useCallback(() => {
-            if (currentZoneId) {
-                fetchParameterSettings(String(currentZoneId)); // Fire and forget to update store
-            }
-        }, [currentZoneId, fetchParameterSettings])
-    );
+    const metricTypes = useMemo(() => metricTypesData || [], [metricTypesData]);
 
-    return { isLoading, metricTypes, zones };
+    const parameterSettings = useMemo(() => {
+        if (!currentZoneId || !settingsResponse?.items) return {};
+        return { [currentZoneId]: settingsResponse.items } as Record<string, ParameterSetting[]>;
+    }, [currentZoneId, settingsResponse]);
+
+    const isLoading = isLoadingMetrics || (!!currentZoneId && isLoadingSettings);
+
+    return { isLoading, metricTypes, zones, parameterSettings };
 };
 
 /**

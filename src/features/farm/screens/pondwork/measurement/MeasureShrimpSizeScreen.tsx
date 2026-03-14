@@ -19,7 +19,7 @@ import {
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import { MeasurementDataBox } from '@/features/farm/components/pondwork/measurement/MeasurementDataBox';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
@@ -83,20 +83,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         );
     }, [activeCycleData]);
 
-    // --- AI Measurement Sync ---
-    const latestAIMeasurement = useFarmStore(state =>
-        currentPond?.id ? state.latestAIMeasurement[currentPond.id] : undefined
-    );
-    const clearLatestAIMeasurement = useFarmStore(state => state.clearLatestAIMeasurement);
-
-    useEffect(() => {
-        return () => {
-            if (currentPond?.id) {
-                clearLatestAIMeasurement(currentPond.id);
-            }
-        };
-    }, [currentPond?.id, clearLatestAIMeasurement]);
-
     // --- Form Handling ---
     const {
         time,
@@ -105,8 +91,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         setShrimpSize,
         remainingWeight,
         setRemainingWeight,
-        averageShrimpSize,
-        setAverageShrimpSize,
         notes,
         setNotes,
         images,
@@ -124,15 +108,6 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
             generalInfoBoxRef.current?.markAsSaved();
         },
     });
-
-    // --- Sync Effects ---
-    // Only update if values are explicitly undefined in current state to avoid overwriting user input
-    // or if specific conditions are met (like AI measurement just arrived)
-    useEffect(() => {
-        if (latestAIMeasurement?.averageSizeCm && !averageShrimpSize) {
-            setAverageShrimpSize(latestAIMeasurement.averageSizeCm.toString());
-        }
-    }, [latestAIMeasurement, averageShrimpSize, setAverageShrimpSize]);
 
     useEffect(() => {
         setTabBarVisible(false);

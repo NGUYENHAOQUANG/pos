@@ -8,7 +8,6 @@ import type {
     UpdateShrimpHealthCheckPayload,
     IShrimpHealthListParams,
 } from '@/features/farm/types/shrimpHealthCheck.types';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobExecution } from '@/features/farm/types/farm.types';
 import { mapFromApiResponse } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { formatDate, parseDate } from '@/features/farm/utils/dateUtils';
@@ -164,7 +163,6 @@ export const useShrimpHealthChecksAsJobs = (pondId: string, params?: IShrimpHeal
 };
 
 export const useShrimpHealthCheckData = (pondId: string) => {
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
     const queryClient = useQueryClient();
 
     const {
@@ -172,7 +170,6 @@ export const useShrimpHealthCheckData = (pondId: string) => {
         isLoading,
         error,
         refetch,
-        isSuccess,
     } = useQuery({
         queryKey: farmKeys.shrimpHealthChecks.byPond(pondId),
         queryFn: async () => {
@@ -182,18 +179,6 @@ export const useShrimpHealthCheckData = (pondId: string) => {
         staleTime: 30000,
         gcTime: 5 * 60 * 1000,
     });
-
-    useEffect(() => {
-        const apiSuccess = ((response as any)?.success ?? (response as any)?.isSuccess) === true;
-
-        if (isSuccess && apiSuccess && response?.data && pondId) {
-            const shrimpHealthChecks = response.data.items || [];
-            (async () => {
-                const jobExecutions = await convertToJobExecutions(shrimpHealthChecks, pondId);
-                updatePondJob(pondId, 'SHRIMP_INSPECTION', jobExecutions);
-            })();
-        }
-    }, [isSuccess, response, pondId, updatePondJob]);
 
     return {
         data: response?.data,

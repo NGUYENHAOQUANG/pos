@@ -37,8 +37,6 @@ export const AddEnvironmentScreen: React.FC = () => {
     const { pond, itemToEdit } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
 
-    // Decomposed useFarm() selectors
-    const parameterSettings = useFarmStore(state => state.parameterSettings);
     const generalInfoBoxRef = useRef<any>(null);
 
     // State for images when editing
@@ -47,11 +45,11 @@ export const AddEnvironmentScreen: React.FC = () => {
     const [documentIds, setDocumentIds] = useState<string[]>([]);
 
     // 1. Resolve Zone
-    const zones = useFarmStore(state => state.zones); // Needed for resolution
+    const zones = useFarmStore(state => state.zones);
     const currentZone = useZoneResolution(pond, zones);
 
     // 2. Initialize Data (Fetch types, zones, settings)
-    const { isLoading, metricTypes } = useEnvironmentInit(
+    const { isLoading, metricTypes, parameterSettings } = useEnvironmentInit(
         currentZone ? String(currentZone.id) : undefined
     );
 

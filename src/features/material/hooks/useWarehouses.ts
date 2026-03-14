@@ -33,6 +33,16 @@ export const useCurrentWarehouse = (zoneId?: string) => {
     };
 };
 
+export const fetchCurrentWarehouseId = async (zoneId: string): Promise<string | null> => {
+    try {
+        const response = await warehouseApi.getAll({ PageSize: 1, ZoneId: zoneId });
+        return response?.data?.items?.[0]?.id ?? null;
+    } catch (error) {
+        console.error('Failed to fetch warehouse for zone:', error);
+        return null;
+    }
+};
+
 export const useWarehouseItems = (
     warehouseId: string | undefined,
     params?: GetWarehouseItemsQueryParams,

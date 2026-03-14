@@ -30,6 +30,16 @@ export const useReportsScreen = () => {
         return found || farmOptions[0] || { id: '1', label: 'Trại Kiên Giang' };
     }, [farmOptions, selectedZoneId]);
 
+    // Default zone selection
+    useEffect(() => {
+        if (zones.length > 0 && !selectedZoneId) {
+            const targetZone = zones.find(z => z.name === 'Trại Kiên Giang') || zones[0];
+            if (targetZone) {
+                setSelectedZoneId(String(targetZone.id));
+            }
+        }
+    }, [zones, selectedZoneId, setSelectedZoneId]);
+
     const handleSelectFarm = (item: DropDownItem) => {
         setSelectedZoneId(String(item.id));
     };
@@ -63,10 +73,10 @@ export const useReportsScreen = () => {
         }
     }, [pondData, selectedPond.id]);
 
-    const { data: allPondsForLookup } = useAllPondsByZone(selectedZoneId?.toString() || null);
+    const { data: allPondsForLookup } = useAllPondsByZone(selectedZoneId?.toString() || '');
     const { data: rawCycles } = useAllCycles({ PageSize: 100 });
 
-    const { data: rawSeasons } = useSeasonsByZone(selectedZoneId?.toString() || null);
+    const { data: rawSeasons } = useSeasonsByZone(selectedZoneId?.toString() || '');
 
     const seasonData: DropDownItem[] = useMemo(() => {
         const defaultOption = { id: '1', label: 'Chọn mùa vụ' };

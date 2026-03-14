@@ -103,7 +103,6 @@ export const useCreateHarvestRecord = () => {
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
-            queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
         },
         onError: handleError,
@@ -132,7 +131,6 @@ export const useUpdateHarvestRecord = () => {
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
-            queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
         },
         onError: handleError,
@@ -151,7 +149,6 @@ export const useDeleteHarvestRecord = () => {
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: farmKeys.cycles.byPond(pondId) });
-            queryClient.invalidateQueries({ queryKey: farmKeys.ponds.detail(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.ponds.all() });
         },
         onError: handleError,
