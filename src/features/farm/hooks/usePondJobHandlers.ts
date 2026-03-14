@@ -49,7 +49,7 @@ export const usePondJobNavigateHandlers = ({
 
             [JOB_TYPES.ENVIRONMENT]: () => {
                 if (!pond) return;
-                navigation.navigate('AddEnvironmentScreen', { pond });
+                navigation.navigate('AddEnvironmentScreen', { pondId: pond.id });
             },
 
             [JOB_TYPES.SIPHON]: () => {
@@ -138,7 +138,10 @@ export const usePondJobEditHandlers = ({
 
             [JOB_TYPES.ENVIRONMENT]: item => {
                 if (!pond) return;
-                navigation.navigate('AddEnvironmentScreen', { pond, itemToEdit: item });
+                navigation.navigate('AddEnvironmentScreen', {
+                    pondId: pond.id,
+                    environmentId: item.id,
+                });
             },
 
             [JOB_TYPES.SIPHON]: item => {
