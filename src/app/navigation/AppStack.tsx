@@ -25,7 +25,7 @@ import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiph
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
 import { WaterSupplyScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeScreen';
 import { WaterSupplyLogScreen } from '@/features/farm/screens/pondwork/waterchange/WaterChangeLogScreen';
-import { AddTransferScreen } from '@/features/farm/screens/pondwork/transfer/AddTransferScreen';
+import { StockTransferFormScreen } from '@/features/farm/screens/pondwork/stock-transfer/StockTransferFormScreen';
 import { AddHarvestScreen } from '@/features/farm/screens/pondwork/harvest/AddHarvestScreen';
 import { HarvestLogScreen } from '@/features/farm/screens/pondwork/harvest/HarvestLogScreen';
 import { CycleDetailScreen } from '@/features/farm/screens/cycle-detail/CycleDetailScreen';
@@ -75,13 +75,7 @@ import { EditEquimentMaintenanceScreens } from '@/features/menu/screens/devices/
 import { DeleteAccountFormScreen } from '@/features/menu/screens/deleteAcount/DeleteAccountFormScreen';
 
 // Types
-import {
-    JobExecution,
-    PondData,
-    FarmData,
-    CycleData,
-    SeasonData,
-} from '@/features/farm/types/farm.types';
+import { JobExecution, PondData, FarmData, SeasonData } from '@/features/farm/types/farm.types';
 import { IMaterial } from '@/features/material/types/material.types';
 import { IInventoryCheck } from '@/features/material/types/inventoryCheck.types';
 import { Member } from '@/features/menu/types/menu.types';
@@ -171,11 +165,10 @@ export type AppStackParamList = {
     WaterTreatmentLog: { pondId?: string; pond?: PondData };
     WaterSupply: { pond?: PondData; item?: JobExecution };
     WaterSupplyLog: { pond: PondData };
-    AddTransferScreen: {
-        pond: PondData;
-        itemToEdit?: JobExecution;
-        latestShrimpSize?: string;
-        cycleData?: CycleData | null;
+    StockTransferFormScreen: {
+        pondId: string;
+        cycleId: string;
+        warehouseId: string;
     };
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
@@ -301,7 +294,7 @@ export const AppStack: React.FC = () => {
             <Stack.Screen name="WaterTreatmentLog" component={WaterTreatmentLogScreens} />
             <Stack.Screen name="WaterSupply" component={WaterSupplyScreen} />
             <Stack.Screen name="WaterSupplyLog" component={WaterSupplyLogScreen} />
-            <Stack.Screen name="AddTransferScreen" component={AddTransferScreen} />
+            <Stack.Screen name="StockTransferFormScreen" component={StockTransferFormScreen} />
             <Stack.Screen name="AddHarvestScreen" component={AddHarvestScreen} />
             <Stack.Screen name="HarvestLog" component={HarvestLogScreen} />
             <Stack.Screen name="CycleDetailScreen" component={CycleDetailScreen} />
