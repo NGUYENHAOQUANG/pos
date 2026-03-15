@@ -23,7 +23,15 @@ export const useFarmStore = create<FarmState>()(
                 zones: state.zones,
                 selectedZoneId: state.selectedZoneId,
                 currentWarehouseId: state.currentWarehouseId,
+                // isLoadingWarehouse: NOT persisted — always false on restore
             }),
+            onRehydrateStorage: () => restoredState => {
+                // Nếu selectedZoneId có nhưng currentWarehouseId bị mất
+                // (e.g. app bị kill giữa chừng), re-fetch lại silently
+                if (restoredState?.selectedZoneId && !restoredState?.currentWarehouseId) {
+                    restoredState.setSelectedZoneId(restoredState.selectedZoneId);
+                }
+            },
         }
     )
 );

@@ -268,9 +268,9 @@ export const PondDetailScreen: React.FC = () => {
     }, [navigation, pond, warehouseId, currentCycle?.id]);
 
     const onGoToMeasureSizeScreen = useCallback(() => {
-        if (!pond) return;
+        if (!pond?.id) return;
         setIsMeasureSizeModalVisible(false);
-        navigation.navigate('MeasureShrimpSizeScreen', { pond });
+        navigation.navigate('MeasureShrimpSizeScreen', { pondId: pond.id });
     }, [navigation, pond]);
 
     const handleStartCycle = useCallback(() => {
