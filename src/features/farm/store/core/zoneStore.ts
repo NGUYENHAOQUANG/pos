@@ -10,8 +10,12 @@ export interface ZoneStore {
     selectedZoneId: string | null;
     setSelectedZoneId: (id: string | null) => void;
     currentWarehouseId: string | null;
+    isLoadingWarehouse: boolean;
     getSelectedZone: () => Zone | undefined;
 }
+
+// Track in-flight request to prevent stale results from overwriting newer ones
+let _warehouseFetchId = 0;
 
 export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]], [], ZoneStore> = (
     set,
@@ -21,6 +25,7 @@ export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]]
     isLoadingZones: false,
     selectedZoneId: null,
     currentWarehouseId: null,
+    isLoadingWarehouse: false,
 
     fetchZones: async () => {
         set({ isLoadingZones: true });
@@ -34,13 +39,28 @@ export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]]
     },
 
     setSelectedZoneId: id => {
-        set({ selectedZoneId: id, currentWarehouseId: null });
+        const fetchId = ++_warehouseFetchId;
 
-        if (!id) return;
+        set({ selectedZoneId: id, isLoadingWarehouse: !!id });
 
-        fetchCurrentWarehouseId(String(id)).then(warehouseId => {
-            set({ currentWarehouseId: warehouseId });
-        });
+        if (!id) {
+            set({ currentWarehouseId: null, isLoadingWarehouse: false });
+            return;
+        }
+
+        fetchCurrentWarehouseId(String(id))
+            .then(warehouseId => {
+                if (fetchId !== _warehouseFetchId) return;
+
+                if (get().selectedZoneId !== id) return;
+
+                set({ currentWarehouseId: warehouseId, isLoadingWarehouse: false });
+            })
+            .catch(err => {
+                if (fetchId !== _warehouseFetchId) return;
+                console.error('Failed to fetch warehouseId for zone:', err);
+                set({ isLoadingWarehouse: false });
+            });
     },
 
     getSelectedZone: () => {

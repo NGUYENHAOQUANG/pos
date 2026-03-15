@@ -19,12 +19,23 @@ export const useSizeMeasurements = (pondId: string, params?: ISizeMeasurementPar
     });
 };
 
-export const useSizeMeasurementsAsJobs = (pondId: string, params?: ISizeMeasurementParams) => {
-    const { data, isLoading: isQueryLoading, error, refetch } = useSizeMeasurements(pondId, params);
+export const useSizeMeasurementsAsJobs = (
+    pondId: string | undefined,
+    params?: ISizeMeasurementParams
+) => {
+    const {
+        data,
+        isLoading: isQueryLoading,
+        error,
+        refetch,
+    } = useSizeMeasurements(pondId || '', params);
     const [jobs, setJobs] = useState<JobExecution[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
+
     useEffect(() => {
         const processData = async () => {
+            if (data === undefined) return;
+
             if (!data?.data?.items) {
                 setJobs([]);
                 return;

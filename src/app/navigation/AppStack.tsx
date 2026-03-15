@@ -120,9 +120,9 @@ export type AppStackParamList = {
         aiHealthCheckResult?: AIHealthCheckResult;
     };
     ShrimpHealthCheckAIScreen: { pondId: string; zoneId: string };
-    MeasureShrimpSizeLogScreen: { pond: PondData };
+    MeasureShrimpSizeLogScreen: { pondId: string };
     MeasureShrimpSizeScreen: {
-        pond: PondData;
+        pondId: string;
         itemToEdit?: JobExecution;
         aiShrimpSize?: string;
     };

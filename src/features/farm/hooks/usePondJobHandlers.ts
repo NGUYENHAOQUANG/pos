@@ -43,8 +43,8 @@ export const usePondJobNavigateHandlers = ({
             },
 
             [JOB_TYPES.MEASURE_SIZE]: () => {
-                if (!pond) return;
-                navigation.navigate('MeasureShrimpSizeScreen', { pond });
+                if (!pond?.id) return;
+                navigation.navigate('MeasureShrimpSizeScreen', { pondId: pond.id });
             },
 
             [JOB_TYPES.ENVIRONMENT]: () => {
@@ -132,8 +132,11 @@ export const usePondJobEditHandlers = ({
             },
 
             [JOB_TYPES.MEASURE_SIZE]: item => {
-                if (!pond) return;
-                navigation.navigate('MeasureShrimpSizeScreen', { pond, itemToEdit: item });
+                if (!pond?.id) return;
+                navigation.navigate('MeasureShrimpSizeScreen', {
+                    pondId: pond.id,
+                    itemToEdit: item,
+                });
             },
 
             [JOB_TYPES.ENVIRONMENT]: item => {
@@ -235,8 +238,8 @@ export const usePondJobLogHandlers = ({
             },
 
             [JOB_TYPES.MEASURE_SIZE]: () => {
-                if (!pond) return;
-                navigation.navigate('MeasureShrimpSizeLogScreen', { pond });
+                if (!pond?.id) return;
+                navigation.navigate('MeasureShrimpSizeLogScreen', { pondId: pond.id });
             },
 
             [JOB_TYPES.ENVIRONMENT]: () => {

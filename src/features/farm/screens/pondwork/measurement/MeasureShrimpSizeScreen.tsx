@@ -8,7 +8,9 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
+import { usePondDetail } from '@/features/farm/hooks/usePonds';
 import { cycleApi } from '@/features/farm/api/cycleAPI';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { CycleData } from '@/features/farm/types/cycle.types';
@@ -32,20 +34,17 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
-    // Route params now contain full pond object which should be used directly
-    const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
+    const { itemToEdit, pondId, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
+
+    const zoneId = useFarmStore(state => state.selectedZoneId) || '';
 
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
-    const currentPond = routePond;
+    const { data: currentPond } = usePondDetail(zoneId, pondId || '');
 
-    // Get stocking quantity from cycle data
-    // Optimized selector to get stocking quantity without re-rendering on unrelated store updates
-    // Get initial active cycle from hook
     const { data: activeCycle } = useActiveCycle(currentPond?.id || '');
 
-    // 4. Fetch detailed cycle data
     const { data: fetchedCycleData } = useQuery({
         queryKey: farmKeys.cycles.detail(currentPond?.id || '', activeCycle?.id || ''),
         queryFn: async () => {
@@ -115,10 +114,10 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     }, [setTabBarVisible]);
 
     useEffect(() => {
-        if (aiShrimpSize && !shrimpSize) {
+        if (aiShrimpSize) {
             setShrimpSize(aiShrimpSize);
         }
-    }, [aiShrimpSize, shrimpSize, setShrimpSize]);
+    }, [aiShrimpSize, setShrimpSize]);
 
     const onSavePress = () => {
         if (isSubmitting) return;
