@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useQuery } from '@tanstack/react-query';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 
 import { colors } from '@/styles';
@@ -11,9 +10,6 @@ import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { usePondDetail } from '@/features/farm/hooks/usePonds';
-import { cycleApi } from '@/features/farm/api/cycleAPI';
-import { farmKeys } from '@/features/farm/hooks/farmKeys';
-import { CycleData } from '@/features/farm/types/cycle.types';
 import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
@@ -43,32 +39,9 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
 
     const { data: currentPond } = usePondDetail(zoneId, pondId || '');
 
-    const { data: activeCycle } = useActiveCycle(currentPond?.id || '');
-
-    const { data: fetchedCycleData } = useQuery({
-        queryKey: farmKeys.cycles.detail(currentPond?.id || '', activeCycle?.id || ''),
-        queryFn: async () => {
-            if (!currentPond?.id || !activeCycle?.id) return null;
-            try {
-                const rawData = await cycleApi.getCycleDetail(currentPond.id, activeCycle.id);
-                if (rawData?.data) {
-                    const data = rawData.data;
-                    return {
-                        ...data,
-                    } as CycleData;
-                }
-            } catch (_error) {
-                // Ignore silent error
-            }
-            return null;
-        },
-        enabled: !!currentPond?.id && !!activeCycle?.id,
-        initialData: activeCycle,
-        refetchOnMount: 'always',
-        staleTime: 0,
-    });
-
-    const activeCycleData = fetchedCycleData || activeCycle;
+    // Get stocking quantity from cycle data
+    // useActiveCycle already fetches cycle detail internally - no need for a separate useQuery
+    const { data: activeCycleData } = useActiveCycle(currentPond?.id || '');
 
     // --- Stocking Quantity Optimization ---
     const stockingQuantity = useMemo(() => {

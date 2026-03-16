@@ -3,6 +3,7 @@ import { JobType } from '@/features/farm/components/pondwork/JobItem';
 import { APP_CONFIG } from '@/shared/constants/config';
 import { FieldErrors } from 'react-hook-form';
 import { FeedingFormValues } from '@/features/farm/schemas/feedingFormSchema';
+import { HarvestFormData } from '@/features/farm/schemas/harvestFormSchema';
 
 /**
  * Toast message configurations for different job types
@@ -191,6 +192,22 @@ export const handleFeedingFormError = (errors: FieldErrors<FeedingFormValues>) =
         Toast.show({
             type: 'error',
             text1: 'Số lượng vật tư phải lớn hơn 0',
+            visibilityTime: 3000,
+        });
+    }
+};
+
+//harvest
+export const handleHarvestFormError = (errors: FieldErrors<HarvestFormData>) => {
+    const firstError =
+        errors.totalWeightKg?.message ||
+        errors.shrimpSize?.message ||
+        errors.referencePrice?.message;
+
+    if (firstError) {
+        Toast.show({
+            type: 'error',
+            text1: firstError,
             visibilityTime: 3000,
         });
     }
