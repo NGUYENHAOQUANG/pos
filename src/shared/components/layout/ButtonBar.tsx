@@ -185,6 +185,6 @@ const styles = StyleSheet.create({
         height: 40,
     },
     spacer: {
-        width: spacing.md,
+        width: spacing.sm,
     },
 });
