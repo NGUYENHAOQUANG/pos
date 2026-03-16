@@ -102,14 +102,42 @@ export const usePondDetail = (zoneId: string, pondId: string) => {
     return query;
 };
 
-export const useAllPondsByZone = (zoneId: string | null) => {
+export const useAllPondsByZone = (zoneId: string) => {
     return useQuery({
-        queryKey: [...farmKeys.ponds.byZone(zoneId || 'all'), 'all-lookup'],
+        queryKey: [...farmKeys.ponds.byZone(zoneId || 'all'), 'all-pages'],
         queryFn: async () => {
             if (!zoneId) return [];
-            // Fetch with a large page size to get all ponds for lookup purposes
-            const response = await pondApi.getPondsByZone(zoneId, { PageSize: 500 });
-            return response.data?.items || [];
+
+            const pageSize = APP_CONFIG.MAX_PAGE_SIZE;
+
+            const firstResponse = await pondApi.getPondsByZone(zoneId, {
+                PageSize: pageSize,
+                Page: 1,
+            });
+            const firstPage = firstResponse.data;
+            if (!firstPage?.items) return [];
+
+            const allItems: PondData[] = [...firstPage.items];
+            const totalPages = firstPage.totalPages || 1;
+
+            if (totalPages > 1) {
+                const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+                const responses = await Promise.all(
+                    remainingPages.map(page =>
+                        pondApi.getPondsByZone(zoneId, {
+                            PageSize: pageSize,
+                            Page: page,
+                        })
+                    )
+                );
+                responses.forEach(res => {
+                    if (res.data?.items) {
+                        allItems.push(...res.data.items);
+                    }
+                });
+            }
+
+            return allItems;
         },
         enabled: !!zoneId,
         staleTime: 10 * 60 * 1000,

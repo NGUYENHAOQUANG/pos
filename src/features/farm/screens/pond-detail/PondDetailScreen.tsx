@@ -5,13 +5,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import {
-    ALLOWED_JOBS_WHEN_NO_CYCLE,
-    HIDDEN_JOBS_WHEN_HAS_CYCLE,
-    APP_CONFIG,
-} from '@/shared/constants/config';
+import { ALLOWED_JOBS_WHEN_NO_CYCLE, HIDDEN_JOBS_WHEN_HAS_CYCLE } from '@/shared/constants/config';
 import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
-import { useWarehouses } from '@/features/material/hooks/useWarehouses';
+import { useCurrentWarehouse } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { PondDetail } from '@/features/farm/screens/pond-detail/PondDetail';
@@ -141,12 +137,9 @@ export const PondDetailScreen: React.FC = () => {
     ]);
 
     const effectiveZoneId = pond?.zoneId?.toString();
-    const { data: warehouses } = useWarehouses({
-        PageSize: APP_CONFIG.DEFAULT_PAGE_SIZE,
-        ZoneId: effectiveZoneId,
-    });
+    const { warehouseId } = useCurrentWarehouse(effectiveZoneId);
 
-    const { data: shrimpSeeds } = useShrimpSeeds(warehouses?.[0]?.id);
+    const { data: shrimpSeeds } = useShrimpSeeds(warehouseId);
 
     const { data: currentCycle } = useActiveCycle(pond?.id || '');
 
@@ -198,13 +191,20 @@ export const PondDetailScreen: React.FC = () => {
             return;
         }
 
-        const latestShrimpSize = pondDetailService.getLatestShrimpSize(apiMeasureSizeJobs);
-
-        navigation.navigate('AddTransferScreen', {
-            pond,
-            latestShrimpSize,
+        navigation.navigate('StockTransferFormScreen', {
+            pondId: pondId,
+            cycleId: currentCycle?.id || '',
+            warehouseId: warehouseId || '',
         });
-    }, [pond, apiMeasureSizeJobs, setIsMeasureSizeModalVisible, navigation]);
+    }, [
+        pond,
+        apiMeasureSizeJobs,
+        setIsMeasureSizeModalVisible,
+        navigation,
+        currentCycle?.id,
+        pondId,
+        warehouseId,
+    ]);
 
     const navigateHandlers = usePondJobNavigateHandlers({
         pond,
@@ -279,18 +279,18 @@ export const PondDetailScreen: React.FC = () => {
         navigation.navigate('PondCycleListScreen', {
             pondId: pond.id || '',
             zoneId: pond.zoneId?.toString() || '',
-            warehouseId: warehouses?.[0]?.id ?? '',
+            warehouseId: warehouseId ?? '',
         });
-    }, [navigation, pond, warehouses]);
+    }, [navigation, pond, warehouseId]);
 
     const onEditCycle = useCallback(() => {
         navigation.navigate('CycleDetailScreen', {
             pondId: pond?.id || '',
             zoneId: pond?.zoneId?.toString() ?? '',
-            warehouseId: warehouses?.[0]?.id ?? '',
+            warehouseId: warehouseId ?? '',
             cycleId: currentCycle?.id || '',
         });
-    }, [navigation, pond, warehouses, currentCycle?.id]);
+    }, [navigation, pond, warehouseId, currentCycle?.id]);
 
     const onGoToMeasureSizeScreen = useCallback(() => {
         if (!pond) return;

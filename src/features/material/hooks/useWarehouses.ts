@@ -19,6 +19,20 @@ export const useWarehouses = (params?: GetWarehousesParams) => {
     });
 };
 
+export const useCurrentWarehouse = (zoneId?: string) => {
+    const { data: warehouses, ...rest } = useWarehouses({
+        PageSize: 1,
+        ZoneId: zoneId || undefined,
+    });
+    const warehouse = warehouses?.[0];
+
+    return {
+        ...rest,
+        warehouse,
+        warehouseId: warehouse?.id,
+    };
+};
+
 export const useWarehouseItems = (
     warehouseId: string | undefined,
     params?: GetWarehouseItemsQueryParams,
