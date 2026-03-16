@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 import { colors } from '@/styles';
-import { formatNumericInput, formatDecimalInput } from '@/shared/utils/formatters';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconAICheck } from '@/assets/icons';
+import { formatDecimalInput, formatNumericInput } from '@/shared/utils';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;
@@ -107,6 +107,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     }
                 }}
                 keyboardType="numeric"
+                inputFormat={InputFormat.INTEGER}
+                maxDigits={6}
                 required
                 maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
@@ -121,6 +123,8 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                     }
                 }}
                 keyboardType="numeric"
+                inputFormat={InputFormat.DECIMAL}
+                maxDigits={9}
                 required
                 maxLength={15}
                 containerStyle={{ marginBottom: 0 }}

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 
 interface ShrimpInspectionFoodCheckBoxProps {
@@ -25,22 +25,15 @@ export const ShrimpInspectionFoodCheckBox: React.FC<ShrimpInspectionFoodCheckBox
     leftoverFood,
     onLeftoverFoodChange,
 }) => {
-    const handleFoodAmountChange = (text: string) => {
-        let cleaned = text.replace(/[^0-9.]/g, '');
-        if (cleaned.startsWith('.')) cleaned = cleaned.substring(1);
-        const parts = cleaned.split('.');
-        if (parts.length > 2) cleaned = parts[0] + '.' + parts.slice(1).join('');
-        onFoodAmountChange(cleaned);
-    };
-
     return (
         <SelectionInfoBox title="Kiểm tra thức ăn">
             <Input
                 label="Lượng thức ăn cho vào nhá (g)"
                 placeholder="Nhập lượng thức ăn vào đây nhá"
                 value={foodAmount}
-                onChangeText={handleFoodAmountChange}
+                onChangeText={onFoodAmountChange}
                 keyboardType="numeric"
+                inputFormat={InputFormat.DECIMAL}
                 containerStyle={{ marginBottom: 0 }}
                 required
             />

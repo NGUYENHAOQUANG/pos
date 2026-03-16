@@ -259,7 +259,11 @@ export function Input({
                                         paddingLeft: 0,
                                         marginLeft: 0,
                                         fontSize: 14,
-                                        color: disabled ? colors.textTertiary : colors.text,
+                                        color: disabled
+                                            ? colors.textTertiary
+                                            : error
+                                            ? colors.error
+                                            : colors.text,
                                         ...Platform.select({
                                             ios: {
                                                 fontFamily: 'System',
