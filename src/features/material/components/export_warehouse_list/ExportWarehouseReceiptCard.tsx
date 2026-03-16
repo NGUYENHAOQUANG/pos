@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
     },
     detailsContainer: {
         backgroundColor: colors.white,
+        marginTop: spacing.md,
     },
     editButton: {
         marginTop: spacing.sm,

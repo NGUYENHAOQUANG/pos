@@ -5,6 +5,7 @@ import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/Pon
 import { colors } from '@/styles';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconAICheck } from '@/assets/icons';
+import { formatDecimalInput, formatNumericInput } from '@/shared/utils';
 
 interface MeasurementDataBoxProps {
     shrimpSize: string;
@@ -34,7 +35,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         if (!isNaN(size) && !isNaN(weight) && size > 0 && weight > 0) {
             // Số con thu = Cỡ tôm (con/kg) × Sản lượng còn lại (kg)
-            const currentTotal = Math.round(size * weight);
+            const currentTotal = Math.floor(size * weight);
             setTotalShrimp(currentTotal);
 
             // Tỉ lệ sống (%) = (Tổng số con hiện tại / Số lượng giống thả ban đầu) × 100
@@ -100,24 +101,32 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 label="Cỡ tôm (con/kg)"
                 placeholder="Cỡ tôm (con/kg)"
                 value={shrimpSize}
-                onChangeText={onShrimpSizeChange}
+                onChangeText={text => {
+                    if (text.length <= 15) {
+                        onShrimpSizeChange(formatNumericInput(text));
+                    }
+                }}
                 keyboardType="numeric"
                 inputFormat={InputFormat.INTEGER}
                 maxDigits={6}
                 required
-                maxLength={6}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
             <Input
                 label="Sản lượng còn lại (kg)"
                 placeholder="Sản lượng còn lại (kg)"
                 value={remainingWeight}
-                onChangeText={onRemainingWeightChange}
+                onChangeText={text => {
+                    if (text.length <= 15) {
+                        onRemainingWeightChange(formatDecimalInput(text));
+                    }
+                }}
                 keyboardType="numeric"
                 inputFormat={InputFormat.DECIMAL}
                 maxDigits={9}
                 required
-                maxLength={9}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>
