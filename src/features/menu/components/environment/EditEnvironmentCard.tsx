@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
-import { colors, spacing } from '@/styles';
+import { View, Text, StyleSheet } from 'react-native';
+import { colors } from '@/styles';
 import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
-import { RequiredDot } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import WarningCircle from '@/assets/Icon/IconMenu/WarningCircle.svg';
 
 interface EditEnvironmentCardProps {
@@ -29,49 +29,38 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
     return (
         <View style={styles.container}>
             {/* Parameter Name */}
-            <View style={styles.inputGroup}>
-                <View style={styles.labelRow}>
-                    <Text style={styles.label}>Tên</Text>
-                    <RequiredDot />
-                </View>
-                <TextInput
-                    style={styles.input}
-                    value={name}
-                    onChangeText={onNameChange}
-                    placeholder="Nhập tên thông số"
-                    placeholderTextColor={colors.textSecondary}
-                />
-            </View>
+            <Input
+                label="Tên"
+                required
+                value={name}
+                onChangeText={onNameChange}
+                placeholder="Nhập tên thông số"
+                containerStyle={styles.inputGroup}
+            />
 
-            {/* Lower Limit Row -> Vertical */}
-            <View style={styles.inputGroup}>
-                <View style={styles.labelRow}>
-                    <Text style={styles.label}>Giới hạn dưới</Text>
-                    <RequiredDot />
-                </View>
-                <TextInput
-                    style={styles.input}
-                    value={lowerLimit}
-                    onChangeText={onLowerLimitChange}
-                    keyboardType="default"
-                    placeholderTextColor={colors.textSecondary}
-                />
-            </View>
+            {/* Lower Limit */}
+            <Input
+                label="Giới hạn dưới"
+                required
+                value={lowerLimit}
+                onChangeText={onLowerLimitChange}
+                inputFormat={InputFormat.DECIMAL}
+                keyboardType="numeric"
+                placeholder="Nhập giới hạn dưới"
+                containerStyle={styles.inputGroup}
+            />
 
-            {/* Upper Limit Row -> Vertical */}
-            <View style={styles.inputGroup}>
-                <View style={styles.labelRow}>
-                    <Text style={styles.label}>Giới hạn trên</Text>
-                    <RequiredDot />
-                </View>
-                <TextInput
-                    style={styles.input}
-                    value={upperLimit}
-                    onChangeText={onUpperLimitChange}
-                    keyboardType="default"
-                    placeholderTextColor={colors.textSecondary}
-                />
-            </View>
+            {/* Upper Limit */}
+            <Input
+                label="Giới hạn trên"
+                required
+                value={upperLimit}
+                onChangeText={onUpperLimitChange}
+                inputFormat={InputFormat.DECIMAL}
+                keyboardType="numeric"
+                placeholder="Nhập giới hạn trên"
+                containerStyle={styles.inputGroup}
+            />
 
             {/* Alert Config Card */}
             <View style={styles.alertCard}>
@@ -112,33 +101,7 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     inputGroup: {
-        // gap: 6 managed by marginBottom if gap isn't fully supported, but using gap usually works in RN >= 0.71.
-        gap: 6,
-    },
-    labelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        color: colors.gray[950],
-        fontWeight: '500',
-        lineHeight: 20,
-    },
-    required: {
-        color: colors.red[600],
-    },
-    input: {
-        height: 44,
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: 8,
-        paddingHorizontal: spacing.md,
-        fontSize: 16,
-        fontWeight: '500',
-        lineHeight: 20,
-        color: colors.gray[950],
-        backgroundColor: colors.white,
+        marginBottom: 0,
     },
     // Alert styles
     alertCard: {
