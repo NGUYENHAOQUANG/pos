@@ -7,7 +7,9 @@ import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { colors } from '@/styles';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
+import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
+import { usePondDetail } from '@/features/farm/hooks/usePonds';
 import {
     GeneralInfoBox,
     GeneralInfoBoxRef,
@@ -28,13 +30,14 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const route = useRoute<MeasureShrimpSizeScreenRouteProp>();
 
-    // Route params now contain full pond object which should be used directly
-    const { itemToEdit, pond: routePond, aiShrimpSize } = route.params || {};
+    const { itemToEdit, pondId, aiShrimpSize } = route.params || {};
     const { setTabBarVisible } = useTabBarVisibility();
+
+    const zoneId = useFarmStore(state => state.selectedZoneId) || '';
 
     const generalInfoBoxRef = useRef<GeneralInfoBoxRef>(null);
 
-    const currentPond = routePond;
+    const { data: currentPond } = usePondDetail(zoneId, pondId || '');
 
     // Get stocking quantity from cycle data
     // useActiveCycle already fetches cycle detail internally - no need for a separate useQuery
@@ -86,10 +89,10 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
     }, [setTabBarVisible]);
 
     useEffect(() => {
-        if (aiShrimpSize && !shrimpSize) {
+        if (aiShrimpSize) {
             setShrimpSize(aiShrimpSize);
         }
-    }, [aiShrimpSize, shrimpSize, setShrimpSize]);
+    }, [aiShrimpSize, setShrimpSize]);
 
     const onSavePress = () => {
         if (isSubmitting) return;
