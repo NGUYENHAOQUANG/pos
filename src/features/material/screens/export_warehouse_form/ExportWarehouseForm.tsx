@@ -15,7 +15,7 @@ import { HeaderMeterial } from '@/features/material/components/HeaderMaterial';
 import { ExportWarehouseFooter } from '@/features/material/components/export_warehouse/ExportWarehouseFooter';
 import { ExportWarehouseInformation } from '@/features/material/components/export_warehouse/ExportWarehouseInformation';
 import { AddWarehouseMaterial } from '@/features/material/components/AddWarehouseMaterial';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import Animated from 'react-native-reanimated';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
@@ -208,13 +208,10 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
             <HeaderMeterial
                 title={isEditMode ? 'Chỉnh Sửa Phiếu Xuất Kho' : 'Tạo Phiếu Xuất Kho'}
                 onBackPress={onBackPress}
-                rightIcon={
+                rightComponent={
                     isEditMode && onDelete ? (
-                        <IconTrashOutlined width={20} height={20} color={colors.text} />
+                        <DeleteButton onPress={() => setDeleteModalVisible(true)} />
                     ) : undefined
-                }
-                onRightPress={
-                    isEditMode && onDelete ? () => setDeleteModalVisible(true) : undefined
                 }
             />
 

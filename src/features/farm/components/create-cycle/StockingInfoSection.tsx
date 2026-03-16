@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { colors, spacing } from '@/styles';
 import { PondDataBox } from '@/features/farm/components/pondwork/PondDataBox';
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
-import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
@@ -116,42 +116,36 @@ const StockingInfoSection: React.FC<Props> = ({
                 <Controller
                     control={control}
                     name="stockingQuantity"
-                    render={({ field: { onChange, value }, fieldState: { error } }) => (
-                        <View style={styles.fieldGroup}>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Tổng số lượng thả (PLs)</Text>
-                                <RequiredDot />
-                            </View>
-                            <Input
-                                containerStyle={{ marginBottom: 0 }}
-                                placeholder="Vd: 200.000"
-                                keyboardType="numeric"
-                                value={value || ''}
-                                onChangeText={text => onChange(text.slice(0, 10))}
-                            />
-                            {error && <Text style={styles.errorText}>{error.message}</Text>}
-                        </View>
+                    render={({ field: { onChange, value } }) => (
+                        <Input
+                            label="Tổng số lượng thả (PLs)"
+                            required
+                            containerStyle={{ marginBottom: 0 }}
+                            placeholder="Vd: 200.000"
+                            keyboardType="numeric"
+                            value={value || ''}
+                            onChangeText={onChange}
+                            inputFormat={InputFormat.INTEGER}
+                            maxDigits={10}
+                        />
                     )}
                 />
 
                 <Controller
                     control={control}
                     name="age"
-                    render={({ field: { onChange, value }, fieldState: { error } }) => (
-                        <View style={styles.fieldGroup}>
-                            <View style={styles.labelWrapper}>
-                                <Text style={styles.label}>Ngày tuổi (PLs)</Text>
-                                <RequiredDot />
-                            </View>
-                            <Input
-                                containerStyle={{ marginBottom: 0 }}
-                                placeholder="Vd: 10"
-                                keyboardType="numeric"
-                                value={value || ''}
-                                onChangeText={onChange}
-                            />
-                            {error && <Text style={styles.errorText}>{error.message}</Text>}
-                        </View>
+                    render={({ field: { onChange, value } }) => (
+                        <Input
+                            label="Ngày tuổi (PLs)"
+                            required
+                            containerStyle={{ marginBottom: 0 }}
+                            placeholder="Vd: 10"
+                            keyboardType="numeric"
+                            value={value || ''}
+                            onChangeText={onChange}
+                            inputFormat={InputFormat.INTEGER}
+                            maxDigits={5}
+                        />
                     )}
                 />
 
@@ -171,25 +165,6 @@ export default StockingInfoSection;
 const styles = StyleSheet.create({
     inputsWrapper: {
         gap: spacing.md,
-    },
-    fieldGroup: {
-        gap: 4,
-    },
-    labelWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: colors.text,
-        lineHeight: 22,
-        includeFontPadding: false,
-        textAlignVertical: 'center',
-    },
-    errorText: {
-        color: colors.error,
-        fontSize: 12,
     },
     aiButtonText: {
         color: colors.textSecondary,

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
@@ -81,6 +81,22 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
         onMaterialsChange(selectedMaterials.filter((_, i) => i !== index));
     };
 
+    // Handle inline quantity change on material card
+    const handleQuantityChange = (index: number, text: string) => {
+        let sanitized = text.replace(/[^0-9.]/g, '');
+        const parts = sanitized.split('.');
+        if (parts.length > 2) {
+            sanitized = parts[0] + '.' + parts.slice(1).join('');
+        }
+        if (sanitized.length > 7) {
+            sanitized = sanitized.substring(0, 7);
+        }
+        const updated = selectedMaterials.map((item, i) =>
+            i === index ? { ...item, quantity: sanitized === '' ? 0 : Number(sanitized) } : item
+        );
+        onMaterialsChange(updated);
+    };
+
     return (
         <>
             <SelectionInfoBox
@@ -101,9 +117,13 @@ export const MaterialSelectionBox: React.FC<MaterialSelectionBoxProps> = ({
                                 </Text>
                                 <View style={styles.materialActions}>
                                     <View style={styles.quantityBox}>
-                                        <Text style={styles.quantityText} numberOfLines={1}>
-                                            {item.quantity}
-                                        </Text>
+                                        <TextInput
+                                            style={styles.quantityInput}
+                                            value={String(item.quantity)}
+                                            onChangeText={text => handleQuantityChange(index, text)}
+                                            keyboardType="decimal-pad"
+                                            selectTextOnFocus
+                                        />
                                         <Text style={styles.unitText} numberOfLines={1}>
                                             {item.unit}
                                         </Text>
@@ -185,11 +205,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: colors.white,
     },
-    quantityText: {
+    quantityInput: {
         fontSize: 16,
         fontWeight: '600',
         color: colors.text,
         flex: 1,
+        padding: 0,
+        textAlign: 'center',
     },
     unitText: {
         fontSize: 14,

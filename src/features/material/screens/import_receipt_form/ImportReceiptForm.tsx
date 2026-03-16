@@ -17,7 +17,7 @@ import { colors, spacing } from '@/styles';
 import { ConfirmSubmiss } from '@/features/material/components/ConfirmSubmiss';
 import { WarehouseFooter } from '@/features/material/components/import_receipt_form/WarehouseFooter';
 import { FileUploader, FileUploaderRef } from '@/shared/components/forms/FileUploader';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 
@@ -236,12 +236,9 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                     <HeaderMeterial
                         title={isEditMode ? 'Chỉnh Sửa Phiếu Nhập Kho' : 'Tạo Phiếu Nhập Kho'}
                         onBackPress={onBackPress}
-                        rightIcon={
-                            isEditMode ? (
-                                <IconTrashOutlined width={20} height={20} color={colors.text} />
-                            ) : undefined
+                        rightComponent={
+                            isEditMode ? <DeleteButton onPress={handleDeletePress} /> : undefined
                         }
-                        onRightPress={isEditMode ? handleDeletePress : undefined}
                     />
 
                     <SafeInputLayoutMaterial>
