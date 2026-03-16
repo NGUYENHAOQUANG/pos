@@ -24,7 +24,7 @@ export const API_ENDPOINTS = {
         LIST: '/device',
         TOGGLE: (id: string) => `/device/${id}/toggle`,
         SCHEDULE: '/device/schedule',
-        GET_SCHEDULES: (deviceId: string) => `/devices/${deviceId}/schedule`, //disable get schedule
+        GET_SCHEDULES: (deviceId: string) => `/device/${deviceId}/schedule`,
         HEALTH: '/device/health',
         HEALTH_DETAIL: (deviceId: string) => `/device/health/${deviceId}`,
         DEVICE_ID_REFERENCE: '/device/device-id-reference',

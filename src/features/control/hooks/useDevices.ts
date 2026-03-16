@@ -39,7 +39,10 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
 };
 
 /** Map API DeviceItem to local DeviceData */
-const mapApiDeviceToDeviceData = (item: DeviceItem): DeviceData => {
+const mapApiDeviceToDeviceData = (
+    item: DeviceItem,
+    unhealthyDeviceIds?: Set<string>
+): DeviceData => {
     let type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump' = 'feeder';
     switch (item.deviceType) {
         case 'Syphon':
@@ -61,15 +64,19 @@ const mapApiDeviceToDeviceData = (item: DeviceItem): DeviceData => {
             type = 'feeder';
     }
 
-    // Determine on/off from connectionStatus
-    const isOn = item.connectionStatus === 'On';
+    // Determine on/off from device status (not connectionStatus)
+    const isOn = item.status === 'On';
 
-    // Determine error message from installationStatus or connection
+    // Determine error message from installationStatus, connection, or fault
     let errorMessage: string | undefined;
     if (item.installationStatus !== 'Installed') {
         errorMessage = item.installationStatus;
     } else if (item.connectionStatus === 'DisConnected' || item.connectionStatus === 'Disconnect') {
         errorMessage = 'Mất kết nối';
+    } else if (item.status === 'Fault') {
+        errorMessage = 'Lỗi thiết bị';
+    } else if (unhealthyDeviceIds?.has(item.id)) {
+        errorMessage = 'Thiết bị không phản hồi';
     }
 
     return {
@@ -88,7 +95,11 @@ const mapApiDeviceToDeviceData = (item: DeviceItem): DeviceData => {
  * Flow: DeviceHub has pondId/pondName, Device has deviceHubName.
  * So: Device.deviceHubName === DeviceHub.name → mapped to DeviceHub.pondId/pondName
  */
-const buildPondsFromApi = (hubs: DeviceHubItem[], devices: DeviceItem[]): Pond[] => {
+const buildPondsFromApi = (
+    hubs: DeviceHubItem[],
+    devices: DeviceItem[],
+    unhealthyDeviceIds?: Set<string>
+): Pond[] => {
     // Build hub name → hub map for fast lookup
     const hubByName = new Map<string, DeviceHubItem>();
     hubs.forEach(hub => {
@@ -103,7 +114,7 @@ const buildPondsFromApi = (hubs: DeviceHubItem[], devices: DeviceItem[]): Pond[]
         if (!hub) return; // Device has no matching hub, skip
 
         const existing = pondDevicesMap.get(hub.pondId);
-        const mappedDevice = mapApiDeviceToDeviceData(device);
+        const mappedDevice = mapApiDeviceToDeviceData(device, unhealthyDeviceIds);
 
         if (existing) {
             existing.devices.push(mappedDevice);
@@ -171,16 +182,30 @@ export const useDevices = () => {
     return useQuery({
         queryKey: controlKeys.devices.list(),
         queryFn: async (): Promise<Pond[]> => {
-            // Fetch both hubs and devices in parallel
-            const [hubsResponse, devicesResponse] = await Promise.all([
+            // Fetch hubs, devices, and health check in parallel
+            const [hubsResponse, devicesResponse, healthResponse] = await Promise.all([
                 deviceApi.getDeviceHubs(),
                 deviceApi.getDevices(),
+                deviceApi.getHealthCheck().catch(() => null),
             ]);
 
             const hubs = hubsResponse.data?.data?.items ?? [];
             const devices = devicesResponse.data?.data?.items ?? [];
 
-            const allPonds = [...buildPondsFromApi(hubs, devices), ...MOCK_PONDS];
+            // Build unhealthy device set from health check
+            const unhealthyDeviceIds = new Set<string>();
+            if (healthResponse?.data?.data?.devices) {
+                healthResponse.data.data.devices.forEach(d => {
+                    if (!d.isHealthy) {
+                        unhealthyDeviceIds.add(d.deviceId);
+                    }
+                });
+            }
+
+            const allPonds = [
+                ...buildPondsFromApi(hubs, devices, unhealthyDeviceIds),
+                ...MOCK_PONDS,
+            ];
             return sortPondsByCategory(allPonds);
         },
         staleTime: 1000 * 30,

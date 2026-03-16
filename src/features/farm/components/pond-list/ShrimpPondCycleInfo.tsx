@@ -22,8 +22,10 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
     return (
         <View style={styles.cycleSection}>
             <View style={styles.cycleHeader}>
-                <Text style={styles.cycleName}>{cycleData.name || '---'}</Text>
-                <Text style={styles.cycleDate}>
+                <View style={styles.cycleNameWrapper}>
+                    <Text style={styles.cycleName}>{cycleData.name || '---'}</Text>
+                </View>
+                <Text style={styles.cycleDate} numberOfLines={1}>
                     {cycleData.createdAt
                         ? `${formatDate(new Date(cycleData.createdAt))} - nay`
                         : '-- nay'}
@@ -65,6 +67,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
+    cycleNameWrapper: {
+        flex: 1,
+        marginRight: spacing.sm,
+    },
     cycleName: {
         fontSize: typography.fontSize.sm,
         fontWeight: typography.fontWeight.bold,
@@ -73,6 +79,7 @@ const styles = StyleSheet.create({
     cycleDate: {
         fontSize: typography.fontSize.sm,
         color: colors.text,
+        flexShrink: 0,
     },
     cycleInfo: {
         gap: spacing.xs,

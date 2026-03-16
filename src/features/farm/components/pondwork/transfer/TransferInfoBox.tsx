@@ -1,12 +1,11 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, Keyboard } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import DeleteBlack from '@/assets/Icon/IconFarm/DeleteBlack.svg';
 import { IconError } from '@/assets/icons';
-import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
-import { ReceivingPondDropdown } from './ReceivingPondDropdown';
+import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { Input } from '@/shared/components/forms/Input';
 
@@ -23,9 +22,9 @@ interface TransferInfoBoxProps {
     onReceivingPondsChange: (ponds: ReceivingPondItem[]) => void;
     onReceivingPondPress?: (id: string) => void;
     totalEstimatedShrimp?: number;
-    pondOptions: DropDownItem[];
+    pondOptions: DropdownOption[];
     containerStyle?: ViewStyle;
-    onDropdownOpen?: () => void; // Callback when dropdown opens
+    onDropdownOpen?: () => void;
 }
 
 export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
@@ -39,6 +38,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     containerStyle,
     onDropdownOpen,
 }) => {
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     // Calculate total quantity from all rows
     const totalQuantity = useMemo(() => {
         return receivingPonds.reduce((sum, pond) => {
@@ -59,7 +59,6 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
         const newPondCount = receivingPonds.length + 1;
 
         if (!totalEstimatedShrimp || totalEstimatedShrimp === 0) {
-            // If no total, just add empty row
             const newPond: ReceivingPondItem = {
                 id: Date.now().toString(),
                 quantity: '',
@@ -68,21 +67,16 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
             return;
         }
 
-        // Calculate quantity per pond (divide totalEstimatedShrimp by number of ponds, rounded down)
         const quantityPerPond = Math.floor(totalEstimatedShrimp / newPondCount);
 
-        // Calculate remainder (what's left after distributing evenly)
         const totalDistributed = quantityPerPond * newPondCount;
         const remainder = totalEstimatedShrimp - totalDistributed;
 
-        // Update all existing ponds with calculated quantity
-        // First pond gets quantityPerPond + remainder, others get quantityPerPond
         const updatedPonds = receivingPonds.map((pond, index) => ({
             ...pond,
             quantity: (index === 0 ? quantityPerPond + remainder : quantityPerPond).toString(),
         }));
 
-        // Add new pond with calculated quantity
         const newPond: ReceivingPondItem = {
             id: Date.now().toString(),
             quantity: quantityPerPond.toString(),
@@ -92,23 +86,17 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     };
 
     const handleDeleteRow = (id: string) => {
-        // Find the index of the pond to delete
         const deleteIndex = receivingPonds.findIndex(pond => pond.id === id);
         if (deleteIndex === -1) return;
 
-        // Get the quantity of the pond being deleted
         const deletedQuantity =
             parseFloat(receivingPonds[deleteIndex].quantity.replace(/\D/g, '')) || 0;
 
-        // Remove the deleted pond
         const updatedPonds = receivingPonds.filter(pond => pond.id !== id);
 
-        // If only 1 row remains, set quantity to totalEstimatedShrimp
         if (updatedPonds.length === 1 && totalEstimatedShrimp) {
             updatedPonds[0].quantity = totalEstimatedShrimp.toString();
         } else if (updatedPonds.length > 0 && deletedQuantity > 0) {
-            // Add deleted quantity to the previous row (index - 1)
-            // If deleting first row (index 0), add to the new first row (index 0 after deletion)
             const targetIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
             const targetQuantity =
                 parseFloat(updatedPonds[targetIndex].quantity.replace(/\D/g, '')) || 0;
@@ -119,7 +107,6 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
     };
 
     const handleQuantityChange = (id: string, text: string) => {
-        // Remove all non-numeric characters and limit to 9 digits
         const numericValue = text.replace(/\D/g, '').substring(0, 9);
         onReceivingPondsChange(
             receivingPonds.map(pond =>
@@ -128,19 +115,51 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
         );
     };
 
-    const handleReceivingPondSelect = (pondId: string, selectedPondId: string) => {
-        onReceivingPondsChange(
-            receivingPonds.map(pond =>
-                pond.id === pondId ? { ...pond, receivingPond: selectedPondId } : pond
-            )
-        );
-        onReceivingPondPress?.(pondId);
-    };
+    const handleReceivingPondSelect = useCallback(
+        (pondId: string, selectedValue: string | number) => {
+            onReceivingPondsChange(
+                receivingPonds.map(pond =>
+                    pond.id === pondId ? { ...pond, receivingPond: String(selectedValue) } : pond
+                )
+            );
+            onReceivingPondPress?.(pondId);
+        },
+        [receivingPonds, onReceivingPondsChange, onReceivingPondPress]
+    );
 
-    // List of selected pond IDs for filtering dropdown options
+    const handleToggleDropdown = useCallback(
+        (pondId: string) => {
+            Keyboard.dismiss();
+            setOpenDropdownId(prev => {
+                if (prev === pondId) {
+                    return null;
+                }
+                onDropdownOpen?.();
+                setTimeout(() => {
+                    setOpenDropdownId(pondId);
+                }, 400);
+                return null;
+            });
+        },
+        [onDropdownOpen]
+    );
+
     const selectedPondIds = useMemo(() => {
         return receivingPonds.map(p => p.receivingPond).filter((id): id is string => !!id);
     }, [receivingPonds]);
+
+    const getAvailableOptions = useCallback(
+        (currentPondId: string | undefined): DropdownOption[] => {
+            return pondOptions.filter(option => {
+                const isSelectedInOtherRow = selectedPondIds.some(
+                    selectedId =>
+                        selectedId === String(option.value) && selectedId !== currentPondId
+                );
+                return !isSelectedInOtherRow;
+            });
+        },
+        [pondOptions, selectedPondIds]
+    );
 
     return (
         <SelectionInfoBox title="Thông tin chuyển đi" style={containerStyle}>
@@ -173,16 +192,7 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                 {/* Receiving Pond Rows */}
                 {receivingPonds.map((pond, index) => {
                     const isFirstRow = index === 0;
-
-                    // Filter options: Keep current selection + options not selected elsewhere
-                    const availableOptions = pondOptions.filter(option => {
-                        const isSelectedInOtherRow = selectedPondIds.some(
-                            selectedId =>
-                                selectedId === option.id.toString() &&
-                                selectedId !== pond.receivingPond
-                        );
-                        return !isSelectedInOtherRow;
-                    });
+                    const availableOptions = getAvailableOptions(pond.receivingPond);
 
                     return (
                         <View key={pond.id} style={styles.rowContainer}>
@@ -194,11 +204,15 @@ export const TransferInfoBox: React.FC<TransferInfoBoxProps> = ({
                                         Ao nhận
                                     </Text>
                                 )}
-                                <ReceivingPondDropdown
-                                    pond={pond}
-                                    onSelect={handleReceivingPondSelect}
-                                    pondOptions={availableOptions}
-                                    onDropdownOpen={onDropdownOpen}
+                                <DropdownMaterial
+                                    value={pond.receivingPond}
+                                    onChange={val => handleReceivingPondSelect(pond.id, val)}
+                                    options={availableOptions}
+                                    placeholder="Chọn"
+                                    showAllOption={false}
+                                    isOpen={openDropdownId === pond.id}
+                                    onToggle={() => handleToggleDropdown(pond.id)}
+                                    useAutoScroll={true}
                                 />
                             </View>
 
