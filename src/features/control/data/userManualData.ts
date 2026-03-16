@@ -1,24 +1,24 @@
-import React from 'react';
+import { ImageSourcePropType } from 'react-native';
 
-// Import device card SVGs
-import TurnOnCard from '@/assets/Icon/IconDevices/feeder.svg';
-import TurnOffCard from '@/assets/Icon/IconDevices/oxy.svg';
-import HandmadeCard from '@/assets/Icon/IconDevices/fan.svg';
-import OnSiteCard from '@/assets/Icon/IconDevices/syphon.svg';
+// Import device PNG images (performance optimized)
+const TurnOnCard = require('@/assets/Icon/IconDevices/Feeder.png');
+const HandmadeCard = require('@/assets/Icon/IconDevices/Fan.png');
+const TurnOffCard = require('@/assets/Icon/IconDevices/Oxy.png');
+const OnSiteCard = require('@/assets/Icon/IconDevices/Syphon.png');
 
 // Type definition for manual items
 export interface ManualItem {
     id: string;
-    CardSvg: React.FC<{ width?: number; height?: number }>;
+    icon: ImageSourcePropType;
     descriptions: string[];
     note?: string;
 }
 
-// Manual data with SVG cards
+// Manual data with PNG images
 export const MANUAL_DATA: ManualItem[] = [
     {
         id: '1',
-        CardSvg: TurnOnCard,
+        icon: TurnOnCard as ImageSourcePropType,
         descriptions: [
             'Tên thiết bị: Máy cho ăn',
             'Chức năng: Tự động phân phối thức ăn cho vật nuôi.',
@@ -27,7 +27,7 @@ export const MANUAL_DATA: ManualItem[] = [
     },
     {
         id: '2',
-        CardSvg: HandmadeCard,
+        icon: HandmadeCard as ImageSourcePropType,
         descriptions: [
             'Tên thiết bị: Quạt nước',
             'Chức năng : Tạo oxy hòa tan trong nước và giúp lưu thông dòng nước, cải thiện môi trường sống cho các loài thủy sản, đặc biệt quan trọng trong nuôi trồng thâm canh.',
@@ -36,7 +36,7 @@ export const MANUAL_DATA: ManualItem[] = [
     },
     {
         id: '3',
-        CardSvg: TurnOffCard,
+        icon: TurnOffCard as ImageSourcePropType,
         descriptions: [
             'Tên thiết bị: Máy thổi khí',
             'Chức năng: Cung cấp lượng lớn khí oxy vào nước thông qua các đường ống và đá sủi, duy trì nồng độ oxy cần thiết cho sự sống của động vật thủy sản',
@@ -45,7 +45,7 @@ export const MANUAL_DATA: ManualItem[] = [
     },
     {
         id: '4',
-        CardSvg: OnSiteCard,
+        icon: OnSiteCard as ImageSourcePropType,
         descriptions: [
             'Tên thiết bị: Xyphon đáy',
             'Chức năng: Hút chất thải, thức ăn thừa và các chất cặn bẩn tích tụ dưới đáy ao, giúp làm sạch môi trường nước và duy trì chất lượng nước ổn định.',

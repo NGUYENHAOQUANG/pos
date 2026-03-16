@@ -59,7 +59,7 @@ export const DevicesStatus: React.FC<DevicesStatusProps> = ({
             <StatusItem label="Hoạt động" value={activePonds} valueColor={colors.gray[800]} />
             <View style={styles.spacer} />
             <StatusItem
-                label="Nguy cơ"
+                label="Lỗi"
                 value={warningPonds}
                 valueColor={colors.red[600]}
                 backgroundColor={colors.red[25]}
