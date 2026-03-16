@@ -24,36 +24,13 @@ interface PondDataBoxProps {
     disclaimerText?: string;
     containerStyle?: ViewStyle;
 }
-
-/** Result value with custom inline tooltip for abbreviated numbers */
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const TOOLTIP_SCREEN_PADDING = 16;
-const TOOLTIP_WIDTH = SCREEN_WIDTH - TOOLTIP_SCREEN_PADDING * 2;
 
 const ResultValue: React.FC<{
     value: string | number;
     isOpen: boolean;
     onToggle: () => void;
 }> = ({ value, isOpen, onToggle }) => {
-    const wrapperRef = React.useRef<View>(null);
-    const [tooltipLeft, setTooltipLeft] = useState(0);
-    const [arrowRight, setArrowRight] = useState(20);
-
-    // Measure wrapper position to calculate tooltip offset
-    const handleToggle = () => {
-        if (!isOpen && wrapperRef.current) {
-            wrapperRef.current.measureInWindow((x, _y, width) => {
-                // Tooltip left = screen 16px - wrapper x position
-                setTooltipLeft(TOOLTIP_SCREEN_PADDING - x);
-                // Arrow should point to the center of the wrapper
-                setArrowRight(TOOLTIP_WIDTH - (x - TOOLTIP_SCREEN_PADDING) - width + width / 2);
-                onToggle();
-            });
-        } else {
-            onToggle();
-        }
-    };
-
     // Check if value is a number that can be abbreviated
     const numValue =
         typeof value === 'number' ? value : parseFloat(String(value).replace(/,/g, ''));
@@ -64,30 +41,18 @@ const ResultValue: React.FC<{
 
         if (isAbbreviated) {
             return (
-                <View ref={wrapperRef} style={styles.tooltipWrapper}>
-                    <Pressable style={styles.abbreviatedRow} onPress={handleToggle}>
+                <View style={styles.tooltipWrapper}>
+                    <Pressable style={styles.abbreviatedRow} onPress={onToggle}>
                         <Text style={styles.resultValue} numberOfLines={1}>
                             {abbreviated}
                         </Text>
                         <EyeIcon width={16} height={16} />
                     </Pressable>
                     {isOpen && (
-                        <View
-                            style={[
-                                styles.tooltipContainer,
-                                { left: tooltipLeft, width: TOOLTIP_WIDTH },
-                            ]}
-                        >
-                            <View
-                                style={[
-                                    styles.tooltipArrow,
-                                    { marginLeft: 'auto', marginRight: Math.max(arrowRight, 10) },
-                                ]}
-                            />
+                        <View style={styles.tooltipContainer}>
+                            <View style={styles.tooltipArrow} />
                             <View style={styles.tooltipContent}>
-                                <Text style={styles.tooltipText} numberOfLines={1}>
-                                    {full}
-                                </Text>
+                                <Text style={styles.tooltipText}>{full}</Text>
                                 <Text style={styles.tooltipDetailText}>{detail}</Text>
                             </View>
                         </View>
@@ -251,12 +216,12 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.md,
         paddingHorizontal: 12,
         paddingVertical: 8,
+        alignSelf: 'flex-end',
     },
     tooltipText: {
         color: colors.white,
         fontSize: 14,
         fontWeight: '600',
-        flexWrap: 'wrap',
     },
     tooltipDetailText: {
         color: colors.gray[400],
@@ -281,8 +246,10 @@ const styles = StyleSheet.create({
     tooltipContainer: {
         position: 'absolute',
         top: '100%',
+        right: -8,
         marginTop: 4,
         zIndex: 999,
+        width: SCREEN_WIDTH - 64,
     },
     tooltipArrow: {
         width: 0,
@@ -293,7 +260,8 @@ const styles = StyleSheet.create({
         borderLeftColor: 'transparent',
         borderRightColor: 'transparent',
         borderBottomColor: colors.black,
-        marginRight: 30,
+        alignSelf: 'flex-end',
+        marginRight: 12,
     },
     dismissOverlay: {
         flex: 1,
