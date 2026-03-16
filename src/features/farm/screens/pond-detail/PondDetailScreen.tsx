@@ -5,7 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
-import { ALLOWED_JOBS_WHEN_NO_CYCLE } from '@/shared/constants/config';
+import { ALLOWED_JOBS_WHEN_NO_CYCLE, HIDDEN_JOBS_WHEN_HAS_CYCLE } from '@/shared/constants/config';
 import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
@@ -141,7 +141,11 @@ export const PondDetailScreen: React.FC = () => {
     // const cycles = useMemo(() => cyclesData?.data?.items || [], [cyclesData]);
 
     const filteredJobs = useMemo(() => {
-        if (currentCycle) return jobs;
+        if (currentCycle) {
+            // Có chu kỳ → ẩn rửa ao & phơi ao
+            return jobs.filter(job => !HIDDEN_JOBS_WHEN_HAS_CYCLE.includes((job as any).type));
+        }
+        // Không có chu kỳ → chỉ hiện các job được phép
         return jobs.filter(job => ALLOWED_JOBS_WHEN_NO_CYCLE.includes((job as any).type));
     }, [jobs, currentCycle]);
 
