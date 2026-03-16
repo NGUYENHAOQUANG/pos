@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         overflow: 'hidden',
+        marginHorizontal: 16,
     },
     fieldContainer: {
         flexDirection: 'row',
@@ -70,7 +71,6 @@ const styles = StyleSheet.create({
     },
     fieldLabel: {
         fontSize: 14,
-        fontWeight: '700',
         lineHeight: 22,
         color: colors.textSecondary,
     },
