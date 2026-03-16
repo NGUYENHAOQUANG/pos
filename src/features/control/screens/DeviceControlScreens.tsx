@@ -13,7 +13,7 @@ import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
-import { HelpOptionsModal } from '../components/HelpOptionsModal';
+import { HelpOptionsModal } from '@/features/control/components/HelpOptionsModal';
 import { colors, spacing } from '@/styles';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,11 +21,15 @@ import { ControlStackParamList } from '@/features/control/navigation/ControlNavi
 import { useDevices } from '@/features/control/hooks/useDevices';
 import { Zone } from '@/features/farm/types/farm.types';
 import { DeviceControlSkeleton } from '@/features/control/components/skeleton/DeviceControlSkeleton';
-import { useZones, usePondsByZone } from '@/features/farm/hooks';
+import { useZones, useAllPondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
 import { CameraData } from '@/features/control/data/camerasData';
+
+/** Stable key extractor - defined outside component to prevent re-creation */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const keyExtractor = (item: any) => item.id.toString();
 
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
@@ -63,15 +67,15 @@ export const DeviceControlScreens = () => {
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
 
-    // Get Ponds via React Query based on selected Farm
+    // Get ALL Ponds via React Query based on selected Farm
     const {
         data: pondsData,
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-    } = usePondsByZone(selectedZoneId);
+    } = useAllPondsByZone(selectedZoneId);
 
-    // Flatten pagination data and ensure valid array
+    // Ensure valid array
     const farmPonds = useMemo(() => {
         if (!pondsData || pondsData.length === 0) return [];
         return pondsData;
@@ -98,12 +102,8 @@ export const DeviceControlScreens = () => {
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);
-
-    // Ref for scroll to top
     const flatListRef = useRef<FlatList>(null);
     useScrollToTop(flatListRef as any);
-
-    // Close help modal automatically when leaving this tab/screen
     useFocusEffect(
         useCallback(() => {
             return () => {
@@ -111,28 +111,12 @@ export const DeviceControlScreens = () => {
             };
         }, [])
     );
-
-    // Update ref when farm changes
     React.useEffect(() => {
         if (selectedFarm?.id) {
             prevFarmIdRef.current = selectedFarm.id;
         }
     }, [selectedFarm]);
-
-    // Combined Loading State
-    // Show skeleton if:
-    // 1. Loading Zones (App startup/First navigaton)
-    // 2. Zones loaded but Farm not yet selected (Init logic in useEffect)
-    // 3. Loading Ponds (React Query active)
-    // 4. Manual Refetch or Network Reconnect (but not Load More)
     const { isConnected } = useNetInfo();
-
-    // Combined Loading State
-    // Show skeleton if:
-    // 1. Loading Zones (App startup/First navigaton)
-    // 2. Zones loaded but Farm not yet selected (Init logic in useEffect)
-    // 3. Loading Ponds (React Query active)
-    // 4. Manual Refetch or Network Reconnect (but not Load More)
     const showSkeleton =
         isLoadingZones ||
         !selectedFarm ||
@@ -143,10 +127,6 @@ export const DeviceControlScreens = () => {
         await refetch();
     };
 
-    const handleConnectDevice = (pondName: string) => {
-        navigation.navigate('ConnectDevice', { pondName });
-    };
-
     const handleHelpPress = (position: { x: number; y: number; width: number; height: number }) => {
         setHelpButtonPosition(position);
         setShowHelpModal(true);
@@ -155,12 +135,23 @@ export const DeviceControlScreens = () => {
     const filteredPonds = useMemo(() => {
         if (!selectedFarm || !farmPonds) return [];
 
+        // Separate API device ponds from mock ponds
+        const apiDevicePonds = devicePonds.filter(p => !p.id?.startsWith('mock-'));
+        const mockDevicePonds = devicePonds.filter(p => p.id?.startsWith('mock-'));
+
+        // Map farm ponds - match API first, then mock by name
+        const farmPondNames = new Set<string>();
         const mappedPonds = farmPonds.map((realPond: any) => {
-            // Find corresponding device data from React Query
-            const devicePond = devicePonds.find(p => p.name === realPond.name);
+            farmPondNames.add(realPond.name);
+
+            // Try API device data first, then mock
+            const apiPond = apiDevicePonds.find(p => p.name === realPond.name);
+            const mockPond = mockDevicePonds.find(p => p.name === realPond.name);
+            const devicePond = apiPond || mockPond;
+            const isMock = !apiPond && !!mockPond;
 
             return {
-                id: realPond.id,
+                id: isMock ? mockPond!.id : realPond.id,
                 name: realPond.name,
                 hasDevices: devicePond?.hasDevices ?? false,
                 devices: devicePond?.devices ?? [],
@@ -168,10 +159,30 @@ export const DeviceControlScreens = () => {
             };
         });
 
-        // Sort: Ponds with devices first
-        return mappedPonds.sort((a: any, b: any) => {
-            if (a.hasDevices === b.hasDevices) return 0;
-            return a.hasDevices ? -1 : 1;
+        // Append mock ponds whose names don't exist in farm
+        const extraMockPonds = mockDevicePonds.filter(p => !farmPondNames.has(p.name));
+        const allPonds = [...mappedPonds, ...extraMockPonds];
+
+        // Sort: devices-first, then by category, then alphabetically
+        return allPonds.sort((a, b) => {
+            // Primary: ponds with devices first
+            if (a.hasDevices !== b.hasDevices) return a.hasDevices ? -1 : 1;
+
+            // Secondary: by category
+            const getPriority = (name: string): number => {
+                const prefix = name.replace(/^Ao\s+/i, '');
+                if (prefix.startsWith('V')) return 0;
+                if (prefix.startsWith('N')) return 1;
+                if (prefix.startsWith('SS')) return 2;
+                if (prefix.startsWith('XL')) return 3;
+                if (prefix.startsWith('L')) return 4;
+                if (prefix.startsWith('T')) return 5;
+                return 99;
+            };
+            const pA = getPriority(a.name);
+            const pB = getPriority(b.name);
+            if (pA !== pB) return pA - pB;
+            return a.name.localeCompare(b.name);
         });
     }, [farmPonds, devicePonds, selectedFarm]);
 
@@ -187,7 +198,8 @@ export const DeviceControlScreens = () => {
                 (stats.fan.warning || 0) +
                 (stats.feeder.warning || 0) +
                 (stats.oxy.warning || 0) +
-                (stats.syphon.warning || 0)
+                (stats.syphon.warning || 0) +
+                (stats.pump?.warning || 0)
             );
         }, 0);
 
@@ -203,6 +215,47 @@ export const DeviceControlScreens = () => {
     const handleLoadMore = () => {
         // No pagination logic needed for now
     };
+
+    const handlePondDetail = useCallback(
+        (pondName: string, isMock: boolean) => {
+            navigation.navigate('ControlDetail', {
+                pondName,
+                isMock,
+            });
+        },
+        [navigation]
+    );
+
+    const renderPondCard = useCallback(
+        ({ item }: { item: (typeof filteredPonds)[number] }) => {
+            const isMock = item.id.startsWith('mock-');
+            return (
+                <PondCard
+                    pondName={item.name}
+                    isEmpty={!item.hasDevices}
+                    deviceStats={item.deviceStats}
+                    compact={isMock}
+                    onPressDetail={() => handlePondDetail(item.name, isMock)}
+                />
+            );
+        },
+        [handlePondDetail]
+    );
+
+    const ListHeader = useMemo(() => {
+        if (!showStats) return null;
+        return (
+            <>
+                <DevicesStatus
+                    totalPonds={filteredPonds.length}
+                    activePonds={totalStats.active}
+                    warningPonds={totalStats.warning}
+                    otherPonds={totalStats.other}
+                />
+                <View style={styles.spacer} />
+            </>
+        );
+    }, [showStats, filteredPonds.length, totalStats.active, totalStats.warning, totalStats.other]);
 
     return (
         <View style={styles.container}>
@@ -266,42 +319,19 @@ export const DeviceControlScreens = () => {
                         <FlatList
                             ref={flatListRef}
                             data={filteredPonds}
-                            keyExtractor={(item: any) => item.id.toString()}
-                            renderItem={({ item }) => (
-                                <PondCard
-                                    pondName={item.name}
-                                    isEmpty={!item.hasDevices}
-                                    deviceStats={item.deviceStats}
-                                    onPressDetail={() =>
-                                        navigation.navigate('ControlDetail', {
-                                            pondName: item.name,
-                                        })
-                                    }
-                                    onAddDevice={() => handleConnectDevice(item.name)}
-                                />
-                            )}
+                            keyExtractor={keyExtractor}
+                            renderItem={renderPondCard}
                             style={styles.content}
                             contentContainerStyle={[
                                 styles.scrollContent,
                                 styles.scrollContentPadding,
                             ]}
-                            ListHeaderComponent={
-                                showStats ? (
-                                    <>
-                                        <DevicesStatus
-                                            totalPonds={filteredPonds.length}
-                                            activePonds={totalStats.active}
-                                            warningPonds={totalStats.warning}
-                                            otherPonds={totalStats.other}
-                                        />
-                                        <View style={styles.spacer} />
-                                    </>
-                                ) : null
-                            }
-                            initialNumToRender={5}
-                            maxToRenderPerBatch={10}
-                            windowSize={5}
+                            ListHeaderComponent={ListHeader}
+                            initialNumToRender={4}
+                            maxToRenderPerBatch={4}
+                            windowSize={3}
                             removeClippedSubviews={true}
+                            updateCellsBatchingPeriod={100}
                             refreshControl={
                                 <RefreshControl
                                     refreshing={isRefetching}

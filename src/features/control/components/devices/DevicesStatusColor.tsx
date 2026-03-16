@@ -1,35 +1,34 @@
 import React from 'react';
-import { SvgProps } from 'react-native-svg';
-import { colors } from '@/styles/colors';
-import { StyleProp, ViewStyle } from 'react-native';
+import { Image, ImageSourcePropType, ImageStyle, StyleProp } from 'react-native';
 
 interface DevicesStatusColorProps {
-  icon: React.FC<SvgProps>;
-  isOn: boolean;
-  errorMessage?: string;
-  size?: number;
-  style?: StyleProp<ViewStyle>;
+    icon: ImageSourcePropType;
+    isOn: boolean;
+    errorMessage?: string;
+    size?: number;
+    style?: StyleProp<ImageStyle>;
 }
 
-export const DevicesStatusColor: React.FC<DevicesStatusColorProps> = ({
-  icon: Icon,
-  isOn,
-  errorMessage,
-  size = 48,
-  style,
-}) => {
-  let iconColor: string | undefined;
-
-  if (errorMessage) {
-    iconColor = colors.error;
-  } else if (isOn) {
-    iconColor = colors.primary;
-  } else {
-    iconColor = colors.text; // Default text color (usually black/dark gray) for inactive state
-  }
-
-  // We pass both 'color' and 'fill' ensuring maximum compatibility depending on how the SVG deals with props.
-  // Ideally, if the SVG has hardcoded colors, this might not work without 'currentColor',
-  // but we are strictly following "Do not edit SVG" instruction.
-  return <Icon width={size} height={size} color={iconColor} fill={iconColor} style={style} />;
-};
+/**
+ * Renders a device icon as a PNG Image.
+ * Replaces the previous SVG-based implementation for better performance.
+ */
+export const DevicesStatusColor: React.FC<DevicesStatusColorProps> = React.memo(
+    ({
+        icon,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        isOn,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        errorMessage,
+        size = 48,
+        style,
+    }) => {
+        return (
+            <Image
+                source={icon}
+                style={[{ width: size, height: size }, style]}
+                resizeMode="contain"
+            />
+        );
+    }
+);

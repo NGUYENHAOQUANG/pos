@@ -82,7 +82,7 @@ export const PersonalInformationScreens: React.FC = () => {
         control,
         handleSubmit,
         reset,
-        formState: { errors },
+        formState: { errors, isDirty },
     } = useForm<InformationFormValues>({
         resolver: zodResolver(informationFormSchema),
         defaultValues: initialData,
@@ -335,7 +335,7 @@ export const PersonalInformationScreens: React.FC = () => {
                     secondaryTitle="Huỷ"
                     onPrimaryPress={handleSubmit(handleFormSubmit)}
                     onSecondaryPress={handleCancel}
-                    primaryDisabled={isSaving}
+                    primaryDisabled={isSaving || (!isDirty && !avatarAsset)}
                 />
             </View>
         </Loading>

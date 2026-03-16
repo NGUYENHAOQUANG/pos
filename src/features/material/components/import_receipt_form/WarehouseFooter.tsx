@@ -9,6 +9,7 @@ interface WarehouseFooterProps {
     totalAmount: number;
     onSaveDraft: () => void;
     onSubmit: () => void;
+    disabled?: boolean;
 }
 
 export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
@@ -16,6 +17,7 @@ export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
     totalAmount,
     onSaveDraft,
     onSubmit,
+    disabled = false,
 }) => {
     return (
         <View style={[styles.footer, { paddingBottom: safeBottom }]}>
@@ -25,11 +27,21 @@ export const WarehouseFooter: React.FC<WarehouseFooterProps> = ({
             </View>
             <View style={styles.buttonRow}>
                 <View style={styles.buttonWrapper}>
-                    <Button title="Lưu Nháp" variant="outline" onPress={onSaveDraft} />
+                    <Button
+                        title="Lưu Nháp"
+                        variant="outline"
+                        onPress={onSaveDraft}
+                        disabled={disabled}
+                    />
                 </View>
                 <View style={styles.buttonSpacer} />
                 <View style={styles.buttonWrapper}>
-                    <Button title="Gửi Phiếu" variant="primary" onPress={onSubmit} />
+                    <Button
+                        title="Gửi Phiếu"
+                        variant="primary"
+                        onPress={onSubmit}
+                        disabled={disabled}
+                    />
                 </View>
             </View>
         </View>

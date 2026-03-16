@@ -78,6 +78,7 @@ export interface ShrimpHealthCheckDto {
     editor?: Creator;
     pondId: string;
     cycleId?: string;
+    documentIds?: string[];
     documents?: IDocument[];
     healthCheck?: ShrimpHealthCheckDetailDto;
 }

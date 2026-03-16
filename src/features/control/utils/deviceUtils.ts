@@ -1,20 +1,26 @@
-import { SvgProps } from 'react-native-svg';
-import FanIcon from '@/assets/Icon/IconDevices/fan.svg';
-import FeederIcon from '@/assets/Icon/IconDevices/feeder.svg';
-import OxyIcon from '@/assets/Icon/IconDevices/oxy.svg';
-import SyphonIcon from '@/assets/Icon/IconDevices/syphon.svg';
+import { ImageSourcePropType } from 'react-native';
 
-export const getDeviceIcon = (type: string): React.FC<SvgProps> => {
+// Use PNG images instead of SVG for performance optimization
+// PNG files are ~300x smaller than the embedded-raster SVG originals
+const FanIcon = require('@/assets/Icon/IconDevices/Fan.png');
+const FeederIcon = require('@/assets/Icon/IconDevices/Feeder.png');
+const OxyIcon = require('@/assets/Icon/IconDevices/Oxy.png');
+const SyphonIcon = require('@/assets/Icon/IconDevices/Syphon.png');
+const PumpIcon = require('@/assets/Icon/IconDevices/Pump.png');
+
+export const getDeviceIcon = (type: string): ImageSourcePropType => {
     switch (type) {
         case 'feeder':
-            return FeederIcon;
+            return FeederIcon as ImageSourcePropType;
         case 'fan':
-            return FanIcon;
+            return FanIcon as ImageSourcePropType;
         case 'oxy':
-            return OxyIcon;
+            return OxyIcon as ImageSourcePropType;
         case 'syphon':
-            return SyphonIcon;
+            return SyphonIcon as ImageSourcePropType;
+        case 'pump':
+            return PumpIcon as ImageSourcePropType;
         default:
-            return FanIcon;
+            return FanIcon as ImageSourcePropType;
     }
 };

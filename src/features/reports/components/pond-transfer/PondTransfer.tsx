@@ -60,8 +60,8 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
                         </View>
                     ) : (
                         <>
-                            {dataList.map(item => (
-                                <MemoizedTransferItemCard key={item.id} item={item} />
+                            {dataList.map((item, index) => (
+                                <MemoizedTransferItemCard key={`${item.id}-${index}`} item={item} />
                             ))}
 
                             {/* Load more button */}

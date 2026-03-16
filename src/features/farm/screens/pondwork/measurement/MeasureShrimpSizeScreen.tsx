@@ -66,12 +66,14 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
         notes,
         setNotes,
         images,
+        setImages,
         initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
         UnsavedChangesModal,
+        hasChanges,
         isSubmitting,
     } = useMeasureShrimpSizeForm({
         pondId: currentPond?.id,
@@ -121,6 +123,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     date={time}
                     onDateChange={setTime}
                     imageUris={images}
+                    onImagesChange={setImages}
                     documentIds={initialDocumentIds}
                     disabledDate={true}
                 />
@@ -146,6 +149,7 @@ export const MeasureShrimpSizeScreen: React.FC = () => {
                     onPrimaryPress={onSavePress}
                     onSecondaryPress={navigation.goBack}
                     isLoading={isSubmitting}
+                    primaryDisabled={!!itemToEdit && !hasChanges}
                 />
             </View>
 

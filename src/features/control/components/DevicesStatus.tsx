@@ -59,7 +59,7 @@ export const DevicesStatus: React.FC<DevicesStatusProps> = ({
             <StatusItem label="Hoạt động" value={activePonds} valueColor={colors.gray[800]} />
             <View style={styles.spacer} />
             <StatusItem
-                label="Nguy cơ"
+                label="Lỗi"
                 value={warningPonds}
                 valueColor={colors.red[600]}
                 backgroundColor={colors.red[25]}
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: 12,
         paddingHorizontal: 12,
-        borderRadius: 16,
+        borderRadius: 12,
         borderWidth: 1,
         borderColor: colors.border,
     },

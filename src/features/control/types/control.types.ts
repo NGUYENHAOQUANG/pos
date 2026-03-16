@@ -4,6 +4,14 @@ export enum EControlMode {
     LOCAL = 'LOCAL',
 }
 
+// Device operation status from API
+export enum EDeviceStatus {
+    UNDEFINED = 'UnDefined',
+    ON = 'On',
+    OFF = 'Off',
+    FAULT = 'Fault',
+}
+
 export type ControlModeType = EControlMode;
 export interface DeviceStat {
     active: number;
@@ -16,6 +24,7 @@ export interface PondDeviceStats {
     feeder: DeviceStat;
     oxy: DeviceStat;
     syphon: DeviceStat;
+    pump: DeviceStat;
 }
 
 // Feeding Machine Specific Types
@@ -35,11 +44,11 @@ export interface DeviceSchedule {
 export interface DeviceData {
     id: string;
     name: string;
-    // icon removed for persistence, use getDeviceIcon(type) instead
+    model?: string;
     mode: EControlMode;
     isOn: boolean;
     errorMessage?: string;
-    type: 'feeder' | 'fan' | 'oxy' | 'syphon'; // Add type for filtering
+    type: 'feeder' | 'fan' | 'oxy' | 'syphon' | 'pump';
     farmId?: string; // Add farmId for filtering
 
     // Extended properties for persistence

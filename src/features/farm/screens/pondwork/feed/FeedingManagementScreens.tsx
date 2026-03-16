@@ -42,6 +42,7 @@ export const FeedingManagementScreens = () => {
 
     const formRef = useRef<FeedingFormRef>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [formHasChanges, setFormHasChanges] = useState(false);
     // const [isSubmittingControl, setIsSubmittingControl] = useState(false);
     const isSubmittingControl = false; // Tạm thời Fix cứng bằng false do đã comment hàm điều khiển thiết bị
 
@@ -215,6 +216,7 @@ export const FeedingManagementScreens = () => {
                                 isSubmitting={isLoading}
                                 initialData={initialData}
                                 onSubmit={handleSubmit}
+                                onHasChangesChange={setFormHasChanges}
                             />
                         </SafeInputLayout>
                     )}
@@ -226,7 +228,11 @@ export const FeedingManagementScreens = () => {
                 onPrimaryPress={handlePrimaryPress}
                 onSecondaryPress={() => navigation.goBack()}
                 isLoading={createMutation.isPending || updateMutation.isPending}
-                primaryDisabled={createMutation.isPending || updateMutation.isPending}
+                primaryDisabled={
+                    createMutation.isPending ||
+                    updateMutation.isPending ||
+                    (isEditMode && !formHasChanges)
+                }
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
             {isEditMode && (
