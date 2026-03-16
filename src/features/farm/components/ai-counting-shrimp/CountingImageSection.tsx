@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
+import { useAIImageDimensions } from '@/features/farm/hooks/useAIImageDimensions';
 
 export interface CountingImageSectionProps {
     imageUri: string | null;
@@ -27,14 +28,7 @@ export const CountingImageSection: React.FC<CountingImageSectionProps> = ({
     onImageRemove,
     onLayoutDisplay,
 }) => {
-    const aspectRatio =
-        imageDimensions.width > 0 && imageDimensions.height > 0
-            ? imageDimensions.width / imageDimensions.height
-            : 1;
-    const overlayHeight =
-        imageDimensions.width > 0 && imageDimensions.height > 0
-            ? displayDimensions.width / (imageDimensions.width / imageDimensions.height)
-            : displayDimensions.width;
+    const { aspectRatio, overlayHeight } = useAIImageDimensions(imageDimensions, displayDimensions);
 
     return (
         <View

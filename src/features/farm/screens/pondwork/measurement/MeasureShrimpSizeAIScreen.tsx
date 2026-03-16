@@ -11,6 +11,7 @@ import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Loading } from '@/shared/components/ui/Loading';
 
 import Toast from 'react-native-toast-message';
+import RNFS from 'react-native-fs';
 import { ToastMessages } from '@/features/menu/utils/toastMessages';
 import { Input } from '@/shared/components/forms/Input';
 import { Button } from '@/shared/components/buttons/Button';
@@ -28,6 +29,8 @@ import {
     MeasurementDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpMeasurementBoundingBoxOverlay';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
+import { AIImagePickerSheet } from '@/features/farm/components/ai-common/AIImagePickerSheet';
+import type { CropRegion } from '@/shared/components/image-cropper';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 // type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
@@ -61,6 +64,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const [detections, setDetections] = useState<MeasurementDetectionBox[]>([]);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
+    const [isPickerSheetVisible, setIsPickerSheetVisible] = useState(false);
 
     // Derived state for current/latest display
     const currentMeasurement =
@@ -135,6 +139,24 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
         }
         setDetections([]); // Clear previous detections
         setHasAnalyzedCurrent(false);
+    };
+
+    // ── Gallery crop callback (từ AIImagePickerSheet → ImageCropperView) ──────────────────
+    // Nhận uri gốc + region cắt, encode base64 và set lên state
+    const handleGalleryCrop = async (uri: string, _region: CropRegion) => {
+        setIsPickerSheetVisible(false);
+        try {
+            const base64 = await RNFS.readFile(uri, 'base64');
+            await handleImageSelect(uri, base64);
+        } catch (err) {
+            console.error('Failed to read image as base64', err);
+            await handleImageSelect(uri); // Fallback
+        }
+    };
+
+    // ── Mở camera (giữ nguyên flow cũ) ─────────────────────────────────────────
+    const handleOpenCamera = () => {
+        // TODO: mở camera flow
     };
 
     const handleGetCount = async () => {
@@ -314,6 +336,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                             displayDimensions={displayDimensions}
                             onImageSelect={handleImageSelect}
                             onImageAreaLayout={size => setDisplayDimensions(size)}
+                            onOpenPickerSheet={() => setIsPickerSheetVisible(true)}
                         >
                             {imageUri && detections.length > 0 && (
                                 <ShrimpMeasurementBoundingBoxOverlay
@@ -514,6 +537,16 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
                 onConfirm={confirmReset}
                 onCancel={() => setIsResetModalVisible(false)}
                 type="measure_reset"
+            />
+
+            {/* ── Image Picker Sheet ── */}
+            <AIImagePickerSheet
+                visible={isPickerSheetVisible}
+                onClose={() => setIsPickerSheetVisible(false)}
+                onOpenCamera={handleOpenCamera}
+                onOpenGallery={handleGalleryCrop}
+                title="Chọn ảnh đo tôm"
+                subtitle="Ảnh sẽ được AI phân tích để đo kích thước tôm"
             />
         </View>
     );
