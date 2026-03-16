@@ -72,7 +72,7 @@ export const SettingEnvironmentForm: React.FC<SettingEnvironmentFormProps> = ({
 
             <ButtonBar
                 mode="double"
-                primaryTitle="Lưu"
+                primaryTitle="Lưu thông tin"
                 secondaryTitle="Thiết lập lại"
                 onPrimaryPress={onSave}
                 onSecondaryPress={onReset}
