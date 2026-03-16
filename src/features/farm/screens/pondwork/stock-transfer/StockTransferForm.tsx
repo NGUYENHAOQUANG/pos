@@ -18,7 +18,7 @@ import type { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll
 
 export interface StockTransferFormProps {
     shrimpBreed?: string;
-    actualStockingQuantity: number;
+    totalShrimpCount: number;
     latestShrimpSize?: string;
     pondOptions: DropdownOption[];
     isSubmitting: boolean;
@@ -36,7 +36,7 @@ export interface StockTransferFormData {
 
 export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     shrimpBreed,
-    actualStockingQuantity,
+    totalShrimpCount,
     latestShrimpSize,
     pondOptions,
     isSubmitting,
@@ -55,17 +55,10 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     const transferInfoY = useRef(0);
 
-    const calculatedTotal = useMemo(() => {
-        if (actualStockingQuantity && shrimpSize && parseFloat(shrimpSize) > 0) {
-            return Math.round((actualStockingQuantity * 1000) / parseFloat(shrimpSize));
-        }
-        return 0;
-    }, [actualStockingQuantity, shrimpSize]);
-
     const hasChanges = useMemo(() => {
         const hasPondSelected = receivingPonds.some(p => !!p.receivingPond);
         const hasQuantityChanged = receivingPonds.some(
-            p => p.quantity !== '' && p.quantity !== calculatedTotal.toString()
+            p => p.quantity !== '' && p.quantity !== totalShrimpCount.toString()
         );
         const defaultShrimpSize = latestShrimpSize || '60';
         const hasShrimpSizeChanged = shrimpSize !== defaultShrimpSize;
@@ -78,21 +71,21 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
             transferMethod !== 'Sang hết' ||
             receivingPonds.length > 1
         );
-    }, [notes, shrimpSize, transferMethod, receivingPonds, calculatedTotal, latestShrimpSize]);
+    }, [notes, shrimpSize, transferMethod, receivingPonds, totalShrimpCount, latestShrimpSize]);
 
     const { UnsavedChangesModal } = useUnsavedChanges(hasChanges);
 
     useEffect(() => {
-        if (!hasInitialized.current && calculatedTotal > 0) {
+        if (!hasInitialized.current && totalShrimpCount > 0) {
             setReceivingPonds(prev => {
                 if (prev.length === 1 && (prev[0].quantity === '' || prev[0].quantity === '0')) {
                     hasInitialized.current = true;
-                    return [{ ...prev[0], quantity: calculatedTotal.toString() }];
+                    return [{ ...prev[0], quantity: totalShrimpCount.toString() }];
                 }
                 return prev;
             });
         }
-    }, [calculatedTotal]);
+    }, [totalShrimpCount]);
 
     const handleDropdownOpen = useCallback(() => {
         setTimeout(() => {
@@ -118,7 +111,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
             <HeaderSection title="Sang ao" onBack={onBack} />
 
             <SafeInputLayout
-                scrollRef={scrollRef}
+                innerRef={scrollRef}
                 contentContainerStyle={styles.scrollContent}
                 extraScrollHeight={150}
             >
@@ -131,10 +124,9 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
 
                 <CurrentPondInfoBox
                     shrimpBreed={shrimpBreed}
-                    actualStockingQuantity={actualStockingQuantity}
                     shrimpSize={shrimpSize}
                     onShrimpSizeChange={setShrimpSize}
-                    totalEstimatedShrimp={calculatedTotal}
+                    totalEstimatedShrimp={totalShrimpCount}
                 />
 
                 <View
@@ -148,7 +140,7 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                         receivingPonds={receivingPonds}
                         onReceivingPondsChange={setReceivingPonds}
                         onReceivingPondPress={_id => {}}
-                        totalEstimatedShrimp={calculatedTotal}
+                        totalEstimatedShrimp={totalShrimpCount}
                         pondOptions={pondOptions}
                         onDropdownOpen={handleDropdownOpen}
                     />
