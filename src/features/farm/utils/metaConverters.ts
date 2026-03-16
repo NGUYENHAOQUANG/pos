@@ -372,7 +372,9 @@ export const convertMeasureSizeMetaToActivityData = (
         label: 'Tỉ lệ sống dự kiến (%)',
         value:
             meta.survivalRate !== null && meta.survivalRate !== undefined
-                ? `${Math.round(meta.survivalRate)}`
+                ? Number(meta.survivalRate).toLocaleString('en-US', {
+                      maximumFractionDigits: 2,
+                  })
                 : '0',
     });
 

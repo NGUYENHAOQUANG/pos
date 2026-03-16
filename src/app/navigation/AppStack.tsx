@@ -206,7 +206,7 @@ export type AppStackParamList = {
     };
 
     // ============== Control Screens (Tab Bar hidden) ==============
-    ControlDetail: { pondName: string };
+    ControlDetail: { pondName: string; isMock?: boolean };
     ConnectDevice: { pondName: string };
     CustomFeedingMachine: {
         initialMode: 'manual' | 'schedule';

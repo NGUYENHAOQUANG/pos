@@ -13,12 +13,14 @@ import { HarvestDataBox } from '@/features/farm/components/pondwork/harvest/Harv
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
+import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
 import {
     HarvestFormData,
     harvestFormSchema,
     getHarvestTypeDisplay,
     getHarvestTypeFromDisplay,
 } from '@/features/farm/schemas/harvestFormSchema';
+import { handleHarvestFormError } from '@/features/farm/utils/toastMessages';
 
 export interface AddHarvestFormProps {
     initialData: HarvestFormData;
@@ -41,7 +43,13 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
     onBack,
     onCancel,
 }) => {
-    const { control, handleSubmit, watch, reset } = useForm<HarvestFormData>({
+    const {
+        control,
+        handleSubmit,
+        watch,
+        reset,
+        formState: { isDirty },
+    } = useForm<HarvestFormData>({
         resolver: zodResolver(harvestFormSchema),
         defaultValues: initialData,
     });
@@ -56,21 +64,28 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
+    const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(isDirty);
+
     const watchedHarvestType = watch('harvestType');
     const harvestTypeDisplay = getHarvestTypeDisplay(watchedHarvestType);
     const harvestTypeOptions = ['Thu hết', 'Thu tỉa'];
 
     const handleSavePress = () => {
         if (harvestTypeDisplay === 'Thu hết' && !isEditMode) {
-            setIsConfirmationModalVisible(true);
+            // Validate first, then show confirmation modal
+            handleSubmit(() => {
+                setIsConfirmationModalVisible(true);
+            }, handleHarvestFormError)();
         } else {
-            handleSubmit(onSubmitForm)();
+            allowNavigation();
+            handleSubmit(onSubmitForm, handleHarvestFormError)();
         }
     };
 
     const handleConfirmSave = () => {
         setIsConfirmationModalVisible(false);
-        handleSubmit(onSubmitForm)();
+        allowNavigation();
+        handleSubmit(onSubmitForm, handleHarvestFormError)();
     };
 
     const handleCancelConfirmation = () => {
@@ -83,6 +98,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const handleConfirmDelete = () => {
         setDeleteModalVisible(false);
+        allowNavigation();
         onDelete?.();
     };
 
@@ -170,7 +186,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                             : 'Lưu thông tin'
                     }
                     secondaryTitle="Huỷ"
-                    primaryDisabled={isSubmitting}
+                    primaryDisabled={isSubmitting || (isEditMode && !isDirty)}
                     onPrimaryPress={handleSavePress}
                     onSecondaryPress={onCancel}
                 />
@@ -194,6 +210,7 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
             />
+            {UnsavedChangesModal}
         </View>
     );
 };

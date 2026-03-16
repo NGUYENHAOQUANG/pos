@@ -33,8 +33,9 @@ export const HistoryActivitieScreens: React.FC<HistoryActivitieScreensProps> = (
     const [isLoading, setIsLoading] = React.useState(true);
 
     // Get current pond object to find ID
+    // Fallback to N01 (PONDS_LIST[1]) which has the most mock device data
     const currentPond = React.useMemo(() => {
-        return PONDS_LIST.find(p => p.name === pondName) || PONDS_LIST[0];
+        return PONDS_LIST.find(p => p.name === pondName) || PONDS_LIST[1];
     }, [pondName]);
 
     React.useEffect(() => {

@@ -4,7 +4,7 @@ import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -299,13 +299,7 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-                <TouchableOpacity style={styles.backButton} onPress={navigation.goBack}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Đo kích thước & cỡ tôm bằng AI</Text>
-                <View style={styles.headerSpacer} />
-            </View>
+            <HeaderSection title="Đo kích thước & cỡ tôm bằng AI" />
 
             <Loading isLoading={isScreenLoading}>
                 <ScrollView
@@ -529,35 +523,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 12,
-        paddingHorizontal: spacing.md,
-        backgroundColor: colors.white,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderLight,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: borderRadius.sm,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: colors.gray[200],
-    },
-    headerTitle: {
-        flex: 1,
-        fontSize: 16,
-        fontWeight: '600',
-        color: colors.text,
-        textAlign: 'center',
-    },
-    headerSpacer: {
-        width: 40,
-    },
+
     scrollContent: {
         paddingHorizontal: 0,
         paddingTop: 8,

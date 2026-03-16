@@ -110,6 +110,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
         onScroll,
     } = useDropdownScroll();
     const initializedRef = useRef(false);
+    const initialSnapshotRef = useRef<string | null>(null);
 
     const totalAmount = useMemo(
         () => warehouseFormUtils.calculateTotal(warehouseItems || []),
@@ -142,8 +143,37 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                 warehouseItems: initialData.warehouseItems,
             });
             initializedRef.current = true;
+            // Save snapshot for change comparison
+            initialSnapshotRef.current = JSON.stringify({
+                date: new Date(initialData.date).getTime(),
+                supplier: initialData.supplier || '',
+                warehouseItems: (initialData.warehouseItems || []).map((item: any) => ({
+                    materialId: item.materialId || '',
+                    quantity: item.quantity || '',
+                    price: item.price || '',
+                })),
+            });
         }
     }, [isEditMode, initialData, supplierOptions, reset]);
+
+    // Track changes for edit mode disable
+    const hasChanges = useMemo(() => {
+        if (!isEditMode || !initialSnapshotRef.current) return true;
+        const normalizeItems = (items: any[]) =>
+            (items || []).map((item: any) => ({
+                materialId: item.materialId || '',
+                quantity: item.quantity || '',
+                price: item.price || '',
+            }));
+        const currentSnapshot = JSON.stringify({
+            date: new Date(date).getTime(),
+            supplier: supplier || '',
+            warehouseItems: normalizeItems(warehouseItems),
+        });
+        if (currentSnapshot !== initialSnapshotRef.current) return true;
+        if ((files || []).length > 0) return true;
+        return false;
+    }, [isEditMode, date, supplier, warehouseItems, files]);
 
     const onError = useCallback(
         (errors: any) => warehouseFormUtils.handleFormError(errors, showValidationError),
@@ -257,6 +287,7 @@ const ImportReceiptForm: React.FC<AddImportReceiptUIProps> = ({
                         totalAmount={totalAmount}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={triggerSubmitValidation}
+                        disabled={isEditMode && !hasChanges}
                     />
 
                     <ConfirmSubmiss

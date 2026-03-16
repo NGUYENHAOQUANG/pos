@@ -7,8 +7,7 @@ interface SafeInputLayoutProps {
     style?: ViewStyle;
     contentContainerStyle?: ViewStyle;
     extraScrollHeight?: number;
-    /** Ref to access KeyboardAwareScrollView methods (e.g. scrollToPosition) */
-    innerRef?: React.Ref<KeyboardAwareScrollView>;
+    scrollRef?: React.RefObject<KeyboardAwareScrollView | null>;
 }
 
 /**
@@ -20,11 +19,11 @@ export const SafeInputLayout: React.FC<SafeInputLayoutProps> = ({
     style,
     contentContainerStyle,
     extraScrollHeight = 20,
-    innerRef,
+    scrollRef,
 }) => {
     return (
         <KeyboardAwareScrollView
-            ref={innerRef}
+            ref={scrollRef}
             style={[styles.container, style]}
             contentContainerStyle={contentContainerStyle}
             enableOnAndroid={true}

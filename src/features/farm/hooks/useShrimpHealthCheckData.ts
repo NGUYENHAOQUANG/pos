@@ -234,6 +234,9 @@ export const useUpdateShrimpHealthCheck = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.shrimpHealthChecks.byPond(variables.pondId),
             });
+            queryClient.invalidateQueries({
+                queryKey: farmKeys.shrimpHealthChecks.detail(variables.id),
+            });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
         },
         onError: handleError,
