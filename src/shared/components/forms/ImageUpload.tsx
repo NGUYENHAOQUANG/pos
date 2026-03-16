@@ -38,6 +38,8 @@ interface ImageUploadProps {
         dimensions?: { width: number; height: number }
     ) => void;
     onImageRemove?: () => void;
+    /** Override hành vi chụp ảnh mặc định (launchCamera) bằng camera tùy chỉnh */
+    onTakePhoto?: () => void;
     style?: ViewStyle;
     label?: string;
     returnBase64?: boolean;
@@ -55,6 +57,7 @@ export function ImageUpload({
     imageUri,
     onImageSelect,
     onImageRemove,
+    onTakePhoto: _onTakePhoto,
     style,
     label,
     returnBase64 = false,
