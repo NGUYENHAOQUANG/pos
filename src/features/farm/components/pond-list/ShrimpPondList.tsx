@@ -78,7 +78,6 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                         })
                     }
                     onDetailPress={() => onPondPress?.(item)}
-                    effectiveZoneId={zoneId}
                 />
             );
         };

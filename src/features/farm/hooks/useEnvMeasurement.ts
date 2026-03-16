@@ -4,6 +4,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
+import { handleError } from '@/shared/utils/errorHandler';
 import { environmentApi } from '@/features/farm/api/environmentApi';
 import {
     ICreateEnvMeasurementReq,
@@ -57,7 +59,9 @@ export const useCreateEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            Toast.show({ type: 'success', text1: 'Đã đo thông số môi trường thành công' });
         },
+        onError: handleError,
     });
 };
 
@@ -81,7 +85,9 @@ export const useUpdateEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
         },
+        onError: handleError,
     });
 };
 
@@ -95,7 +101,9 @@ export const useDeleteEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
         },
+        onError: handleError,
     });
 };
 

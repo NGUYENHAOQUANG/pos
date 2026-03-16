@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
 import Animated, { SlideInDown } from 'react-native-reanimated';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
@@ -22,7 +22,6 @@ import { formatDecimalInput } from '@/shared/utils/formatters';
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
 import { useEstimateShrimpSize } from '@/features/farm/hooks/useAI';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     ShrimpMeasurementBoundingBoxOverlay,
     MeasurementDetectionBox,
@@ -30,15 +29,12 @@ import {
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
-type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
+// type MeasureShrimpSizeAIScreenRouteProp = RouteProp<AppStackParamList, 'MeasureShrimpSizeAIScreen'>;
 
 export const MeasureShrimpSizeAIScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
-    const route = useRoute<MeasureShrimpSizeAIScreenRouteProp>();
-    const { pondId } = route.params || {};
-
-    // Store action to save AI result
-    const setLatestAIMeasurement = useFarmStore(state => state.setLatestAIMeasurement);
+    // const route = useRoute<MeasureShrimpSizeAIScreenRouteProp>();
+    // const { pondId } = route.params || {};
 
     // Use the hook
     const { mutate: estimateSize, isPending: isAnalyzing } = useEstimateShrimpSize();
@@ -289,16 +285,6 @@ export const MeasureShrimpSizeAIScreen: React.FC = () => {
 
     const handleSave = () => {
         if (sizePcsPerKg !== null && averageSizeCm !== null) {
-            // Save to store if we have a pondId
-            if (pondId && aiCount !== null) {
-                setLatestAIMeasurement(pondId, {
-                    averageSizeCm,
-                    sizePcsPerKg,
-                    aiCount,
-                    timestamp: Date.now(),
-                });
-            }
-
             navigation.navigate({
                 name: 'MeasureShrimpSizeScreen',
                 params: {

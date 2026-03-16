@@ -143,8 +143,7 @@ export const pondDetailService = {
 
     mapJobsWithPriorities: (
         pondOperations: PondTypeOperation[],
-        apiItemsByJobType: Partial<Record<JobType, JobExecution[]>>,
-        fallbackItemsByJobType: (jobType: JobType) => JobExecution[]
+        apiItemsByJobType: Partial<Record<JobType, JobExecution[]>>
     ): { type: JobType; items: JobExecution[] }[] => {
         const JOB_PRIORITY: Record<JobType, number> = {
             [JOB_TYPES.FEED]: 1,
@@ -169,8 +168,7 @@ export const pondDetailService = {
 
             if (!jobType) continue;
 
-            const apiItems = apiItemsByJobType[jobType];
-            const items = apiItems ?? fallbackItemsByJobType(jobType);
+            const items = apiItemsByJobType[jobType] ?? [];
 
             jobTypes.push({ type: jobType, items });
         }

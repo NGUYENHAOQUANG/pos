@@ -394,6 +394,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     titleWrapper: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
     },

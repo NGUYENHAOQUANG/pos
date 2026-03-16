@@ -16,13 +16,13 @@ type ScreenRouteProp = RouteProp<FarmStackParamList, 'MeasureShrimpSizeLogScreen
 export const MeasureShrimpSizeLogScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
     const { params } = useRoute<ScreenRouteProp>();
-    const { pond } = params || {};
+    const { pondId } = params || {};
 
     const { startDate, endDate, setStartDate, setEndDate, dateParams } = useDateRangeFilter();
 
     const [refreshing, setRefreshing] = React.useState(false);
 
-    const { jobs, isLoading, refetch } = useSizeMeasurementsAsJobs(pond?.id, dateParams);
+    const { jobs, isLoading, refetch } = useSizeMeasurementsAsJobs(pondId, dateParams);
 
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
@@ -35,7 +35,7 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
 
     const config: LogScreenConfig<MeasureSizeMeta> = {
         jobType: 'MEASURE_SIZE',
-        pond,
+        pondId,
         externalData: jobs,
         startDate,
         endDate,
@@ -44,14 +44,14 @@ export const MeasureShrimpSizeLogScreen: React.FC = () => {
         metaConverter: (item: JobExecution, meta: MeasureSizeMeta) =>
             convertMeasureSizeMetaToActivityData(item, meta),
         editRoute: 'MeasureShrimpSizeScreen',
-        getEditParams: (pondData, item) => ({ pond: pondData, itemToEdit: item }),
+        getEditParams: (_pondData, item) => ({ pondId, itemToEdit: item }),
     };
 
     const { groupedData } = useLogScreenData(config);
 
     const handleNavigateToCreate = () => {
-        if (pond) {
-            navigation.navigate('MeasureShrimpSizeScreen', { pond });
+        if (pondId) {
+            navigation.navigate('MeasureShrimpSizeScreen', { pondId });
         }
     };
 

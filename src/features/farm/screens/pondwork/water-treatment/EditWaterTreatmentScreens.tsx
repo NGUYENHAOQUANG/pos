@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import Toast from 'react-native-toast-message';
 import {
     showMaterialQuantityZeroToast,
     showEditJobSuccessToast,
     showDeleteJobSuccessToast,
+    showInvalidActivityTypeToast,
 } from '@/features/farm/utils/toastMessages';
 import { handleError } from '@/shared/utils/errorHandler';
 import { colors } from '@/styles';
@@ -185,10 +185,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
         const treatmentTypeEnum = TREATMENT_LABEL_TO_ENUM[activityType];
         if (!treatmentTypeEnum) {
-            Toast.show({
-                type: 'error',
-                text1: 'Loại hoạt động không hợp lệ',
-            });
+            showInvalidActivityTypeToast();
             return;
         }
 

@@ -6,6 +6,7 @@ import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import GearSix from '@/assets/Icon/GearSix.svg';
 import WarningCircle from '@/assets/Icon/WarningCircle.svg';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
+import { IParameterLimits } from '@/features/farm/types/envMeasurement.types';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 
 interface EnvironmentParametersBoxProps {
@@ -32,7 +33,7 @@ interface EnvironmentParametersBoxProps {
     onMagieChange?: (value: string) => void;
     no3?: string;
     onNo3Change?: (value: string) => void;
-    limits?: Record<string, string>; // Code -> Limit string (e.g., "7.5 - 8.5")
+    limits?: IParameterLimits;
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -61,7 +62,6 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onNo3Change,
     limits = {},
 }) => {
-    // Parse limit string "min - max" and validate input value
     const getLimitError = (value: string, metricCode: string): string | undefined => {
         if (!value || !limits[metricCode]) return undefined;
         const numValue = parseFloat(value);
@@ -78,12 +78,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         if (numValue > max) return `Vượt quá giới hạn trên: ${max}`;
         return undefined;
     };
-    // Helper to generate label
-    const getLabel = (baseName: string, id: string, unit: string = '') => {
+
+    const getLabel = (baseName: string, _id: string, unit: string = '') => {
         return unit ? `${baseName} (${unit})` : baseName;
     };
 
-    // Map advanced parameter IDs to render fields
     const getAdvancedParameterValue = (id: string): string => {
         if (id === ENVIRONMENT_METRIC_IDS.KALI) return kali;
         if (id === ENVIRONMENT_METRIC_IDS.TAN) return tan;
@@ -109,108 +108,93 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                 </View>
             )}
             <View>
-                {/* pH */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH, '1-14')}
-                        value={pH}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onPHChange}
-                        error={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH, '1-14')}
+                    value={pH}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onPHChange}
+                    hint={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* DO */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
-                        value={doValue}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onDOChange}
-                        error={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
+                    value={doValue}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onDOChange}
+                    hint={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* Nhiệt độ */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
-                        value={temperature}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onTemperatureChange}
-                        error={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
+                    value={temperature}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onTemperatureChange}
+                    hint={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* Độ mặn */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
-                        value={salinity}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onSalinityChange}
-                        error={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
+                    value={salinity}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onSalinityChange}
+                    hint={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* Độ kiềm */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
-                        value={alkalinity}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onAlkalinityChange}
-                        error={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
+                    value={alkalinity}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onAlkalinityChange}
+                    hint={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* Độ trong */}
-                <View style={styles.fullWidthRow}>
-                    <Input
-                        label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
-                        value={transparency}
-                        placeholder="--"
-                        keyboardType="numeric"
-                        inputFormat={InputFormat.DECIMAL}
-                        onChangeText={onTransparencyChange}
-                        error={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
-                    />
-                </View>
+                <Input
+                    label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
+                    value={transparency}
+                    placeholder="--"
+                    inputFormat={InputFormat.DECIMAL}
+                    onChangeText={onTransparencyChange}
+                    hint={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
+                    reserveErrorSpace
+                    containerStyle={styles.inputContainer}
+                />
 
-                {/* Advanced Parameters */}
                 {advancedParameters.length > 0 &&
                     advancedParameters.map(param => {
                         const paramValue = getAdvancedParameterValue(param.id);
                         const paramOnChange = getAdvancedParameterOnChange(param.id);
                         if (!paramOnChange) return null;
 
-                        let label = param.name;
-
                         return (
-                            <View key={param.id} style={styles.fullWidthRow}>
-                                <Input
-                                    label={label}
-                                    value={paramValue}
-                                    placeholder="--"
-                                    keyboardType="numeric"
-                                    inputFormat={InputFormat.DECIMAL}
-                                    onChangeText={paramOnChange}
-                                    error={getLimitError(paramValue, param.id)}
-                                />
-                            </View>
+                            <Input
+                                key={param.id}
+                                label={param.name}
+                                value={paramValue}
+                                placeholder="--"
+                                inputFormat={InputFormat.DECIMAL}
+                                onChangeText={paramOnChange}
+                                hint={getLimitError(paramValue, param.id)}
+                                reserveErrorSpace
+                                containerStyle={styles.inputContainer}
+                            />
                         );
                     })}
-                {/* Setup Button */}
+
                 {onSetupPress && (
                     <OutlineButton
                         label="Thiết lập chỉ số môi trường"
@@ -244,28 +228,10 @@ const styles = StyleSheet.create({
         color: colors.text,
         flex: 1,
     },
-    row: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    column: {
-        flex: 1,
-    },
-    fullWidthRow: {
-        width: '100%',
+    inputContainer: {
+        marginBottom: 0,
     },
     setupButton: {
         marginTop: 4,
-    },
-    warningRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        marginTop: 2,
-    },
-    warningText: {
-        fontSize: 12,
-        color: colors.warning,
-        flex: 1,
     },
 });

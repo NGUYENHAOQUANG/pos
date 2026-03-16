@@ -15,7 +15,7 @@ import {
     InventoryItem,
 } from '@/features/material/components/inventory/InventoryMaterialList';
 import { formatMaterialDate, formatMaterialDateTime } from '@/features/material/utils/dateUtils';
-import { IconTrashOutlined } from '@/assets/icons';
+import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { AddMaterialSkeleton } from '@/features/material/components/AddMaterialSkeleton';
 import { Loading } from '@/shared/components/ui/Loading';
@@ -197,12 +197,11 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                                 : 'Tạo Phiếu Điều Chỉnh Tồn Kho'
                         }
                         onBackPress={onBackPress}
-                        rightIcon={
+                        rightComponent={
                             isEditMode ? (
-                                <IconTrashOutlined width={20} height={20} color={colors.text} />
+                                <DeleteButton onPress={() => setDeleteModalVisible(true)} />
                             ) : undefined
                         }
-                        onRightPress={isEditMode ? () => setDeleteModalVisible(true) : undefined}
                     />
 
                     <SafeInputLayoutMaterial>

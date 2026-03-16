@@ -76,6 +76,10 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     formatPattern?: RegExp;
     /** Maximum number of characters allowed */
     maxDigits?: number;
+    /** Always reserve space for error/hint text to prevent layout shift */
+    reserveErrorSpace?: boolean;
+    /** Hint/warning text displayed below input — does NOT change border color */
+    hint?: string;
 }
 
 export const RequiredDot = () => <View style={styles.requiredDot} />;
@@ -109,6 +113,8 @@ export function Input({
     inputFormat = InputFormat.TEXT,
     formatPattern,
     maxDigits,
+    reserveErrorSpace = false,
+    hint,
     ...restProps
 }: InputProps) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -316,12 +322,42 @@ export function Input({
                     </TouchableOpacity>
                 )}
             </View>
-            {/* Error Message */}
-            {error && (
-                <Text style={styles.errorText} maxFontSizeMultiplier={1.1}>
-                    {error}
-                </Text>
-            )}
+            {/* Error / Hint Message */}
+            {(() => {
+                const displayText = error || hint;
+                if (reserveErrorSpace) {
+                    return (
+                        <Text
+                            style={[
+                                styles.errorText,
+                                hint && !error && styles.hintText,
+                                !displayText && styles.errorTextHidden,
+                            ]}
+                            maxFontSizeMultiplier={1.1}
+                        >
+                            {displayText || ' '}
+                        </Text>
+                    );
+                }
+                if (error) {
+                    return (
+                        <Text style={styles.errorText} maxFontSizeMultiplier={1.1}>
+                            {error}
+                        </Text>
+                    );
+                }
+                if (hint) {
+                    return (
+                        <Text
+                            style={[styles.errorText, styles.hintText]}
+                            maxFontSizeMultiplier={1.1}
+                        >
+                            {hint}
+                        </Text>
+                    );
+                }
+                return null;
+            })()}
         </View>
     );
 }
@@ -411,6 +447,12 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         color: colors.error,
         marginTop: spacing.xs,
+    },
+    errorTextHidden: {
+        color: 'transparent',
+    },
+    hintText: {
+        color: colors.error,
     },
     suffixWrapper: {
         justifyContent: 'center',

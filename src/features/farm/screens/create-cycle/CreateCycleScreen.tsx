@@ -9,7 +9,10 @@ import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleFor
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
-import Toast from 'react-native-toast-message';
+import {
+    showPondNotFoundToast,
+    showCycleFormValidationToast,
+} from '@/features/farm/utils/toastMessages';
 import {
     useCreateCycle,
     useUpdateCycle,
@@ -120,7 +123,7 @@ export const CreateCycleScreen: React.FC = () => {
 
     const onSubmit = (formData: CreateCycleFormValues) => {
         if (!pondId) {
-            Toast.show({ type: 'error', text1: 'Không tìm thấy thông tin Ao' });
+            showPondNotFoundToast();
             return;
         }
 
@@ -154,13 +157,13 @@ export const CreateCycleScreen: React.FC = () => {
             errors.breedSource?.message ||
             errors.season?.message ||
             errors.cycleName?.message ||
+            errors.stockingQuantity?.message ||
+            errors.age?.message ||
             'Vui lòng kiểm tra lại thông tin nguồn giống và vụ nuôi';
 
-        Toast.show({
-            type: 'error',
-            text1: typeof message === 'string' ? message : 'Dữ liệu không hợp lệ',
-            position: 'top',
-        });
+        showCycleFormValidationToast(
+            typeof message === 'string' ? message : 'Dữ liệu không hợp lệ'
+        );
     };
 
     const onDelete = async () => {

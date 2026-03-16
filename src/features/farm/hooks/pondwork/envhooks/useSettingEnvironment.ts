@@ -1,4 +1,6 @@
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
 import { environmentApi } from '@/features/farm/api/environmentApi';
 import { environmentSettingApi } from '@/features/farm/api/enviromentSettingApi';
 import { handleError } from '@/shared/utils/errorHandler';
@@ -8,6 +10,7 @@ import {
 } from '@/features/farm/types/environmentSettings.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { envMeasurementKeys } from '@/features/farm/hooks/useEnvMeasurement';
+import { useEnvironmentSettingStore } from '@/features/farm/store/environmentSettingStore';
 
 export const useEnvironmentMetricTypes = () => {
     return useQuery({
@@ -81,4 +84,59 @@ export const useDeleteEnvironmentSetting = () => {
         },
         onError: handleError,
     });
+};
+
+/**
+ * Batch save all pending environment setting changes (create + update).
+ * Reads from environmentSettingStore, executes mutations, clears on success.
+ */
+export const useSaveEnvironmentSettings = (zoneId: string) => {
+    const createSetting = useCreateEnvironmentSetting();
+    const updateSetting = useUpdateEnvironmentSetting();
+    const pendingChanges = useEnvironmentSettingStore(state => state.pendingChanges);
+    const clearChanges = useEnvironmentSettingStore(state => state.clearChanges);
+
+    const [isSaving, setIsSaving] = useState(false);
+
+    const save = useCallback(async () => {
+        const changes = Object.values(pendingChanges);
+        if (changes.length === 0) return true;
+
+        setIsSaving(true);
+
+        try {
+            const promises: Promise<unknown>[] = [];
+
+            for (const change of changes) {
+                if (change.type === 'update' && change.settingId) {
+                    promises.push(
+                        updateSetting.mutateAsync({
+                            zoneId,
+                            id: change.settingId,
+                            data: change.data as UpdateEnvironmentSettingRequest,
+                        })
+                    );
+                } else if (change.type === 'create') {
+                    promises.push(
+                        createSetting.mutateAsync({
+                            zoneId,
+                            data: change.data as CreateEnvironmentSettingRequest,
+                        })
+                    );
+                }
+            }
+
+            await Promise.all(promises);
+            Toast.show({ type: 'success', text1: 'Đã lưu thiết lập thành công' });
+            clearChanges();
+            return true;
+        } catch (error) {
+            handleError(error);
+            return false;
+        } finally {
+            setIsSaving(false);
+        }
+    }, [pendingChanges, zoneId, updateSetting, createSetting, clearChanges]);
+
+    return { save, isSaving };
 };
