@@ -7,6 +7,7 @@ import {
     UpdateEnvironmentSettingRequest,
 } from '@/features/farm/types/environmentSettings.types';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { envMeasurementKeys } from '@/features/farm/hooks/useEnvMeasurement';
 
 export const useEnvironmentMetricTypes = () => {
     return useQuery({
@@ -34,6 +35,9 @@ export const useCreateEnvironmentSetting = () => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.environment.settings(variables.zoneId),
             });
+            queryClient.invalidateQueries({
+                queryKey: envMeasurementKeys.lists(),
+            });
         },
         onError: handleError,
     });
@@ -55,6 +59,9 @@ export const useUpdateEnvironmentSetting = () => {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
                 queryKey: farmKeys.environment.settings(variables.zoneId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: envMeasurementKeys.lists(),
             });
         },
         onError: handleError,

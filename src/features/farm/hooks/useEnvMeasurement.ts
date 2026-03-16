@@ -18,6 +18,7 @@ import {
 import { useMemo } from 'react';
 import { useEnvironmentInit } from '@/features/farm/hooks/pondwork/envhooks/useEnvironmentLogic';
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
+import { toCreateAtFromISO, toCreateAtToISO } from '@/features/farm/utils/dateUtils';
 
 // Query keys
 export const envMeasurementKeys = {
@@ -99,26 +100,28 @@ export const useDeleteEnvMeasurement = () => {
 };
 
 // Hook to fetch environment measurements and map them to JobExecution format
-export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
-    // 1. Prepare date params
-    const params = useMemo(() => {
-        if (!date) return undefined;
-        // Start of day
-        const start = new Date(date);
-        start.setHours(0, 0, 0, 0);
-        // End of day
-        const end = new Date(date);
-        end.setHours(23, 59, 59, 999);
-
+export const useEnvMeasurementsAsJobs = (pondId: string, params?: IEnvMeasurementParams) => {
+    // Build query params — API requires date range to return data
+    const queryParams = useMemo(() => {
+        if (params?.CreateAtFrom && params?.CreateAtTo) {
+            return {
+                ...params,
+                PageSize: params.PageSize ?? 100,
+            };
+        }
+        // Default: start of current month → today
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         return {
-            CreateAtFrom: start.toISOString(),
-            CreateAtTo: end.toISOString(),
-            PageSize: 100, // Ensure we get all for the day
+            ...params,
+            CreateAtFrom: toCreateAtFromISO(startOfMonth),
+            CreateAtTo: toCreateAtToISO(now),
+            PageSize: params?.PageSize ?? 100,
         };
-    }, [date]);
+    }, [params]);
 
     // 2. Fetch data
-    const { data: response, isLoading, refetch } = useEnvMeasurements(pondId, params);
+    const { data: response, isLoading, refetch } = useEnvMeasurements(pondId, queryParams);
 
     const { metricTypes } = useEnvironmentInit();
 
@@ -127,44 +130,42 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
 
         const rawItems = response.data.items || [];
 
-        // Count daily items
-        const totalPerDay: Record<string, number> = {};
+        // Group by date
+        const grouped = new Map<string, any[]>();
         rawItems.forEach((item: any) => {
             const d = item.createdAt ? new Date(item.createdAt) : new Date();
-            const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-            totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+            const dateKey = d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+            if (!grouped.has(dateKey)) grouped.set(dateKey, []);
+            grouped.get(dateKey)!.push(item);
         });
 
-        // Sort descending (newest first)
-        const sortedItems = [...rawItems].sort((a: any, b: any) => {
-            const timeA = new Date(a.createdAt).getTime();
-            const timeB = new Date(b.createdAt).getTime();
-            return timeB - timeA;
+        // Sort each day ASC to assign sequential numbering
+        grouped.forEach(items => {
+            items.sort(
+                (a: any, b: any) =>
+                    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
         });
 
-        const dayCounts: Record<string, number> = {};
+        const allJobs: JobExecution[] = [];
 
-        return sortedItems.map((item: any) => {
-            const dateObj = new Date(item.createdAt);
-            const dateKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
-            const timeStr = dateObj.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-            });
+        grouped.forEach(dayItems => {
+            dayItems.forEach((item: any, index: number) => {
+                const dateObj = new Date(item.createdAt);
+                const timeStr = dateObj.toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+                const entryNumber = index + 1;
 
-            if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
-            dayCounts[dateKey]++;
-            const total = totalPerDay[dateKey] ?? dayCounts[dateKey];
-            const dailyIndex = total - dayCounts[dateKey] + 1;
+                // Construct meta with all metrics
+                const meta: EnvironmentMeta = {};
+                const details = item.envMeasurementDetail?.envMeasurementDetails || [];
+                if (details.length > 0 && metricTypes.length > 0) {
+                    details.forEach((m: any) => {
+                        const metric = metricTypes.find(mt => mt.id === m.metricId);
+                        if (!metric) return;
 
-            // Construct meta for warnings
-            const meta: EnvironmentMeta = {};
-            const details = item.envMeasurementDetail?.envMeasurementDetails || [];
-            if (details.length > 0 && metricTypes.length > 0) {
-                details.forEach((m: any) => {
-                    const metric = metricTypes.find(mt => mt.id === m.metricId);
-                    if (metric) {
-                        // Map code to warning field
                         switch (metric.code) {
                             case ENVIRONMENT_METRIC_IDS.PH:
                                 meta.pH = m.value.toString();
@@ -178,21 +179,58 @@ export const useEnvMeasurementsAsJobs = (pondId: string, date?: Date) => {
                                 meta.temperature = m.value.toString();
                                 meta.temperatureWarning = m.isAlerted;
                                 break;
+                            case ENVIRONMENT_METRIC_IDS.SALINITY:
+                                meta.salinity = m.value.toString();
+                                meta.salinityWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.ALKALINITY:
+                                meta.alkalinity = m.value.toString();
+                                meta.alkalinityWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.TRANSPARENCY:
+                                meta.transparency = m.value.toString();
+                                meta.transparencyWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.KALI:
+                                meta.kali = m.value.toString();
+                                meta.kaliWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.TAN:
+                                meta.tan = m.value.toString();
+                                meta.tanWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.MAGIE:
+                                meta.magie = m.value.toString();
+                                meta.magieWarning = m.isAlerted;
+                                break;
+                            case ENVIRONMENT_METRIC_IDS.NO3:
+                                meta.no3 = m.value.toString();
+                                meta.no3Warning = m.isAlerted;
+                                break;
                         }
-                    }
-                });
-            }
+                    });
+                }
 
-            return {
-                id: item.id,
-                label: `Lần ${dailyIndex}`,
-                time: timeStr,
-                date: item.createdAt,
-                pondId: item.pondId,
-                note: item.envMeasurementDetail?.notes,
-                meta,
-            };
+                allJobs.push({
+                    id: item.id,
+                    label: `Lần ${entryNumber}`,
+                    time: timeStr,
+                    date: item.createdAt,
+                    pondId: item.pondId,
+                    note: item.envMeasurementDetail?.notes,
+                    meta,
+                });
+            });
         });
+
+        // Sort all jobs DESC (newest first)
+        allJobs.sort((a, b) => {
+            const timeA = new Date(a.date || '').getTime();
+            const timeB = new Date(b.date || '').getTime();
+            return timeB - timeA;
+        });
+
+        return allJobs;
     }, [response, metricTypes]);
 
     return { jobs, isLoading, refetch };

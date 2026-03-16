@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
-import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { Input, InputFormat, RequiredDot } from '@/shared/components/forms/Input';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -201,6 +201,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     value={quantity}
                     onChangeText={handleQuantityChange}
                     keyboardType="decimal-pad"
+                    inputFormat={InputFormat.DECIMAL}
                     required
                     containerStyle={{ marginBottom: 0 }}
                 />

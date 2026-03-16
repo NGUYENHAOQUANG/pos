@@ -8,7 +8,7 @@
  * @see https://rn.mobile.ant.design/components/input-item
  */
 import { colors, sizes, spacing, typography } from '@/styles';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     Platform,
     StyleSheet,
@@ -21,6 +21,19 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Input as AntdInput } from '@ant-design/react-native';
+import { InputFilters } from '@/shared/regex';
+
+/** Input format types for controlling what characters are allowed */
+export enum InputFormat {
+    /** Allow any text (default) */
+    TEXT = 'TEXT',
+    /** Allow only digits (0-9) */
+    INTEGER = 'INTEGER',
+    /** Allow digits and at most one decimal point */
+    DECIMAL = 'DECIMAL',
+    /** Use a custom regex pattern to validate each keystroke */
+    REGEX = 'REGEX',
+}
 
 export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 'value'> {
     /** Label text displayed above the input */
@@ -57,6 +70,12 @@ export interface InputProps extends Omit<TextInputProps, 'style' | 'onChange' | 
     suffix?: string | React.ReactNode;
     /** Ellipsize mode for the text (only works when disabled) */
     ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+    /** Input format — controls allowed characters */
+    inputFormat?: InputFormat;
+    /** Custom regex pattern (used when inputFormat = REGEX) */
+    formatPattern?: RegExp;
+    /** Maximum number of characters allowed */
+    maxDigits?: number;
 }
 
 export const RequiredDot = () => <View style={styles.requiredDot} />;
@@ -87,6 +106,9 @@ export function Input({
     numberOfLines = 1,
     suffix,
     ellipsizeMode,
+    inputFormat = InputFormat.TEXT,
+    formatPattern,
+    maxDigits,
     ...restProps
 }: InputProps) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -102,6 +124,39 @@ export function Input({
 
     // Determine if we should show password toggle
     const showPasswordToggle = secureTextEntry && !iconRight;
+
+    // Filter text based on inputFormat and maxDigits
+    const handleChangeText = useCallback(
+        (text: string) => {
+            let filtered = text;
+
+            switch (inputFormat) {
+                case InputFormat.INTEGER:
+                    filtered = InputFilters.integer(text);
+                    break;
+                case InputFormat.DECIMAL:
+                    filtered = InputFilters.decimal(text);
+                    break;
+                case InputFormat.REGEX:
+                    if (formatPattern) {
+                        const result = InputFilters.matchRegex(text, formatPattern);
+                        if (result === null) return;
+                    }
+                    break;
+                case InputFormat.TEXT:
+                default:
+                    break;
+            }
+
+            // Apply maxDigits limit
+            if (maxDigits !== undefined && filtered.length > maxDigits) {
+                filtered = filtered.slice(0, maxDigits);
+            }
+
+            onChangeText?.(filtered);
+        },
+        [inputFormat, formatPattern, maxDigits, onChangeText]
+    );
 
     // Get border color based on state
     const getBorderColor = (): string => {
@@ -170,7 +225,7 @@ export function Input({
                     ) : (
                         <AntdInput
                             value={value}
-                            onChangeText={onChangeText}
+                            onChangeText={handleChangeText}
                             placeholder={placeholder}
                             placeholderTextColor={colors.textTertiary}
                             editable={!disabled}

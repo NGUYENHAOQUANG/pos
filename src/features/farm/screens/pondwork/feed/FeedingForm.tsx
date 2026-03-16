@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { colors } from '@/styles';
@@ -12,6 +12,7 @@ import { IMaterial, MaterialGroupType } from '@/features/material/types/material
 import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { RadioButton } from '@/shared/components/forms/RadioButton';
 import ActivitySchedule, {
     ScheduleItem,
 } from '@/features/control/components/CustomFeedingMachine/ActivitySchedule';
@@ -160,7 +161,7 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                     }}
                 />
 
-                {!isEditMode && (
+                {
                     <SelectionInfoBox title="Chế độ hoạt động">
                         <View style={styles.infoBox}>
                             <InfoIcon
@@ -179,49 +180,20 @@ export const FeedingForm = React.forwardRef<FeedingFormRef, FeedingFormProps>(
                             name="mode"
                             control={control}
                             render={({ field: { value, onChange } }) => (
-                                <View style={styles.radioGroup}>
-                                    <TouchableOpacity
-                                        style={styles.radioItem}
-                                        onPress={() => onChange('manual')}
-                                        activeOpacity={0.8}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.radioOuter,
-                                                value === 'manual' && styles.radioOuterSelected,
-                                            ]}
-                                        >
-                                            {value === 'manual' && (
-                                                <View style={styles.radioInner} />
-                                            )}
-                                        </View>
-                                        <Text style={styles.radioLabel}>Thủ công</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        style={styles.radioItem}
-                                        onPress={() => onChange('schedule')}
-                                        activeOpacity={0.8}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.radioOuter,
-                                                value === 'schedule' && styles.radioOuterSelected,
-                                            ]}
-                                        >
-                                            {value === 'schedule' && (
-                                                <View style={styles.radioInner} />
-                                            )}
-                                        </View>
-                                        <Text style={styles.radioLabel}>Lịch trình</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                <RadioButton
+                                    options={[
+                                        { label: 'Thủ công', value: 'manual' },
+                                        { label: 'Lịch trình', value: 'schedule' },
+                                    ]}
+                                    value={value}
+                                    onValueChange={onChange}
+                                />
                             )}
                         />
                     </SelectionInfoBox>
-                )}
+                }
 
-                {!isEditMode && currentMode === 'schedule' && (
+                {currentMode === 'schedule' && (
                     <Controller
                         name="schedules"
                         control={control}
@@ -347,7 +319,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     activityScheduleTitle: {
-        fontSize: 14,
+        fontSize: 16,
     },
     spacer: {
         height: 80,

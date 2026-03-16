@@ -163,6 +163,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                         visibleRest={VISIBLE_REST}
                                         itemTextStyle={styles.pickerItemText}
                                         selectedIndicatorStyle={styles.selectedIndicator}
+                                        flatListProps={{
+                                            initialNumToRender: 65,
+                                            maxToRenderPerBatch: 65,
+                                            windowSize: 11,
+                                        }}
                                     />
                                 </View>
 
@@ -182,6 +187,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                         visibleRest={VISIBLE_REST}
                                         itemTextStyle={styles.pickerItemText}
                                         selectedIndicatorStyle={styles.selectedIndicator}
+                                        flatListProps={{
+                                            initialNumToRender: 65,
+                                            maxToRenderPerBatch: 65,
+                                            windowSize: 11,
+                                        }}
                                     />
                                 </View>
 
@@ -204,6 +214,11 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                                             visibleRest={VISIBLE_REST}
                                             itemTextStyle={styles.pickerItemText}
                                             selectedIndicatorStyle={styles.selectedIndicator}
+                                            flatListProps={{
+                                                initialNumToRender: 65,
+                                                maxToRenderPerBatch: 65,
+                                                windowSize: 11,
+                                            }}
                                         />
                                     </View>
                                 )}

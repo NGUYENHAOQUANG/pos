@@ -102,13 +102,13 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 placeholder="Cỡ tôm (con/kg)"
                 value={shrimpSize}
                 onChangeText={text => {
-                    if (text.length <= 6) {
+                    if (text.length <= 15) {
                         onShrimpSizeChange(formatNumericInput(text));
                     }
                 }}
                 keyboardType="numeric"
                 required
-                maxLength={6}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
             <Input
@@ -116,13 +116,13 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
                 placeholder="Sản lượng còn lại (kg)"
                 value={remainingWeight}
                 onChangeText={text => {
-                    if (text.length <= 12) {
+                    if (text.length <= 15) {
                         onRemainingWeightChange(formatDecimalInput(text));
                     }
                 }}
                 keyboardType="numeric"
                 required
-                maxLength={9}
+                maxLength={15}
                 containerStyle={{ marginBottom: 0 }}
             />
         </PondDataBox>

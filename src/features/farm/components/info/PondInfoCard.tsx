@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 
 import { colors, typography } from '@/styles';
 import { PondData } from '@/features/farm/types/farm.types';
+import { POND_SHAPE_LABELS, PondShape } from '@/features/farm/types/pond.types';
 
 interface InfoFieldProps {
     label: string;
@@ -27,7 +28,9 @@ export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
         name: pond?.name || '{ten ao nuoi tom}',
         // Safely handle if type is string (old) or object (new)
         type: (typeof pond?.type === 'object' ? pond?.type?.name : pond?.type) || '{loại ao}',
-        // shape: pond?.shape || '{hình dáng ao}',
+        shape: pond?.shape
+            ? POND_SHAPE_LABELS[pond.shape as PondShape] || pond.shape
+            : '{hình dáng ao}',
         area: pond?.areaSqm
             ? `${Math.round(Number(pond.areaSqm))} m²`
             : pond?.area
@@ -40,7 +43,7 @@ export const PondInfoCard: React.FC<PondInfoCardProps> = ({ pond }) => {
         <View style={styles.card}>
             <InfoField label="Tên ao:" value={pondInfo.name} />
             <InfoField label="Loại ao:" value={pondInfo.type} />
-            {/* <InfoField label="Hình dáng ao:" value={pondInfo.shape} /> */}
+            <InfoField label="Hình dáng ao:" value={pondInfo.shape} />
             <InfoField label="Diện tích:" value={pondInfo.area} />
             <InfoField label="Độ sâu:" value={pondInfo.depth.toString()} />
         </View>

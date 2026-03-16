@@ -16,6 +16,7 @@ import {
     Animated,
     LayoutChangeEvent,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
@@ -193,7 +194,7 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const innerWidth = Math.max(0, barWidth - 10);
     const tabWidth = innerWidth > 0 ? innerWidth / state.routes.length : 0;
 
-    return (
+    const tabBarContent = (
         <View
             onLayout={e => {
                 handleLayout(e);
@@ -257,6 +258,28 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
             })}
         </View>
     );
+
+    return (
+        <View style={styles.tabBarWrapper}>
+            {/* Multi-stop gradient to simulate frosted glass effect */}
+            <LinearGradient
+                colors={[
+                    colors.fade[0],
+                    colors.fade[8],
+                    colors.fade[20],
+                    colors.fade[40],
+                    colors.fade[65],
+                    colors.fade[85],
+                    colors.fade[95],
+                ]}
+                locations={[0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]}
+                style={styles.blurContainer}
+                pointerEvents="none"
+            />
+            {/* Tab bar sits on top */}
+            {tabBarContent}
+        </View>
+    );
 };
 
 const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
@@ -286,10 +309,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     bottomContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         flexDirection: 'row',
         backgroundColor: 'white',
         borderRadius: borderRadius.full,
@@ -302,6 +321,22 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: borderRadius.full,
         elevation: 1,
+        zIndex: 1,
+    },
+    tabBarWrapper: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+    blurContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 80,
+        marginHorizontal: 16,
+        overflow: 'hidden',
     },
     tabItem: {
         flex: 1,

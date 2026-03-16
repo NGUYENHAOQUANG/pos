@@ -76,7 +76,7 @@ export const PondDetailScreen: React.FC = () => {
     const { jobs: apiMeasureSizeJobs } = useSizeMeasurementsAsJobs(pondId);
     const { jobs: apiShrimpInspectionJobs } = useShrimpHealthChecksAsJobs(pondId);
     const { jobs: apiSiphonJobs } = useSiphonRecordsAsJobs(pondId);
-    const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pondId, new Date());
+    const { jobs: apiEnvJobs } = useEnvMeasurementsAsJobs(pondId);
     const { jobs: apiIncidentJobs } = useIncidentsAsJobs(pondId);
     const { jobs: apiCleanRenovationJobs } = useCleanRenovationsAsJobs(pondId);
     const { jobs: apiDryRenovationJobs } = useDryRenovationsAsJobs(pondId);

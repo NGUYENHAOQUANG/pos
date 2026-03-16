@@ -29,6 +29,7 @@ interface CycleDetailContentProps {
     shrimpSize: string;
     displayStockingDate: string;
     showIncomingTransfer?: boolean;
+    isCultivation?: boolean;
     refreshing: boolean;
     transferDetail?: IStockTransferDetail;
     harvestSummary?: HarvestSummaryItem[];
@@ -45,6 +46,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     shrimpSize,
     displayStockingDate,
     showIncomingTransfer = true,
+    isCultivation = false,
     refreshing,
     transferDetail,
     harvestSummary,
@@ -166,8 +168,8 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 </View>
             )}
 
-            {/* Thông tin thu hoạch chu kỳ */}
-            {harvestSummary &&
+            {isCultivation &&
+                harvestSummary &&
                 harvestSummary.length > 0 &&
                 harvestSummary.map((item, index) => (
                     <View
