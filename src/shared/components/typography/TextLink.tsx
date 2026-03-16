@@ -181,7 +181,6 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     link: {
-        fontFamily: typography.fontFamily.regular,
         fontSize: typography.fontSize.sm,
         color: colors.primary,
         fontWeight: typography.fontWeight.regular,

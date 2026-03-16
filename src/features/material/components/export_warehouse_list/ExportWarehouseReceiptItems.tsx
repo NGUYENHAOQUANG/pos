@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { ExportReceiptItem } from '@/features/material/types/exportReceipt.types';

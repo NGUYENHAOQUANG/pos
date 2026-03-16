@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     StyleProp,
@@ -9,6 +8,7 @@ import {
     Image,
     ImageSourcePropType,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 
 import DeviceActiveIcon from '@/assets/Icon/IconDevices/DeviceActive.svg';

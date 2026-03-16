@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     StyleSheet,
     Platform,
@@ -11,6 +10,7 @@ import {
     TouchableWithoutFeedback,
     ScrollView,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';

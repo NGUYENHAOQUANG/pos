@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Image,
@@ -10,6 +9,7 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import {
     launchCamera,

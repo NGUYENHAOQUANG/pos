@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { DeviceCard } from './Devices';
 import { ButtonControlSwitch } from './ButtonControlSwitch'; // Assuming it's in the same folder or adjusted path
 import { EControlMode, DeviceData } from '../../types/control.types';

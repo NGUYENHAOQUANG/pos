@@ -87,7 +87,6 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: spacing.md,
-        fontFamily: typography.fontFamily.medium,
     },
     description: {
         fontSize: 14,

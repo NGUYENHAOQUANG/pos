@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     StyleSheet,
     Platform,
@@ -10,6 +9,7 @@ import {
     Dimensions,
     LayoutChangeEvent,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
 import { Loading } from '@/shared/components/ui/Loading';

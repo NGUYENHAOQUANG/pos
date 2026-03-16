@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-    TouchableOpacity,
-    Text,
-    StyleSheet,
-    StyleProp,
-    ViewStyle,
-    TextStyle,
-    View,
-} from 'react-native';
+import { TouchableOpacity, StyleSheet, StyleProp, ViewStyle, TextStyle, View } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, borderRadius, spacing } from '@/styles';
 
 interface ButtonMaterialListProps {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, ScrollView, RefreshControl, StyleSheet, Text } from 'react-native';
+import { View, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';

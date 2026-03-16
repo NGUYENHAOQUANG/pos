@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
+import { Text } from '@/shared/components/typography/Text';
 import { colors, typography } from '@/styles';
 import { FarmData } from '@/features/farm/types/farm.types';
 const BGFarmInfo = require('@/assets/backgrounds/Farm-Infor.png');

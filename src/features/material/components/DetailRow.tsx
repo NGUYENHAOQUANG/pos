@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     StyleProp,
     TextStyle,
@@ -16,6 +15,7 @@ import {
     Animated,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/styles';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

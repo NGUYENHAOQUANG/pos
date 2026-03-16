@@ -226,7 +226,6 @@ const styles = StyleSheet.create({
     },
     tabText: {
         textAlign: 'center',
-        fontFamily: typography.fontFamily.regular,
         color: colors.black,
         fontWeight: typography.fontWeight.bold,
         fontSize: typography.fontSize.lg,

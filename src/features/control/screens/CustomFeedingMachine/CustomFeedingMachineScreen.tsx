@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, BackHandler, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, BackHandler, RefreshControl } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/styles';
 import Toast from 'react-native-toast-message';

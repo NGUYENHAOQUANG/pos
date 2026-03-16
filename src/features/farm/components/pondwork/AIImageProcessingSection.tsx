@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
+import { Text } from '@/shared/components/typography/Text';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconCamera } from '@/assets/icons';

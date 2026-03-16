@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius, typography } from '@/styles';
 import { formatDate } from '@/features/farm/utils/dateUtils';
 import { CycleData } from '@/features/farm/types/cycle.types';

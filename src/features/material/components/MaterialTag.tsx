@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors } from '@/styles';
 import { MaterialGroupType } from '@/features/material/types/material.types';
 

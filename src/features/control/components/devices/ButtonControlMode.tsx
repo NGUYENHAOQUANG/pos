@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, StyleSheet, StyleProp, ViewStyle, TouchableOpacity } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { EControlMode } from '../../types/control.types';
 import { borderRadius, colors } from '@/styles';
 

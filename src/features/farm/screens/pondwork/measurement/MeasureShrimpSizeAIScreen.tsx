@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';

@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';

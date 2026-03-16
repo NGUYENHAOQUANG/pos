@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors,typography } from '@/styles';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
+import { colors, typography } from '@/styles';
 
 export const PondInfor = () => {
     // Mock data based on the image requirement

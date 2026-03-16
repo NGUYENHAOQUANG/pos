@@ -1,16 +1,17 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
-    TextInput,
     FlatList,
     Platform,
     Modal,
     Keyboard,
     StatusBar,
+    TextInput as RNTextInput,
 } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
@@ -36,7 +37,7 @@ export const DropDownSelectMaterial: React.FC<DropDownSelectMaterialProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-    const inputRef = useRef<TextInput>(null);
+    const inputRef = useRef<RNTextInput>(null);
     const triggerRef = useRef<View>(null);
 
     // Filter data based on search text

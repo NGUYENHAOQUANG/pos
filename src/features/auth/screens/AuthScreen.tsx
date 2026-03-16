@@ -5,9 +5,9 @@ import {
     StatusBar,
     StyleSheet,
     View,
-    Text,
     KeyboardAvoidingView,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, ErrorBoundary, Logo } from '@/shared/components';

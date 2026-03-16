@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, typography } from '@/styles';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import { useCycleDetail } from '@/features/farm/hooks/useCycle';

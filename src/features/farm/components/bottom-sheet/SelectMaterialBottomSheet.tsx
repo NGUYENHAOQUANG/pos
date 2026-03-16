@@ -6,7 +6,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -17,9 +16,11 @@ import {
     Platform,
     KeyboardAvoidingView,
     FlatList,
-    TextInput,
     ActivityIndicator,
+    TextInput as RNTextInput,
 } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { Input, InputFormat, RequiredDot } from '@/shared/components/forms/Input';
@@ -63,7 +64,7 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     const [selectedUnit, setSelectedUnit] = useState<string>('');
     // 'form' = material form view, 'product' = product selection list view
     const [currentView, setCurrentView] = useState<'form' | 'product'>('form');
-    const searchInputRef = useRef<TextInput>(null);
+    const searchInputRef = useRef<RNTextInput>(null);
 
     // Slide-up animation
     useEffect(() => {
@@ -497,11 +498,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.text,
         flex: 1,
+        fontWeight: '500',
         marginRight: spacing.sm,
     },
     itemStock: {
-        fontSize: 13,
+        fontSize: 14,
         color: colors.textSecondary,
+        fontWeight: '500',
     },
     emptyContainer: {
         padding: spacing.xl,

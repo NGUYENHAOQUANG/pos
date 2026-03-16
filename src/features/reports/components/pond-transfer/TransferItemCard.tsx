@@ -6,7 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, typography } from '@/styles';
 import ArrowIcon from '@/assets/Icon/IconReport/Arrow.svg';
@@ -121,7 +122,6 @@ const styles = StyleSheet.create({
     centerLineText: {
         fontSize: 14,
         color: colors.textSecondary,
-        fontFamily: typography.fontFamily.regular,
         fontWeight: typography.fontWeight.regular,
         textAlign: 'center',
     },

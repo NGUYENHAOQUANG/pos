@@ -225,7 +225,6 @@ const styles = StyleSheet.create({
 
     // Text styles
     buttonText: {
-        fontFamily: typography.fontFamily.regular,
         fontWeight: typography.fontWeight.medium,
         textAlign: 'center',
     },

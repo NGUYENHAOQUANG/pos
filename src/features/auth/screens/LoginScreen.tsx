@@ -12,12 +12,12 @@ import {
     Platform,
     ScrollView,
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
     KeyboardAvoidingView,
     StatusBar,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/styles';
 

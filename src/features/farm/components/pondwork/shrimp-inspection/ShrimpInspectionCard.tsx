@@ -1,36 +1,37 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { ShrimpInspectionData } from '@/features/farm/types/farm.types';
 
 interface ShrimpInspectionCardProps {
-  inspection: ShrimpInspectionData;
+    inspection: ShrimpInspectionData;
 }
 
 export const ShrimpInspectionCard: React.FC<ShrimpInspectionCardProps> = ({ inspection }) => {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Shrimp Inspection Card</Text>
-      <Text style={styles.text}>Pond ID: {inspection.pondId}</Text>
-    </View>
-  );
+    return (
+        <View style={styles.card}>
+            <Text style={styles.title}>Shrimp Inspection Card</Text>
+            <Text style={styles.text}>Pond ID: {inspection.pondId}</Text>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.white,
-    padding: 16,
-    borderRadius: 8,
-    margin: 8,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
+    card: {
+        backgroundColor: colors.white,
+        padding: 16,
+        borderRadius: 8,
+        margin: 8,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+        marginBottom: 8,
+    },
+    text: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
 });

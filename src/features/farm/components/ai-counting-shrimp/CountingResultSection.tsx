@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import InfoIcon from '@/assets/Icon/information-circle.svg';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';

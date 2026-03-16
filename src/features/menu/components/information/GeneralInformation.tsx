@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import AvatarIcon from '@/assets/Icon/IconMenu/AvatarNew.svg';
 

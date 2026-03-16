@@ -17,11 +17,6 @@ import React from 'react';
 import { Text as RNText, TextProps, StyleSheet } from 'react-native';
 import { fontFamily, fontWeightToFamily } from '@/styles/typography';
 
-/**
- * Resolve fontFamily from fontWeight in style.
- * If fontWeight is provided, use the corresponding font file.
- * Otherwise, use Regular as default.
- */
 const resolveFontFamily = (style?: TextProps['style']): string => {
     if (!style) return fontFamily.regular;
 
@@ -41,18 +36,25 @@ const resolveFontFamily = (style?: TextProps['style']): string => {
     return fontFamily.regular;
 };
 
-export const Text: React.FC<TextProps> = ({ style, ...props }) => {
+export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
     const resolvedFamily = resolveFontFamily(style);
+
+    const safeChildren = typeof children === 'string' ? children + '\u200A' : children;
 
     return (
         <RNText
             {...props}
             style={[
-                { fontFamily: resolvedFamily },
+                {
+                    fontFamily: resolvedFamily,
+                    includeFontPadding: false,
+                    textAlignVertical: 'center',
+                },
                 style,
-                // Override fontFamily after style to ensure correct font file
                 { fontFamily: resolvedFamily },
             ]}
-        />
+        >
+            {safeChildren}
+        </RNText>
     );
 };

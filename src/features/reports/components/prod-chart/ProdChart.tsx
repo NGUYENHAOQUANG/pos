@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { spacing } from '@/styles/spacing';
@@ -246,7 +247,6 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,
-        fontFamily: typography.fontFamily.medium,
     },
     chartMainArea: {
         flexDirection: 'row',
@@ -311,7 +311,6 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.medium,
         width: 50,
         textAlign: 'center',
-        fontFamily: typography.fontFamily.medium,
     },
     bar: {
         width: '100%',

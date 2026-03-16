@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     ScrollView,
     Image,
@@ -11,6 +10,7 @@ import {
     NativeSyntheticEvent,
     NativeScrollEvent,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import { ScheduleDescriptionTab } from '@/features/control/components/schedule/ScheduleDescriptionTab';
 import { ScheduleActivityPill } from '@/features/control/components/schedule/ScheduleActivityPill';

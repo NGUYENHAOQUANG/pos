@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Toast from 'react-native-toast-message';
 import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
