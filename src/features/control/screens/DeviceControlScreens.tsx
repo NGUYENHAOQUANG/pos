@@ -95,16 +95,10 @@ export const DeviceControlScreens = () => {
 
     // Default select Farm logic (Global Sync)
     React.useEffect(() => {
-        if (zones.length > 0) {
-            // Check if current selectedZoneId is valid
-            const isValidZone = selectedZoneId && zones.some(z => z.id === selectedZoneId);
-
-            if (!isValidZone) {
-                // Priority: Zone ID 71 (Trại Kiên Giang) -> First Zone
-                const targetZone = zones.find(z => z.id === '71') || zones[0];
-                if (targetZone) {
-                    setSelectedZoneId(targetZone.id.toString());
-                }
+        if (zones.length > 0 && !selectedZoneId) {
+            const targetZone = zones.find(z => z.name === 'Trại Kiên Giang') || zones[0];
+            if (targetZone) {
+                setSelectedZoneId(String(targetZone.id));
             }
         }
     }, [zones, selectedZoneId, setSelectedZoneId]);

@@ -66,10 +66,13 @@ export const MaterialScreen = () => {
     );
 
     useEffect(() => {
-        if (!selectedZoneId && dropdownData.length > 0) {
-            setSelectedZoneId(dropdownData[0].id.toString());
+        if (zonesData.length > 0 && !selectedZoneId) {
+            const targetZone = zonesData.find(z => z.name === 'Trại Kiên Giang') || zonesData[0];
+            if (targetZone) {
+                setSelectedZoneId(String(targetZone.id));
+            }
         }
-    }, [dropdownData, selectedZoneId, setSelectedZoneId]);
+    }, [zonesData, selectedZoneId, setSelectedZoneId]);
 
     // 5. Header Menu State
     const [menuOpen, setMenuOpen] = useState(false);

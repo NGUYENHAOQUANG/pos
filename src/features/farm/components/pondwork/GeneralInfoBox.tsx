@@ -169,15 +169,22 @@ export const GeneralInfoBox = React.forwardRef<GeneralInfoBoxRef, GeneralInfoBox
             }
         }, [initialImageUris, initialDocumentIds]);
 
+        // Keep callback refs stable to avoid infinite loops
+        const onDateChangeRef = useRef(onDateChange);
+        onDateChangeRef.current = onDateChange;
+
+        const onImagesChangeRef = useRef(onImagesChange);
+        onImagesChangeRef.current = onImagesChange;
+
         // Notify parent when date changes
         useEffect(() => {
-            onDateChange?.(selectedDate);
-        }, [selectedDate, onDateChange]);
+            onDateChangeRef.current?.(selectedDate);
+        }, [selectedDate]);
 
         // Notify parent when images change
         useEffect(() => {
-            onImagesChange?.(imageUris);
-        }, [imageUris, onImagesChange]);
+            onImagesChangeRef.current?.(imageUris);
+        }, [imageUris]);
 
         // Track URIs that need retry upload (failed due to network or other transient errors)
         const pendingRetryUris = useRef<Set<string>>(new Set());

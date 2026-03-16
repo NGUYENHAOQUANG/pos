@@ -4,9 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
 
 import { FarmStackParamList } from '@/features/farm/navigation/FarmNavigator';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import { JobType } from '@/features/farm/components/pondwork/JobItem';
-import { formatDate } from '@/features/farm/utils/dateUtils';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -47,9 +45,6 @@ export const HandleProblemFormScreen = () => {
     const { pondId, item, jobType = 'CLEAN_POND' } = route.params || {};
     const currentJobType = jobType as JobType;
     const isEditMode = !!item;
-
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
 
     const { materials: allMaterials } = useFarmMaterials();
 
@@ -274,52 +269,6 @@ export const HandleProblemFormScreen = () => {
             return;
         }
 
-        // Fallback for Local Store (if needed)
-        const currentItems = getPondJobItems(pondId, currentJobType);
-        const timeString = data.selectedDate.toLocaleTimeString('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-        const dateString = formatDate(data.selectedDate);
-
-        const jobData = {
-            materials: data.selectedMaterials.map(m => ({
-                ...m,
-                quantity: Number.isNaN(Number(m.quantity)) ? 0 : Number(m.quantity),
-            })),
-            note: data.note || undefined,
-            images: data.imageUris && data.imageUris.length > 0 ? data.imageUris : undefined,
-            meta: { ...item?.meta, documentIds },
-        };
-
-        if (isEditMode) {
-            const updatedItems = currentItems.map((i: any) =>
-                i.id === item.id ? { ...i, time: timeString, date: dateString, ...jobData } : i
-            );
-            updatePondJob(pondId, currentJobType, updatedItems);
-            showEditJobSuccessToast(currentJobType);
-        } else {
-            let maxIndex = 0;
-            currentItems.forEach((i: any) => {
-                const match = i.label?.match(/Lần (\d+)/);
-                if (match) {
-                    const idx = parseInt(match[1], 10);
-                    if (idx > maxIndex) maxIndex = idx;
-                }
-            });
-            const nextIndex = maxIndex + 1;
-
-            const newItem = {
-                id: Date.now().toString(),
-                label: `Lần ${nextIndex}`,
-                time: timeString,
-                date: dateString,
-                pondId,
-                ...jobData,
-            };
-            updatePondJob(pondId, currentJobType, [...currentItems, newItem]);
-            showAddJobSuccessToast(currentJobType);
-        }
         navigation.goBack();
     };
 
@@ -341,11 +290,6 @@ export const HandleProblemFormScreen = () => {
                 navigation.goBack();
                 return;
             }
-
-            const currentItems = getPondJobItems(pondId, currentJobType);
-            const updatedItems = currentItems.filter((i: any) => i.id !== item.id);
-            updatePondJob(pondId, currentJobType, updatedItems);
-            navigation.goBack();
         } catch (error) {
             handleError(error);
         }

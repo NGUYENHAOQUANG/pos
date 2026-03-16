@@ -13,14 +13,14 @@ import {
 import { colors, spacing, borderRadius } from '@/styles';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';
-import { useFarmStore } from '@/features/farm/store/farmStore';
 import {
     ActionMenu,
     ActionMenuItem,
     ActionMenuPosition,
 } from '@/shared/components/buttons/ActionMenuButton';
 
-import { usePondBreedInfo } from '@/features/farm/hooks/usePondBreedInfo';
+import { useFarmStore } from '@/features/farm/store/farmStore';
+import { useCurrentShrimpBreed } from '@/features/material/hooks/useShrimpSeeds';
 import { useActiveCycle } from '@/features/farm/hooks/useCycle';
 import { useLatestPondActivity } from '@/features/farm/hooks/usePondRecords';
 import { pondRecordService } from '@/features/farm/services/pond-record.service';
@@ -42,7 +42,6 @@ interface ShrimpPondProps {
     style?: StyleProp<ViewStyle>;
     status?: TagStatus;
     pondId?: string;
-    effectiveZoneId?: string; // Add prop to receive zoneId from parent
 }
 
 export const ShrimpPond: React.FC<ShrimpPondProps> = ({
@@ -57,7 +56,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     style,
     status,
     pondId,
-    effectiveZoneId: propZoneId,
 }) => {
     const typeValue = typeof type === 'string' ? type : type?.name;
 
@@ -70,22 +68,22 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
         typeValue === POND_TYPES.WASTE;
 
     const calculateDOC = pondDetailService.calculateDOC;
-    const pond = useFarmStore(state => state.ponds.find(p => p.id === pondId));
 
-    const effectiveZoneId = propZoneId || pond?.zoneId?.toString();
-
-    const { getBreedLabel } = usePondBreedInfo(effectiveZoneId);
+    const warehouseId = useFarmStore(state => state.currentWarehouseId);
 
     const { data: activeCycle } = useActiveCycle(pondId || '');
 
     const cycleData = useMemo(() => {
         if (!pondId) return null;
-
-        // 1. Prefer active cycle
         if (activeCycle) return activeCycle;
-
         return null;
     }, [pondId, activeCycle]);
+
+    const { breedName } = useCurrentShrimpBreed(
+        pondId || '',
+        cycleData?.id || '',
+        warehouseId || ''
+    );
 
     const { data: latestRecordData } = useLatestPondActivity(pondId || '');
     const latestRecord = latestRecordData?.data?.items?.[0];
@@ -108,11 +106,6 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
     const doc = useMemo(() => {
         return calculateDOC(effectiveStockingDate);
     }, [effectiveStockingDate, calculateDOC]);
-
-    const breedLabel = useMemo(() => {
-        const breedId = cycleData?.warehouseItemId;
-        return getBreedLabel(breedId);
-    }, [cycleData, getBreedLabel]);
 
     const displayType = type;
 
@@ -173,7 +166,11 @@ export const ShrimpPond: React.FC<ShrimpPondProps> = ({
             />
 
             {cycleData && (
-                <ShrimpPondCycleInfo cycleData={cycleData} doc={doc} breedLabel={breedLabel} />
+                <ShrimpPondCycleInfo
+                    cycleData={cycleData}
+                    doc={doc}
+                    breedLabel={breedName !== 'N/A' ? breedName : undefined}
+                />
             )}
 
             {hasData && (

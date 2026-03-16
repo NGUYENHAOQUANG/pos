@@ -17,9 +17,9 @@ import { PondInfoScreen } from '@/features/farm/screens/info/PondInfoScreen';
 import { FarmInfoScreen } from '@/features/farm/screens/info/FarmInfoScreen';
 import { ShrimpHealthScreen } from '@/features/farm/screens/pondwork/shrimp-health/ShrimpInspectionScreen';
 import { PondworkLogScreen } from '@/features/farm/screens/pondwork/shrimp-health-log/ShrimpInspectionLogScreen';
-import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment/AddEnvironmentScreen';
-import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment/SettingEnvironmentScreens';
-import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment/EnvironmentLogScreen';
+import { AddEnvironmentScreen } from '@/features/farm/screens/pondwork/environment-form/AddEnvironmentScreen';
+import { SettingEnvironmentScreens } from '@/features/farm/screens/pondwork/environment-setting/EnvironmentSettingScreens';
+import { EnvironmentLogScreen } from '@/features/farm/screens/pondwork/environment-log/EnvironmentLogScreen';
 import { CreateCycleScreen } from '@/features/farm/screens/create-cycle/CreateCycleScreen';
 import { AddSiphonScreen } from '@/features/farm/screens/pondwork/xyphon/AddSiphonScreen';
 import { SiphonLogScreen } from '@/features/farm/screens/pondwork/xyphon/SiphonLogScreen';
@@ -120,18 +120,17 @@ export type AppStackParamList = {
         aiHealthCheckResult?: AIHealthCheckResult;
     };
     ShrimpHealthCheckAIScreen: { pondId: string; zoneId: string };
-    MeasureShrimpSizeLogScreen: { pond: PondData };
+    MeasureShrimpSizeLogScreen: { pondId: string };
     MeasureShrimpSizeScreen: {
-        pond: PondData;
+        pondId: string;
         itemToEdit?: JobExecution;
         aiShrimpSize?: string;
     };
     MeasureShrimpSizeAIScreen: { pondId: string };
     PondworkLogScreen: { pondId: string; zoneId: string };
-    AddEnvironmentScreen: { pond: PondData; itemToEdit?: JobExecution };
+    AddEnvironmentScreen: { pondId: string; environmentId?: string };
     SettingEnvironment: {
         data?: { advancedParameters?: Array<{ id: string; name: string }> };
-        onSave?: (data: { advancedParameters: Array<{ id: string; name: string }> }) => void;
     };
     EditEnvironment: {
         parameter: {

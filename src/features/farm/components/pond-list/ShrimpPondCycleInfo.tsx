@@ -44,7 +44,7 @@ export const ShrimpPondCycleInfo: React.FC<ShrimpPondCycleInfoProps> = ({
                 </View>
                 <View style={styles.cycleInfoRow}>
                     <Text style={styles.cycleLabel}>Tôm giống:</Text>
-                    <Text style={styles.cycleValue}>{breedLabel || '-'}</Text>
+                    <Text style={styles.cycleValue}>{breedLabel || 'N/A'}</Text>
                 </View>
             </View>
         </View>

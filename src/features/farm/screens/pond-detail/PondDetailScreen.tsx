@@ -7,7 +7,6 @@ import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { ALLOWED_JOBS_WHEN_NO_CYCLE, HIDDEN_JOBS_WHEN_HAS_CYCLE } from '@/shared/constants/config';
 import { useActiveCycle, useCyclesByPond } from '@/features/farm/hooks/useCycle';
-import { useCurrentWarehouse } from '@/features/material/hooks/useWarehouses';
 import { useShrimpSeeds } from '@/features/material/hooks/useShrimpSeeds';
 import { pondDetailService } from '@/features/farm/services/pond-detail.service';
 import { PondDetail } from '@/features/farm/screens/pond-detail/PondDetail';
@@ -54,9 +53,6 @@ export const PondDetailScreen: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const { setTabBarVisible } = useTabBarVisibility();
-
-    const getPondJobItems = useFarmStore(state => state.getPondJobItems);
-    const updatePondJob = useFarmStore(state => state.updatePondJob);
 
     const { data: pondFromApi, isLoading: isLoadingPond } = usePondDetail(zoneId, pondId);
 
@@ -114,14 +110,10 @@ export const PondDetailScreen: React.FC = () => {
             [JOB_TYPES.TRANSFER_POND]: apiTransferJobs,
         };
 
-        return pondDetailService.mapJobsWithPriorities(pondOperations, apiItemsByJobType, jobType =>
-            pond?.id ? getPondJobItems(pond.id, jobType) : []
-        );
+        return pondDetailService.mapJobsWithPriorities(pondOperations, apiItemsByJobType);
     }, [
         pondTypeId,
         pondOperations,
-        pond?.id,
-        getPondJobItems,
         apiFeedingJobs,
         apiMeasureSizeJobs,
         apiShrimpInspectionJobs,
@@ -136,10 +128,9 @@ export const PondDetailScreen: React.FC = () => {
         apiTransferJobs,
     ]);
 
-    const effectiveZoneId = pond?.zoneId?.toString();
-    const { warehouseId } = useCurrentWarehouse(effectiveZoneId);
+    const warehouseId = useFarmStore(state => state.currentWarehouseId);
 
-    const { data: shrimpSeeds } = useShrimpSeeds(warehouseId);
+    const { data: shrimpSeeds } = useShrimpSeeds(warehouseId ?? undefined);
 
     const { data: currentCycle } = useActiveCycle(pond?.id || '');
 
@@ -222,35 +213,23 @@ export const PondDetailScreen: React.FC = () => {
     const handleAddJobItem = useCallback(
         (type: JobType) => {
             if (!pond?.id) return;
-
             const handler = navigateHandlers[type];
             if (handler) {
                 handler();
-                return;
             }
-
-            const currentItems = getPondJobItems(pond.id, type);
-            const newItem = pondDetailService.generateNextJobItem(currentItems, pond.id);
-            updatePondJob(pond.id, type, [...currentItems, newItem]);
         },
-        [pond, navigateHandlers, getPondJobItems, updatePondJob]
+        [pond, navigateHandlers]
     );
 
     const handleEditJobItem = useCallback(
         (type: JobType, item: JobExecution) => {
             if (!pond?.id) return;
-
             const handler = editHandlers[type];
             if (handler) {
                 handler(item);
-                return;
             }
-
-            const currentItems = getPondJobItems(pond.id, type);
-            const newItems = currentItems.filter(i => i.id !== item.id);
-            updatePondJob(pond.id, type, newItems);
         },
-        [pond, editHandlers, getPondJobItems, updatePondJob]
+        [pond, editHandlers]
     );
 
     const handleJobPress = useCallback(
@@ -293,9 +272,9 @@ export const PondDetailScreen: React.FC = () => {
     }, [navigation, pond, warehouseId, currentCycle?.id]);
 
     const onGoToMeasureSizeScreen = useCallback(() => {
-        if (!pond) return;
+        if (!pond?.id) return;
         setIsMeasureSizeModalVisible(false);
-        navigation.navigate('MeasureShrimpSizeScreen', { pond });
+        navigation.navigate('MeasureShrimpSizeScreen', { pondId: pond.id });
     }, [navigation, pond]);
 
     const handleStartCycle = useCallback(() => {

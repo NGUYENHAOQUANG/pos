@@ -1,6 +1,7 @@
 import { StateCreator } from 'zustand';
 import { Zone } from '@/features/farm/types/farm.types';
 import { zoneApi } from '@/features/farm/api/zoneApi';
+import { fetchCurrentWarehouseId } from '@/features/material/hooks/useWarehouses';
 
 export interface ZoneStore {
     zones: Zone[];
@@ -8,9 +9,13 @@ export interface ZoneStore {
     fetchZones: () => Promise<void>;
     selectedZoneId: string | null;
     setSelectedZoneId: (id: string | null) => void;
-    // Helper to get selected zone object
+    currentWarehouseId: string | null;
+    isLoadingWarehouse: boolean;
     getSelectedZone: () => Zone | undefined;
 }
+
+// Track in-flight request to prevent stale results from overwriting newer ones
+let _warehouseFetchId = 0;
 
 export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]], [], ZoneStore> = (
     set,
@@ -19,6 +24,8 @@ export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]]
     zones: [],
     isLoadingZones: false,
     selectedZoneId: null,
+    currentWarehouseId: null,
+    isLoadingWarehouse: false,
 
     fetchZones: async () => {
         set({ isLoadingZones: true });
@@ -31,7 +38,30 @@ export const createZoneStore: StateCreator<ZoneStore, [['zustand/immer', never]]
         }
     },
 
-    setSelectedZoneId: id => set({ selectedZoneId: id }),
+    setSelectedZoneId: id => {
+        const fetchId = ++_warehouseFetchId;
+
+        set({ selectedZoneId: id, isLoadingWarehouse: !!id });
+
+        if (!id) {
+            set({ currentWarehouseId: null, isLoadingWarehouse: false });
+            return;
+        }
+
+        fetchCurrentWarehouseId(String(id))
+            .then(warehouseId => {
+                if (fetchId !== _warehouseFetchId) return;
+
+                if (get().selectedZoneId !== id) return;
+
+                set({ currentWarehouseId: warehouseId, isLoadingWarehouse: false });
+            })
+            .catch(err => {
+                if (fetchId !== _warehouseFetchId) return;
+                console.error('Failed to fetch warehouseId for zone:', err);
+                set({ isLoadingWarehouse: false });
+            });
+    },
 
     getSelectedZone: () => {
         const { zones, selectedZoneId } = get();
