@@ -92,6 +92,7 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
         onScroll,
     } = useDropdownScroll();
     const initializedRef = useRef(false);
+    const initialSnapshotRef = useRef<string | null>(null);
 
     const materialActions = useInventoryMaterialActions(
         control,
@@ -116,8 +117,33 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                 inventoryItems: initialData.inventoryItems,
             });
             initializedRef.current = true;
+            // Save snapshot for change comparison
+            initialSnapshotRef.current = JSON.stringify({
+                date: new Date(initialData.date || new Date()).getTime(),
+                note: initialData.note || '',
+                inventoryItems: (initialData.inventoryItems || []).map((item: any) => ({
+                    materialId: item.materialId || '',
+                    newStock: item.newStock || '',
+                })),
+            });
         }
     }, [initialData, reset]);
+
+    // Track changes for edit mode disable
+    const hasChanges = useMemo(() => {
+        if (!isEditMode || !initialSnapshotRef.current) return true;
+        const normalizeItems = (items: any[]) =>
+            (items || []).map((item: any) => ({
+                materialId: item.materialId || '',
+                newStock: item.newStock || '',
+            }));
+        const currentSnapshot = JSON.stringify({
+            date: new Date(date).getTime(),
+            note: note || '',
+            inventoryItems: normalizeItems(inventoryItems),
+        });
+        return currentSnapshot !== initialSnapshotRef.current;
+    }, [isEditMode, date, note, inventoryItems]);
 
     const onError = useCallback(
         (errors: any) => warehouseFormUtils.handleFormError(errors, showValidationError),
@@ -220,6 +246,8 @@ export const InventoryForm: React.FC<InventoryFormProps> = ({
                         secondaryTitle="Lưu Nháp"
                         onPrimaryPress={triggerSubmitValidation}
                         onSecondaryPress={handleSaveDraft}
+                        primaryButtonDisabled={isEditMode && !hasChanges}
+                        secondaryButtonDisabled={isEditMode && !hasChanges}
                         containerStyle={{
                             borderTopWidth: 1,
                             borderTopColor: colors.gray[200],

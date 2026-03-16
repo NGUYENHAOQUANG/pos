@@ -65,11 +65,15 @@ export const WaterSupplyScreen = () => {
     // Initial Data
     const meta = useMemo(() => (item?.meta as WaterSupplyMeta) || {}, [item?.meta]);
 
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    // Init date from item (list data has correct createdAt)
+    const [selectedDate, setSelectedDate] = useState(() => {
+        if (item?.date) return new Date(item.date);
+        return new Date();
+    });
 
-    // Thông số nước
-    const [targetLevel, setTargetLevel] = useState(meta.targetLevel?.toString() || ''); // H_target
-    const [supplyLevel, setSupplyLevel] = useState(meta.supplyLevel?.toString() || ''); // H_add
+    // Thông số nước - init từ meta (list data)
+    const [targetLevel, setTargetLevel] = useState(meta.targetLevel?.toString() || '');
+    const [supplyLevel, setSupplyLevel] = useState(meta.supplyLevel?.toString() || '');
 
     // Vật tư & Ghi chú
     const [selectedMaterials, setSelectedMaterials] = useState<SelectedMaterialItem[]>([]);
@@ -97,9 +101,7 @@ export const WaterSupplyScreen = () => {
         const fetchDetail = async () => {
             if (pond?.id && item?.id) {
                 try {
-                    // waterSupplyApi.getDetail() already returns response.data (unwrapped from axios)
                     const result = await waterSupplyApi.getDetail(pond.id, item.id);
-                    // Handle both wrapped { data: {...} } and flat response formats
                     const detail = result?.data ?? result;
                     if (detail) {
                         setDetailData(detail);
@@ -119,19 +121,13 @@ export const WaterSupplyScreen = () => {
         if (detailData.createdAt) setSelectedDate(new Date(detailData.createdAt));
 
         if (detailData.waterChangeDetail) {
-            const detailAny = detailData.waterChangeDetail as any;
-            setTargetLevel(
-                detailAny.targetWaterLevel?.toString() ||
-                    detailAny.TargetWaterLevel?.toString() ||
-                    ''
-            );
-            setSupplyLevel(
-                detailAny.waterAdded?.toString() || detailAny.WaterAdded?.toString() || ''
-            );
-            setNote(detailAny.note || detailAny.notes || '');
+            const detail = detailData.waterChangeDetail;
+            setTargetLevel(detail.targetWaterLevel?.toString() || '');
+            setSupplyLevel(detail.waterAdded?.toString() || '');
+            setNote(detail.note || '');
 
-            // Images
-            const docIds = detailData.waterChangeDetail.documentIds || detailData.documentIds;
+            // Images — documentIds is at root level per API spec
+            const docIds = detailData.documentIds;
             if (docIds && docIds.length > 0) {
                 setDocumentIds(docIds);
                 documentApi.getUrls(docIds).then(setImageUris).catch(console.error);
@@ -139,39 +135,35 @@ export const WaterSupplyScreen = () => {
         }
     }, [detailData, setImageUris]);
 
-    // Bind Materials (Wait for materials from warehouse)
+    // Bind Materials from detail API — use API data directly, enrich name from warehouse if available
     useEffect(() => {
-        if (!detailData?.waterChangeDetail?.materials || allMaterials.length === 0) return;
+        if (!detailData?.waterChangeDetail?.materials) return;
 
-        const mapped = detailData.waterChangeDetail.materials
-            .map((m: any) => {
-                // Try to find in warehouse items
-                // Priority: warehouseItemId, then materialId
-                const targetId = m.warehouseItemId || m.materialId;
+        const mapped = detailData.waterChangeDetail.materials.map((m: any) => {
+            const targetId = m.warehouseItemId || m.materialId;
+            // Optional: enrich with name/unit from warehouse list
+            const found =
+                allMaterials.length > 0
+                    ? allMaterials.find(
+                          mat => mat.id === targetId || mat.materialDefId === targetId
+                      )
+                    : undefined;
+            return {
+                material:
+                    found ||
+                    ({
+                        id: targetId,
+                        name: m.warehouseItemName || 'Vật tư',
+                        unitName: m.unitName || '',
+                        materialDefId: m.materialId,
+                    } as any),
+                quantity: m.quantity,
+                unit: found?.unitName || m.unitName || '',
+            } as SelectedMaterialItem;
+        });
 
-                let found = allMaterials.find(
-                    mat => mat.id === targetId || mat.materialDefId === targetId
-                );
-
-                if (found) {
-                    return {
-                        material: found,
-                        quantity: m.quantity,
-                        unit: found.unitName,
-                    } as SelectedMaterialItem;
-                }
-                return null;
-            })
-            .filter(Boolean) as SelectedMaterialItem[];
-
-        // Only set if we found something, to avoid clearing valid user selection if re-runs?
-        // Actually for Edit mode, we want to set initial.
-        // If user already changed selectedMaterials, this might overwrite?
-        // But this only runs when detailData changes or materials loads.
-        // detailData changes once. materials might change once.
-        // To be safe, checking if selectedMaterials is empty might start initial load only.
         if (mapped.length > 0) {
-            setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
+            setSelectedMaterials(mapped);
         }
     }, [detailData, allMaterials]);
     // ---LOGIC TÍNH TOÁN THEO CÔNG THỨC---
@@ -243,14 +235,10 @@ export const WaterSupplyScreen = () => {
         if (!detailData) return false;
 
         // Edit mode comparison
-        const detailAny = detailData.waterChangeDetail as any;
-        const originalTarget =
-            detailAny?.targetWaterLevel?.toString() ||
-            detailAny?.TargetWaterLevel?.toString() ||
-            '';
-        const originalSupply =
-            detailAny?.waterAdded?.toString() || detailAny?.WaterAdded?.toString() || '';
-        const originalNote = detailAny?.note || detailAny?.notes || '';
+        const detail = detailData.waterChangeDetail;
+        const originalTarget = detail?.targetWaterLevel?.toString() || '';
+        const originalSupply = detail?.waterAdded?.toString() || '';
+        const originalNote = detail?.note || '';
 
         if (targetLevel !== originalTarget) return true;
         if (supplyLevel !== originalSupply) return true;
@@ -272,22 +260,12 @@ export const WaterSupplyScreen = () => {
 
         if (materialsChanged) return true;
 
-        // Image check (simplified comparison)
-        const originalDocIds =
-            detailData.waterChangeDetail?.documentIds || detailData.documentIds || [];
-        if (documentIds.length !== originalDocIds.length) return true;
+        // Image check — documentIds is at root level per API spec
+        const originalDocIds = detailData.documentIds || [];
+        if (imageUris.length !== originalDocIds.length) return true;
 
         return false;
-    }, [
-        item,
-        detailData,
-        targetLevel,
-        supplyLevel,
-        selectedMaterials,
-        note,
-        imageUris,
-        documentIds,
-    ]);
+    }, [item, detailData, targetLevel, supplyLevel, selectedMaterials, note, imageUris]);
 
     const { UnsavedChangesModal, allowNavigation } = useUnsavedChanges(hasChanges);
 
@@ -465,6 +443,7 @@ export const WaterSupplyScreen = () => {
                 secondaryTitle="Huỷ"
                 onPrimaryPress={handleSave}
                 onSecondaryPress={() => navigation.goBack()}
+                primaryDisabled={!!item && !hasChanges}
                 style={{ borderTopWidth: 1, borderTopColor: colors.border }}
             />
 

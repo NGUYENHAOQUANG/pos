@@ -47,7 +47,7 @@ export const CreateCycleScreen: React.FC = () => {
         handleSubmit,
         reset,
         setValue,
-        formState: { isSubmitting },
+        formState: { isSubmitting, isDirty },
     } = useForm<CreateCycleFormValues>({
         resolver: zodResolver(createCycleSchema),
         defaultValues: cycleService.mapDetailToForm(null),
@@ -232,7 +232,8 @@ export const CreateCycleScreen: React.FC = () => {
                     isUpdating ||
                     isSubmitting ||
                     isLoadingDetail ||
-                    isLoadingShrimpSeeds
+                    isLoadingShrimpSeeds ||
+                    (isEditMode && !isDirty)
                 }
             />
 
