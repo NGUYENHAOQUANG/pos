@@ -12,6 +12,7 @@ import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { JobListCard } from '@/features/farm/components/pondwork/JobListCard';
 import { CycleCard } from '@/features/farm/components/pond/CycleCard';
 import { PondJobSkeleton } from '@/features/farm/components/skeleton/PondJobSkeleton';
+import { PondDetailHeaderSkeleton } from '@/features/farm/components/skeleton/PondDetailHeaderSkeleton';
 import { WorkLogScreens } from '@/features/farm/screens/worklog/WorkLogScreens';
 import { ConfirmationModal } from '@/shared/components/modal/ConfirmationModal';
 
@@ -74,24 +75,28 @@ export const PondDetail: React.FC<PondDetailProps> = ({
 
     return (
         <View style={styles.container}>
-            <HeadingFarm
-                selectedTab={selectedTab}
-                onTabSelect={setSelectedTab}
-                tabType="pond-detail"
-                fullWidth
-                pond={pond}
-                onBack={onBack}
-                menuOptions={[
-                    {
-                        value: 'Thông tin ao',
-                        onMenuOptionPress: onGoToPondInfo,
-                    },
-                    {
-                        value: 'Các chu kỳ nuôi',
-                        onMenuOptionPress: onGoToCycleList,
-                    },
-                ]}
-            />
+            {isLoading ? (
+                <PondDetailHeaderSkeleton />
+            ) : (
+                <HeadingFarm
+                    selectedTab={selectedTab}
+                    onTabSelect={setSelectedTab}
+                    tabType="pond-detail"
+                    fullWidth
+                    pond={pond}
+                    onBack={onBack}
+                    menuOptions={[
+                        {
+                            value: 'Thông tin ao',
+                            onMenuOptionPress: onGoToPondInfo,
+                        },
+                        {
+                            value: 'Các chu kỳ nuôi',
+                            onMenuOptionPress: onGoToCycleList,
+                        },
+                    ]}
+                />
+            )}
 
             <View style={styles.content}>
                 {selectedTab === 'work' ? (
