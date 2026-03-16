@@ -13,7 +13,7 @@ import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { DevicesStatus } from '@/features/control/components/DevicesStatus';
 import { PondCard } from '@/features/control/components/devices/PondCard';
-import { HelpOptionsModal } from '../components/HelpOptionsModal';
+import { HelpOptionsModal } from '@/features/control/components/HelpOptionsModal';
 import { colors, spacing } from '@/styles';
 import { useNavigation, useScrollToTop, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,7 +21,7 @@ import { ControlStackParamList } from '@/features/control/navigation/ControlNavi
 import { useDevices } from '@/features/control/hooks/useDevices';
 import { Zone } from '@/features/farm/types/farm.types';
 import { DeviceControlSkeleton } from '@/features/control/components/skeleton/DeviceControlSkeleton';
-import { useZones, usePondsByZone } from '@/features/farm/hooks';
+import { useZones, useAllPondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
@@ -67,15 +67,15 @@ export const DeviceControlScreens = () => {
     // Track previous zone to detect switches
     const prevFarmIdRef = useRef<string | undefined>(selectedFarm?.id);
 
-    // Get Ponds via React Query based on selected Farm
+    // Get ALL Ponds via React Query based on selected Farm
     const {
         data: pondsData,
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-    } = usePondsByZone(selectedZoneId);
+    } = useAllPondsByZone(selectedZoneId);
 
-    // Flatten pagination data and ensure valid array
+    // Ensure valid array
     const farmPonds = useMemo(() => {
         if (!pondsData || pondsData.length === 0) return [];
         return pondsData;

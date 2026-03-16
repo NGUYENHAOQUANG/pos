@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -10,14 +10,16 @@ import {
 } from 'react-native';
 import IconSetting from '@/assets/Icon/IconDevices/IconSetting.svg';
 import InfoIcon from '@/assets/Icon/IconDevices/Info.svg';
-import { ButtonDevices } from './ButtonDevices';
-import { DevicesStatusColor } from './DevicesStatusColor';
+import WarningCircleIcon from '@/assets/Icon/WarningCircle.svg';
+import { ButtonDevices } from '@/features/control/components/devices/ButtonDevices';
+import { DevicesStatusColor } from '@/features/control/components/devices/DevicesStatusColor';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import Toast from 'react-native-toast-message';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
 import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
 import { borderRadius } from '@/styles';
+import { deviceApi } from '@/features/control/api/deviceApi';
 
 export interface DeviceCardProps {
     data: DeviceData;
@@ -55,7 +57,7 @@ const getModeLabel = (mode: EControlMode): string => {
         case EControlMode.SCHEDULE:
             return 'Lịch trình';
         case EControlMode.LOCAL:
-            return 'Tại chỗ';
+            return '';
         default:
             return '';
     }
@@ -64,9 +66,26 @@ const getModeLabel = (mode: EControlMode): string => {
 export const DeviceCard = React.memo<DeviceCardProps>(
     ({ data, onToggle, onSettingsPress, style, isLoading }) => {
         const [showLocalModal, setShowLocalModal] = useState(false);
+        const [actualMode, setActualMode] = useState<EControlMode>(EControlMode.MANUAL);
 
         const isOxy = data.type === 'oxy';
-        const effectiveMode = isOxy ? EControlMode.LOCAL : data.mode;
+
+        // Fetch schedules from API to determine real mode
+        useEffect(() => {
+            if (isOxy || !data.id) return;
+            const fetchMode = async () => {
+                try {
+                    const response = await deviceApi.getSchedules(data.id);
+                    const items = response.data?.data?.items ?? [];
+                    setActualMode(items.length > 0 ? EControlMode.SCHEDULE : EControlMode.MANUAL);
+                } catch {
+                    setActualMode(EControlMode.MANUAL);
+                }
+            };
+            fetchMode();
+        }, [data.id, isOxy]);
+
+        const effectiveMode = isOxy ? EControlMode.LOCAL : actualMode;
         const switchTrackColor =
             !data.isOn && effectiveMode !== EControlMode.LOCAL
                 ? colors.gray[200]
@@ -75,8 +94,16 @@ export const DeviceCard = React.memo<DeviceCardProps>(
         const Icon = getDeviceIcon(data.type);
         if (!Icon) return null;
 
+        const hasError = !!data.errorMessage;
+
         return (
-            <View style={[styles.cardContainer, style]}>
+            <View
+                style={[
+                    styles.cardContainer,
+                    hasError && { borderColor: colors.red[500], backgroundColor: colors.red[25] },
+                    style,
+                ]}
+            >
                 <View
                     style={[styles.innerContent, isLoading && { opacity: 0.3 }]}
                     collapsable={false}
@@ -102,7 +129,10 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                         </Text>
                         {/* Mode tag - tappable only for LOCAL mode */}
                         <TouchableOpacity
-                            style={styles.modeBadge}
+                            style={[
+                                styles.modeBadge,
+                                getModeLabel(effectiveMode) ? { gap: 4 } : { gap: 0 },
+                            ]}
                             activeOpacity={effectiveMode === EControlMode.LOCAL ? 0.7 : 1}
                             onPress={
                                 effectiveMode === EControlMode.LOCAL
@@ -110,9 +140,19 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                                     : undefined
                             }
                         >
-                            <Text style={styles.modeText}>{getModeLabel(effectiveMode)}</Text>
+                            {getModeLabel(effectiveMode) ? (
+                                <Text style={styles.modeText}>{getModeLabel(effectiveMode)}</Text>
+                            ) : null}
                             <InfoIcon width={14} height={14} />
                         </TouchableOpacity>
+
+                        {/* Error message */}
+                        {hasError && (
+                            <View style={styles.errorRow}>
+                                <WarningCircleIcon width={16} height={16} />
+                                <Text style={styles.errorText}>{data.errorMessage}</Text>
+                            </View>
+                        )}
                     </View>
 
                     {/* Right: Settings + Toggle */}
@@ -155,8 +195,8 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                     visible={showLocalModal}
                     onConfirm={() => setShowLocalModal(false)}
                     onCancel={() => setShowLocalModal(false)}
-                    title="Thiết bị điều khiển tại chỗ"
-                    message={`Thiết bị không điều khiển qua App\nVui lòng thao tác trực tiếp trên thiết bị khi sử dụng`}
+                    title="Thiết bị Oxy luôn hoạt động"
+                    message={`Thiết bị không thể điều khiển`}
                     confirmText="Đã hiểu "
                     cancelText=""
                     showSuccessToast={false}
@@ -215,7 +255,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.white,
-        gap: 4,
     },
     modeText: {
         fontSize: 12,
@@ -242,5 +281,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         zIndex: 10,
         borderRadius: 12,
+    },
+    errorRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 2,
+    },
+    errorText: {
+        fontSize: 12,
+        color: colors.red[500],
+        fontWeight: '400',
     },
 });

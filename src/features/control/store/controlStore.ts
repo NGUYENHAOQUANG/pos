@@ -13,6 +13,7 @@ const calculatePondStats = (devices: DeviceData[]): PondDeviceStats => {
         feeder: { active: 0, warning: 0, inactive: 0 },
         oxy: { active: 0, warning: 0, inactive: 0 },
         syphon: { active: 0, warning: 0, inactive: 0 },
+        pump: { active: 0, warning: 0, inactive: 0 },
     };
 
     devices.forEach(device => {

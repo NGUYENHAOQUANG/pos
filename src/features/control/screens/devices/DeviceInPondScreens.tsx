@@ -8,23 +8,22 @@ import {
     LayoutChangeEvent,
     NativeSyntheticEvent,
     NativeScrollEvent,
-    InteractionManager,
     Image,
 } from 'react-native';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
-import { ButtonHistory } from '../../components/devices/ButtonHistory';
-import { DevicesCard } from '../../components/devices/DevicesCard';
+import { ButtonHistory } from '@/features/control/components/devices/ButtonHistory';
+import { DevicesCard } from '@/features/control/components/devices/DevicesCard';
 import { colors, spacing } from '@/styles';
-import { EControlMode } from '../../types/control.types';
+import { EControlMode } from '@/features/control/types/control.types';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ControlStackParamList } from '../../navigation/ControlNavigator';
+import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
 import { useBottomTabBarHeight } from '@/app/navigation/BottomBarContext';
 import { useDevices, useUpdateDeviceMode } from '@/features/control/hooks/useDevices';
-import { useDeviceToggle } from '../../hooks/useDeviceToggle';
-import { getDeviceIcon } from '../../utils/deviceUtils';
-import { DeviceInPondSkeleton } from '../../components/skeleton/DeviceInPondSkeleton';
+import { useDeviceToggle } from '@/features/control/hooks/useDeviceToggle';
+import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
+import { DeviceInPondSkeleton } from '@/features/control/components/skeleton/DeviceInPondSkeleton';
 import InfoPrimaryIcon from '@/assets/Icon/IconDevices/InfoPrimary.svg';
 import Toast from 'react-native-toast-message';
 
@@ -65,13 +64,13 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
     // Delay heavy render until navigation animation completes
     // Use minimum delay to ensure skeleton is always visible when navigating
     useEffect(() => {
-        const interaction = InteractionManager.runAfterInteractions(() => {
+        const rafId = requestAnimationFrame(() => {
             // Add minimum delay so skeleton is visible even when data is cached
             setTimeout(() => {
                 setIsReady(true);
             }, 300);
         });
-        return () => interaction.cancel();
+        return () => cancelAnimationFrame(rafId);
     }, []);
 
     // Scroll sync refs
@@ -205,7 +204,7 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
         [currentPond, toggleDevice]
     );
 
-    const handleModeToggle = React.useCallback(
+    const _handleModeToggle = React.useCallback(
         (id: string) => {
             if (!currentPond) return;
             const device = allDevices.find(d => d.id === id);
@@ -351,7 +350,6 @@ export const DevicesInPondScreens: React.FC<DevicesInPondScreensProps> = () => {
                             title={section.title}
                             devices={section.devices}
                             onSettingsPress={handleSettingsPress}
-                            onModePress={handleModeToggle}
                             onToggle={handleToggleDevice}
                             style={styles.sectionCard}
                             loadingIds={loadingIds}

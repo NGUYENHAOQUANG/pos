@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import IconAdd from 'react-native-vector-icons/Ionicons';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
-import ModalAddTurn from './ModalAddTurn';
-import { AddTurnModalUI } from './AddTurnModalUI';
+import ModalAddTurn from '@/features/control/components/CustomFeedingMachine/ModalAddTurn';
+import { AddTurnModalUI } from '@/features/control/components/CustomFeedingMachine/AddTurnModalUI';
 import { colors } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 
@@ -11,6 +11,7 @@ export interface ScheduleItem {
     id: string;
     startTime: Date | null;
     endTime: Date | null;
+    isNew?: boolean;
 }
 
 interface ActivityScheduleProps {
@@ -44,6 +45,7 @@ export default function ActivitySchedule({
             id: Date.now().toString(),
             startTime,
             endTime,
+            isNew: true,
         };
         onUpdateSchedules([...schedules, newTurn]);
         closeAddModal();
