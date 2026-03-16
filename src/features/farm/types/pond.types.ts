@@ -30,7 +30,7 @@ export interface PondData {
     pondPhase?: string;
     status?: string | PondStatus;
     pondCategoryId?: string;
-    type?: PondType;
+    type: PondType;
     zoneId?: string;
     farmCode?: string;
     zone?: string;

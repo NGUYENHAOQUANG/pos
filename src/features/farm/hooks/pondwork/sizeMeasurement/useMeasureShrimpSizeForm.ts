@@ -313,12 +313,14 @@ export const useMeasureShrimpSizeForm = ({
         notes,
         setNotes,
         images,
+        setImages,
         initialDocumentIds,
         isDeleteModalVisible,
         setIsDeleteModalVisible,
         handleSave,
         handleDelete,
         UnsavedChangesModal,
+        hasChanges,
         isSubmitting:
             createSizeMeasurement.isPending ||
             updateSizeMeasurement.isPending ||

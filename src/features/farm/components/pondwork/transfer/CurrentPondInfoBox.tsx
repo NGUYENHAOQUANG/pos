@@ -15,7 +15,7 @@ interface CurrentPondInfoBoxProps {
 export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
     shrimpBreed,
     actualStockingQuantity,
-    shrimpSize = '60',
+    shrimpSize,
     onShrimpSizeChange,
     totalEstimatedShrimp,
     containerStyle,
@@ -32,10 +32,10 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
     // Build info items
     const infoItems: InfoItem[] = [];
     if (shrimpBreed) {
-        infoItems.push({ label: 'Tôm giống', value: shrimpBreed });
+        infoItems.push({ label: 'Tôm giống:', value: shrimpBreed });
     }
     if (actualStockingQuantity !== undefined) {
-        infoItems.push({ label: 'Số lượng thả thực tế', value: actualStockingQuantity });
+        infoItems.push({ label: 'Số lượng thả thực tế:', value: actualStockingQuantity });
     }
 
     // Build result items
@@ -60,6 +60,7 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
                 required
                 editable={false}
                 containerStyle={{ marginBottom: 0 }}
+                disabled
             />
         </PondDataBox>
     );

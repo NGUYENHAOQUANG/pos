@@ -2,6 +2,7 @@ import React, { ReactNode, useState } from 'react';
 import { View, Text, StyleSheet, ViewStyle, Pressable, Dimensions, Modal } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
+import { DetailRow } from '@/features/material/components/DetailRow';
 import { formatNumber } from '@/features/farm/utils/numberUtils';
 import { abbreviateNumber } from '@/shared/utils/formatters';
 import EyeIcon from '@/assets/Icon/Eye.svg';
@@ -108,10 +109,11 @@ export const PondDataBox: React.FC<PondDataBoxProps> = ({
                 {infoItems && infoItems.length > 0 && (
                     <View style={styles.infoSectionContainer}>
                         {infoItems.map((item, index) => (
-                            <View key={index} style={styles.infoSection}>
-                                <Text style={styles.infoLabel}>{item.label}:</Text>
-                                <Text style={styles.infoValue}>{formatValue(item.value)}</Text>
-                            </View>
+                            <DetailRow
+                                key={index}
+                                label={item.label}
+                                value={formatValue(item.value)}
+                            />
                         ))}
                     </View>
                 )}
@@ -150,23 +152,6 @@ export const PondDataBox: React.FC<PondDataBoxProps> = ({
 const styles = StyleSheet.create({
     infoSectionContainer: {
         gap: spacing.xs,
-    },
-    infoSection: {
-        flexDirection: 'row',
-    },
-    infoLabel: {
-        fontSize: 14,
-        fontWeight: '700',
-        lineHeight: 22,
-        color: colors.text,
-        marginRight: spacing.xs,
-    },
-    infoValue: {
-        fontSize: 14,
-        fontWeight: '400',
-        lineHeight: 22,
-        color: colors.text,
-        flex: 1,
     },
     resultSectionContainer: {
         gap: spacing.xs,

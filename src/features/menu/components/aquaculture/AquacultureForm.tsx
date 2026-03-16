@@ -34,6 +34,7 @@ export interface AquacultureFormProps {
     initialData: AquacultureFormValues | undefined;
     zoneOptions: ZoneOption[];
     onSubmit: (data: AquacultureFormValues) => void;
+    onHasChangesChange?: (hasChanges: boolean) => void;
 }
 
 // ================================================================
@@ -54,7 +55,7 @@ interface StatusOption {
 // Presenter Component (forwardRef for Container submit trigger)
 // ================================================================
 export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureFormProps>(
-    ({ isEditMode, initialData, zoneOptions, onSubmit }, ref) => {
+    ({ isEditMode, initialData, zoneOptions, onSubmit, onHasChangesChange }, ref) => {
         const initializedRef = useRef(false);
         const [showFullCode, setShowFullCode] = useState(false);
 
@@ -63,7 +64,7 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
             handleSubmit,
             reset,
             watch,
-            formState: { errors },
+            formState: { errors, isDirty },
         } = useForm<AquacultureFormValues>({
             resolver: zodResolver(aquacultureFormSchema),
             defaultValues: {
@@ -87,6 +88,11 @@ export const AquacultureForm = React.forwardRef<AquacultureFormRef, AquacultureF
         }, [initialData, reset]);
 
         const currentCode = watch('code');
+
+        // Notify parent of dirty state changes
+        useEffect(() => {
+            onHasChangesChange?.(isDirty);
+        }, [isDirty, onHasChangesChange]);
 
         // Build radio options based on edit mode and initial status
         const statusOptions = useMemo((): StatusOption[] => {

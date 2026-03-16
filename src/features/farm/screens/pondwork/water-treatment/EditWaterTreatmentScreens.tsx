@@ -3,9 +3,9 @@ import { StyleSheet } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import {
     showMaterialQuantityZeroToast,
-    showInvalidActivityTypeToast,
     showEditJobSuccessToast,
     showDeleteJobSuccessToast,
+    showInvalidActivityTypeToast,
 } from '@/features/farm/utils/toastMessages';
 import { handleError } from '@/shared/utils/errorHandler';
 import { colors } from '@/styles';
@@ -18,7 +18,7 @@ import { SelectedMaterialItem } from '@/features/farm/components/bottom-sheet/Ma
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
-import { WaterTreatmentSkeleton } from '@/features/farm/components/skeleton/WaterTreatmentSkeleton';
+import { Loading } from '@/shared/components/ui/Loading';
 
 import { waterTreatmentApi } from '@/features/farm/api/waterTreatmentApi';
 import {
@@ -54,7 +54,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
     const [note, setNote] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [detailData, setDetailData] = useState<IWaterTreatmentRecord | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(true);
 
     const targetPondId = pondId || pond?.id || '';
     const targetJobId = jobId || item?.id || '';
@@ -64,7 +64,7 @@ export const EditWaterTreatmentScreens: React.FC = () => {
         const fetchDetail = async () => {
             if (targetPondId && targetJobId) {
                 try {
-                    setIsLoading(true);
+                    setIsLoadingDetail(true);
                     const response = await waterTreatmentApi.getDetail(targetPondId, targetJobId);
                     if (response?.data) {
                         setDetailData(response.data);
@@ -72,10 +72,10 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 } catch (e) {
                     console.error('Fetch water treatment detail error:', e);
                 } finally {
-                    setIsLoading(false);
+                    setIsLoadingDetail(false);
                 }
             } else {
-                setIsLoading(false);
+                setIsLoadingDetail(false);
             }
         };
         fetchDetail();
@@ -105,26 +105,31 @@ export const EditWaterTreatmentScreens: React.FC = () => {
 
     // --- Bind materials (need to wait for materials from warehouse to load) ---
     useEffect(() => {
-        if (!detailData?.waterTreatmentDetail?.materials || materials.length === 0) return;
+        if (!detailData?.waterTreatmentDetail?.materials) return;
 
-        const mapped = detailData.waterTreatmentDetail.materials
-            .map(m => {
-                const found = materials.find(
-                    mat => mat.id === m.warehouseItemId || mat.materialDefId === m.warehouseItemId
-                );
-                if (found) {
-                    return {
-                        material: found,
-                        quantity: m.quantity,
-                        unit: found.unitName || '',
-                    } as SelectedMaterialItem;
-                }
-                return null;
-            })
-            .filter(Boolean) as SelectedMaterialItem[];
+        const mapped = detailData.waterTreatmentDetail.materials.map(m => {
+            const targetId = m.warehouseItemId;
+            // Enrich with name/unit from warehouse list (fallback if not found)
+            const found =
+                materials.length > 0
+                    ? materials.find(mat => mat.id === targetId || mat.materialDefId === targetId)
+                    : undefined;
+            return {
+                material:
+                    found ||
+                    ({
+                        id: targetId,
+                        name: 'Vật tư',
+                        unitName: '',
+                        materialDefId: targetId,
+                    } as any),
+                quantity: m.quantity,
+                unit: found?.unitName || '',
+            } as SelectedMaterialItem;
+        });
 
         if (mapped.length > 0) {
-            setSelectedMaterials(prev => (prev.length === 0 ? mapped : prev));
+            setSelectedMaterials(mapped);
         }
     }, [detailData, materials]);
 
@@ -240,10 +245,8 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                 rightComponent={<DeleteButton onPress={handleDelete} />}
             />
 
-            {isLoading ? (
-                <WaterTreatmentSkeleton />
-            ) : (
-                <>
+            <Loading isLoading={isLoadingDetail}>
+                {isLoadingDetail ? null : (
                     <SafeInputLayout
                         style={styles.container}
                         contentContainerStyle={styles.scrollContent}
@@ -262,17 +265,18 @@ export const EditWaterTreatmentScreens: React.FC = () => {
                             onNoteChange={setNote}
                         />
                     </SafeInputLayout>
+                )}
+            </Loading>
 
-                    {/* Footer Buttons */}
-                    <ButtonBarFarm
-                        primaryTitle="Cập nhật thông tin"
-                        secondaryTitle="Huỷ"
-                        onPrimaryPress={handleSave}
-                        onSecondaryPress={handleBack}
-                        style={{ borderTopWidth: 1, borderTopColor: colors.border }}
-                    />
-                </>
-            )}
+            {/* Footer Buttons */}
+            <ButtonBarFarm
+                primaryTitle="Cập nhật thông tin"
+                secondaryTitle="Huỷ"
+                onPrimaryPress={handleSave}
+                onSecondaryPress={handleBack}
+                primaryDisabled={!hasChanges}
+                style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+            />
 
             {UnsavedChangesModal}
 

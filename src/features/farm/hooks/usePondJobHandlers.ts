@@ -162,9 +162,8 @@ export const usePondJobEditHandlers = ({
                 navigation.navigate('WaterSupply', { pond, item });
             },
 
-            [JOB_TYPES.TRANSFER_POND]: item => {
-                if (!pond) return;
-                navigation.navigate('AddTransferScreen', { pond, itemToEdit: item });
+            [JOB_TYPES.TRANSFER_POND]: _item => {
+                // Stock transfer does not support editing
             },
 
             [JOB_TYPES.HARVEST]: item => {
@@ -231,7 +230,7 @@ export const usePondJobLogHandlers = ({
                 if (!pond?.id || !pond.zoneId) return;
                 navigation.navigate('PondworkLogScreen', {
                     pondId: pond.id,
-                    zoneId: pond.zoneId.toString(),
+                    zoneId: pond.zoneId,
                 });
             },
 

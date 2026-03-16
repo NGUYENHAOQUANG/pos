@@ -4,6 +4,14 @@ export enum EControlMode {
     LOCAL = 'LOCAL',
 }
 
+// Device operation status from API
+export enum EDeviceStatus {
+    UNDEFINED = 'UnDefined',
+    ON = 'On',
+    OFF = 'Off',
+    FAULT = 'Fault',
+}
+
 export type ControlModeType = EControlMode;
 export interface DeviceStat {
     active: number;

@@ -32,6 +32,7 @@ import { MaterialGroupType } from '@/features/material/types/material.types';
 import { SiphonMeta } from '@/features/farm/types/farm.types';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { DeleteButton } from '@/shared/components/buttons/DeleteButton';
+import { Loading } from '@/shared/components/ui/Loading';
 import {
     showAddJobSuccessToast,
     showEditJobSuccessToast,
@@ -67,6 +68,7 @@ export const AddSiphonScreen: React.FC = () => {
 
     // Additional state to track when data from API is fully loaded for accurate comparison
     const [isDetailLoaded, setIsDetailLoaded] = useState(!itemToEdit);
+    const isLoadingDetail = !!itemToEdit && !isDetailLoaded;
     const [fetchedInitialData, setFetchedInitialData] = useState<any>(null);
 
     // Store initial data for comparison when editing
@@ -99,6 +101,8 @@ export const AddSiphonScreen: React.FC = () => {
     }, [setTabBarVisible]);
 
     // Fetch detail when editing
+    const [detailData, setDetailData] = useState<any>(null);
+
     useEffect(() => {
         const fetchDetail = async () => {
             if (pond?.id && itemToEdit?.id) {
@@ -106,6 +110,7 @@ export const AddSiphonScreen: React.FC = () => {
                     const response = await siphonApi.getDetail(pond.id, itemToEdit.id);
                     if (response && response.data) {
                         const detail = response.data;
+                        setDetailData(detail);
 
                         // Update Date
                         if (detail.createdAt) {
@@ -116,31 +121,6 @@ export const AddSiphonScreen: React.FC = () => {
                         if (detail.siphonDetail) {
                             setLossAmount(detail.siphonDetail.shrimpLossKg?.toString() || '');
                             setNotes(detail.siphonDetail.notes || '');
-
-                            // Update Materials
-                            if (detail.siphonDetail.materials && materials.length > 0) {
-                                const mappedMaterials: SelectedMaterialItem[] =
-                                    detail.siphonDetail.materials
-                                        .map((m: any) => {
-                                            // Find material in materials (id matches warehouseItemId)
-                                            const foundItem = materials.find(
-                                                mat => mat.id === m.warehouseItemId
-                                            );
-                                            if (foundItem) {
-                                                return {
-                                                    material: foundItem,
-                                                    quantity: m.quantity,
-                                                    unit: foundItem.unitName || '',
-                                                };
-                                            }
-                                            return null;
-                                        })
-                                        .filter((m: any) => m !== null);
-
-                                if (mappedMaterials.length > 0) {
-                                    setSelectedMaterials(mappedMaterials);
-                                }
-                            }
                         }
 
                         // Update Images
@@ -174,7 +154,37 @@ export const AddSiphonScreen: React.FC = () => {
         if (itemToEdit) {
             fetchDetail();
         }
-    }, [pond?.id, itemToEdit, materials]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pond?.id, itemToEdit?.id]);
+
+    // Bind materials separately — re-run when warehouse data loads
+    useEffect(() => {
+        if (!detailData?.siphonDetail?.materials) return;
+
+        const mapped: SelectedMaterialItem[] = detailData.siphonDetail.materials.map((m: any) => {
+            const targetId = m.warehouseItemId;
+            const found =
+                materials.length > 0
+                    ? materials.find(mat => mat.id === targetId || mat.materialDefId === targetId)
+                    : undefined;
+            return {
+                material:
+                    found ||
+                    ({
+                        id: targetId,
+                        name: m.warehouseItemName || 'Vật tư',
+                        unitName: m.unitName || '',
+                        materialDefId: targetId,
+                    } as any),
+                quantity: m.quantity,
+                unit: found?.unitName || m.unitName || '',
+            } as SelectedMaterialItem;
+        });
+
+        if (mapped.length > 0) {
+            setSelectedMaterials(mapped);
+        }
+    }, [detailData, materials]);
 
     const handleBack = () => {
         if (navigation.canGoBack()) {
@@ -234,12 +244,9 @@ export const AddSiphonScreen: React.FC = () => {
         if (lossAmount !== compareData.lossAmount) return true;
         if (notes !== compareData.notes) return true;
 
-        // Set up arrays for comparison, default to empty to safely check lengths
+        // Image check — imageUris reflects visible images (including newly added/removed)
         const compareDocs = compareData.images || [];
-        const currentDocs = documentIds || [];
-
-        // Ensure same number of images
-        if (currentDocs.length !== compareDocs.length) return true;
+        if (imageUris.length !== compareDocs.length) return true;
 
         // Compare materials arrays
         const currentMats = selectedMaterials.map(m => ({
@@ -269,7 +276,7 @@ export const AddSiphonScreen: React.FC = () => {
         selectedDate,
         lossAmount,
         notes,
-        documentIds,
+        imageUris,
         selectedMaterials,
     ]);
 
@@ -391,28 +398,35 @@ export const AddSiphonScreen: React.FC = () => {
             />
 
             {/* Content */}
-            <SafeInputLayout contentContainerStyle={styles.scrollContent} extraScrollHeight={80}>
-                <GeneralInfoBox
-                    ref={generalInfoBoxRef}
-                    type="withImage"
-                    date={selectedDate}
-                    onDateChange={setSelectedDate}
-                    imageUris={imageUris}
-                    onImagesChange={setImageUris}
-                    documentIds={documentIds}
-                    disabledDate={true}
-                />
+            <Loading isLoading={isLoadingDetail}>
+                {isLoadingDetail ? null : (
+                    <SafeInputLayout
+                        contentContainerStyle={styles.scrollContent}
+                        extraScrollHeight={80}
+                    >
+                        <GeneralInfoBox
+                            ref={generalInfoBoxRef}
+                            type="withImage"
+                            date={selectedDate}
+                            onDateChange={setSelectedDate}
+                            imageUris={imageUris}
+                            onImagesChange={setImageUris}
+                            documentIds={documentIds}
+                            disabledDate={true}
+                        />
 
-                <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
+                        <SiphonLossBox lossAmount={lossAmount} onLossAmountChange={setLossAmount} />
 
-                <MaterialSelectionBox
-                    selectedMaterials={selectedMaterials}
-                    onMaterialsChange={setSelectedMaterials}
-                    groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
-                />
+                        <MaterialSelectionBox
+                            selectedMaterials={selectedMaterials}
+                            onMaterialsChange={setSelectedMaterials}
+                            groupTypes={[MaterialGroupType.ELECTRIC, MaterialGroupType.TOOLS]}
+                        />
 
-                <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
-            </SafeInputLayout>
+                        <SelectionNotesBox notes={notes} onNotesChange={setNotes} />
+                    </SafeInputLayout>
+                )}
+            </Loading>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
