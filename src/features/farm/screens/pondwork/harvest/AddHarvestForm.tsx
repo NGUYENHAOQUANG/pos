@@ -19,6 +19,7 @@ import {
     getHarvestTypeDisplay,
     getHarvestTypeFromDisplay,
 } from '@/features/farm/schemas/harvestFormSchema';
+import { handleHarvestFormError } from '@/features/farm/utils/toastMessages';
 
 export interface AddHarvestFormProps {
     initialData: HarvestFormData;
@@ -62,15 +63,18 @@ export const AddHarvestForm: React.FC<AddHarvestFormProps> = ({
 
     const handleSavePress = () => {
         if (harvestTypeDisplay === 'Thu hết' && !isEditMode) {
-            setIsConfirmationModalVisible(true);
+            // Validate first, then show confirmation modal
+            handleSubmit(() => {
+                setIsConfirmationModalVisible(true);
+            }, handleHarvestFormError)();
         } else {
-            handleSubmit(onSubmitForm)();
+            handleSubmit(onSubmitForm, handleHarvestFormError)();
         }
     };
 
     const handleConfirmSave = () => {
         setIsConfirmationModalVisible(false);
-        handleSubmit(onSubmitForm)();
+        handleSubmit(onSubmitForm, handleHarvestFormError)();
     };
 
     const handleCancelConfirmation = () => {

@@ -35,7 +35,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         if (!isNaN(size) && !isNaN(weight) && size > 0 && weight > 0) {
             // Số con thu = Cỡ tôm (con/kg) × Sản lượng còn lại (kg)
-            const currentTotal = Math.round(size * weight);
+            const currentTotal = Math.floor(size * weight);
             setTotalShrimp(currentTotal);
 
             // Tỉ lệ sống (%) = (Tổng số con hiện tại / Số lượng giống thả ban đầu) × 100
