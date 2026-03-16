@@ -1,5 +1,5 @@
 import { TagStatus } from '@/features/menu/components/Tag';
-import { EControlMode } from '@/features/control/types/control.types';
+import { EControlMode, Pond } from '@/features/control/types/control.types';
 import { DeviceData as MenuDeviceData } from '@/features/menu/types/menu.types';
 
 // Data Interface Definitions
@@ -106,6 +106,8 @@ export const PONDS_LIST: IPond[] = [
         id: 'N03',
         name: 'Ao N03',
     },
+    // Map Ao N09 to N01 devices for history mock data
+    { id: 'N01', name: 'Ao N09' },
     // Mock Demo Ponds
     { id: 'N001', name: 'Ao N001' },
     { id: 'N002', name: 'Ao N002' },
@@ -1325,5 +1327,205 @@ export const SENSOR_STATISTICS: ISensorStatistic[] = [
         so2: 0.01,
         feedAmount: 25.0,
         plannedFeedAmount: 25.0,
+    },
+];
+
+/** Mock devices for Ao L01 and Ao L02 */
+export const MOCK_PONDS: Pond[] = [
+    {
+        id: 'mock-l01',
+        name: 'Ao L01',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'l01-qn1',
+                name: 'L01-QN1',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'l01-qn2',
+                name: 'L01-QN2',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'l01-mb',
+                name: 'L01-MB',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 2 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 1 },
+        },
+    },
+    {
+        id: 'mock-l02',
+        name: 'Ao L02',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'l02-qn1',
+                name: 'L02-QN1',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'l02-qn2',
+                name: 'L02-QN2',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'l02-mb',
+                name: 'L02-MB',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 2 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 1 },
+        },
+    },
+    {
+        id: 'mock-xl01',
+        name: 'Ao XL01',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'xl01-qn1',
+                name: 'XL01-QN1',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl01-qn2',
+                name: 'XL01-QN2',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl01-mb1',
+                name: 'XL01-MB1',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl01-mb2',
+                name: 'XL01-MB2',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 2 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 2 },
+        },
+    },
+    {
+        id: 'mock-xl02',
+        name: 'Ao XL02',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'xl02-qn1',
+                name: 'XL02-QN1',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl02-qn2',
+                name: 'XL02-QN2',
+                type: 'fan',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl02-mb1',
+                name: 'XL02-MB1',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+            {
+                id: 'xl02-mb2',
+                name: 'XL02-MB2',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 2 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 2 },
+        },
+    },
+    {
+        id: 'mock-ss01',
+        name: 'Ao SS01',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'ss01-mb',
+                name: 'SS01-MB',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 0 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 1 },
+        },
+    },
+    {
+        id: 'mock-ss02',
+        name: 'Ao SS02',
+        hasDevices: true,
+        devices: [
+            {
+                id: 'ss02-mb',
+                name: 'SS02-MB',
+                type: 'pump',
+                mode: EControlMode.SCHEDULE,
+                isOn: false,
+            },
+        ],
+        deviceStats: {
+            fan: { active: 0, warning: 0, inactive: 0 },
+            feeder: { active: 0, warning: 0, inactive: 0 },
+            oxy: { active: 0, warning: 0, inactive: 0 },
+            syphon: { active: 0, warning: 0, inactive: 0 },
+            pump: { active: 0, warning: 0, inactive: 1 },
+        },
     },
 ];

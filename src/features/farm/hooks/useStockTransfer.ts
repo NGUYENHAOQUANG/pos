@@ -25,7 +25,7 @@ export const useStockTransfers = (pondId: string, params?: GetStockTransfersPara
             const { data } = await stockTransferApi.getList(pondId, {
                 ...params,
                 Page: 1,
-                PageSize: 100,
+                PageSize: 50,
             });
             return data;
         },

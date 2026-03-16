@@ -5,8 +5,7 @@ import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';
 
 // Import device card SVGs
-import { MANUAL_DATA } from '@/features/control/data/GeneraluserManualData';
-import { ManualItem } from '@/features/control/data/userManualData';
+import { MANUAL_DATA, ManualItem } from '@/features/control/data/GeneraluserManualData';
 
 // Helper function to get highlight color
 const getHighlightColor = (text: string): string | undefined => {

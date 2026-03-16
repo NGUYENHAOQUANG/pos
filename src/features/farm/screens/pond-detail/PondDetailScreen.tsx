@@ -279,8 +279,9 @@ export const PondDetailScreen: React.FC = () => {
         navigation.navigate('PondCycleListScreen', {
             pondId: pond.id || '',
             zoneId: pond.zoneId?.toString() || '',
+            warehouseId: warehouses?.[0]?.id ?? '',
         });
-    }, [navigation, pond]);
+    }, [navigation, pond, warehouses]);
 
     const onEditCycle = useCallback(() => {
         navigation.navigate('CycleDetailScreen', {

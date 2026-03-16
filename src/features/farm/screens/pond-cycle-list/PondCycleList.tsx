@@ -11,11 +11,12 @@ import { pondDetailService } from '@/features/farm/services/pond-detail.service'
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { Tag } from '@/features/farm/components/pond/Tag';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
 interface PondCycleDetailContentProps {
     isLoading: boolean;
     displayedCycles: CycleData[];
-    getBreedLabel: (warehouseItemId: string | undefined) => string | undefined;
+    getBreedLabel: (cycle: CycleData) => string;
     seasonOptions: DropdownOption[];
     selectedSeason: string;
     setSelectedSeason: (val: string) => void;
@@ -49,7 +50,10 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                 <DropdownMaterial
                     options={seasonOptions}
                     value={selectedSeason}
-                    onChange={setSelectedSeason}
+                    onChange={value => {
+                        setSelectedSeason(value);
+                        console.log(value, 'value');
+                    }}
                     placeholder="Chọn vụ nuôi"
                     isOpen={dropdownOpen}
                     onToggle={() => setDropdownOpen(!dropdownOpen)}
@@ -64,7 +68,7 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                         style={{ marginTop: spacing.xl }}
                     />
                 ) : displayedCycles.length === 0 ? (
-                    <Text style={styles.emptyText}>Chưa có dữ liệu chu kỳ nuôi</Text>
+                    <EmptyStateCard message="Chưa có chu kỳ nuôi nào" />
                 ) : (
                     displayedCycles.map((cycle, index) => {
                         const dateText = cycle.createdAt
@@ -78,7 +82,7 @@ export const PondCycleDetailContent: React.FC<PondCycleDetailContentProps> = ({
                         const statusText =
                             cycle.status === 'Completed' ? 'Hoàn thành' : 'Chưa hoàn thành';
                         const doc = pondDetailService.calculateDOC(cycle.createdAt);
-                        const breed = getBreedLabel(cycle.warehouseItemId);
+                        const breed = getBreedLabel(cycle);
 
                         return (
                             <View key={cycle.id || index.toString()} style={styles.card}>

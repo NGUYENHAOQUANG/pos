@@ -64,7 +64,7 @@ export interface DeviceHubItem {
 export interface DeviceItem {
     id: string;
     deviceCode: string;
-    deviceType: 'Syphon' | 'Feeder' | 'AirBlower' | 'PaddleWheel';
+    deviceType: 'Syphon' | 'Feeder' | 'AirBlower' | 'PaddleWheel' | 'Pump';
     name: string;
     deviceHubName: string;
     connectionStatus: 'On' | 'Off' | 'DisConnected' | 'Disconnect' | 'UnDefined';

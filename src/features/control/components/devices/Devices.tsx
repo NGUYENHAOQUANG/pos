@@ -1,29 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
     TouchableOpacity,
     ViewStyle,
     StyleProp,
-    Dimensions,
     ActivityIndicator,
+    Text,
 } from 'react-native';
 import IconSetting from '@/assets/Icon/IconDevices/IconSetting.svg';
-import { ButtonControlMode } from './ButtonControlMode';
+import InfoIcon from '@/assets/Icon/IconDevices/Info.svg';
 import { ButtonDevices } from './ButtonDevices';
 import { DevicesStatusColor } from './DevicesStatusColor';
+import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import Toast from 'react-native-toast-message';
 import { DeviceData, EControlMode } from '@/features/control/types/control.types';
 import { colors } from '@/styles/colors';
-import { AutoScrollText } from '@/shared/components/ui/AutoScrollText';
 import { getDeviceIcon } from '@/features/control/utils/deviceUtils';
-
-// Responsive Scaling Helper
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const BASE_WIDTH = 375; // Standard design width (e.g., iPhone X/11/12/13/14 Pro)
-const scaleFactor = Math.min(SCREEN_WIDTH / BASE_WIDTH, 1.2); // Cap scaling to avoid excessive size on tablets
-
-const s = (size: number) => Math.round(size * scaleFactor);
+import { borderRadius } from '@/styles';
 
 export interface DeviceCardProps {
     data: DeviceData;
@@ -34,86 +28,103 @@ export interface DeviceCardProps {
     isLoading?: boolean;
 }
 
+/**
+ * Get display label for device type
+ */
+const getDeviceTypeLabel = (type: string): string => {
+    switch (type) {
+        case 'feeder':
+            return 'Máy cho ăn';
+        case 'fan':
+            return 'Quạt nước';
+        case 'oxy':
+            return 'Máy Oxy';
+        case 'syphon':
+            return 'Syphon';
+        case 'pump':
+            return 'Máy bơm';
+        default:
+            return type;
+    }
+};
+
+const getModeLabel = (mode: EControlMode): string => {
+    switch (mode) {
+        case EControlMode.MANUAL:
+            return 'Thủ công';
+        case EControlMode.SCHEDULE:
+            return 'Lịch trình';
+        case EControlMode.LOCAL:
+            return 'Tại chỗ';
+        default:
+            return '';
+    }
+};
+
 export const DeviceCard = React.memo<DeviceCardProps>(
-    ({ data, onToggle, onSettingsPress, onModePress, style, isLoading }) => {
-        // Determine styles based on state
-        let containerStyle: ViewStyle = styles.cardContainer;
-        let switchTrackColor: string = colors.primaryOrange;
+    ({ data, onToggle, onSettingsPress, style, isLoading }) => {
+        const [showLocalModal, setShowLocalModal] = useState(false);
+
         const isOxy = data.type === 'oxy';
         const effectiveMode = isOxy ? EControlMode.LOCAL : data.mode;
-
-        if (data.errorMessage) {
-            // Error State
-            containerStyle = { ...styles.cardContainer, ...styles.cardError };
-            switchTrackColor = colors.primaryOrange;
-        } else if (effectiveMode === EControlMode.LOCAL) {
-            // Local Mode (Active but locked)
-            containerStyle = { ...styles.cardContainer, ...styles.cardActive };
-            switchTrackColor = colors.primaryOrange; // Orange for local too
-        } else if (!data.isOn) {
-            // Inactive State
-            containerStyle = { ...styles.cardContainer, ...styles.cardInactive };
-            switchTrackColor = colors.gray[200];
-        } else {
-            // Active State
-            containerStyle = { ...styles.cardContainer, ...styles.cardActive };
-        }
+        const switchTrackColor =
+            !data.isOn && effectiveMode !== EControlMode.LOCAL
+                ? colors.gray[200]
+                : colors.primaryOrange;
 
         const Icon = getDeviceIcon(data.type);
-
         if (!Icon) return null;
 
         return (
-            <View style={[containerStyle, style]}>
+            <View style={[styles.cardContainer, style]}>
                 <View
                     style={[styles.innerContent, isLoading && { opacity: 0.3 }]}
                     collapsable={false}
                     renderToHardwareTextureAndroid={true}
                 >
-                    {/* Top Row: Icon & Settings */}
-                    <View style={styles.rowTop}>
+                    {/* Left: Device Icon */}
+                    <View style={styles.iconContainer}>
                         <DevicesStatusColor
                             icon={Icon}
                             isOn={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
                             errorMessage={data.errorMessage}
-                            size={s(48)}
+                            size={36}
                         />
+                    </View>
+
+                    {/* Middle: Type Label, Device Name, Mode Badge */}
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.deviceName} numberOfLines={1}>
+                            {getDeviceTypeLabel(data.type)}
+                        </Text>
+                        <Text style={styles.modelName} numberOfLines={1}>
+                            {data.name}
+                        </Text>
+                        {/* Mode tag - tappable only for LOCAL mode */}
+                        <TouchableOpacity
+                            style={styles.modeBadge}
+                            activeOpacity={effectiveMode === EControlMode.LOCAL ? 0.7 : 1}
+                            onPress={
+                                effectiveMode === EControlMode.LOCAL
+                                    ? () => setShowLocalModal(true)
+                                    : undefined
+                            }
+                        >
+                            <Text style={styles.modeText}>{getModeLabel(effectiveMode)}</Text>
+                            <InfoIcon width={14} height={14} />
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Right: Settings + Toggle */}
+                    <View style={styles.rightContainer}>
                         <TouchableOpacity
                             style={styles.settingsButton}
                             onPress={() => onSettingsPress?.(data.id)}
                             activeOpacity={0.7}
                             disabled={isLoading}
                         >
-                            <IconSetting width={s(32)} height={s(32)} />
+                            <IconSetting width={16} height={16} />
                         </TouchableOpacity>
-                    </View>
-
-                    {/* Middle Row: Error & Mode */}
-                    <View style={styles.rowMiddle}>
-                        <View style={styles.errorContainer}>
-                            {data.errorMessage ? (
-                                <AutoScrollText text={data.errorMessage} style={styles.errorText} />
-                            ) : null}
-                        </View>
-                        <View style={styles.modeContainer}>
-                            <ButtonControlMode
-                                mode={effectiveMode}
-                                onPress={
-                                    effectiveMode === EControlMode.LOCAL
-                                        ? undefined
-                                        : () => onModePress?.(data.id)
-                                }
-                                style={styles.scaledButton}
-                                disabled={isLoading}
-                            />
-                        </View>
-                    </View>
-
-                    {/* Bottom Row: Name & Switch */}
-                    <View style={styles.rowBottom}>
-                        <View style={styles.nameContainer}>
-                            <AutoScrollText text={data.name} style={styles.deviceName} />
-                        </View>
                         <ButtonDevices
                             value={effectiveMode === EControlMode.LOCAL ? true : data.isOn}
                             onValueChange={val => {
@@ -127,10 +138,7 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                                 onToggle(data.id, val);
                             }}
                             trackColor={switchTrackColor}
-                            style={[
-                                styles.scaledButton,
-                                effectiveMode === EControlMode.LOCAL && { opacity: 0.5 },
-                            ]}
+                            style={[effectiveMode === EControlMode.LOCAL && { opacity: 0.5 }]}
                             disabled={isLoading}
                         />
                     </View>
@@ -141,6 +149,19 @@ export const DeviceCard = React.memo<DeviceCardProps>(
                         <ActivityIndicator size="small" color={colors.primary} />
                     </View>
                 )}
+
+                {/* Local mode info modal */}
+                <ConfirmationModalUI
+                    visible={showLocalModal}
+                    onConfirm={() => setShowLocalModal(false)}
+                    onCancel={() => setShowLocalModal(false)}
+                    title="Thiết bị điều khiển tại chỗ"
+                    message={`Thiết bị không điều khiển qua App\nVui lòng thao tác trực tiếp trên thiết bị khi sử dụng`}
+                    confirmText="Đã hiểu "
+                    cancelText=""
+                    showSuccessToast={false}
+                    cancelButtonStyle={{ display: 'none' }}
+                />
             </View>
         );
     }
@@ -149,87 +170,77 @@ export const DeviceCard = React.memo<DeviceCardProps>(
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: colors.white,
-        borderRadius: s(16),
-        padding: s(12),
+        borderRadius: 12,
+        padding: 12,
         borderWidth: 1,
         borderColor: colors.border,
-        width: '100%', // Fill the grid wrapper
-        aspectRatio: 152 / 114, // Increase height for better spacing
-    },
-    cardActive: {
-        borderColor: colors.primary,
-        backgroundColor: colors.white,
-    },
-    cardInactive: {
-        borderColor: colors.border, // Light visible border
-        backgroundColor: colors.gray[100],
-    },
-    cardError: {
-        borderColor: colors.red[200],
-        backgroundColor: colors.red[25], // Light red background
+        width: '100%',
     },
     innerContent: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    // Row Styles
-    rowTop: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'flex-start',
     },
-    rowMiddle: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        // No flex:1 here, let it just take necessary height?
-        // Actually, justifyContent space-between on parent handles the gap.
-        // If we want it to align specifically, we need to ensure rows don't collapse?
-        // They have content, so they won't collapse.
-    },
-    rowBottom: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-end',
-    },
-    // Element Styles
-    settingsButton: {
-        width: s(32),
-        height: s(32),
-        alignItems: 'center',
+    iconContainer: {
+        width: 44,
+        height: 44,
         justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        marginRight: 12,
     },
-    errorContainer: {
+    infoContainer: {
         flex: 1,
-        paddingRight: s(8),
         justifyContent: 'center',
-    },
-    errorText: {
-        fontSize: s(12),
-        color: colors.error,
-        fontWeight: '400',
-    },
-    nameContainer: {
-        flex: 1,
-        paddingRight: s(8),
-        justifyContent: 'flex-end',
+        gap: 4,
     },
     deviceName: {
-        fontSize: s(14),
-        fontWeight: '400',
+        fontSize: 15,
+        fontWeight: '600',
         color: colors.text,
     },
-    modeContainer: {
-        marginTop: -s(16),
+    modelName: {
+        fontSize: 13,
+        color: colors.gray[500],
+        fontWeight: '400',
     },
-    scaledButton: {
-        transform: [{ scale: scaleFactor < 1 ? scaleFactor : 1 }],
+    modeBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.white,
+        gap: 4,
+    },
+    modeText: {
+        fontSize: 12,
+        color: colors.text,
+        fontWeight: '400',
+    },
+    rightContainer: {
+        alignItems: 'flex-end',
+        gap: 8,
+        marginLeft: 8,
+    },
+    settingsButton: {
+        width: 36,
+        height: 36,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: borderRadius.full,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     loadingContainer: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 10,
-        borderRadius: s(16), // Match card border radius
+        borderRadius: 12,
     },
 });

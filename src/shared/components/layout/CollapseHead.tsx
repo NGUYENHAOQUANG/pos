@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet, ViewStyle, TextStyle, View, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, ViewStyle, TextStyle, View } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -18,12 +18,12 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
     style,
     titleStyle,
     isExpanded = true,
-    onToggle,
+    // onToggle,
     showIcon = false,
     rightComponent,
 }) => {
     return (
-        <TouchableOpacity style={[styles.container, style]} onPress={onToggle} activeOpacity={0.7}>
+        <View style={[styles.container, style]} /* onPress={onToggle} */>
             <Text style={[styles.title, titleStyle]} numberOfLines={1}>
                 {title}
             </Text>
@@ -37,7 +37,7 @@ export const CollapseHead: React.FC<CollapseHeadProps> = ({
                     />
                 )}
             </View>
-        </TouchableOpacity>
+        </View>
     );
 };
 
