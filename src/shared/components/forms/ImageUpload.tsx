@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Image as RNImage,
@@ -16,6 +15,7 @@ import {
     PermissionsAndroid,
     Alert,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import {
     launchCamera,
     launchImageLibrary,

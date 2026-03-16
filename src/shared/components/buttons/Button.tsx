@@ -12,13 +12,13 @@ import React from 'react';
 import {
     ActivityIndicator,
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
     ViewStyle,
     TextStyle,
     StyleProp,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'text';

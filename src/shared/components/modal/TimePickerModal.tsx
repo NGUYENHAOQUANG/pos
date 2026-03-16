@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     Modal,
     TouchableOpacity,
@@ -10,6 +9,7 @@ import {
     Dimensions,
     Pressable,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

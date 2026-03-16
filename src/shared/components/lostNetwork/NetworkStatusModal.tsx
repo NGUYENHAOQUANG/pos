@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, AppState, AppStateStatus, Modal } from 'react-native';
+import { View, StyleSheet, Dimensions, AppState, AppStateStatus, Modal } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';

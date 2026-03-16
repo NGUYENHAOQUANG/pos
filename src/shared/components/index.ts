@@ -31,6 +31,7 @@ export { default as WhiteSpace } from '@ant-design/react-native/lib/white-space'
 // Typography
 export * from './typography/Text';
 export * from './typography/TextLink';
+export * from './typography/AppTextInput';
 
 // Brand
 export * from './brand/Logo';

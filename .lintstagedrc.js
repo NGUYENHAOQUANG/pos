@@ -4,7 +4,9 @@ module.exports = {
             file =>
                 !file.includes('.lintstagedrc.js') &&
                 !file.includes('.prettierrc.js') &&
-                !file.includes('eslint.config.js')
+                !file.includes('eslint.config.js') &&
+                !file.includes('babel.config.js') &&
+                !file.includes('react-native.config.js')
         );
         if (filesToLint.length === 0) {
             return [];
