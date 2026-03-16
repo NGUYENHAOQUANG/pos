@@ -14,41 +14,42 @@ const CHART_CONTENT_HEIGHT = 350; // Set to fit with padding
 interface Props {
     zoneId: string;
     pondId?: string;
+    pondCode?: string;
 }
 
-export const HarvestChart: React.FC<Props> = ({ zoneId, pondId }) => {
+export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
 
     const { data: response, isLoading: queryLoading } = useHarvestStats({
         ZoneId: zoneId,
-        Id: pondId,
     });
     const isLoading = !isCollapsed && queryLoading;
 
     const statsData = response?.data;
 
-    // Lọc theo pondId nếu có
-    const filteredByPond = useMemo(() => {
-        if (!statsData?.byPond) return [];
-        if (pondId) {
-            return statsData.byPond.filter(p => p.pondId === pondId);
+    // TODO: API /report/harvest-stats không hỗ trợ filter theo pondId, luôn trả tất cả ao.
+    // Đang filter client-side bằng pondCode. Khi BE cập nhật thì sửa lại dùng pondId.
+    const byPondData = useMemo(() => {
+        const allPonds = statsData?.byPond ?? [];
+        if (pondCode) {
+            return allPonds.filter(p => p.pondCode === pondCode);
         }
-        return statsData.byPond;
-    }, [statsData?.byPond, pondId]);
+        return allPonds;
+    }, [statsData?.byPond, pondCode]);
 
     const totalYield = useMemo(() => {
-        if (pondId) {
-            return filteredByPond.reduce((sum, p) => sum + p.totalHarvested, 0);
+        if (pondCode) {
+            return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0);
         }
         return statsData?.kpis?.totalHarvested ?? 0;
-    }, [filteredByPond, pondId, statsData?.kpis?.totalHarvested]);
+    }, [byPondData, pondCode, statsData?.kpis?.totalHarvested]);
 
     const chartData: HarvestChartData[] = useMemo(() => {
-        return filteredByPond.map(pondStat => ({
+        return byPondData.map(pondStat => ({
             pond: pondStat.pondName,
             yield: pondStat.totalHarvested,
         }));
-    }, [filteredByPond]);
+    }, [byPondData]);
 
     // Get screen layout dimensions dynamically
     const screenWidth = Dimensions.get('window').width;

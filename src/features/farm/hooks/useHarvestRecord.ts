@@ -33,20 +33,41 @@ export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordP
 
     const rawItems: IHarvestRecord[] = data?.data?.items ?? [];
 
-    // Sort by createdAt ascending so Lần 1, 2... are in correct daily order
-    const sortedItems = [...rawItems].sort((a, b) => {
+    // Sort by createdAt ascending first for "Lần x" counting (oldest → newest)
+    const ascItems = [...rawItems].sort((a, b) => {
         const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return timeA - timeB;
     });
 
+    // Count total occurrences per day
+    const totalPerDay: Record<string, number> = {};
+    ascItems.forEach(item => {
+        const d = item.createdAt ? new Date(item.createdAt) : new Date();
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        totalPerDay[key] = (totalPerDay[key] || 0) + 1;
+    });
+
+    // Assign "Lần x" labels in ascending order
     const dayCounts: Record<string, number> = {};
-    const jobs: JobExecution[] = sortedItems.map(item => {
+    const labelMap = new Map<string, string>();
+    ascItems.forEach(item => {
         const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
         const dateKey = `${createdDate.getFullYear()}-${createdDate.getMonth()}-${createdDate.getDate()}`;
         if (!dayCounts[dateKey]) dayCounts[dateKey] = 0;
         dayCounts[dateKey]++;
-        const dailyIndex = dayCounts[dateKey];
+        labelMap.set(item.id, `Lần ${dayCounts[dateKey]}`);
+    });
+
+    // Sort descending (newest first) for card display — slice(0,3) shows latest items
+    const sortedDesc = [...rawItems].sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+    });
+
+    const jobs: JobExecution[] = sortedDesc.map(item => {
+        const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
 
         const timeStr = createdDate.toLocaleTimeString('en-GB', {
             hour: '2-digit',
@@ -58,7 +79,7 @@ export const useHarvestRecordsAsJobs = (pondId: string, params?: IHarvestRecordP
 
         return {
             id: item.id,
-            label: `Lần ${dailyIndex}`,
+            label: labelMap.get(item.id) || 'Lần 1',
             time: timeStr,
             date: dateStr,
             note: detail?.notes ?? undefined,
