@@ -91,10 +91,10 @@ export const useDeleteCycle = () => {
     });
 };
 
-export const useCyclesByPond = (pondId: string) => {
+export const useCyclesByPond = (pondId: string, params?: ICycleListParams) => {
     return useQuery({
-        queryKey: farmKeys.cycles.byPond(pondId),
-        queryFn: () => cycleApi.getCyclesByPond(pondId),
+        queryKey: [...farmKeys.cycles.byPond(pondId), params],
+        queryFn: () => cycleApi.getCyclesByPond(pondId, params),
         enabled: !!pondId,
         staleTime: 0,
         refetchOnMount: 'always',

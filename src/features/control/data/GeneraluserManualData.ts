@@ -7,7 +7,7 @@ import OnSiteCard from '@/assets/Icon/IconDevices/OnSiteCard.svg';
 import ErrorCard from '@/assets/Icon/IconDevices/ErrorCard.svg';
 
 // Type definition for manual items
-interface ManualItem {
+export interface ManualItem {
     id: string;
     CardSvg: React.FC<{ width?: number; height?: number }>;
     descriptions: string[];
