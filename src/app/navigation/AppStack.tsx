@@ -180,8 +180,8 @@ export type AppStackParamList = {
     TransferLog: { pond: PondData };
     AddHarvestScreen: { pond: PondData; itemToEdit?: JobExecution };
     HarvestLog: { pond: PondData };
-    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId?: string; cycleId: string };
-    PondCycleListScreen: { pondId: string; zoneId: string };
+    CycleDetailScreen: { pondId: string; zoneId: string; warehouseId: string; cycleId: string };
+    PondCycleListScreen: { pondId: string; zoneId: string; warehouseId: string };
     HandleProblem: {
         pondId: string;
         item?: JobExecution;

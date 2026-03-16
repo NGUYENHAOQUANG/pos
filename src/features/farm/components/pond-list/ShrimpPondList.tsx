@@ -21,6 +21,7 @@ interface ShrimpPondListProps {
     refreshing?: boolean;
     onRefresh?: () => void;
     zoneId?: string;
+    warehouseId?: string;
 }
 
 export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
@@ -35,6 +36,7 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
             refreshing,
             onRefresh,
             zoneId,
+            warehouseId,
         },
         ref
     ) => {
@@ -71,7 +73,8 @@ export const ShrimpPondList = React.forwardRef<FlatList, ShrimpPondListProps>(
                     onCyclePress={() =>
                         navigation.navigate('PondCycleListScreen', {
                             pondId: item.id || '',
-                            zoneId: item.zoneId || zoneId || '',
+                            warehouseId: warehouseId || '',
+                            zoneId: zoneId || '',
                         })
                     }
                     onDetailPress={() => onPondPress?.(item)}

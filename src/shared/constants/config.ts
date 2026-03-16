@@ -14,6 +14,7 @@ export const APP_CONFIG = {
     IMAGE_SIZE_LIMIT_MB: 50,
     IMAGE_SIZE_LIMIT_BYTES: 50 * 1024 * 1024, // 50MB
     DEFAULT_PAGE_SIZE: 20,
+    MAX_PAGE_SIZE: 50,
 } as const;
 
 export const ALLOWED_JOBS_WHEN_NO_CYCLE: string[] = [

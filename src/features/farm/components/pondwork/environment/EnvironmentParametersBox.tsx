@@ -32,7 +32,7 @@ interface EnvironmentParametersBoxProps {
     onMagieChange?: (value: string) => void;
     no3?: string;
     onNo3Change?: (value: string) => void;
-    limits?: Record<string, string>; // ID -> Limit string (e.g., "7.5 - 8.5")
+    limits?: Record<string, string>; // Code -> Limit string (e.g., "7.5 - 8.5")
 }
 
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
@@ -256,5 +256,16 @@ const styles = StyleSheet.create({
     },
     setupButton: {
         marginTop: 4,
+    },
+    warningRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+        marginTop: 2,
+    },
+    warningText: {
+        fontSize: 12,
+        color: colors.warning,
+        flex: 1,
     },
 });

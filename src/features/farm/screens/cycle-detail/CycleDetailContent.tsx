@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Text } from 'react-native';
 import { borderRadius, colors, spacing } from '@/styles';
 import { CycleData } from '@/features/farm/types/cycle.types';
@@ -6,8 +6,13 @@ import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import EditIcon from '@/assets/Icon/IconFarm/Edit.svg';
 import { DetailRow } from '@/features/material/components/DetailRow';
 import { IStockTransferDetail } from '@/features/farm/types/stockTransfer.types';
+import { IShrimpSeed } from '@/features/material/types/warehouse.types';
+import { IncomingStockTransfer } from '@/features/farm/hooks/stock-transfer/useStockTransfer';
+import { pondDetailService } from '@/features/farm/services/pond-detail.service';
+import { formatDate } from '@/features/farm/utils/dateUtils';
 import type { HarvestType } from '@/features/farm/types/harvestRecord.types';
 import { getHarvestTypeDisplay } from '@/features/farm/schemas/harvestFormSchema';
+import { POND_TYPES } from '@/features/farm/types/farm.types';
 
 type CycleHarvestType = HarvestType | 'CloseCycle';
 
@@ -22,16 +27,11 @@ interface HarvestSummaryItem {
 
 interface CycleDetailContentProps {
     activeCycleData?: CycleData;
-    seasonLabel: string;
-    breedLabel: string;
-    doc: number;
-    sourcePondName: string;
-    shrimpSize: string;
-    displayStockingDate: string;
-    showIncomingTransfer?: boolean;
-    isCultivation?: boolean;
-    refreshing: boolean;
+    shrimpSeeds?: IShrimpSeed[];
+    incomingTransfer?: IncomingStockTransfer | null;
     transferDetail?: IStockTransferDetail;
+    pondType?: string;
+    refreshing: boolean;
     harvestSummary?: HarvestSummaryItem[];
     onRefresh: () => void;
     onEditPress: () => void;
@@ -39,14 +39,9 @@ interface CycleDetailContentProps {
 
 export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     activeCycleData,
-    seasonLabel,
-    breedLabel,
-    doc,
-    sourcePondName,
-    shrimpSize,
-    displayStockingDate,
-    showIncomingTransfer = true,
-    isCultivation = false,
+    shrimpSeeds,
+    incomingTransfer,
+    pondType,
     refreshing,
     transferDetail,
     harvestSummary,
@@ -57,6 +52,41 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
     const [isTransferExpanded, setIsTransferExpanded] = useState(true);
     const [isOutgoingTransferExpanded, setIsOutgoingTransferExpanded] = useState(true);
     const [isHarvestExpanded, setIsHarvestExpanded] = useState(true);
+
+    const isNursery = pondType === POND_TYPES.NURSERY;
+    const isShowHarvest = pondType === POND_TYPES.CULTIVATION || pondType === POND_TYPES.READY;
+
+    // Derive display values from raw data
+    const seasonLabel = useMemo(
+        () => (activeCycleData?.season ? activeCycleData.season.name : 'N/A'),
+        [activeCycleData?.season]
+    );
+
+    const breedLabel = useMemo(
+        () => pondDetailService.getBreedName(activeCycleData, shrimpSeeds),
+        [activeCycleData, shrimpSeeds]
+    );
+
+    const doc = useMemo(
+        () => pondDetailService.calculateDOC(activeCycleData?.createdAt),
+        [activeCycleData?.createdAt]
+    );
+
+    const displayStockingDate = useMemo(
+        () =>
+            activeCycleData?.createdAt ? formatDate(new Date(activeCycleData.createdAt)) : '---',
+        [activeCycleData?.createdAt]
+    );
+
+    const sourcePondName = useMemo(() => {
+        return incomingTransfer?.fromPondName || '--';
+    }, [incomingTransfer]);
+
+    const shrimpSize = useMemo(() => {
+        return incomingTransfer?.shrimpSizePcsPerKg
+            ? `${incomingTransfer.shrimpSizePcsPerKg}`
+            : '--';
+    }, [incomingTransfer?.shrimpSizePcsPerKg]);
 
     return (
         <ScrollView
@@ -101,8 +131,8 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 )}
             </View>
 
-            {/* Thông tin sang ao - Chỉ hiển thị nếu showIncomingTransfer = true (không phải Ao nuôi) */}
-            {!showIncomingTransfer && (
+            {/* Thông tin nhận ao - Chỉ hiển thị nếu không phải Ao vèo */}
+            {!isNursery && (
                 <View style={[styles.card, { marginTop: spacing.sm }]}>
                     <CollapseHead
                         title="Thông tin nhận ao"
@@ -168,7 +198,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 </View>
             )}
 
-            {isCultivation &&
+            {isShowHarvest &&
                 harvestSummary &&
                 harvestSummary.length > 0 &&
                 harvestSummary.map((item, index) => (
@@ -243,7 +273,7 @@ const styles = StyleSheet.create({
         marginHorizontal: spacing.md,
     },
     cardHeader: {
-        backgroundColor: colors.transparent, // Inherit from card to prevent corner issues
+        backgroundColor: colors.transparent,
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
         paddingHorizontal: spacing.md,
@@ -261,7 +291,7 @@ const styles = StyleSheet.create({
     line: {
         height: 1,
         backgroundColor: colors.borderLight,
-        marginHorizontal: spacing.md, // match DataRow internal padding, so 12+4=16 total
+        marginHorizontal: spacing.md,
     },
     infoContainer: {
         paddingBottom: 16,
