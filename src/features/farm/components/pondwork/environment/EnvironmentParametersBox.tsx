@@ -6,7 +6,7 @@ import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import GearSix from '@/assets/Icon/GearSix.svg';
 import WarningCircle from '@/assets/Icon/WarningCircle.svg';
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 
 interface EnvironmentParametersBoxProps {
     pH: string;
@@ -35,24 +35,6 @@ interface EnvironmentParametersBoxProps {
     limits?: Record<string, string>; // Code -> Limit string (e.g., "7.5 - 8.5")
 }
 
-/** Parse limit string "min - max" into [min, max] or null */
-function parseLimits(limitStr?: string): [number, number] | null {
-    if (!limitStr) return null;
-    const parts = limitStr.split('-').map(s => parseFloat(s.trim()));
-    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
-    return [parts[0], parts[1]];
-}
-
-/** Check if value is outside the min/max range */
-function isOutOfRange(value: string, limitStr?: string): boolean {
-    if (!value || value === '') return false;
-    const num = parseFloat(value);
-    if (isNaN(num)) return false;
-    const range = parseLimits(limitStr);
-    if (!range) return false;
-    return num < range[0] || num > range[1];
-}
-
 export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> = ({
     pH,
     onPHChange,
@@ -79,6 +61,23 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
     onNo3Change,
     limits = {},
 }) => {
+    // Parse limit string "min - max" and validate input value
+    const getLimitError = (value: string, metricCode: string): string | undefined => {
+        if (!value || !limits[metricCode]) return undefined;
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) return undefined;
+
+        const parts = limits[metricCode].split('-').map(s => s.trim());
+        if (parts.length !== 2) return undefined;
+
+        const min = parseFloat(parts[0]);
+        const max = parseFloat(parts[1]);
+        if (isNaN(min) || isNaN(max)) return undefined;
+
+        if (numValue < min) return `Thấp quá giới hạn dưới: ${min}`;
+        if (numValue > max) return `Vượt quá giới hạn trên: ${max}`;
+        return undefined;
+    };
     // Helper to generate label
     const getLabel = (baseName: string, id: string, unit: string = '') => {
         return unit ? `${baseName} (${unit})` : baseName;
@@ -101,35 +100,6 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
         return undefined;
     };
 
-    const handleNumericInput = (text: string, callback: (val: string) => void) => {
-        // 1. Remove any character that is not 0-9 or .
-        let cleaned = text.replace(/[^0-9.]/g, '');
-
-        // 2. Prevent . at the beginning
-        if (cleaned.startsWith('.')) {
-            cleaned = cleaned.substring(1);
-        }
-
-        // 3. Ensure only one . exists
-        const parts = cleaned.split('.');
-        if (parts.length > 2) {
-            cleaned = parts[0] + '.' + parts.slice(1).join('');
-        }
-
-        callback(cleaned);
-    };
-
-    /** Render warning text below input if out of range */
-    const renderWarning = (metricCode: string, value: string) => {
-        const limitStr = limits[metricCode];
-        if (!isOutOfRange(value, limitStr)) return null;
-        return (
-            <View style={styles.warningRow}>
-                <WarningCircle width={14} height={14} color={colors.warning} />
-                <Text style={styles.warningText}>Giá trị ngoài phạm vi cho phép ({limitStr})</Text>
-            </View>
-        );
-    };
     return (
         <SelectionInfoBox title="Chỉ số môi trường">
             {showError && (
@@ -145,10 +115,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('pH', ENVIRONMENT_METRIC_IDS.PH, '1-14')}
                         value={pH}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onPHChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onPHChange}
+                        error={getLimitError(pH, ENVIRONMENT_METRIC_IDS.PH)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.PH, pH)}
                 </View>
 
                 {/* DO */}
@@ -157,10 +128,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('DO', ENVIRONMENT_METRIC_IDS.DO, 'mg/L')}
                         value={doValue}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onDOChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onDOChange}
+                        error={getLimitError(doValue, ENVIRONMENT_METRIC_IDS.DO)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.DO, doValue)}
                 </View>
 
                 {/* Nhiệt độ */}
@@ -169,10 +141,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('Nhiệt độ', ENVIRONMENT_METRIC_IDS.TEMPERATURE, '°C')}
                         value={temperature}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onTemperatureChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onTemperatureChange}
+                        error={getLimitError(temperature, ENVIRONMENT_METRIC_IDS.TEMPERATURE)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.TEMPERATURE, temperature)}
                 </View>
 
                 {/* Độ mặn */}
@@ -181,10 +154,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('Độ mặn', ENVIRONMENT_METRIC_IDS.SALINITY, 'ppt')}
                         value={salinity}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onSalinityChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onSalinityChange}
+                        error={getLimitError(salinity, ENVIRONMENT_METRIC_IDS.SALINITY)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.SALINITY, salinity)}
                 </View>
 
                 {/* Độ kiềm */}
@@ -193,10 +167,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('Độ kiềm', ENVIRONMENT_METRIC_IDS.ALKALINITY, 'mg/L')}
                         value={alkalinity}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onAlkalinityChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onAlkalinityChange}
+                        error={getLimitError(alkalinity, ENVIRONMENT_METRIC_IDS.ALKALINITY)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.ALKALINITY, alkalinity)}
                 </View>
 
                 {/* Độ trong */}
@@ -205,10 +180,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                         label={getLabel('Độ trong', ENVIRONMENT_METRIC_IDS.TRANSPARENCY, 'cm')}
                         value={transparency}
                         placeholder="--"
-                        keyboardType="default"
-                        onChangeText={text => handleNumericInput(text, onTransparencyChange)}
+                        keyboardType="numeric"
+                        inputFormat={InputFormat.DECIMAL}
+                        onChangeText={onTransparencyChange}
+                        error={getLimitError(transparency, ENVIRONMENT_METRIC_IDS.TRANSPARENCY)}
                     />
-                    {renderWarning(ENVIRONMENT_METRIC_IDS.TRANSPARENCY, transparency)}
                 </View>
 
                 {/* Advanced Parameters */}
@@ -226,10 +202,11 @@ export const EnvironmentParametersBox: React.FC<EnvironmentParametersBoxProps> =
                                     label={label}
                                     value={paramValue}
                                     placeholder="--"
-                                    keyboardType="default"
-                                    onChangeText={text => handleNumericInput(text, paramOnChange)}
+                                    keyboardType="numeric"
+                                    inputFormat={InputFormat.DECIMAL}
+                                    onChangeText={paramOnChange}
+                                    error={getLimitError(paramValue, param.id)}
                                 />
-                                {renderWarning(param.id, paramValue)}
                             </View>
                         );
                     })}

@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     value: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.text,
+        color: colors.red[500],
         lineHeight: 22,
     },
     icon: {

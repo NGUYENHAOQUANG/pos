@@ -183,7 +183,15 @@ export const JobCard: React.FC<JobCardProps> = ({
                                             gap: 8,
                                         }}
                                     >
-                                        <Text style={styles.itemText}>
+                                        <Text
+                                            style={[
+                                                styles.itemText,
+                                                // Warning: turn text red when flagged
+                                                hasWarning(item) && {
+                                                    color: colors.red[500],
+                                                },
+                                            ]}
+                                        >
                                             {item.label} - {item.time}
                                         </Text>
                                         {hasWarning(item) && <Warning width={16} height={16} />}

@@ -14,7 +14,7 @@ import { Button } from '@/shared/components/buttons/Button';
 import { DropdownMaterial, DropdownOption } from './DropdownMaterial';
 import { formatCurrency } from '@/features/material/utils/formatCurrency';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { warehouseFormUtils } from '@/features/material/utils/warehouseFormUtils';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 
@@ -169,6 +169,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             value={item.quantity}
                                             onChangeText={val => handleQuantityChange(item.id, val)}
                                             keyboardType="numeric"
+                                            inputFormat={InputFormat.DECIMAL}
                                             containerStyle={styles.noMarginBottom}
                                             suffix={item.unit}
                                         />
@@ -185,6 +186,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                             value={warehouseFormUtils.formatPriceInput(item.price)}
                                             onChangeText={val => handlePriceChange(item.id, val)}
                                             keyboardType="numeric"
+                                            inputFormat={InputFormat.DECIMAL}
                                             containerStyle={styles.noMarginBottom}
                                             disabled={isPriceDisabled}
                                             suffix={<Text style={styles.currencyUnderline}>đ</Text>}

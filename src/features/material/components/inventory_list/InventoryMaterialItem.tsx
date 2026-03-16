@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '@/styles';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { numericStringSchema } from '@/shared/utils/validation';
 import { InventoryItem } from '../inventory/InventoryMaterialList';
 
@@ -84,6 +84,7 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                                     }
                                 }}
                                 keyboardType="numeric"
+                                inputFormat={InputFormat.DECIMAL}
                                 containerStyle={styles.noMarginBottom}
                                 suffix={item.unit}
                             />
