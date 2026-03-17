@@ -1,10 +1,9 @@
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
-import { PondData } from '@/features/farm/types/pond.types';
 
 export interface StockTransferRecordDto {
     recordId: string;
-    fromPondCode: string | null;
-    toPondCode: string | null;
+    fromPondName: string | null;
+    toPondName: string | null;
     releaseDate: string;
     transferDate: string;
     doc: number;
@@ -19,13 +18,12 @@ export interface StockTransferStatsParams {
     CycleId?: string;
     StartDate?: string;
     EndDate?: string;
-    PageNumber?: number;
-    PageSize?: number;
     Id?: string;
     CreatedAt?: string;
     CreateAtFrom?: string;
     CreateAtTo?: string;
     Page?: number;
+    PageSize?: number;
     OrderBy?: string;
 }
 
@@ -54,5 +52,4 @@ export interface PondTransferProps {
     zoneId: string;
     pondId?: string;
     cycleId?: string;
-    ponds?: PondData[];
 }

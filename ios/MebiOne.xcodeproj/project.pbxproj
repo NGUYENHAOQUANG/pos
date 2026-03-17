@@ -7,24 +7,62 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0652B5A60AE148EBB4DC1F69 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */; };
+		081092403F7548B39004FACC /* GoogleSansFlex120pt-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		197EA8125D814FC5973159FE /* GoogleSansFlex_120pt-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 00A9A49B5A4F41A7BA77E1EB /* GoogleSansFlex_120pt-Medium.ttf */; };
+		358E69730ABD41EAA6B827B4 /* GoogleSansFlex_120pt-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AD9B47DABBE047CF9656D15D /* GoogleSansFlex_120pt-Light.ttf */; };
+		553B6698FD5C4559B427EF88 /* GoogleSansFlex120pt-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */; };
 		5A773223237725FA17A26DB7 /* libPods-MebiOne.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B7A3055B70D3B9A52FBC502 /* libPods-MebiOne.a */; };
+		75FB2985C93442C491D8C31B /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8624D82C8C124930B863BF9B /* GoogleSansFlex_120pt-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F78113E6881747AABCE38441 /* GoogleSansFlex_120pt-Bold.ttf */; };
+		926063DA9A6A4322B68E5B23 /* GoogleSansFlex_120pt-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 093B680BBF3A4A858E7B6001 /* GoogleSansFlex_120pt-Thin.ttf */; };
+		B31A28A550FD49318C81B270 /* GoogleSansFlex_120pt-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B2175F22A8934F6DA035239A /* GoogleSansFlex_120pt-Regular.ttf */; };
+		C36517C030CD4295B3D1B6DA /* GoogleSansFlex120pt-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */; };
+		C40BF0F4210B42B0975D390B /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = E778926902E1436F9E18EE18 /* OFL.txt */; };
+		C643F8F0BCFB41BE834A986B /* GoogleSansFlex120pt-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */; };
+		C93FE65744AD471BA4EA4BD0 /* GoogleSansFlex_120pt-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8157DD9CF63E4604A6680767 /* GoogleSansFlex_120pt-ExtraLight.ttf */; };
 		D5EF9C88B97FEF593E722BDD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		D8E2540CF7BC44A7B80582C1 /* GoogleSansFlex120pt-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */; };
+		E0707CE44C9D496A98CB12B9 /* GoogleSansFlex120pt-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */; };
+		E1D4BA734D40474899F8644A /* GoogleSansFlex_120pt-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24BB3CAF28154F309DF90856 /* GoogleSansFlex_120pt-SemiBold.ttf */; };
+		E5BA1B9B246845FE8A166E14 /* GoogleSansFlex120pt-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */; };
+		F94ADF8D13B64AFFA9D8430F /* GoogleSansFlex_120pt-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3012D6E8E2E4427FACD0B93B /* GoogleSansFlex_120pt-Black.ttf */; };
+		FF2CCA6F85FB4CAE8F0EEAF4 /* GoogleSansFlex_120pt-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 975BE724D14749A0A34D7898 /* GoogleSansFlex_120pt-ExtraBold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		00A9A49B5A4F41A7BA77E1EB /* GoogleSansFlex_120pt-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Medium.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Medium.ttf"; sourceTree = "<group>"; };
+		093B680BBF3A4A858E7B6001 /* GoogleSansFlex_120pt-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Thin.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Thin.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* MebiOne.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MebiOne.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = MebiOne/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = MebiOne/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = MebiOne/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1F0470F3CA4745E84508D7AB /* Pods-MebiOne.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MebiOne.release.xcconfig"; path = "Target Support Files/Pods-MebiOne/Pods-MebiOne.release.xcconfig"; sourceTree = "<group>"; };
+		24BB3CAF28154F309DF90856 /* GoogleSansFlex_120pt-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-SemiBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-SemiBold.ttf"; sourceTree = "<group>"; };
+		2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Light.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Light.ttf"; sourceTree = "<group>"; };
+		2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-ExtraLight.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraLight.ttf"; sourceTree = "<group>"; };
+		3012D6E8E2E4427FACD0B93B /* GoogleSansFlex_120pt-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Black.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Black.ttf"; sourceTree = "<group>"; };
+		3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Bold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Bold.ttf"; sourceTree = "<group>"; };
 		3DBEB21044DA6303B10B5AA3 /* Pods-MebiOne.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MebiOne.debug.xcconfig"; path = "Target Support Files/Pods-MebiOne/Pods-MebiOne.debug.xcconfig"; sourceTree = "<group>"; };
 		4B7A3055B70D3B9A52FBC502 /* libPods-MebiOne.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MebiOne.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Medium.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Medium.ttf"; sourceTree = "<group>"; };
+		735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Black.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Black.ttf"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = MebiOne/AppDelegate.swift; sourceTree = "<group>"; };
+		8157DD9CF63E4604A6680767 /* GoogleSansFlex_120pt-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-ExtraLight.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-ExtraLight.ttf"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = MebiOne/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-SemiBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-SemiBold.ttf"; sourceTree = "<group>"; };
+		975BE724D14749A0A34D7898 /* GoogleSansFlex_120pt-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-ExtraBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-ExtraBold.ttf"; sourceTree = "<group>"; };
+		AD9B47DABBE047CF9656D15D /* GoogleSansFlex_120pt-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Light.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Light.ttf"; sourceTree = "<group>"; };
+		B2175F22A8934F6DA035239A /* GoogleSansFlex_120pt-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Regular.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Regular.ttf"; sourceTree = "<group>"; };
+		CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Thin.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Thin.ttf"; sourceTree = "<group>"; };
+		E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-ExtraBold.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-ExtraBold.ttf"; sourceTree = "<group>"; };
+		E778926902E1436F9E18EE18 /* OFL.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = OFL.txt; path = ../src/assets/fonts/OFL.txt; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F78113E6881747AABCE38441 /* GoogleSansFlex_120pt-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex_120pt-Bold.ttf"; path = "../src/assets/fonts/GoogleSansFlex_120pt-Bold.ttf"; sourceTree = "<group>"; };
+		FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "GoogleSansFlex120pt-Regular.ttf"; path = "../src/assets/fonts/GoogleSansFlex120pt-Regular.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +98,33 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3AA64A4C658D4160AA6BA6D3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AD9B47DABBE047CF9656D15D /* GoogleSansFlex_120pt-Light.ttf */,
+				F78113E6881747AABCE38441 /* GoogleSansFlex_120pt-Bold.ttf */,
+				975BE724D14749A0A34D7898 /* GoogleSansFlex_120pt-ExtraBold.ttf */,
+				093B680BBF3A4A858E7B6001 /* GoogleSansFlex_120pt-Thin.ttf */,
+				00A9A49B5A4F41A7BA77E1EB /* GoogleSansFlex_120pt-Medium.ttf */,
+				8157DD9CF63E4604A6680767 /* GoogleSansFlex_120pt-ExtraLight.ttf */,
+				B2175F22A8934F6DA035239A /* GoogleSansFlex_120pt-Regular.ttf */,
+				3012D6E8E2E4427FACD0B93B /* GoogleSansFlex_120pt-Black.ttf */,
+				24BB3CAF28154F309DF90856 /* GoogleSansFlex_120pt-SemiBold.ttf */,
+				E778926902E1436F9E18EE18 /* OFL.txt */,
+				90D457BFE704485D8DA6C7AB /* GoogleSansFlex120pt-SemiBold.ttf */,
+				730AEF5A5A0C4F7BAE447FDE /* GoogleSansFlex120pt-Medium.ttf */,
+				2A72FB6E280F45D7AF33C514 /* GoogleSansFlex120pt-Light.ttf */,
+				E7482C004F424BC1BD3729E6 /* GoogleSansFlex120pt-ExtraBold.ttf */,
+				2E6E7A6A17F44740BA4228CF /* GoogleSansFlex120pt-ExtraLight.ttf */,
+				FAFE93F1464C42948971EAEA /* GoogleSansFlex120pt-Regular.ttf */,
+				CB36A92B49954D76BB3CD0AF /* GoogleSansFlex120pt-Thin.ttf */,
+				3C42EF6023EF4FEAA43BC93F /* GoogleSansFlex120pt-Bold.ttf */,
+				735CA3B2EED542749AE70A4C /* GoogleSansFlex120pt-Black.ttf */,
+			);
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -75,6 +140,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				3AA64A4C658D4160AA6BA6D3 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -163,6 +229,25 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				D5EF9C88B97FEF593E722BDD /* PrivacyInfo.xcprivacy in Resources */,
+				358E69730ABD41EAA6B827B4 /* GoogleSansFlex_120pt-Light.ttf in Resources */,
+				8624D82C8C124930B863BF9B /* GoogleSansFlex_120pt-Bold.ttf in Resources */,
+				FF2CCA6F85FB4CAE8F0EEAF4 /* GoogleSansFlex_120pt-ExtraBold.ttf in Resources */,
+				926063DA9A6A4322B68E5B23 /* GoogleSansFlex_120pt-Thin.ttf in Resources */,
+				197EA8125D814FC5973159FE /* GoogleSansFlex_120pt-Medium.ttf in Resources */,
+				C93FE65744AD471BA4EA4BD0 /* GoogleSansFlex_120pt-ExtraLight.ttf in Resources */,
+				B31A28A550FD49318C81B270 /* GoogleSansFlex_120pt-Regular.ttf in Resources */,
+				F94ADF8D13B64AFFA9D8430F /* GoogleSansFlex_120pt-Black.ttf in Resources */,
+				E1D4BA734D40474899F8644A /* GoogleSansFlex_120pt-SemiBold.ttf in Resources */,
+				C40BF0F4210B42B0975D390B /* OFL.txt in Resources */,
+				553B6698FD5C4559B427EF88 /* GoogleSansFlex120pt-SemiBold.ttf in Resources */,
+				E0707CE44C9D496A98CB12B9 /* GoogleSansFlex120pt-Medium.ttf in Resources */,
+				C643F8F0BCFB41BE834A986B /* GoogleSansFlex120pt-Light.ttf in Resources */,
+				0652B5A60AE148EBB4DC1F69 /* GoogleSansFlex120pt-ExtraBold.ttf in Resources */,
+				75FB2985C93442C491D8C31B /* GoogleSansFlex120pt-ExtraLight.ttf in Resources */,
+				C36517C030CD4295B3D1B6DA /* GoogleSansFlex120pt-Regular.ttf in Resources */,
+				D8E2540CF7BC44A7B80582C1 /* GoogleSansFlex120pt-Thin.ttf in Resources */,
+				E5BA1B9B246845FE8A166E14 /* GoogleSansFlex120pt-Bold.ttf in Resources */,
+				081092403F7548B39004FACC /* GoogleSansFlex120pt-Black.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

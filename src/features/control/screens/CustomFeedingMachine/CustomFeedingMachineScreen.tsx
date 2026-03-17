@@ -21,7 +21,7 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { ButtonBar } from '@/shared/components/layout/ButtonBar';
 import { ConfirmationModalUI } from '@/shared/components/modal/ConfirmationModalUI';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { RadioButton } from '@/shared/components/forms/RadioButton';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ControlStackParamList } from '@/features/control/navigation/ControlNavigator';
@@ -474,10 +474,10 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 placeholder="Nhập số giây"
                                 placeholderTextColor={colors.gray[400]}
                                 keyboardType="numeric"
+                                inputFormat={InputFormat.INTEGER}
                                 value={runDuration}
                                 onChangeText={text => {
-                                    const numericText = text.replace(/[^0-9]/g, '');
-                                    setRunDuration(numericText);
+                                    setRunDuration(text);
                                     setIsDirty(true);
                                     isDirtyRef.current = true;
                                 }}
@@ -489,10 +489,10 @@ export default function CustomFeedingMachine(props: CustomFeedingMachineProps) {
                                 placeholder="Nhập số phút"
                                 placeholderTextColor={colors.gray[400]}
                                 keyboardType="numeric"
+                                inputFormat={InputFormat.INTEGER}
                                 value={stopDuration}
                                 onChangeText={text => {
-                                    const numericText = text.replace(/[^0-9]/g, '');
-                                    setStopDuration(numericText);
+                                    setStopDuration(text);
                                     setIsDirty(true);
                                     isDirtyRef.current = true;
                                 }}

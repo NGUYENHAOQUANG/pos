@@ -253,16 +253,16 @@ const styles = StyleSheet.create({
         paddingRight: spacing.md,
     },
     yAxisContainer: {
-        width: 35,
+        width: 45,
         position: 'relative',
         marginRight: spacing.xs,
     },
     yLabelWrapper: {
         position: 'absolute',
         right: 0,
-        height: 20,
+        height: 24,
         justifyContent: 'center',
-        marginTop: -10, // Half of height to center on the point
+        marginTop: -12, // Half of height to center on the point
     },
     yAxisLabel: {
         fontSize: 10,

@@ -10,20 +10,14 @@ import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { HarvestItemCard } from './HarvestItemCard';
 import chartStyles from '@/features/reports/styles/chart.styles';
-import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
+import HarvestStatIcon from '@/assets/Icon/IconReport/Vector (8).svg';
 import { useInfiniteHarvestStatsTable } from '@/features/reports/hooks/useHarvestStatsTable';
 import { HarvestStatProps } from '@/features/reports/types/harvest-stats-table';
 
 // Wrap item with React.memo for performance
 const MemoizedHarvestItemCard = React.memo(HarvestItemCard);
 
-export const HarvestStat: React.FC<HarvestStatProps> = ({
-    zoneId,
-    pondId,
-    cycleId,
-    ponds,
-    cycles,
-}) => {
+export const HarvestStat: React.FC<HarvestStatProps> = ({ zoneId, pondId, cycleId }) => {
     const [isSectionOpen, setIsSectionOpen] = React.useState(false);
 
     const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
@@ -31,8 +25,6 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({
             ZoneId: zoneId,
             Id: pondId,
             CycleId: cycleId,
-            ponds,
-            cycles,
             enabled: isSectionOpen,
         });
 
@@ -50,7 +42,7 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({
         <View style={chartStyles.container}>
             <BasicDropDownButton
                 prefixIcon={<HarvestStatIcon width={16} height={16} />}
-                label="THỐNG KÊ THU HOẠCH"
+                label="Thống kê thu hoạch"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
                 isExpanded={isSectionOpen}
@@ -68,8 +60,12 @@ export const HarvestStat: React.FC<HarvestStatProps> = ({
                         </View>
                     ) : (
                         <>
-                            {dataList.map(item => (
-                                <MemoizedHarvestItemCard key={item.recordId} item={item} />
+                            {dataList.map((item, index) => (
+                                <MemoizedHarvestItemCard
+                                    key={item.recordId}
+                                    item={item}
+                                    index={index}
+                                />
                             ))}
 
                             {/* Load more button */}
