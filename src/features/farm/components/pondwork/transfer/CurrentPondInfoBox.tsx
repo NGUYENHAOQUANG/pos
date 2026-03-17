@@ -56,7 +56,7 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
                 value={shrimpSize}
                 onChangeText={onShrimpSizeChange}
                 keyboardType="numeric"
-                placeholder="0"
+                placeholder="Cỡ tôm (con/kg)"
                 required
                 editable={false}
                 containerStyle={{ marginBottom: 0 }}

@@ -1,17 +1,14 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CompositeNavigationProp } from '@react-navigation/native';
 
-import { FarmLocation } from '@/features/control/components/HeaderCamLocation';
 import { MenuStackParamList } from '@/features/menu/navigation/MenuNavigator';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { EnvironmentParameter } from '@/features/farm/components/pondwork/environment/EnvironmentParameterSection';
-import { DropDownItem } from '@/features/farm/components/DropDownButtonBasic';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useZones } from '@/features/farm/hooks/useZones';
 import { useUnsavedChanges } from '@/shared/hooks/useUnsavedChanges';
-
 import {
     CreateEnvironmentSettingRequest,
     UpdateEnvironmentSettingRequest,
@@ -54,18 +51,15 @@ export const SettingEnvironmentScreens: React.FC = () => {
     const removeChange = useEnvironmentSettingStore(state => state.removeChange);
     const clearChanges = useEnvironmentSettingStore(state => state.clearChanges);
 
-    const [overrideLocation, setOverrideLocation] = useState<FarmLocation | null>(null);
-
     // --- Derived State ---
     const activeLocation = useMemo(() => {
-        if (overrideLocation) return overrideLocation;
         if (zones && zones.length > 0) {
             const storeZone = selectedZoneId ? zones.find(z => z.id === selectedZoneId) : null;
             const target = storeZone || zones[0];
             return { id: String(target.id), name: target.name };
         }
         return null;
-    }, [zones, selectedZoneId, overrideLocation]);
+    }, [zones, selectedZoneId]);
 
     const zoneId = activeLocation?.id || '';
 
@@ -96,15 +90,6 @@ export const SettingEnvironmentScreens: React.FC = () => {
             environmentSettingService.mapMetricToUI(m, parameterSettings, pendingChanges)
         );
     }, [metricTypes, activeLocation, parameterSettings, pendingChanges]);
-
-    const locationData = useMemo<DropDownItem[]>(
-        () => environmentSettingService.mapZonesToDropdown(zones),
-        [zones]
-    );
-
-    const activeDropdownItem = useMemo<DropDownItem | undefined>(() => {
-        return activeLocation ? { id: activeLocation.id, label: activeLocation.name } : undefined;
-    }, [activeLocation]);
 
     const isDirty = useMemo(() => Object.keys(pendingChanges).length > 0, [pendingChanges]);
 
@@ -181,10 +166,6 @@ export const SettingEnvironmentScreens: React.FC = () => {
         navigation.goBack();
     }, [navigation]);
 
-    const handleSelectLocation = useCallback((item: DropDownItem) => {
-        setOverrideLocation({ id: String(item.id), name: item.label });
-    }, []);
-
     const handleEdit = useCallback(
         (parameter: EnvironmentParameter) => {
             navigation.navigate('EditEnvironment', { parameter });
@@ -208,10 +189,7 @@ export const SettingEnvironmentScreens: React.FC = () => {
             isSaving={isSaving}
             parameters={parameters}
             advancedParameters={advancedParameters}
-            locationData={locationData}
-            activeDropdownItem={activeDropdownItem}
             onBack={handleBack}
-            onSelectLocation={handleSelectLocation}
             onToggleParameter={handleToggleParameter}
             onToggleAdvancedParameter={handleToggleAdvancedParameter}
             onEdit={handleEdit}
