@@ -36,6 +36,16 @@ export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const insets = useSafeAreaInsets();
 
+    // Restore portrait when this screen gains focus (coming back from landscape VideoPlayer)
+    useFocusEffect(
+        useCallback(() => {
+            const timer = setTimeout(() => {
+                Orientation.lockToPortrait();
+            }, 150);
+            return () => clearTimeout(timer);
+        }, [])
+    );
+
     // React Query Hooks (replacing farmStore fetchers)
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
     // Fallback to empty array if undefined
@@ -347,11 +357,14 @@ export const DeviceControlScreens = () => {
             ) : (
                 <CameraList
                     onCameraPress={(camera: CameraData) => {
-                        navigation.navigate('CameraPlayer', {
-                            videoUrl: camera.videoUrl,
-                            cameraName: camera.cameraName,
-                            pondName: camera.pondName,
-                        });
+                        Orientation.lockToLandscape();
+                        setTimeout(() => {
+                            navigation.navigate('CameraPlayer', {
+                                videoUrl: camera.videoUrl,
+                                cameraName: camera.cameraName,
+                                pondName: camera.pondName,
+                            });
+                        }, 500);
                     }}
                 />
             )}
