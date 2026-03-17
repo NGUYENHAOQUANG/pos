@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Path, Text as SvgText } from 'react-native-svg';
-import { colors, spacing } from '@/styles';
+import { colors } from '@/styles';
 import {
     PADDING_LEFT,
     PADDING_TOP,
@@ -14,6 +14,18 @@ interface ChartProps {
     chartHeight: number;
     data: ProfitStatsByDate[];
 }
+
+const formatAxisValue = (value: number) => {
+    if (value === 0) return '0';
+    const absVal = Math.abs(value);
+    if (absVal >= 1e9) {
+        return `${Number((value / 1e9).toFixed(2))} tỉ`;
+    }
+    if (absVal >= 1e6) {
+        return `${Number((value / 1e6).toFixed(2))} tr`;
+    }
+    return value.toLocaleString('vi-VN');
+};
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
     // ============================================================================
@@ -177,8 +189,13 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
         getYAxisLabels,
     } = processedData;
 
+    // Use dynamic width to prevent squishing when data is large (many days)
+    const MIN_DAY_WIDTH = 12;
+    const actualChartWidth = Math.max(chartWidth, TOTAL_DAYS * MIN_DAY_WIDTH);
+
+    const SCROLL_PADDING = 17;
     // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * chartWidth + PADDING_LEFT;
+    const getX = (day: number) => (day / TOTAL_DAYS) * actualChartWidth + PADDING_LEFT;
     const getY = (value: number) => {
         // Y-axis is centered at zero
         // value = -Y_MAX maps to bottom (PADDING_TOP + chartHeight)
@@ -233,33 +250,14 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
     return (
         <View style={styles.chartContainer}>
-            <View style={{ flexDirection: 'row', height: dynamicHeight }}>
-                {/* Fixed Y-axis labels */}
-                <Svg width={PADDING_LEFT} height={dynamicHeight}>
-                    {getYAxisLabels().map(value => {
-                        const y = getY(value);
-                        return (
-                            <SvgText
-                                key={`y-label-${value}`}
-                                x={PADDING_LEFT - 4}
-                                y={y + 4}
-                                fill={colors.text}
-                                fontSize={10}
-                                textAnchor="end"
-                            >
-                                {value.toFixed(0)}
-                            </SvgText>
-                        );
-                    })}
-                </Svg>
-
+            <View style={{ position: 'relative', height: dynamicHeight }}>
                 {/* Scrollable chart content */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingLeft: 10 }}
+                    contentContainerStyle={{ paddingLeft: SCROLL_PADDING }}
                 >
-                    <Svg width={chartWidth + PADDING_LEFT + 40} height={dynamicHeight}>
+                    <Svg width={actualChartWidth + PADDING_LEFT + 40} height={dynamicHeight}>
                         {/* Grid lines (horizontal) */}
                         {getYAxisGridLines().map(value => {
                             const y = getY(value);
@@ -268,7 +266,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                     key={`grid-${value}`}
                                     x1={0}
                                     y1={y}
-                                    x2={chartWidth + PADDING_LEFT + 40}
+                                    x2={actualChartWidth + PADDING_LEFT + 40}
                                     y2={y}
                                     stroke={colors.gray[200]}
                                     strokeWidth={1}
@@ -280,7 +278,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                         <Line
                             x1={0}
                             y1={zeroLineY}
-                            x2={chartWidth + PADDING_LEFT + 40}
+                            x2={actualChartWidth + PADDING_LEFT + 40}
                             y2={zeroLineY}
                             stroke={colors.red[500]}
                             strokeWidth={1}
@@ -318,7 +316,9 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
                         {/* X-axis labels */}
                         {DAY_MARKS.map((day, index) => {
-                            const x = getX(day);
+                            let x = getX(day);
+                            let align: 'middle' | 'start' | 'end' = 'middle';
+
                             const axisY = getY(-Y_MAX);
                             const y = axisY + 20;
 
@@ -329,7 +329,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                     y={y}
                                     fill={colors.text}
                                     fontSize={12}
-                                    textAnchor="middle"
+                                    textAnchor={align}
                                 >
                                     {DAY_LABELS[index]}
                                 </SvgText>
@@ -343,28 +343,28 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
             <View
                 style={{
                     position: 'absolute',
-                    left: spacing.md,
+                    left: 0,
                     top: 0,
-                    width: PADDING_LEFT + 10,
+                    width: PADDING_LEFT,
                     height: dynamicHeight,
                     backgroundColor: colors.white,
                     zIndex: 10,
                 }}
                 pointerEvents="none"
             >
-                <Svg width={PADDING_LEFT + 10} height={dynamicHeight}>
+                <Svg width={PADDING_LEFT} height={dynamicHeight} style={{ overflow: 'visible' }}>
                     {getYAxisLabels().map(value => {
                         const y = getY(value);
                         return (
                             <SvgText
                                 key={`y-overlay-${value}`}
-                                x={PADDING_LEFT - 4}
+                                x={16}
                                 y={y + 4}
                                 fill={colors.text}
-                                fontSize={10}
-                                textAnchor="end"
+                                fontSize={12}
+                                textAnchor="start"
                             >
-                                {value.toFixed(0)}
+                                {formatAxisValue(value)}
                             </SvgText>
                         );
                     })}
@@ -377,7 +377,6 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 const styles = StyleSheet.create({
     chartContainer: {
         backgroundColor: colors.white,
-        paddingHorizontal: spacing.md,
         position: 'relative',
     },
 });

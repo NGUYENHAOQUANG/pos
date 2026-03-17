@@ -285,7 +285,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                             return (
                                 <SvgText
                                     key={`y-label-sticky-${value}`}
-                                    x={PADDING_LEFT - 4}
+                                    x={16}
                                     y={y + 4}
                                     fill={CHART_THEME.text}
                                     fontSize={12}
@@ -298,11 +298,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                     </Svg>
                 </View>
 
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingLeft: 20 }}
-                >
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <Svg
                         width={actualWidth + PADDING_LEFT + PADDING_RIGHT + 40}
                         height={CHART_HEIGHT}
@@ -394,7 +390,13 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
 
                         {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {
-                            const x = getX(day);
+                            let x = getX(day);
+                            let align: 'middle' | 'start' | 'end' = 'middle';
+                            if (index === 0) {
+                                x = x + 2;
+                                align = 'start';
+                            }
+
                             const y = PADDING_TOP + chartHeight + 18;
                             return (
                                 <SvgText
@@ -403,7 +405,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                                     y={y}
                                     fill={CHART_THEME.text}
                                     fontSize={12}
-                                    textAnchor="middle"
+                                    textAnchor={align}
                                 >
                                     {formatXLabel(DAY_LABELS[index])}
                                 </SvgText>
