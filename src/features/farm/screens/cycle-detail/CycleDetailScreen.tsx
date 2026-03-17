@@ -172,7 +172,20 @@ export const CycleDetailScreen: React.FC = () => {
 
     const isCompleted = activeCycleData?.status === 'Completed';
     const cycleTagStatus = isCompleted ? 'active' : 'preparing';
-    const cycleTagLabel = isCompleted ? 'Hoàn thành' : activeCycleData?.status || 'Chưa hoàn thành';
+
+    const getCycleTagLabel = (status?: string): string => {
+        switch (status) {
+            case 'Completed':
+                return 'Hoàn thành';
+            case 'InProgress':
+                return 'Đang nuôi';
+            case 'Preparing':
+                return 'Chuẩn bị';
+            default:
+                return 'Chưa hoàn thành';
+        }
+    };
+    const cycleTagLabel = getCycleTagLabel(activeCycleData?.status);
 
     return (
         <View style={styles.container}>

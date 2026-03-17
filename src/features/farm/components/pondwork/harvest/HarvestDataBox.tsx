@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { Input } from '@/shared/components/forms/Input';
+import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 
 interface HarvestDataBoxProps {
@@ -32,32 +32,6 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
         return null;
     }, [yieldAmount, referencePrice]);
 
-    const handleNumericInput = (text: string, callback?: (val: string) => void) => {
-        if (!callback) return;
-
-        // 1. Remove any character that is not 0-9 or .
-        let cleaned = text.replace(/[^0-9.]/g, '');
-
-        // 2. Prevent . at the beginning
-        if (cleaned.startsWith('.')) {
-            cleaned = cleaned.substring(1);
-        }
-
-        // 3. Ensure only one . exists
-        const parts = cleaned.split('.');
-        if (parts.length > 2) {
-            cleaned = parts[0] + '.' + parts.slice(1).join('');
-        }
-
-        // 4. Limit to 10 characters
-        if (cleaned.length > 20) {
-            cleaned = cleaned.substring(0, 20);
-        }
-
-        callback(cleaned);
-    };
-
-    // Build result items
     const resultItems: ResultItem[] = [
         { label: 'Doanh thu (VNĐ)', value: revenue !== null ? revenue : '-' },
     ];
@@ -72,10 +46,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 label="Sản lượng (kg)"
                 placeholder="Sản lượng (kg)"
                 value={String(yieldAmount)}
-                onChangeText={text => handleNumericInput(text, onYieldAmountChange)}
+                onChangeText={onYieldAmountChange}
+                inputFormat={InputFormat.DECIMAL}
+                maxDigits={20}
                 keyboardType="numeric"
                 required
-                maxLength={20}
                 containerStyle={styles.inputGap}
             />
 
@@ -83,10 +58,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 label="Cỡ tôm (con/kg)"
                 placeholder="Cỡ tôm (con/kg)"
                 value={String(shrimpSize)}
-                onChangeText={text => handleNumericInput(text, onShrimpSizeChange)}
+                onChangeText={onShrimpSizeChange}
+                inputFormat={InputFormat.DECIMAL}
+                maxDigits={20}
                 keyboardType="numeric"
                 required
-                maxLength={20}
                 containerStyle={styles.inputGap}
             />
 
@@ -94,10 +70,11 @@ export const HarvestDataBox: React.FC<HarvestDataBoxProps> = ({
                 label="Giá tôm tham khảo (VNĐ/kg)"
                 placeholder="Giá tôm tham khảo (VNĐ/kg)"
                 value={String(referencePrice)}
-                onChangeText={text => handleNumericInput(text, onReferencePriceChange)}
+                onChangeText={onReferencePriceChange}
+                inputFormat={InputFormat.DECIMAL}
+                maxDigits={20}
                 keyboardType="numeric"
                 required
-                maxLength={20}
                 containerStyle={styles.lastInput}
             />
         </PondDataBox>

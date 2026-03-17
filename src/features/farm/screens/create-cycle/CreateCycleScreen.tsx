@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeInputLayout } from '@/shared/components/layout/SafeInputLayout';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { colors, borderRadius } from '@/styles';
+import { colors } from '@/styles';
 import { ButtonBarFarm } from '@/features/farm/components/ButtonBarFarm';
 import CreateCycleForm from '@/features/farm/screens/create-cycle/CreateCycleForm';
 import { AppStackParamList } from '@/app/navigation/AppStack';
-import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
-import DeleteIcon from '@/assets/Icon/IconFarm/Delete.svg';
+import { HeaderSection } from '@/shared/components/layout/HeaderSection';
+import DeleteIcon from '@/assets/Icon/Delete.svg';
 import {
     showPondNotFoundToast,
     showCycleFormValidationToast,
@@ -192,20 +192,15 @@ export const CreateCycleScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <HeaderFarm
+            <HeaderSection
                 title={isEditMode ? 'Chỉnh sửa chu kỳ nuôi' : 'Tạo chu kỳ nuôi'}
                 onBack={() => navigation.goBack()}
-                type="simple"
-                rightAction={
+                rightIcon={
                     isEditMode ? (
-                        <TouchableOpacity
-                            style={styles.iconBtn}
-                            onPress={() => setShowDeleteModal(true)}
-                        >
-                            <DeleteIcon width={20} height={20} color={colors.red[900]} />
-                        </TouchableOpacity>
-                    ) : null
+                        <DeleteIcon width={20} height={20} color={colors.text} />
+                    ) : undefined
                 }
+                onRightPress={isEditMode ? () => setShowDeleteModal(true) : undefined}
             />
 
             <View style={{ flex: 1 }}>
@@ -258,16 +253,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.backgroundPrimary,
-    },
-    iconBtn: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.white,
-        borderRadius: borderRadius.sm,
-        borderWidth: 1,
-        borderColor: colors.red[900],
     },
 });
 

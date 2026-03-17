@@ -21,7 +21,7 @@ export { default as IconSkipBack } from '@/assets/Icon/IconDevices/SkipBack.svg'
 export { default as IconSkipForward } from '@/assets/Icon/IconDevices/SkipForward.svg';
 
 // Icon Farm
-export { default as IconFeed } from '@/assets/Icon/IconFarm/Feed.svg';
+export { default as IconFeed } from '@/assets/Icon/IconFarm/Feeding.svg';
 export { default as IconShrimpInspection } from '@/assets/Icon/IconFarm/ShrimpInspection.svg';
 export { default as IconRuler } from '@/assets/Icon/IconFarm/Ruler.svg';
 export { default as IconEnvironment } from '@/assets/Icon/IconFarm/Environment.svg';

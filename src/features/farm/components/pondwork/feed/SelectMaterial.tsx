@@ -14,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';
 import { DropDownSelectMaterial } from '@/features/farm/components/pondwork/feed/DropDownSelectMaterial';
-import { Input, RequiredDot } from '@/shared/components/forms/Input';
+import { Input, RequiredDot, InputFormat } from '@/shared/components/forms/Input';
 import { Button } from '@/shared/components/buttons/Button';
 
 interface SelectMaterialProps {
@@ -57,13 +57,13 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
     }, [selectedMaterial]);
 
     const handleSave = () => {
-        if (selectedMaterial && quantity && selectedUnit) {
+        const parsedQuantity = parseFloat(quantity);
+        if (selectedMaterial && quantity && selectedUnit && !isNaN(parsedQuantity)) {
             onSave({
                 material: selectedMaterial,
-                quantity: parseFloat(quantity),
+                quantity: parsedQuantity,
                 unit: selectedUnit,
             });
-            // Reset form
             setSelectedMaterial(undefined);
             setQuantity('');
             setSelectedUnit('');
@@ -126,21 +126,11 @@ export const SelectMaterial: React.FC<SelectMaterialProps> = ({
                                         <Input
                                             label="Số lượng"
                                             value={quantity}
-                                            onChangeText={text => {
-                                                let sanitized = text.replace(/[^0-9.]/g, '');
-                                                const parts = sanitized.split('.');
-                                                if (parts.length > 2) {
-                                                    sanitized =
-                                                        parts[0] + '.' + parts.slice(1).join('');
-                                                }
-                                                if (sanitized.length > 6) {
-                                                    sanitized = sanitized.substring(0, 6);
-                                                }
-                                                setQuantity(sanitized);
-                                            }}
+                                            onChangeText={setQuantity}
+                                            inputFormat={InputFormat.DECIMAL}
+                                            maxDigits={6}
                                             keyboardType="decimal-pad"
                                             required
-                                            maxLength={6}
                                         />
                                     </View>
 

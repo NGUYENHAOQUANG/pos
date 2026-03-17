@@ -390,7 +390,7 @@ export const AddSiphonScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <HeaderSection
-                title="Xi-Phông"
+                title="Xi-phông"
                 onBack={handleBack}
                 rightComponent={
                     itemToEdit ? <DeleteButton onPress={handleDeletePress} /> : undefined
