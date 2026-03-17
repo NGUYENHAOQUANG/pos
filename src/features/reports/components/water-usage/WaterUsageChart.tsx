@@ -13,7 +13,7 @@ import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './wate
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_HEIGHT = 400;
-const PADDING_LEFT = 80;
+const PADDING_LEFT = 85;
 const PADDING_RIGHT = 20;
 const PADDING_TOP = 20;
 const PADDING_BOTTOM = 40;
@@ -85,7 +85,11 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                             {/* Chart: fixed Y-axis + scrollable content */}
                             <View style={styles.chartRow}>
                                 {/* Fixed Y-axis labels */}
-                                <Svg width={PADDING_LEFT} height={CHART_HEIGHT}>
+                                <Svg
+                                    width={PADDING_LEFT}
+                                    height={CHART_HEIGHT}
+                                    style={{ overflow: 'visible' }}
+                                >
                                     {yTicks.map(tick => {
                                         const y = scaleLinear(
                                             tick,
@@ -95,11 +99,11 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                                         return (
                                             <SvgText
                                                 key={`y-${tick}`}
-                                                x={PADDING_LEFT - 8}
+                                                x={16}
                                                 y={y + 4}
-                                                fontSize={14}
+                                                fontSize={12}
                                                 fill={colors.text}
-                                                textAnchor="end"
+                                                textAnchor="start"
                                             >
                                                 {tick === 0 ? '0' : formatNumberVietnamese(tick)}
                                             </SvgText>
