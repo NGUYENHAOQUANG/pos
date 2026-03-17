@@ -213,16 +213,18 @@ export const useInfiniteMaterials = (
     const groupMap = React.useMemo(() => new Map(groups.map(g => [g.id, g])), [groups]);
     const typeMap = React.useMemo(() => new Map(types.map(t => [t.id, t])), [types]);
 
-    // Flatten data
+    // Flatten & deduplicate data (same item may appear across pages when data shifts)
     const materials = React.useMemo(() => {
         if (!query.data) return [];
-        return query.data.pages.reduce((acc: IMaterial[], page) => {
+        const seen = new Map<string, IMaterial>();
+        for (const page of query.data.pages) {
             const items = page.items || [];
-            const mappedItems = items.map((item: MaterialResponseV2) =>
-                mapMaterialResponse(item, groupMap, typeMap)
-            );
-            return [...acc, ...mappedItems];
-        }, []);
+            for (const item of items) {
+                const mapped = mapMaterialResponse(item as MaterialResponseV2, groupMap, typeMap);
+                seen.set(mapped.id, mapped);
+            }
+        }
+        return Array.from(seen.values());
     }, [query.data, groupMap, typeMap]);
 
     return {

@@ -37,7 +37,7 @@ export const StockTransferFormScreen: React.FC = () => {
         PageSize: 1,
         OrderBy: 'CreatedAt desc',
     });
-    const { breedName, cycleData } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
+    const { breedName } = useCurrentShrimpBreed(pondId, cycleId, warehouseId);
 
     const pondOptions = useMemo(
         () =>
@@ -49,7 +49,11 @@ export const StockTransferFormScreen: React.FC = () => {
         [pondsByZoneData, pondId, categoriesResponse]
     );
 
-    const actualStockingQuantity = cycleData?.totalStocking ?? 0;
+    const totalShrimpCount = useMemo(() => {
+        const latest = sizeMeasurementsData?.data?.items?.[0];
+        const detail = latest?.sizeMeasurementDetail ?? latest?.sizeMeasurement;
+        return detail?.totalShrimpCount ?? 0;
+    }, [sizeMeasurementsData]);
 
     const latestShrimpSize = useMemo(() => {
         const latest = sizeMeasurementsData?.data?.items?.[0];
@@ -88,7 +92,7 @@ export const StockTransferFormScreen: React.FC = () => {
             const { shrimpSize, notes, receivingPonds } = formData;
             const apiRequestData = stockTransferService.buildCreateRequest(
                 receivingPonds,
-                actualStockingQuantity,
+                totalShrimpCount,
                 shrimpSize,
                 notes
             );
@@ -96,14 +100,14 @@ export const StockTransferFormScreen: React.FC = () => {
             await createStockTransfer({ pondId, data: apiRequestData, zoneId });
             navigation.goBack();
         },
-        [pondId, zoneId, actualStockingQuantity, createStockTransfer, navigation]
+        [pondId, zoneId, totalShrimpCount, createStockTransfer, navigation]
     );
 
     return (
         <StockTransferForm
             totalShrimpCount={actualStockingQuantity}
             shrimpBreed={breedName}
-            actualStockingQuantity={actualStockingQuantity}
+            totalShrimpCount={totalShrimpCount}
             latestShrimpSize={latestShrimpSize}
             pondOptions={pondOptions}
             isSubmitting={isCreating}

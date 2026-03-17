@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useCallback } from 'react';
+import Orientation from 'react-native-orientation-locker';
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +35,16 @@ const keyExtractor = (item: any) => item.id.toString();
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const insets = useSafeAreaInsets();
+
+    // Restore portrait when this screen gains focus (coming back from landscape VideoPlayer)
+    useFocusEffect(
+        useCallback(() => {
+            const timer = setTimeout(() => {
+                Orientation.lockToPortrait();
+            }, 150);
+            return () => clearTimeout(timer);
+        }, [])
+    );
 
     // React Query Hooks (replacing farmStore fetchers)
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
@@ -346,11 +357,14 @@ export const DeviceControlScreens = () => {
             ) : (
                 <CameraList
                     onCameraPress={(camera: CameraData) => {
-                        navigation.navigate('CameraPlayer', {
-                            videoUrl: camera.videoUrl,
-                            cameraName: camera.cameraName,
-                            pondName: camera.pondName,
-                        });
+                        Orientation.lockToLandscape();
+                        setTimeout(() => {
+                            navigation.navigate('CameraPlayer', {
+                                videoUrl: camera.videoUrl,
+                                cameraName: camera.cameraName,
+                                pondName: camera.pondName,
+                            });
+                        }, 500);
                     }}
                 />
             )}

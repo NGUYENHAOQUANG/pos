@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import { Skeleton } from '@/shared/components/ui/Skeleton';
 import { colors, spacing, borderRadius } from '@/styles';
 
@@ -10,13 +12,16 @@ import { colors, spacing, borderRadius } from '@/styles';
  */
 export const PondDetailHeaderSkeleton: React.FC = () => {
     const insets = useSafeAreaInsets();
+    const navigation = useNavigation();
 
     return (
         <View>
             {/* Header Row: Back button | Title + Subtitle | Tag + Menu */}
             <View style={[styles.headerRow, { paddingTop: insets.top + 12 }]}>
-                {/* Back Button Skeleton */}
-                <Skeleton width={40} height={40} borderRadius={20} />
+                {/* Real back button – always tappable even while loading */}
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <ArrowLeftIcon width={20} height={20} />
+                </TouchableOpacity>
 
                 {/* Title + Subtitle */}
                 <View style={styles.centerContainer}>
@@ -58,6 +63,16 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
         paddingHorizontal: 16,
         backgroundColor: colors.backgroundPrimary,
+    },
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: borderRadius.full,
+        backgroundColor: colors.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     centerContainer: {
         flex: 1,

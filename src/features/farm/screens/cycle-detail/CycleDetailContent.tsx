@@ -67,6 +67,7 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
         [activeCycleData, shrimpSeeds]
     );
 
+    // DOC & stocking date: use cycle's createdAt for the stocking section
     const doc = useMemo(
         () => pondDetailService.calculateDOC(activeCycleData?.createdAt),
         [activeCycleData?.createdAt]
@@ -78,6 +79,18 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
         [activeCycleData?.createdAt]
     );
 
+    // Transfer-specific values (for nhận ao / sang ao sections)
+    const transferDate = useMemo(
+        () =>
+            incomingTransfer?.createdAt ? formatDate(new Date(incomingTransfer.createdAt)) : '---',
+        [incomingTransfer?.createdAt]
+    );
+
+    const transferDOC = useMemo(
+        () => pondDetailService.calculateDOC(incomingTransfer?.createdAt),
+        [incomingTransfer?.createdAt]
+    );
+
     const sourcePondName = useMemo(() => {
         return incomingTransfer?.fromPondName || '--';
     }, [incomingTransfer]);
@@ -87,6 +100,10 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
             ? `${incomingTransfer.shrimpSizePcsPerKg}`
             : '--';
     }, [incomingTransfer?.shrimpSizePcsPerKg]);
+
+    const transferQuantity = useMemo(() => {
+        return incomingTransfer?.quantity?.toLocaleString() || '0';
+    }, [incomingTransfer?.quantity]);
 
     return (
         <ScrollView
@@ -131,11 +148,11 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
                 )}
             </View>
 
-            {/* Thông tin nhận ao - Chỉ hiển thị nếu không phải Ao vèo */}
-            {!isNursery && (
+            {/* Thông tin nhận ao - Hiển thị khi không phải Ao vèo VÀ có transfer hợp lệ */}
+            {!isNursery && incomingTransfer && (
                 <View style={[styles.card, { marginTop: spacing.sm }]}>
                     <CollapseHead
-                        title="Thông tin nhận ao"
+                        title="Thông tin sang ao"
                         isExpanded={isTransferExpanded}
                         onToggle={() => setIsTransferExpanded(!isTransferExpanded)}
                         style={styles.cardHeader}
@@ -143,14 +160,11 @@ export const CycleDetailContent: React.FC<CycleDetailContentProps> = ({
 
                     {isTransferExpanded && (
                         <View style={styles.infoContainer}>
-                            <DetailRow label="Ngày nhận ao:" value={displayStockingDate} />
+                            <DetailRow label="Ngày nhận ao:" value={transferDate} />
                             <DetailRow label="Chuyển sang từ ao:" value={sourcePondName} />
-                            <DetailRow label="Ngày nuôi (DOC):" value={`${doc} ngày`} />
+                            <DetailRow label="Ngày nuôi (DOC):" value={`${transferDOC} ngày`} />
                             <DetailRow label="Cỡ tôm (con/kg):" value={shrimpSize} />
-                            <DetailRow
-                                label="Số lượng tôm sang (con):"
-                                value={activeCycleData?.totalStocking?.toLocaleString() || 0}
-                            />
+                            <DetailRow label="Số lượng tôm sang (con):" value={transferQuantity} />
                         </View>
                     )}
                 </View>
