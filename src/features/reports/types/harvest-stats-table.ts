@@ -1,13 +1,9 @@
 import { IApiResponse, IPaginate } from '@/shared/types/common.types';
-import { PondData } from '@/features/farm/types/pond.types';
-import { CycleData } from '@/features/farm/types/cycle.types';
 
 export interface HarvestRecord {
     recordId: string;
-    pondCode: string;
-    pondName?: string;
-    cycleCode: string | null;
-    cycleName?: string;
+    pondName: string;
+    cycleName: string | null;
     harvestDate: string;
     harvestType: string | null;
     doc: number;
@@ -22,9 +18,12 @@ export interface HarvestStatsTableParams {
     CycleId?: string;
     StartDate?: string;
     EndDate?: string;
-    PageNumber?: number;
+    Page?: number;
     PageSize?: number;
     Id?: string;
+    CreatedAt?: string;
+    CreateAtFrom?: string;
+    CreateAtTo?: string;
     OrderBy?: string;
 }
 
@@ -39,6 +38,4 @@ export interface HarvestStatProps {
     zoneId: string;
     pondId?: string;
     cycleId?: string;
-    ponds?: PondData[];
-    cycles?: CycleData[];
 }
