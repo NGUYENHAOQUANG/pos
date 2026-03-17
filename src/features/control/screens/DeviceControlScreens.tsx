@@ -74,7 +74,7 @@ export const DeviceControlScreens = () => {
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-    } = useAllPondsByZone(selectedZoneId);
+    } = useAllPondsByZone(selectedZoneId ?? '');
 
     // Ensure valid array
     const farmPonds = useMemo(() => {
