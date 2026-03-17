@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Keyboard,
@@ -10,6 +9,7 @@ import {
     KeyboardAvoidingView,
     ScrollView,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import OTPInput, { OTPInputHandle } from '@/features/auth/components/OTPInput';
 import { colors, spacing, typography } from '@/styles';
 import { DeleteAccountWarningBox } from './DeleteAccountWarningStep';

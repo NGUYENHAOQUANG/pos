@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { colors } from '@/styles';
@@ -312,7 +313,8 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 14,
         color: colors.text,
-        lineHeight: 18,
+        lineHeight: 20,
+        fontWeight: '400',
     },
     activitySchedule: {
         marginTop: 8,

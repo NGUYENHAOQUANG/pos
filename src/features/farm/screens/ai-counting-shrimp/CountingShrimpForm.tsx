@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
+import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { colors, spacing } from '@/styles';

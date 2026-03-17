@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 
@@ -44,7 +45,7 @@ export const TooltipEnvChart = ({
     if (left + tooltipWidth > chartWidth) {
         left = position.x - tooltipWidth - 10;
     }
-    
+
     // Ensure not off-screen left
     if (left < 0) left = 10;
 
@@ -58,7 +59,10 @@ export const TooltipEnvChart = ({
         <View style={[styles.tooltipContainer, { left, top }]}>
             <View style={styles.tooltipHeader}>
                 <Text style={styles.tooltipDate}>{formatDate(date)}</Text>
-                <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={onClose}>
+                <TouchableOpacity
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    onPress={onClose}
+                >
                     <Text style={styles.tooltipClose}>×</Text>
                 </TouchableOpacity>
             </View>
@@ -67,7 +71,7 @@ export const TooltipEnvChart = ({
                     <View key={item.pond} style={styles.tooltipRow}>
                         <View style={[styles.dot, { backgroundColor: item.color }]} />
                         <Text style={styles.tooltipLabel}>
-                            <Text style={{fontWeight: 'bold'}}>{item.pond}: </Text>
+                            <Text style={{ fontWeight: 'bold' }}>{item.pond}: </Text>
                             {item.value.toFixed(2)} {item.unit}
                         </Text>
                     </View>

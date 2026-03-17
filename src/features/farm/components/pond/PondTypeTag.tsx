@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, borderRadius } from '@/styles';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 

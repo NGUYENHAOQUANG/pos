@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
 import { CostItem } from './costChartData';
@@ -21,9 +22,9 @@ const DISPLAY_ORDER = [
 
 const BottomCostChart = ({ data }: Props) => {
     const sortedData = useMemo(() => {
-        return DISPLAY_ORDER.map(label => 
-            data.find(item => item.label === label)
-        ).filter((item): item is CostItem => !!item);
+        return DISPLAY_ORDER.map(label => data.find(item => item.label === label)).filter(
+            (item): item is CostItem => !!item
+        );
     }, [data]);
 
     return (

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing, typography } from '@/styles';
 import { Tag } from '@/features/menu/components/Tag';
 import WarningCircleIcon from '@/assets/Icon/IconDevices/WarningCircle.svg';

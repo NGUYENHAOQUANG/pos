@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     Modal,
     TouchableOpacity,
-    TextInput,
     KeyboardAvoidingView,
     Platform,
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';

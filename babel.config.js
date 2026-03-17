@@ -25,6 +25,7 @@ module.exports = {
                 safe: false,
                 allowUndefined: true,
                 verbose: false,
+                cache: false,
             },
         ],
         'react-native-worklets-core/plugin',

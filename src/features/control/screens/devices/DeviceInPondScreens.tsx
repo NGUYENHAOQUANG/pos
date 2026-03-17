@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     ScrollView,
     RefreshControl,
@@ -10,6 +9,7 @@ import {
     NativeScrollEvent,
     Image,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { ButtonHistory } from '@/features/control/components/devices/ButtonHistory';

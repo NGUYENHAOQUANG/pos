@@ -1,14 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     ScrollView,
-    TextInput,
     KeyboardAvoidingView,
     Platform,
     Keyboard,
+    TextInput as RNTextInput,
 } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -53,7 +54,7 @@ export const DeleteAccountInputStep: React.FC<DeleteAccountInputStepProps> = ({
     const hasOtherReason = watchSelectedReasons.includes(OTHER_REASON_KEY);
 
     const scrollViewRef = useRef<ScrollView>(null);
-    const otherReasonInputRef = useRef<TextInput>(null);
+    const otherReasonInputRef = useRef<RNTextInput>(null);
 
     useEffect(() => {
         const handleKeyboardShow = () => {

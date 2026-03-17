@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Modal,
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
 

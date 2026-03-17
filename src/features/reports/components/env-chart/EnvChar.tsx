@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, LayoutChangeEvent, Text } from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { Path, Line } from 'react-native-svg';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-native-reanimated';

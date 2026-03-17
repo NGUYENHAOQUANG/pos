@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import CheckboxIcon from '@/assets/Icon/Checkbox.svg';
 import CheckboxActiveIcon from '@/assets/Icon/CheckboxActive.svg';

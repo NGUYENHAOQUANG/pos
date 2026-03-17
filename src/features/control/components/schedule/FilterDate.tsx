@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import ArrowRightIcon from '@/assets/Icon/ArrowRight.svg';
 import { DatePickerModal } from '@/shared/components/modal/DatePickerModal';

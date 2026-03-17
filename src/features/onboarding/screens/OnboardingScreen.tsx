@@ -5,15 +5,8 @@
  * @created 2025-11-17
  */
 import React, { useEffect, useState } from 'react';
-import {
-    Dimensions,
-    Platform,
-    StyleSheet,
-    Text,
-    View,
-    StatusBar,
-    TouchableOpacity,
-} from 'react-native';
+import { Dimensions, Platform, StyleSheet, View, StatusBar, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';

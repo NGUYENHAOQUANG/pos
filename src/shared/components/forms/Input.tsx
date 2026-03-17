@@ -12,13 +12,13 @@ import React, { useState, useCallback } from 'react';
 import {
     Platform,
     StyleSheet,
-    Text,
     TextInputProps,
     TextStyle,
     TouchableOpacity,
     View,
     ViewStyle,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Input as AntdInput } from '@ant-design/react-native';
 import { InputFilters } from '@/shared/regex';

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Modal,
@@ -9,6 +8,7 @@ import {
     Dimensions,
     TouchableWithoutFeedback,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { borderRadius, colors, spacing } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';

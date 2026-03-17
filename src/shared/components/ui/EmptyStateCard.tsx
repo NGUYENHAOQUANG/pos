@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { Button } from '@/shared/components/buttons/Button';
 import { colors, spacing, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
@@ -86,7 +87,6 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: spacing.md,
-        fontFamily: typography.fontFamily.medium,
     },
     description: {
         fontSize: 14,

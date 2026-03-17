@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     StyleSheet,
     Modal,
@@ -12,6 +11,7 @@ import {
     Animated,
     Easing,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import { colors, spacing, borderRadius, shadows } from '@/styles';

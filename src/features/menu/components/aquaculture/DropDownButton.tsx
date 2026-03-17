@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     StyleSheet,
     Modal,
@@ -9,6 +8,7 @@ import {
     StyleProp,
     ViewStyle,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { colors, spacing, borderRadius, shadows, typography } from '@/styles';
 
