@@ -253,5 +253,6 @@ export const API_ENDPOINTS = {
         DAILY_WATER_STATS: '/report/daily-water-stats',
         PRODUCTION_DISTRIBUTION: '/report/production-distribution',
         ENV_MEASUREMENT_CHART: '/report/env-measurement-chart',
+        COST_DONUT: '/report/cost-donut',
     },
 } as const;

@@ -17,6 +17,7 @@ import {
     ProductionDistributionParams,
     ProductionDistributionResponse,
 } from '../types/production-distribution';
+import { CostDonutParams, CostDonutResponse } from '../types/cost-donut';
 import {
     EnvMeasurementChartParams,
     EnvMeasurementChartResponse,
@@ -124,6 +125,12 @@ export const reportApi = {
             API_ENDPOINTS.REPORT.ENV_MEASUREMENT_CHART,
             { params }
         );
+        return data;
+    },
+    getCostDonut: async (params: CostDonutParams): Promise<CostDonutResponse> => {
+        const { data } = await apiClient.get<CostDonutResponse>(API_ENDPOINTS.REPORT.COST_DONUT, {
+            params,
+        });
         return data;
     },
 };
