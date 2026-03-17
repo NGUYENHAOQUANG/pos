@@ -44,6 +44,12 @@ export const VideoPlayerScreen: React.FC = () => {
     const route = useRoute<VideoPlayerRouteProp>();
     const { videoUrl, cameraName, pondName } = route.params;
 
+    useEffect(() => {
+        return () => {
+            setPaused(true);
+        };
+    }, []);
+
     // Video ref
     const videoRef = useRef<any>(null);
 
@@ -281,7 +287,10 @@ export const VideoPlayerScreen: React.FC = () => {
                                 </View>
                             </View>
                             <TouchableOpacity
-                                onPress={() => navigation.goBack()}
+                                onPress={() => {
+                                    setPaused(true);
+                                    navigation.goBack();
+                                }}
                                 style={styles.closeButton}
                             >
                                 <Text style={styles.closeText}>✕</Text>
