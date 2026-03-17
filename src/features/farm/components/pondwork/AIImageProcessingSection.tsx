@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { ImageUpload } from '@/shared/components/forms/ImageUpload';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
 import { IconCamera } from '@/assets/icons';
@@ -18,6 +18,8 @@ interface Props {
         dimensions?: { width: number; height: number }
     ) => void;
     onImageAreaLayout: (size: { width: number; height: number }) => void;
+    onTakePhoto?: () => void;
+    onOpenPickerSheet?: () => void;
     children?: React.ReactNode;
 }
 
@@ -27,6 +29,8 @@ export const AIImageProcessingSection: React.FC<Props> = ({
     displayDimensions: _displayDimensions,
     onImageSelect,
     onImageAreaLayout,
+    onTakePhoto,
+    onOpenPickerSheet,
     children,
 }) => {
     const defaultAspectRatio =
@@ -49,12 +53,32 @@ export const AIImageProcessingSection: React.FC<Props> = ({
         >
             <OutlineButton
                 label="Chụp hoặc chọn ảnh"
-                onPress={openPicker}
+                onPress={onOpenPickerSheet ?? openPicker}
                 prefix={<IconCamera width={20} height={20} fill={colors.textSecondary} />}
                 style={styles.emptyStateButton}
                 labelStyle={styles.emptyStateButtonText}
             />
         </View>
+    );
+
+    const imageUploadNode = (
+        <ImageUpload
+            imageUri={imageUri}
+            onImageSelect={onImageSelect}
+            onTakePhoto={onTakePhoto}
+            returnBase64={true}
+            aspectRatio={imageUri ? defaultAspectRatio : undefined}
+            customEmptyState={renderEmptyState}
+            bottomContent={renderBottomButton}
+            uploadStyle={
+                !imageUri
+                    ? { ...styles.emptyUploadContainer, aspectRatio: undefined as any }
+                    : styles.imageUploadContainer
+            }
+            disablePressContainer={!imageUri || !!onOpenPickerSheet}
+        >
+            {children}
+        </ImageUpload>
     );
 
     return (
@@ -65,22 +89,13 @@ export const AIImageProcessingSection: React.FC<Props> = ({
                     onImageAreaLayout({ width, height });
                 }}
             >
-                <ImageUpload
-                    imageUri={imageUri}
-                    onImageSelect={onImageSelect}
-                    returnBase64={true}
-                    aspectRatio={imageUri ? defaultAspectRatio : undefined}
-                    customEmptyState={renderEmptyState}
-                    bottomContent={renderBottomButton}
-                    uploadStyle={
-                        !imageUri
-                            ? { ...styles.emptyUploadContainer, aspectRatio: undefined as any }
-                            : styles.imageUploadContainer
-                    }
-                    disablePressContainer={!imageUri}
-                >
-                    {children}
-                </ImageUpload>
+                {imageUri && onOpenPickerSheet ? (
+                    <TouchableOpacity onPress={onOpenPickerSheet} activeOpacity={0.85}>
+                        {imageUploadNode}
+                    </TouchableOpacity>
+                ) : (
+                    imageUploadNode
+                )}
             </View>
         </View>
     );

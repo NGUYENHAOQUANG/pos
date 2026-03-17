@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 
 interface MetricItem {
@@ -14,7 +15,7 @@ const DATA: MetricItem[] = [
     { label: 'Cỡ tôm (g/con)', value: '1.2' },
     { label: 'Mật độ (con/m²)', value: '454' },
     { label: 'Đã ăn (kg)', value: '470' },
-    { label: 'FCR', value: '1.1', valueColor: colors.green[600] }, 
+    { label: 'FCR', value: '1.1', valueColor: colors.green[600] },
     { label: 'Tỷ lệ sống (%)', value: '88.7', valueColor: colors.green[600] },
 ];
 
@@ -22,15 +23,17 @@ export const OverView = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>TỔNG QUAN</Text>
-            
+
             <View style={styles.grid}>
                 {DATA.map((item, index) => (
                     <View key={index} style={styles.card}>
                         <Text style={styles.label}>{item.label}</Text>
-                        <Text style={[
-                            styles.value, 
-                            item.valueColor ? { color: item.valueColor } : {}
-                        ]}>
+                        <Text
+                            style={[
+                                styles.value,
+                                item.valueColor ? { color: item.valueColor } : {},
+                            ]}
+                        >
                             {item.value}
                         </Text>
                     </View>
@@ -82,5 +85,5 @@ const styles = StyleSheet.create({
         fontWeight: typography.fontWeight.bold,
         color: colors.text,
         textAlign: 'center',
-    }
+    },
 });

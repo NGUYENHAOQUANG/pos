@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, StyleProp, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, ViewStyle, StyleProp, View } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing } from '@/styles';
 import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
 

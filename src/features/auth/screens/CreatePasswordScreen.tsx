@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    Platform,
-    ScrollView,
-    KeyboardAvoidingView,
-} from 'react-native';
-import { BackButton } from "@/shared/components/buttons/BackButton";
-import { Button } from "@/shared/components/buttons/Button";
-import { Input } from "@/shared/components/forms/Input";
-import { Logo } from "@/shared/components/brand/Logo";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, StyleSheet, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
+import { BackButton } from '@/shared/components/buttons/BackButton';
+import { Button } from '@/shared/components/buttons/Button';
+import { Input } from '@/shared/components/forms/Input';
+import { Logo } from '@/shared/components/brand/Logo';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { AuthStackNavigationProp } from '@/app/navigation/types';
 import { colors, spacing, typography } from '@/styles';
@@ -65,7 +59,8 @@ export default function CreatePasswordScreen() {
                     <View style={styles.content}>
                         <Text style={styles.title}>Tạo mật khẩu</Text>
                         <Text style={styles.subtitle}>
-                            Mật khẩu chứa ít nhất 8 ký tự. Bao gồm chữ viết hoa, viết thường, chữ số. Không chứa khoảng trắng.
+                            Mật khẩu chứa ít nhất 8 ký tự. Bao gồm chữ viết hoa, viết thường, chữ
+                            số. Không chứa khoảng trắng.
                         </Text>
 
                         <Input
@@ -127,11 +122,11 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.lg,
     },
     header: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingTop: spacing.md,
         paddingBottom: spacing.xl,
-        position: "relative",
+        position: 'relative',
         minHeight: 45,
         paddingHorizontal: spacing.lg,
     },
@@ -140,10 +135,10 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         top: spacing.md,
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: 'center',
+        justifyContent: 'center',
         zIndex: -1,
-        pointerEvents: "none",
+        pointerEvents: 'none',
     },
     spacer: {
         height: 80,

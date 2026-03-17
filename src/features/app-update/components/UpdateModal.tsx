@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { useAppUpdate } from '@/features/app-update/hooks/useAppUpdate';
 import MebiEcoLogo from '@/assets/MebiEco-Logo.svg';

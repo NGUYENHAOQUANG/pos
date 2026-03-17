@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     ScrollView,
     StyleSheet,
-    Text,
     View,
     TouchableOpacity,
     AppState,
@@ -10,6 +9,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';

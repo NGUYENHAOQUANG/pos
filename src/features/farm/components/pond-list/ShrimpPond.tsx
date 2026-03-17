@@ -1,15 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { formatDateWithTime } from '@/features/farm/utils/dateUtils';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    StyleProp,
-    ViewStyle,
-    Dimensions,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, Dimensions } from 'react-native';
 
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { PondType, POND_TYPES } from '@/features/farm/types/farm.types';
 import { TagStatus } from '@/features/farm/components/pond/Tag';

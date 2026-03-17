@@ -6,8 +6,8 @@ import {
     ViewStyle,
     StyleProp,
     ActivityIndicator,
-    Text,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import IconSetting from '@/assets/Icon/IconDevices/IconSetting.svg';
 import InfoIcon from '@/assets/Icon/IconDevices/Info.svg';
 import WarningCircleIcon from '@/assets/Icon/WarningCircle.svg';

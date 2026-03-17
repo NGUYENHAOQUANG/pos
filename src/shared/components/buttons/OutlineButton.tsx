@@ -1,4 +1,5 @@
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, borderRadius } from '@/styles';
 
 interface OutlineButtonProps {

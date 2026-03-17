@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import TrashIcon from '@/assets/Icon/IconMenu/Trash.svg';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';

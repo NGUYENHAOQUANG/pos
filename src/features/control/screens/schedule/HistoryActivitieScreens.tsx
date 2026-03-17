@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { HeaderDevices, CONTROL_TABS } from '../../components/HeaderDevices';
 import { HeadingBar } from '@/shared/components/layout/HeadingBar';
 import { HistoryActivitie } from '../../components/schedule/HistoryActivitie';

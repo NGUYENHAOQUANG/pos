@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
     Modal,
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Animated,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';

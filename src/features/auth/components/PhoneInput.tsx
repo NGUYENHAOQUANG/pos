@@ -3,7 +3,9 @@
  * @description Phone input component matching the Mebione design
  */
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import DangerIcon from '@/assets/Icon/Danger.svg';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 // Giả định bạn đã có các biến này trong project, nếu chưa hãy thay bằng mã màu cứng

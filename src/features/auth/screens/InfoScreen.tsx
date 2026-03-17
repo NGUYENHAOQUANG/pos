@@ -3,12 +3,12 @@ import {
     ScrollView,
     StatusBar,
     StyleSheet,
-    Text,
     View,
     Alert,
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from '@/features/auth/store/authStore';

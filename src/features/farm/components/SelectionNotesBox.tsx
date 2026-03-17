@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { StyleSheet, TextInput as RNTextInput } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
 import { colors } from '@/styles';
 import { showLimitCharacterToast } from '@/features/farm/utils/toastMessages';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
@@ -11,7 +12,7 @@ interface SelectionNotesBoxProps {
 }
 
 export const SelectionNotesBox: React.FC<SelectionNotesBoxProps> = ({ notes, onNotesChange }) => {
-    const inputRef = useRef<TextInput>(null);
+    const inputRef = useRef<RNTextInput>(null);
 
     const handleChangeText = (text: string) => {
         if (text.length > 1999) {

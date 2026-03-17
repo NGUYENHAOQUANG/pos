@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageSourcePropType } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { DevicesItem } from './DevicesItem';
 import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 

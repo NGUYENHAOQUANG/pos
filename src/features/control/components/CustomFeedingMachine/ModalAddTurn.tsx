@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import ClockIcon from '@/assets/Icon/IconDevices/Clock.svg';
 import { TimePickerModal } from '@/shared/components/modal/TimePickerModal';
 import { colors } from '@/styles';

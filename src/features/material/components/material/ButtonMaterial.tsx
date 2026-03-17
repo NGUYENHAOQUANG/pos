@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import {
     View,
-    Text,
     TouchableOpacity,
     StyleSheet,
     Platform,
     TouchableHighlight,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,

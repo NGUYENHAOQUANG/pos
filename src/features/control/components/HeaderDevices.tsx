@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    StyleProp,
-    ViewStyle,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ScrollView, StyleProp, ViewStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import { HeaderSection } from '@/shared/components/layout/HeaderSection';
 

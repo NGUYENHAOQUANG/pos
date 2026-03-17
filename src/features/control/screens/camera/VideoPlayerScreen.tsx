@@ -1,7 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
@@ -9,6 +8,7 @@ import {
     Dimensions,
     ActivityIndicator,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, {

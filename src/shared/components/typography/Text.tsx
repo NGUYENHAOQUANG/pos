@@ -1,76 +1,60 @@
+/**
+ * @file Text.tsx
+ * @description Custom Text component that automatically applies Google Sans Flex font.
+ * Export as `Text` so existing JSX doesn't need to change — only the import line.
+ * Auto-resolves fontWeight to the correct font file.
+ *
+ * @example
+ * // Just change import:
+ * // Before: import { View, Text } from 'react-native';
+ * // After:  import { View } from 'react-native';
+ * //         import { Text } from '@/shared/components/typography/Text';
+ *
+ * // JSX stays the same:
+ * <Text style={{ fontWeight: '700' }}>Bold text</Text>
+ */
 import React from 'react';
-import { Text as RNText, TextStyle, StyleSheet } from 'react-native';
-import { colors, typography } from '@/styles';
+import { Text as RNText, TextProps, StyleSheet } from 'react-native';
+import { fontFamily, fontWeightToFamily } from '@/styles/typography';
 
-interface TextProps {
-  children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'small';
-  weight?: 'regular' | 'medium' | 'semibold' | 'bold';
-  color?: string;
-  align?: 'left' | 'center' | 'right';
-  style?: TextStyle;
-}
+const resolveFontFamily = (style?: TextProps['style']): string => {
+    if (!style) return fontFamily.regular;
 
-export const Text: React.FC<TextProps> = ({
-  children,
-  variant = 'body',
-  weight = 'regular',
-  color = colors.text,
-  align = 'left',
-  style,
-}) => {
-  return (
-    <RNText
-      style={[
-        styles[variant],
-        styles[weight],
-        { color, textAlign: align },
-        style,
-      ]}
-    >
-      {children}
-    </RNText>
-  );
+    // Flatten style array to get final computed style
+    const flatStyle = StyleSheet.flatten(style);
+    if (!flatStyle) return fontFamily.regular;
+
+    // If fontFamily is already explicitly set, respect it
+    if (flatStyle.fontFamily) return flatStyle.fontFamily;
+
+    // Map fontWeight to corresponding font file
+    const weight = flatStyle.fontWeight;
+    if (weight && fontWeightToFamily[String(weight)]) {
+        return fontWeightToFamily[String(weight)];
+    }
+
+    return fontFamily.regular;
 };
 
-const styles = StyleSheet.create({
-  // Variants
-  h1: {
-    fontSize: typography.fontSize['4xl'],
-    lineHeight: typography.fontSize['4xl'] * typography.lineHeight.tight,
-  },
-  h2: {
-    fontSize: typography.fontSize['3xl'],
-    lineHeight: typography.fontSize['3xl'] * typography.lineHeight.tight,
-  },
-  h3: {
-    fontSize: typography.fontSize['2xl'],
-    lineHeight: typography.fontSize['2xl'] * typography.lineHeight.normal,
-  },
-  body: {
-    fontSize: typography.fontSize.base,
-    lineHeight: typography.fontSize.base * typography.lineHeight.normal,
-  },
-  caption: {
-    fontSize: typography.fontSize.sm,
-    lineHeight: typography.fontSize.sm * typography.lineHeight.normal,
-  },
-  small: {
-    fontSize: typography.fontSize.xs,
-    lineHeight: typography.fontSize.xs * typography.lineHeight.normal,
-  },
+export const Text: React.FC<TextProps> = ({ style, children, ...props }) => {
+    const resolvedFamily = resolveFontFamily(style);
 
-  // Weights
-  regular: {
-    fontWeight: typography.fontWeight.regular,
-  },
-  medium: {
-    fontWeight: typography.fontWeight.medium,
-  },
-  semibold: {
-    fontWeight: typography.fontWeight.semibold,
-  },
-  bold: {
-    fontWeight: typography.fontWeight.bold,
-  },
-});
+    const safeChildren = typeof children === 'string' ? children + '\u200A' : children;
+
+    return (
+        <RNText
+            {...props}
+            style={[
+                {
+                    fontFamily: resolvedFamily,
+                    includeFontPadding: false,
+                    textAlignVertical: 'center',
+                },
+                style,
+                { fontFamily: resolvedFamily },
+            ]}
+        >
+            {safeChildren}
+        </RNText>
+    );
+};

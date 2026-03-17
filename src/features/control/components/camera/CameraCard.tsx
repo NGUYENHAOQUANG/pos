@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { BlurView } from '@react-native-community/blur';
 import { colors, spacing, borderRadius } from '@/styles';
 import { CameraData } from '@/features/control/data/camerasData';
