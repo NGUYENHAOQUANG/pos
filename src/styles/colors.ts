@@ -159,6 +159,10 @@ export const colors = {
     overlayLight: 'rgba(0, 0, 0, 0.45)', // Lighter overlay for modals
     overlayBadge: 'rgba(0, 0, 0, 0.36)',
     overlayLoading: 'rgba(255, 255, 255, 0.5)',
+    // Camera overlay colors
+    cameraOverlay: 'rgba(0, 0, 0, 0.55)', // Dark mask over camera preview
+    cameraButtonBg: 'rgba(255, 255, 255, 0.15)', // Translucent button background
+    cameraIconBg: 'rgba(0, 0, 0, 0.30)', // Icon button background on camera
     // Status colors (for DevicesStatus)
     healthStatus: {
         healthy: '#4CAF50',

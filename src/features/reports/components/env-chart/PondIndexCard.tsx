@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
-import { typography } from '@/styles/typography';
 
 export interface PondIndexCardData {
     id: string;
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     title: {
-        fontFamily: typography.fontFamily.regular,
         fontSize: 12,
         color: colors.textSecondary,
         fontWeight: '400',
@@ -89,7 +88,6 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
     valueNumber: {
-        fontFamily: typography.fontFamily.bold,
         fontSize: 16,
         color: colors.text,
         fontWeight: '500',
@@ -98,7 +96,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     valueUnit: {
-        fontFamily: typography.fontFamily.regular,
         fontSize: 12,
         color: colors.textSecondary,
         fontWeight: '400',

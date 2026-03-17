@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { Checkbox } from '@/shared/components/forms/Checkbox';
 import PencilSimpleLine from '@/assets/Icon/IconMenu/PencilSimpleLine.svg';

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Avatar from '@/assets/Icon/IconMenu/Avatar.svg';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Tag, TagStatus } from '../Tag';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { borderRadius, colors } from '@/styles';
 import { useNavigation } from '@react-navigation/native';

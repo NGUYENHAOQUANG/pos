@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { PondTypeTag } from '@/features/farm/components/pond/PondTypeTag';
 import { MoreButton } from '@/shared/components/buttons/MoreButton';
 import { colors, spacing } from '@/styles';

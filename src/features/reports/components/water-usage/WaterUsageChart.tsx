@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, Text, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
 import { colors } from '@/styles/colors';

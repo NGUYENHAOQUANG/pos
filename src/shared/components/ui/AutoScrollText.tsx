@@ -3,13 +3,13 @@ import {
     Animated,
     Easing,
     StyleSheet,
-    Text,
     View,
     ViewStyle,
     TextStyle,
     ScrollView,
     StyleProp,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 
 interface AutoScrollTextProps {
     text: string;

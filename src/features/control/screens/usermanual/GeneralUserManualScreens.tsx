@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing } from '@/styles';
 import { HeaderDevices } from '@/features/control/components/HeaderDevices';

@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    StyleProp,
-    ViewStyle,
-    TextStyle,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArrowLeftIcon from '@/assets/Icon/ArrowLeft.svg';
 import { colors, borderRadius } from '@/styles';

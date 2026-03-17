@@ -3,7 +3,8 @@ import { colors, spacing, typography } from '@/styles';
 import { Logo } from '@/shared/components/brand/Logo';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useMemo } from 'react';
-import { Dimensions, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StatusBar, StyleSheet, View } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
     Easing,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     Modal,
@@ -10,6 +9,7 @@ import {
     Platform,
     KeyboardAvoidingView,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { borderRadius, colors, spacing } from '@/styles';
 import { IMaterial } from '@/features/material/types/material.types';

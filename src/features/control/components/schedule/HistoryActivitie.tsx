@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, ImageSourcePropType } from 'react-native';
+import { View, StyleSheet, ScrollView, Image, ImageSourcePropType } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing } from '@/styles';
 import { ScheduleDescriptionTab } from './ScheduleDescriptionTab';
 import { ScheduleActivityPill } from './ScheduleActivityPill';

@@ -2,13 +2,13 @@ import React from 'react';
 import {
     Modal,
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     TouchableWithoutFeedback,
     Animated,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { JobExecution, EnvironmentMeta } from '@/features/farm/types/farm.types';
 import { borderRadius, colors } from '@/styles';
@@ -300,8 +301,8 @@ const styles = StyleSheet.create({
     itemText: {
         fontSize: 14,
         color: colors.text,
-        lineHeight: 22,
-        fontWeight: '400',
+        lineHeight: 20,
+        fontWeight: '500',
     },
     itemDivider: {
         height: 1,

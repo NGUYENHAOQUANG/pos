@@ -1,4 +1,5 @@
-import { ImageSourcePropType, StyleSheet, Text, View } from 'react-native';
+import { ImageSourcePropType, StyleSheet, View } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import LinearGradient from 'react-native-linear-gradient';
 import { useEffect, useState } from 'react';
 import Animated, {

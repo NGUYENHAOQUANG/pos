@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { Input } from '@/shared/components/forms/Input';
 import Toast from 'react-native-toast-message';
