@@ -170,7 +170,10 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                 onClose={camera.closeCamera}
                 onToggleFlash={camera.toggleFlash}
                 onCapture={camera.takePhoto}
-                onGallery={camera.pickFromGallery}
+                onGallery={(...args) => {
+                    camera.closeCamera();
+                    handleImageSelect(...args);
+                }}
             />
         );
     }

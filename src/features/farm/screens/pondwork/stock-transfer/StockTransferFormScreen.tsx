@@ -101,6 +101,7 @@ export const StockTransferFormScreen: React.FC = () => {
 
     return (
         <StockTransferForm
+            totalShrimpCount={actualStockingQuantity}
             shrimpBreed={breedName}
             actualStockingQuantity={actualStockingQuantity}
             latestShrimpSize={latestShrimpSize}

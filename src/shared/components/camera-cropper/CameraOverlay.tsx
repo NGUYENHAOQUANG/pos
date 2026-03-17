@@ -40,7 +40,7 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
             pointerEvents="box-none"
         >
             <Path
-                fill={colors.cameraOverlay}
+                fill="rgba(0, 0, 0, 0.7)"
                 fillRule="evenodd"
                 d={`M0,0 H${FRAME_W} V${FRAME_H} H0 Z M${SQ_X},${SQ_Y} H${SQ_X + SQ_SIZE} V${
                     SQ_Y + SQ_SIZE
@@ -89,7 +89,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingBottom: 8,
-        backgroundColor: colors.cameraOverlay,
     },
     iconButton: {
         width: 44,
@@ -106,7 +105,6 @@ const styles = StyleSheet.create({
         right: 0,
         paddingVertical: 16,
         alignItems: 'center',
-        backgroundColor: colors.cameraOverlay,
     },
     guideText: {
         color: colors.white,
