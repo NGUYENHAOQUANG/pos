@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 
@@ -6,64 +6,124 @@ import { BasicDropDownButton } from '../BasicDropDownButton';
 import { HeadingEnvChart } from './HeadingEnvChart';
 import { PondIndex } from './PondIndex';
 import EnvChar from './EnvChar';
-import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
 import { Loading } from '@/shared/components/ui/Loading';
 import Peformance from '@/assets/Icon/IconReport/Peformance.svg';
 import chartStyles from '@/features/reports/styles/chart.styles';
+import { useEnvMeasurementChart } from '@/features/reports/hooks/useEnvMeasurementChart';
+import { useMetrics } from '@/features/farm/hooks/metric/useMetric';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 
-// Metric Map (duplicated from EnvChar for independence, or could be shared)
-const METRIC_MAP: Record<string, { key: keyof EnvLog; label: string; unit: string }> = {
-    pH: { key: 'pH', label: 'pH', unit: '' },
-    DO: { key: 'do', label: 'DO', unit: 'mg/L' },
-    'Nhiệt độ': { key: 'temp', label: 'Nhiệt độ', unit: '°C' },
-    'Độ kiềm': { key: 'alk', label: 'Độ kiềm', unit: 'mg/L' },
-    'Độ trong': { key: 'clear', label: 'Độ trong', unit: 'cm' },
-    'Độ mặn': { key: 'salt', label: 'Độ mặn', unit: 'ppt' },
-};
+// Color palette for dynamically assigning colors to ponds
+const POND_COLOR_PALETTE = [
+    '#7B2CBF', // purple
+    '#E85D04', // orange
+    '#2D6A4F', // green
+    '#1D4ED8', // blue
+    '#9D174D', // magenta
+    '#0E7490', // cyan
+    '#DC2626', // red
+    '#1E3A5F', // dark blue
+    '#CA8A04', // yellow
+    '#C2410C', // volcano
+    '#059669', // emerald
+    '#7C3AED', // violet
+    '#DB2777', // pink
+    '#0284C7', // sky
+    '#65A30D', // lime
+];
 
-const parseDate = (dateStr: string) => {
-    const [day, month, year] = dateStr.split('/').map(Number);
-    return new Date(year, month - 1, day);
-};
+interface CompilationEnvChartProps {
+    zoneId: string;
+    pondIds?: string[];
+    cycleId?: string;
+}
 
-const CompilationEnvChart = () => {
+const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartProps) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [selectedTab, setSelectedTab] = useState('pH');
-    const [isLoading, setIsLoading] = useState(true);
 
+    // Fetch available metrics from API
+    const { data: metricsResponse } = useMetrics();
+    const metrics = useMemo(() => metricsResponse?.data || [], [metricsResponse?.data]);
+
+    // Build heading items from metrics
+    const headingItems = useMemo(() => {
+        if (metrics.length === 0) return [];
+        return metrics.map(m => ({
+            key: m.id,
+            label: m.name,
+        }));
+    }, [metrics]);
+
+    // Selected metric tab (by MetricId)
+    const [selectedMetricId, setSelectedMetricId] = useState<string | null>(null);
+
+    // Auto-select first metric when metrics load
     React.useEffect(() => {
-        // Mock loading
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timer);
-    }, []);
+        if (metrics.length > 0 && !selectedMetricId) {
+            setSelectedMetricId(metrics[0].id);
+        }
+    }, [metrics, selectedMetricId]);
 
-    // Calculate latest data for PondIndex
-    const pondData = React.useMemo(() => {
-        const metricInfo = METRIC_MAP[selectedTab] || METRIC_MAP['pH'];
-        const metricKey = metricInfo.key;
+    // Fetch chart data from API
+    const {
+        data: chartResponse,
+        isLoading,
+        isRefetching,
+    } = useEnvMeasurementChart({
+        ZoneId: zoneId,
+        MetricId: selectedMetricId,
+        PondIds: pondIds,
+        CycleId: cycleId,
+    });
 
-        // Get unique ponds from colors or data
-        const pondIds = Object.keys(POND_COLORS);
+    const chartData = chartResponse?.data;
+    const series = useMemo(() => chartData?.series || [], [chartData?.series]);
+    const metadata = useMemo(
+        () => chartData?.metadata || { minY: 0, maxY: 10, xAxis: [] as string[] },
+        [chartData?.metadata]
+    );
+    const unitMetric = chartData?.unitMetric || '';
 
-        return pondIds.map(pondId => {
-            const pondLogs = ENV_DATA.filter(d => d.pond === pondId);
-            // Sort by date descending to get latest
-            pondLogs.sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime());
-
-            const latest = pondLogs[0];
-            const value = latest ? latest[metricKey] : '--';
-            const unit = value !== '--' && metricInfo.unit ? ` ${metricInfo.unit}` : '';
-
-            return {
-                id: pondId,
-                name: pondId,
-                value: `${value}${unit}`,
-                color: POND_COLORS[pondId],
-            };
+    // Build color map for ponds (stable per pondId)
+    const pondColors = useMemo(() => {
+        const colorMap: Record<string, string> = {};
+        series.forEach((s, i) => {
+            colorMap[s.pondId] = POND_COLOR_PALETTE[i % POND_COLOR_PALETTE.length];
         });
-    }, [selectedTab]);
+        return colorMap;
+    }, [series]);
+
+    // Build PondIndex data from series
+    const pondData = useMemo(() => {
+        return series.map(s => ({
+            id: s.pondId,
+            name: s.pondName,
+            value: unitMetric ? `${s.averageValue} ${unitMetric}` : `${s.averageValue}`,
+            color: pondColors[s.pondId] || '#999',
+        }));
+    }, [series, pondColors, unitMetric]);
+
+    const showLoading = isLoading || isRefetching;
+    const isEmpty = !showLoading && series.length === 0;
+
+    // --- Pond card filter ---
+    const [selectedPondId, setSelectedPondId] = useState<string | null>(null);
+
+    // Reset selected pond when metric/data changes
+    React.useEffect(() => {
+        setSelectedPondId(null);
+    }, [selectedMetricId, zoneId, pondIds]);
+
+    const handlePondPress = (pondId: string) => {
+        // Toggle: tap same card → deselect (show all)
+        setSelectedPondId(prev => (prev === pondId ? null : pondId));
+    };
+
+    // Filter series for chart: show only selected pond, or all if none selected
+    const filteredSeries = useMemo(() => {
+        if (!selectedPondId) return series;
+        return series.filter(s => s.pondId === selectedPondId);
+    }, [series, selectedPondId]);
 
     return (
         <View style={chartStyles.container}>
@@ -77,18 +137,33 @@ const CompilationEnvChart = () => {
 
             {isExpanded && (
                 <View style={styles.content}>
-                    {isLoading ? (
+                    <HeadingEnvChart
+                        items={headingItems}
+                        selected={selectedMetricId || undefined}
+                        onSelect={setSelectedMetricId}
+                    />
+
+                    {showLoading ? (
                         <View style={{ height: 300 }}>
                             <Loading />
                         </View>
+                    ) : isEmpty ? (
+                        <EmptyStateCard message="Không có dữ liệu thông số môi trường" />
                     ) : (
                         <>
-                            <HeadingEnvChart selected={selectedTab} onSelect={setSelectedTab} />
-
-                            <PondIndex data={pondData} />
+                            <PondIndex
+                                data={pondData}
+                                selectedId={selectedPondId}
+                                onPress={handlePondPress}
+                            />
 
                             <View style={styles.chartContainer}>
-                                <EnvChar selected={selectedTab} />
+                                <EnvChar
+                                    series={filteredSeries}
+                                    metadata={metadata}
+                                    unit={unitMetric}
+                                    pondColors={pondColors}
+                                />
                             </View>
                         </>
                     )}
@@ -107,12 +182,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.borderLight,
     },
-    headerTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: colors.text,
-        textTransform: 'uppercase',
-    },
     content: {
         backgroundColor: colors.white,
         paddingHorizontal: 16,
@@ -121,10 +190,5 @@ const styles = StyleSheet.create({
     },
     chartContainer: {
         marginVertical: 16,
-    },
-    divider: {
-        height: 1,
-        backgroundColor: colors.borderLight,
-        marginBottom: 8,
     },
 });

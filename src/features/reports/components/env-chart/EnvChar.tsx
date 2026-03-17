@@ -7,8 +7,8 @@ import Animated, { useSharedValue, useAnimatedStyle, runOnJS } from 'react-nativ
 import * as shape from 'd3-shape';
 import { colors } from '@/styles/colors';
 import { typography } from '@/styles/typography';
-import { ENV_DATA, EnvLog, POND_COLORS } from './envChartData';
 import { TooltipEnvChart } from './TooltipEnvChart';
+import { EnvChartSeries, EnvChartMetadata } from '@/features/reports/types/env-measurement-chart';
 
 // --- Utils: Robust Manual Scales ---
 const scaleLinear = ({ domain, range }: { domain: number[]; range: number[] }) => {
@@ -34,15 +34,11 @@ const scaleTime = ({ domain, range }: { domain: Date[]; range: number[] }) => {
 };
 
 // --- Formatters ---
+// Use UTC to match backend convention (dates stored at 17:00 UTC = 00:00 VN next day)
 const formatDate = (date: Date) => {
-    const d = date.getDate().toString().padStart(2, '0');
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getUTCDate().toString().padStart(2, '0');
+    const m = (date.getUTCMonth() + 1).toString().padStart(2, '0');
     return `${d}/${m}`;
-};
-
-const parseDate = (dateStr: string) => {
-    const [day, month, year] = dateStr.split('/').map(Number);
-    return new Date(year, month - 1, day);
 };
 
 // --- Types ---
@@ -52,23 +48,25 @@ interface DataPoint {
     pond: string;
 }
 
-interface EnvCharProps {
-    selected?: string;
+interface SeriesEntry {
+    pond: string;
+    data: DataPoint[];
 }
 
-// --- Mapping Configuration ---
-const METRIC_MAP: Record<string, { key: keyof EnvLog; label: string; unit: string }> = {
-    pH: { key: 'pH', label: 'pH', unit: '' },
-    DO: { key: 'do', label: 'DO', unit: 'mg/L' },
-    'Nhiệt độ': { key: 'temp', label: 'Nhiệt độ', unit: '°C' },
-    'Độ kiềm': { key: 'alk', label: 'Độ kiềm', unit: 'mg/L' },
-    'Độ trong': { key: 'clear', label: 'Độ trong', unit: 'cm' },
-    'Độ mặn': { key: 'salt', label: 'Độ mặn', unit: 'ppt' },
-};
+interface EnvCharProps {
+    /** Series data from API, mapped to chart format */
+    series: EnvChartSeries[];
+    /** Metadata from API (minY, maxY, xAxis) */
+    metadata: EnvChartMetadata;
+    /** Unit string for tooltip display */
+    unit?: string;
+    /** Map of pondId → color */
+    pondColors: Record<string, string>;
+}
 
 const GRAPH_HEIGHT = 380;
 
-// Helper for Animated Label (Now Static)
+// Helper for Static Label
 const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
     return (
         <View style={{ position: 'absolute', left: baseX, bottom: 0 }}>
@@ -79,26 +77,23 @@ const AnimatedLabel = ({ date, baseX }: { date: Date; baseX: number }) => {
     );
 };
 
-export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
-    const metric = METRIC_MAP[selected] || METRIC_MAP['pH'];
-
+export default function EnvChar({ series, metadata, unit = '', pondColors }: EnvCharProps) {
     // --- Data Preparation ---
-    // Group data by Pond
-    const seriesData = useMemo(() => {
-        const ponds = Array.from(new Set(ENV_DATA.map(d => d.pond)));
-        return ponds.map(pond => {
-            const data = ENV_DATA.filter(d => d.pond === pond)
-                .map(item => ({
-                    date: parseDate(item.date),
-                    value: Number(item[metric.key]),
-                    pond: item.pond,
+    // Convert API series to chart format
+    const seriesData: SeriesEntry[] = useMemo(() => {
+        return series.map(s => ({
+            pond: s.pondId,
+            data: s.data
+                .map(point => ({
+                    date: new Date(point.date),
+                    value: point.value,
+                    pond: s.pondId,
                 }))
-                .sort((a, b) => a.date.getTime() - b.date.getTime());
-            return { pond, data };
-        });
-    }, [metric.key]);
+                .sort((a, b) => a.date.getTime() - b.date.getTime()),
+        }));
+    }, [series]);
 
-    // Flatten for scales using reduce instead of flatMap
+    // Flatten for scales
     const allPoints = seriesData.reduce<DataPoint[]>((acc, s) => acc.concat(s.data), []);
 
     const [layout, setLayout] = useState({ width: 0, height: 0 });
@@ -108,11 +103,26 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
     const savedTranslateX = useSharedValue(0);
 
     // Derived dimensions
-    const density = 8;
+    const CHART_LEFT_PADDING = 60;
+    const CHART_RIGHT_PADDING = 30; // half label width to prevent clipping at edge
+    const MIN_DATE_SPACING = 10; // px per day interval
     const chartAreaWidth = Math.max(0, layout.width);
 
-    const pointsCount = seriesData[0]?.data.length || 0;
-    const contentWidth = Math.max(chartAreaWidth, pointsCount * density);
+    // X-axis dates from metadata only
+    const xAxisDates = useMemo(() => {
+        return metadata.xAxis.map(d => new Date(d));
+    }, [metadata.xAxis]);
+
+    // Use xAxis length for total points
+    const pointsCount = xAxisDates.length;
+    const contentWidth =
+        (pointsCount - 1) * MIN_DATE_SPACING + CHART_LEFT_PADDING + CHART_RIGHT_PADDING;
+
+    // Spacing between consecutive date points on the x-axis (must match scaleX range)
+    const pointSpacing =
+        pointsCount > 1
+            ? (contentWidth - CHART_LEFT_PADDING - CHART_RIGHT_PADDING) / (pointsCount - 1)
+            : chartAreaWidth;
 
     const maxTranslateX = 0;
     const minTranslateX = Math.min(0, chartAreaWidth - contentWidth);
@@ -141,19 +151,11 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
 
     const tap = Gesture.Tap().onEnd(e => {
         const internalX = e.x - translateX.value;
-        const index = Math.round(internalX / density);
+        // Map tap x to nearest date index using actual point spacing
+        const index = Math.round((internalX - CHART_LEFT_PADDING) / pointSpacing);
 
         if (index >= 0 && index < pointsCount) {
             runOnJS(setSelectedIndex)(index);
-            // Position relative to the *visible* view, need to account for scroll if inside the container?
-            // Actually e.x is relative to the GestureDetector which wraps the whole scrollable content?
-            // Wait, the GestureDetector wraps Animated.View?
-            // No, GestureDetector wraps the outer container. `chartArea`.
-            // So e.x is absolute in the Viewport.
-            // BUT `translateX` moves the content.
-            // If we place the tooltip INSIDE the Animated.View, it will move with scroll. That's annoying.
-            // Better to place tooltip OUTSIDE the Animated.View (floating).
-            // If outside, we just need `e.x` and `e.y`.
             runOnJS(setTooltipPos)({ x: e.x, y: e.y });
         } else {
             runOnJS(setSelectedIndex)(null);
@@ -172,12 +174,12 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
     const height = layout.height || GRAPH_HEIGHT;
 
     // Scales
-    const minDate = allPoints[0]?.date || new Date();
-    const maxDate = allPoints[allPoints.length - 1]?.date || new Date();
+    const minDate = xAxisDates[0] || new Date();
+    const maxDate = xAxisDates[xAxisDates.length - 1] || new Date();
 
     const scaleX = scaleTime({
         domain: [minDate, maxDate],
-        range: [60, contentWidth],
+        range: [CHART_LEFT_PADDING, contentWidth - CHART_RIGHT_PADDING],
     });
 
     // Custom Y-Axis Logic - Always show exactly 6 ticks
@@ -187,8 +189,14 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
     let yTicks: number[] = [0, 2, 4, 6, 8, 10];
 
     if (vals.length > 0) {
-        const minVal = Math.min(...vals);
-        const maxVal = Math.max(...vals);
+        // Y-axis always starts from 0
+        const minVal = 0;
+        let maxVal = Math.max(...vals);
+
+        // Handle edge case: all values are 0
+        if (maxVal === 0) {
+            maxVal = 10;
+        }
 
         // Calculate a nice step that produces exactly 6 ticks (5 intervals)
         const rawRange = maxVal - minVal;
@@ -217,7 +225,7 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
 
     const scaleY = scaleLinear({
         domain: yDomain,
-        range: [height - 40, 10],
+        range: [height - 30, 10],
     });
 
     const RenderLineSeries = ({
@@ -252,23 +260,35 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
         setLayout(event.nativeEvent.layout);
     };
 
-    // Ticks (using first series dates)
-    const xTicks = seriesData[0]?.data || [];
+    // X-axis tick labels (use xAxisDates from metadata)
+    const xTicks = xAxisDates;
 
-    // Tooltip Logic
-    const tooltipData =
-        selectedIndex !== null
-            ? seriesData
-                  .map(s => ({
-                      pond: s.pond,
-                      value: s.data[selectedIndex]?.value,
-                      color: POND_COLORS[s.pond],
-                      unit: metric.unit,
-                  }))
-                  .filter(d => d.value !== undefined)
-            : [];
+    // Tooltip Logic — find values at the closest xAxis date for each series
+    const tooltipData = useMemo(() => {
+        if (selectedIndex === null || selectedIndex >= xAxisDates.length) return [];
+        const targetDate = xAxisDates[selectedIndex];
+        const targetTime = targetDate.getTime();
 
-    const selectedDate = selectedIndex !== null ? xTicks[selectedIndex]?.date : null;
+        return series
+            .map(s => {
+                // Find the data point closest to this xAxis date (within 24h tolerance)
+                const matched = s.data.find(dp => {
+                    const dpTime = new Date(dp.date).getTime();
+                    return Math.abs(dpTime - targetTime) < 24 * 60 * 60 * 1000;
+                });
+                if (matched === undefined) return null;
+                return {
+                    pond: s.pondName,
+                    value: matched.value,
+                    color: pondColors[s.pondId] || '#999',
+                    unit,
+                };
+            })
+            .filter((d): d is NonNullable<typeof d> => d !== null);
+    }, [selectedIndex, xAxisDates, series, pondColors, unit]);
+
+    const selectedDate =
+        selectedIndex !== null && selectedIndex < xTicks.length ? xTicks[selectedIndex] : null;
 
     return (
         <GestureHandlerRootView style={styles.container} onLayout={onLayout}>
@@ -290,7 +310,6 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                         <Animated.View style={[styles.chartContent, scrollStyle]}>
                             <View>
                                 <Svg width={contentWidth} height={height}>
-                                    {/* Vertical Grid Lines removed */}
                                     {/* Horizontal Grid Lines */}
                                     {yTicks.map((v, i) => (
                                         <Line
@@ -305,19 +324,16 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                                     ))}
 
                                     {/* Data Lines */}
-                                    {seriesData.map(series => (
+                                    {seriesData.map(s => (
                                         <RenderLineSeries
-                                            key={series.pond}
-                                            data={series.data}
-                                            color={POND_COLORS[series.pond] || '#999'}
+                                            key={s.pond}
+                                            data={s.data}
+                                            color={pondColors[s.pond] || '#999'}
                                             strokeWidth={2}
                                         />
                                     ))}
                                 </Svg>
                             </View>
-
-                            {/* Dots */}
-                            {/* Dots removed */}
 
                             {/* Text Label Container */}
                             <View
@@ -332,13 +348,11 @@ export default function EnvChar({ selected = 'pH' }: EnvCharProps) {
                                 pointerEvents="none"
                             >
                                 {xTicks.map((d, i) => {
-                                    if (i % 7 !== 0) return null;
+                                    //show label every 7 days + always show last
+                                    const isLast = i === xTicks.length - 1;
+                                    if (i % 7 !== 0 && !isLast) return null;
                                     return (
-                                        <AnimatedLabel
-                                            key={`l-${i}`}
-                                            date={d.date}
-                                            baseX={scaleX(d.date)}
-                                        />
+                                        <AnimatedLabel key={`l-${i}`} date={d} baseX={scaleX(d)} />
                                     );
                                 })}
                             </View>

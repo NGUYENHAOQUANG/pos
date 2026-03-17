@@ -68,7 +68,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
         <>
             <PondInfor />
             <OverView />
-            <CompilationEnvChart />
+            <CompilationEnvChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <GrowthChart />
             <ProdChart
                 zoneId={selectedZoneId?.toString() || ''}
@@ -95,7 +98,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
 
     const renderStandardContent = () => (
         <>
-            <CompilationEnvChart />
+            <CompilationEnvChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}

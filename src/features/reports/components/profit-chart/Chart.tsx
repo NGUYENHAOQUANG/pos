@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Svg, { Line, Path, Text as SvgText } from 'react-native-svg';
 import { colors, spacing } from '@/styles';
 import {
-    CHART_WIDTH,
     PADDING_LEFT,
     PADDING_TOP,
     ProfitLineDataPoint,
@@ -60,19 +59,20 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
         const DIVIDER_DAY = TOTAL_DAYS;
 
         /**
-         * Generate day marks: every ~15 days for better visualization
+         * Generate day marks: fixed 7-day intervals + always show last day
          */
         const generateDayMarks = (totalDays: number): number[] => {
             if (totalDays <= 0) return [0];
 
             const marks: number[] = [];
-            const step = Math.max(1, Math.ceil(totalDays / 6)); // ~7 marks total
+            const step = 7; // Fixed 7-day intervals
 
-            for (let day = 0; day < totalDays; day += step) {
+            for (let day = 0; day <= totalDays; day += step) {
                 marks.push(day);
             }
 
-            if (totalDays - marks[marks.length - 1] > step / 2) {
+            // Always show the last data day
+            if (marks[marks.length - 1] !== totalDays) {
                 marks.push(totalDays);
             }
 
@@ -233,100 +233,143 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
 
     return (
         <View style={styles.chartContainer}>
-            <Svg width={CHART_WIDTH} height={dynamicHeight}>
-                {/* Grid lines (horizontal) */}
-                {getYAxisGridLines().map(value => {
-                    const y = getY(value);
-                    return (
+            <View style={{ flexDirection: 'row', height: dynamicHeight }}>
+                {/* Fixed Y-axis labels */}
+                <Svg width={PADDING_LEFT} height={dynamicHeight}>
+                    {getYAxisLabels().map(value => {
+                        const y = getY(value);
+                        return (
+                            <SvgText
+                                key={`y-label-${value}`}
+                                x={PADDING_LEFT - 4}
+                                y={y + 4}
+                                fill={colors.text}
+                                fontSize={10}
+                                textAnchor="end"
+                            >
+                                {value.toFixed(0)}
+                            </SvgText>
+                        );
+                    })}
+                </Svg>
+
+                {/* Scrollable chart content */}
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingLeft: 10 }}
+                >
+                    <Svg width={chartWidth + PADDING_LEFT + 40} height={dynamicHeight}>
+                        {/* Grid lines (horizontal) */}
+                        {getYAxisGridLines().map(value => {
+                            const y = getY(value);
+                            return (
+                                <Line
+                                    key={`grid-${value}`}
+                                    x1={0}
+                                    y1={y}
+                                    x2={chartWidth + PADDING_LEFT + 40}
+                                    y2={y}
+                                    stroke={colors.gray[200]}
+                                    strokeWidth={1}
+                                />
+                            );
+                        })}
+
+                        {/* Break-even line (Điểm hòa vốn) - dashed red at 0 */}
                         <Line
-                            key={`grid-${value}`}
-                            x1={PADDING_LEFT}
-                            y1={y}
-                            x2={PADDING_LEFT + chartWidth}
-                            y2={y}
-                            stroke={colors.gray[200]}
+                            x1={0}
+                            y1={zeroLineY}
+                            x2={chartWidth + PADDING_LEFT + 40}
+                            y2={zeroLineY}
+                            stroke={colors.red[500]}
                             strokeWidth={1}
+                            strokeDasharray="6 4"
                         />
-                    );
-                })}
 
-                {/* Break-even line (Điểm hòa vốn) - dashed red at 0 */}
-                <Line
-                    x1={PADDING_LEFT}
-                    y1={zeroLineY}
-                    x2={PADDING_LEFT + chartWidth}
-                    y2={zeroLineY}
-                    stroke={colors.red[500]}
-                    strokeWidth={1}
-                    strokeDasharray="6 4"
-                />
-
-                {/* Profit line (smooth bezier curve) */}
-                <Path
-                    d={createProfitLinePath()}
-                    fill="none"
-                    stroke={colors.orange[900]}
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-
-                {/* X-axis tick marks (vertical lines below axis) */}
-                {DAY_MARKS.map(day => {
-                    const x = getX(day);
-                    const axisY = getY(-Y_MAX);
-
-                    return (
-                        <Line
-                            key={`x-tick-${day}`}
-                            x1={x}
-                            y1={axisY}
-                            x2={x}
-                            y2={axisY + 8}
-                            stroke="black"
-                            strokeOpacity={0.25}
-                            strokeWidth={0.5}
+                        {/* Profit line (smooth bezier curve) */}
+                        <Path
+                            d={createProfitLinePath()}
+                            fill="none"
+                            stroke={colors.orange[900]}
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                         />
-                    );
-                })}
 
-                {/* X-axis labels */}
-                {DAY_MARKS.map((day, index) => {
-                    const x = getX(day);
-                    const axisY = getY(-Y_MAX);
-                    const y = axisY + 20;
+                        {/* X-axis tick marks (vertical lines below axis) */}
+                        {DAY_MARKS.map(day => {
+                            const x = getX(day);
+                            const axisY = getY(-Y_MAX);
 
-                    return (
-                        <SvgText
-                            key={`x-label-${day}`}
-                            x={x}
-                            y={y}
-                            fill={colors.text}
-                            fontSize={10}
-                            textAnchor="middle"
-                        >
-                            {DAY_LABELS[index]}
-                        </SvgText>
-                    );
-                })}
+                            return (
+                                <Line
+                                    key={`x-tick-${day}`}
+                                    x1={x}
+                                    y1={axisY}
+                                    x2={x}
+                                    y2={axisY + 8}
+                                    stroke="black"
+                                    strokeOpacity={0.25}
+                                    strokeWidth={0.5}
+                                />
+                            );
+                        })}
 
-                {/* Y-axis labels: show both negative and positive values */}
-                {getYAxisLabels().map(value => {
-                    const y = getY(value);
-                    return (
-                        <SvgText
-                            key={`y-label-${value}`}
-                            x={PADDING_LEFT - 10}
-                            y={y + 4}
-                            fill={colors.text}
-                            fontSize={10}
-                            textAnchor="end"
-                        >
-                            {value.toFixed(0)}
-                        </SvgText>
-                    );
-                })}
-            </Svg>
+                        {/* X-axis labels */}
+                        {DAY_MARKS.map((day, index) => {
+                            const x = getX(day);
+                            const axisY = getY(-Y_MAX);
+                            const y = axisY + 20;
+
+                            return (
+                                <SvgText
+                                    key={`x-label-${day}`}
+                                    x={x}
+                                    y={y}
+                                    fill={colors.text}
+                                    fontSize={12}
+                                    textAnchor="middle"
+                                >
+                                    {DAY_LABELS[index]}
+                                </SvgText>
+                            );
+                        })}
+                    </Svg>
+                </ScrollView>
+            </View>
+
+            {/* Y-axis overlay to hide scrolled content */}
+            <View
+                style={{
+                    position: 'absolute',
+                    left: spacing.md,
+                    top: 0,
+                    width: PADDING_LEFT + 10,
+                    height: dynamicHeight,
+                    backgroundColor: colors.white,
+                    zIndex: 10,
+                }}
+                pointerEvents="none"
+            >
+                <Svg width={PADDING_LEFT + 10} height={dynamicHeight}>
+                    {getYAxisLabels().map(value => {
+                        const y = getY(value);
+                        return (
+                            <SvgText
+                                key={`y-overlay-${value}`}
+                                x={PADDING_LEFT - 4}
+                                y={y + 4}
+                                fill={colors.text}
+                                fontSize={10}
+                                textAnchor="end"
+                            >
+                                {value.toFixed(0)}
+                            </SvgText>
+                        );
+                    })}
+                </Svg>
+            </View>
         </View>
     );
 };
@@ -335,5 +378,6 @@ const styles = StyleSheet.create({
     chartContainer: {
         backgroundColor: colors.white,
         paddingHorizontal: spacing.md,
+        position: 'relative',
     },
 });
