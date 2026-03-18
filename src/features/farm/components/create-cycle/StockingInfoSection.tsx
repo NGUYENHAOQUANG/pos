@@ -11,7 +11,7 @@ import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 
 import { parseDate } from '@/features/farm/utils/dateUtils';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { IconAICheck } from '@/assets/icons';
 
 interface Props {
@@ -149,11 +149,12 @@ const StockingInfoSection: React.FC<Props> = ({
                     )}
                 />
 
-                <OutlineButton
-                    label="Kiểm đếm tôm giống bằng AI"
+                <Button
+                    title="Kiểm đếm tôm giống bằng AI"
+                    variant="outline"
                     onPress={onPressCountingShrimp || (() => {})}
-                    prefix={<IconAICheck width={20} height={20} />}
-                    labelStyle={styles.aiButtonText}
+                    renderLeftIcon={<IconAICheck width={20} height={20} fill={colors.text} />}
+                    fullWidth
                 />
             </View>
         </PondDataBox>
@@ -165,10 +166,5 @@ export default StockingInfoSection;
 const styles = StyleSheet.create({
     inputsWrapper: {
         gap: spacing.md,
-    },
-    aiButtonText: {
-        color: colors.textSecondary,
-        fontSize: 14,
-        fontWeight: '500',
     },
 });
