@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { StatusBar } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -26,6 +26,8 @@ import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/u
 import { useWarehouses, useWarehouseItems } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useMaterialOptions } from '@/features/material/hooks/inventory';
+import { useZones } from '@/features/farm/hooks/useZones';
+import { useAllPondsByZone } from '@/features/farm/hooks/usePonds';
 
 export const ExportWarehouseFormScreen: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -44,7 +46,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
     // Context & Farm Store
     const selectedZoneId = useFarmStore(state => state.selectedZoneId);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setTabBarVisible(false);
         return () => setTabBarVisible(true);
     }, [setTabBarVisible]);
@@ -57,8 +59,19 @@ export const ExportWarehouseFormScreen: React.FC = () => {
         exportReceiptId || ''
     );
 
+    const [activeZoneId, setActiveZoneId] = useState<string>(selectedZoneId || '');
+
+    useEffect(() => {
+        if (isEditMode && detailData?.zoneId) {
+            setActiveZoneId(detailData.zoneId.toString());
+        }
+    }, [isEditMode, detailData?.zoneId]);
+
+    const { data: zones = [], isLoading: isLoadingZones } = useZones();
+    const { data: ponds = [], isLoading: isLoadingPonds } = useAllPondsByZone(activeZoneId);
+
     const { data: warehouses } = useWarehouses({
-        ZoneId: detailData?.zoneId || selectedZoneId || undefined,
+        ZoneId: activeZoneId || undefined,
     });
     const warehouseId = detailData?.warehouseId || warehouses?.[0]?.id;
 
@@ -178,6 +191,11 @@ export const ExportWarehouseFormScreen: React.FC = () => {
                     onSubmit={onSubmit}
                     onDelete={onDelete}
                     onBackPress={handleBackPress}
+                    zones={zones}
+                    ponds={ponds}
+                    isLoadingZones={isLoadingZones}
+                    isLoadingPonds={isLoadingPonds}
+                    onZoneChange={zoneId => setActiveZoneId(zoneId)}
                 />
             </Loading>
         </>

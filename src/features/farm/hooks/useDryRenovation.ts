@@ -56,14 +56,6 @@ export const useDryRenovationsAsJobs = (pondId: string, params?: IDryRenovationP
     return { jobs, isLoading: isQueryLoading || isProcessing, error, refetch };
 };
 
-export const useDryRenovation = (pondId: string, id: string) => {
-    return useQuery({
-        queryKey: farmKeys.dryRenovations.detail(id),
-        queryFn: () => dryRenovationApi.getById(pondId, id),
-        enabled: !!pondId && !!id,
-    });
-};
-
 export const useCreateDryRenovation = () => {
     const queryClient = useQueryClient();
 

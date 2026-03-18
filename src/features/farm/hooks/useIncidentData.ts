@@ -33,15 +33,6 @@ export const useCreateIncident = () => {
     });
 };
 
-/** Fetch incident detail by id (GET /pond/{pondId}/incident/{id}) – for edit screen */
-export const useIncidentDetail = (pondId: string, incidentId: string | undefined) => {
-    return useQuery({
-        queryKey: [...farmKeys.incident.byPond(pondId || ''), 'detail', incidentId],
-        queryFn: () => incidentApi.getDetail(pondId, incidentId!),
-        enabled: !!pondId && !!incidentId,
-    });
-};
-
 /** Delete incident (DELETE /pond/{pondId}/incident/{id}) */
 export const useDeleteIncident = () => {
     const queryClient = useQueryClient();

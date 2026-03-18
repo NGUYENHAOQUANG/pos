@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
-import { environmentApi } from '@/features/farm/api/environmentApi';
 import { environmentSettingApi } from '@/features/farm/api/enviromentSettingApi';
 import { handleError } from '@/shared/utils/errorHandler';
 import {
@@ -11,14 +10,6 @@ import {
 import { farmKeys } from '@/features/farm/hooks/farmKeys';
 import { envMeasurementKeys } from '@/features/farm/hooks/useEnvMeasurement';
 import { useEnvironmentSettingStore } from '@/features/farm/store/environmentSettingStore';
-
-export const useEnvironmentMetricTypes = () => {
-    return useQuery({
-        queryKey: farmKeys.environment.metricTypes(),
-        queryFn: environmentApi.getEnvMetricTypes,
-        staleTime: 1000 * 60 * 60,
-    });
-};
 
 export const useEnvironmentSettings = (zoneId: string) => {
     return useQuery({
@@ -86,10 +77,6 @@ export const useDeleteEnvironmentSetting = () => {
     });
 };
 
-/**
- * Batch save all pending environment setting changes (create + update).
- * Reads from environmentSettingStore, executes mutations, clears on success.
- */
 export const useSaveEnvironmentSettings = (zoneId: string) => {
     const createSetting = useCreateEnvironmentSetting();
     const updateSetting = useUpdateEnvironmentSetting();

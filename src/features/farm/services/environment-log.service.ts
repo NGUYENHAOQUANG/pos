@@ -1,7 +1,10 @@
 import { ENVIRONMENT_METRIC_IDS } from '@/features/farm/types/farm.types';
-import { EnvMetricType } from '@/features/farm/api/environmentApi';
-import { IEnvMeasurement, IEnvMeasurementDetail } from '@/features/farm/types/envMeasurement.types';
-import { ActivityData } from '@/features/farm/components/ActivityCard';
+import type { EnvMetricType } from '@/features/farm/types/environment.types';
+import type {
+    IEnvMeasurement,
+    IEnvMeasurementDetail,
+} from '@/features/farm/types/envMeasurement.types';
+import type { ActivityData } from '@/features/farm/components/ActivityCard';
 import { TrackingGroup, TimelineActivity } from '@/features/farm/components/TrackingList';
 
 const METRIC_DISPLAY: Record<string, { label: string; unit: string }> = {

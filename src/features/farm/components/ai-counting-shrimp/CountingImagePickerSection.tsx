@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
+
 import { launchImageLibrary, ImagePickerResponse, Asset } from 'react-native-image-picker';
 import { Image as ImageCompressor } from 'react-native-compressor';
 import RNFS from 'react-native-fs';
@@ -7,7 +9,7 @@ import { colors, spacing, typography } from '@/styles';
 import EmptyStateIcon from '@/assets/Icon/EmptyStateIcon.svg';
 import { IconCamera } from '@/assets/icons';
 import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
-import { CountingPickerSheet } from '@/features/farm/components/ai-counting-shrimp/CountingPickerSheet';
+import { AIImagePickerSheet } from '@/features/farm/components/ai-common/AIImagePickerSheet';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -109,7 +111,7 @@ export const CountingImagePickerSection: React.FC<CountingImagePickerSectionProp
             />
 
             {/* Custom bottom sheet */}
-            <CountingPickerSheet
+            <AIImagePickerSheet
                 visible={sheetVisible}
                 onClose={() => setSheetVisible(false)}
                 onOpenCamera={onOpenCamera}

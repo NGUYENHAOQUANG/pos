@@ -2,11 +2,11 @@ import { formatDate } from '@/features/farm/utils/dateUtils';
 import { mapOperationTypeToJobType } from '@/features/farm/utils/operationTypeMapping';
 import { mapFromApiResponse as mapShrimpHealthAndEnv } from '@/features/farm/utils/shrimpHealthCheckMapper';
 import { JOB_CONFIG, JobType } from '@/features/farm/components/pondwork/JobItem';
-import type { ActivityData } from '@/features/farm/components/ActivityCard';
-import type { TimelineActivity } from '@/features/farm/components/TrackingList';
-import type { EnvMetricType } from '@/features/farm/api/environmentApi';
-import type { JobExecution } from '@/features/farm/types/farm.types';
-import type { HarvestType } from '@/features/farm/types/harvestRecord.types';
+import { ActivityData } from '@/features/farm/components/ActivityCard';
+import { TimelineActivity } from '@/features/farm/components/TrackingList';
+import { EnvMetricType } from '@/features/farm/types/environment.types';
+import { JobExecution } from '@/features/farm/types/farm.types';
+import { HarvestType } from '@/features/farm/types/harvestRecord.types';
 import type {
     IPondRecordItem,
     IPondRecordReferenceData,

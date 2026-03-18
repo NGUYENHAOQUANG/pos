@@ -50,7 +50,7 @@ export const ImportReceiptFormScreen: React.FC = () => {
         ZoneId: selectedZoneId || undefined,
     });
     const { data: materialsData = [] } = useMaterials({
-        PageSize: 1000,
+        PageSize: 50,
         OrderBy: 'CreatedAt desc',
     });
     const { data: suppliers = [] } = useSuppliers();

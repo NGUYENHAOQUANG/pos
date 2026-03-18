@@ -29,11 +29,6 @@ export interface IWaterSupplyRecord {
     };
 }
 
-export interface IWaterSupplyRecordResponse {
-    items: IWaterSupplyRecord[];
-    totalCount: number;
-}
-
 /** Query params for water change list – matches Swagger /api/v1/pond/{pondId}/water-changes */
 export interface IWaterSupplyParams {
     PondId?: string;

@@ -3,7 +3,7 @@ import { View, StyleSheet, Platform, LayoutAnimation, UIManager } from 'react-na
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { borderRadius, colors, spacing } from '@/styles';
 import { DropdownMaterial, DropdownOption } from '../DropdownMaterial';
-import { useFarmStore } from '@/features/farm/store/farmStore';
+
 import { DateInputButton } from '@/features/farm/components/pondwork/DateInputButton';
 import { formatMaterialDate } from '@/features/material/utils/dateUtils';
 
@@ -18,6 +18,10 @@ interface ExportWarehouseInformationProps {
     onZoneChange: (value: string) => void;
     selectedPond: string;
     onPondChange: (value: string) => void;
+    zones: any[];
+    ponds: any[];
+    isLoadingZones?: boolean;
+    isLoadingPonds?: boolean;
     children?: React.ReactNode;
 }
 
@@ -28,56 +32,37 @@ export const ExportWarehouseInformation: React.FC<ExportWarehouseInformationProp
     onZoneChange,
     selectedPond,
     onPondChange,
+    zones,
+    ponds,
+    isLoadingZones,
+    isLoadingPonds,
     children,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-    // Get zones and ponds from form store
-    const zones = useFarmStore(state => state.zones);
-    const ponds = useFarmStore(state => state.ponds);
-    const fetchZones = useFarmStore(state => state.fetchZones);
-    const fetchPondsByZone = useFarmStore(state => state.fetchPondsByZone);
-    const isLoadingZones = useFarmStore(state => state.isLoadingZones);
-    const isLoadingPonds = useFarmStore(state => state.isLoadingPonds);
-
-    // Fetch initial data (Zones)
-    useEffect(() => {
-        if (zones.length === 0) fetchZones();
-    }, [zones.length, fetchZones]);
-
-    // Fetch ponds when selectedZone changes
-    useEffect(() => {
-        if (selectedZone) {
-            fetchPondsByZone(selectedZone);
-        }
-    }, [selectedZone, fetchPondsByZone]);
-
     // Auto-select "Trại Kiên Giang" or first zone if available and none selected
     useEffect(() => {
         if (!selectedZone && zones.length > 0) {
             const defaultZone =
-                zones.find(z => z.name.toLowerCase().includes('kiên giang')) || zones[0];
+                zones.find((z: any) => z.name.toLowerCase().includes('kiên giang')) || zones[0];
             onZoneChange(defaultZone.id.toString());
         }
     }, [zones, selectedZone, onZoneChange]);
 
     // Zones Dropdown Options
     const zoneOptions: DropdownOption[] = useMemo(() => {
-        return zones.map(z => ({
+        return zones.map((z: any) => ({
             label: z.name,
             value: z.id.toString(),
         }));
     }, [zones]);
 
-    // Filter Ponds based on selected Zone
-    // Filter Ponds based on selected Zone
+    // Ponds dropdown map
     const pondOptions: DropdownOption[] = useMemo(() => {
-        if (!selectedZone) return [];
+        if (!selectedZone || ponds.length === 0) return [];
 
-        const filteredPonds = ponds.filter(p => p.zoneId?.toString() === selectedZone);
-
-        return filteredPonds.map(p => ({
+        return ponds.map(p => ({
             label: p.name,
             value: p.id,
         }));

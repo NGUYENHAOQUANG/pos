@@ -41,6 +41,11 @@ export interface ExportWarehouseFormProps {
     onSubmit: (data: ExportWarehouseFormValues, isDraft: boolean) => void;
     onDelete?: () => void;
     onBackPress: () => void;
+    zones: any[];
+    ponds: any[];
+    isLoadingZones?: boolean;
+    isLoadingPonds?: boolean;
+    onZoneChange: (zoneId: string) => void;
 }
 
 export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
@@ -53,6 +58,11 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
     onSubmit,
     onDelete,
     onBackPress,
+    zones,
+    ponds,
+    isLoadingZones,
+    isLoadingPonds,
+    onZoneChange,
 }) => {
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
@@ -230,13 +240,18 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
                             date={watchedForm.date ?? new Date()}
                             onDateChange={val => setValue('date', val, { shouldValidate: true })}
                             selectedZone={watchedForm.selectedZone ?? ''}
-                            onZoneChange={val =>
-                                setValue('selectedZone', val, { shouldValidate: true })
-                            }
+                            onZoneChange={val => {
+                                setValue('selectedZone', val, { shouldValidate: true });
+                                onZoneChange(val);
+                            }}
                             selectedPond={watchedForm.selectedPond ?? ''}
                             onPondChange={val =>
                                 setValue('selectedPond', val, { shouldValidate: true })
                             }
+                            zones={zones}
+                            ponds={ponds}
+                            isLoadingZones={isLoadingZones}
+                            isLoadingPonds={isLoadingPonds}
                         >
                             {isEditMode && creatorName ? (
                                 <Input

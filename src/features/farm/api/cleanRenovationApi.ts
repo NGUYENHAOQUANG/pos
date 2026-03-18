@@ -4,7 +4,6 @@ import {
     ICleanRenovationResponse,
     ICleanRenovationDetail,
     ICleanRenovationParams,
-    ICleanRenovationDetailResponse,
     ICleanRenovationCreateResponse,
     ICleanRenovationUpdateResponse,
     ICleanRenovationDeleteResponse,

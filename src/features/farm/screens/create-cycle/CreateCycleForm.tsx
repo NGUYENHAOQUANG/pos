@@ -4,12 +4,12 @@ import { View, StyleSheet } from 'react-native';
 import { colors, spacing } from '@/styles';
 import { BreedOption, PondData } from '@/features/farm/types/farm.types';
 
-import { Control } from 'react-hook-form';
+import { Control, Controller, useWatch } from 'react-hook-form';
 import { CreateCycleFormValues } from '@/features/farm/schemas/createCycleSchema';
 
 import BreedAndSeasonSection from '@/features/farm/components/create-cycle/BreedAndSeasonSection';
 import StockingInfoSection from '@/features/farm/components/create-cycle/StockingInfoSection';
-import CreateCycleNotesSection from '@/features/farm/components/create-cycle/CreateCycleNotesSection';
+import { SelectionNotesBox } from '@/features/farm/components/SelectionNotesBox';
 
 interface Props {
     control: Control<CreateCycleFormValues>;
@@ -30,6 +30,8 @@ const CreateCycleForm: React.FC<Props> = ({
     seasonOptions,
     onPressCountingShrimp,
 }) => {
+    const activeNotes = useWatch({ control, name: 'notes' });
+
     return (
         <View style={styles.container}>
             <BreedAndSeasonSection
@@ -48,7 +50,13 @@ const CreateCycleForm: React.FC<Props> = ({
                 onPressCountingShrimp={onPressCountingShrimp}
             />
 
-            <CreateCycleNotesSection control={control} />
+            <Controller
+                control={control}
+                name="notes"
+                render={({ field: { onChange } }) => (
+                    <SelectionNotesBox notes={activeNotes || ''} onNotesChange={onChange} />
+                )}
+            />
         </View>
     );
 };

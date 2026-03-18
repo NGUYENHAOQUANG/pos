@@ -33,6 +33,7 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ visibl
                         onPress={onConfirm}
                         fullWidth
                         style={styles.button}
+                        adjustsFontSizeToFit={false}
                     />
                 </View>
             </View>

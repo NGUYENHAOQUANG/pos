@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { feedingRecordApi } from '@/features/farm/api/feedingRecordApi';
 import {
@@ -16,19 +15,6 @@ import type {
 import { useFarmMaterials } from '@/features/farm/hooks/useFarmMaterials';
 import { feedingService } from '@/features/farm/services/feeding.service';
 import { handleError } from '@/shared/utils';
-
-export const useFeeding = () => {
-    const { materials: allMaterials, isLoading } = useFarmMaterials();
-
-    const materials = useMemo(() => {
-        return feedingService.filterFeedingMaterials(allMaterials);
-    }, [allMaterials]);
-
-    return {
-        materials,
-        isLoading,
-    };
-};
 
 export const useFeedingRecords = (pondId: string, params?: FeedingRecordListParams) => {
     return useQuery({

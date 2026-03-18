@@ -21,7 +21,6 @@ export interface PondListStore {
         zoneId: string,
         updates?: { isBackground?: boolean; isLoadMore?: boolean }
     ) => Promise<void>;
-    fetchMasterData: () => Promise<void>;
 
     getPondById: (pondId: string) => PondData | undefined;
     getOperationsForPond: (pondId: string) => PondTypeOperation[];
