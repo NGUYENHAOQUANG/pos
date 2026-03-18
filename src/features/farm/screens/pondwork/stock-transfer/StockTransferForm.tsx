@@ -19,7 +19,6 @@ import type { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll
 export interface StockTransferFormProps {
     shrimpBreed?: string;
     totalShrimpCount: number;
-    actualStockingQuantity?: number;
     latestShrimpSize?: string;
     pondOptions: DropdownOption[];
     isSubmitting: boolean;
@@ -38,7 +37,6 @@ export interface StockTransferFormData {
 export const StockTransferForm: React.FC<StockTransferFormProps> = ({
     shrimpBreed,
     totalShrimpCount,
-    actualStockingQuantity,
     latestShrimpSize,
     pondOptions,
     isSubmitting,
@@ -129,7 +127,6 @@ export const StockTransferForm: React.FC<StockTransferFormProps> = ({
                     shrimpSize={shrimpSize}
                     onShrimpSizeChange={setShrimpSize}
                     totalEstimatedShrimp={totalShrimpCount}
-                    actualStockingQuantity={actualStockingQuantity}
                 />
 
                 <View

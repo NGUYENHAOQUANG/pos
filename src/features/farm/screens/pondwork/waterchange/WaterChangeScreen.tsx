@@ -205,18 +205,21 @@ export const WaterSupplyScreen = () => {
         // V_total = S * (H_target / 100)
         const V_total = S * (H_target / 100);
 
+        // Helper: round to max 5 decimal places to avoid floating-point precision issues
+        const round5 = (v: number) => parseFloat(v.toFixed(5));
+
         return {
             // Mực nước xả xuống (cm)
-            drainLevel: H_base >= 0 ? H_base.toString() : '0',
+            drainLevel: H_base >= 0 ? round5(H_base).toString() : '0',
 
             // Thể tích sau xả (m3)
-            volumeAfterDrain: V_base > 0 ? V_base.toString() : '0',
+            volumeAfterDrain: V_base > 0 ? round5(V_base).toString() : '0',
 
             // Thể tích nước cấp vào (m3)
-            volumeSupply: V_add.toString(),
+            volumeSupply: round5(V_add).toString(),
 
             // Thể tích nước sau cấp (m3)
-            volumeAfterSupply: V_total.toString(),
+            volumeAfterSupply: round5(V_total).toString(),
         };
     }, [targetLevel, supplyLevel, pond]);
 
