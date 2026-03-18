@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
-import { VLCPlayer } from 'react-native-vlc-media-player';
+import { VlCPlayerView } from 'react-native-vlc-media-player';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
 import Animated, {
@@ -91,13 +91,22 @@ export const VideoPlayerScreen: React.FC = () => {
         Orientation.addOrientationListener(onOrientation);
 
         // Small delay to let the black screen render before rotating
+        let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
         const timer = setTimeout(() => {
             Orientation.lockToLandscape();
+
+            // Fallback: If orientation event doesn't fire, forcefully show UI anyway
+            fallbackTimer = setTimeout(() => {
+                if (isMountedRef.current) {
+                    setIsReady(true);
+                }
+            }, 600);
         }, 50);
 
         return () => {
             isMountedRef.current = false;
             clearTimeout(timer);
+            if (fallbackTimer) clearTimeout(fallbackTimer);
             Orientation.removeOrientationListener(onOrientation);
             StatusBar.setHidden(false);
             Orientation.lockToPortrait();
@@ -122,6 +131,23 @@ export const VideoPlayerScreen: React.FC = () => {
 
     // Video ref
     const videoRef = useRef<any>(null);
+    // VLC player ref for proper cleanup
+    const vlcRef = useRef<any>(null);
+
+    // Cleanup: stop VLC player and pause Video on unmount to prevent memory leaks
+    useEffect(() => {
+        const vlcPlayer = vlcRef.current;
+        return () => {
+            // Stop VLC native player to release RTSP stream & decoder buffers
+            if (vlcPlayer) {
+                try {
+                    vlcPlayer.stopPlayer?.();
+                } catch (_e) {
+                    // Ignore errors during cleanup
+                }
+            }
+        };
+    }, []);
 
     // State
     const [paused, setPaused] = useState(false);
@@ -311,12 +337,17 @@ export const VideoPlayerScreen: React.FC = () => {
                 {/* Video with pinch-to-zoom scale */}
                 <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
                     {isLiveStream ? (
-                        <VLCPlayer
+                        <VlCPlayerView
+                            ref={vlcRef}
                             source={{ uri: videoUrl }}
                             style={styles.video}
                             paused={paused}
-                            onBuffering={() => setIsBuffering(true)}
-                            onPlaying={() => setIsBuffering(false)}
+                            onBuffering={() => {
+                                if (isMountedRef.current) setIsBuffering(true);
+                            }}
+                            onPlaying={() => {
+                                if (isMountedRef.current) setIsBuffering(false);
+                            }}
                             autoplay={true}
                         />
                     ) : (
