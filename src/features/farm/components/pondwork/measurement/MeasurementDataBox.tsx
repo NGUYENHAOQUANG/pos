@@ -24,7 +24,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
     onRemainingWeightChange,
     stockingQuantity,
     onAIMeasurePress,
-    averageSizeCm,
+    averageSizeCm: _averageSizeCm,
 }) => {
     const [totalShrimp, setTotalShrimp] = useState<number | null>(null);
     const [survivalRate, setSurvivalRate] = useState<number | null>(null);
@@ -59,16 +59,16 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
         // Result box in the screenshot only shows Total Shrimp and Survival Rate
 
-        items.push({
-            label: 'Trung bình kích thước tôm (cm)',
-            value:
-                averageSizeCm !== undefined && averageSizeCm !== null
-                    ? averageSizeCm.toLocaleString('en-US', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                      })
-                    : '-',
-        });
+        // items.push({
+        //     label: 'Trung bình kích thước tôm (cm)',
+        //     value:
+        //         averageSizeCm !== undefined && averageSizeCm !== null
+        //             ? averageSizeCm.toLocaleString('en-US', {
+        //                   minimumFractionDigits: 2,
+        //                   maximumFractionDigits: 2,
+        //               })
+        //             : '-',
+        // });
 
         items.push({
             label: 'Tổng số tôm hiện tại (con)',
@@ -86,7 +86,7 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         });
 
         return items;
-    }, [totalShrimp, survivalRate, averageSizeCm]);
+    }, [totalShrimp, survivalRate]);
 
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>

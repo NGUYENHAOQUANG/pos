@@ -66,9 +66,17 @@ const calculateScale = (values: number[]): ProdChartScale => {
 
     const yMax = Math.max(step, Math.ceil((maxVal * 1.1) / step) * step);
 
+    const formatLabel = (value: number): string => {
+        if (value === 0) return '0';
+        if (value >= 1000000000) return `${(value / 1000000000).toFixed(1).replace(/\.0$/, '')} Tỷ`;
+        if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')} Triệu`;
+        if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')} Nghìn`;
+        return Math.round(value).toString();
+    };
+
     const labels: string[] = [];
     for (let v = 0; v <= yMax + 0.1; v += step) {
-        labels.push(Math.round(v).toString());
+        labels.push(formatLabel(Math.round(v)));
     }
 
     const yLabels = [...labels].reverse();

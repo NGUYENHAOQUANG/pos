@@ -11,15 +11,15 @@
  * Use font file name without extension (works on both iOS and Android)
  */
 export const fontFamily = {
-    thin: 'GoogleSansFlex_120pt-Thin',
-    extraLight: 'GoogleSansFlex_120pt-ExtraLight',
-    light: 'GoogleSansFlex_120pt-Light',
-    regular: 'GoogleSansFlex_120pt-Regular',
-    medium: 'GoogleSansFlex_120pt-Medium',
-    semiBold: 'GoogleSansFlex_120pt-SemiBold',
-    bold: 'GoogleSansFlex_120pt-Bold',
-    extraBold: 'GoogleSansFlex_120pt-ExtraBold',
-    black: 'GoogleSansFlex_120pt-Black',
+    thin: 'GoogleSansFlex120pt-Thin',
+    extraLight: 'GoogleSansFlex120pt-ExtraLight',
+    light: 'GoogleSansFlex120pt-Light',
+    regular: 'GoogleSansFlex120pt-Regular',
+    medium: 'GoogleSansFlex120pt-Medium',
+    semiBold: 'GoogleSansFlex120pt-SemiBold',
+    bold: 'GoogleSansFlex120pt-Bold',
+    extraBold: 'GoogleSansFlex120pt-ExtraBold',
+    black: 'GoogleSansFlex120pt-Black',
 } as const;
 
 export type FontFamily = typeof fontFamily;

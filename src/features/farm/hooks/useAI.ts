@@ -1,15 +1,11 @@
-/**
- * @file useAI.ts
- * @description React Query hooks for AI features
- */
 import { useMutation, UseMutationResult } from '@tanstack/react-query';
-import {
-    aiApi,
+import { aiApi } from '@/features/farm/api/aiApi';
+import type {
+    AIPredictRequest,
     SeedstockCountingResponse,
     EstimatedSizeResponse,
     ShrimpHealthResponse,
-    AIPredictRequest,
-} from '@/features/farm/api/aiApi';
+} from '@/features/farm/types/ai.types';
 import { handleError } from '@/shared/utils/errorHandler';
 
 export const useCountSeedstock = (): UseMutationResult<

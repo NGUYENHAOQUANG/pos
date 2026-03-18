@@ -23,21 +23,6 @@ export interface PaginatedResponse<T> {
     limit: number;
     totalPages: number;
 }
-
-export interface ApiResponse<T> {
-    success: boolean;
-    data: T;
-    message?: string;
-}
-
-export interface ApiErrorResponse {
-    success: false;
-    message: string;
-    errors?: Record<string, string[]>;
-}
-
-// ============ New Standard Types (V2/Common) ============
-
 export interface IPaginate<T> {
     items: T[];
     pageNumber: number;
@@ -63,6 +48,49 @@ export interface IDocument {
     fileName?: string;
     filePath?: string;
     publicUrl?: string;
+}
+
+export enum StorageType {
+    Unspecified = 'Unspecified',
+    Local = 'Local',
+    External = 'External',
+    S3 = 'S3',
+    Azure = 'Azure',
+}
+
+export interface IDocumentV2 {
+    id: string;
+    no: number;
+    fileName: string;
+    filePath: string;
+    thumbnailPath: string | null;
+    parentId: string | null;
+    parentType: string | null;
+    storageType: StorageType | string;
+    contentType: string;
+    size: number;
+    publicUrl: string;
+    concurrencyStamp: string;
+    domainEvents: unknown[];
+    createdAt: string;
+    createdBy: string;
+    updatedAt: string;
+    updatedBy: string | null;
+    isDeleted: boolean;
+    deletedAt: string | null;
+    deletedBy: string | null;
+}
+
+export interface IDocumentV2Response {
+    documents: IDocumentV2[];
+    id: string;
+    no: number;
+    creatorId: string | null;
+    editorId: string | null;
+    createdAt: string;
+    editedAt: string;
+    creator: string | null;
+    editor: string | null;
 }
 
 /** Creator/Editor info from API  */

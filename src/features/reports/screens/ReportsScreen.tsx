@@ -48,8 +48,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
         pondTypeData,
         selectedPondType,
         handleSelectPondType,
-        allPondsForLookup,
-        rawCycles,
     } = useReportsScreen();
 
     const handleRightPress = () => {
@@ -94,7 +92,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
             />
         </>
     );
@@ -134,13 +131,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
             />
             <HarvestStat
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
-                cycles={rawCycles?.data?.items}
             />
         </>
     );

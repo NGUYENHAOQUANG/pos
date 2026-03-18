@@ -11,13 +11,13 @@ import { Loading } from '@/shared/components/ui/Loading';
 import { TransferItemCard } from './TransferItemCard';
 import { useInfiniteStockTransferStats } from '@/features/reports/hooks/useStockTransferStats';
 import chartStyles from '@/features/reports/styles/chart.styles';
-import PondTransferIcon from '@/assets/Icon/IconReport/PondTransferIcon.svg';
+import HarvestStatIcon from '@/assets/Icon/IconReport/HarvestStatIcon.svg';
 import { PondTransferProps } from '@/features/reports/types/stock-transfer-stats';
 
 // Wrap item with React.memo for performance
 const MemoizedTransferItemCard = React.memo(TransferItemCard);
 
-export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycleId, ponds }) => {
+export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycleId }) => {
     const [isSectionOpen, setIsSectionOpen] = React.useState(false);
 
     const { dataList, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
@@ -25,7 +25,6 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
             ZoneId: zoneId,
             Id: pondId,
             CycleId: cycleId,
-            ponds,
             enabled: isSectionOpen,
         });
 
@@ -42,8 +41,8 @@ export const PondTransfer: React.FC<PondTransferProps> = ({ zoneId, pondId, cycl
     return (
         <View style={chartStyles.container}>
             <BasicDropDownButton
-                prefixIcon={<PondTransferIcon width={16} height={16} />}
-                label="THỐNG KÊ SANG AO"
+                prefixIcon={<HarvestStatIcon width={16} height={16} />}
+                label="Thống kê sang ao"
                 style={styles.sectionHeader}
                 onPress={toggleSection}
                 isExpanded={isSectionOpen}

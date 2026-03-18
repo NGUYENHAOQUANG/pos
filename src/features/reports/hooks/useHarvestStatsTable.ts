@@ -7,8 +7,6 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { reportApi } from '../api/reportApi';
 import { HarvestStatsTableParams, HarvestRecord } from '../types/harvest-stats-table';
 import { APP_CONFIG } from '@/shared/constants/config';
-import { PondData } from '@/features/farm/types/pond.types';
-import { CycleData } from '@/features/farm/types/cycle.types';
 
 // Standard query hook (kept for backward compatibility)
 export const useHarvestStatsTable = (params: HarvestStatsTableParams & { enabled?: boolean }) => {
@@ -29,23 +27,27 @@ interface UseInfiniteHarvestStatsParams {
     ZoneId: string;
     Id?: string;
     CycleId?: string;
-    ponds?: PondData[];
-    cycles?: CycleData[];
     enabled?: boolean;
 }
 
-/** Extended HarvestRecord with resolved pond/cycle names */
+/** Extended HarvestRecord with formatted date for display */
 export interface HarvestRecordWithNames extends HarvestRecord {
-    pondName: string;
-    cycleName?: string;
+    /** Formatted harvest date as dd/MM/yyyy */
+    formattedDate: string;
 }
+
+const formatHarvestDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
 
 export const useInfiniteHarvestStatsTable = ({
     ZoneId,
     Id,
     CycleId,
-    ponds,
-    cycles,
     enabled = true,
 }: UseInfiniteHarvestStatsParams) => {
     const pageSize = APP_CONFIG.DEFAULT_PAGE_SIZE;
@@ -58,7 +60,7 @@ export const useInfiniteHarvestStatsTable = ({
                 ZoneId,
                 Id,
                 CycleId,
-                PageNumber: pageParam,
+                Page: pageParam,
                 PageSize: pageSize,
             });
         },
@@ -70,46 +72,20 @@ export const useInfiniteHarvestStatsTable = ({
         enabled: enabled && !!ZoneId,
     });
 
-    // Create Maps for O(1) lookup
-    const pondMap = React.useMemo(() => new Map(ponds?.map(p => [p.code, p.name]) || []), [ponds]);
-
-    const pondIdMap = React.useMemo(() => new Map(ponds?.map(p => [p.id, p.name]) || []), [ponds]);
-
-    const cycleCodeMap = React.useMemo(
-        () => new Map(cycles?.map(c => [c.code, c.name]) || []),
-        [cycles]
-    );
-
-    const cycleIdMap = React.useMemo(
-        () => new Map(cycles?.map(c => [c.id, c.name]) || []),
-        [cycles]
-    );
-
-    // Flatten pages into a single array with resolved names
+    // Flatten pages into a single array with formatted date
     const dataList: HarvestRecordWithNames[] = React.useMemo(() => {
         if (!query.data) return [];
-
-        const getPondName = (code: string | null): string => {
-            if (!code) return 'N/A';
-            return pondMap.get(code) || pondIdMap.get(code) || code;
-        };
-
-        const getCycleName = (code: string | null): string | undefined => {
-            if (!code) return undefined;
-            return cycleCodeMap.get(code) || cycleIdMap.get(code) || undefined;
-        };
 
         return query.data.pages.reduce<HarvestRecordWithNames[]>((acc, page) => {
             const items = page.data?.items || [];
             const mapped = items.map((record: HarvestRecord) => ({
                 ...record,
-                pondName: getPondName(record.pondCode),
-                cycleName: getCycleName(record.cycleCode),
+                formattedDate: formatHarvestDate(record.harvestDate),
             }));
             acc.push(...mapped);
             return acc;
         }, []);
-    }, [query.data, pondMap, pondIdMap, cycleCodeMap, cycleIdMap]);
+    }, [query.data]);
 
     return {
         dataList,

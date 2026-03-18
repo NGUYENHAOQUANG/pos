@@ -1,5 +1,6 @@
 import { apiClient } from '@/core/api/client';
 import { API_ENDPOINTS } from '@/core/api/endpoints';
+import { StorageType, IDocumentV2Response, IApiResponse } from '@/shared/types/common.types';
 
 export interface DocumentResponse {
     id: string;
@@ -64,6 +65,53 @@ export const documentApi = {
         }
 
         return [];
+    },
+
+    /**
+     * Upload documents (V2) – returns full IDocumentV2Response.
+     */
+    uploadV2: async (
+        files: { uri: string; type?: string; name?: string }[],
+        storageType: StorageType = StorageType.Azure
+    ): Promise<IDocumentV2Response> => {
+        const formData = new FormData();
+
+        files.forEach(file => {
+            const fileName = file.name || file.uri.split('/').pop() || `file_${Date.now()}`;
+            formData.append('Files', {
+                uri: file.uri,
+                type: file.type || 'application/octet-stream',
+                name: fileName,
+            } as any);
+        });
+
+        formData.append('StorageType', storageType);
+
+        const { data } = await apiClient.post<IApiResponse<IDocumentV2Response>>(
+            API_ENDPOINTS.DOCUMENT.UPLOAD,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+
+        if (data?.success && data.data) {
+            return data.data;
+        }
+
+        return {
+            documents: [],
+            id: '',
+            no: 0,
+            creatorId: null,
+            editorId: null,
+            createdAt: '',
+            editedAt: '',
+            creator: null,
+            editor: null,
+        };
     },
 
     getUrl: async (id: string): Promise<string> => {
