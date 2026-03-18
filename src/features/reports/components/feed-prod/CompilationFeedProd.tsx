@@ -75,6 +75,7 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                                 production={formatMetricValue(getLatestProduction())}
                                 consumed={formatMetricValue(getLatestConsumed())}
                                 fcr={formatFCR(getLatestFCR())}
+                                cardVariant="prodSummary"
                             />
                             {chartDataList.length > 0 ? (
                                 <Chart

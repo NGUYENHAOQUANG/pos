@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     titleProd: {
-        fontSize: 13,
+        fontSize: 14,
+        fontWeight: '400',
         marginBottom: 6,
     },
     valueRow: {
@@ -93,15 +94,16 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     valueNumberProd: {
-        fontSize: 18,
+        fontSize: 16,
+        fontWeight: '700',
     },
     valueUnit: {
         fontSize: 12,
         color: colors.textSecondary,
-        fontWeight: '400',
+        fontWeight: '500',
         marginLeft: 4,
     },
     valueUnitProd: {
-        fontSize: 13,
+        fontSize: 14,
     },
 });
