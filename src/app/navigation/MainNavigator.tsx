@@ -1,16 +1,15 @@
-/**
- * @file MainNavigator.tsx
- * @description Main Tab Navigator - Only contains main screens for each tab
- * Tab Bar is always visible here. Detail screens are in AppStack (outside tabs).
- * Following Partner pattern.
- * @author Kindy
- * @created 2025-11-16
- * @updated 2025-01-07
- */
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
+import {
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    Animated,
+    LayoutChangeEvent,
+    Platform,
+} from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import LinearGradient from 'react-native-linear-gradient';
+import { LiquidGlassView, isLiquidGlassSupported } from '@callstack/liquid-glass';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import BottomBarContext, { BottomBarProvider } from '@/app/navigation/BottomBarContext';
@@ -188,19 +187,9 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
     const innerWidth = Math.max(0, barWidth - 10);
     const tabWidth = innerWidth > 0 ? innerWidth / state.routes.length : 0;
 
-    const tabBarContent = (
-        <View
-            onLayout={e => {
-                handleLayout(e);
-                onBarLayout(e);
-            }}
-            style={[
-                styles.bottomContainer,
-                {
-                    marginBottom: insets.bottom + 4,
-                },
-            ]}
-        >
+    // Tab bar items shared between glass and fallback
+    const tabBarItems = (
+        <>
             {barWidth > 0 && (
                 <Animated.View
                     style={[
@@ -250,12 +239,49 @@ const CustomTabBar = ({ state, navigation }: BottomTabBarProps) => {
                     />
                 );
             })}
+        </>
+    );
+
+    const useGlass = Platform.OS === 'ios' && isLiquidGlassSupported;
+
+    const tabBarContent = useGlass ? (
+        <LiquidGlassView
+            effect="clear"
+            tintColor="rgba(173, 173, 173, 0.13)"
+            onLayout={e => {
+                handleLayout(e);
+                onBarLayout(e);
+            }}
+            style={[
+                styles.bottomContainer,
+                {
+                    marginBottom: insets.bottom + 4,
+                    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                },
+            ]}
+        >
+            {tabBarItems}
+        </LiquidGlassView>
+    ) : (
+        <View
+            onLayout={e => {
+                handleLayout(e);
+                onBarLayout(e);
+            }}
+            style={[
+                styles.bottomContainer,
+                {
+                    marginBottom: insets.bottom + 4,
+                },
+            ]}
+        >
+            {tabBarItems}
         </View>
     );
 
     return (
         <View style={styles.tabBarWrapper}>
-            {/* Multi-stop gradient to simulate frosted glass effect */}
+            {/* Fade gradient below tab bar - always visible */}
             <LinearGradient
                 colors={[
                     colors.fade[0],
@@ -304,17 +330,23 @@ const styles = StyleSheet.create({
     },
     bottomContainer: {
         flexDirection: 'row',
-        backgroundColor: 'white',
+        backgroundColor: Platform.OS === 'ios' && isLiquidGlassSupported ? 'transparent' : 'white',
         borderRadius: borderRadius.full,
-        borderColor: colors.border,
-        borderWidth: 1,
+        borderColor:
+            Platform.OS === 'ios' && isLiquidGlassSupported ? 'transparent' : colors.border,
+        borderWidth: Platform.OS === 'ios' && isLiquidGlassSupported ? 0 : 1,
         marginHorizontal: 16,
         padding: 4,
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: borderRadius.full,
-        elevation: 1,
+        overflow: 'hidden',
+        ...(Platform.OS === 'ios' && isLiquidGlassSupported
+            ? {}
+            : {
+                  shadowColor: colors.black,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: borderRadius.full,
+                  elevation: 1,
+              }),
         zIndex: 1,
     },
     tabBarWrapper: {

@@ -26,9 +26,7 @@ import { useZones, useAllPondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
-import { CameraItem } from '@/features/control/api/cameraApi';
-import { cameraApi } from '@/features/control/api/cameraApi';
-import Toast from 'react-native-toast-message';
+import { CameraData } from '@/features/control/data/camerasData';
 
 /** Stable key extractor - defined outside component to prevent re-creation */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,6 +35,16 @@ const keyExtractor = (item: any) => item.id.toString();
 export const DeviceControlScreens = () => {
     const navigation = useNavigation<NativeStackNavigationProp<ControlStackParamList>>();
     const insets = useSafeAreaInsets();
+
+    // Restore portrait when this screen gains focus (coming back from landscape VideoPlayer)
+    useFocusEffect(
+        useCallback(() => {
+            const timer = setTimeout(() => {
+                Orientation.lockToPortrait();
+            }, 150);
+            return () => clearTimeout(timer);
+        }, [])
+    );
 
     // React Query Hooks (replacing farmStore fetchers)
     const { data: zonesData = [], isLoading: isLoadingZones } = useZones();
@@ -76,7 +84,7 @@ export const DeviceControlScreens = () => {
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-    } = useAllPondsByZone(selectedZoneId!);
+    } = useAllPondsByZone(selectedZoneId ?? '');
 
     // Ensure valid array
     const farmPonds = useMemo(() => {
@@ -348,30 +356,15 @@ export const DeviceControlScreens = () => {
                 </>
             ) : (
                 <CameraList
-                    onCameraPress={async (camera: CameraItem) => {
-                        try {
-                            const response = await cameraApi.getStream(camera.deviceSn);
-                            const streamData = response.data?.data;
-                            if (!streamData?.url) {
-                                Toast.show({
-                                    type: 'error',
-                                    text1: 'Lỗi',
-                                    text2: 'Không lấy được URL stream',
-                                });
-                                return;
-                            }
+                    onCameraPress={(camera: CameraData) => {
+                        Orientation.lockToLandscape();
+                        setTimeout(() => {
                             navigation.navigate('CameraPlayer', {
-                                videoUrl: streamData.url,
-                                cameraName: camera.name,
-                                pondName: camera.name,
+                                videoUrl: camera.videoUrl,
+                                cameraName: camera.cameraName,
+                                pondName: camera.pondName,
                             });
-                        } catch {
-                            Toast.show({
-                                type: 'error',
-                                text1: 'Lỗi',
-                                text2: 'Không thể kết nối đến camera',
-                            });
-                        }
+                        }, 500);
                     }}
                 />
             )}
