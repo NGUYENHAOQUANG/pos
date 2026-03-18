@@ -80,7 +80,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                     statsData?.kpis?.totalEstimatedProfit ?? 0
                                 )}
                             />
-                            <Text style={styles.chartTitle}>Lợi nhuận(tỷ đồng)</Text>
+                            <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
                             {statsData?.byDate && statsData.byDate.length > 0 ? (
                                 <Chart
                                     chartWidth={chartWidth}
@@ -140,10 +140,10 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
     },
     chartTitle: {
-        fontSize: 14,
+        fontSize: 12,
         color: colors.text,
         paddingLeft: 16,
-        paddingVertical: 12,
+        paddingVertical: 8,
         backgroundColor: colors.white,
         lineHeight: 18,
     },

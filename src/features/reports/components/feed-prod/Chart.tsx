@@ -424,6 +424,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
     },
     title: {
+        marginTop: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.regular,
         color: colors.text,

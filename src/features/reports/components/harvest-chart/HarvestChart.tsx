@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     chartTitle: {
-        marginBottom: spacing.sm,
+        marginVertical: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,

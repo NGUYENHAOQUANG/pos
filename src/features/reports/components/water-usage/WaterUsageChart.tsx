@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.border,
         marginHorizontal: 16,
-        marginVertical: 16,
+        marginVertical: 12,
         borderRadius: 12,
         backgroundColor: colors.white,
     },
@@ -238,10 +238,10 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
     yAxisTitle: {
-        fontSize: 16,
-        color: colors.textSecondary,
+        fontSize: 12,
+        color: colors.text,
         paddingLeft: 16,
-        marginBottom: 12,
+        marginVertical: 12,
     },
     chartRow: {
         flexDirection: 'row',
