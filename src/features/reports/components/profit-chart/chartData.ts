@@ -1,9 +1,5 @@
 import { Dimensions } from 'react-native';
 import { spacing } from '@/styles';
-export interface ProfitLineDataPoint {
-    day: number;
-    value: number; // Profit estimate value
-}
 export const SCREEN_WIDTH = Dimensions.get('window').width;
 export const CHART_WIDTH = SCREEN_WIDTH - spacing.lg * 2;
 export const CHART_HEIGHT = 350;
