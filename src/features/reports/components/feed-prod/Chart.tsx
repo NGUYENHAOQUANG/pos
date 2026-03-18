@@ -11,13 +11,7 @@ const CHART_THEME = {
     green: '#22c55e',
     orange: '#f97316',
 };
-import {
-    CHART_HEIGHT,
-    PADDING_LEFT,
-    PADDING_RIGHT,
-    PADDING_TOP,
-    PADDING_BOTTOM,
-} from './feedprodData';
+import { CHART_HEIGHT, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
 
 interface ChartProps {
@@ -69,13 +63,13 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
             if (totalDays <= 0) return [0];
 
             const marks: number[] = [];
-            const targetMarks = Math.min(13, totalDays + 1);
-            const step = Math.max(1, Math.ceil(totalDays / (targetMarks - 1)));
+            const step = 7; // Fixed 7-day intervals
 
             for (let day = 0; day <= totalDays; day += step) {
                 marks.push(day);
             }
 
+            // Always show the last data day
             if (marks[marks.length - 1] !== totalDays) {
                 marks.push(totalDays);
             }
@@ -278,7 +272,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                         position: 'absolute',
                         left: 0,
                         top: 0,
-                        height: CHART_HEIGHT - PADDING_BOTTOM,
+                        height: CHART_HEIGHT,
                         width: PADDING_LEFT,
                         zIndex: 10,
                         backgroundColor: colors.white,
@@ -291,10 +285,10 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                             return (
                                 <SvgText
                                     key={`y-label-sticky-${value}`}
-                                    x={PADDING_LEFT - 4}
+                                    x={16}
                                     y={y + 4}
                                     fill={CHART_THEME.text}
-                                    fontSize={10}
+                                    fontSize={12}
                                     textAnchor="end"
                                 >
                                     {Math.round(value * 100) / 100}
@@ -396,7 +390,13 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
 
                         {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {
-                            const x = getX(day);
+                            let x = getX(day);
+                            let align: 'middle' | 'start' | 'end' = 'middle';
+                            if (index === 0) {
+                                x = x + 2;
+                                align = 'start';
+                            }
+
                             const y = PADDING_TOP + chartHeight + 18;
                             return (
                                 <SvgText
@@ -404,8 +404,8 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                                     x={x}
                                     y={y}
                                     fill={CHART_THEME.text}
-                                    fontSize={10}
-                                    textAnchor="middle"
+                                    fontSize={12}
+                                    textAnchor={align}
                                 >
                                     {formatXLabel(DAY_LABELS[index])}
                                 </SvgText>

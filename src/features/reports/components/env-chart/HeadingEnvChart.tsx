@@ -3,18 +3,34 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 
+interface HeadingItem {
+    key: string;
+    label: string;
+}
+
 interface HeadingEnvChartProps {
+    /** Custom items from API metrics. Falls back to default if not provided. */
+    items?: HeadingItem[];
     selected?: string;
     onSelect?: (item: string) => void;
 }
 
-const ITEMS = ['pH', 'DO', 'Nhiệt độ', 'Độ kiềm', 'Độ trong', 'Độ mặn'];
+const DEFAULT_ITEMS: HeadingItem[] = [
+    { key: 'pH', label: 'pH' },
+    { key: 'DO', label: 'DO' },
+    { key: 'Nhiệt độ', label: 'Nhiệt độ' },
+    { key: 'Độ kiềm', label: 'Độ kiềm' },
+    { key: 'Độ trong', label: 'Độ trong' },
+    { key: 'Độ mặn', label: 'Độ mặn' },
+];
 
 export const HeadingEnvChart = ({
+    items,
     selected: selectedProp,
     onSelect: onSelectProp,
 }: HeadingEnvChartProps) => {
-    const [localSelected, setLocalSelected] = useState(ITEMS[0]);
+    const displayItems = items && items.length > 0 ? items : DEFAULT_ITEMS;
+    const [localSelected, setLocalSelected] = useState(displayItems[0]?.key || '');
 
     const selected = selectedProp ?? localSelected;
     const onSelect = onSelectProp ?? setLocalSelected;
@@ -26,17 +42,17 @@ export const HeadingEnvChart = ({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {ITEMS.map(item => {
-                    const isSelected = item === selected;
+                {displayItems.map(item => {
+                    const isSelected = item.key === selected;
                     return (
                         <TouchableOpacity
-                            key={item}
+                            key={item.key}
                             style={styles.item}
-                            onPress={() => onSelect(item)}
+                            onPress={() => onSelect(item.key)}
                             activeOpacity={0.7}
                         >
                             <Text style={[styles.text, isSelected && styles.textSelected]}>
-                                {item}
+                                {item.label}
                             </Text>
                             {isSelected && <View style={styles.indicator} />}
                         </TouchableOpacity>

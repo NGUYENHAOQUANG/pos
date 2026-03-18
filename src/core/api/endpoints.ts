@@ -252,5 +252,7 @@ export const API_ENDPOINTS = {
         STOCK_TRANSFER_STATS: '/report/stock-transfer-stats',
         DAILY_WATER_STATS: '/report/daily-water-stats',
         PRODUCTION_DISTRIBUTION: '/report/production-distribution',
+        ENV_MEASUREMENT_CHART: '/report/env-measurement-chart',
+        COST_DONUT: '/report/cost-donut',
     },
 } as const;

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
@@ -13,11 +13,11 @@ import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './wate
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_HEIGHT = 400;
-const PADDING_LEFT = 80;
-const PADDING_RIGHT = 16;
+const PADDING_LEFT = 85;
+const PADDING_RIGHT = 20;
 const PADDING_TOP = 20;
 const PADDING_BOTTOM = 40;
-const CHART_WIDTH = SCREEN_WIDTH - 32;
+const CHART_WIDTH = SCREEN_WIDTH;
 const DRAW_WIDTH = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
 const DRAW_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
@@ -43,6 +43,9 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
     }, [statsData]);
 
     const { totalWaterSupplied, cumulativeData, yMax, yTicks, xLabels } = parsedData;
+    const SCROLL_PAD = 36; // left padding inside scroll to avoid first label clipping
+    const SCROLL_PAD_RIGHT = 36; // right padding to avoid last label clipping
+    const scrollWidth = DRAW_WIDTH + SCROLL_PAD + SCROLL_PAD_RIGHT;
     const barWidth = cumulativeData.length > 0 ? DRAW_WIDTH / cumulativeData.length : DRAW_WIDTH;
 
     return (
@@ -79,10 +82,14 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
 
                             <Text style={styles.yAxisTitle}>Lượng nước m3</Text>
 
-                            {/* Chart Svg */}
-                            <View style={styles.chartWrapper}>
-                                <Svg width={CHART_WIDTH} height={CHART_HEIGHT}>
-                                    {/* Y Axis Grid & Labels */}
+                            {/* Chart: fixed Y-axis + scrollable content */}
+                            <View style={styles.chartRow}>
+                                {/* Fixed Y-axis labels */}
+                                <Svg
+                                    width={PADDING_LEFT}
+                                    height={CHART_HEIGHT}
+                                    style={{ overflow: 'visible' }}
+                                >
                                     {yTicks.map(tick => {
                                         const y = scaleLinear(
                                             tick,
@@ -90,89 +97,100 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                                             [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
                                         );
                                         return (
-                                            <G key={`y-${tick}`}>
-                                                {/* Grid Line */}
+                                            <SvgText
+                                                key={`y-${tick}`}
+                                                x={16}
+                                                y={y + 4}
+                                                fontSize={12}
+                                                fill={colors.text}
+                                                textAnchor="start"
+                                            >
+                                                {tick === 0 ? '0' : formatNumberVietnamese(tick)}
+                                            </SvgText>
+                                        );
+                                    })}
+                                </Svg>
+
+                                {/* Scrollable bars + grid + x-labels */}
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                    <Svg width={scrollWidth} height={CHART_HEIGHT}>
+                                        {/* Grid lines */}
+                                        {yTicks.map(tick => {
+                                            const y = scaleLinear(
+                                                tick,
+                                                [0, yMax],
+                                                [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
+                                            );
+                                            return (
                                                 <Line
-                                                    x1={PADDING_LEFT}
+                                                    key={`grid-${tick}`}
+                                                    x1={SCROLL_PAD}
                                                     y1={y}
-                                                    x2={CHART_WIDTH - PADDING_RIGHT}
+                                                    x2={scrollWidth}
                                                     y2={y}
                                                     stroke={colors.borderLight}
                                                     strokeWidth={1}
                                                 />
-                                                {/* Label */}
-                                                <SvgText
-                                                    x={PADDING_LEFT - 8}
-                                                    y={y + 4} // Optical center
-                                                    fontSize={14}
-                                                    fill={colors.text}
-                                                    textAnchor="end"
-                                                >
-                                                    {tick === 0
-                                                        ? '0'
-                                                        : formatNumberVietnamese(tick)}
-                                                </SvgText>
-                                            </G>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    {/* Bars */}
-                                    {cumulativeData.map((point, index) => {
-                                        const prevValue =
-                                            index === 0 ? 0 : cumulativeData[index - 1].value;
-                                        const yTop = scaleLinear(
-                                            point.value,
-                                            [0, yMax],
-                                            [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
-                                        );
-                                        const yBottom = scaleLinear(
-                                            prevValue,
-                                            [0, yMax],
-                                            [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
-                                        );
-                                        let h = Math.abs(yBottom - yTop);
-                                        if (h < 2 && point.value > prevValue) h = 2; // ensure visibility if small
-                                        const x = PADDING_LEFT + index * barWidth;
-                                        return (
-                                            <G key={`bar-${index}`}>
+                                        {/* Bars */}
+                                        {cumulativeData.map((point, index) => {
+                                            const prevValue =
+                                                index === 0 ? 0 : cumulativeData[index - 1].value;
+                                            const yTop = scaleLinear(
+                                                point.value,
+                                                [0, yMax],
+                                                [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
+                                            );
+                                            const yBottom = scaleLinear(
+                                                prevValue,
+                                                [0, yMax],
+                                                [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
+                                            );
+                                            let h = Math.abs(yBottom - yTop);
+                                            if (h < 2 && point.value > prevValue) h = 2;
+                                            const x = SCROLL_PAD + index * barWidth;
+                                            return (
                                                 <Rect
-                                                    x={x + 1} // Padding
+                                                    key={`bar-${index}`}
+                                                    x={x + 1}
                                                     y={yTop}
                                                     width={barWidth - 2 > 0 ? barWidth - 2 : 1}
                                                     height={h}
                                                     fill={colors.orange[600]}
                                                 />
-                                            </G>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    {/* X Axis Labels */}
-                                    {xLabels.map((date, i) => {
-                                        const x =
-                                            PADDING_LEFT +
-                                            i * (DRAW_WIDTH / Math.max(1, xLabels.length - 1));
-                                        return (
-                                            <G key={`x-label-${i}`}>
-                                                <Line
-                                                    x1={x}
-                                                    y1={DRAW_HEIGHT + PADDING_TOP}
-                                                    x2={x}
-                                                    y2={DRAW_HEIGHT + PADDING_TOP + 5}
-                                                    stroke={colors.border}
-                                                />
-                                                <SvgText
-                                                    x={x}
-                                                    y={DRAW_HEIGHT + PADDING_TOP + 20}
-                                                    fontSize={10}
-                                                    fill={colors.black}
-                                                    textAnchor="middle"
-                                                >
-                                                    {date}
-                                                </SvgText>
-                                            </G>
-                                        );
-                                    })}
-                                </Svg>
+                                        {/* X Axis Labels */}
+                                        {xLabels.map((date, i) => {
+                                            const x =
+                                                SCROLL_PAD +
+                                                i * (DRAW_WIDTH / Math.max(1, xLabels.length - 1));
+                                            return (
+                                                <G key={`x-label-${i}`}>
+                                                    <Line
+                                                        x1={x}
+                                                        y1={DRAW_HEIGHT + PADDING_TOP}
+                                                        x2={x}
+                                                        y2={DRAW_HEIGHT + PADDING_TOP + 5}
+                                                        stroke={colors.border}
+                                                    />
+                                                    <SvgText
+                                                        x={x}
+                                                        y={DRAW_HEIGHT + PADDING_TOP + 20}
+                                                        fontSize={12}
+                                                        fill={colors.black}
+                                                        textAnchor="middle"
+                                                    >
+                                                        {date}
+                                                    </SvgText>
+                                                </G>
+                                            );
+                                        })}
+                                    </Svg>
+                                </ScrollView>
                             </View>
                         </>
                     )}
@@ -219,8 +237,9 @@ const styles = StyleSheet.create({
         paddingLeft: 16,
         marginBottom: 12,
     },
-    chartWrapper: {
-        alignItems: 'center',
+    chartRow: {
+        flexDirection: 'row',
+        height: CHART_HEIGHT,
     },
 });
 

@@ -40,7 +40,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Dimensions
     const PADDING_TOP = 20;
     const PADDING_BOTTOM = 25; // space for x-axis labels
-    const PADDING_LEFT = 35; // decreased space for y-axis labels to move chart left
+    const PADDING_LEFT = 85;
     const PADDING_RIGHT = 10;
 
     // Use dynamic width to prevent squishing when data is large
@@ -82,18 +82,18 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                     }}
                     pointerEvents="none"
                 >
-                    <Svg width={PADDING_LEFT} height={chartHeight}>
+                    <Svg width={PADDING_LEFT} height={chartHeight} style={{ overflow: 'visible' }}>
                         {/* Y Axis Labels */}
                         {yAxisLabels.map(value => {
                             const y = getY(value);
                             return (
                                 <SvgText
                                     key={`y-label-${value}`}
-                                    x={PADDING_LEFT - 4}
+                                    x={16}
                                     y={y + 4} // Optical vertical alignment
                                     fill={colors.gray[500]}
-                                    fontSize={10}
-                                    textAnchor="end"
+                                    fontSize={12}
+                                    textAnchor="start"
                                 >
                                     {value % 1 === 0
                                         ? value.toString()
@@ -147,7 +147,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                         x={x}
                                         y={y - 8}
                                         fill={colors.text}
-                                        fontSize={10}
+                                        fontSize={12}
                                         fontWeight={typography.fontWeight.medium.toString()}
                                         textAnchor="middle"
                                     >
