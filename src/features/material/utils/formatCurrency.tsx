@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text } from 'react-native';
+
 import { formatCurrencyValue } from '@/shared/utils/formatters';
 import { View } from 'react-native';
 
+import { Text } from '@/shared/components/typography/Text';
 export const formatCurrency = (value: number) => {
     return (
         <View style={{ flexDirection: 'row' }}>

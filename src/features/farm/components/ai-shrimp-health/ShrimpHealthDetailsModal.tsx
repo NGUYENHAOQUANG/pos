@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, ScrollView, Modal, TouchableWithoutFeedback } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Animated, { SlideInDown } from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 

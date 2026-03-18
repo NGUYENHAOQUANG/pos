@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Icon from 'react-native-vector-icons/Feather';
 import { colors } from '@/styles/colors';
 import { DataRow } from './DataRow';

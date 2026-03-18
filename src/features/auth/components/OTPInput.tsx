@@ -1,11 +1,6 @@
-import {
-    View,
-    Text,
-    TextInput,
-    StyleSheet,
-    NativeSyntheticEvent,
-    TextInputKeyPressEventData,
-} from 'react-native';
+import { View, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import { colors } from '@/styles';
 

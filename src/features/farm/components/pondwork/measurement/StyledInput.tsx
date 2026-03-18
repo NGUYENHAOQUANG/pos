@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { View, StyleSheet, TextInputProps } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 
 interface StyledInputProps extends TextInputProps {

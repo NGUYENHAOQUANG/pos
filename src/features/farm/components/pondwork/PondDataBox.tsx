@@ -1,5 +1,6 @@
 import React, { ReactNode, useState } from 'react';
-import { View, Text, StyleSheet, ViewStyle, Pressable, Dimensions, Modal } from 'react-native';
+import { View, StyleSheet, ViewStyle, Pressable, Dimensions, Modal } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import { SelectionInfoBox } from '@/features/farm/components/pondwork/SelectionInfoBox';
 import { DetailRow } from '@/features/material/components/DetailRow';

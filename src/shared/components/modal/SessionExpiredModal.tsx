@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, Dimensions } from 'react-native';
+import { View, StyleSheet, Modal, Dimensions } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from '@/shared/components/buttons/Button';

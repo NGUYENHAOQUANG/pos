@@ -1,12 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    LayoutChangeEvent,
-    ScrollView,
-    TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, LayoutChangeEvent, ScrollView, TouchableOpacity } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { scaleLinear } from 'd3-scale';
 import { colors, borderRadius } from '@/styles';

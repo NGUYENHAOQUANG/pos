@@ -8,14 +8,8 @@
  * @updated 2025-01-07
  */
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import {
-    StyleSheet,
-    TouchableOpacity,
-    View,
-    Text,
-    Animated,
-    LayoutChangeEvent,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Animated, LayoutChangeEvent } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';

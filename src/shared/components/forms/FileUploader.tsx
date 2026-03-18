@@ -4,7 +4,8 @@
  * @created 2026-01-27
  */
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import {
     pick,
     types,

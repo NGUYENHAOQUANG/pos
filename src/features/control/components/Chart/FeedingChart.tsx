@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     Dimensions,
     TouchableOpacity,
@@ -9,6 +8,7 @@ import {
     Easing,
     ScrollView,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Path, Circle, Rect, G, Text as SvgText } from 'react-native-svg';
 import { FeedingTooltip } from './FeedingTooltip';
 import { colors } from '@/styles';

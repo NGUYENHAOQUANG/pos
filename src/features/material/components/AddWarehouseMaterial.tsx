@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     TouchableOpacity,
     LayoutAnimation,
     UIManager,
     Platform,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, borderRadius } from '@/styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from '@/shared/components/buttons/Button';

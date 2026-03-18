@@ -1,34 +1,54 @@
 /**
  * @file typography.ts
- * @description Typography system
+ * @description Typography system using Google Sans Flex 120pt
  * @author Kindy
  * @created 2025-11-16
+ * @updated 2026-03-16
  */
-import { Platform } from 'react-native';
+
+/**
+ * Google Sans Flex font family mapping
+ * Use font file name without extension (works on both iOS and Android)
+ */
+export const fontFamily = {
+    thin: 'GoogleSansFlex_120pt-Thin',
+    extraLight: 'GoogleSansFlex_120pt-ExtraLight',
+    light: 'GoogleSansFlex_120pt-Light',
+    regular: 'GoogleSansFlex_120pt-Regular',
+    medium: 'GoogleSansFlex_120pt-Medium',
+    semiBold: 'GoogleSansFlex_120pt-SemiBold',
+    bold: 'GoogleSansFlex_120pt-Bold',
+    extraBold: 'GoogleSansFlex_120pt-ExtraBold',
+    black: 'GoogleSansFlex_120pt-Black',
+} as const;
+
+export type FontFamily = typeof fontFamily;
+
+/**
+ * Map fontWeight string to corresponding fontFamily
+ * Used by AppText to auto-resolve font file from weight
+ */
+export const fontWeightToFamily: Record<string, string> = {
+    '100': fontFamily.thin,
+    '200': fontFamily.extraLight,
+    '300': fontFamily.light,
+    '400': fontFamily.regular,
+    normal: fontFamily.regular,
+    '500': fontFamily.medium,
+    '600': fontFamily.semiBold,
+    '700': fontFamily.bold,
+    bold: fontFamily.bold,
+    '800': fontFamily.extraBold,
+    '900': fontFamily.black,
+};
 
 export const typography = {
-    // Font families
+    // Font families (backward compatible)
     fontFamily: {
-        regular: Platform.select({
-            ios: 'System',
-            android: 'sans-serif',
-            default: 'System',
-        }),
-        medium: Platform.select({
-            ios: 'System',
-            android: 'sans-serif-medium',
-            default: 'System',
-        }),
-        bold: Platform.select({
-            ios: 'System',
-            android: 'sans-serif',
-            default: 'System',
-        }),
-        light: Platform.select({
-            ios: 'System',
-            android: 'sans-serif-light',
-            default: 'System',
-        }),
+        regular: fontFamily.regular,
+        medium: fontFamily.medium,
+        bold: fontFamily.bold,
+        light: fontFamily.light,
     },
 
     // Font sizes

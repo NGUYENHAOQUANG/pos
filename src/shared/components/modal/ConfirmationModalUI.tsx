@@ -1,6 +1,7 @@
 import React from 'react';
 import Toast from 'react-native-toast-message';
-import { View, Text, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 import CloseIcon from '@/assets/Icon/CloseOutlined.svg';

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import IconAdd from 'react-native-vector-icons/Ionicons';
 import DeleteIcon from '@/assets/Icon/Delete.svg';
 import ModalAddTurn from '@/features/control/components/CustomFeedingMachine/ModalAddTurn';

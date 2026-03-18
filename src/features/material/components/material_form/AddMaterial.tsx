@@ -1,13 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    LayoutAnimation,
-    Platform,
-    UIManager,
-} from 'react-native';
+import { View, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import { DropdownMaterial, DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';

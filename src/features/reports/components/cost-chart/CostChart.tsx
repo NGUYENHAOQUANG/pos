@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import Svg, { G, Path } from 'react-native-svg';
 import * as shape from 'd3-shape';
 import { colors } from '@/styles/colors';
@@ -216,7 +217,6 @@ const styles = StyleSheet.create({
     totalValue: {
         fontSize: 24,
         fontWeight: 'bold',
-        fontFamily: typography.fontFamily.bold,
         color: colors.black,
         textAlign: 'center',
     },
@@ -244,7 +244,6 @@ const styles = StyleSheet.create({
     },
     tooltipName: {
         fontSize: 12,
-        fontFamily: typography.fontFamily.regular,
         color: colors.gray[600],
         marginRight: 8,
         fontWeight: '400',
@@ -252,7 +251,6 @@ const styles = StyleSheet.create({
     tooltipPercentage: {
         fontSize: 12,
         fontWeight: '500',
-        fontFamily: typography.fontFamily.bold,
         color: colors.black,
     },
 });

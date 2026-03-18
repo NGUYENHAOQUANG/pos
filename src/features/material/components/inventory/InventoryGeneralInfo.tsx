@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
-    TextInput,
     TouchableOpacity,
     LayoutAnimation,
     Platform,
     UIManager,
 } from 'react-native';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
+import { Text } from '@/shared/components/typography/Text';
 import CalenderIcon from '@/assets/Icon/Calender.svg';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
 import { colors, spacing, borderRadius } from '@/styles';

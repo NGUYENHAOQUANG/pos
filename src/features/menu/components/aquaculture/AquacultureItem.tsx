@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography, borderRadius } from '@/styles';
 import { SeasonData, SeasonStatus } from '@/features/farm/types/farm.types';
 import { Tag } from '@/features/menu/components/Tag';

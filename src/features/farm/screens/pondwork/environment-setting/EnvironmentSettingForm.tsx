@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-
 import { colors } from '@/styles';
 import {
     EnvironmentParameterSection,

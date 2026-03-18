@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
-    Text,
     TouchableOpacity,
     Modal,
     TouchableWithoutFeedback,
     Dimensions,
 } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing } from '@/styles';
 import {

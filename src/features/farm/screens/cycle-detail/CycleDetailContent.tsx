@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { borderRadius, colors, spacing } from '@/styles';
 import { CycleData } from '@/features/farm/types/cycle.types';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';

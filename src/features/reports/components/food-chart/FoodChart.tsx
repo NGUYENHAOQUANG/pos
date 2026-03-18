@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';

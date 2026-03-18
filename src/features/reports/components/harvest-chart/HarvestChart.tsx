@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { colors, spacing, typography } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '@/features/reports/components/BasicDropDownButton';
@@ -132,7 +133,6 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,
-        fontFamily: typography.fontFamily.medium,
     },
     headerButton: {
         // Ghi đè style của BasicDropDownButton

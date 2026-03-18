@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
+import { Text } from '@/shared/components/typography/Text';
 import { colors, typography } from '@/styles';
 import { PondData } from '@/features/farm/types/farm.types';
 import { POND_SHAPE_LABELS, PondShape } from '@/features/farm/types/pond.types';

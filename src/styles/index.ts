@@ -10,8 +10,8 @@ export type { Colors } from './colors';
 export { spacing } from './spacing';
 export type { Spacing } from './spacing';
 
-export { typography } from './typography';
-export type { Typography } from './typography';
+export { typography, fontFamily, fontWeightToFamily } from './typography';
+export type { Typography, FontFamily } from './typography';
 
 export { shadows } from './shadows';
 export type { Shadows } from './shadows';
