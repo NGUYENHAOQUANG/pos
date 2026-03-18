@@ -27,6 +27,7 @@ import { useZones, useAllPondsByZone } from '@/features/farm/hooks';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
 import { CameraData } from '@/features/control/data/camerasData';
+import Orientation from 'react-native-orientation-locker';
 
 /** Stable key extractor - defined outside component to prevent re-creation */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

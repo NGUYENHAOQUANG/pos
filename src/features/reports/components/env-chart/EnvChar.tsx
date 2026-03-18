@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     },
     axisLabel: {
         fontFamily: typography.fontFamily.regular,
-        fontSize: 14,
+        fontSize: 12,
         color: colors.text,
         textAlign: 'right',
         width: '100%',
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
     },
     axisLabelCenter: {
         fontFamily: typography.fontFamily.regular,
-        fontSize: 14,
+        fontSize: 12,
         color: colors.text,
         textAlign: 'center',
         width: '100%',
