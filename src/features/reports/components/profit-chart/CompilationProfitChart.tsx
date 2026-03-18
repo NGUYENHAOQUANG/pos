@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import { colors, typography } from '@/styles';
+import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
@@ -80,6 +80,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                     statsData?.kpis?.totalEstimatedProfit ?? 0
                                 )}
                             />
+                            <Text style={styles.chartTitle}>Lợi nhuận(tỷ đồng)</Text>
                             {statsData?.byDate && statsData.byDate.length > 0 ? (
                                 <Chart
                                     chartWidth={chartWidth}
@@ -135,8 +136,15 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     breakEvenText: {
-        fontSize: typography.fontSize.sm,
+        fontSize: 12,
         color: colors.textSecondary,
-        fontFamily: typography.fontFamily.regular,
+    },
+    chartTitle: {
+        fontSize: 14,
+        color: colors.text,
+        paddingLeft: 16,
+        paddingVertical: 12,
+        backgroundColor: colors.white,
+        lineHeight: 18,
     },
 });

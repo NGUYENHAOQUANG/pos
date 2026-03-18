@@ -17,14 +17,9 @@ interface ChartProps {
 
 const formatAxisValue = (value: number) => {
     if (value === 0) return '0';
-    const absVal = Math.abs(value);
-    if (absVal >= 1e9) {
-        return `${Number((value / 1e9).toFixed(2))} tỉ`;
-    }
-    if (absVal >= 1e6) {
-        return `${Number((value / 1e6).toFixed(2))} tr`;
-    }
-    return value.toLocaleString('vi-VN');
+    const billionVal = value / 1e9;
+    const formatted = Number(billionVal.toFixed(2));
+    return formatted.toString();
 };
 
 export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) => {
@@ -193,9 +188,10 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
     const MIN_DAY_WIDTH = 12;
     const actualChartWidth = Math.max(chartWidth, TOTAL_DAYS * MIN_DAY_WIDTH);
 
-    const SCROLL_PADDING = 17;
+    const SCROLL_PADDING = 16;
     // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * actualChartWidth + PADDING_LEFT;
+    const getX = (day: number) =>
+        (day / TOTAL_DAYS) * actualChartWidth + PADDING_LEFT + SCROLL_PADDING;
     const getY = (value: number) => {
         // Y-axis is centered at zero
         // value = -Y_MAX maps to bottom (PADDING_TOP + chartHeight)
