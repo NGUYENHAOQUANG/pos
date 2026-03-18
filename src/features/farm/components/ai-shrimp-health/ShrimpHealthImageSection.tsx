@@ -9,6 +9,7 @@ import {
     ShrimpHealthBoundingBoxOverlay,
     HealthDetectionBox,
 } from '@/features/farm/components/boderbox/ShrimpHealthBoundingBoxOverlay';
+import { useAIImageDimensions } from '@/features/farm/hooks/useAIImageDimensions';
 
 interface Props {
     imageUri: string | null;
@@ -36,14 +37,7 @@ export const ShrimpHealthImageSection: React.FC<Props> = ({
     onImageAreaLayout,
     onGetResultPress,
 }) => {
-    const aspectRatio =
-        imageDimensions.width > 0 && imageDimensions.height > 0
-            ? imageDimensions.width / imageDimensions.height
-            : 1;
-    const overlayHeight =
-        imageDimensions.width > 0 && imageDimensions.height > 0
-            ? displayDimensions.width / (imageDimensions.width / imageDimensions.height)
-            : displayDimensions.width;
+    const { aspectRatio, overlayHeight } = useAIImageDimensions(imageDimensions, displayDimensions);
 
     return (
         <View>
