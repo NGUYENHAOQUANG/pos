@@ -127,103 +127,101 @@ BarGroup.displayName = 'BarGroup';
 // SUB-COMPONENT: VISUAL CHART
 // ----------------------------------------------------------------------
 
-const VisualChart = ({
-    data,
-    yLabels,
-    maxValue,
-    height = 220,
-    barWidth = DEFAULT_BAR_WIDTH,
-}: ProdVisualChartProps) => {
-    // Pre-compute column width based on number of items per group
-    const columnWidth = useMemo(() => {
-        const maxItems = data.reduce((max, g) => Math.max(max, g.items.length), 0);
-        return Math.max(barWidth * maxItems + 16, 60);
-    }, [data, barWidth]);
+const VisualChart = React.memo(
+    ({
+        data,
+        yLabels,
+        maxValue,
+        height = 220,
+        barWidth = DEFAULT_BAR_WIDTH,
+    }: ProdVisualChartProps) => {
+        const columnWidth = useMemo(() => {
+            const maxItems = data.reduce((max, g) => Math.max(max, g.items.length), 0);
+            return Math.max(barWidth * maxItems + 16, 60);
+        }, [data, barWidth]);
 
-    // Pre-compute total scroll width
-    const totalWidth = useMemo(() => data.length * columnWidth, [data.length, columnWidth]);
+        const totalWidth = useMemo(() => data.length * columnWidth, [data.length, columnWidth]);
 
-    // Memoize grid lines to avoid re-rendering
-    const gridLines = useMemo(
-        () =>
-            yLabels.map((_, index) => {
-                const topPos = index * (height / (yLabels.length - 1));
-                return <View key={index} style={[chartInnerStyles.gridLine, { top: topPos }]} />;
-            }),
-        [yLabels, height]
-    );
+        const gridLines = useMemo(
+            () =>
+                yLabels.map((_, index) => {
+                    const topPos = index * (height / (yLabels.length - 1));
+                    return (
+                        <View key={index} style={[chartInnerStyles.gridLine, { top: topPos }]} />
+                    );
+                }),
+            [yLabels, height]
+        );
 
-    // Memoize Y-axis labels
-    const yAxisElements = useMemo(
-        () =>
-            yLabels.map((label, index) => {
-                const topPos = index * (height / (yLabels.length - 1));
-                return (
-                    <View key={index} style={[chartInnerStyles.yLabelWrapper, { top: topPos }]}>
-                        <Text style={chartInnerStyles.yAxisLabel}>{label}</Text>
-                    </View>
-                );
-            }),
-        [yLabels, height]
-    );
+        const yAxisElements = useMemo(
+            () =>
+                yLabels.map((label, index) => {
+                    const topPos = index * (height / (yLabels.length - 1));
+                    return (
+                        <View key={index} style={[chartInnerStyles.yLabelWrapper, { top: topPos }]}>
+                            <Text style={chartInnerStyles.yAxisLabel}>{label}</Text>
+                        </View>
+                    );
+                }),
+            [yLabels, height]
+        );
 
-    // Render a single X-axis label
-    const renderXLabel = useCallback(
-        (group: ProdChartGroupData, index: number) => (
-            <View key={index} style={[barStyles.column, { width: columnWidth }]}>
-                <Text style={chartInnerStyles.xAxisLabel} numberOfLines={1}>
-                    {group.label}
-                </Text>
-            </View>
-        ),
-        [columnWidth]
-    );
-
-    return (
-        <View style={chartInnerStyles.mainArea}>
-            {/* Y Axis Labels - Fixed */}
-            <View style={[chartInnerStyles.yAxisContainer, { height }]}>{yAxisElements}</View>
-
-            {/* Scrollable Chart Area */}
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                removeClippedSubviews
-                nestedScrollEnabled
-            >
-                <View
-                    style={[
-                        chartInnerStyles.contentContainer,
-                        {
-                            height: height + X_AXIS_HEIGHT,
-                            width: totalWidth,
-                        },
-                    ]}
-                >
-                    {/* Grid Lines */}
-                    <View style={[chartInnerStyles.gridContainer, { height }]}>{gridLines}</View>
-
-                    {/* Bars Area */}
-                    <View style={[chartInnerStyles.barsArea, { height }]}>
-                        {data.map((group, groupIndex) => (
-                            <BarGroup
-                                key={groupIndex}
-                                group={group}
-                                maxValue={maxValue}
-                                chartHeight={height}
-                                barWidth={barWidth}
-                                columnWidth={columnWidth}
-                            />
-                        ))}
-                    </View>
-
-                    {/* X Axis Labels */}
-                    <View style={chartInnerStyles.xAxisRow}>{data.map(renderXLabel)}</View>
+        const renderXLabel = useCallback(
+            (group: ProdChartGroupData, index: number) => (
+                <View key={index} style={[barStyles.column, { width: columnWidth }]}>
+                    <Text style={chartInnerStyles.xAxisLabel} numberOfLines={1}>
+                        {group.label}
+                    </Text>
                 </View>
-            </ScrollView>
-        </View>
-    );
-};
+            ),
+            [columnWidth]
+        );
+
+        return (
+            <View style={chartInnerStyles.mainArea}>
+                <View style={[chartInnerStyles.yAxisContainer, { height }]}>{yAxisElements}</View>
+
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    removeClippedSubviews
+                    nestedScrollEnabled
+                >
+                    <View
+                        style={[
+                            chartInnerStyles.contentContainer,
+                            {
+                                height: height + X_AXIS_HEIGHT,
+                                width: totalWidth,
+                            },
+                        ]}
+                    >
+                        <View style={[chartInnerStyles.gridContainer, { height }]}>
+                            {gridLines}
+                        </View>
+
+                        <View style={[chartInnerStyles.barsArea, { height }]}>
+                            {data.map((group, groupIndex) => (
+                                <BarGroup
+                                    key={groupIndex}
+                                    group={group}
+                                    maxValue={maxValue}
+                                    chartHeight={height}
+                                    barWidth={barWidth}
+                                    columnWidth={columnWidth}
+                                />
+                            ))}
+                        </View>
+
+                        <View style={chartInnerStyles.xAxisRow}>{data.map(renderXLabel)}</View>
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    }
+);
+
+VisualChart.displayName = 'VisualChart';
 
 // ----------------------------------------------------------------------
 // MAIN COMPONENT
@@ -234,7 +232,8 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
 
     const { isLoading, activeData, yLabels, yMax, chartHeight, summaryCards } = useProdChartData(
         zoneId,
-        pondId
+        pondId,
+        isExpanded
     );
 
     const handleToggle = useCallback(() => {
@@ -278,7 +277,7 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
                                         yLabels={yLabels}
                                         maxValue={yMax}
                                         height={chartHeight}
-                                        barWidth={24}
+                                        barWidth={DEFAULT_BAR_WIDTH}
                                     />
                                 </View>
                             )}

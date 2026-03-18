@@ -20,9 +20,7 @@ interface ProdChartScale {
     yLabels: string[];
 }
 
-/** Color for "Còn lại" bars */
-const REMAINING_COLOR = colors.blue[600];
-/** Color for "Đã thu" bars */
+/** Color for "Đã thu" bars and legend */
 const HARVESTED_COLOR = colors.orange[900];
 /** Maximum Y-axis labels to prevent rendering overflow */
 const MAX_Y_LABELS = 8;
@@ -85,7 +83,6 @@ const formatLabel = (value: number): string => {
 const calculateScale = (values: number[]): ProdChartScale => {
     const maxVal = values.length > 0 ? Math.max(...values, 1) : 1;
 
-    // Determine a nice step that keeps labels count <= MAX_Y_LABELS
     const rawStep = (maxVal * 1.1) / MAX_Y_LABELS;
     const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
     const niceSteps = [1, 2, 5, 10];
@@ -97,28 +94,33 @@ const calculateScale = (values: number[]): ProdChartScale => {
         }
     }
 
-    // Ensure minimum step of 1
     step = Math.max(1, step);
 
     const yMax = Math.max(step, Math.ceil((maxVal * 1.1) / step) * step);
 
+    // Use integer iteration to avoid floating-point precision drift
+    const labelCount = Math.round(yMax / step);
     const labels: string[] = [];
-    for (let v = 0; v <= yMax + 0.1; v += step) {
-        labels.push(formatLabel(Math.round(v)));
+    for (let i = 0; i <= labelCount; i++) {
+        labels.push(formatLabel(Math.round(i * step)));
     }
 
-    const yLabels = [...labels].reverse();
+    labels.reverse();
 
-    return { yMax, yLabels };
+    return { yMax, yLabels: labels };
 };
 
 /**
  * Hook that fetches production distribution data and transforms it
  * into chart-ready grouped bar format with remaining + harvested per pond.
  */
-export const useProdChartData = (zoneId: string, pondId?: string): UseProdChartDataResult => {
+export const useProdChartData = (
+    zoneId: string,
+    pondId?: string,
+    enabled = true
+): UseProdChartDataResult => {
     const { data: response, isLoading } = useProductionDistribution({
-        ZoneId: zoneId,
+        ZoneId: enabled ? zoneId : null,
         Id: pondId,
     });
 
@@ -135,7 +137,7 @@ export const useProdChartData = (zoneId: string, pondId?: string): UseProdChartD
                     remaining > 0
                         ? {
                               value: remaining,
-                              color: REMAINING_COLOR,
+                              color: REMAINING_COLOR_PALETTE[2],
                           }
                         : null,
                     harvested > 0
