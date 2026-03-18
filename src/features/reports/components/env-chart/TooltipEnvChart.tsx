@@ -30,10 +30,10 @@ export const TooltipEnvChart = ({
 }: TooltipEnvChartProps) => {
     if (!visible) return null;
 
-    // --- Formatters ---
+    // --- Formatters (use UTC to match backend date convention) ---
     const formatDate = (d: Date) => {
-        const day = d.getDate().toString().padStart(2, '0');
-        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const day = d.getUTCDate().toString().padStart(2, '0');
+        const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
         return `${day}/${month}`;
     };
 

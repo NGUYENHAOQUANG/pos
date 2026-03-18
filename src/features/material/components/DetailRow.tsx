@@ -27,19 +27,19 @@ const MAX_LINES = 3;
 export interface DetailRowProps {
     label: string;
     value?: React.ReactNode | string | number | null;
+    unit?: string;
     labelStyle?: StyleProp<TextStyle>;
     valueStyle?: StyleProp<TextStyle>;
     style?: StyleProp<ViewStyle>;
     isSpaceBetween?: boolean;
-    /** Tiêu đề hiển thị trên header của bottom sheet */
     bottomSheetTitle?: string;
-    /** Label hiển thị trong nội dung bottom sheet (nếu khác với tiêu đề) */
     sheetLabel?: string;
 }
 
 export const DetailRow: React.FC<DetailRowProps> = ({
     label,
     value,
+    unit,
     labelStyle,
     valueStyle,
     style,
@@ -73,13 +73,16 @@ export const DetailRow: React.FC<DetailRowProps> = ({
 
                 {isTextValue ? (
                     <View style={isTruncated ? styles.valueBlock : styles.valueInline}>
-                        <Text
-                            style={[styles.detailValue, valueStyle]}
-                            numberOfLines={isTruncated ? MAX_LINES : undefined}
-                            onTextLayout={!isTruncated ? handleTextLayout : undefined}
-                        >
-                            {display}
-                        </Text>
+                        <View style={styles.valueRow}>
+                            <Text
+                                style={[styles.detailValue, valueStyle]}
+                                numberOfLines={isTruncated ? MAX_LINES : undefined}
+                                onTextLayout={!isTruncated ? handleTextLayout : undefined}
+                            >
+                                {display}
+                            </Text>
+                            {unit && <Text style={styles.unitText}>{unit}</Text>}
+                        </View>
                         {isTruncated && (
                             <TouchableOpacity
                                 style={styles.seeMoreBtn}
@@ -101,7 +104,6 @@ export const DetailRow: React.FC<DetailRowProps> = ({
                 isTruncated &&
                 (() => {
                     const sheetTitle = bottomSheetTitle ?? label;
-                    // Show contentLabel inside scroll only if sheetLabel is provided and differs from sheetTitle
                     const contentLabel =
                         sheetLabel &&
                         sheetLabel.replace(/:$/, '').trim() !== sheetTitle.replace(/:$/, '').trim()
@@ -128,7 +130,6 @@ interface DetailBottomSheetProps {
     onClose: () => void;
     title: string;
     content: string;
-    /** Label hiển thị trong scroll content (chỉ khi khác title) */
     contentLabel?: string;
 }
 
@@ -166,7 +167,6 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
     return (
         <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
             <View style={styles.overlay}>
-                {/* Tap outside to dismiss */}
                 <Pressable style={styles.dismissArea} onPress={onClose} />
 
                 <Animated.View
@@ -191,7 +191,6 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
 
                     <View style={styles.sheetDivider} />
 
-                    {/* Scrollable content */}
                     <ScrollView
                         style={styles.scrollArea}
                         contentContainerStyle={styles.scrollContent}
@@ -207,10 +206,7 @@ const DetailBottomSheet: React.FC<DetailBottomSheetProps> = ({
     );
 };
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
-    // DetailRow
     detailRow: {
         flexDirection: 'row',
         alignItems: 'flex-start',
@@ -237,6 +233,16 @@ const styles = StyleSheet.create({
     },
     valueInline: {
         flexShrink: 1,
+    },
+    valueRow: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        gap: 4,
+    },
+    unitText: {
+        fontSize: 12,
+        color: colors.gray[500],
+        lineHeight: 22,
     },
     valueBlock: {
         width: '100%',
@@ -267,8 +273,8 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        flexDirection: 'column', // Added this
-        overflow: 'hidden', // Added this
+        flexDirection: 'column',
+        overflow: 'hidden',
     },
     handle: {
         width: 36,

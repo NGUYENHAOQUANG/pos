@@ -48,8 +48,6 @@ export const ReportsScreen = ({ navigation }: Props) => {
         pondTypeData,
         selectedPondType,
         handleSelectPondType,
-        allPondsForLookup,
-        rawCycles,
     } = useReportsScreen();
 
     const handleRightPress = () => {
@@ -68,7 +66,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
         <>
             <PondInfor />
             <OverView />
-            <CompilationEnvChart />
+            <CompilationEnvChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <GrowthChart />
             <ProdChart
                 zoneId={selectedZoneId?.toString() || ''}
@@ -82,20 +83,25 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <CompilationCostChart />
+            <CompilationCostChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
             <FoodChart />
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
             />
         </>
     );
 
     const renderStandardContent = () => (
         <>
-            <CompilationEnvChart />
+            <CompilationEnvChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondIds={selectedPond.id !== '1' ? [selectedPond.id?.toString()] : undefined}
+            />
             <CompilationFeedProd
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
@@ -109,7 +115,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
             />
-            <CompilationCostChart />
+            <CompilationCostChart
+                zoneId={selectedZoneId?.toString() || ''}
+                pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
+            />
             <WaterUsageChart zoneId={selectedZoneId?.toString() || ''} />
             {/* TODO: API /report/harvest-stats hiện tại không hỗ trợ filter theo pondId,
                 chỉ trả về tất cả ao. Đang filter client-side bằng pondCode.
@@ -122,13 +131,10 @@ export const ReportsScreen = ({ navigation }: Props) => {
             <PondTransfer
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
             />
             <HarvestStat
                 zoneId={selectedZoneId?.toString() || ''}
                 pondId={selectedPond.id !== '1' ? selectedPond.id?.toString() : undefined}
-                ponds={allPondsForLookup}
-                cycles={rawCycles?.data?.items}
             />
         </>
     );

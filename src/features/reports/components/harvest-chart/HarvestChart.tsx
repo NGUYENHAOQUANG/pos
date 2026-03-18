@@ -54,8 +54,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
 
     // Get screen layout dimensions dynamically
     const screenWidth = Dimensions.get('window').width;
-    // Assuming 16 horizontal padding on both sides in the container and parent views
-    const chartWidth = screenWidth - 32;
+    const chartWidth = screenWidth;
 
     return (
         <View style={chartStyles.container}>
@@ -117,11 +116,11 @@ const styles = StyleSheet.create({
     },
     body: {
         paddingVertical: 24,
-        paddingHorizontal: 16,
     },
     summaryContainer: {
         paddingBottom: spacing.md,
         width: '100%',
+        paddingHorizontal: 16,
     },
     loadingContainer: {
         minHeight: 300,
@@ -133,6 +132,7 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.medium,
         color: colors.textSecondary,
+        paddingHorizontal: 16,
     },
     headerButton: {
         // Ghi đè style của BasicDropDownButton

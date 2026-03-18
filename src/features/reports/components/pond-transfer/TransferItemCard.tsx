@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, LayoutAnimation } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import CaretDownIcon from '@/assets/Icon/IconReport/CaretDown.svg';
 import { colors, typography } from '@/styles';
 import ArrowIcon from '@/assets/Icon/IconReport/Arrow.svg';
 import { TransferData } from '@/features/reports/types/stock-transfer-stats';
@@ -47,7 +47,7 @@ export const TransferItemCard = ({ item }: Props) => {
                         Ngày sang: {item.transferDate}
                     </Text>
                     <View style={styles.centerDivider}>
-                        <ArrowIcon width={100} height={6} />
+                        <ArrowIcon width={'100%'} height={4} preserveAspectRatio="none" />
                     </View>
                     <Text style={styles.centerLineText} numberOfLines={1}>
                         Ngày nuôi (DOC): {item.doc}
@@ -76,10 +76,10 @@ export const TransferItemCard = ({ item }: Props) => {
 
             <TouchableOpacity onPress={toggleExpand} style={styles.expandBtn} activeOpacity={0.7}>
                 <Text style={styles.expandText}>{expanded ? 'Thu gọn' : 'Xem thêm'}</Text>
-                <Ionicons
-                    name={expanded ? 'chevron-up' : 'chevron-down'}
-                    size={16}
-                    color={colors.orange[600]}
+                <CaretDownIcon
+                    width={14}
+                    height={14}
+                    style={{ transform: [{ rotate: expanded ? '180deg' : '0deg' }] }}
                 />
             </TouchableOpacity>
         </View>
@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     pondCode: {
-        fontSize: 14,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
         color: colors.text,
         flex: 1,
     },
@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
     },
 
     centerInfo: {
-        flex: 1.5,
-        marginHorizontal: 8,
+        flex: 2,
+        marginHorizontal: 4,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -128,12 +128,13 @@ const styles = StyleSheet.create({
 
     centerDivider: {
         marginVertical: 6,
+        alignSelf: 'stretch',
     },
     divider: {
         height: 1,
         backgroundColor: colors.borderLight,
         marginBottom: 12,
-        marginHorizontal: -16,
+        marginHorizontal: 2,
     },
     content: {
         gap: 6,

@@ -77,6 +77,32 @@ export const TOAST_MESSAGES_CONFIG = {
             getText2: (limitMb: number) => `Tổng giới hạn các ảnh là ${limitMb}MB`,
         },
     },
+    AI_COMMON: {
+        UPLOAD_FAILED: {
+            type: 'error',
+            text1: 'Lỗi',
+            text2: 'Không thể tải ảnh lên.',
+        },
+        PROCESS_FAILED: {
+            type: 'error',
+            text1: 'Lỗi',
+            text2: 'Không thể xử lý ảnh này',
+        },
+    },
+    AI_COUNTING: {
+        SUCCESS: {
+            type: 'success',
+            text1: 'Đã có kết quả phân tích từ AI!',
+            position: 'bottom',
+        },
+    },
+    AI_MEASURE: {
+        SUCCESS: {
+            type: 'success',
+            text1: 'Đã có kết quả đo từ AI!',
+            position: 'bottom',
+        },
+    },
     SHRIMP_HEALTH_AI: {
         HEALTHY: {
             type: 'success',
@@ -85,6 +111,11 @@ export const TOAST_MESSAGES_CONFIG = {
         SICK: {
             type: 'error',
             text1: 'Phát hiện tôm bệnh !',
+        },
+        SUCCESS: {
+            type: 'success',
+            text1: 'Đã có kết quả phân tích từ AI!',
+            position: 'bottom',
         },
         NO_IMAGE: {
             type: 'error',
@@ -276,52 +307,4 @@ export const showCycleFormValidationToast = (message: string) => {
         text1: message || 'Dữ liệu không hợp lệ',
         visibilityTime: 3000,
     });
-};
-
-/**
- * Stock transfer error message mapping
- * Maps backend error keywords to user-friendly Vietnamese messages
- */
-const STOCK_TRANSFER_ERROR_MAP: { keywords: string[]; message: string }[] = [
-    {
-        keywords: ['shrimpsizepcsperkg', 'kích cỡ tôm', 'shrimpsize'],
-        message: 'Cỡ tôm không hợp lệ',
-    },
-    {
-        keywords: ['totalstocking', 'tổng số lượng', 'total stocking'],
-        message: 'Tổng số lượng thả không hợp lệ',
-    },
-    {
-        keywords: ['toponds', 'topond', 'ao nhận'],
-        message: 'Ao nhận không hợp lệ',
-    },
-    {
-        keywords: ['quantity', 'số lượng'],
-        message: 'Số lượng tôm không hợp lệ',
-    },
-    {
-        keywords: ['cycle', 'chu kỳ'],
-        message: 'Chu kỳ không hợp lệ hoặc chưa được tạo',
-    },
-];
-
-/**
- * Map backend stock transfer error to Vietnamese message
- * @param rawMessage - Raw error message from backend
- * @param fallback - Fallback message if no mapping found
- * @returns Vietnamese error message
- */
-export const mapStockTransferError = (
-    rawMessage: string,
-    fallback: string = 'Tạo phiếu sang ao thất bại'
-): string => {
-    const lowerMessage = rawMessage.toLowerCase();
-
-    for (const entry of STOCK_TRANSFER_ERROR_MAP) {
-        if (entry.keywords.some(keyword => lowerMessage.includes(keyword))) {
-            return entry.message;
-        }
-    }
-
-    return fallback;
 };

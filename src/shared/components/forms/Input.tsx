@@ -19,8 +19,8 @@ import {
     ViewStyle,
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
+import { TextInput } from '@/shared/components/typography/AppTextInput';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Input as AntdInput } from '@ant-design/react-native';
 import { InputFilters } from '@/shared/regex';
 
 /** Input format types for controlling what characters are allowed */
@@ -229,15 +229,15 @@ export function Input({
                             {value || placeholder}
                         </Text>
                     ) : (
-                        <AntdInput
+                        <TextInput
                             value={value}
                             onChangeText={handleChangeText}
                             placeholder={placeholder}
                             placeholderTextColor={colors.textTertiary}
                             editable={!disabled}
-                            type={secureTextEntry && !isPasswordVisible ? 'password' : 'text'}
+                            secureTextEntry={secureTextEntry && !isPasswordVisible}
                             keyboardType={keyboardType}
-                            autoCapitalize={autoCapitalize as any}
+                            autoCapitalize={autoCapitalize}
                             multiline={multiline}
                             textAlignVertical="center"
                             numberOfLines={numberOfLines}
@@ -246,43 +246,25 @@ export function Input({
                                 setIsFocused(false);
                                 onBlur?.();
                             }}
-                            styles={{
-                                container: {
-                                    borderBottomWidth: 0,
-                                    marginLeft: 0,
-                                    paddingLeft: 0,
-                                    paddingRight: 0,
-                                    minHeight: 0,
-                                    height: '100%',
+                            style={[
+                                styles.input,
+                                inputStyle,
+                                multiline && styles.inputMultiline,
+                                {
+                                    fontSize: 14,
+                                    color: disabled
+                                        ? colors.textTertiary
+                                        : error
+                                        ? colors.error
+                                        : colors.text,
+                                    ...Platform.select({
+                                        android: {
+                                            lineHeight: 1.54 * 14,
+                                        },
+                                    }),
                                 },
-                                input: [
-                                    styles.input,
-                                    inputStyle,
-                                    multiline && styles.inputMultiline,
-                                    {
-                                        height: '100%',
-                                        paddingVertical: 0,
-                                        paddingLeft: 0,
-                                        marginLeft: 0,
-                                        fontSize: 14,
-                                        color: disabled
-                                            ? colors.textTertiary
-                                            : error
-                                            ? colors.error
-                                            : colors.text,
-                                        ...Platform.select({
-                                            ios: {
-                                                fontFamily: 'System',
-                                                lineHeight: 0,
-                                            },
-                                            android: {
-                                                lineHeight: 1.54 * 14,
-                                            },
-                                        }),
-                                    },
-                                ],
-                            }}
-                            {...(restProps as any)}
+                            ]}
+                            {...restProps}
                         />
                     )}
                 </View>
@@ -424,9 +406,6 @@ const styles = StyleSheet.create({
         ...Platform.select({
             android: {
                 textAlignVertical: 'center',
-            },
-            ios: {
-                fontFamily: 'System',
             },
         }),
     },

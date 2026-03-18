@@ -106,10 +106,11 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
     }, [selectedMaterial]);
 
     const handleSave = () => {
-        if (selectedMaterial && quantity && selectedUnit) {
+        const parsedQuantity = parseFloat(quantity);
+        if (selectedMaterial && quantity && selectedUnit && !isNaN(parsedQuantity)) {
             onSave({
                 material: selectedMaterial,
-                quantity: parseFloat(quantity),
+                quantity: parsedQuantity,
                 unit: selectedUnit,
             });
             setSelectedMaterial(undefined);
@@ -117,18 +118,6 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
             setSelectedUnit('');
             onClose();
         }
-    };
-
-    const handleQuantityChange = (text: string) => {
-        let sanitized = text.replace(/[^0-9.]/g, '');
-        const parts = sanitized.split('.');
-        if (parts.length > 2) {
-            sanitized = parts[0] + '.' + parts.slice(1).join('');
-        }
-        if (sanitized.length > 6) {
-            sanitized = sanitized.substring(0, 6);
-        }
-        setQuantity(sanitized);
     };
 
     const handleSelectProduct = (material: IMaterial) => {
@@ -200,9 +189,10 @@ export const SelectMaterialBottomSheet: React.FC<SelectMaterialBottomSheetProps>
                     label="Số lượng"
                     placeholder="Nhập số lượng"
                     value={quantity}
-                    onChangeText={handleQuantityChange}
+                    onChangeText={setQuantity}
                     keyboardType="decimal-pad"
                     inputFormat={InputFormat.DECIMAL}
+                    maxDigits={6}
                     required
                     containerStyle={{ marginBottom: 0 }}
                 />

@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Text } from '@/shared/components/typography/Text';
-import { View, StyleSheet, ScrollView, Image, Dimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import Toast from 'react-native-toast-message';
-import RNFS from 'react-native-fs';
+import { TOAST_MESSAGES_CONFIG } from '@/features/farm/utils/toastMessages';
 import { colors, spacing } from '@/styles';
 import { HeaderFarm } from '@/features/farm/components/HeaderFarm';
 import { Loading } from '@/shared/components/ui/Loading';
 import { DotingOverlay, DetectionDot } from '@/features/farm/components/boderbox/DotingOverlay';
-import type { CountingResult } from '@/features/farm/hooks/useCountingShrimp';
+import type { CountingResult } from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
 import { CountingResultSection } from '@/features/farm/components/ai-counting-shrimp/CountingResultSection';
 import { AIImageProcessingSection } from '@/features/farm/components/pondwork/AIImageProcessingSection';
 import { CountingPickerSheet } from '@/features/farm/components/ai-counting-shrimp/CountingPickerSheet';
@@ -19,12 +19,10 @@ import { useCameraCapture } from '@/features/farm/hooks/camera-capture/useCamera
 import type { CapturedImage } from '@/features/farm/hooks/camera-capture/useCameraCapture';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 export interface CountingShrimpFormProps {
     isLoading: boolean;
     lastCountingResult: CountingResult | null;
-    onRequestStartCounting: (base64Content: string, imageUri: string) => void;
+    onRequestStartCounting: (imageUri: string) => void;
     onImageChange: () => void;
     onSave: (result: string) => void;
     onBack: () => void;
@@ -47,7 +45,6 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
 
     // ──── Image state ────
     const [imageUri, setImageUri] = useState<string | null>(null);
-    const [base64Image, setBase64Image] = useState<string | null>(null);
     const [imageDimensions, setImageDimensions] = useState({ width: 1, height: 1 });
     const [displayDimensions, setDisplayDimensions] = useState({ width: 1, height: 1 });
     const [detections, setDetections] = useState<DetectionDot[]>([]);
@@ -60,7 +57,6 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
     // ──── Camera logic ────
     const handleImageCaptured = useCallback((img: CapturedImage) => {
         setImageUri(img.uri);
-        setBase64Image(img.base64);
         setImageDimensions({ width: img.width, height: img.height });
         setDetections([]);
         setCurrentImageCount(0);
@@ -75,15 +71,12 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
     const handleImageSelect = useCallback(
         (
             uri: string,
-            base64?: string,
+            _base64?: string,
             _file?: { fileName: string; type: string },
             dimensions?: { width: number; height: number }
         ) => {
             onImageChange();
             setImageUri(uri);
-            if (base64) {
-                setBase64Image(base64);
-            }
             if (dimensions?.width && dimensions?.height) {
                 setImageDimensions(dimensions);
             } else {
@@ -108,21 +101,17 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
             setDetections(lastCountingResult.detections);
             setCountTimes(c => c + 1);
             setResult(prev => String(parseInt(prev || '0', 10) + lastCountingResult.count));
-            Toast.show({
-                type: 'success',
-                text1: 'Đã có kết quả phân tích từ AI!',
-                position: 'bottom',
-            });
+            Toast.show(TOAST_MESSAGES_CONFIG.AI_COUNTING.SUCCESS);
         }
     }, [lastCountingResult, currentImageCount]);
 
     // ──── Actions ────
     const handleRequestStartCounting = useCallback(() => {
-        if (!base64Image || !imageUri) {
+        if (!imageUri) {
             return;
         }
-        onRequestStartCounting(base64Image, imageUri);
-    }, [base64Image, imageUri, onRequestStartCounting]);
+        onRequestStartCounting(imageUri);
+    }, [imageUri, onRequestStartCounting]);
 
     const handleReset = useCallback(() => setIsConfirmVisible(true), []);
 
@@ -134,22 +123,20 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
         lastCompletedCount.current = 0;
         setDetections([]);
         setImageUri(null);
-        setBase64Image(null);
         setImageDimensions({ width: 1, height: 1 });
         setIsConfirmVisible(false);
         onImageChange();
     }, [onImageChange]);
 
     const handleAddMore = useCallback(() => {
-        if (!imageUri || !base64Image) {
+        if (!imageUri) {
             return;
         }
-        onRequestStartCounting(base64Image, imageUri);
-    }, [imageUri, base64Image, onRequestStartCounting]);
+        onRequestStartCounting(imageUri);
+    }, [imageUri, onRequestStartCounting]);
 
     const handleRetakePhoto = useCallback(() => {
         setImageUri(null);
-        setBase64Image(null);
         setDetections([]);
         setCurrentImageCount(0);
         onImageChange();
@@ -171,7 +158,10 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                 onClose={camera.closeCamera}
                 onToggleFlash={camera.toggleFlash}
                 onCapture={camera.takePhoto}
-                onGallery={camera.pickFromGallery}
+                onGallery={(...args) => {
+                    camera.closeCamera();
+                    handleImageSelect(...args);
+                }}
             />
         );
     }
@@ -244,17 +234,9 @@ export const CountingShrimpForm: React.FC<CountingShrimpFormProps> = ({
                         setIsPickerSheetOpen(false);
                         camera.openCamera();
                     }}
-                    onOpenGallery={async (uri, _region) => {
-                        // AIImagePickerSheet handles picking and cropping internally,
-                        // then returns the final uri here.
+                    onOpenGallery={(uri, _region) => {
                         setIsPickerSheetOpen(false);
-                        try {
-                            const base64 = await RNFS.readFile(uri, 'base64');
-                            handleImageSelect(uri, base64);
-                        } catch (err) {
-                            console.error('Failed to read image as base64', err);
-                            handleImageSelect(uri); // fallback without base64
-                        }
+                        handleImageSelect(uri);
                     }}
                 />
 
@@ -333,6 +315,3 @@ const styles = StyleSheet.create({
     },
     flexButton: { flex: 1 },
 });
-
-// Unused – kept to silence TS "unused import" if SCREEN_WIDTH referenced elsewhere
-void SCREEN_WIDTH;

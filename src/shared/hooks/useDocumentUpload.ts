@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { documentApi } from '@/features/material/api/documentApi';
 import { handleError } from '@/shared/utils';
+import { StorageType } from '@/shared/types/common.types';
+import type { IDocumentV2Response } from '@/shared/types/common.types';
 
 export const useDocumentUpload = () => {
     return useMutation({
@@ -32,6 +34,33 @@ export const useDocumentUpload = () => {
                 console.warn('Không tìm thấy ID trong response:', response);
                 return null;
             }
+        },
+        onError: handleError,
+    });
+};
+
+// ── V2: Upload files via multipart/form-data with full IDocumentV2 response ──
+
+export interface UploadV2Params {
+    files: { uri: string; type?: string; name?: string }[];
+    storageType?: StorageType;
+}
+
+/**
+ * Hook upload documents V2 – dùng multipart/form-data.
+ *
+ * @example
+ * const { mutateAsync: uploadDocs } = useDocumentUploadV2();
+ * const docs = await uploadDocs({
+ *     files: [{ uri: imageUri, type: 'image/jpeg', name: 'photo.jpg' }],
+ *     storageType: StorageType.Azure,
+ * });
+ * // result: IDocumentV2Response
+ */
+export const useDocumentUploadV2 = () => {
+    return useMutation<IDocumentV2Response, Error, UploadV2Params>({
+        mutationFn: async ({ files, storageType = StorageType.Azure }) => {
+            return await documentApi.uploadV2(files, storageType);
         },
         onError: handleError,
     });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     View,
     StyleSheet,
@@ -63,8 +63,16 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
+    // Track previous visible state to detect open transition
+    const prevVisibleRef = useRef(false);
+
     useEffect(() => {
-        if (visible) {
+        const wasVisible = prevVisibleRef.current;
+        prevVisibleRef.current = visible;
+
+        if (visible && !wasVisible) {
+            // Only sync time when modal OPENS (false -> true)
+            // Avoid re-syncing on every `time` reference change
             const t = time || new Date();
             setSelectedHour(t.getHours());
             setSelectedMinute(t.getMinutes());
@@ -79,8 +87,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 friction: 8,
                 useNativeDriver: true,
             }).start();
-        } else {
-            // Slide down animation
+        } else if (!visible && wasVisible) {
+            // Slide down animation when closing
             Animated.timing(slideAnim, {
                 toValue: SCREEN_HEIGHT,
                 duration: 200,

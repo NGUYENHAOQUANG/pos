@@ -41,7 +41,7 @@ import { EditWaterTreatmentScreens } from '@/features/farm/screens/pondwork/wate
 import { WaterTreatmentLogScreens } from '@/features/farm/screens/pondwork/water-treatment/WaterTreatmentLogScreens';
 import { EditEnvironmentScreens } from '@/features/menu/screens/environment/EditEnvironmentScreens';
 import CountingShrimpScreen from '@/features/farm/screens/ai-counting-shrimp/CountingShrimpScreens';
-import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/measurement/MeasureShrimpSizeAIScreen';
+import { MeasureShrimpSizeAIScreen } from '@/features/farm/screens/pondwork/ai-measure-shrimp-size/MeasureShrimpSizeAIScreen';
 import { ShrimpHealthCheckAIScreen } from '@/features/farm/screens/pondwork/ai-shrimp-health/ShrimpHealthAIScreen';
 
 // Material screens
@@ -325,10 +325,11 @@ export const AppStack: React.FC = () => {
                 name="CameraPlayer"
                 component={VideoPlayerScreen}
                 options={{
+                    headerShown: false,
                     gestureEnabled: false,
-                    animation: 'fade',
-                    // animationDuration: 200,
-                    // contentStyle: { backgroundColor: '#000' },
+                    presentation: 'fullScreenModal',
+                    animation: 'none',
+                    contentStyle: { backgroundColor: '#000' },
                 }}
             />
 
