@@ -69,8 +69,8 @@ const calculateScale = (values: number[]): ProdChartScale => {
     const formatLabel = (value: number): string => {
         if (value === 0) return '0';
         if (value >= 1000000000) return `${(value / 1000000000).toFixed(1).replace(/\.0$/, '')} Tỷ`;
-        if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')} Triệu`;
-        if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')} Nghìn`;
+        if (value >= 1000000) return `${(value / 1000000).toFixed(1).replace(/\.0$/, '')} Tr`;
+        if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, '')} Ng`;
         return Math.round(value).toString();
     };
 

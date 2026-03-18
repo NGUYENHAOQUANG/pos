@@ -132,7 +132,7 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
         <View style={chartStyles.container}>
             <BasicDropDownButton
                 prefixIcon={<ProdChartIcon width={16} height={16} />}
-                label="BIỂU ĐỒ SẢN LƯỢNG"
+                label="Biểu đồ sản lượng"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
         marginTop: -12, // Half of height to center on the point
     },
     yAxisLabel: {
-        fontSize: 10,
+        fontSize: 12,
         color: colors.gray[500],
         fontFamily: typography.fontFamily.regular,
         textAlign: 'right',

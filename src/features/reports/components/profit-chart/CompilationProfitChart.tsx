@@ -56,7 +56,7 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
             {/* Collapsible Chart Section */}
             <BasicDropDownButton
                 prefixIcon={<ProfitChartIcon width={16} height={16} />}
-                label="BIỂU ĐỒ LỢI NHUẬN"
+                label="Biểu đồ lợi nhuận"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}
