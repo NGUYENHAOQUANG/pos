@@ -20,6 +20,10 @@ export const API_ENDPOINTS = {
         PROFILE: '/auth/me',
         UPDATE_PROFILE: '/auth/profile',
     },
+    CAMERA: {
+        LIST: '/camera',
+        STREAM: (sn: string) => `/camera/${sn}/stream`,
+    },
     DEVICE: {
         LIST: '/device',
         TOGGLE: (id: string) => `/device/${id}/toggle`,

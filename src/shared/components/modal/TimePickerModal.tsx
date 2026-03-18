@@ -4,7 +4,6 @@ import {
     StyleSheet,
     Modal,
     TouchableOpacity,
-    InteractionManager,
     Animated,
     Dimensions,
     Pressable,
@@ -13,7 +12,7 @@ import { Text } from '@/shared/components/typography/Text';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import WheelPicker from 'react-native-wheely';
+import ScrollPicker from 'react-native-wheel-scrollview-picker';
 import { colors } from '@/styles';
 
 const spacing = { sm: 8, md: 16, lg: 24 };
@@ -23,16 +22,16 @@ const typography = {
 };
 
 const ITEM_HEIGHT = 44;
-const VISIBLE_REST = 2;
-const PICKER_HEIGHT = ITEM_HEIGHT * (VISIBLE_REST * 2 + 1); // 220
+const VISIBLE_COUNT = 5; // Total visible items (2 above + 1 selected + 2 below)
+const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_COUNT;
 
 // Format a number to 2-digit string
 const formatNumber = (num: number): string => (num < 10 ? `0${num}` : `${num}`);
 
 // Pre-computed option arrays (static, never changes)
-const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => formatNumber(i));
-const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, i) => formatNumber(i));
-const SECOND_OPTIONS = Array.from({ length: 60 }, (_, i) => formatNumber(i));
+const HOUR_DATA = Array.from({ length: 24 }, (_, i) => formatNumber(i));
+const MINUTE_DATA = Array.from({ length: 60 }, (_, i) => formatNumber(i));
+const SECOND_DATA = Array.from({ length: 60 }, (_, i) => formatNumber(i));
 
 interface TimePickerModalProps {
     visible: boolean;
@@ -59,11 +58,8 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
         showSeconds ? defaultTime.getSeconds() : 0
     );
 
-    // Force remount key - changes each time modal opens so FlatList re-initializes
+    // Force remount key - changes each time modal opens
     const [mountKey, setMountKey] = useState(0);
-
-    // Defer picker rendering until after modal animation completes
-    const [showPickers, setShowPickers] = useState(false);
 
     const slideAnim = React.useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -75,11 +71,6 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
             setSelectedSecond(showSeconds ? t.getSeconds() : 0);
             setMountKey(prev => prev + 1);
 
-            // Wait for modal animation to finish, then mount pickers
-            const handle = InteractionManager.runAfterInteractions(() => {
-                setShowPickers(true);
-            });
-
             // Slide up animation
             slideAnim.setValue(SCREEN_HEIGHT);
             Animated.spring(slideAnim, {
@@ -88,11 +79,7 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
                 friction: 8,
                 useNativeDriver: true,
             }).start();
-
-            return () => handle.cancel();
         } else {
-            setShowPickers(false);
-
             // Slide down animation
             Animated.timing(slideAnim, {
                 toValue: SCREEN_HEIGHT,
@@ -111,12 +98,20 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
         onClose();
     }, [selectedHour, selectedMinute, selectedSecond, onSelectTime, onClose]);
 
-    const handleHourChange = useCallback((index: number) => setSelectedHour(index), []);
-    const handleMinuteChange = useCallback((index: number) => setSelectedMinute(index), []);
-    const handleSecondChange = useCallback((index: number) => setSelectedSecond(index), []);
+    /** Render each item inside the ScrollPicker */
+    const renderItem = useCallback(
+        (data: string, _index: number, isSelected: boolean) => (
+            <View style={styles.pickerItem}>
+                <Text style={[styles.pickerItemText, isSelected && styles.pickerItemTextSelected]}>
+                    {data}
+                </Text>
+            </View>
+        ),
+        []
+    );
 
     return (
-        <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
             <View style={styles.modalRoot}>
                 {/* Overlay - tap to dismiss */}
                 <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
@@ -143,86 +138,100 @@ export const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
                     {/* Time Picker Labels */}
                     <View style={styles.labelsContainer}>
-                        <Text style={styles.columnLabel}>Giờ</Text>
-                        <Text style={styles.columnLabel}>Phút</Text>
-                        {showSeconds && <Text style={styles.columnLabel}>Giây</Text>}
+                        <View style={styles.labelColumn}>
+                            <Text style={styles.columnLabel}>Giờ</Text>
+                        </View>
+                        <View style={styles.labelSpacer} />
+                        <View style={styles.labelColumn}>
+                            <Text style={styles.columnLabel}>Phút</Text>
+                        </View>
+                        {showSeconds && (
+                            <>
+                                <View style={styles.labelSpacer} />
+                                <View style={styles.labelColumn}>
+                                    <Text style={styles.columnLabel}>Giây</Text>
+                                </View>
+                            </>
+                        )}
                     </View>
 
                     {/* Time Picker Body */}
                     <View style={styles.pickerBody}>
-                        {showPickers && (
-                            <>
-                                {/* Hour */}
-                                <View style={styles.columnContainer}>
-                                    <WheelPicker
-                                        key={`hour-${mountKey}`}
-                                        selectedIndex={selectedHour}
-                                        options={HOUR_OPTIONS}
-                                        onChange={handleHourChange}
-                                        itemHeight={ITEM_HEIGHT}
-                                        visibleRest={VISIBLE_REST}
-                                        itemTextStyle={styles.pickerItemText}
-                                        selectedIndicatorStyle={styles.selectedIndicator}
-                                        flatListProps={{
-                                            initialNumToRender: 65,
-                                            maxToRenderPerBatch: 65,
-                                            windowSize: 11,
-                                        }}
-                                    />
-                                </View>
+                        {/* Hour */}
+                        <View style={styles.columnContainer}>
+                            <ScrollPicker
+                                key={`hour-${mountKey}`}
+                                dataSource={HOUR_DATA}
+                                selectedIndex={selectedHour}
+                                onValueChange={(
+                                    _data: string | undefined,
+                                    selectedIndex: number
+                                ) => {
+                                    setSelectedHour(selectedIndex);
+                                }}
+                                wrapperHeight={PICKER_HEIGHT}
+                                wrapperBackground="transparent"
+                                itemHeight={ITEM_HEIGHT}
+                                highlightColor={colors.gray[200]}
+                                highlightBorderWidth={1}
+                                renderItem={renderItem}
+                            />
+                        </View>
 
-                                {/* Separator : */}
-                                <View style={styles.separatorContainer}>
-                                    <Text style={styles.separatorText}>:</Text>
-                                </View>
+                        {/* Separator : */}
+                        <View style={styles.separatorContainer}>
+                            <Text style={styles.separatorText}>:</Text>
+                        </View>
 
-                                {/* Minute */}
-                                <View style={styles.columnContainer}>
-                                    <WheelPicker
-                                        key={`minute-${mountKey}`}
-                                        selectedIndex={selectedMinute}
-                                        options={MINUTE_OPTIONS}
-                                        onChange={handleMinuteChange}
-                                        itemHeight={ITEM_HEIGHT}
-                                        visibleRest={VISIBLE_REST}
-                                        itemTextStyle={styles.pickerItemText}
-                                        selectedIndicatorStyle={styles.selectedIndicator}
-                                        flatListProps={{
-                                            initialNumToRender: 65,
-                                            maxToRenderPerBatch: 65,
-                                            windowSize: 11,
-                                        }}
-                                    />
-                                </View>
+                        {/* Minute */}
+                        <View style={styles.columnContainer}>
+                            <ScrollPicker
+                                key={`minute-${mountKey}`}
+                                dataSource={MINUTE_DATA}
+                                selectedIndex={selectedMinute}
+                                onValueChange={(
+                                    _data: string | undefined,
+                                    selectedIndex: number
+                                ) => {
+                                    setSelectedMinute(selectedIndex);
+                                }}
+                                wrapperHeight={PICKER_HEIGHT}
+                                wrapperBackground="transparent"
+                                itemHeight={ITEM_HEIGHT}
+                                highlightColor={colors.gray[200]}
+                                highlightBorderWidth={1}
+                                renderItem={renderItem}
+                            />
+                        </View>
 
-                                {/* Separator : (seconds) */}
-                                {showSeconds && (
-                                    <View style={styles.separatorContainer}>
-                                        <Text style={styles.separatorText}>:</Text>
-                                    </View>
-                                )}
+                        {/* Separator : (seconds) */}
+                        {showSeconds && (
+                            <View style={styles.separatorContainer}>
+                                <Text style={styles.separatorText}>:</Text>
+                            </View>
+                        )}
 
-                                {/* Second */}
-                                {showSeconds && (
-                                    <View style={styles.columnContainer}>
-                                        <WheelPicker
-                                            key={`second-${mountKey}`}
-                                            selectedIndex={selectedSecond}
-                                            options={SECOND_OPTIONS}
-                                            onChange={handleSecondChange}
-                                            itemHeight={ITEM_HEIGHT}
-                                            visibleRest={VISIBLE_REST}
-                                            itemTextStyle={styles.pickerItemText}
-                                            selectedIndicatorStyle={styles.selectedIndicator}
-                                            flatListProps={{
-                                                initialNumToRender: 65,
-                                                maxToRenderPerBatch: 65,
-                                                windowSize: 11,
-                                            }}
-                                        />
-                                    </View>
-                                )}
-                            </>
+                        {/* Second */}
+                        {showSeconds && (
+                            <View style={styles.columnContainer}>
+                                <ScrollPicker
+                                    key={`second-${mountKey}`}
+                                    dataSource={SECOND_DATA}
+                                    selectedIndex={selectedSecond}
+                                    onValueChange={(
+                                        _data: string | undefined,
+                                        selectedIndex: number
+                                    ) => {
+                                        setSelectedSecond(selectedIndex);
+                                    }}
+                                    wrapperHeight={PICKER_HEIGHT}
+                                    wrapperBackground="transparent"
+                                    itemHeight={ITEM_HEIGHT}
+                                    highlightColor={colors.gray[200]}
+                                    highlightBorderWidth={1}
+                                    renderItem={renderItem}
+                                />
+                            </View>
                         )}
                     </View>
                 </Animated.View>
@@ -271,9 +280,15 @@ const styles = StyleSheet.create({
     },
     labelsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 36,
+        alignItems: 'center',
         marginBottom: 8,
+    },
+    labelColumn: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    labelSpacer: {
+        width: 12,
     },
     pickerBody: {
         flexDirection: 'row',
@@ -283,13 +298,13 @@ const styles = StyleSheet.create({
     },
     columnContainer: {
         flex: 1,
+        alignItems: 'center',
         height: PICKER_HEIGHT,
     },
     columnLabel: {
         fontSize: typography.fontSize.sm,
         color: colors.textSecondary,
         fontWeight: '600',
-        width: 60,
         textAlign: 'center',
     },
     separatorContainer: {
@@ -303,17 +318,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: colors.text,
     },
-    // Wheel picker styles
+    // ScrollPicker item styles
+    pickerItem: {
+        height: ITEM_HEIGHT,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     pickerItemText: {
         fontSize: 20,
-        color: colors.text,
-        fontWeight: typography.fontWeight.semibold,
+        color: colors.gray[400],
+        fontWeight: typography.fontWeight.medium,
     },
-    selectedIndicator: {
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: colors.gray[200],
-        borderRadius: 0,
-        backgroundColor: 'transparent',
+    pickerItemTextSelected: {
+        color: colors.text,
+        fontWeight: typography.fontWeight.bold,
     },
 });

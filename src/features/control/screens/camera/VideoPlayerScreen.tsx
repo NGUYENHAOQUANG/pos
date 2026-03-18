@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Animated, {
     useSharedValue,
@@ -26,23 +27,30 @@ import { IconSkipBack, IconSkipForward } from '@/assets/icons';
 const CONTROLS_TIMEOUT = 5000; // Auto-hide controls after 5s
 const SEEK_STEP = 10; // Seek 10s per double tap
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('screen');
+// In rotated mode: landscape width = screen height, landscape height = screen width
 const LANDSCAPE_W = Math.max(SCREEN_W, SCREEN_H);
+const LANDSCAPE_H = Math.min(SCREEN_W, SCREEN_H);
 
 type VideoPlayerRouteProp = RouteProp<AppStackParamList, 'CameraPlayer'>;
 
 /**
- * Full-screen landscape video player with:
- * - Auto landscape orientation
- * - Tap to show/hide controls
- * - Auto-hide controls after 5s
- * - Double-tap left/right to seek ±10s
- * - Horizontal pan gesture to seek
- * - Progress bar with scrubbing
+ * Full-screen landscape video player using CSS transform rotate.
+ * Device stays in portrait, content is rotated 90deg for landscape view.
+ * Works identically on both Android and iOS without native orientation changes.
  */
 export const VideoPlayerScreen: React.FC = () => {
     const navigation = useNavigation();
     const route = useRoute<VideoPlayerRouteProp>();
     const { videoUrl, cameraName, pondName } = route.params;
+
+    // Detect if the URL is an RTSP live stream
+    const isLiveStream = videoUrl.toLowerCase().startsWith('rtsp://');
+
+    useEffect(() => {
+        return () => {
+            setPaused(true);
+        };
+    }, []);
 
     // Video ref
     const videoRef = useRef<any>(null);
@@ -232,132 +240,165 @@ export const VideoPlayerScreen: React.FC = () => {
     return (
         <GestureHandlerRootView style={styles.root}>
             <StatusBar hidden />
-            <View style={styles.container}>
-                {/* Video with pinch-to-zoom scale */}
-                <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
-                    <Video
-                        ref={videoRef}
-                        source={{ uri: videoUrl }}
-                        style={styles.video}
-                        resizeMode="contain"
-                        paused={paused}
-                        onLoad={onLoad}
-                        onProgress={onProgress}
-                        onBuffer={onBuffer}
-                        repeat
-                        playInBackground={false}
-                        playWhenInactive={false}
-                    />
-                </Animated.View>
-
-                {/* Buffering indicator */}
-                {isBuffering && (
-                    <View style={styles.bufferingContainer}>
-                        <ActivityIndicator size="large" color={colors.white} />
-                    </View>
-                )}
-
-                {/* Gesture area - tap, double-tap, pan, pinch (always on top for touch) */}
-                <GestureDetector gesture={composedGesture}>
-                    <Animated.View
-                        style={[styles.gestureContainer, { backgroundColor: 'transparent' }]}
-                    />
-                </GestureDetector>
-
-                {/* Controls overlay */}
-                {showControls && (
-                    <Animated.View
-                        style={[styles.controlsOverlay, controlsAnimatedStyle]}
-                        pointerEvents="box-none"
-                    >
-                        {/* Top bar - Badges left, Close right */}
-                        <View style={styles.topBar} pointerEvents="box-none">
-                            <View style={styles.badgesRow}>
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{pondName}</Text>
-                                </View>
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{cameraName}</Text>
-                                </View>
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => navigation.goBack()}
-                                style={styles.closeButton}
-                            >
-                                <Text style={styles.closeText}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Center - Skip back, Play/Pause, Skip forward */}
-                        <View style={styles.centerControls} pointerEvents="box-none">
-                            <TouchableOpacity
-                                onPress={() => {
-                                    seekTo(currentTime - SEEK_STEP);
-                                    showControlsUI();
-                                }}
-                                style={styles.seekButton}
-                            >
-                                <IconSkipBack width={32} height={32} />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setPaused(!paused);
-                                    showControlsUI();
-                                }}
-                                style={styles.playPauseButton}
-                            >
-                                {paused ? (
-                                    <View style={styles.playIcon} />
-                                ) : (
-                                    <View style={styles.pauseIconRow}>
-                                        <View style={styles.pauseBar} />
-                                        <View style={styles.pauseBar} />
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    seekTo(currentTime + SEEK_STEP);
-                                    showControlsUI();
-                                }}
-                                style={styles.seekButton}
-                            >
-                                <IconSkipForward width={32} height={32} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Bottom bar - Time + Progress */}
-                        <View style={styles.bottomBar} pointerEvents="box-none">
-                            <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-                            <TouchableWithoutFeedback
-                                onPress={e => {
-                                    const locationX = e.nativeEvent.locationX;
-                                    const barWidth = LANDSCAPE_W - 140;
-                                    const seekPercent = locationX / barWidth;
-                                    seekTo(seekPercent * duration);
-                                    showControlsUI();
-                                }}
-                            >
-                                <View style={styles.progressBarContainer}>
-                                    <View style={styles.progressBarBackground}>
-                                        <View
-                                            style={[
-                                                styles.progressBarFill,
-                                                { width: `${progress}%` },
-                                            ]}
-                                        />
-                                        <View
-                                            style={[styles.progressDot, { left: `${progress}%` }]}
-                                        />
-                                    </View>
-                                </View>
-                            </TouchableWithoutFeedback>
-                            <Text style={styles.timeText}>{formatTime(duration)}</Text>
-                        </View>
+            {/* Rotated container: simulate landscape by rotating 90deg */}
+            <View style={styles.rotatedContainer}>
+                <View style={styles.container}>
+                    {/* Video with pinch-to-zoom scale */}
+                    <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
+                        {isLiveStream ? (
+                            <VLCPlayer
+                                source={{ uri: videoUrl }}
+                                style={styles.video}
+                                paused={paused}
+                                onBuffering={() => setIsBuffering(true)}
+                                onPlaying={() => setIsBuffering(false)}
+                                autoplay={true}
+                            />
+                        ) : (
+                            <Video
+                                ref={videoRef}
+                                source={{ uri: videoUrl }}
+                                style={styles.video}
+                                resizeMode="contain"
+                                paused={paused}
+                                onLoad={onLoad}
+                                onProgress={onProgress}
+                                onBuffer={onBuffer}
+                                repeat
+                                playInBackground={false}
+                                playWhenInactive={false}
+                            />
+                        )}
                     </Animated.View>
-                )}
+
+                    {/* Buffering indicator */}
+                    {isBuffering && (
+                        <View style={styles.bufferingContainer}>
+                            <ActivityIndicator size="large" color={colors.white} />
+                        </View>
+                    )}
+
+                    {/* Gesture area - tap, double-tap, pan, pinch (always on top for touch) */}
+                    <GestureDetector gesture={composedGesture}>
+                        <Animated.View
+                            style={[styles.gestureContainer, { backgroundColor: 'transparent' }]}
+                        />
+                    </GestureDetector>
+
+                    {/* Controls overlay */}
+                    {showControls && (
+                        <Animated.View
+                            style={[styles.controlsOverlay, controlsAnimatedStyle]}
+                            pointerEvents="box-none"
+                        >
+                            {/* Top bar - Badges left, Close right */}
+                            <View style={styles.topBar} pointerEvents="box-none">
+                                <View style={styles.badgesRow}>
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{pondName}</Text>
+                                    </View>
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{cameraName}</Text>
+                                    </View>
+                                </View>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setPaused(true);
+                                        navigation.goBack();
+                                    }}
+                                    style={styles.closeButton}
+                                >
+                                    <Text style={styles.closeText}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Center - Skip back, Play/Pause, Skip forward */}
+                            <View style={styles.centerControls} pointerEvents="box-none">
+                                {!isLiveStream && (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            seekTo(currentTime - SEEK_STEP);
+                                            showControlsUI();
+                                        }}
+                                        style={styles.seekButton}
+                                    >
+                                        <IconSkipBack width={32} height={32} />
+                                    </TouchableOpacity>
+                                )}
+
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setPaused(!paused);
+                                        showControlsUI();
+                                    }}
+                                    style={styles.playPauseButton}
+                                >
+                                    {paused ? (
+                                        <View style={styles.playIcon} />
+                                    ) : (
+                                        <View style={styles.pauseIconRow}>
+                                            <View style={styles.pauseBar} />
+                                            <View style={styles.pauseBar} />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+
+                                {!isLiveStream && (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            seekTo(currentTime + SEEK_STEP);
+                                            showControlsUI();
+                                        }}
+                                        style={styles.seekButton}
+                                    >
+                                        <IconSkipForward width={32} height={32} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            {/* Bottom bar - Time + Progress (hidden for live stream) */}
+                            {isLiveStream ? (
+                                <View style={styles.bottomBar} pointerEvents="box-none">
+                                    <View style={styles.liveBadge}>
+                                        <View style={styles.liveDot} />
+                                        <Text style={styles.liveText}>LIVE</Text>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View style={styles.bottomBar} pointerEvents="box-none">
+                                    <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+                                    <TouchableWithoutFeedback
+                                        onPress={e => {
+                                            const locationX = e.nativeEvent.locationX;
+                                            const barWidth = LANDSCAPE_W - 140;
+                                            const seekPercent = locationX / barWidth;
+                                            seekTo(seekPercent * duration);
+                                            showControlsUI();
+                                        }}
+                                    >
+                                        <View style={styles.progressBarContainer}>
+                                            <View style={styles.progressBarBackground}>
+                                                <View
+                                                    style={[
+                                                        styles.progressBarFill,
+                                                        { width: `${progress}%` },
+                                                    ]}
+                                                />
+                                                <View
+                                                    style={[
+                                                        styles.progressDot,
+                                                        { left: `${progress}%` },
+                                                    ]}
+                                                />
+                                            </View>
+                                        </View>
+                                    </TouchableWithoutFeedback>
+                                    <Text style={styles.timeText}>{formatTime(duration)}</Text>
+                                </View>
+                            )}
+                        </Animated.View>
+                    )}
+                </View>
             </View>
         </GestureHandlerRootView>
     );
@@ -367,6 +408,15 @@ const styles = StyleSheet.create({
     root: {
         flex: 1,
         backgroundColor: colors.black,
+    },
+    // Rotated wrapper: simulate landscape by rotating content 90deg
+    rotatedContainer: {
+        width: LANDSCAPE_W,
+        height: LANDSCAPE_H,
+        transform: [{ rotate: '90deg' }],
+        position: 'absolute',
+        top: (SCREEN_H - LANDSCAPE_H) / 2,
+        left: (SCREEN_W - LANDSCAPE_W) / 2,
     },
     container: {
         flex: 1,
@@ -520,6 +570,26 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         backgroundColor: colors.white,
         marginLeft: -6,
+    },
+    liveBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.red[500],
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        gap: 6,
+    },
+    liveDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: colors.white,
+    },
+    liveText: {
+        color: colors.white,
+        fontSize: 13,
+        fontWeight: '700',
     },
 });
 

@@ -1,22 +1,39 @@
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
+import { Text } from '@/shared/components/typography/Text';
 import { CameraCard } from '@/features/control/components/camera/CameraCard';
-import { CameraData, MOCK_CAMERAS } from '@/features/control/data/camerasData';
-import { spacing } from '@/styles';
+import { CameraSkeleton } from '@/features/control/components/skeleton/CameraSkeleton';
+import { useCameras } from '@/features/control/hooks/useCameras';
+import { CameraItem } from '@/features/control/api/cameraApi';
+import { colors, spacing } from '@/styles';
 
 interface CameraListProps {
-    onCameraPress: (camera: CameraData) => void;
+    onCameraPress: (camera: CameraItem) => void;
 }
 
 /**
  * Scrollable list of camera cards for the Camera tab.
- * Uses mock data for now — will be replaced with API data later.
+ * Fetches data from API via useCameras hook.
  */
 export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
+    const { data: cameras = [], isLoading } = useCameras();
+
+    if (isLoading) {
+        return <CameraSkeleton />;
+    }
+
+    if (cameras.length === 0) {
+        return (
+            <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Chưa có camera nào được kết nối</Text>
+            </View>
+        );
+    }
+
     return (
         <FlatList
-            data={MOCK_CAMERAS}
-            keyExtractor={item => item.id}
+            data={cameras}
+            keyExtractor={item => item.deviceSn}
             renderItem={({ item }) => <CameraCard camera={item} onPress={onCameraPress} />}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
@@ -33,5 +50,15 @@ const styles = StyleSheet.create({
     },
     separator: {
         height: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: spacing.xl,
+    },
+    emptyText: {
+        fontSize: 14,
+        color: colors.gray[500],
     },
 });

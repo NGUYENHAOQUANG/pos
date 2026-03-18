@@ -12,4 +12,9 @@ export const controlKeys = {
         byDevice: (deviceId: string) =>
             [...controlKeys.schedules.all(), 'byDevice', deviceId] as const,
     },
+    cameras: {
+        all: () => [...controlKeys.all, 'cameras'] as const,
+        list: () => [...controlKeys.cameras.all(), 'list'] as const,
+        stream: (sn: string) => [...controlKeys.cameras.all(), 'stream', sn] as const,
+    },
 };

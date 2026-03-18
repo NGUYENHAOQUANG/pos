@@ -26,7 +26,9 @@ import { useZones, useAllPondsByZone } from '@/features/farm/hooks';
 
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { CameraList } from '@/features/control/components/camera/CameraList';
-import { CameraData } from '@/features/control/data/camerasData';
+import { CameraItem } from '@/features/control/api/cameraApi';
+import { cameraApi } from '@/features/control/api/cameraApi';
+import Toast from 'react-native-toast-message';
 
 /** Stable key extractor - defined outside component to prevent re-creation */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,7 +76,7 @@ export const DeviceControlScreens = () => {
         isLoading: isLoadingPonds,
         refetch,
         isRefetching,
-    } = useAllPondsByZone(selectedZoneId ?? '');
+    } = useAllPondsByZone(selectedZoneId!);
 
     // Ensure valid array
     const farmPonds = useMemo(() => {
@@ -346,12 +348,30 @@ export const DeviceControlScreens = () => {
                 </>
             ) : (
                 <CameraList
-                    onCameraPress={(camera: CameraData) => {
-                        navigation.navigate('CameraPlayer', {
-                            videoUrl: camera.videoUrl,
-                            cameraName: camera.cameraName,
-                            pondName: camera.pondName,
-                        });
+                    onCameraPress={async (camera: CameraItem) => {
+                        try {
+                            const response = await cameraApi.getStream(camera.deviceSn);
+                            const streamData = response.data?.data;
+                            if (!streamData?.url) {
+                                Toast.show({
+                                    type: 'error',
+                                    text1: 'Lỗi',
+                                    text2: 'Không lấy được URL stream',
+                                });
+                                return;
+                            }
+                            navigation.navigate('CameraPlayer', {
+                                videoUrl: streamData.url,
+                                cameraName: camera.name,
+                                pondName: camera.name,
+                            });
+                        } catch {
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Lỗi',
+                                text2: 'Không thể kết nối đến camera',
+                            });
+                        }
                     }}
                 />
             )}
