@@ -59,6 +59,8 @@ export const useCreateEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'env-measurement-chart'] });
             Toast.show({ type: 'success', text1: 'Đã đo thông số môi trường thành công' });
         },
         onError: handleError,
@@ -85,6 +87,8 @@ export const useUpdateEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'env-measurement-chart'] });
             Toast.show({ type: 'success', text1: 'Đã cập nhật thành công' });
         },
         onError: handleError,
@@ -101,6 +105,8 @@ export const useDeleteEnvMeasurement = () => {
                 queryKey: envMeasurementKeys.lists(),
             });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['report', 'env-measurement-chart'] });
             Toast.show({ type: 'success', text1: 'Tác vụ đã được xóa' });
         },
         onError: handleError,

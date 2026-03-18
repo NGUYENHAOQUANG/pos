@@ -122,6 +122,9 @@ export const useCreateWaterTreatment = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
     });
 };
@@ -143,6 +146,9 @@ export const useUpdateWaterTreatment = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
     });
 };
@@ -157,6 +163,9 @@ export const useDeleteWaterTreatment = () => {
             queryClient.invalidateQueries({ queryKey: farmKeys.waterTreatment.list(pondId) });
             queryClient.invalidateQueries({ queryKey: farmKeys.pondRecords.all() });
             queryClient.invalidateQueries({ queryKey: ['warehouse-items'] });
+            // Invalidate report charts
+            queryClient.invalidateQueries({ queryKey: ['cost-donut'] });
+            queryClient.invalidateQueries({ queryKey: ['report', 'profit-stats'] });
         },
     });
 };

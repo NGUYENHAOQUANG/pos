@@ -38,17 +38,20 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
         return allPonds;
     }, [statsData?.byPond, pondCode]);
 
+    // Convert kg → tấn (1 tấn = 1000 kg)
+    const KG_TO_TAN = 1000;
+
     const totalYield = useMemo(() => {
         if (pondCode) {
-            return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0);
+            return byPondData.reduce((sum, p) => sum + p.totalHarvested, 0) / KG_TO_TAN;
         }
-        return statsData?.kpis?.totalHarvested ?? 0;
+        return (statsData?.kpis?.totalHarvested ?? 0) / KG_TO_TAN;
     }, [byPondData, pondCode, statsData?.kpis?.totalHarvested]);
 
     const chartData: HarvestChartData[] = useMemo(() => {
         return byPondData.map(pondStat => ({
             pond: pondStat.pondName,
-            yield: pondStat.totalHarvested,
+            yield: pondStat.totalHarvested / KG_TO_TAN,
         }));
     }, [byPondData]);
 

@@ -40,14 +40,15 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Dimensions
     const PADDING_TOP = 20;
     const PADDING_BOTTOM = 25; // space for x-axis labels
-    const PADDING_LEFT = 85;
+    const PADDING_LEFT = 50;
     const PADDING_RIGHT = 10;
 
     // Use dynamic width to prevent squishing when data is large
-    const MIN_BAR_STEP = 50;
+    const MIN_BAR_STEP = 70;
+    const SCROLL_OFFSET = 16; // Extra left padding inside scroll for first bar
     const actualWidth = Math.max(
         chartWidth,
-        data.length * MIN_BAR_STEP + PADDING_LEFT + PADDING_RIGHT
+        data.length * MIN_BAR_STEP + PADDING_LEFT + PADDING_RIGHT + SCROLL_OFFSET
     );
 
     const drawWidth = actualWidth - PADDING_LEFT - PADDING_RIGHT;
@@ -61,7 +62,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     const getX = (index: number) => {
         const effectiveDataLength = Math.max(data.length, 5);
         const stepLength = drawWidth / effectiveDataLength;
-        return PADDING_LEFT + index * stepLength + stepLength / 2;
+        return PADDING_LEFT + SCROLL_OFFSET + index * stepLength + stepLength / 2;
     };
 
     const barWidth = 32;

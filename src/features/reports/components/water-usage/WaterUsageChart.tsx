@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
@@ -10,15 +10,12 @@ import chartStyles from '@/features/reports/styles/chart.styles';
 import DropIcon from '@/assets/Icon/IconReport/Drop.svg';
 import { useWaterUsageStats } from '../../hooks/useWaterUsageStats';
 import { scaleLinear, formatNumberVietnamese, parseWaterUsageData } from './waterUsageHelpers';
+import { typography } from '@/styles/typography';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_HEIGHT = 400;
 const PADDING_LEFT = 85;
-const PADDING_RIGHT = 20;
 const PADDING_TOP = 20;
 const PADDING_BOTTOM = 40;
-const CHART_WIDTH = SCREEN_WIDTH;
-const DRAW_WIDTH = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
 const DRAW_HEIGHT = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
 
 interface WaterUsageChartProps {
@@ -28,7 +25,6 @@ interface WaterUsageChartProps {
 const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Fetch API data only when expanded and zoneId is available
     const {
         data: statsData,
         isLoading,
@@ -42,11 +38,18 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
         return parseWaterUsageData(statsData);
     }, [statsData]);
 
-    const { totalWaterSupplied, cumulativeData, yMax, yTicks, xLabels } = parsedData;
-    const SCROLL_PAD = 36; // left padding inside scroll to avoid first label clipping
-    const SCROLL_PAD_RIGHT = 36; // right padding to avoid last label clipping
-    const scrollWidth = DRAW_WIDTH + SCROLL_PAD + SCROLL_PAD_RIGHT;
-    const barWidth = cumulativeData.length > 0 ? DRAW_WIDTH / cumulativeData.length : DRAW_WIDTH;
+    const { totalWaterSupplied, bars, yMax, yTicks } = parsedData;
+
+    // Simple layout: fixed width per bar, evenly spaced
+    const BAR_WIDTH = 32;
+    const BAR_STEP = 80; // Distance between bar centers (ensures date labels don't overlap)
+    const SCROLL_PAD = 16;
+    const SCROLL_PAD_RIGHT = 36;
+
+    const scrollWidth = SCROLL_PAD + bars.length * BAR_STEP + SCROLL_PAD_RIGHT;
+
+    // Get center X of a bar
+    const getBarCenterX = (index: number) => SCROLL_PAD + index * BAR_STEP + BAR_STEP / 2;
 
     return (
         <View style={chartStyles.container}>
@@ -76,7 +79,8 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                             <View style={styles.statsContainer}>
                                 <Text style={styles.statLabel}>Tổng lượng nước cấp</Text>
                                 <Text style={styles.statValue}>
-                                    {formatNumberVietnamese(totalWaterSupplied, false)} m³
+                                    {formatNumberVietnamese(totalWaterSupplied, false)}{' '}
+                                    <Text style={styles.statUnit}>m³</Text>
                                 </Text>
                             </View>
 
@@ -134,57 +138,52 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                                             );
                                         })}
 
-                                        {/* Bars */}
-                                        {cumulativeData.map((point, index) => {
-                                            const prevValue =
-                                                index === 0 ? 0 : cumulativeData[index - 1].value;
+                                        {/* One bar per day */}
+                                        {bars.map((bar, index) => {
+                                            const cx = getBarCenterX(index);
                                             const yTop = scaleLinear(
-                                                point.value,
+                                                bar.value,
                                                 [0, yMax],
                                                 [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
                                             );
-                                            const yBottom = scaleLinear(
-                                                prevValue,
-                                                [0, yMax],
-                                                [DRAW_HEIGHT + PADDING_TOP, PADDING_TOP]
-                                            );
-                                            let h = Math.abs(yBottom - yTop);
-                                            if (h < 2 && point.value > prevValue) h = 2;
-                                            const x = SCROLL_PAD + index * barWidth;
+                                            const yBottom = DRAW_HEIGHT + PADDING_TOP;
+                                            let h = yBottom - yTop;
+                                            if (h < 2 && bar.value > 0) h = 2;
+
                                             return (
                                                 <Rect
                                                     key={`bar-${index}`}
-                                                    x={x + 1}
+                                                    x={cx - BAR_WIDTH / 2}
                                                     y={yTop}
-                                                    width={barWidth - 2 > 0 ? barWidth - 2 : 1}
+                                                    width={BAR_WIDTH}
                                                     height={h}
                                                     fill={colors.orange[600]}
+                                                    rx={2}
+                                                    ry={2}
                                                 />
                                             );
                                         })}
 
-                                        {/* X Axis Labels */}
-                                        {xLabels.map((date, i) => {
-                                            const x =
-                                                SCROLL_PAD +
-                                                i * (DRAW_WIDTH / Math.max(1, xLabels.length - 1));
+                                        {/* X Axis date labels */}
+                                        {bars.map((bar, i) => {
+                                            const cx = getBarCenterX(i);
                                             return (
                                                 <G key={`x-label-${i}`}>
                                                     <Line
-                                                        x1={x}
+                                                        x1={cx}
                                                         y1={DRAW_HEIGHT + PADDING_TOP}
-                                                        x2={x}
+                                                        x2={cx}
                                                         y2={DRAW_HEIGHT + PADDING_TOP + 5}
                                                         stroke={colors.border}
                                                     />
                                                     <SvgText
-                                                        x={x}
+                                                        x={cx}
                                                         y={DRAW_HEIGHT + PADDING_TOP + 20}
                                                         fontSize={12}
                                                         fill={colors.black}
                                                         textAnchor="middle"
                                                     >
-                                                        {date}
+                                                        {bar.dateLabel}
                                                     </SvgText>
                                                 </G>
                                             );
@@ -227,9 +226,16 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: '700',
+        fontSize: 14,
+        fontWeight: typography.fontWeight.bold,
         color: colors.black,
+        lineHeight: 20,
+    },
+    statUnit: {
+        fontSize: 12,
+        fontWeight: '400',
+        color: colors.black,
+        lineHeight: 18,
     },
     yAxisTitle: {
         fontSize: 16,
