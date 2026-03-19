@@ -21,8 +21,8 @@ import {
     useCreateExportReceipt,
     useUpdateExportReceipt,
     useDeleteExportReceipt,
-} from '@/features/material/hooks/exportReceipt/useExportReceipt';
-import { useExportReceiptItems } from '@/features/material/hooks/exportReceipt/useExportReceiptItems';
+} from '@/features/material/hooks/useExportReceipt';
+import { useExportReceiptItems } from '@/features/material/hooks/useExportReceiptItems';
 import { useCurrentWarehouse } from '@/features/material/hooks/useWarehouses';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 
@@ -30,8 +30,7 @@ export const ExportWarehouseFormScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<RouteProp<AppStackParamList, 'ExportWarehouseForm'>>();
 
-    const params = route.params as any;
-    const exportReceiptId = params?.exportReceiptId;
+    const { exportReceiptId } = route.params ?? {};
     const isEditMode = !!exportReceiptId;
 
     const { setTabBarVisible } = useTabBarVisibility();

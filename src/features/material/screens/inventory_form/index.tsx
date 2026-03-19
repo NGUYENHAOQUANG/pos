@@ -14,7 +14,7 @@ import {
     useCreateInventoryCheck,
     useUpdateInventoryCheck,
     useDeleteInventoryTicket,
-} from '@/features/material/hooks/inventory/useInventory';
+} from '@/features/material/hooks/useInventory';
 import {
     CreateInventoryCheckRequest,
     UpdateInventoryCheckRequest,

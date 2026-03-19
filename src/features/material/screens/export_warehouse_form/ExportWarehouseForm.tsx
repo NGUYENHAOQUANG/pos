@@ -116,12 +116,7 @@ export const ExportWarehouseForm: React.FC<ExportWarehouseFormProps> = ({
         }
     }, [isEditMode, initialData, settledZone, getValues]);
 
-    const { add, remove, update } = useExportMaterialActions(
-        control,
-        getValues,
-        setValue,
-        [] // Material data now set directly by DropdownWarehouseItem callback
-    );
+    const { add, remove, update } = useExportMaterialActions(control, getValues, setValue);
 
     const onError = (formErrors: any) => {
         const firstErrorKey = Object.keys(formErrors)[0];
