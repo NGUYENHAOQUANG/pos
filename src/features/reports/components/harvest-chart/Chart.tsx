@@ -17,10 +17,24 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
     // Process Data
     const processedData = useMemo(() => {
         const maxValue = Math.max(...data.map(d => d.yield));
-        const roundMax = Math.ceil(maxValue / 10) * 10 || 10;
 
-        // Setup 4 steps
-        const step = roundMax / 4;
+        // Find a nice integer step for 4 intervals (5 tick marks including 0)
+        const INTERVALS = 4;
+        const rawStep = (maxValue || 10) / INTERVALS;
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep || 1)));
+        const niceMultiples = [1, 1.5, 2, 2.5, 3, 5, 10];
+        let step = niceMultiples[niceMultiples.length - 1] * magnitude;
+        for (const m of niceMultiples) {
+            if (m * magnitude >= rawStep) {
+                step = m * magnitude;
+                break;
+            }
+        }
+        // Ensure step is integer
+        step = Math.max(1, Math.ceil(step));
+
+        const roundMax = step * INTERVALS;
+
         const yAxisLabels = [
             roundMax,
             roundMax - step,
@@ -147,7 +161,7 @@ export const Chart: React.FC<ChartProps> = ({ data, chartWidth, chartHeight }) =
                                     <SvgText
                                         x={x}
                                         y={y - 8}
-                                        fill={colors.text}
+                                        fill={colors.textSecondary}
                                         fontSize={12}
                                         fontWeight={typography.fontWeight.medium.toString()}
                                         textAnchor="middle"

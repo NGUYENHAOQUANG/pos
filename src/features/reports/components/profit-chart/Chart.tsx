@@ -275,7 +275,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                     key={`x-label-${day}`}
                                     x={x}
                                     y={y}
-                                    fill={colors.text}
+                                    fill={colors.textSecondary}
                                     fontSize={12}
                                     textAnchor="middle"
                                 >
@@ -308,7 +308,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data }) =
                                 key={`y-overlay-${value}`}
                                 x={16}
                                 y={y + 4}
-                                fill={colors.text}
+                                fill={colors.textSecondary}
                                 fontSize={12}
                                 textAnchor="start"
                             >

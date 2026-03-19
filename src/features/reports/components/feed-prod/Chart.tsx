@@ -7,7 +7,7 @@ import { Text } from '@/shared/components/typography/Text';
 const CHART_THEME = {
     bg: colors.white,
     grid: colors.gray[200],
-    text: colors.text,
+    text: colors.textSecondary,
     green: '#22c55e',
     orange: '#f97316',
 };

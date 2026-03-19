@@ -106,7 +106,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                                                 x={16}
                                                 y={y + 4}
                                                 fontSize={12}
-                                                fill={colors.text}
+                                                fill={colors.textSecondary}
                                                 textAnchor="start"
                                             >
                                                 {tick === 0 ? '0' : formatNumberVietnamese(tick)}
@@ -180,7 +180,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                                                         x={cx}
                                                         y={DRAW_HEIGHT + PADDING_TOP + 20}
                                                         fontSize={12}
-                                                        fill={colors.black}
+                                                        fill={colors.textSecondary}
                                                         textAnchor="middle"
                                                     >
                                                         {bar.dateLabel}
