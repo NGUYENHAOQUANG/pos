@@ -7,9 +7,6 @@ import { useTabBarVisibility } from '@/app/navigation/TabBarVisibilityContext';
 import { AppStackParamList } from '@/app/navigation/AppStack';
 import { useFarmStore } from '@/features/farm/store/farmStore';
 import { useWarehouses } from '@/features/material/hooks/useWarehouses';
-import { useMaterials } from '@/features/material/hooks/useMaterials';
-import { useSuppliers } from '@/features/material/hooks/useSuppliers';
-import { useMaterialOptions } from '@/features/material/hooks/inventory';
 import {
     useCreateImportReceipt,
     useUpdateImportReceipt,
@@ -49,24 +46,6 @@ export const ImportReceiptFormScreen: React.FC = () => {
     const { data: warehouses = [] } = useWarehouses({
         ZoneId: selectedZoneId || undefined,
     });
-    const { data: materialsData = [] } = useMaterials({
-        PageSize: 50,
-        OrderBy: 'CreatedAt desc',
-    });
-    const { data: suppliers = [] } = useSuppliers();
-
-    // Derived Data
-    const availableMaterials = useMemo(
-        () => importReceiptService.mapMaterialsToOptions(materialsData),
-        [materialsData]
-    );
-
-    const supplierOptions = useMemo(
-        () => importReceiptService.mapSuppliersToOptions(suppliers),
-        [suppliers]
-    );
-
-    const materialOptions = useMaterialOptions(availableMaterials);
 
     // Fetch Details for Edit Mode
     const { data: importReceiptDetail, isLoading: isLoadingDetailData } = useImportReceiptDetail(
@@ -80,19 +59,20 @@ export const ImportReceiptFormScreen: React.FC = () => {
 
     // Initial Data for Edit
     const initialData = useMemo(() => {
-        if (isEditMode && importReceiptDetail && importReceiptItems && suppliers.length > 0) {
-            const formState = importReceiptService.mapDetailToForm(importReceiptDetail, suppliers);
+        if (isEditMode && importReceiptDetail && importReceiptItems) {
+            const formState = importReceiptService.mapDetailToForm(importReceiptDetail);
             const itemsData = importReceiptItems.items || [];
             const mappedItems = importReceiptService.mapItemsToForm(itemsData);
 
             return {
                 date: formState.date,
                 supplier: formState.supplier,
+                supplierName: formState.supplierName,
                 warehouseItems: mappedItems,
             };
         }
         return undefined;
-    }, [isEditMode, importReceiptDetail, importReceiptItems, suppliers]);
+    }, [isEditMode, importReceiptDetail, importReceiptItems]);
 
     // Mutations
     const { submitWithFiles, isUploading } = useFileSubmit();
@@ -125,16 +105,17 @@ export const ImportReceiptFormScreen: React.FC = () => {
             status: ImportReceiptStatus,
             onSuccessUpload: () => void
         ) => {
-            const selectedSupplier = suppliers.find(s => s.name === data.supplier);
+            // data.supplier is now the supplier ID directly
+            const supplierId = data.supplier;
 
-            if (!selectedSupplier) {
+            if (!supplierId) {
                 showValidationError('Vui lòng chọn nhà cung cấp hợp lệ');
                 return;
             }
 
             const processSubmit = async (documentIds: string[]) => {
                 const payload = importReceiptService.mapFormToPayload(
-                    selectedSupplier.id,
+                    supplierId,
                     warehouses[0]?.id || '',
                     data.warehouseItems as MaterialItem[],
                     status,
@@ -156,7 +137,6 @@ export const ImportReceiptFormScreen: React.FC = () => {
             await submitWithFiles(data.files || [], processSubmit);
         },
         [
-            suppliers,
             warehouses,
             isEditMode,
             importReceiptId,
@@ -191,9 +171,6 @@ export const ImportReceiptFormScreen: React.FC = () => {
             isLoadingDetail={isLoadingDetail}
             isSubmitting={isSubmitting}
             initialData={initialData}
-            supplierOptions={supplierOptions}
-            materialOptions={materialOptions}
-            availableMaterials={availableMaterials}
             onBackPress={handleBackPress}
             onSubmit={onSubmit}
             onDelete={onDelete}

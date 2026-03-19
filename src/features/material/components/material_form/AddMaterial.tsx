@@ -88,9 +88,9 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
     };
 
     return (
-        <View>
+        <View style={styles.container}>
             {/* Basic Info Section */}
-            <View style={[styles.sectionContainer, styles.sectionContainerZ20]}>
+            <View style={[styles.sectionContainer]}>
                 <CollapseHead
                     title="Thông tin cơ bản"
                     isExpanded={isBasicExpanded}
@@ -219,8 +219,11 @@ export const AddMaterial: React.FC<AddMaterialProps> = ({
 };
 
 const styles = StyleSheet.create({
+    container: {
+        gap: spacing.sm,
+    },
     sectionContainer: {
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         backgroundColor: colors.white,
         borderRadius: borderRadius.md,
         borderWidth: 1,
@@ -267,9 +270,6 @@ const styles = StyleSheet.create({
     },
     halfWidth: {
         flex: 1,
-    },
-    sectionContainerZ20: {
-        zIndex: 20,
     },
     sectionContainerZ10: {
         zIndex: 10,

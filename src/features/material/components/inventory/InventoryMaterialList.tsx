@@ -3,9 +3,8 @@ import { View, StyleSheet, LayoutAnimation, UIManager, Platform } from 'react-na
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { colors, spacing, borderRadius } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
-import { DropdownOption } from '@/features/material/components/DropdownMaterial';
 import { CollapseHead } from '@/shared/components/layout/CollapseHead';
-import { InventoryMaterialItem } from '@/features/material/components/inventory_list/InventoryMaterialItem';
+import { InventoryMaterialItem } from '@/features/material/components/inventory/InventoryMaterialItem';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -27,8 +26,8 @@ interface InventoryMaterialListProps {
     onUpdateItem: (id: string, field: keyof InventoryItem, value: any) => void;
     onAddItem: () => void;
     onRemoveItem: (id: string) => void;
-    materialOptions?: DropdownOption[];
-    onDropdownOpen?: (itemIndex: number) => void;
+    /** Warehouse ID for the dropdown */
+    warehouseId?: string;
 }
 
 export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
@@ -36,25 +35,20 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
     onUpdateItem,
     onAddItem,
     onRemoveItem,
-    materialOptions = [],
-    onDropdownOpen,
+    warehouseId,
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setIsExpanded(!isExpanded);
     };
 
-    const handleToggleDropdown = (id: string, index: number) => {
-        if (activeDropdownId === id) {
-            setActiveDropdownId(null);
-        } else {
-            setActiveDropdownId(id);
-            onDropdownOpen?.(index);
-        }
-    };
+    // Compute used material IDs once for all items
+    const usedMaterialIds = React.useMemo(
+        () => new Set(items.map(i => i.materialId).filter(Boolean)),
+        [items]
+    );
 
     return (
         <View style={styles.mainMaterialCard}>
@@ -66,31 +60,17 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
 
             {isExpanded && (
                 <View style={styles.mainContent}>
-                    {items.map((item, index) => {
-                        const isDropdownOpen = activeDropdownId === item.id;
-                        const usedMaterialIds = new Set(
-                            items.map(i => i.materialId).filter(Boolean)
-                        );
-                        const currentItemMaterialId = item.materialId;
-                        const availableOptions = materialOptions.filter(
-                            opt =>
-                                !usedMaterialIds.has(String(opt.value)) ||
-                                String(opt.value) === String(currentItemMaterialId)
-                        );
-
-                        return (
-                            <InventoryMaterialItem
-                                key={item.id}
-                                item={item}
-                                index={index}
-                                availableOptions={availableOptions}
-                                isDropdownOpen={isDropdownOpen}
-                                onUpdateItem={onUpdateItem}
-                                onRemoveItem={onRemoveItem}
-                                handleToggleDropdown={handleToggleDropdown}
-                            />
-                        );
-                    })}
+                    {items.map((item, index) => (
+                        <InventoryMaterialItem
+                            key={item.id}
+                            item={item}
+                            index={index}
+                            warehouseId={warehouseId}
+                            usedMaterialIds={usedMaterialIds}
+                            onUpdateItem={onUpdateItem}
+                            onRemoveItem={onRemoveItem}
+                        />
+                    ))}
 
                     <Button
                         title="Thêm vật tư"
@@ -110,14 +90,15 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
 const styles = StyleSheet.create({
     mainMaterialCard: {
         backgroundColor: colors.white,
-        margin: spacing.md,
+        marginHorizontal: spacing.md,
         borderRadius: borderRadius.md,
         borderWidth: 1,
         borderColor: colors.border,
         zIndex: 1,
     },
     mainContent: {
-        padding: spacing.md,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
         zIndex: 2,
     },
     addButton: {

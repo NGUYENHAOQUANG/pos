@@ -6,15 +6,13 @@ import {
     CreateImportReceiptRequest,
     ImportReceipt,
 } from '@/features/material/types/importReceipt.types';
-import { IWarehouseItem } from '@/features/material/types/warehouse.types';
-import { ISupplier } from '@/features/material/types/supplier.types';
-import { IMaterial } from '@/features/material/types/material.types';
 
 export const importReceiptService = {
-    mapDetailToForm: (detail: ImportReceipt | { data: ImportReceipt }, suppliers: ISupplier[]) => {
+    mapDetailToForm: (detail: ImportReceipt | { data: ImportReceipt }) => {
         const formState = {
             date: new Date(),
             supplier: '',
+            supplierName: '',
             items: [] as MaterialItem[],
         };
 
@@ -24,15 +22,9 @@ export const importReceiptService = {
             formState.date = new Date(data.createdAt);
         }
 
-        if (data.supplierId && suppliers.length > 0) {
-            const foundSupplier = suppliers.find(s => s.id === data.supplierId);
-            if (foundSupplier) {
-                formState.supplier = foundSupplier.name;
-            } else if (data.supplierName) {
-                formState.supplier = data.supplierName;
-            }
-        } else if (data.supplierName) {
-            formState.supplier = data.supplierName;
+        if (data.supplierId) {
+            formState.supplier = data.supplierId;
+            formState.supplierName = data.supplierName || '';
         }
 
         return formState;
@@ -74,24 +66,5 @@ export const importReceiptService = {
             documentIds,
             status,
         };
-    },
-
-    mapMaterialsToOptions: (materialsData: IMaterial[]): IWarehouseItem[] => {
-        return materialsData.map((m: IMaterial) => ({
-            id: m.id,
-            materialId: m.id,
-            materialName: m.name,
-            unit: m.unitName || '',
-            remaining: 0,
-            quantity: 0,
-            unitId: '',
-        }));
-    },
-
-    mapSuppliersToOptions: (suppliers: ISupplier[]) => {
-        return suppliers.map(s => ({
-            label: s.name,
-            value: s.name,
-        }));
     },
 };
