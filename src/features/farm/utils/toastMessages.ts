@@ -66,6 +66,11 @@ const JOB_TOAST_MESSAGES_CONFIG: Partial<
         edit: 'Đã cập nhật thu hoạch thành công',
         delete: 'Tác vụ đã được xóa',
     },
+    MEASURE_SIZE: {
+        add: 'Đã đo kích thước tôm thành công',
+        edit: 'Đã cập nhật thành công',
+        delete: 'Tác vụ đã được xóa',
+    },
 };
 
 export const TOAST_MESSAGES_CONFIG = {
@@ -305,6 +310,28 @@ export const showCycleFormValidationToast = (message: string) => {
     Toast.show({
         type: 'error',
         text1: message || 'Dữ liệu không hợp lệ',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast when shrimp size input is invalid
+ */
+export const showShrimpSizeErrorToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng nhập cỡ tôm (con/kg)',
+        visibilityTime: 3000,
+    });
+};
+
+/**
+ * Show error toast when remaining weight input is invalid
+ */
+export const showRemainingWeightErrorToast = () => {
+    Toast.show({
+        type: 'error',
+        text1: 'Vui lòng nhập sản lượng còn lại (kg)',
         visibilityTime: 3000,
     });
 };

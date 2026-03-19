@@ -59,7 +59,7 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
             {/* Collapsible Chart Section */}
             <BasicDropDownButton
                 prefixIcon={<FeedChart width={18} height={18} />}
-                label="BIỂU ĐỒ THỨC ĂN - SẢN LƯỢNG"
+                label="Biểu đồ thức ăn - sản lượng"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={isExpanded ? styles.headerExpanded : styles.headerCollapsed}

@@ -139,7 +139,7 @@ const CompilationEnvChart = ({ zoneId, pondIds, cycleId }: CompilationEnvChartPr
         <View style={chartStyles.container}>
             <BasicDropDownButton
                 prefixIcon={<Peformance width={18} height={18} />}
-                label="BIỂU ĐỒ THÔNG SỐ MÔI TRƯỜNG"
+                label="Biểu đồ thông số môi trường"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}

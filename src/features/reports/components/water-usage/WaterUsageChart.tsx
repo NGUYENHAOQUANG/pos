@@ -54,7 +54,7 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
     return (
         <View style={chartStyles.container}>
             <BasicDropDownButton
-                label="LƯỢNG NƯỚC SỬ DỤNG THEO NGÀY"
+                label="Lượng nước sử dụng theo ngày"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}

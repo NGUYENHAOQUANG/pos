@@ -85,7 +85,7 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
         <View style={chartStyles.container}>
             <BasicDropDownButton
                 prefixIcon={<CostChartIcon width={16} height={16} />}
-                label="BIỂU ĐỒ CHI PHÍ"
+                label="Biểu đồ chi phí"
                 isExpanded={isExpanded}
                 onPress={() => setIsExpanded(!isExpanded)}
                 style={styles.header}
