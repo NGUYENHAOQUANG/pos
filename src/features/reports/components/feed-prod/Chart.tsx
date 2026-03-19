@@ -28,7 +28,16 @@ export const Chart: React.FC<ChartProps> = ({
     data = [],
     hiddenSeries,
 }) => {
-    const MIN_CHART_WIDTH = 450;
+    const PIXELS_PER_DAY = 50;
+    const totalDays =
+        data.length > 0
+            ? Math.floor(
+                  (new Date(data[data.length - 1].date).getTime() -
+                      new Date(data[0].date).getTime()) /
+                      (1000 * 60 * 60 * 24)
+              )
+            : 0;
+    const MIN_CHART_WIDTH = Math.max(450, totalDays * PIXELS_PER_DAY);
     const actualWidth = Math.max(chartWidth, MIN_CHART_WIDTH);
 
     // ============================================================================
@@ -70,17 +79,9 @@ export const Chart: React.FC<ChartProps> = ({
             if (totalDays <= 0) return [0];
 
             const marks: number[] = [];
-            const step = 7; // Fixed 7-day intervals
-
-            for (let day = 0; day <= totalDays; day += step) {
+            for (let day = 0; day <= totalDays; day++) {
                 marks.push(day);
             }
-
-            // Always show the last data day
-            if (marks[marks.length - 1] !== totalDays) {
-                marks.push(totalDays);
-            }
-
             return marks;
         };
 
@@ -182,7 +183,14 @@ export const Chart: React.FC<ChartProps> = ({
     } = processedData;
 
     // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * actualWidth + PADDING_LEFT;
+    const INNER_PADDING_LEFT = 20; // Khoảng cách từ trục Y đến điểm dữ liệu đầu tiên
+    const INNER_PADDING_RIGHT = 30; // Khoảng cách từ điểm dữ liệu cuối đến bên phải
+    const availableWidth = actualWidth - INNER_PADDING_LEFT - INNER_PADDING_RIGHT;
+
+    const getX = (day: number) => {
+        if (TOTAL_DAYS === 0) return PADDING_LEFT + INNER_PADDING_LEFT;
+        return (day / TOTAL_DAYS) * availableWidth + PADDING_LEFT + INNER_PADDING_LEFT;
+    };
     const getY = (value: number) =>
         chartHeight - (value / Y_MAX_CHART1) * chartHeight + PADDING_TOP;
 
@@ -402,12 +410,8 @@ export const Chart: React.FC<ChartProps> = ({
 
                         {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {
-                            let x = getX(day);
-                            let align: 'middle' | 'start' | 'end' = 'middle';
-                            if (index === 0) {
-                                x = x + 2;
-                                align = 'start';
-                            }
+                            const x = getX(day);
+                            const align: 'middle' | 'start' | 'end' = 'middle';
 
                             const y = PADDING_TOP + chartHeight + 18;
                             return (
