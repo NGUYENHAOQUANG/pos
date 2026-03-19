@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { colors, borderRadius } from '@/styles';
 import { BasicDropDownButton } from '../BasicDropDownButton';
@@ -33,6 +33,36 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
     });
 
     const isLoading = isExpanded && queryLoading;
+
+    // Filter state: null = show all, string = show only that series
+    const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+
+    const handleToggleFilter = useCallback((id: string) => {
+        setSelectedFilter(prev => (prev === id ? null : id));
+    }, []);
+
+    // Build activeFilters for cards (all active when nothing selected, only selected when picked)
+    const activeFilters = useMemo(() => {
+        if (!selectedFilter)
+            return { production: false, consumed: false, forecast: false, fcr: false };
+        return {
+            production: selectedFilter === 'production',
+            consumed: selectedFilter === 'consumed',
+            forecast: selectedFilter === 'forecast',
+            fcr: selectedFilter === 'fcr',
+        };
+    }, [selectedFilter]);
+
+    // Build hiddenSeries for chart
+    const hiddenSeries = useMemo(() => {
+        if (!selectedFilter) return new Set<string>(); // nothing hidden = show all
+        const allSeries = ['production', 'consumed', 'forecast'];
+        const set = new Set<string>();
+        allSeries.forEach(s => {
+            if (s !== selectedFilter) set.add(s);
+        });
+        return set;
+    }, [selectedFilter]);
 
     const chartWidth = CHART_WIDTH - PADDING_LEFT - PADDING_RIGHT;
     const chartHeight = CHART_HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -76,12 +106,15 @@ export const CompilationFeedProd = ({ zoneId, pondId }: Props) => {
                                 consumed={formatMetricValue(getLatestConsumed())}
                                 fcr={formatFCR(getLatestFCR())}
                                 cardVariant="prodSummary"
+                                activeFilters={activeFilters}
+                                onToggleFilter={handleToggleFilter}
                             />
                             {chartDataList.length > 0 ? (
                                 <Chart
                                     chartWidth={chartWidth}
                                     chartHeight={chartHeight}
                                     data={chartDataList}
+                                    hiddenSeries={hiddenSeries}
                                 />
                             ) : null}
                             <FeedProdInfoCard />

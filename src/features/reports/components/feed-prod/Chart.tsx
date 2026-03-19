@@ -10,6 +10,7 @@ const CHART_THEME = {
     text: colors.textSecondary,
     green: '#22c55e',
     orange: '#f97316',
+    forecast: '#F59E0B',
 };
 import { CHART_HEIGHT, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
@@ -18,9 +19,15 @@ interface ChartProps {
     chartWidth: number;
     chartHeight: number;
     data: FeedProdChartDataPoint[];
+    hiddenSeries?: Set<string>;
 }
 
-export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = [] }) => {
+export const Chart: React.FC<ChartProps> = ({
+    chartWidth,
+    chartHeight,
+    data = [],
+    hiddenSeries,
+}) => {
     const MIN_CHART_WIDTH = 450;
     const actualWidth = Math.max(chartWidth, MIN_CHART_WIDTH);
 
@@ -341,7 +348,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                         )}
 
                         {/* Green line (Sản lượng) - historical only, solid */}
-                        {BLUE_DATA_HISTORICAL.length > 0 && (
+                        {BLUE_DATA_HISTORICAL.length > 0 && !hiddenSeries?.has('production') && (
                             <Path
                                 d={createBluePathHistorical()}
                                 fill="none"
@@ -353,40 +360,45 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                         )}
 
                         {/* Green line (Sản lượng) forecast - dashed */}
-                        {BLUE_DATA_FORECAST.length > 0 && (
-                            <Path
-                                d={createBluePathForecast()}
-                                fill="none"
-                                stroke={CHART_THEME.green}
-                                strokeWidth={2}
-                                strokeDasharray="6,4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        )}
+                        {BLUE_DATA_FORECAST.length > 0 &&
+                            (!hiddenSeries?.has('production') ||
+                                !hiddenSeries?.has('forecast')) && (
+                                <Path
+                                    d={createBluePathForecast()}
+                                    fill="none"
+                                    stroke={CHART_THEME.forecast}
+                                    strokeWidth={2}
+                                    strokeDasharray="6,4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
 
-                        {/* Orange line - forecast (dashed): vẽ trước để nét liền thực tế đè lên bên trái */}
-                        {ORANGE_DATA_FORECAST.length > 0 && (
+                        {/* Orange line - forecast (dashed) */}
+                        {ORANGE_DATA_FORECAST.length > 0 &&
+                            (!hiddenSeries?.has('consumed') || !hiddenSeries?.has('forecast')) && (
+                                <Path
+                                    d={createOrangePathForecast()}
+                                    fill="none"
+                                    stroke={CHART_THEME.forecast}
+                                    strokeWidth={2}
+                                    strokeDasharray="6,4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
+
+                        {/* Orange line - historical (solid) */}
+                        {!hiddenSeries?.has('consumed') && (
                             <Path
-                                d={createOrangePathForecast()}
+                                d={createOrangePathHistorical()}
                                 fill="none"
                                 stroke={CHART_THEME.orange}
                                 strokeWidth={2}
-                                strokeDasharray="6,4"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />
                         )}
-
-                        {/* Orange line - historical (solid): vẽ sau để luôn nét liền bên trái đường ngăn cách */}
-                        <Path
-                            d={createOrangePathHistorical()}
-                            fill="none"
-                            stroke={CHART_THEME.orange}
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
 
                         {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {

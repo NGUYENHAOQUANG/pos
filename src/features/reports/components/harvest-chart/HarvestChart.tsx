@@ -82,7 +82,7 @@ export const HarvestChart: React.FC<Props> = ({ zoneId, pondCode }) => {
                                         id: 'harvest-yield',
                                         name: 'Sản lượng đã thu hoạch',
                                         value: `${totalYield.toFixed(2)} tấn`,
-                                        color: colors.orange[600],
+                                        color: '',
                                     }}
                                     variant="prodSummary"
                                 />
