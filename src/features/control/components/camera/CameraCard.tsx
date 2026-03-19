@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions,
+    ActivityIndicator,
+    Image,
+} from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { BlurView } from '@react-native-community/blur';
-import { VLCPlayer } from 'react-native-vlc-media-player';
 import { colors, spacing, borderRadius } from '@/styles';
 import { CameraItem } from '@/features/control/api/cameraApi';
 import { useCameraStream } from '@/features/control/hooks/useCameras';
@@ -12,6 +18,33 @@ const CARD_HORIZONTAL_PADDING = spacing.md * 2;
 const CARD_WIDTH = SCREEN_WIDTH - CARD_HORIZONTAL_PADDING;
 const CARD_HEIGHT = CARD_WIDTH * 0.56; // ~16:9 aspect ratio
 
+// Snapshot auto-refresh interval (ms)
+const SNAPSHOT_REFRESH_INTERVAL = 10000;
+
+/**
+ * Parse RTSP URL to build HTTP snapshot URL for Dahua cameras.
+ * RTSP format: rtsp://user:pass@host:port/cam/realmonitor?channel=1&subtype=1
+ * Snapshot format: http://user:pass@host/cgi-bin/snapshot.cgi?channel=1
+ */
+const getSnapshotUrl = (rtspUrl: string): string | null => {
+    try {
+        // Extract credentials and host from RTSP URL
+        const match = rtspUrl.match(/rtsp:\/\/([^@]+)@([^:/]+)/i);
+        if (!match) return null;
+
+        const credentials = match[1]; // user:pass
+        const host = match[2]; // IP address
+
+        // Extract channel from query params (default to 1)
+        const channelMatch = rtspUrl.match(/channel=(\d+)/);
+        const channel = channelMatch ? channelMatch[1] : '1';
+
+        return `http://${credentials}@${host}/cgi-bin/snapshot.cgi?channel=${channel}`;
+    } catch {
+        return null;
+    }
+};
+
 interface CameraCardProps {
     camera: CameraItem;
     onPress: (camera: CameraItem) => void;
@@ -20,7 +53,39 @@ interface CameraCardProps {
 export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
     const isOnline = camera.status === 'Online';
     const { data: streamData } = useCameraStream(camera.deviceSn);
-    const [isBuffering, setIsBuffering] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+    // Append timestamp to URL to force refresh (bypass cache)
+    const [refreshKey, setRefreshKey] = useState(Date.now());
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const snapshotUrl = streamData?.url ? getSnapshotUrl(streamData.url) : null;
+
+    // Auto-refresh snapshot periodically
+    useEffect(() => {
+        if (!snapshotUrl || !isOnline) return;
+
+        intervalRef.current = setInterval(() => {
+            setRefreshKey(Date.now());
+        }, SNAPSHOT_REFRESH_INTERVAL);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [snapshotUrl, isOnline]);
+
+    const handleLoadEnd = useCallback(() => {
+        setIsLoading(false);
+        setHasError(false);
+    }, []);
+
+    const handleError = useCallback(() => {
+        setIsLoading(false);
+        setHasError(true);
+    }, []);
+
+    // Build image URI with cache-busting timestamp
+    const imageUri = snapshotUrl ? `${snapshotUrl}&t=${refreshKey}` : null;
 
     return (
         <TouchableOpacity
@@ -28,20 +93,25 @@ export const CameraCard: React.FC<CameraCardProps> = ({ camera, onPress }) => {
             onPress={() => onPress(camera)}
             style={styles.container}
         >
-            {/* Stream preview or placeholder */}
-            {streamData?.url ? (
+            {/* Snapshot preview or placeholder */}
+            {imageUri && isOnline ? (
                 <View style={styles.streamContainer}>
-                    <VLCPlayer
-                        source={{ uri: streamData.url }}
-                        style={styles.vlcPlayer}
-                        paused={false}
-                        onBuffering={() => setIsBuffering(true)}
-                        onPlaying={() => setIsBuffering(false)}
-                        autoplay={true}
+                    <Image
+                        source={{ uri: imageUri }}
+                        style={styles.snapshot}
+                        resizeMode="cover"
+                        onLoadEnd={handleLoadEnd}
+                        onError={handleError}
                     />
-                    {isBuffering && (
+                    {isLoading && (
                         <View style={styles.bufferingOverlay}>
                             <ActivityIndicator size="small" color={colors.white} />
+                        </View>
+                    )}
+                    {hasError && (
+                        <View style={styles.placeholderBg}>
+                            <Text style={styles.snText}>{camera.deviceSn}</Text>
+                            <Text style={styles.modelText}>Không thể tải ảnh</Text>
                         </View>
                     )}
                 </View>
@@ -85,7 +155,7 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: colors.gray[800],
     },
-    vlcPlayer: {
+    snapshot: {
         width: '100%',
         height: '100%',
     },

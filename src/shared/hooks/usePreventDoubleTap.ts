@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { Keyboard } from 'react-native';
 
 /**
  * Custom hook to prevent double tap/spam clicking on buttons.
@@ -20,6 +21,9 @@ export const usePreventDoubleTap = (
     const handler = useCallback(
         (...args: unknown[]) => {
             if (!callback || isBlocked.current) return;
+
+            // Dismiss keyboard to prevent "first tap only dismisses keyboard" issue
+            Keyboard.dismiss();
 
             // Block subsequent calls
             isBlocked.current = true;
