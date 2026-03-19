@@ -343,10 +343,19 @@ export const VideoPlayerScreen: React.FC = () => {
                             style={styles.video}
                             paused={paused}
                             onBuffering={() => {
+                                console.log('[VLC] Buffering...', videoUrl);
                                 if (isMountedRef.current) setIsBuffering(true);
                             }}
                             onPlaying={() => {
+                                console.log('[VLC] Playing!');
                                 if (isMountedRef.current) setIsBuffering(false);
+                            }}
+                            onError={(e: unknown) => {
+                                console.error('[VLC] Error:', e);
+                                if (isMountedRef.current) setIsBuffering(false);
+                            }}
+                            onStopped={() => {
+                                console.log('[VLC] Stopped');
                             }}
                             autoplay={true}
                         />
