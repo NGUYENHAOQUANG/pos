@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import Video, { OnProgressData, OnLoadData } from 'react-native-video';
-import { VlCPlayerView } from 'react-native-vlc-media-player';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
 import Animated, {
@@ -337,10 +337,30 @@ export const VideoPlayerScreen: React.FC = () => {
                 {/* Video with pinch-to-zoom scale */}
                 <Animated.View style={[styles.videoWrapper, videoAnimatedStyle]}>
                     {isLiveStream ? (
-                        <VlCPlayerView
+                        <VLCPlayer
                             ref={vlcRef}
-                            source={{ uri: videoUrl }}
+                            source={
+                                {
+                                    initType: 2,
+                                    hwDecoderEnabled: 1,
+                                    hwDecoderForced: 1,
+                                    uri: videoUrl,
+                                    initOptions: [
+                                        '--no-audio',
+                                        '--rtsp-tcp',
+                                        '--network-caching=150',
+                                        '--rtsp-caching=150',
+                                        '--no-stats',
+                                        '--tcp-caching=150',
+                                        '--realrtsp-caching=150',
+                                    ],
+                                } as any
+                            }
                             style={styles.video}
+                            autoplay={true}
+                            autoAspectRatio={true}
+                            resizeMode="cover"
+                            {...({ isLive: true, autoReloadLive: true } as any)}
                             paused={paused}
                             onBuffering={() => {
                                 console.log('[VLC] Buffering...', videoUrl);
@@ -357,7 +377,6 @@ export const VideoPlayerScreen: React.FC = () => {
                             onStopped={() => {
                                 console.log('[VLC] Stopped');
                             }}
-                            autoplay={true}
                         />
                     ) : (
                         <Video
