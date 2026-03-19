@@ -261,6 +261,7 @@ export const ScheduleActivitie: React.FC<ScheduleActivitieProps> = ({ pondName =
                                     >
                                         {time}
                                     </Text>
+                                    <View style={styles.timeTick} />
                                 </View>
                             );
                         })}
@@ -427,6 +428,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-end',
         paddingRight: 6,
+        position: 'relative',
     },
     timeText: {
         fontSize: 11,
@@ -436,13 +438,24 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: colors.text,
     },
+    timeTick: {
+        position: 'absolute',
+        right: 0,
+        top: '50%',
+        width: 6,
+        height: 1,
+        backgroundColor: colors.gray[400],
+    },
 
     // Right: device area
     deviceAreaContainer: {
         flex: 1,
+        borderLeftWidth: 1,
+        borderLeftColor: colors.gray[400],
     },
     deviceHeader: {
         flexDirection: 'row',
+        height: 52,
     },
     deviceColumn: {
         alignItems: 'center',
@@ -486,7 +499,10 @@ const styles = StyleSheet.create({
         top: 0,
         bottom: 0,
         width: 1,
-        backgroundColor: colors.gray[300],
+        borderLeftWidth: 1,
+        borderLeftColor: colors.gray[300],
+        borderStyle: 'dashed',
+        zIndex: -1,
     },
 
     currentTimeLine: {

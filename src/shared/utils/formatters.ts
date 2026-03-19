@@ -35,7 +35,11 @@ export function formatNumericInput(text: string): string {
     return text.replace(/[^0-9]/g, '');
 }
 
-export function formatDecimalInput(text: string): string {
+export function formatDecimalInput(
+    text: string,
+    maxIntegerDigits: number = 15,
+    maxDecimalDigits: number = 5
+): string {
     // 1. Remove any character that is not 0-9 or .
     let cleaned = text.replace(/[^0-9.]/g, '');
 
@@ -50,7 +54,17 @@ export function formatDecimalInput(text: string): string {
         cleaned = parts[0] + '.' + parts.slice(1).join('');
     }
 
-    return cleaned;
+    // 4. Limit integer digits
+    const [intPart, decPart] = cleaned.split('.');
+    const limitedInt = intPart.slice(0, maxIntegerDigits);
+
+    // 5. Limit decimal digits
+    if (decPart !== undefined) {
+        const limitedDec = decPart.slice(0, maxDecimalDigits);
+        return `${limitedInt}.${limitedDec}`;
+    }
+
+    return limitedInt;
 }
 
 export interface AbbreviatedNumber {

@@ -224,40 +224,14 @@ export const useToggleDevice = () => {
         mutationFn: async ({ deviceId }: { deviceId: string; pondId: string; isOn: boolean }) => {
             return deviceApi.toggleDevice({ deviceId });
         },
-        onMutate: async ({ pondId, deviceId, isOn }) => {
-            // Cancel pending refetches
-            await queryClient.cancelQueries({ queryKey: controlKeys.devices.list() });
-
-            // Snapshot current data
-            const previousData = queryClient.getQueryData<Pond[]>(controlKeys.devices.list());
-
-            // Optimistic update
-            if (previousData) {
-                const updated = previousData.map(pond => {
-                    if (pond.id !== pondId) return pond;
-                    const updatedDevices = pond.devices.map(d =>
-                        d.id === deviceId ? { ...d, isOn } : d
-                    );
-                    return {
-                        ...pond,
-                        devices: updatedDevices,
-                        deviceStats: calculatePondStats(updatedDevices),
-                    };
-                });
-                queryClient.setQueryData(controlKeys.devices.list(), updated);
-            }
-
-            return { previousData };
-        },
-        onError: (_err, _vars, context) => {
-            // Rollback on error
-            if (context?.previousData) {
-                queryClient.setQueryData(controlKeys.devices.list(), context.previousData);
-            }
+        onError: _err => {
+            // Extract message from NormalizedError
+            const errorMessage =
+                (_err as { message?: string })?.message || 'Không thể gửi lệnh điều khiển';
             Toast.show({
                 type: 'error',
-                text1: 'Lỗi kết nối',
-                text2: 'Không thể gửi lệnh điều khiển',
+                text1: 'Lỗi',
+                text2: errorMessage,
             });
         },
         onSuccess: (_data, { isOn }) => {
@@ -267,9 +241,7 @@ export const useToggleDevice = () => {
                 text2: `${isOn ? 'Bật' : 'Tắt'} thiết bị thành công`,
                 visibilityTime: 2000,
             });
-        },
-        onSettled: () => {
-            // Refetch after mutation settles
+            // Refetch to get updated state from server
             queryClient.invalidateQueries({ queryKey: controlKeys.devices.list() });
         },
     });

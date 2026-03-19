@@ -8,6 +8,7 @@ export interface ToggleDeviceRequest {
 }
 
 export interface CreateScheduleRequest {
+    id?: string;
     deviceId: string;
     startTime: string;
     endtime: string;
@@ -40,6 +41,8 @@ export interface GetScheduleResponse {
             isActive: boolean;
             runDate: string;
             no: number;
+            runTime: number;
+            pauseTime: number;
         }>;
     };
 }
