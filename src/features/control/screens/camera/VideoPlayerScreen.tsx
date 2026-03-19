@@ -133,6 +133,8 @@ export const VideoPlayerScreen: React.FC = () => {
     const videoRef = useRef<any>(null);
     // VLC player ref for proper cleanup
     const vlcRef = useRef<any>(null);
+    // Buffering auto-hide timeout for live streams
+    const bufferingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Cleanup: stop VLC player and pause Video on unmount to prevent memory leaks
     useEffect(() => {
@@ -146,6 +148,7 @@ export const VideoPlayerScreen: React.FC = () => {
                     // Ignore errors during cleanup
                 }
             }
+            if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
         };
     }, []);
 
@@ -154,6 +157,19 @@ export const VideoPlayerScreen: React.FC = () => {
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [isBuffering, setIsBuffering] = useState(true);
+
+    // Auto-hide buffering indicator after 5s for live streams
+    // VLC's onBuffering fires repeatedly even while playing
+    useEffect(() => {
+        if (isBuffering && isLiveStream) {
+            bufferingTimeoutRef.current = setTimeout(() => {
+                if (isMountedRef.current) setIsBuffering(false);
+            }, 5000);
+            return () => {
+                if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+            };
+        }
+    }, [isBuffering, isLiveStream]);
     const [showControls, setShowControls] = useState(true);
     const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0 });
 
@@ -358,8 +374,8 @@ export const VideoPlayerScreen: React.FC = () => {
                             }
                             style={styles.video}
                             autoplay={true}
-                            autoAspectRatio={true}
-                            resizeMode="cover"
+                            videoAspectRatio="16:9"
+                            resizeMode="contain"
                             {...({ isLive: true, autoReloadLive: true } as any)}
                             paused={paused}
                             onBuffering={() => {

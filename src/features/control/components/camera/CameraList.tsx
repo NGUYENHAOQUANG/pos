@@ -1,5 +1,5 @@
-import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { FlatList, StyleSheet, View, RefreshControl } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { CameraCard } from '@/features/control/components/camera/CameraCard';
 import { CameraSkeleton } from '@/features/control/components/skeleton/CameraSkeleton';
@@ -16,7 +16,11 @@ interface CameraListProps {
  * Fetches data from API via useCameras hook.
  */
 export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
-    const { data: cameras = [], isLoading } = useCameras();
+    const { data: cameras = [], isLoading, refetch, isRefetching } = useCameras();
+
+    const handleRefresh = useCallback(() => {
+        refetch();
+    }, [refetch]);
 
     if (isLoading) {
         return <CameraSkeleton />;
@@ -38,6 +42,7 @@ export const CameraList: React.FC<CameraListProps> = ({ onCameraPress }) => {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
+            refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />}
         />
     );
 };

@@ -8,6 +8,8 @@ import { AddTurnModalUI } from '@/features/control/components/CustomFeedingMachi
 import { colors } from '@/styles';
 import { Button } from '@/shared/components/buttons/Button';
 
+const MAX_TURNS = 15;
+
 export interface ScheduleItem {
     id: string;
     startTime: Date | null;
@@ -71,10 +73,17 @@ export default function ActivitySchedule({
         onUpdateSchedules(updatedSchedules);
     };
 
+    const isMaxReached = schedules.length >= MAX_TURNS;
+
     return (
         <View style={[styles.container, style]}>
             <View style={styles.card}>
-                <Text style={[styles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
+                <View style={styles.headerRow}>
+                    <Text style={[styles.headerTitle, titleStyle]}>Lịch hoạt động</Text>
+                    <Text style={styles.turnCount}>
+                        ({schedules.length}/{MAX_TURNS})
+                    </Text>
+                </View>
 
                 {/* Danh sách các lượt đã thêm */}
                 {schedules.map((item, index) => (
@@ -107,14 +116,16 @@ export default function ActivitySchedule({
                     </View>
                 ))}
 
-                {/* Nút mở Popup thêm lượt */}
-                <Button
-                    title="Thêm lượt"
-                    variant="outline"
-                    onPress={openAddModal}
-                    renderLeftIcon={<IconAdd name="add" size={20} color={colors.text} />}
-                    style={styles.addBtn}
-                />
+                {/* Nút mở Popup thêm lượt - hidden when max reached */}
+                {!isMaxReached && (
+                    <Button
+                        title="Thêm lượt"
+                        variant="outline"
+                        onPress={openAddModal}
+                        renderLeftIcon={<IconAdd name="add" size={20} color={colors.text} />}
+                        style={styles.addBtn}
+                    />
+                )}
             </View>
 
             {/* --- MODAL POPUP --- */}
@@ -135,11 +146,21 @@ const styles = StyleSheet.create({
         borderColor: colors.border,
         borderRadius: 16,
     },
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        gap: 6,
+    },
     headerTitle: {
         fontSize: 16,
         fontWeight: '600',
         color: colors.text,
-        marginBottom: 12,
+    },
+    turnCount: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.textSecondary,
     },
 
     card: {
