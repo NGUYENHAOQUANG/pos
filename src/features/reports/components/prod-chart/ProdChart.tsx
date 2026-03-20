@@ -5,6 +5,7 @@ import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import ProdChartIcon from '@/assets/Icon/IconReport/ProdChartIcon.svg';
 import { useProdChartData } from '../../hooks/useProductionDistribution';
@@ -259,6 +260,8 @@ export const ProdChart = ({ zoneId, pondId }: ProdChartProps) => {
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
+                    ) : !hasData ? (
+                        <EmptyStateCard message="Không có dữ liệu sản lượng" />
                     ) : (
                         <>
                             {/* Summary Cards Row */}

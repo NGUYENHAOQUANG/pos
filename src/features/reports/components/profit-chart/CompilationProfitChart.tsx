@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import { Chart } from '@/features/reports/components/profit-chart/Chart';
 import { MetricsRow } from '@/features/reports/components/profit-chart/MetricsRow';
@@ -81,6 +82,8 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                         <View style={styles.loadingContainer}>
                             <Loading />
                         </View>
+                    ) : !statsData?.byDate || statsData.byDate.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu lợi nhuận" />
                     ) : (
                         <>
                             {console.log('[PROFIT CHART] Raw data:', {
@@ -114,13 +117,11 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
                             <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
-                            {statsData?.byDate && statsData.byDate.length > 0 ? (
-                                <Chart
-                                    chartWidth={chartWidth}
-                                    chartHeight={chartHeight}
-                                    data={statsData.byDate}
-                                />
-                            ) : null}
+                            <Chart
+                                chartWidth={chartWidth}
+                                chartHeight={chartHeight}
+                                data={statsData.byDate}
+                            />
                             {/* Legend (2x2 grid) */}
                             <View style={styles.legendContainer}>
                                 {LEGEND_ITEMS.map(item => (

@@ -5,6 +5,7 @@ import Svg, { Line, Text as SvgText, Rect, G } from 'react-native-svg';
 
 import { colors } from '@/styles/colors';
 import { Loading } from '@/shared/components/ui/Loading';
+import { EmptyStateCard } from '@/shared/components/ui/EmptyStateCard';
 import { BasicDropDownButton } from '../BasicDropDownButton';
 import chartStyles from '@/features/reports/styles/chart.styles';
 import DropIcon from '@/assets/Icon/IconReport/Drop.svg';
@@ -73,6 +74,8 @@ const WaterUsageChart: React.FC<WaterUsageChartProps> = ({ zoneId }) => {
                         >
                             <Text>Có lỗi xảy ra khi tải dữ liệu lượng nước.</Text>
                         </View>
+                    ) : bars.length === 0 ? (
+                        <EmptyStateCard message="Không có dữ liệu lượng nước" />
                     ) : (
                         <>
                             {/* Summary Stats */}
