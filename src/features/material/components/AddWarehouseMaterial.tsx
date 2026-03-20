@@ -122,7 +122,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                     <View style={styles.inputGroup}>
                                         {warehouseId ? (
                                             <DropdownWarehouseItem
-                                                label="Tên vật tư"
+                                                label={'Tên vật tư '}
                                                 required
                                                 value={item.materialId}
                                                 displayValue={item.materialName}
@@ -157,11 +157,11 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         warehouseItem.quantity || 0
                                                     );
                                                 }}
-                                                placeholder="Chọn vật tư"
+                                                placeholder="Chọn vật tư​"
                                             />
                                         ) : (
                                             <DropdownMaterialItem
-                                                label="Tên vật tư"
+                                                label={'Tên vật tư\u200B'}
                                                 required
                                                 value={item.materialId}
                                                 displayValue={item.materialName}
@@ -187,7 +187,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                                                         );
                                                     }
                                                 }}
-                                                placeholder="Chọn vật tư"
+                                                placeholder="Chọn vật tư​"
                                             />
                                         )}
 
@@ -253,7 +253,7 @@ export const AddWarehouseMaterial: React.FC<AddWarehouseMaterialProps> = ({
                 })}
 
                 <Button
-                    title="Thêm vật tư"
+                    title="Thêm vật tư​"
                     variant="outline"
                     onPress={onAddMaterial}
                     renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}

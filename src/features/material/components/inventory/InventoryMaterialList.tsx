@@ -73,7 +73,7 @@ export const InventoryMaterialList: React.FC<InventoryMaterialListProps> = ({
                     ))}
 
                     <Button
-                        title="Thêm vật tư"
+                        title="Thêm vật tư​"
                         variant="outline"
                         onPress={onAddItem}
                         renderLeftIcon={<Ionicons name="add" size={20} color={colors.text} />}

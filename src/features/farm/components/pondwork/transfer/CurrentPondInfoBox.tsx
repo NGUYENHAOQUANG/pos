@@ -5,6 +5,7 @@ import { PondDataBox, InfoItem, ResultItem } from '@/features/farm/components/po
 
 interface CurrentPondInfoBoxProps {
     shrimpBreed?: string;
+    actualStockingQuantity?: number;
     shrimpSize?: string;
     onShrimpSizeChange?: (value: string) => void;
     totalEstimatedShrimp?: number;
@@ -13,6 +14,7 @@ interface CurrentPondInfoBoxProps {
 
 export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
     shrimpBreed,
+    actualStockingQuantity,
     shrimpSize,
     onShrimpSizeChange,
     totalEstimatedShrimp,
@@ -22,6 +24,9 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
     const infoItems: InfoItem[] = [];
     if (shrimpBreed) {
         infoItems.push({ label: 'Tôm giống:', value: shrimpBreed });
+    }
+    if (actualStockingQuantity !== undefined) {
+        infoItems.push({ label: 'Số lượng thả thực tế:', value: actualStockingQuantity });
     }
 
     // Build result items
@@ -42,7 +47,7 @@ export const CurrentPondInfoBox: React.FC<CurrentPondInfoBoxProps> = ({
                 value={shrimpSize}
                 onChangeText={onShrimpSizeChange}
                 keyboardType="numeric"
-                placeholder="Cỡ tôm (con/kg)"
+                placeholder="0"
                 required
                 editable={false}
                 containerStyle={{ marginBottom: 0 }}

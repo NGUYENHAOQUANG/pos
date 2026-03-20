@@ -51,12 +51,12 @@ export const InventoryMaterialItem: React.FC<InventoryMaterialItemProps> = React
                         {/* Material Selection */}
                         <View style={styles.inputGroup}>
                             <DropdownWarehouseItem
-                                label="Tên vật tư"
+                                label="Tên vật tư​"
                                 required
                                 value={item.materialId}
                                 displayValue={item.materialName}
                                 onChange={handleMaterialChange}
-                                placeholder="Chọn vật tư"
+                                placeholder="Chọn vật tư​"
                                 warehouseId={warehouseId}
                                 excludeIds={usedMaterialIds}
                             />
