@@ -251,7 +251,6 @@ const VisualChart = React.memo(
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    removeClippedSubviews
                     nestedScrollEnabled
                     contentContainerStyle={{ flexGrow: 1 }}
                 >
@@ -280,7 +279,7 @@ const VisualChart = React.memo(
                                     barWidth={barWidth}
                                     columnWidth={columnWidth}
                                     isSelected={selectedIndex === groupIndex}
-                                    isLast={groupIndex === data.length - 1}
+                                    isLast={groupIndex >= data.length - 2 && groupIndex > 0}
                                     onPress={handleBarGroupPress}
                                 />
                             ))}
