@@ -7,9 +7,10 @@ import { Text } from '@/shared/components/typography/Text';
 const CHART_THEME = {
     bg: colors.white,
     grid: colors.gray[200],
-    text: colors.text,
+    text: colors.textSecondary,
     green: '#22c55e',
     orange: '#f97316',
+    forecast: '#F59E0B',
 };
 import { CHART_HEIGHT, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP } from './feedprodData';
 import { FeedProdChartDataPoint } from '../../types/feeding-production';
@@ -18,10 +19,25 @@ interface ChartProps {
     chartWidth: number;
     chartHeight: number;
     data: FeedProdChartDataPoint[];
+    hiddenSeries?: Set<string>;
 }
 
-export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = [] }) => {
-    const MIN_CHART_WIDTH = 450;
+export const Chart: React.FC<ChartProps> = ({
+    chartWidth,
+    chartHeight,
+    data = [],
+    hiddenSeries,
+}) => {
+    const PIXELS_PER_DAY = 50;
+    const totalDays =
+        data.length > 0
+            ? Math.floor(
+                  (new Date(data[data.length - 1].date).getTime() -
+                      new Date(data[0].date).getTime()) /
+                      (1000 * 60 * 60 * 24)
+              )
+            : 0;
+    const MIN_CHART_WIDTH = Math.max(450, totalDays * PIXELS_PER_DAY);
     const actualWidth = Math.max(chartWidth, MIN_CHART_WIDTH);
 
     // ============================================================================
@@ -63,17 +79,9 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
             if (totalDays <= 0) return [0];
 
             const marks: number[] = [];
-            const step = 7; // Fixed 7-day intervals
-
-            for (let day = 0; day <= totalDays; day += step) {
+            for (let day = 0; day <= totalDays; day++) {
                 marks.push(day);
             }
-
-            // Always show the last data day
-            if (marks[marks.length - 1] !== totalDays) {
-                marks.push(totalDays);
-            }
-
             return marks;
         };
 
@@ -175,7 +183,14 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
     } = processedData;
 
     // Helper functions
-    const getX = (day: number) => (day / TOTAL_DAYS) * actualWidth + PADDING_LEFT;
+    const INNER_PADDING_LEFT = 20; // Khoảng cách từ trục Y đến điểm dữ liệu đầu tiên
+    const INNER_PADDING_RIGHT = 30; // Khoảng cách từ điểm dữ liệu cuối đến bên phải
+    const availableWidth = actualWidth - INNER_PADDING_LEFT - INNER_PADDING_RIGHT;
+
+    const getX = (day: number) => {
+        if (TOTAL_DAYS === 0) return PADDING_LEFT + INNER_PADDING_LEFT;
+        return (day / TOTAL_DAYS) * availableWidth + PADDING_LEFT + INNER_PADDING_LEFT;
+    };
     const getY = (value: number) =>
         chartHeight - (value / Y_MAX_CHART1) * chartHeight + PADDING_TOP;
 
@@ -341,7 +356,7 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                         )}
 
                         {/* Green line (Sản lượng) - historical only, solid */}
-                        {BLUE_DATA_HISTORICAL.length > 0 && (
+                        {BLUE_DATA_HISTORICAL.length > 0 && !hiddenSeries?.has('production') && (
                             <Path
                                 d={createBluePathHistorical()}
                                 fill="none"
@@ -353,49 +368,50 @@ export const Chart: React.FC<ChartProps> = ({ chartWidth, chartHeight, data = []
                         )}
 
                         {/* Green line (Sản lượng) forecast - dashed */}
-                        {BLUE_DATA_FORECAST.length > 0 && (
-                            <Path
-                                d={createBluePathForecast()}
-                                fill="none"
-                                stroke={CHART_THEME.green}
-                                strokeWidth={2}
-                                strokeDasharray="6,4"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        )}
+                        {BLUE_DATA_FORECAST.length > 0 &&
+                            (!hiddenSeries?.has('production') ||
+                                !hiddenSeries?.has('forecast')) && (
+                                <Path
+                                    d={createBluePathForecast()}
+                                    fill="none"
+                                    stroke={CHART_THEME.forecast}
+                                    strokeWidth={2}
+                                    strokeDasharray="6,4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
 
-                        {/* Orange line - forecast (dashed): vẽ trước để nét liền thực tế đè lên bên trái */}
-                        {ORANGE_DATA_FORECAST.length > 0 && (
+                        {/* Orange line - forecast (dashed) */}
+                        {ORANGE_DATA_FORECAST.length > 0 &&
+                            (!hiddenSeries?.has('consumed') || !hiddenSeries?.has('forecast')) && (
+                                <Path
+                                    d={createOrangePathForecast()}
+                                    fill="none"
+                                    stroke={CHART_THEME.forecast}
+                                    strokeWidth={2}
+                                    strokeDasharray="6,4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            )}
+
+                        {/* Orange line - historical (solid) */}
+                        {!hiddenSeries?.has('consumed') && (
                             <Path
-                                d={createOrangePathForecast()}
+                                d={createOrangePathHistorical()}
                                 fill="none"
                                 stroke={CHART_THEME.orange}
                                 strokeWidth={2}
-                                strokeDasharray="6,4"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                             />
                         )}
 
-                        {/* Orange line - historical (solid): vẽ sau để luôn nét liền bên trái đường ngăn cách */}
-                        <Path
-                            d={createOrangePathHistorical()}
-                            fill="none"
-                            stroke={CHART_THEME.orange}
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-
                         {/* X-axis labels - white, DD/MM */}
                         {DAY_MARKS.map((day, index) => {
-                            let x = getX(day);
-                            let align: 'middle' | 'start' | 'end' = 'middle';
-                            if (index === 0) {
-                                x = x + 2;
-                                align = 'start';
-                            }
+                            const x = getX(day);
+                            const align: 'middle' | 'start' | 'end' = 'middle';
 
                             const y = PADDING_TOP + chartHeight + 18;
                             return (
@@ -424,6 +440,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
     },
     title: {
+        marginTop: 12,
         fontSize: typography.fontSize.xs,
         fontWeight: typography.fontWeight.regular,
         color: colors.text,

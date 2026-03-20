@@ -4,6 +4,7 @@ import { Text } from '@/shared/components/typography/Text';
 import Svg, { Line, Text as SvgText, G, Rect, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { scaleLinear } from 'd3-scale';
 import { colors, borderRadius } from '@/styles';
+import { typography } from '@/styles/typography';
 import ActivePondChartIcon from '@/assets/Icon/IconReport/ActivePondChartIcon.svg';
 import ExpandedIcon from '@/assets/Icon/IconReport/Expanded.svg';
 import { PondIndex } from '@/features/reports/components/env-chart/PondIndex';
@@ -280,7 +281,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                         key={tick}
                                                         x={-5}
                                                         y={yScale(tick) + 4}
-                                                        fontSize="10"
+                                                        fontSize="12"
                                                         fill={CHART_COLORS.text}
                                                         textAnchor="end"
                                                     >
@@ -392,7 +393,7 @@ export const ActivePondChart = ({ zoneId }: ActivePondChartProps) => {
                                                             <SvgText
                                                                 x={tick.x}
                                                                 y={yScale(0) + 18}
-                                                                fontSize="10"
+                                                                fontSize="12"
                                                                 fill={CHART_COLORS.text}
                                                                 textAnchor="middle"
                                                             >
@@ -438,8 +439,8 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     headerTitleText: {
-        fontSize: 16,
-        fontWeight: '600',
+        fontSize: 14,
+        fontWeight: typography.fontWeight.bold,
         color: colors.text,
     },
     badge: {

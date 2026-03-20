@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { Input, InputFormat } from '@/shared/components/forms/Input';
 import { PondDataBox, ResultItem } from '@/features/farm/components/pondwork/PondDataBox';
 import { colors } from '@/styles';
-import { OutlineButton } from '@/shared/components/buttons/OutlineButton';
+import { Button } from '@/shared/components/buttons/Button';
 import { IconAICheck } from '@/assets/icons';
 import { formatDecimalInput } from '@/shared/utils';
 
@@ -90,11 +89,12 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
 
     return (
         <PondDataBox title="Số liệu đo" resultItems={resultItems}>
-            <OutlineButton
-                label="Kiểm tra kích thước tôm bằng AI"
+            <Button
+                title="Kiểm tra kích thước tôm bằng AI"
+                variant="outline"
                 onPress={onAIMeasurePress || (() => {})}
-                prefix={<IconAICheck width={20} height={20} />}
-                labelStyle={styles.aiButtonText}
+                renderLeftIcon={<IconAICheck width={20} height={20} fill={colors.text} />}
+                fullWidth
             />
 
             <Input
@@ -126,11 +126,3 @@ export const MeasurementDataBox: React.FC<MeasurementDataBoxProps> = ({
         </PondDataBox>
     );
 };
-
-const styles = StyleSheet.create({
-    aiButtonText: {
-        color: colors.textSecondary,
-        fontSize: 14,
-        fontWeight: '500',
-    },
-});

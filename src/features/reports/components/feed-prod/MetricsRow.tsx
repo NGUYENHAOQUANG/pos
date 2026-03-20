@@ -9,6 +9,8 @@ interface MetricsRowProps {
     fcr?: string;
     forecast?: string;
     cardVariant?: 'default' | 'prodSummary';
+    activeFilters?: Record<string, boolean>;
+    onToggleFilter?: (id: string) => void;
 }
 
 const METRIC_ITEMS = (
@@ -17,10 +19,10 @@ const METRIC_ITEMS = (
     fcr: string,
     forecast: string
 ): { id: string; name: string; value: string; color: string; unit?: string }[] => [
-    { id: 'production', name: 'Sản lượng', value: production, color: '#22c55e' },
-    { id: 'consumed', name: 'Đã ăn', value: consumed, color: '#f97316' },
-    { id: 'forecast', name: 'Dự báo', value: forecast, color: colors.gray[500], unit: 'tấn' },
-    { id: 'fcr', name: 'FCR', value: fcr, color: colors.gray[500] },
+    { id: 'production', name: 'Sản lượng', value: production, color: '#f97316' },
+    { id: 'consumed', name: 'Đã ăn', value: consumed, color: '#22c55e' },
+    { id: 'forecast', name: 'Dự báo', value: forecast, color: '#F59E0B', unit: 'tấn' },
+    { id: 'fcr', name: 'FCR', value: fcr, color: '#E6E8EC' },
 ];
 
 export const MetricsRow: React.FC<MetricsRowProps> = ({
@@ -29,6 +31,8 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
     fcr = '1.37',
     forecast = '3.37',
     cardVariant = 'default',
+    activeFilters,
+    onToggleFilter,
 }) => {
     const items = METRIC_ITEMS(production, consumed, fcr, forecast);
 
@@ -40,7 +44,13 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
             style={styles.container}
         >
             {items.map(item => (
-                <PondIndexCard key={item.id} item={item} variant={cardVariant} />
+                <PondIndexCard
+                    key={item.id}
+                    item={item}
+                    variant={cardVariant}
+                    onPress={onToggleFilter ? () => onToggleFilter(item.id) : undefined}
+                    isActive={activeFilters ? activeFilters[item.id] !== false : true}
+                />
             ))}
         </ScrollView>
     );
