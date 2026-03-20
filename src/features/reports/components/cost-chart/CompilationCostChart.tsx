@@ -67,7 +67,16 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
     // Format total display
     const totalDisplay = useMemo(() => {
         if (!summary) return '0';
-        return formatCurrency(summary.totalCost, summary.currencyUnit);
+        console.log('[COST CHART] Raw data:', {
+            totalCost: summary.totalCost,
+            currencyUnit: summary.currencyUnit,
+            totalFoodUsage: summary.totalFoodUsage,
+            weightUnit: summary.weightUnit,
+            fcr: summary.fcr,
+        });
+        const formatted = formatCurrency(summary.totalCost, summary.currencyUnit);
+        console.log('[COST CHART] Formatted totalCost:', formatted);
+        return formatted;
     }, [summary]);
 
     const showLoading = isLoading || isRefetching;
@@ -113,6 +122,13 @@ const CompilationCostChart = ({ zoneId, pondId }: CompilationCostChartProps) => 
                                         value: totalDisplay,
                                         color: '',
                                     }}
+                                    tooltipValue={
+                                        summary?.totalCost !== undefined
+                                            ? summary.totalCost.toLocaleString('vi-VN') +
+                                              ' ' +
+                                              (summary.currencyUnit || 'đ')
+                                            : undefined
+                                    }
                                 />
                                 <PondIndexCard
                                     variant="prodSummary"

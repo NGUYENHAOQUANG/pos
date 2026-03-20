@@ -83,6 +83,22 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                         </View>
                     ) : (
                         <>
+                            {console.log('[PROFIT CHART] Raw data:', {
+                                totalActualRevenue: statsData?.kpis?.totalActualRevenue,
+                                totalEstimatedRevenue: statsData?.kpis?.totalEstimatedRevenue,
+                                totalMaterialCost: statsData?.kpis?.totalMaterialCost,
+                                totalEstimatedProfit: statsData?.kpis?.totalEstimatedProfit,
+                            })}
+                            {console.log('[PROFIT CHART] Formatted:', {
+                                revenue: formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0),
+                                estimatedRevenue: formatCurrency(
+                                    statsData?.kpis?.totalEstimatedRevenue ?? 0
+                                ),
+                                totalCost: formatCurrency(statsData?.kpis?.totalMaterialCost ?? 0),
+                                estimatedProfit: formatCurrency(
+                                    statsData?.kpis?.totalEstimatedProfit ?? 0
+                                ),
+                            })}
                             <MetricsRow
                                 revenue={formatCurrency(statsData?.kpis?.totalActualRevenue ?? 0)}
                                 estimatedRevenue={formatCurrency(
@@ -92,6 +108,10 @@ export const CompilationProfitChart: React.FC<CompilationProfitChartProps> = ({
                                 estimatedProfit={formatCurrency(
                                     statsData?.kpis?.totalEstimatedProfit ?? 0
                                 )}
+                                rawRevenue={statsData?.kpis?.totalActualRevenue}
+                                rawEstimatedRevenue={statsData?.kpis?.totalEstimatedRevenue}
+                                rawTotalCost={statsData?.kpis?.totalMaterialCost}
+                                rawEstimatedProfit={statsData?.kpis?.totalEstimatedProfit}
                             />
                             <Text style={styles.chartTitle}>Lợi nhuận(Tỉ đồng)</Text>
                             {statsData?.byDate && statsData.byDate.length > 0 ? (

@@ -8,13 +8,26 @@ interface MetricsRowProps {
     estimatedRevenue?: string;
     totalCost?: string;
     estimatedProfit?: string;
+    rawRevenue?: number;
+    rawEstimatedRevenue?: number;
+    rawTotalCost?: number;
+    rawEstimatedProfit?: number;
 }
+
+const formatFullNumber = (value?: number) => {
+    if (value === undefined || value === null) return undefined;
+    return value.toLocaleString('vi-VN') + ' đ';
+};
 
 export const MetricsRow: React.FC<MetricsRowProps> = ({
     revenue = '0 đ',
     estimatedRevenue = '0 đ',
     totalCost = '0 đ',
     estimatedProfit = '0 đ',
+    rawRevenue,
+    rawEstimatedRevenue,
+    rawTotalCost,
+    rawEstimatedProfit,
 }) => {
     const items = [
         {
@@ -22,24 +35,28 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
             name: 'Doanh thu',
             value: revenue,
             color: '',
+            tooltipValue: formatFullNumber(rawRevenue),
         },
         {
             id: 'estimatedRevenue',
             name: 'Tổng doanh thu ước tính',
             value: estimatedRevenue,
             color: '',
+            tooltipValue: formatFullNumber(rawEstimatedRevenue),
         },
         {
             id: 'totalCost',
             name: 'Tổng chi phí',
             value: totalCost,
             color: '',
+            tooltipValue: formatFullNumber(rawTotalCost),
         },
         {
             id: 'estimatedProfit',
             name: 'Tổng lợi nhuận ước tính',
             value: estimatedProfit,
             color: '',
+            tooltipValue: formatFullNumber(rawEstimatedProfit),
         },
     ];
 
@@ -48,14 +65,22 @@ export const MetricsRow: React.FC<MetricsRowProps> = ({
             <View style={styles.metricsTopRow}>
                 {items.slice(0, 2).map(item => (
                     <View key={item.id} style={styles.metricItem}>
-                        <PondIndexCard item={item} variant="prodSummary" />
+                        <PondIndexCard
+                            item={item}
+                            variant="prodSummary"
+                            tooltipValue={item.tooltipValue}
+                        />
                     </View>
                 ))}
             </View>
             <View style={styles.metricsBottomRow}>
                 {items.slice(2, 4).map(item => (
                     <View key={item.id} style={styles.metricItem}>
-                        <PondIndexCard item={item} variant="prodSummary" />
+                        <PondIndexCard
+                            item={item}
+                            variant="prodSummary"
+                            tooltipValue={item.tooltipValue}
+                        />
                     </View>
                 ))}
             </View>

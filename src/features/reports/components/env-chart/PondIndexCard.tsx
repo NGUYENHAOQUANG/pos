@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { Text } from '@/shared/components/typography/Text';
 import { colors } from '@/styles/colors';
 
@@ -17,6 +17,8 @@ interface PondIndexCardProps {
     variant?: PondIndexCardVariant;
     onPress?: () => void;
     isActive?: boolean;
+    /** Full value to display in tooltip on long press */
+    tooltipValue?: string;
 }
 
 const parseValueAndUnit = (value: string): { value: string; unit: string } => {
@@ -33,11 +35,19 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
     variant = 'default',
     onPress,
     isActive = true,
+    tooltipValue,
 }) => {
     const { value: valuePart, unit: unitPart } = parseValueAndUnit(item.value);
     const isProdSummary = variant === 'prodSummary';
+    const [showTooltip, setShowTooltip] = useState(false);
 
-    const content = (
+    const handleTooltipPress = useCallback(() => {
+        if (tooltipValue) {
+            setShowTooltip(prev => !prev);
+        }
+    }, [tooltipValue]);
+
+    const card = (
         <View
             style={[
                 styles.card,
@@ -61,17 +71,30 @@ export const PondIndexCard: React.FC<PondIndexCardProps> = ({
                     </Text>
                 ) : null}
             </View>
+
+            {/* Tooltip overlay */}
+            {showTooltip && tooltipValue ? (
+                <Pressable style={styles.tooltipOverlay} onPress={() => setShowTooltip(false)}>
+                    <Text style={styles.tooltipText}>{tooltipValue}</Text>
+                </Pressable>
+            ) : null}
         </View>
     );
 
-    if (onPress) {
+    if (onPress || tooltipValue) {
         return (
-            <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
-                {content}
+            <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                    onPress?.();
+                    handleTooltipPress();
+                }}
+            >
+                {card}
             </TouchableOpacity>
         );
     }
-    return content;
+    return card;
 };
 
 const styles = StyleSheet.create({
@@ -132,5 +155,29 @@ const styles = StyleSheet.create({
     },
     valueUnitProd: {
         fontSize: 14,
+    },
+    tooltipOverlay: {
+        position: 'absolute',
+        bottom: '100%',
+        left: 0,
+        right: 0,
+        backgroundColor: colors.white,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 6,
+        borderRadius: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        marginBottom: 10,
+        zIndex: 100,
+        alignItems: 'center',
+    },
+    tooltipText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500',
+        textAlign: 'center',
     },
 });
