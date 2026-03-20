@@ -64,6 +64,7 @@ export const EditEnvironmentCard: React.FC<EditEnvironmentCardProps> = ({
                 onChangeText={onNameChange}
                 placeholder="Nhập tên thông số"
                 containerStyle={styles.inputGroup}
+                editable={false}
             />
 
             {/* Lower Limit */}
